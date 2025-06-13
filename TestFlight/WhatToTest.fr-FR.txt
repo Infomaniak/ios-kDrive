@@ -1,2 +1,2 @@
-- Correction de l'action déplacer
-- Correction de l'action upload de fichier
+- Ajout d'une selection en glissant sur les photos de la galerie
+- Gestion des videos non lisibles

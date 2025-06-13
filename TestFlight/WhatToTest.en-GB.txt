@@ -1,2 +1,2 @@
-- Fix move action
-- Fix upload File action
+- Add slide select in the photo gallery
+- Handle unreadable videos
