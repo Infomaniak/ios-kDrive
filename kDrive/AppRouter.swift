@@ -106,6 +106,27 @@ public struct AppRouter: AppNavigable {
 
             // Show store
             showStore(from: viewController, driveFileManager: driveFileManager)
+
+        case .sharedWithMe:
+            guard let driveFileManager = accountManager.currentDriveFileManager else {
+                Log.sceneDelegate(
+                    "NavigationManager: Unable to navigate to .sharedWithMe without a DriveFileManager",
+                    level: .error
+                )
+                return
+            }
+
+            guard let navigationController =
+                getControllerForRestoration(
+                    tabBarViewController: rootViewController as? UISplitViewController
+                ) as? UINavigationController
+            else {
+                return
+            }
+
+            let destinationViewModel = SharedWithMeViewModel(driveFileManager: driveFileManager)
+            let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+            navigationController.pushViewController(destinationViewController, animated: true)
         }
     }
 

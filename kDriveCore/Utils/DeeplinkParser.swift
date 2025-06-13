@@ -48,8 +48,15 @@ public struct DeeplinkParser: DeeplinkParsable {
 
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
-            Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
-            return false
+            if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
+                print("sharedWithMeLink: \(sharedWithMeLink.driveId)")
+                await router.navigate(to: .sharedWithMe(driveId: sharedWithMeLink.driveId))
+                return true
+
+            } else {
+                Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
+                return false
+            }
         }
 
         if components.path == DeeplinkPath.store.rawValue,
