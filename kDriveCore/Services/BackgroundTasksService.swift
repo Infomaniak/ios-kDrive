@@ -102,53 +102,55 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
     }
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
-        let expiringActivity = ExpiringActivity(id: UUID().uuidString, delegate: nil)
-        expiringActivity.start()
+        Task {
+            let expiringActivity = ExpiringActivity(id: UUID().uuidString, delegate: nil)
+            expiringActivity.start()
 
-        Log.backgroundTaskScheduling("handleBackgroundRefresh")
-        // User installed the app but never logged in
-        if expiringActivity.shouldTerminate || accountManager.accounts.isEmpty {
-            Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
-            completion(false)
-            expiringActivity.endAll()
-            return
-        }
+            Log.backgroundTaskScheduling("handleBackgroundRefresh")
+            // User installed the app but never logged in
+            if expiringActivity.shouldTerminate || accountManager.accounts.isEmpty {
+                Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
+                completion(false)
+                expiringActivity.endAll()
+                return
+            }
 
-        Log.backgroundTaskScheduling("Enqueue new pictures")
-        photoScan.scheduleNewPicturesForUpload()
+            Log.backgroundTaskScheduling("Enqueue new pictures")
+            await photoScan.scheduleNewPicturesForUpload()
 
-        guard !expiringActivity.shouldTerminate else {
-            Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
-            completion(false)
-            expiringActivity.endAll()
-            return
-        }
+            guard !expiringActivity.shouldTerminate else {
+                Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
+                completion(false)
+                expiringActivity.endAll()
+                return
+            }
 
-        Log.backgroundTaskScheduling("Clean errors for all uploads")
-        uploadService.cleanNetworkAndLocalErrorsForAllOperations()
+            Log.backgroundTaskScheduling("Clean errors for all uploads")
+            uploadService.cleanNetworkAndLocalErrorsForAllOperations()
 
-        guard !expiringActivity.shouldTerminate else {
-            Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
-            completion(false)
-            expiringActivity.endAll()
-            return
-        }
+            guard !expiringActivity.shouldTerminate else {
+                Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
+                completion(false)
+                expiringActivity.endAll()
+                return
+            }
 
-        Log.backgroundTaskScheduling("Reload operations in queue")
-        uploadService.blockingRebuildUploadQueue()
+            Log.backgroundTaskScheduling("Reload operations in queue")
+            uploadService.blockingRebuildUploadQueue()
 
-        guard !expiringActivity.shouldTerminate else {
-            Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
-            completion(false)
-            expiringActivity.endAll()
-            return
-        }
+            guard !expiringActivity.shouldTerminate else {
+                Log.backgroundTaskScheduling(Self.activityShouldTerminateMessage, level: .error)
+                completion(false)
+                expiringActivity.endAll()
+                return
+            }
 
-        Log.backgroundTaskScheduling("waitForCompletion")
-        uploadService.waitForCompletion {
-            Log.backgroundTaskScheduling("Background activity ended with success")
-            completion(true)
-            expiringActivity.endAll()
+            Log.backgroundTaskScheduling("waitForCompletion")
+            uploadService.waitForCompletion {
+                Log.backgroundTaskScheduling("Background activity ended with success")
+                completion(true)
+                expiringActivity.endAll()
+            }
         }
     }
 
