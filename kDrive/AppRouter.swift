@@ -128,7 +128,7 @@ public struct AppRouter: AppNavigable {
                 let database = driveFileManager.database
                 let frozenFetchedFiles = database.fetchResults(ofType: File.self) { lazyCollection in
                     lazyCollection
-                        .filter("id IN %@", fileId)
+                        .filter("id == %@", fileId)
                         .freezeIfNeeded()
                 }
 
@@ -154,7 +154,7 @@ public struct AppRouter: AppNavigable {
                 let database = driveFileManager.database
                 let frozenFetchedFiles = database.fetchResults(ofType: File.self) { lazyCollection in
                     lazyCollection
-                        .filter("id IN %@", folderId)
+                        .filter("id == %@", folderId)
                         .freezeIfNeeded()
                 }
 
