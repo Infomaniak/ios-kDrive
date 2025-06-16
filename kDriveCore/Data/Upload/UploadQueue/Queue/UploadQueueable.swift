@@ -37,7 +37,7 @@ public protocol UploadQueueable {
     func cancelAllOperations(uploadingFilesIds: [String])
 
     func cancelAllOperations()
-    
+
     func rescheduleRunningOperations()
 
     func parallelismShouldChange(value: Int)
