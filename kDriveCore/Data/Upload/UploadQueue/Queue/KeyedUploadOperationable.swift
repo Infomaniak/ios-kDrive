@@ -54,4 +54,10 @@ final class KeyedUploadOperationable {
         }
         return empty
     }
+
+    public func removeAll() {
+        queue.sync {
+            self.operationsInQueue.removeAll()
+        }
+    }
 }

@@ -144,6 +144,7 @@ extension UploadQueue: UploadQueueable {
 
     public func cancelAllOperations() {
         operationQueue.cancelAllOperations()
+        keyedUploadOperations.removeAll()
     }
 
     private func operation(uploadFileId: String) -> UploadOperationable? {
