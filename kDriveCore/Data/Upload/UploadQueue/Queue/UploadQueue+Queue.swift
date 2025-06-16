@@ -142,6 +142,10 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
+    public func cancelAllOperations() {
+        operationQueue.cancelAllOperations()
+    }
+
     private func operation(uploadFileId: String) -> UploadOperationable? {
         Log.uploadQueue("\(self) operation fileId:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {

@@ -87,6 +87,8 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         if shouldReset {
             try? await uploadService.cancelAnyPhotoSync()
             await forgetUploadedPhotos()
+            @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
+            photoUploadQueue.cancelAllOperations()
         }
 
         uploadService.retryAllOperations(
