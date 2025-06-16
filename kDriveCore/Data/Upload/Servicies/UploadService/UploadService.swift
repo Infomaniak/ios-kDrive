@@ -28,6 +28,8 @@ public enum UploadServiceBackgroundIdentifier {
 }
 
 public final class UploadService {
+    private static let batchSize = 100
+
     @InjectService(customTypeIdentifier: UploadQueueID.global) var globalUploadQueue: UploadQueueable
     @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
 
@@ -129,7 +131,7 @@ extension UploadService: UploadServiceable {
         let uploadingFileIds = Array(uploadingFiles.map(\.id))
         Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm uploads to restart:\(uploadingFileIds.count)")
 
-        let batches = uploadingFileIds.chunks(ofCount: 100)
+        let batches = uploadingFileIds.chunks(ofCount: Self.batchSize)
         Log.uploadQueue("batched count:\(batches.count)")
         for batch in batches {
             Log.uploadQueue("rebuildUploadQueueFromObjectsInRealm in batch")
@@ -204,7 +206,7 @@ extension UploadService: UploadServiceable {
 
         serialTransactionQueue.async {
             let failedFileIds = self.getFailedFileIds(parentId: parentId, userId: userId, driveId: driveId)
-            let batches = failedFileIds.chunks(ofCount: 100)
+            let batches = failedFileIds.chunks(ofCount: Self.batchSize)
             Log.uploadQueue("batches:\(batches.count)")
 
             for batch in batches {
@@ -323,7 +325,7 @@ extension UploadService: UploadServiceable {
         }
 
         let allPhotoSyncUploadIDs = getAllUploadingPhotoSyncFileIDs()
-        let chunks = allPhotoSyncUploadIDs.chunks(ofCount: 50)
+        let chunks = allPhotoSyncUploadIDs.chunks(ofCount: Self.batchSize)
 
         try chunks.forEach { chunk in
             try self.uploadsDatabase.writeTransaction { writableRealm in
