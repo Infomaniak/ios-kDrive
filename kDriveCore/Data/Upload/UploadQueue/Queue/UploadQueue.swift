@@ -36,12 +36,14 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     weak var delegate: UploadQueueDelegate?
 
+    var name = "kDrive base upload queue"
+
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
 
     public lazy var operationQueue: OperationQueue = {
         let queue = OperationQueue()
-        queue.name = "kDrive upload queue"
+        queue.name = self.name
         queue.qualityOfService = .userInitiated
         queue.isSuspended = shouldSuspendQueue
         return queue
