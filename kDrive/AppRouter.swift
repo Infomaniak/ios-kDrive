@@ -107,7 +107,7 @@ public struct AppRouter: AppNavigable {
             // Show store
             showStore(from: viewController, driveFileManager: driveFileManager)
 
-        case .sharedWithMe:
+        case .sharedWithMe(let sharedWithMeLink):
             guard let driveFileManager = accountManager.currentDriveFileManager else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .sharedWithMe without a DriveFileManager",
@@ -124,9 +124,52 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            let destinationViewModel = SharedWithMeViewModel(driveFileManager: driveFileManager)
-            let destinationViewController = FileListViewController(viewModel: destinationViewModel)
-            navigationController.pushViewController(destinationViewController, animated: true)
+            if let fileId = sharedWithMeLink.fileId {
+                let database = driveFileManager.database
+                let frozenFetchedFiles = database.fetchResults(ofType: File.self) { lazyCollection in
+                    lazyCollection
+                        .filter("id IN %@", fileId)
+                        .freezeIfNeeded()
+                }
+
+                let frozenOrderedFilesToRestore = [fileId].compactMap { id in
+                    frozenFetchedFiles.first { $0.id == id }
+                }
+
+                let rawPresentationOrigin = "fileList"
+                guard let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
+                    return
+                }
+
+                presentPreviewViewController(
+                    frozenFiles: frozenOrderedFilesToRestore,
+                    index: 0,
+                    driveFileManager: driveFileManager,
+                    normalFolderHierarchy: true,
+                    presentationOrigin: presentationOrigin,
+                    navigationController: navigationController,
+                    animated: true
+                )
+            } else if let folderId = sharedWithMeLink.folderId {
+                let database = driveFileManager.database
+                let frozenFetchedFiles = database.fetchResults(ofType: File.self) { lazyCollection in
+                    lazyCollection
+                        .filter("id IN %@", folderId)
+                        .freezeIfNeeded()
+                }
+
+                let destinationViewModel = SharedWithMeViewModel(
+                    driveFileManager: driveFileManager,
+                    currentDirectory: frozenFetchedFiles.first
+                )
+
+                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+                navigationController.pushViewController(destinationViewController, animated: true)
+            } else {
+                let destinationViewModel = SharedWithMeViewModel(driveFileManager: driveFileManager)
+                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+                navigationController.pushViewController(destinationViewController, animated: true)
+            }
         }
     }
 

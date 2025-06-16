@@ -20,11 +20,13 @@ import Foundation
 import SwiftRegex
 
 public struct SharedWithMeLink: Sendable {
-    public static let parsingRegex =
-        Regex(pattern: #"^\/all\/kdrive\/app\/drive\/([0-9]+)\/shared-with-me(?:\/([0-9]+)(?:\/([0-9]+))?)?$"#)
+    public static let validationRegex =
+        Regex(pattern: #"^/all/kdrive/app/drive/([0-9]+)/shared-with-me(?:/.*)?$"#)
 
     public let sharedWithMeURL: URL
     public let driveId: Int
+    public let folderId: Int?
+    public let fileId: Int?
 
     public init?(sharedWithMeURL: URL) async {
         guard let components = URLComponents(url: sharedWithMeURL, resolvingAgainstBaseURL: true) else {
@@ -32,15 +34,22 @@ public struct SharedWithMeLink: Sendable {
         }
 
         let path = components.path
-        guard let matches = Self.parsingRegex?.matches(in: path) else {
+        guard let matches = Self.validationRegex?.matches(in: path) else {
             return nil
         }
 
-        guard let firstMatch = matches.first,
-              let driveId = firstMatch[safe: 1],
+        guard let mandatoryMatch = matches.first,
+              let driveId = mandatoryMatch[safe: 1],
               let driveIdInt = Int(driveId) else {
             return nil
         }
+
+        let baseUrl = "/all/kdrive/app/drive/\(driveId)/shared-with-me"
+        let tail = path.replacingOccurrences(of: baseUrl, with: "")
+        let parameters = tail.split(separator: "/").map { String($0) }
+
+        if parameters.indices.contains(1) { folderId = Int(parameters[1]) } else { folderId = nil }
+        if parameters.indices.contains(4) { fileId = Int(parameters[4]) } else { fileId = nil }
 
         self.driveId = driveIdInt
         self.sharedWithMeURL = sharedWithMeURL
