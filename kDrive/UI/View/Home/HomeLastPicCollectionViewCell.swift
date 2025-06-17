@@ -55,9 +55,12 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        file = nil
+        selectionMode = false
         thumbnailDownloadTask?.cancel()
         darkLayer.isHidden = true
         checkmarkImage.isHidden = true
+        checkmarkImage.image = nil
         videoData.isHidden = true
         fileImage.image = nil
         fileImage.backgroundColor = nil
