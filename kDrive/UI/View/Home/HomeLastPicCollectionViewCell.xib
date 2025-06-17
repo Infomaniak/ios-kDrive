@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24093.7" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24053.1"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -51,21 +51,24 @@
                                             <constraint firstAttribute="width" constant="24" id="Udk-rx-MZh"/>
                                         </constraints>
                                     </imageView>
-                                    <view alpha="0.40000000000000002" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ynw-Ya-FV2">
+                                    <view alpha="0.40000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ynw-Ya-FV2">
                                         <rect key="frame" x="0.0" y="0.0" width="175" height="150"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </view>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="bottom" secondItem="j9K-4i-jdP" secondAttribute="bottom" id="DB8-Ob-5gd"/>
+                                    <constraint firstItem="ynw-Ya-FV2" firstAttribute="leading" secondItem="aCp-2c-Jek" secondAttribute="leading" id="Jvp-f3-bdn"/>
                                     <constraint firstItem="L6b-Em-nU6" firstAttribute="leading" secondItem="aCp-2c-Jek" secondAttribute="leading" id="Kqk-At-XQv"/>
                                     <constraint firstItem="j9K-4i-jdP" firstAttribute="leading" secondItem="aCp-2c-Jek" secondAttribute="leading" id="NyN-CO-rvZ"/>
                                     <constraint firstAttribute="bottom" secondItem="L6b-Em-nU6" secondAttribute="bottom" id="SQ3-51-XPM"/>
                                     <constraint firstAttribute="trailing" secondItem="L6b-Em-nU6" secondAttribute="trailing" id="aww-Qk-cd3"/>
+                                    <constraint firstAttribute="trailing" secondItem="ynw-Ya-FV2" secondAttribute="trailing" id="c2y-8z-Ddq"/>
+                                    <constraint firstAttribute="bottom" secondItem="ynw-Ya-FV2" secondAttribute="bottom" id="cHK-zx-mtD"/>
                                     <constraint firstItem="L6b-Em-nU6" firstAttribute="height" secondItem="aCp-2c-Jek" secondAttribute="height" id="ezg-m3-Eg1"/>
                                     <constraint firstItem="eRP-ib-hD3" firstAttribute="top" secondItem="aCp-2c-Jek" secondAttribute="top" constant="10" id="gpN-5R-A3U"/>
+                                    <constraint firstItem="ynw-Ya-FV2" firstAttribute="top" secondItem="aCp-2c-Jek" secondAttribute="top" id="hXa-Cl-3bG"/>
                                     <constraint firstItem="eRP-ib-hD3" firstAttribute="leading" secondItem="aCp-2c-Jek" secondAttribute="leading" constant="10" id="jod-rc-0vs"/>
                                     <constraint firstAttribute="trailing" secondItem="j9K-4i-jdP" secondAttribute="trailing" id="sLt-VB-wsi"/>
                                     <constraint firstItem="j9K-4i-jdP" firstAttribute="top" secondItem="aCp-2c-Jek" secondAttribute="top" id="uyM-yb-yn0"/>
