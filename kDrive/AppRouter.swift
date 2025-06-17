@@ -126,14 +126,16 @@ public struct AppRouter: AppNavigable {
 
             if let fileId = sharedWithMeLink.fileId {
                 let database = driveFileManager.database
-                let frozenFetchedFiles = database.fetchResults(ofType: File.self) { lazyCollection in
+
+                let matchedFrozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
                     lazyCollection
                         .filter("id == %@", fileId)
+                        .first?
                         .freezeIfNeeded()
                 }
 
-                let frozenOrderedFilesToRestore = [fileId].compactMap { id in
-                    frozenFetchedFiles.first { $0.id == id }
+                guard let matchedFrozenFile else {
+                    return
                 }
 
                 let rawPresentationOrigin = "fileList"
@@ -142,7 +144,7 @@ public struct AppRouter: AppNavigable {
                 }
 
                 presentPreviewViewController(
-                    frozenFiles: frozenOrderedFilesToRestore,
+                    frozenFiles: [matchedFrozenFile],
                     index: 0,
                     driveFileManager: driveFileManager,
                     normalFolderHierarchy: true,
@@ -152,15 +154,16 @@ public struct AppRouter: AppNavigable {
                 )
             } else if let folderId = sharedWithMeLink.folderId {
                 let database = driveFileManager.database
-                let frozenFetchedFiles = database.fetchResults(ofType: File.self) { lazyCollection in
+                let matchedFrozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
                     lazyCollection
                         .filter("id == %@", folderId)
+                        .first?
                         .freezeIfNeeded()
                 }
 
                 let destinationViewModel = SharedWithMeViewModel(
                     driveFileManager: driveFileManager,
-                    currentDirectory: frozenFetchedFiles.first
+                    currentDirectory: matchedFrozenFolder
                 )
 
                 let destinationViewController = FileListViewController(viewModel: destinationViewModel)
