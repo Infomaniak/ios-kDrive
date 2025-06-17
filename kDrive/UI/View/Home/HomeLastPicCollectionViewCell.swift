@@ -37,6 +37,12 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         }
     }
 
+    override var isHighlighted: Bool {
+        didSet {
+            highlightView.isHidden = !isHighlighted
+        }
+    }
+
     var selectionMode = false
     var file: File?
 
@@ -70,12 +76,6 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         videoGradientView.isHidden = true
         fileImage.image = nil
         fileImage.backgroundColor = nil
-    }
-
-    override var isHighlighted: Bool {
-        didSet {
-            highlightView.isHidden = !isHighlighted
-        }
     }
 
     func configureLoading() {
