@@ -51,6 +51,12 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
             UIColor.black.withAlphaComponent(0.3).cgColor
         ]
         videoData.layer.insertSublayer(gradient, at: 0)
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        guard videoGradientLayer.frame.size != videoGradientView.frame.size else { return }
+        videoGradientLayer.frame = videoGradientView.frame
     }
 
     override func prepareForReuse() {
