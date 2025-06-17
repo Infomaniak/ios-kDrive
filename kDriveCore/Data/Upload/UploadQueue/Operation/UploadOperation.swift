@@ -182,7 +182,15 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             return false // Continue with standard upload operation
         }
 
-        Log.uploadOperation("Processing an empty file ufid:\(uploadFileId)")
+        let fileData: Data
+        if fileSize == 0 {
+            Log.uploadOperation("Processing empty file ufid:\(uploadFileId)")
+            fileData = Data()
+        } else {
+            Log.uploadOperation("Processing small file ufid:\(uploadFileId)")
+            fileData = try FileHandle(forReadingAtPath: fileUrl.path)?.readToEnd() ?? Data()
+        }
+
         let driveFileManager = try getDriveFileManager(for: uploadFile.driveId, userId: uploadFile.userId)
         let drive = driveFileManager.drive
 
@@ -201,7 +209,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         try handleDriveFilePostUpload(driveFile)
 
-        Log.uploadOperation("Empty file uploaded finishing fid:\(driveFile.id) ufid:\(uploadFileId)")
+        Log.uploadOperation("Small or empty file upload finishing fid:\(driveFile.id) ufid:\(uploadFileId)")
         end()
         return true
     }
