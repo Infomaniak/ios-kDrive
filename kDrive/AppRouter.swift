@@ -124,9 +124,10 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            if let fileId = sharedWithMeLink.fileId {
-                let database = driveFileManager.database
+            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+            let database = sharedWithMeDriveFileManager.database
 
+            if let fileId = sharedWithMeLink.fileId {
                 let matchedFrozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
                     lazyCollection
                         .filter("id == %@", fileId)
@@ -146,14 +147,13 @@ public struct AppRouter: AppNavigable {
                 presentPreviewViewController(
                     frozenFiles: [matchedFrozenFile],
                     index: 0,
-                    driveFileManager: driveFileManager,
+                    driveFileManager: sharedWithMeDriveFileManager,
                     normalFolderHierarchy: true,
                     presentationOrigin: presentationOrigin,
                     navigationController: navigationController,
                     animated: true
                 )
             } else if let folderId = sharedWithMeLink.folderId {
-                let database = driveFileManager.database
                 let matchedFrozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
                     lazyCollection
                         .filter("id == %@", folderId)
@@ -162,14 +162,14 @@ public struct AppRouter: AppNavigable {
                 }
 
                 let destinationViewModel = SharedWithMeViewModel(
-                    driveFileManager: driveFileManager,
+                    driveFileManager: sharedWithMeDriveFileManager,
                     currentDirectory: matchedFrozenFolder
                 )
 
                 let destinationViewController = FileListViewController(viewModel: destinationViewModel)
                 navigationController.pushViewController(destinationViewController, animated: true)
             } else {
-                let destinationViewModel = SharedWithMeViewModel(driveFileManager: driveFileManager)
+                let destinationViewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager)
                 let destinationViewController = FileListViewController(viewModel: destinationViewModel)
                 navigationController.pushViewController(destinationViewController, animated: true)
             }
