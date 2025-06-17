@@ -188,7 +188,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             fileData = Data()
         } else {
             Log.uploadOperation("Processing small file ufid:\(uploadFileId)")
-            fileData = try FileHandle(forReadingAtPath: fileUrl.path)?.readToEnd() ?? Data()
+            fileData = try Data(contentsOf: fileUrl)
         }
 
         let driveFileManager = try getDriveFileManager(for: uploadFile.driveId, userId: uploadFile.userId)
@@ -202,7 +202,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                                            createdAt: uploadFile.creationDate,
                                                                            directoryId: uploadFile.parentDirectoryId,
                                                                            directoryPath: uploadFile.relativePath,
-                                                                           fileData: Data(contentsOf: fileUrl))
+                                                                           fileData: fileData)
 
         // Make sure the parent of the `File` is transferred from the `UploadFile`
         driveFile.parentId = uploadFile.parentDirectoryId
