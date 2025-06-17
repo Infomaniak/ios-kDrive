@@ -24,11 +24,12 @@ import UIKit
 class HomeLastPicCollectionViewCell: UICollectionViewCell {
     @IBOutlet var contentInsetView: UIView!
     @IBOutlet var fileImage: UIImageView!
-    @IBOutlet var darkLayer: UIView!
+    @IBOutlet var highlightView: UIView!
     @IBOutlet var checkmarkImage: UIImageView!
-    @IBOutlet var videoData: UIView!
+    @IBOutlet var videoGradientView: UIView!
 
     private var thumbnailDownloadTask: Kingfisher.DownloadTask?
+    private let videoGradientLayer = CAGradientLayer()
 
     override var isSelected: Bool {
         didSet {
@@ -42,15 +43,14 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         fileImage.layer.masksToBounds = true
-        darkLayer.isHidden = true
+        highlightView.isHidden = true
 
-        let gradient = CAGradientLayer()
-        gradient.frame = videoData.bounds
-        gradient.colors = [
+        videoGradientLayer.colors = [
             UIColor.black.withAlphaComponent(0).cgColor,
             UIColor.black.withAlphaComponent(0.3).cgColor
         ]
-        videoData.layer.insertSublayer(gradient, at: 0)
+        videoGradientView.layer.insertSublayer(videoGradientLayer, at: 0)
+    }
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -64,24 +64,24 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         file = nil
         selectionMode = false
         thumbnailDownloadTask?.cancel()
-        darkLayer.isHidden = true
+        highlightView.isHidden = true
         checkmarkImage.isHidden = true
         checkmarkImage.image = nil
-        videoData.isHidden = true
+        videoGradientView.isHidden = true
         fileImage.image = nil
         fileImage.backgroundColor = nil
     }
 
     override var isHighlighted: Bool {
         didSet {
-            darkLayer.isHidden = !isHighlighted
+            highlightView.isHidden = !isHighlighted
         }
     }
 
     func configureLoading() {
-        darkLayer.isHidden = true
+        highlightView.isHidden = true
         checkmarkImage.isHidden = true
-        videoData.isHidden = true
+        videoGradientView.isHidden = true
         fileImage.backgroundColor = KDriveResourcesAsset.loaderDarkerDefaultColor.color
         contentInsetView.cornerRadius = UIConstants.cornerRadius
     }
@@ -90,10 +90,10 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         self.selectionMode = selectionMode
         self.file = file
         checkmarkImage.isHidden = !selectionMode
-        darkLayer.isHidden = false
+        highlightView.isHidden = false
         thumbnailDownloadTask = file.getThumbnail { [weak self, fileId = file.id] image, isThumbnail in
             if fileId == self?.file?.id {
-                self?.darkLayer.isHidden = true
+                self?.highlightView.isHidden = true
                 self?.fileImage.image = isThumbnail ? image : KDriveResourcesAsset.fileImageSmall.image
             }
         }
@@ -102,7 +102,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         if roundedCorners {
             contentInsetView.cornerRadius = UIConstants.cornerRadius
         }
-        videoData.isHidden = !(file.uti.conforms(to: .video) || file.uti.conforms(to: .movie))
+        videoGradientView.isHidden = !(file.uti.conforms(to: .video) || file.uti.conforms(to: .movie))
         configureForSelection()
     }
 
