@@ -206,7 +206,6 @@ public final class FileImportHelper {
                         return await getUIImage.result
 
                     case .isImageData, .isCompressedData, .isMiscellaneous:
-
                         // handle .heic .jpg tranform here.
                         let getFile = try ItemProviderFileRepresentation(
                             from: itemProvider,

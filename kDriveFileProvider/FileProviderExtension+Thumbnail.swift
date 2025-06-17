@@ -62,7 +62,6 @@ extension FileProviderExtension {
             // For simplicity, this sample downloads each thumbnail separately;
             // however, if possible, you should batch download all the thumbnails at once.
             let downloadTask = urlSession.downloadTask(with: request) { tempURL, _, error in
-
                 guard progress.isCancelled != true else {
                     return
                 }

@@ -271,7 +271,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         var shouldCleanUploadFile = false
         try? transactionWithFile { file in
-
             if let error = file.error {
                 Log.uploadOperation("end file ufid:\(self.uploadFileId) errorCode: \(error.code) error:\(error)", level: .error)
             } else {

@@ -434,7 +434,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     static func createListLayout(selectMode: Bool, isCompactView: Bool) -> UICollectionViewLayout {
         let sectionProvider: UICollectionViewCompositionalLayoutSectionProvider = { sectionIndex, _ in
-
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                   heightDimension: .estimated(60))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)

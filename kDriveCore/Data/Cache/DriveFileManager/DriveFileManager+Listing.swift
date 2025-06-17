@@ -126,7 +126,6 @@ public extension DriveFileManager {
                  .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete,
                  .fileColorUpdate, .fileColorDelete,
                  .fileCategorize, .fileUncategorize:
-
                 if let oldFile: File = writableRealm.getObject(id: fileUid),
                    oldFile.name != actionFile.name {
                     try? renameCachedFile(updatedFile: actionFile, oldFile: oldFile)
