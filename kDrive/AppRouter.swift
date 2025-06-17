@@ -154,7 +154,6 @@ public struct AppRouter: AppNavigable {
         case .appLock:
             showAppLock()
         case .mainViewController(let driveFileManager):
-
             restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
 
             showLaunchFloatingPanel()

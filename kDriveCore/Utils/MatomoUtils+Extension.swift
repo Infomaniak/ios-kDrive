@@ -18,7 +18,6 @@
 
 import InfomaniakCoreCommonUI
 import InfomaniakDI
-import SwiftUICore
 
 public extension MatomoUtils.View {
     static let shareAndRights = MatomoUtils.View(displayName: "ShareAndRights")
