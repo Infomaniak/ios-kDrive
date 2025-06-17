@@ -61,6 +61,8 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
                 }
             }
 
+            let oldSettings = writableRealm.objects(PhotoSyncSettings.self)
+            writableRealm.delete(oldSettings)
             writableRealm.add(liveNewSyncSettings, update: .all)
         }
 
