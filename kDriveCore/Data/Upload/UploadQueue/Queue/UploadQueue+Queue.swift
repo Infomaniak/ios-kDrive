@@ -111,7 +111,7 @@ extension UploadQueue: UploadQueueable {
         if let operation = keyedUploadOperations.getObject(forKey: uploadFileId) {
             Log.uploadQueue("\(self) operation to cancel:\(operation)")
             Task {
-                await operation.cleanUploadFileSession()
+                try await operation.cleanUploadFileSession()
                 operation.cancel()
             }
         }

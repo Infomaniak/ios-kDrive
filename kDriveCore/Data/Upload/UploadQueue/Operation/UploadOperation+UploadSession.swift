@@ -112,7 +112,7 @@ extension UploadOperation {
     }
 
     private func wipeSessionAndRegenerate() async throws {
-        await cleanUploadFileSession()
+        try await cleanUploadFileSession()
         try await generateNewSessionAndStore()
     }
 
@@ -286,22 +286,25 @@ extension UploadOperation {
         }
     }
 
-    public func cleanUploadFileSession() async {
+    public func cleanUploadFileSession() async throws {
         Log.uploadOperation("Clean session for \(uploadFileId)")
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
-        // First remote, then locally
-        await cleanUploadFileSessionRemotely()
+        let readOnlyFile = try readOnlyFile()
+        let fileUrl = try getFileUrlIfReadable(file: readOnlyFile)
+        let fileSize = try fileSize(fileUrl: fileUrl)
+
+        if !isSmallOrEmptyFile(fileSize: fileSize) {
+            await cleanUploadFileSessionRemotely(readOnlyFile: readOnlyFile)
+        }
         cleanUploadFileSessionLocally()
 
-        // Cancel all network requests
         cancelAllUploadRequests()
     }
 
-    private func cleanUploadFileSessionRemotely() async {
+    private func cleanUploadFileSessionRemotely(readOnlyFile: UploadFile) async {
         // Clean the remote session, if any. Invalid ones are already gone server side.
-        guard let readOnlyFile = try? readOnlyFile(),
-              let token = readOnlyFile.uploadingSession?.token else {
+        guard let token = readOnlyFile.uploadingSession?.token else {
             return
         }
 
@@ -364,11 +367,7 @@ extension UploadOperation {
 
         // Check file is readable
         let fileUrl = try getFileUrlIfReadable(file: file)
-
-        guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
-            Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId) url:\(fileUrl)", level: .error)
-            throw DriveError.fileNotFound
-        }
+        let fileSize = try fileSize(fileUrl: fileUrl)
 
         let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
         Log.uploadOperation("got fileSize:\(mebibytes)MiB ufid:\(uploadFileId)")

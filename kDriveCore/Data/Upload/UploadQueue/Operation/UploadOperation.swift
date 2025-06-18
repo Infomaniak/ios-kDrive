@@ -168,17 +168,26 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         return free
     }
 
-    func handleSmallOrEmptyFileIfNeeded() async throws -> Bool {
-        try checkCancelation()
-
-        let uploadFile = try readOnlyFile()
-        let fileUrl = try getFileUrlIfReadable(file: uploadFile)
+    func fileSize(fileUrl: URL) throws -> UInt64 {
         guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
             Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId) url:\(fileUrl)", level: .error)
             throw DriveError.fileNotFound
         }
 
-        guard fileSize < RangeProvider.APIConstants.smallFileMaxSize else {
+        return fileSize
+    }
+
+    func isSmallOrEmptyFile(fileSize: UInt64) -> Bool {
+        return fileSize < RangeProvider.APIConstants.smallFileMaxSize
+    }
+
+    func handleSmallOrEmptyFileIfNeeded() async throws -> Bool {
+        try checkCancelation()
+
+        let uploadFile = try readOnlyFile()
+        let fileUrl = try getFileUrlIfReadable(file: uploadFile)
+        let fileSize = try fileSize(fileUrl: fileUrl)
+        guard isSmallOrEmptyFile(fileSize: fileSize) else {
             return false // Continue with standard upload operation
         }
 
