@@ -281,7 +281,7 @@ final class PhotoListViewController: FileListViewController {
             navigationItem.title = viewModel.title
             scrollViewDidScroll(collectionView)
         }
-        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+        collectionView.reloadSections(IndexSet(integersIn: 0 ..< numberOfSections(in: collectionView)))
     }
 
     func updateTitle(_ count: Int) {
