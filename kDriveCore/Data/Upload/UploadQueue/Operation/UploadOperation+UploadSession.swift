@@ -425,7 +425,7 @@ extension UploadOperation {
         }
     }
 
-    private func cleanUploadFileSessionLocally(_ file: UploadFile? = nil) {
+    private func cleanUploadFileSessionLocally() {
         // Clean the local uploading session, as well as error
         try? transactionWithFile { file in
             file.uploadingSession = nil
