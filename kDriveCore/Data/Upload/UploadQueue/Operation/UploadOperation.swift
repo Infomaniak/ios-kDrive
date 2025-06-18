@@ -203,6 +203,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         let driveFileManager = try getDriveFileManager(for: uploadFile.driveId, userId: uploadFile.userId)
         let drive = driveFileManager.drive
 
+        try transactionWithFile { uploadFile in
+            uploadFile.progress = 0.01
+        }
+
         let driveFile = try await driveFileManager.apiFetcher.directUpload(drive: drive,
                                                                            totalSize: fileSize,
                                                                            fileName: uploadFile.name,
