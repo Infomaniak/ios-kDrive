@@ -187,9 +187,16 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         if let emptyView = collectionView?.backgroundView as? EmptyTableView {
             updateEmptyView(emptyView)
         }
+
+        let visibleCells = (collectionView?.indexPathsForVisibleItems ?? []).sorted()
         coordinator.animate { _ in
-            self.collectionView?.reloadData()
+            self.collectionView?.collectionViewLayout.invalidateLayout()
             self.setSelectedCells()
+            if !visibleCells.isEmpty {
+                let scrolledCell = visibleCells[Int(visibleCells.count / 2)]
+                self.collectionView?.scrollToItem(at: scrolledCell, at: .centeredVertically, animated: false)
+            }
+            self.collectionView.layoutIfNeeded()
         }
     }
 
