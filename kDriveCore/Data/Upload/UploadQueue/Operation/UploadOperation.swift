@@ -213,9 +213,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                                                                            directoryPath: uploadFile.relativePath,
                                                                            fileData: fileData)
 
-        // Make sure the parent of the `File` is transferred from the `UploadFile`
-        driveFile.parentId = uploadFile.parentDirectoryId
-
         try handleDriveFilePostUpload(driveFile)
 
         Log.uploadOperation("Small or empty file upload finishing fid:\(driveFile.id) ufid:\(uploadFileId)")
