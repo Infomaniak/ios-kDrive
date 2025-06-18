@@ -472,7 +472,7 @@ extension Publisher where Self.Failure == Never {
     }
 
     func receiveOnMain(store: inout Set<AnyCancellable>, receiveValue: @escaping ((Self.Output) -> Void)) {
-        receive(on: RunLoop.main)
+        receive(on: DispatchQueue.main)
             .sink(receiveValue: receiveValue)
             .store(in: &store)
     }
