@@ -33,8 +33,10 @@ enum OperationQueueHelper {
             let hasDownloadsInQueue = downloadQueue.operationCount > 0
 
             if shouldBeDisabled {
+            if shouldBeDisabled && !UIApplication.shared.isIdleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = true
             } else if !hasUploadsInQueue && !hasDownloadsInQueue {
+            } else if !hasUploadsInQueue && !hasDownloadsInQueue && UIApplication.shared.isIdleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
         }
