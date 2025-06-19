@@ -144,7 +144,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
                 self.dispatchQueue.async {
                     self.fileOperationsInQueue.removeValue(forKey: file.id)
                     self.publishFileDownloaded(fileId: file.id, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false)
                     completion?(operation.error)
                 }
             }
@@ -188,7 +188,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
                 self.dispatchQueue.async {
                     self.fileOperationsInQueue.removeValue(forKey: file.id)
                     self.publishFileDownloaded(fileId: file.id, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -215,7 +215,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
                     self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false)
                 }
             }
 
@@ -244,7 +244,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
                 self.dispatchQueue.async {
                     self.archiveOperationsInQueue.removeValue(forKey: archiveId)
                     self.publishArchiveDownloaded(archiveId: archiveId, archiveUrl: operation.archiveUrl, error: operation.error)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false)
                 }
             }
             self.operationQueue.addOperation(operation)
@@ -279,7 +279,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.fileOperationsInQueue.removeValue(forKey: fileId)
-                    OperationQueueHelper.disableIdleTimer(false, hasOperationsInQueue: !self.fileOperationsInQueue.isEmpty)
+                    OperationQueueHelper.disableIdleTimer(false)
                     completion(operation.error)
                 }
             }
