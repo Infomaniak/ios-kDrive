@@ -34,6 +34,9 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     private var queueObserver: UploadQueueObserver?
 
+    static let silentErrors: [DriveError] =
+        [.taskRescheduled, .taskCancelled, .uploadOverDataRestrictedError, .uploadNotTerminatedError, .uploadNotTerminated]
+
     weak var delegate: UploadQueueDelegate?
 
     var name = "kDrive base upload queue"
