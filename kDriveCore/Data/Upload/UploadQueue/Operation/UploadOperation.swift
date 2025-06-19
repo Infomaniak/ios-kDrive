@@ -197,7 +197,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             fileData = Data()
         } else {
             Log.uploadOperation("Processing small file ufid:\(uploadFileId)")
-            fileData = try Data(contentsOf: fileUrl)
+            fileData = try Data(contentsOf: fileUrl, options: .alwaysMapped)
         }
 
         let driveFileManager = try getDriveFileManager(for: uploadFile.driveId, userId: uploadFile.userId)
