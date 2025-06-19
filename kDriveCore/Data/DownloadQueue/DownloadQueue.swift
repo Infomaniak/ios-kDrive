@@ -112,6 +112,10 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
 
     // MARK: - Public methods
 
+    public var operationCount: Int {
+        fileOperationsInQueue.count
+    }
+
     public func addPublicShareToQueue(file: File,
                                       driveFileManager: DriveFileManager,
                                       publicShareProxy: PublicShareProxy,
