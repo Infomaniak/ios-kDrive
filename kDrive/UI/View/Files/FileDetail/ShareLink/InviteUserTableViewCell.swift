@@ -17,6 +17,7 @@
  */
 
 import DropDown
+import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -124,7 +125,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
             }
         }
         dropDown.dataSource.removeAll()
-        if isValidEmail(text) && !ignoredEmails.contains(text) && !shareables
+        if EmailChecker(email: text).validate() && !ignoredEmails.contains(text) && !shareables
             .contains(where: { ($0 as? DriveUser)?.email == text }) {
             email = text
             dropDown.dataSource.append(text)
@@ -132,11 +133,6 @@ class InviteUserTableViewCell: InsetTableViewCell {
             email = nil
         }
         dropDown.dataSource.append(contentsOf: results.map(\.displayName))
-    }
-
-    private func isValidEmail(_ email: String) -> Bool {
-        let emailPred = NSPredicate(format: "SELF MATCHES %@", Constants.mailRegex)
-        return emailPred.evaluate(with: email)
     }
 
     private func selectItem(at index: Int) {
