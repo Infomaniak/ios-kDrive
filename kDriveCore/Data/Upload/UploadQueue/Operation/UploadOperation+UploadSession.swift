@@ -291,10 +291,7 @@ extension UploadOperation {
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
         let readOnlyFile = try readOnlyFile()
-        let fileUrl = try getFileUrlIfReadable(file: readOnlyFile)
-        let fileSize = try fileSize(fileUrl: fileUrl)
-
-        if !isSmallOrEmptyFile(fileSize: fileSize) {
+        if readOnlyFile.uploadingSession != nil {
             await cleanUploadFileSessionRemotely(readOnlyFile: readOnlyFile)
         }
         cleanUploadFileSessionLocally()
