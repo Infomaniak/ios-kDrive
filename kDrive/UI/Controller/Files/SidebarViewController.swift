@@ -374,7 +374,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
             rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
             rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
-            rootMenuCell.focusEffect = nil
             return rootMenuCell
         }
 
