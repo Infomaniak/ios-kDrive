@@ -89,6 +89,7 @@ class RootMenuCell: UICollectionViewCell {
     }
 
     private func setupUI() {
+        focusEffect = nil
         contentView.addSubview(contentInsetView)
         contentInsetView.addSubview(iconImageView)
         contentInsetView.addSubview(titleLabel)
