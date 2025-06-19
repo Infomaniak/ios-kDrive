@@ -94,4 +94,6 @@ public protocol DownloadQueueable {
     var fileOperationsInQueue: SendableDictionary<Int, DownloadFileOperationable> { get }
 
     var archiveOperationsInQueue: SendableDictionary<String, DownloadArchiveOperation> { get }
+
+    var operationCount: Int { get }
 }

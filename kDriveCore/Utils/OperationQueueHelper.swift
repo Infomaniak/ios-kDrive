@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakDI
 import UIKit
 
 enum OperationQueueHelper {
@@ -24,10 +25,16 @@ enum OperationQueueHelper {
         Log.uploadQueue("disableIdleTimer shouldBeDisabled:\(shouldBeDisabled) hasOperationsInQueue:\(hasOperationsInQueue)")
 
         #if !ISEXTENSION
+        @InjectService var uploadService: UploadServiceable
+        @InjectService var downloadQueue: DownloadQueueable
+
         Task { @MainActor in
+            let hasUploadsInQueue = uploadService.operationCount > 0
+            let hasDownloadsInQueue = downloadQueue.operationCount > 0
+
             if shouldBeDisabled {
                 UIApplication.shared.isIdleTimerDisabled = true
-            } else if !hasOperationsInQueue {
+            } else if !hasUploadsInQueue && !hasDownloadsInQueue {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
         }
