@@ -196,6 +196,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             Log.uploadOperation("Processing empty file ufid:\(uploadFileId)")
             fileData = Data()
         } else {
+            guard uploadFile.error == nil, uploadFile.maxRetryCount == UploadFile.defaultMaxRetryCount else {
+                return false // On retry we disable direct uploads. Session upload is more stable.
+            }
+
             Log.uploadOperation("Processing small file ufid:\(uploadFileId)")
             fileData = try Data(contentsOf: fileUrl, options: .alwaysMapped)
         }
