@@ -137,10 +137,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             try await self.getPhAssetIfNeeded()
 
             // Check if the file is empty, and uses the 1 shot upload method for it if needed.
-            let handledEmptyFile = try await self.handleSmallOrEmptyFileIfNeeded()
+            let handledSmallOrEmptyFile = try await self.handleSmallOrEmptyFileIfNeeded()
 
             // Continue if we are dealing with a file with data
-            guard !handledEmptyFile else {
+            guard !handledSmallOrEmptyFile else {
                 return
             }
 
