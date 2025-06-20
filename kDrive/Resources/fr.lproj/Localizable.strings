@@ -4,7 +4,7 @@
  * Locale: fr, French
  * Tagged: ios
  * Exported by: Matthieu Déglon
- * Exported at: Wed, 11 Jun 2025 14:06:15 +0200
+ * Exported at: Fri, 20 Jun 2025 13:59:14 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -441,6 +441,9 @@
 
 /* loco:6049df4d5c2c3a04bc397962 */
 "buttonSelectAll" = "Tout sélectionner";
+
+/* loco:685545854a29fa85140fcf62 */
+"buttonSelectTheFolder" = "Sélectionner le dossier";
 
 /* loco:6049df4d5c2c3a04bc397963 */
 "buttonSend" = "Envoyer";
@@ -1729,7 +1732,7 @@
 /* loco:6049df4d5c2c3a04bc397a36 */
 "selectDriveTitle" = "Sélectionner un kDrive";
 
-/* loco:6049df4d5c2c3a04bc397a37 */
+/* loco:68554bfb0b1581a8b40b34a2 */
 "selectFolderTitle" = "Sélectionner un dossier";
 
 /* loco:627cf1f7089b7c7d9e3597e3 */
