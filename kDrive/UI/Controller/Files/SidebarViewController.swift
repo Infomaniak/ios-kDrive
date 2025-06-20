@@ -43,7 +43,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return true
     }
 
-    public enum RootMenuSection {
+    public enum RootMenuSection: Int {
         case main
         case first
         case second
@@ -277,6 +277,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
+        collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
@@ -372,18 +373,39 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     func configureDataSource(for collectionView: UICollectionView)
         -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
         dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
-            collectionView, indexPath, menuItem -> RootMenuCell?
-            in
-            guard let rootMenuCell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: RootMenuCell.identifier,
-                for: indexPath
-            ) as? RootMenuCell else {
-                fatalError("Failed to dequeue cell")
+            collectionView, indexPath, menuItem -> UICollectionViewCell? in
+            guard let sectionIndex = RootMenuSection(rawValue: indexPath.section) else {
+                fatalError("Unknown section")
             }
 
-            rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-            rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
-            return rootMenuCell
+            switch sectionIndex {
+            case .first, .second, .third:
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: "FileCollectionViewCell",
+                    for: indexPath
+                ) as? FileCollectionViewCell else {
+                    fatalError("Failed to dequeue cell")
+                }
+
+                guard case .file(let destinationFile) = menuItem.destination else {
+                    fatalError("Unable to find a matching file")
+                }
+
+                let viewModel = FileViewModel(driveFileManager: self.driveFileManager, file: destinationFile, selectionMode: true)
+                cell.configure(with: viewModel)
+                return cell
+            case .main:
+                guard let rootMenuCell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: RootMenuCell.identifier,
+                    for: indexPath
+                ) as? RootMenuCell else {
+                    fatalError("Failed to dequeue cell")
+                }
+
+                rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
+                rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+                return rootMenuCell
+            }
         }
 
         dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
