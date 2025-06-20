@@ -1,2 +1,3 @@
+- Changing the photo sync destination drive restarts the sync from scratch
 - Add slide select in the photo gallery
 - Handle unreadable videos
