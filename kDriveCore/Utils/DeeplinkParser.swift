@@ -49,7 +49,6 @@ public struct DeeplinkParser: DeeplinkParsable {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
             if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
-                print("sharedWithMeLink: \(sharedWithMeLink.driveId)")
                 await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
                 return true
 

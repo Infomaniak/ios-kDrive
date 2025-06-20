@@ -108,7 +108,10 @@ public struct AppRouter: AppNavigable {
             showStore(from: viewController, driveFileManager: driveFileManager)
 
         case .sharedWithMe(let sharedWithMeLink):
-            guard let driveFileManager = accountManager.currentDriveFileManager else {
+            guard let driveFileManager = try? accountManager.getFirstMatchingDriveFileManager(
+                for: accountManager.currentUserId,
+                driveId: sharedWithMeLink.driveId
+            ) else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .sharedWithMe without a DriveFileManager",
                     level: .error
