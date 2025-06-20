@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakDI
 import RealmSwift
 
 public protocol PhotoLibrarySyncable {
@@ -27,6 +28,8 @@ public protocol PhotoLibrarySyncable {
 extension PhotoLibraryUploader: PhotoLibrarySyncable {
     @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
         let currentSyncSettings = frozenSettings
+        let shouldReset = (currentSyncSettings?.driveId != liveNewSyncSettings.driveId)
+            || (currentSyncSettings?.userId != liveNewSyncSettings.userId)
         try? uploadsDatabase.writeTransaction { writableRealm in
             guard liveNewSyncSettings.userId != -1,
                   liveNewSyncSettings.driveId != -1,
@@ -39,7 +42,8 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
                 liveNewSyncSettings.lastSync = Date()
             case .all:
                 if let currentSyncSettings,
-                   currentSyncSettings.syncMode == .all {
+                   currentSyncSettings.syncMode == .all,
+                   !shouldReset {
                     liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
                     liveNewSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
@@ -49,15 +53,55 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
                    currentSyncSettings
                    .syncMode == .all ||
                    (currentSyncSettings.syncMode == .fromDate && currentSyncSettings.fromDate
-                       .compare(liveNewSyncSettings.fromDate) == .orderedAscending) {
+                       .compare(liveNewSyncSettings.fromDate) == .orderedAscending),
+                   !shouldReset {
                     liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
                     liveNewSyncSettings.lastSync = liveNewSyncSettings.fromDate
                 }
             }
 
+            let oldSettings = writableRealm.objects(PhotoSyncSettings.self)
+            writableRealm.delete(oldSettings)
             writableRealm.add(liveNewSyncSettings, update: .all)
         }
+
+        guard shouldReset else { return }
+
+        let parentDirectoryId = liveNewSyncSettings.parentDirectoryId
+        let userId = liveNewSyncSettings.userId
+        let driveId = liveNewSyncSettings.driveId
+
+        Task {
+            await postSaveSettings(
+                shouldReset: shouldReset,
+                parentDirectoryId: parentDirectoryId,
+                userId: userId,
+                driveId: driveId
+            )
+        }
+    }
+
+    private func postSaveSettings(shouldReset: Bool, parentDirectoryId: Int, userId: Int, driveId: Int) async {
+        @InjectService var photoLibraryScan: PhotoLibraryScanable
+        await photoLibraryScan.cancelScan()
+
+        if shouldReset {
+            try? await uploadService.cancelAnyPhotoSync()
+            await forgetUploadedPhotos()
+            @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
+            photoUploadQueue.cancelAllOperations()
+        }
+
+        uploadService.retryAllOperations(
+            withParent: parentDirectoryId,
+            userId: userId,
+            driveId: driveId
+        )
+        uploadService.updateQueueSuspension()
+
+        await photoLibraryScan.scheduleNewPicturesForUpload()
+        uploadService.rebuildUploadQueue()
     }
 
     public func disableSync() {
@@ -66,10 +110,33 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         }
 
         Task {
+            @InjectService var photoLibraryScan: PhotoLibraryScanable
+            await photoLibraryScan.cancelScan()
+
             do {
                 try await uploadService.cancelAnyPhotoSync()
+                await forgetUploadedPhotos()
             } catch {
                 Log.photoLibraryUploader("Failed to clear photo sync queue: \(error)", level: .error)
+            }
+        }
+    }
+
+    public func forgetUploadedPhotos() async {
+        @InjectService var uploadDataSource: UploadServiceDataSourceable
+
+        let objectsIdsToDelete = uploadDataSource
+            .getUploadedFilesIDs(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
+        let chunks = objectsIdsToDelete.chunks(ofCount: 50)
+
+        try? chunks.forEach { chunk in
+            try self.uploadsDatabase.writeTransaction { writableRealm in
+                for uploadFileId in chunk {
+                    guard let objectToRemove = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
+                        continue
+                    }
+                    writableRealm.delete(objectToRemove)
+                }
             }
         }
     }

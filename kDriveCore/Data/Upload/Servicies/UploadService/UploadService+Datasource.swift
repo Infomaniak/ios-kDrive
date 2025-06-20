@@ -39,6 +39,8 @@ public protocol UploadServiceDataSourceable {
 
     func getUploadedFiles(writableRealm: Realm, optionalPredicate: NSPredicate?) -> Results<UploadFile>
 
+    func getUploadedFilesIDs(optionalPredicate: NSPredicate?) -> [String]
+
     @discardableResult
     func saveToRealm(_ uploadFile: UploadFile,
                      itemIdentifier: NSFileProviderItemIdentifier?,
@@ -124,6 +126,10 @@ extension UploadService: UploadServiceDataSourceable {
                 .filter("uploadDate != nil AND ownedByFileProvider == %@", NSNumber(value: ownedByFileProvider))
                 .filter(optionalPredicate: optionalPredicate)
         }
+    }
+
+    public func getUploadedFilesIDs(optionalPredicate: NSPredicate? = nil) -> [String] {
+        getUploadedFiles(optionalPredicate: optionalPredicate).map { $0.id }
     }
 
     public func getUploadedFiles(writableRealm: Realm, optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
