@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
 
 extension UploadOperation {
     /// Enqueue a task, while making sure we catch the errors in a standard way
@@ -129,7 +130,7 @@ extension UploadOperation {
                      .uploadSessionInvalid:
                     // Clean session, present error, user action required to restart.
                     Task {
-                        await self.cleanUploadFileSession()
+                        try await self.cleanUploadFileSession()
                     }
                     file.error = .localError.wrapping(error)
 
@@ -197,13 +198,27 @@ extension UploadOperation {
                 self.uploadService.suspendAllOperations()
 
             case .uploadNotTerminatedError,
-                 .uploadNotTerminated,
-                 .invalidUploadTokenError,
+                 .uploadNotTerminated:
+                // Direct upload of duplicated files can throw this error.
+                // We silently retry upload with a Session.
+                // Too many retries, we display the error to the end user.
+
+                file.progress = nil
+                file.error = error
+                if file.maxRetryCount > 0 {
+                    file.maxRetryCount -= 1
+                    Task {
+                        @InjectService var uploadService: UploadServiceable
+                        uploadService.retry(self.uploadFileId)
+                    }
+                }
+
+            case .invalidUploadTokenError,
                  .uploadError,
                  .uploadFailedError,
                  .uploadTokenIsNotValid:
                 Task {
-                    await self.cleanUploadFileSession()
+                    try await self.cleanUploadFileSession()
                 }
                 file.progress = nil
                 file.error = error
@@ -219,7 +234,7 @@ extension UploadOperation {
                 file.progress = nil
                 file.error = error
                 Task {
-                    await self.cleanUploadFileSession()
+                    try await self.cleanUploadFileSession()
                 }
                 self.uploadService.cancelAllOperations(withParent: file.parentDirectoryId,
                                                        userId: file.userId,

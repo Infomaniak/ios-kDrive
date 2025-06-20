@@ -137,10 +137,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             try await self.getPhAssetIfNeeded()
 
             // Check if the file is empty, and uses the 1 shot upload method for it if needed.
-            let handledEmptyFile = try await self.handleEmptyFileIfNeeded()
+            let handledSmallOrEmptyFile = try await self.handleSmallOrEmptyFileIfNeeded()
 
             // Continue if we are dealing with a file with data
-            guard !handledEmptyFile else {
+            guard !handledSmallOrEmptyFile else {
                 return
             }
 
@@ -168,40 +168,62 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         return free
     }
 
-    func handleEmptyFileIfNeeded() async throws -> Bool {
-        try checkCancelation()
-
-        let uploadFile = try readOnlyFile()
-        let fileUrl = try getFileUrlIfReadable(file: uploadFile)
+    func fileSize(fileUrl: URL) throws -> UInt64 {
         guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
             Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId) url:\(fileUrl)", level: .error)
             throw DriveError.fileNotFound
         }
 
-        guard fileSize == 0 else {
+        return fileSize
+    }
+
+    func isSmallOrEmptyFile(fileSize: UInt64) -> Bool {
+        return fileSize < RangeProvider.APIConstants.smallFileMaxSize
+    }
+
+    func handleSmallOrEmptyFileIfNeeded() async throws -> Bool {
+        try checkCancelation()
+
+        let uploadFile = try readOnlyFile()
+        let fileUrl = try getFileUrlIfReadable(file: uploadFile)
+        let fileSize = try fileSize(fileUrl: fileUrl)
+        guard isSmallOrEmptyFile(fileSize: fileSize) else {
             return false // Continue with standard upload operation
         }
 
-        Log.uploadOperation("Processing an empty file ufid:\(uploadFileId)")
+        let fileData: Data
+        if fileSize == 0 {
+            Log.uploadOperation("Processing empty file ufid:\(uploadFileId)")
+            fileData = Data()
+        } else {
+            guard uploadFile.error == nil, uploadFile.maxRetryCount == UploadFile.defaultMaxRetryCount else {
+                return false // On retry we disable direct uploads. Session upload is more stable.
+            }
+
+            Log.uploadOperation("Processing small file ufid:\(uploadFileId)")
+            fileData = try Data(contentsOf: fileUrl, options: .alwaysMapped)
+        }
+
         let driveFileManager = try getDriveFileManager(for: uploadFile.driveId, userId: uploadFile.userId)
         let drive = driveFileManager.drive
 
+        try transactionWithFile { uploadFile in
+            uploadFile.progress = 0.01
+        }
+
         let driveFile = try await driveFileManager.apiFetcher.directUpload(drive: drive,
-                                                                           totalSize: 0,
+                                                                           totalSize: fileSize,
                                                                            fileName: uploadFile.name,
                                                                            conflictResolution: uploadFile.conflictOption,
                                                                            lastModifiedAt: uploadFile.modificationDate,
                                                                            createdAt: uploadFile.creationDate,
                                                                            directoryId: uploadFile.parentDirectoryId,
                                                                            directoryPath: uploadFile.relativePath,
-                                                                           fileData: Data())
-
-        // Make sure the parent of the `File` is transferred from the `UploadFile`
-        driveFile.parentId = uploadFile.parentDirectoryId
+                                                                           fileData: fileData)
 
         try handleDriveFilePostUpload(driveFile)
 
-        Log.uploadOperation("Empty file uploaded finishing fid:\(driveFile.id) ufid:\(uploadFileId)")
+        Log.uploadOperation("Small or empty file upload finishing fid:\(driveFile.id) ufid:\(uploadFileId)")
         end()
         return true
     }
