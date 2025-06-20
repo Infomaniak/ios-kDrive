@@ -75,7 +75,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         }
 
         workerTask = worker
-        await worker.finish()
+        await worker.value
     }
 
     public func cancelScan() async {
@@ -84,7 +84,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         }
 
         workerTask.cancel()
-        await workerTask.finish()
+        await workerTask.value
         self.workerTask = nil
     }
 
