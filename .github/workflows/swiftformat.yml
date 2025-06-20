@@ -2,18 +2,17 @@ name: SwiftFormat
 
 on:
   pull_request:
-    branches: [ master ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+  
 jobs:
   build:
     name: SwiftFormat
     runs-on: [ self-hosted, iOS ]
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.1
-        with:
-          access_token: ${{ github.token }}
       - uses: jdx/mise-action@v2
         with:
           cache: false
