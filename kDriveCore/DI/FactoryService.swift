@@ -105,6 +105,9 @@ public enum FactoryService {
             },
             Factory(type: DeeplinkParsable.self) { _, _ in
                 DeeplinkParser()
+            },
+            Factory(type: SharedWithMeServiceable.self) { _, _ in
+                SharedWithMeService()
             }
         ]
         return services

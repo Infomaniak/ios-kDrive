@@ -42,6 +42,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
     @LazyInjectService private var matomo: MatomoUtils
+    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -108,10 +109,27 @@ public struct AppRouter: AppNavigable {
             showStore(from: viewController, driveFileManager: driveFileManager)
 
         case .sharedWithMe(let sharedWithMeLink):
-            guard let driveFileManager = try? accountManager.getFirstMatchingDriveFileManager(
-                for: accountManager.currentUserId,
-                driveId: sharedWithMeLink.driveId
-            ) else {
+            var driveFileManager: DriveFileManager?
+            sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+
+            for _ in accountManager.accounts {
+                if let matchingDriveFileManager = try? accountManager.getFirstMatchingDriveFileManager(
+                    for: accountManager.currentUserId,
+                    driveId: sharedWithMeLink.driveId
+                ) {
+                    driveFileManager = matchingDriveFileManager
+                } else {
+                    accountManager.switchToNextAvailableAccount()
+                    guard let accountManager = accountManager.currentDriveFileManager else {
+                        return
+                    }
+
+                    _ = showMainViewController(driveFileManager: accountManager,
+                                               selectedIndex: MainTabBarIndex.files.rawValue)
+                }
+            }
+
+            guard let driveFileManager else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .sharedWithMe without a DriveFileManager",
                     level: .error
