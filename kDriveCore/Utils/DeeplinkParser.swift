@@ -36,6 +36,7 @@ public struct DeeplinkParser: DeeplinkParsable {
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     public init() {
         // META: keep SonarCloud happy
@@ -50,6 +51,7 @@ public struct DeeplinkParser: DeeplinkParsable {
               let params = components.queryItems else {
             if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
                 await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
+                sharedWithMeService.processSharedWithMePostAuthentication()
                 return true
 
             } else {
