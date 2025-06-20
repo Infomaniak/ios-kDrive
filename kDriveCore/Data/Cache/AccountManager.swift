@@ -70,6 +70,7 @@ public protocol AccountManageable: AnyObject {
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
+    func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
     /// Create on the fly an "in memory" DriveFileManager for a specific share
     func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager?
@@ -251,6 +252,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         return driveFileManager
+    }
+
+    public func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager? {
+        let drives = driveInfosManager.getDrives(for: userId)
+        for drive in drives {
+            if drive.id == driveId {
+                guard let driveFileManager = getDriveFileManager(for: driveId, userId: userId) else {
+                    throw DriveError.NoDriveError.noDriveFileManager
+                }
+                return driveFileManager
+            }
+        }
+        return nil
     }
 
     private func clearDriveFileManagers() {
