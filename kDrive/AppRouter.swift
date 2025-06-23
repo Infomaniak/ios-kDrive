@@ -112,6 +112,60 @@ public struct AppRouter: AppNavigable {
         navigationController.pushViewController(destinationViewController, animated: true)
     }
 
+    @MainActor private func showSharedFileIdView(
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController,
+        fileId: Int
+    ) {
+        let database = driveFileManager.database
+        let matchedFrozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
+            lazyCollection
+                .filter("id == %@", fileId)
+                .first?
+                .freezeIfNeeded()
+        }
+
+        let rawPresentationOrigin = "fileList"
+
+        guard let matchedFrozenFile, let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
+            showSharedWithMeView(
+                driveFileManager: driveFileManager,
+                navigationController: navigationController
+            )
+            return
+        }
+
+        presentPreviewViewController(
+            frozenFiles: [matchedFrozenFile],
+            index: 0,
+            driveFileManager: driveFileManager,
+            normalFolderHierarchy: true,
+            presentationOrigin: presentationOrigin,
+            navigationController: navigationController,
+            animated: true
+        )
+    }
+
+    @MainActor private func showSharedFolderIdView(driveFileManager: DriveFileManager,
+                                                   navigationController: UINavigationController,
+                                                   folderId: Int) {
+        let database = driveFileManager.database
+        let matchedFrozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
+            lazyCollection
+                .filter("id == %@", folderId)
+                .first?
+                .freezeIfNeeded()
+        }
+
+        let destinationViewModel = SharedWithMeViewModel(
+            driveFileManager: driveFileManager,
+            currentDirectory: matchedFrozenFolder
+        )
+
+        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+        navigationController.pushViewController(destinationViewController, animated: true)
+    }
+
     public func navigate(to route: NavigationRoutes) {
         guard let rootViewController = window?.rootViewController else {
             SentryDebug.captureNoWindow()
@@ -161,50 +215,19 @@ public struct AppRouter: AppNavigable {
             }
 
             let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
-            let database = sharedWithMeDriveFileManager.database
 
             if let fileId = sharedWithMeLink.fileId {
-                let matchedFrozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
-                    lazyCollection
-                        .filter("id == %@", fileId)
-                        .first?
-                        .freezeIfNeeded()
-                }
-
-                let rawPresentationOrigin = "fileList"
-
-                guard let matchedFrozenFile, let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
-                    showSharedWithMeView(
-                        driveFileManager: sharedWithMeDriveFileManager,
-                        navigationController: navigationController
-                    )
-                    return
-                }
-
-                presentPreviewViewController(
-                    frozenFiles: [matchedFrozenFile],
-                    index: 0,
+                showSharedFileIdView(
                     driveFileManager: sharedWithMeDriveFileManager,
-                    normalFolderHierarchy: true,
-                    presentationOrigin: presentationOrigin,
                     navigationController: navigationController,
-                    animated: true
+                    fileId: fileId
                 )
             } else if let folderId = sharedWithMeLink.folderId {
-                let matchedFrozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
-                    lazyCollection
-                        .filter("id == %@", folderId)
-                        .first?
-                        .freezeIfNeeded()
-                }
-
-                let destinationViewModel = SharedWithMeViewModel(
+                showSharedFolderIdView(
                     driveFileManager: sharedWithMeDriveFileManager,
-                    currentDirectory: matchedFrozenFolder
+                    navigationController: navigationController,
+                    folderId: folderId
                 )
-
-                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
-                navigationController.pushViewController(destinationViewController, animated: true)
             } else {
                 showSharedWithMeView(driveFileManager: sharedWithMeDriveFileManager, navigationController: navigationController)
             }
