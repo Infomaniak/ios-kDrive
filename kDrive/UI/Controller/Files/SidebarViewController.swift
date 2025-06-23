@@ -395,8 +395,16 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     fatalError("Unable to find a matching file")
                 }
 
-                let viewModel = FileViewModel(driveFileManager: self.driveFileManager, file: destinationFile, selectionMode: true)
+                let viewModel = FileViewModel(
+                    driveFileManager: self.driveFileManager,
+                    file: destinationFile,
+                    selectionMode: false
+                )
                 cell.configure(with: viewModel)
+                cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+                cell.setEnabled(true)
+                cell.moreButton.isHidden = true
+
                 return cell
             case .main, .first, .second, .third:
                 guard let rootMenuCell = collectionView.dequeueReusableCell(
