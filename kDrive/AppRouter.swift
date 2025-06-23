@@ -103,6 +103,15 @@ public struct AppRouter: AppNavigable {
         return driveFileManager
     }
 
+    @MainActor private func showSharedWithMeView(
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController
+    ) {
+        let destinationViewModel = SharedWithMeViewModel(driveFileManager: driveFileManager)
+        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+        navigationController.pushViewController(destinationViewController, animated: true)
+    }
+
     public func navigate(to route: NavigationRoutes) {
         guard let rootViewController = window?.rootViewController else {
             SentryDebug.captureNoWindow()
@@ -162,12 +171,13 @@ public struct AppRouter: AppNavigable {
                         .freezeIfNeeded()
                 }
 
-                guard let matchedFrozenFile else {
-                    return
-                }
-
                 let rawPresentationOrigin = "fileList"
-                guard let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
+
+                guard let matchedFrozenFile, let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
+                    showSharedWithMeView(
+                        driveFileManager: sharedWithMeDriveFileManager,
+                        navigationController: navigationController
+                    )
                     return
                 }
 
@@ -196,9 +206,7 @@ public struct AppRouter: AppNavigable {
                 let destinationViewController = FileListViewController(viewModel: destinationViewModel)
                 navigationController.pushViewController(destinationViewController, animated: true)
             } else {
-                let destinationViewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager)
-                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
-                navigationController.pushViewController(destinationViewController, animated: true)
+                showSharedWithMeView(driveFileManager: sharedWithMeDriveFileManager, navigationController: navigationController)
             }
         }
         sharedWithMeService.clearLastSharedWithMe()
