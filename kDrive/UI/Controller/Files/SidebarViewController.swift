@@ -487,12 +487,21 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                            subitems: [item])
 
             let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = NSDirectionalEdgeInsets(
-                top: -UIConstants.Padding.small,
-                leading: UIConstants.Padding.none,
-                bottom: UIConstants.Padding.standard,
-                trailing: UIConstants.Padding.none
-            )
+            if selectMode {
+                section.contentInsets = NSDirectionalEdgeInsets(
+                    top: -UIConstants.Padding.small,
+                    leading: UIConstants.Padding.mediumSmall,
+                    bottom: UIConstants.Padding.standard,
+                    trailing: UIConstants.Padding.mediumSmall
+                )
+            } else {
+                section.contentInsets = NSDirectionalEdgeInsets(
+                    top: -UIConstants.Padding.small,
+                    leading: UIConstants.Padding.none,
+                    bottom: UIConstants.Padding.standard,
+                    trailing: UIConstants.Padding.none
+                )
+            }
 
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                     heightDimension: .estimated(0))
