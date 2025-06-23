@@ -30,8 +30,13 @@ class SharedWithMeViewModel: FileListViewModel {
                                           supportsDrop: false,
                                           matomoViewPath: [MatomoUtils.View.menu.displayName, "SharedWithMe"])
 
-        super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory ?? sharedWithMeRootFile)
-        observedFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory?.children ?? sharedWithMeRootFile.children).filesSorted(by: sortType))
+        super.init(
+            configuration: configuration,
+            driveFileManager: driveFileManager,
+            currentDirectory: currentDirectory ?? sharedWithMeRootFile
+        )
+        observedFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory?.children ?? sharedWithMeRootFile.children)
+            .filesSorted(by: sortType))
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {

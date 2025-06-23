@@ -77,6 +77,32 @@ public struct AppRouter: AppNavigable {
 
     // MARK: Routable
 
+    @MainActor private func getMatchingDriveFileManager(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager? {
+        var driveFileManager: DriveFileManager?
+        sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+
+        for _ in accountManager.accounts {
+            if let matchingDriveFileManager = try? accountManager.getFirstMatchingDriveFileManager(
+                for: accountManager.currentUserId,
+                driveId: sharedWithMeLink.driveId
+            ) {
+                driveFileManager = matchingDriveFileManager
+            } else {
+                accountManager.switchToNextAvailableAccount()
+                guard let accountManager = accountManager.currentDriveFileManager else {
+                    return nil
+                }
+
+                _ = showMainViewController(driveFileManager: accountManager,
+                                           selectedIndex: MainTabBarIndex.files.rawValue)
+
+                sharedWithMeService.processSharedWithMePostAuthentication()
+            }
+        }
+
+        return driveFileManager
+    }
+
     public func navigate(to route: NavigationRoutes) {
         guard let rootViewController = window?.rootViewController else {
             SentryDebug.captureNoWindow()
@@ -109,27 +135,7 @@ public struct AppRouter: AppNavigable {
             showStore(from: viewController, driveFileManager: driveFileManager)
 
         case .sharedWithMe(let sharedWithMeLink):
-            var driveFileManager: DriveFileManager?
-            sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
-
-            for _ in accountManager.accounts {
-                if let matchingDriveFileManager = try? accountManager.getFirstMatchingDriveFileManager(
-                    for: accountManager.currentUserId,
-                    driveId: sharedWithMeLink.driveId
-                ) {
-                    driveFileManager = matchingDriveFileManager
-                } else {
-                    accountManager.switchToNextAvailableAccount()
-                    guard let accountManager = accountManager.currentDriveFileManager else {
-                        return
-                    }
-
-                    _ = showMainViewController(driveFileManager: accountManager,
-                                               selectedIndex: MainTabBarIndex.files.rawValue)
-                }
-            }
-
-            guard let driveFileManager else {
+            guard let driveFileManager = getMatchingDriveFileManager(sharedWithMeLink: sharedWithMeLink) else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .sharedWithMe without a DriveFileManager",
                     level: .error
@@ -195,6 +201,7 @@ public struct AppRouter: AppNavigable {
                 navigationController.pushViewController(destinationViewController, animated: true)
             }
         }
+        sharedWithMeService.clearLastSharedWithMe()
     }
 
     // MARK: TopmostViewControllerFetchable

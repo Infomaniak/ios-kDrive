@@ -51,7 +51,6 @@ public struct DeeplinkParser: DeeplinkParsable {
               let params = components.queryItems else {
             if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
                 await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
-                sharedWithMeService.processSharedWithMePostAuthentication()
                 return true
 
             } else {
