@@ -43,7 +43,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return true
     }
 
-    public enum RootMenuSection: Int {
+    public enum RootMenuSection {
         case main
         case first
         case second
@@ -168,6 +168,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                                         image: KDriveResourcesAsset.delete.image,
                                                                         destination: .file(DriveFileManager.trashRootFile))]
 
+    public var sections: [RootMenuSection] {
+        [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
+    }
+
     weak var delegate: SidebarViewControllerDelegate?
 
     let driveFileManager: DriveFileManager
@@ -226,7 +230,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         let secondSectionItems = userRootFolders + SidebarViewController.sharedItems
         let thirdSectionItems = SidebarViewController.trashItem
         let sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
-        let sections = [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
 
         for i in 0 ... sectionsItems.count - 1 {
             if !sections.isEmpty {
@@ -374,11 +377,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
         dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
             collectionView, indexPath, menuItem -> UICollectionViewCell? in
-            guard let sectionIndex = RootMenuSection(rawValue: indexPath.section) else {
+            guard let menuSection = self.getSection(for: indexPath.section) else {
                 fatalError("Unknown section")
             }
 
-            switch sectionIndex {
+            switch menuSection {
             case .first, .second, .third:
                 guard let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: "FileCollectionViewCell",
@@ -588,6 +591,14 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
 
         return destinationViewModel
+    }
+
+    func getSection(for index: Int) -> RootMenuSection? {
+        return sections[safe: index]
+    }
+
+    func getIndexOfSection(for menuSection: RootMenuSection) -> Int? {
+        return sections.firstIndex(of: menuSection)
     }
 
     func buttonAddClicked() {

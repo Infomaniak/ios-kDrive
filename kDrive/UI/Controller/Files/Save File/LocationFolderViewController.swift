@@ -39,6 +39,11 @@ class LocationFolderViewController: SidebarViewController {
                                                     RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
                                                                  image: KDriveResourcesAsset.folderSelect.image,
                                                                  destination: .file(DriveFileManager.mySharedRootFile))]
+
+    override var sections: [RootMenuSection] {
+        [RootMenuSection.first, RootMenuSection.main]
+    }
+
     private var selectedIndexPath: IndexPath?
     private let selectHandler: ((File) -> Void)?
     private let disabledDirectoriesSelection: [Int]
@@ -81,7 +86,6 @@ class LocationFolderViewController: SidebarViewController {
 
         let firstSectionItems = recentDirectories
         let secondSectionItems = userRootFolders + LocationFolderViewController.mainItems
-        let sections = [RootMenuSection.first, RootMenuSection.main]
         let sectionItems = [firstSectionItems, secondSectionItems]
 
         for i in 0 ... sectionItems.count - 1 {
