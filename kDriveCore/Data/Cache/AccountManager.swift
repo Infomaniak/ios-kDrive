@@ -255,8 +255,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager? {
-        let drives = driveInfosManager.getDrives(for: userId)
-        for drive in drives {
+        let userDrives = driveInfosManager.getDrives(for: userId)
+        for drive in userDrives {
             if drive.id == driveId {
                 guard let driveFileManager = getDriveFileManager(for: driveId, userId: userId) else {
                     throw DriveError.NoDriveError.noDriveFileManager
