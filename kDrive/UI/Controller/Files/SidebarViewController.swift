@@ -45,6 +45,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     public enum RootMenuSection {
         case main
+        case recent
         case first
         case second
         case third
@@ -52,7 +53,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         var title: String {
             switch self {
             case .main: return KDriveResourcesStrings.Localizable.allFilesTitle
-            case .first: return KDriveResourcesStrings.Localizable.recentTitle
+            case .recent: return KDriveResourcesStrings.Localizable.recentTitle
             default: return ""
             }
         }
@@ -382,7 +383,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             }
 
             switch menuSection {
-            case .first, .second, .third:
+            case .recent:
                 guard let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: "FileCollectionViewCell",
                     for: indexPath
@@ -397,7 +398,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 let viewModel = FileViewModel(driveFileManager: self.driveFileManager, file: destinationFile, selectionMode: true)
                 cell.configure(with: viewModel)
                 return cell
-            case .main:
+            case .main, .first, .second, .third:
                 guard let rootMenuCell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: RootMenuCell.identifier,
                     for: indexPath
