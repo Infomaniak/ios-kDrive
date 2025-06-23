@@ -48,9 +48,8 @@ public struct SharedWithMeLink: Sendable {
         let tail = path.replacingOccurrences(of: baseUrl, with: "")
         let parameters = tail.split(separator: "/").map { String($0) }
 
-        if parameters.indices.contains(1) { folderId = Int(parameters[1]) } else { folderId = nil }
-        if parameters.indices.contains(4) { fileId = Int(parameters[4]) } else { fileId = nil }
-
+        folderId = Int(parameters[safe: 1] ?? "")
+        fileId = Int(parameters[safe: 4] ?? "")
         self.driveId = driveIdInt
         self.sharedWithMeURL = sharedWithMeURL
     }
