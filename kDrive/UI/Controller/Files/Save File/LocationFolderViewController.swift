@@ -41,7 +41,7 @@ class LocationFolderViewController: SidebarViewController {
                                                                  destination: .file(DriveFileManager.mySharedRootFile))]
 
     override var sections: [RootMenuSection] {
-        [RootMenuSection.first, RootMenuSection.main]
+        [RootMenuSection.recent, RootMenuSection.main]
     }
 
     private var selectedIndexPath: IndexPath?
