@@ -47,8 +47,6 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
 
-    private static let idFilter = "id == %@"
-
     /// Get the current window from the app scene
     @MainActor private var window: UIWindow? {
         let scene = UIApplication.shared.connectedScenes.first { scene in
@@ -122,8 +120,7 @@ public struct AppRouter: AppNavigable {
         let database = driveFileManager.database
         let matchedFrozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
             lazyCollection
-                .filter(AppRouter.idFilter, fileId)
-                .first?
+                .first { $0.id == fileId }?
                 .freezeIfNeeded()
         }
 
@@ -154,8 +151,7 @@ public struct AppRouter: AppNavigable {
         let database = driveFileManager.database
         let matchedFrozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
             lazyCollection
-                .filter(AppRouter.idFilter, folderId)
-                .first?
+                .first { $0.id == folderId }?
                 .freezeIfNeeded()
         }
 
@@ -403,8 +399,7 @@ public struct AppRouter: AppNavigable {
         let database = driveFileManager.database
         let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
             lazyCollection
-                .filter(AppRouter.idFilter, fileId)
-                .first?
+                .first { $0.id == fileId as? Int }?
                 .freezeIfNeeded()
         }
 
@@ -432,8 +427,7 @@ public struct AppRouter: AppNavigable {
         let database = driveFileManager.database
         let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
             lazyCollection
-                .filter(AppRouter.idFilter, fileId)
-                .first?
+                .first { $0.id == fileId as? Int }?
                 .freezeIfNeeded()
         }
 
