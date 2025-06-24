@@ -17,17 +17,24 @@
  */
 
 import Foundation
+import InfomaniakDI
 import UIKit
 
 enum OperationQueueHelper {
-    static func disableIdleTimer(_ shouldBeDisabled: Bool, hasOperationsInQueue: Bool = false) {
-        Log.uploadQueue("disableIdleTimer shouldBeDisabled:\(shouldBeDisabled) hasOperationsInQueue:\(hasOperationsInQueue)")
+    static func disableIdleTimer(_ shouldBeDisabled: Bool) {
+        Log.uploadQueue("disableIdleTimer shouldBeDisabled:\(shouldBeDisabled)")
 
         #if !ISEXTENSION
+        @InjectService var uploadService: UploadServiceable
+        @InjectService var downloadQueue: DownloadQueueable
+
         Task { @MainActor in
-            if shouldBeDisabled {
+            let hasUploadsInQueue = uploadService.operationCount > 0
+            let hasDownloadsInQueue = downloadQueue.operationCount > 0
+
+            if shouldBeDisabled && !UIApplication.shared.isIdleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = true
-            } else if !hasOperationsInQueue {
+            } else if !hasUploadsInQueue && !hasDownloadsInQueue && UIApplication.shared.isIdleTimerDisabled {
                 UIApplication.shared.isIdleTimerDisabled = false
             }
         }
