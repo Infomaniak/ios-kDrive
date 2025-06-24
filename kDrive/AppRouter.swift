@@ -77,32 +77,6 @@ public struct AppRouter: AppNavigable {
 
     // MARK: Routable
 
-    @MainActor private func getMatchingDriveFileManager(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager? {
-        var driveFileManager: DriveFileManager?
-        sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
-
-        for _ in accountManager.accounts {
-            if let matchingDriveFileManager = try? accountManager.getFirstMatchingDriveFileManager(
-                for: accountManager.currentUserId,
-                driveId: sharedWithMeLink.driveId
-            ) {
-                driveFileManager = matchingDriveFileManager
-            } else {
-                accountManager.switchToNextAvailableAccount()
-                guard let accountManager = accountManager.currentDriveFileManager else {
-                    return nil
-                }
-
-                _ = showMainViewController(driveFileManager: accountManager,
-                                           selectedIndex: MainTabBarIndex.files.rawValue)
-
-                sharedWithMeService.processSharedWithMePostAuthentication()
-            }
-        }
-
-        return driveFileManager
-    }
-
     @MainActor private func showSharedWithMeView(
         driveFileManager: DriveFileManager,
         navigationController: UINavigationController
@@ -196,7 +170,8 @@ public struct AppRouter: AppNavigable {
             showStore(from: viewController, driveFileManager: driveFileManager)
 
         case .sharedWithMe(let sharedWithMeLink):
-            guard let driveFileManager = getMatchingDriveFileManager(sharedWithMeLink: sharedWithMeLink) else {
+            guard let driveFileManager = accountManager
+                .getMatchingDriveFileManagerAmongAllAvailableAccounts(sharedWithMeLink: sharedWithMeLink) else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .sharedWithMe without a DriveFileManager",
                     level: .error

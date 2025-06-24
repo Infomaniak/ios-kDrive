@@ -69,6 +69,7 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
+    func getMatchingDriveFileManagerAmongAllAvailableAccounts(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -105,6 +106,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var myKSuiteStore: MyKSuiteStore
+    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -206,6 +208,34 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         } else {
             return nil
         }
+    }
+
+    @MainActor public func getMatchingDriveFileManagerAmongAllAvailableAccounts(sharedWithMeLink: SharedWithMeLink)
+        -> DriveFileManager? {
+        @InjectService var appRouter: AppNavigable
+        var driveFileManager: DriveFileManager?
+        sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+
+        for _ in accounts {
+            if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
+                for: currentUserId,
+                driveId: sharedWithMeLink.driveId
+            ) {
+                driveFileManager = matchingDriveFileManager
+            } else {
+                switchToNextAvailableAccount()
+                guard let accountManager = currentDriveFileManager else {
+                    return nil
+                }
+
+                _ = appRouter.showMainViewController(driveFileManager: accountManager,
+                                                     selectedIndex: 0)
+
+                sharedWithMeService.processSharedWithMePostAuthentication()
+            }
+        }
+
+        return driveFileManager
     }
 
     public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager? {
