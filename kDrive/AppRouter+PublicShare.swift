@@ -40,16 +40,14 @@ public extension AppRouter {
                 shareLinkUid: link.shareLinkUid,
                 apiFetcher: apiFetcher
             )
-        } catch {
-            guard let apiError = error as? ApiError else {
-                return false
-            }
-
+        } catch let apiError as ApiError {
             guard let limitation = PublicShareLimitation(rawValue: apiError.code) else {
                 return false
             }
 
             return await processPublicShareMetadataLimitation(limitation, publicShareURL: link.publicShareURL)
+        } catch {
+            return false
         }
     }
 
