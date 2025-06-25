@@ -229,7 +229,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 }
 
                 _ = appRouter.showMainViewController(driveFileManager: accountManager,
-                                                     selectedIndex: 0)
+                                                     selectedIndex: 1)
 
                 sharedWithMeService.processSharedWithMePostAuthentication()
             }
@@ -612,6 +612,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public func logoutCurrentAccountAndSwitchToNextIfPossible() {
         Task { @MainActor in
             deeplinkService.clearLastPublicShare()
+            sharedWithMeService.clearLastSharedWithMe()
 
             if let currentAccount {
                 removeTokenAndAccount(account: currentAccount)

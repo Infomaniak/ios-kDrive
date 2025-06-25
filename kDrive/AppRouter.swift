@@ -118,9 +118,12 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
+            let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+            window?.rootViewController = freshRootViewController
+
             guard let navigationController =
                 getControllerForRestoration(
-                    tabBarViewController: rootViewController as? UISplitViewController
+                    tabBarViewController: freshRootViewController
                 ) as? UINavigationController
             else {
                 return
@@ -201,6 +204,7 @@ public struct AppRouter: AppNavigable {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
                 deeplinkService.processDeeplinksPostAuthentication()
+                sharedWithMeService.processSharedWithMePostAuthentication()
             }
         case .onboarding:
             showOnboarding()
@@ -314,7 +318,8 @@ public struct AppRouter: AppNavigable {
         let database = driveFileManager.database
         let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
             lazyCollection
-                .first { $0.id == fileId as? Int }?
+                .filter("id == %@", fileId)
+                .first?
                 .freezeIfNeeded()
         }
 
@@ -342,7 +347,8 @@ public struct AppRouter: AppNavigable {
         let database = driveFileManager.database
         let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
             lazyCollection
-                .first { $0.id == fileId as? Int }?
+                .filter("id == %@", fileId)
+                .first?
                 .freezeIfNeeded()
         }
 

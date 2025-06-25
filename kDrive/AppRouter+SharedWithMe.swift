@@ -39,7 +39,8 @@ public extension AppRouter {
         let database = driveFileManager.database
         let matchedFrozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
             lazyCollection
-                .first { $0.id == fileId }?
+                .filter("id == %@", fileId)
+                .first?
                 .freezeIfNeeded()
         }
 
@@ -70,7 +71,8 @@ public extension AppRouter {
         let database = driveFileManager.database
         let matchedFrozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
             lazyCollection
-                .first { $0.id == folderId }?
+                .filter("id == %@", folderId)
+                .first?
                 .freezeIfNeeded()
         }
 
