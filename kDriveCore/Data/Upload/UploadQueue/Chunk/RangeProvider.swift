@@ -42,6 +42,7 @@ public struct RangeProvider: RangeProvidable {
         static let chunkMinSize: UInt64 = 1 * 1024 * 1024
         static let chunkMaxSizeClient: UInt64 = 50 * 1024 * 1024
         static let chunkMaxSizeServer: UInt64 = 1 * 1024 * 1024 * 1024
+        static let smallFileMaxSize: UInt64 = 5 * 1024 * 1024
         static let optimalChunkCount: UInt64 = 200
         static let maxTotalChunks: UInt64 = 10000
         static let minTotalChunks: UInt64 = 1

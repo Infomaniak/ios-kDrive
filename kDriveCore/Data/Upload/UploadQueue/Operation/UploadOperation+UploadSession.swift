@@ -290,18 +290,18 @@ extension UploadOperation {
         Log.uploadOperation("Clean session for \(uploadFileId)")
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
-        // First remote, then locally
-        await cleanUploadFileSessionRemotely()
+        if let readOnlyFile = try? readOnlyFile(),
+           readOnlyFile.uploadingSession != nil {
+            await cleanUploadFileSessionRemotely(readOnlyFile: readOnlyFile)
+        }
         cleanUploadFileSessionLocally()
 
-        // Cancel all network requests
         cancelAllUploadRequests()
     }
 
-    private func cleanUploadFileSessionRemotely() async {
+    private func cleanUploadFileSessionRemotely(readOnlyFile: UploadFile) async {
         // Clean the remote session, if any. Invalid ones are already gone server side.
-        guard let readOnlyFile = try? readOnlyFile(),
-              let token = readOnlyFile.uploadingSession?.token else {
+        guard let token = readOnlyFile.uploadingSession?.token else {
             return
         }
 
@@ -364,11 +364,7 @@ extension UploadOperation {
 
         // Check file is readable
         let fileUrl = try getFileUrlIfReadable(file: file)
-
-        guard let fileSize = fileMetadata.fileSize(url: fileUrl) else {
-            Log.uploadOperation("Unable to read file size for ufid:\(uploadFileId) url:\(fileUrl)", level: .error)
-            throw DriveError.fileNotFound
-        }
+        let fileSize = try fileSize(fileUrl: fileUrl)
 
         let mebibytes = String(format: "%.2f", BinaryDisplaySize.bytes(fileSize).toMebibytes)
         Log.uploadOperation("got fileSize:\(mebibytes)MiB ufid:\(uploadFileId)")
@@ -425,7 +421,7 @@ extension UploadOperation {
         }
     }
 
-    private func cleanUploadFileSessionLocally(_ file: UploadFile? = nil) {
+    private func cleanUploadFileSessionLocally() {
         // Clean the local uploading session, as well as error
         try? transactionWithFile { file in
             file.uploadingSession = nil
