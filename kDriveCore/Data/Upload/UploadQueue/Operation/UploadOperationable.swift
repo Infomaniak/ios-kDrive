@@ -61,7 +61,7 @@ public protocol UploadOperationable: Operationable {
     func uploadCompletion(data: Data?, response: URLResponse?, error: Error?)
 
     /// Clean the remote then local session; and cancel running upload chunk operations.
-    func cleanUploadFileSession() async throws
+    func cleanUploadFileSession() async
 
     /// Process errors and terminate the operation
     func end()

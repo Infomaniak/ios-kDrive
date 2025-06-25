@@ -130,7 +130,7 @@ extension UploadOperation {
                      .uploadSessionInvalid:
                     // Clean session, present error, user action required to restart.
                     Task {
-                        try await self.cleanUploadFileSession()
+                        await self.cleanUploadFileSession()
                     }
                     file.error = .localError.wrapping(error)
 
@@ -218,7 +218,7 @@ extension UploadOperation {
                  .uploadFailedError,
                  .uploadTokenIsNotValid:
                 Task {
-                    try await self.cleanUploadFileSession()
+                    await self.cleanUploadFileSession()
                 }
                 file.progress = nil
                 file.error = error
@@ -234,7 +234,7 @@ extension UploadOperation {
                 file.progress = nil
                 file.error = error
                 Task {
-                    try await self.cleanUploadFileSession()
+                    await self.cleanUploadFileSession()
                 }
                 self.uploadService.cancelAllOperations(withParent: file.parentDirectoryId,
                                                        userId: file.userId,

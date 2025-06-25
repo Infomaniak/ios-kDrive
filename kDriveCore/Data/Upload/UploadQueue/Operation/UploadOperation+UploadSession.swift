@@ -112,7 +112,7 @@ extension UploadOperation {
     }
 
     private func wipeSessionAndRegenerate() async throws {
-        try await cleanUploadFileSession()
+        await cleanUploadFileSession()
         try await generateNewSessionAndStore()
     }
 
@@ -286,12 +286,12 @@ extension UploadOperation {
         }
     }
 
-    public func cleanUploadFileSession() async throws {
+    public func cleanUploadFileSession() async {
         Log.uploadOperation("Clean session for \(uploadFileId)")
         SentryDebug.uploadOperationCleanSessionBreadcrumb(uploadFileId)
 
-        let readOnlyFile = try readOnlyFile()
-        if readOnlyFile.uploadingSession != nil {
+        if let readOnlyFile = try? readOnlyFile(),
+           readOnlyFile.uploadingSession != nil {
             await cleanUploadFileSessionRemotely(readOnlyFile: readOnlyFile)
         }
         cleanUploadFileSessionLocally()
