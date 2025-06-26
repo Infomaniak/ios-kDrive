@@ -131,10 +131,11 @@ public struct AppRouter: AppNavigable {
 
             let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
 
-            if let fileId = sharedWithMeLink.fileId {
+            if let fileId = sharedWithMeLink.fileId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
                 showSharedFileIdView(
                     driveFileManager: sharedWithMeDriveFileManager,
                     navigationController: navigationController,
+                    driveId: sharedDriveId,
                     fileId: fileId
                 )
             } else if let folderId = sharedWithMeLink.folderId {
