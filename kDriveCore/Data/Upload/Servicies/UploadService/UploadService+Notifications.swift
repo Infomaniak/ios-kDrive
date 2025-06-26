@@ -59,33 +59,47 @@ extension UploadService: UploadNotifiable {
 
             fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
             let currentOperationCount = operationCount
-            if let error = uploadFile.error {
-                let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-                if error.code == DriveError.LocalCode.errorDeviceStorage.rawValue {
-                    notificationHelper.sendNotEnoughSpaceForUpload(filename: uploadedFileName)
-                } else {
-                    notificationHelper.sendGenericUploadError(filename: uploadedFileName,
-                                                              parentId: uploadFile.parentDirectoryId,
-                                                              error: error,
-                                                              uploadFileId: uploadFile.id)
-                }
-
-                if currentOperationCount == 0 {
-                    fileUploadedCount = 0
-                }
+            if uploadFile.error != nil {
+                sendFileUploadStateNotificationErrorIfNeeded(
+                    result: result,
+                    uploadFile: uploadFile,
+                    currentOperationCount: currentOperationCount
+                )
             } else if currentOperationCount == 0 {
-                // In some cases fileUploadedCount can be == 1 but the result.uploadFile isn't necessary the last file
-                // *successfully* uploaded
-                if fileUploadedCount == 1 && uploadFile.error == nil {
-                    let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-                    notificationHelper.sendUploadDoneNotification(filename: uploadedFileName,
-                                                                  parentId: uploadFile.parentDirectoryId)
-                } else if fileUploadedCount > 0 {
-                    notificationHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount,
-                                                                  parentId: uploadFile.parentDirectoryId)
-                }
-                fileUploadedCount = 0
+                sendFileUploadStateNotificationSuccessIfNeeded(uploadFile: uploadFile, result: result)
             }
+        }
+    }
+
+    private func sendFileUploadStateNotificationErrorIfNeeded(
+        result: UploadCompletionResult,
+        uploadFile: UploadFile,
+        currentOperationCount: Int
+    ) {
+        let uploadedFileName = result.driveFile?.name ?? uploadFile.name
+        if let error = uploadFile.error {
+            if error.code == DriveError.LocalCode.errorDeviceStorage.rawValue {
+                notificationHelper.sendNotEnoughSpaceForUpload(filename: uploadedFileName)
+            } else {
+                fileUploadFailedCount += 1
+                if currentOperationCount == 0 {
+                    notificationHelper.sendFailedUpload(
+                        failedUpload: fileUploadFailedCount,
+                        totalUpload: fileUploadedCount + fileUploadFailedCount
+                    )
+                }
+            }
+        }
+    }
+
+    private func sendFileUploadStateNotificationSuccessIfNeeded(uploadFile: UploadFile, result: UploadCompletionResult) {
+        if fileUploadedCount == 1 && uploadFile.error == nil {
+            let uploadedFileName = result.driveFile?.name ?? uploadFile.name
+            notificationHelper.sendUploadDoneNotification(filename: uploadedFileName,
+                                                          parentId: uploadFile.parentDirectoryId)
+        } else if fileUploadedCount > 0 {
+            notificationHelper.sendUploadDoneNotification(uploadCount: fileUploadedCount,
+                                                          parentId: uploadFile.parentDirectoryId)
         }
     }
 }
