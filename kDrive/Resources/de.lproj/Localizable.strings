@@ -4,7 +4,7 @@
  * Locale: de, German
  * Tagged: ios
  * Exported by: Matthieu Déglon
- * Exported at: Fri, 20 Jun 2025 13:59:14 +0200
+ * Exported at: Thu, 26 Jun 2025 08:52:23 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -443,7 +443,7 @@
 "buttonSelectAll" = "Alles auswählen";
 
 /* loco:685545854a29fa85140fcf62 */
-"buttonSelectTheFolder" = "Wählen Sie den Ordner";
+"buttonSelectTheFolder" = "Einen Ordner auswählen";
 
 /* loco:6049df4d5c2c3a04bc397963 */
 "buttonSend" = "Versenden";
