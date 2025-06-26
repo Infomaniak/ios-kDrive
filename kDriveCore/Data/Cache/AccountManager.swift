@@ -69,7 +69,7 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
-    func getMatchingDriveFileManagerAmongAllAvailableAccounts(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
+    @MainActor func getMatchingDriveFileManagerAmongAllAvailableAccounts(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
