@@ -85,7 +85,7 @@ class SelectDriveViewController: UIViewController {
     private func initForCurrentAccount(_ account: Account) {
         currentAccount = account
         accounts = accountManager.accounts.filter { $0.userId != account.userId }
-        driveList = Array(driveInfosManager.getDrives(for: account.userId, sharedWithMe: nil))
+        driveList = Array(driveInfosManager.getDrives(for: account.userId))
         dropDown.dataSource = accounts.map(\.user.displayName)
     }
 
