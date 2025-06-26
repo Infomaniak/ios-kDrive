@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import UIKit
@@ -34,35 +35,31 @@ public extension AppRouter {
     @MainActor func showSharedFileIdView(
         driveFileManager: DriveFileManager,
         navigationController: UINavigationController,
+        driveId: Int,
         fileId: Int
     ) {
-        let database = driveFileManager.database
-        let matchedFrozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
-            lazyCollection
-                .filter("id == %@", fileId)
-                .first?
-                .freezeIfNeeded()
-        }
-
         let rawPresentationOrigin = "fileList"
-
-        guard let matchedFrozenFile, let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
-            showSharedWithMeView(
-                driveFileManager: driveFileManager,
-                navigationController: navigationController
-            )
+        guard let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
             return
         }
 
-        presentPreviewViewController(
-            frozenFiles: [matchedFrozenFile],
-            index: 0,
-            driveFileManager: driveFileManager,
-            normalFolderHierarchy: true,
-            presentationOrigin: presentationOrigin,
-            navigationController: navigationController,
-            animated: true
-        )
+        let abstractFile = ProxyFile(driveId: driveId, id: fileId)
+        let endpoint = Endpoint.file(abstractFile)
+
+        Task {
+            let file: File = try await driveFileManager.apiFetcher
+                .perform(request: driveFileManager.apiFetcher.authenticatedRequest(endpoint))
+
+            presentPreviewViewController(
+                frozenFiles: [file],
+                index: 0,
+                driveFileManager: driveFileManager,
+                normalFolderHierarchy: true,
+                presentationOrigin: presentationOrigin,
+                navigationController: navigationController,
+                animated: true
+            )
+        }
     }
 
     @MainActor func showSharedFolderIdView(driveFileManager: DriveFileManager,
