@@ -228,7 +228,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
             sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
             switchAccount(newAccount: matchingAccount)
-            @InjectService var appRouter: AppNavigable
             appNavigable.prepareRootViewController(
                 currentState: RootViewControllerState.getCurrentState(),
                 restoration: false
