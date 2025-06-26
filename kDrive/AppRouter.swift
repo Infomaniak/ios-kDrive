@@ -110,9 +110,9 @@ public struct AppRouter: AppNavigable {
 
         case .sharedWithMe(let sharedWithMeLink):
             guard let driveFileManager = accountManager
-                .getMatchingDriveFileManagerAmongAllAvailableAccounts(sharedWithMeLink: sharedWithMeLink) else {
+                .getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: sharedWithMeLink) else {
                 Log.sceneDelegate(
-                    "NavigationManager: Unable to navigate to .sharedWithMe without a DriveFileManager",
+                    "NavigationManager: Unable to navigate to .sharedWithMe without a matching DriveFileManager",
                     level: .error
                 )
                 return

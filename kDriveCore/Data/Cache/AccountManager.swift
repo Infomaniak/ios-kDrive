@@ -69,7 +69,7 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
-    @MainActor func getMatchingDriveFileManagerAmongAllAvailableAccounts(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -210,29 +210,30 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    @MainActor public func getMatchingDriveFileManagerAmongAllAvailableAccounts(sharedWithMeLink: SharedWithMeLink)
+    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink)
         -> DriveFileManager? {
-        @InjectService var appRouter: AppNavigable
         var driveFileManager: DriveFileManager?
-        sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+        var matchingAccount: Account?
 
-        for _ in accounts {
+        for account in accounts {
             if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
-                for: currentUserId,
+                for: account.userId,
                 driveId: sharedWithMeLink.driveId
             ) {
                 driveFileManager = matchingDriveFileManager
-            } else {
-                switchToNextAvailableAccount()
-                guard let accountManager = currentDriveFileManager else {
-                    return nil
-                }
-
-                _ = appRouter.showMainViewController(driveFileManager: accountManager,
-                                                     selectedIndex: 1)
-
-                sharedWithMeService.processSharedWithMePostAuthentication()
+                matchingAccount = account
             }
+        }
+
+        if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
+            sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+            switchAccount(newAccount: matchingAccount)
+            @InjectService var appRouter: AppNavigable
+            appNavigable.prepareRootViewController(
+                currentState: RootViewControllerState.getCurrentState(),
+                restoration: false
+            )
+            return nil
         }
 
         return driveFileManager
