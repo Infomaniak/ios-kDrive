@@ -78,7 +78,7 @@ public struct AppRouter: AppNavigable {
     // MARK: Routable
 
     public func navigate(to route: NavigationRoutes) {
-        guard let rootViewController = window?.rootViewController else {
+        guard let window, let rootViewController = window.rootViewController else {
             SentryDebug.captureNoWindow()
             Log.sceneDelegate("NavigationManager: Unable to navigate without a root view controller", level: .error)
             return
@@ -119,7 +119,7 @@ public struct AppRouter: AppNavigable {
             }
 
             let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
-            window?.rootViewController = freshRootViewController
+            window.rootViewController = freshRootViewController
 
             guard let navigationController =
                 getControllerForRestoration(
