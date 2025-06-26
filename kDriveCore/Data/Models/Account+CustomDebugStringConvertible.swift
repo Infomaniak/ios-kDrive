@@ -21,6 +21,6 @@ import InfomaniakCore
 
 extension Account: @retroactive CustomDebugStringConvertible {
     public var debugDescription: String {
-        return "<\(type(of: self)): id:\(self.id) displayName:\(self.user.displayName)>"
+        return "<\(type(of: self)): id:\(id) displayName:\(user.displayName)>"
     }
 }
