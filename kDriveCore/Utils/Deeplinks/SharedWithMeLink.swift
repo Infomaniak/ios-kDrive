@@ -25,6 +25,7 @@ public struct SharedWithMeLink: Sendable {
 
     public let sharedWithMeURL: URL
     public let driveId: Int
+    public let sharedDriveId: Int?
     public let folderId: Int?
     public let fileId: Int?
 
@@ -48,6 +49,7 @@ public struct SharedWithMeLink: Sendable {
         let tail = path.replacingOccurrences(of: baseUrl, with: "")
         let parameters = tail.split(separator: "/").map { String($0) }
 
+        sharedDriveId = Int(parameters[safe: 0] ?? "")
         folderId = Int(parameters[safe: 1] ?? "")
         fileId = Int(parameters[safe: 4] ?? "")
         self.driveId = driveIdInt

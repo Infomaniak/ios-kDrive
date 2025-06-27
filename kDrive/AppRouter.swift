@@ -77,7 +77,7 @@ public struct AppRouter: AppNavigable {
 
     // MARK: Routable
 
-    public func navigate(to route: NavigationRoutes) {
+    public func navigate(to route: NavigationRoutes) async {
         guard let window, let rootViewController = window.rootViewController else {
             SentryDebug.captureNoWindow()
             Log.sceneDelegate("NavigationManager: Unable to navigate without a root view controller", level: .error)
@@ -131,16 +131,18 @@ public struct AppRouter: AppNavigable {
 
             let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
 
-            if let fileId = sharedWithMeLink.fileId {
-                showSharedFileIdView(
+            if let fileId = sharedWithMeLink.fileId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
+                await showSharedFileIdView(
                     driveFileManager: sharedWithMeDriveFileManager,
                     navigationController: navigationController,
+                    driveId: sharedDriveId,
                     fileId: fileId
                 )
-            } else if let folderId = sharedWithMeLink.folderId {
-                showSharedFolderIdView(
+            } else if let folderId = sharedWithMeLink.folderId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
+                await showSharedFolderIdView(
                     driveFileManager: sharedWithMeDriveFileManager,
                     navigationController: navigationController,
+                    driveId: sharedDriveId,
                     folderId: folderId
                 )
             } else {

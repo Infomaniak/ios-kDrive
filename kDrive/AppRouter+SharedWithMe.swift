@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import UIKit
@@ -34,28 +35,22 @@ public extension AppRouter {
     @MainActor func showSharedFileIdView(
         driveFileManager: DriveFileManager,
         navigationController: UINavigationController,
+        driveId: Int,
         fileId: Int
-    ) {
-        let database = driveFileManager.database
-        let matchedFrozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
-            lazyCollection
-                .filter("id == %@", fileId)
-                .first?
-                .freezeIfNeeded()
-        }
-
+    ) async {
         let rawPresentationOrigin = "fileList"
-
-        guard let matchedFrozenFile, let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
-            showSharedWithMeView(
-                driveFileManager: driveFileManager,
-                navigationController: navigationController
-            )
+        guard let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin),
+              let frozenFile = await driveFileManager.getFrozenFileFromAPI(
+                  driveFileManager: driveFileManager,
+                  driveId: driveId,
+                  fileId: fileId
+              )
+        else {
             return
         }
 
         presentPreviewViewController(
-            frozenFiles: [matchedFrozenFile],
+            frozenFiles: [frozenFile],
             index: 0,
             driveFileManager: driveFileManager,
             normalFolderHierarchy: true,
@@ -67,19 +62,30 @@ public extension AppRouter {
 
     @MainActor func showSharedFolderIdView(driveFileManager: DriveFileManager,
                                            navigationController: UINavigationController,
-                                           folderId: Int) {
-        let database = driveFileManager.database
-        let matchedFrozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
-            lazyCollection
-                .filter("id == %@", folderId)
-                .first?
-                .freezeIfNeeded()
+                                           driveId: Int,
+                                           folderId: Int) async {
+        guard let frozenFolder = await driveFileManager.getFrozenFileFromAPI(
+            driveFileManager: driveFileManager,
+            driveId: driveId,
+            fileId: folderId
+        ) else {
+            return
         }
 
-        let destinationViewModel = SharedWithMeViewModel(
-            driveFileManager: driveFileManager,
-            currentDirectory: matchedFrozenFolder
+        let configuration = FileListViewModel.Configuration(
+            emptyViewType: .emptyFolder,
+            supportsDrop: true,
+            rightBarButtons: [.search]
         )
+        let destinationViewModel = ConcreteFileListViewModel(
+            configuration: configuration,
+            driveFileManager: driveFileManager,
+            currentDirectory: frozenFolder
+        )
+
+        Task {
+            try await destinationViewModel.loadFiles()
+        }
 
         let destinationViewController = FileListViewController(viewModel: destinationViewModel)
         navigationController.pushViewController(destinationViewController, animated: true)
