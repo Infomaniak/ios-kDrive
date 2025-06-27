@@ -40,7 +40,8 @@ final class ITAppLaunchTest: XCTestCase {
     ))
 
     override func setUpWithError() throws {
-        SimpleResolver.sharedResolver.removeAll()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .realApp)
 
         let factoriesWithIdentifier = FactoryService.debugServices + FactoryService.transactionableServices
         SimpleResolver.register(factoriesWithIdentifier)
