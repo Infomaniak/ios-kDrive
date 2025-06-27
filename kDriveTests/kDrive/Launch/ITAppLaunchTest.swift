@@ -105,7 +105,7 @@ final class ITAppLaunchTest: XCTestCase {
         SimpleResolver.register(services)
     }
 
-    @MainActor func testUnlock() throws {
+    @MainActor func testUnlock() async throws {
         // GIVEN applock enabled
         UserDefaults.shared.isAppLockEnabled = true
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
@@ -120,6 +120,9 @@ final class ITAppLaunchTest: XCTestCase {
             return accountManager
         }
         SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
+
+        // We need to wait for the app to settle for this test to be stable
+        try await Task.sleep(nanoseconds: 5_000_000_000)
 
         @InjectService var accountManager: AccountManageable
         XCTAssertNotNil(accountManager.currentAccount, "expecting a user logged in")
