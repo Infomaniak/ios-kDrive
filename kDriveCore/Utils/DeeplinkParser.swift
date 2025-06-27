@@ -36,6 +36,7 @@ public struct DeeplinkParser: DeeplinkParsable {
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     public init() {
         // META: keep SonarCloud happy
@@ -48,8 +49,14 @@ public struct DeeplinkParser: DeeplinkParsable {
 
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
-            Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
-            return false
+            if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
+                await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
+                return true
+
+            } else {
+                Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
+                return false
+            }
         }
 
         if components.path == DeeplinkPath.store.rawValue,

@@ -51,6 +51,11 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager { fatalError("Not implemented") }
 
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink)
+        -> DriveFileManager? {
+        fatalError("Not implemented")
+    }
+
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher { fatalError("Not implemented") }
 
     func getDrive(for accountId: Int, driveId: Int) -> Drive? { nil }
@@ -67,7 +72,13 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func createAndSetCurrentAccount(token: ApiToken) async throws -> Account { fatalError("Not implemented") }
 
-    func updateUser(for account: Account, registerToken: Bool) async throws -> Account { fatalError("Not implemented") }
+    func updateUser(for account: Account, registerToken: Bool) async throws -> Account {
+        guard let currentAccount else {
+            fatalError("Set a currentAccount in the mock for this to work")
+        }
+
+        return currentAccount
+    }
 
     func loadAccounts() -> [Account] { fatalError("Not implemented") }
 
@@ -94,6 +105,10 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
     func logoutCurrentAccountAndSwitchToNextIfPossible() { fatalError("Not implemented") }
 
     func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager? {
+        fatalError("Not implemented")
+    }
+
+    func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager? {
         fatalError("Not implemented")
     }
 }

@@ -69,7 +69,9 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
+    func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
     /// Create on the fly an "in memory" DriveFileManager for a specific share
     func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager?
@@ -104,6 +106,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var myKSuiteStore: MyKSuiteStore
+    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -207,6 +210,34 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
+    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink)
+        -> DriveFileManager? {
+        var driveFileManager: DriveFileManager?
+        var matchingAccount: Account?
+
+        for account in accounts {
+            if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
+                for: account.userId,
+                driveId: sharedWithMeLink.driveId
+            ) {
+                driveFileManager = matchingDriveFileManager
+                matchingAccount = account
+            }
+        }
+
+        if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
+            sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+            switchAccount(newAccount: matchingAccount)
+            appNavigable.prepareRootViewController(
+                currentState: RootViewControllerState.getCurrentState(),
+                restoration: false
+            )
+            return nil
+        }
+
+        return driveFileManager
+    }
+
     public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, rootFileId: Int) -> DriveFileManager? {
         if let inMemoryDriveFileManager = driveFileManagers[publicShareId] {
             return inMemoryDriveFileManager
@@ -251,6 +282,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         return driveFileManager
+    }
+
+    public func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager? {
+        let userDrives = driveInfosManager.getDrives(for: userId)
+        for drive in userDrives {
+            if drive.id == driveId {
+                guard let driveFileManager = getDriveFileManager(for: driveId, userId: userId) else {
+                    throw DriveError.NoDriveError.noDriveFileManager
+                }
+                return driveFileManager
+            }
+        }
+        return nil
     }
 
     private func clearDriveFileManagers() {
@@ -568,6 +612,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public func logoutCurrentAccountAndSwitchToNextIfPossible() {
         Task { @MainActor in
             deeplinkService.clearLastPublicShare()
+            sharedWithMeService.clearLastSharedWithMe()
 
             if let currentAccount {
                 removeTokenAndAccount(account: currentAccount)

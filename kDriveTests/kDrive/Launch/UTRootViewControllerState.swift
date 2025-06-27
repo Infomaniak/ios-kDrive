@@ -29,7 +29,7 @@ import XCTest
 final class UTRootViewControllerState: XCTestCase {
     let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
 
-    let fakeAccount = Account(apiToken: ApiToken(
+    public static let fakeAccount = Account(apiToken: ApiToken(
         accessToken: "",
         expiresIn: 0,
         refreshToken: "",
@@ -144,9 +144,9 @@ final class UTRootViewControllerState: XCTestCase {
 
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
-            accountManager.accounts.append(self.fakeAccount)
-            accountManager.currentAccount = self.fakeAccount
-            accountManager.currentUserId = self.fakeAccount.userId
+            accountManager.accounts.append(Self.fakeAccount)
+            accountManager.currentAccount = Self.fakeAccount
+            accountManager.currentUserId = Self.fakeAccount.userId
             return accountManager
         }
         SimpleResolver.sharedResolver.store(factory: emptyAccountManagerFactory)
@@ -165,7 +165,7 @@ final class UTRootViewControllerState: XCTestCase {
 
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
-            accountManager.accounts.append(self.fakeAccount)
+            accountManager.accounts.append(Self.fakeAccount)
             return accountManager
         }
         SimpleResolver.sharedResolver.store(factory: emptyAccountManagerFactory)
@@ -176,27 +176,32 @@ final class UTRootViewControllerState: XCTestCase {
         // THEN
         XCTAssertEqual(currentState, .onboarding, "State should be onboarding")
     }
+}
+
+final class UTRootViewControllerPreloading: XCTestCase {
+    override func setUp() {
+        super.setUp()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .realApp)
+
+        let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
+            let accountManager = MockAccountManager()
+            accountManager.accounts.append(UTRootViewControllerState.fakeAccount)
+            accountManager.currentAccount = UTRootViewControllerState.fakeAccount
+            accountManager.currentUserId = UTRootViewControllerState.fakeAccount.userId
+            accountManager.currentDriveFileManager = DriveFileManager(
+                drive: Drive(),
+                apiFetcher: DriveApiFetcher(token: UTRootViewControllerState.fakeAccount.token, delegate: accountManager)
+            )
+            return accountManager
+        }
+        SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
+    }
 
     func testMainViewControllerState() throws {
         // GIVEN
         UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = false
-
-        let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
-            let accountManager = MockAccountManager()
-            accountManager.accounts.append(self.fakeAccount)
-            accountManager.currentAccount = self.fakeAccount
-            accountManager.currentUserId = self.fakeAccount.userId
-            accountManager.currentDriveFileManager = DriveFileManager(
-                drive: Drive(),
-                apiFetcher: DriveApiFetcher(token: self.fakeAccount.token, delegate: accountManager)
-            )
-            return accountManager
-        }
-        SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
-
-        @InjectService var accountManager: AccountManageable
-        XCTAssertNotNil(accountManager.currentAccount, "expecting a user logged in")
 
         // WHEN
         let currentState = RootViewControllerState.getCurrentState()
@@ -204,9 +209,9 @@ final class UTRootViewControllerState: XCTestCase {
         // THEN
         switch currentState {
         case .preloading(let account):
-            XCTAssertEqual(account.id, fakeAccount.userId)
+            XCTAssertEqual(account.id, UTRootViewControllerState.fakeAccount.userId)
         default:
-            XCTFail("Should be preloading \(fakeAccount), got \(currentState)")
+            XCTFail("Should be preloading \(UTRootViewControllerState.fakeAccount), got \(currentState)")
         }
     }
 }

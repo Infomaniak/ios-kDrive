@@ -42,6 +42,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
     @LazyInjectService private var matomo: MatomoUtils
+    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -77,7 +78,7 @@ public struct AppRouter: AppNavigable {
     // MARK: Routable
 
     public func navigate(to route: NavigationRoutes) {
-        guard let rootViewController = window?.rootViewController else {
+        guard let window, let rootViewController = window.rootViewController else {
             SentryDebug.captureNoWindow()
             Log.sceneDelegate("NavigationManager: Unable to navigate without a root view controller", level: .error)
             return
@@ -106,6 +107,47 @@ public struct AppRouter: AppNavigable {
 
             // Show store
             showStore(from: viewController, driveFileManager: driveFileManager)
+
+        case .sharedWithMe(let sharedWithMeLink):
+            guard let driveFileManager = accountManager
+                .getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: sharedWithMeLink) else {
+                Log.sceneDelegate(
+                    "NavigationManager: Unable to navigate to .sharedWithMe without a matching DriveFileManager",
+                    level: .error
+                )
+                return
+            }
+
+            let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+            window.rootViewController = freshRootViewController
+
+            guard let navigationController =
+                getControllerForRestoration(
+                    tabBarViewController: freshRootViewController
+                ) as? UINavigationController
+            else {
+                return
+            }
+
+            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+
+            if let fileId = sharedWithMeLink.fileId {
+                showSharedFileIdView(
+                    driveFileManager: sharedWithMeDriveFileManager,
+                    navigationController: navigationController,
+                    fileId: fileId
+                )
+            } else if let folderId = sharedWithMeLink.folderId {
+                showSharedFolderIdView(
+                    driveFileManager: sharedWithMeDriveFileManager,
+                    navigationController: navigationController,
+                    folderId: folderId
+                )
+            } else {
+                showSharedWithMeView(driveFileManager: sharedWithMeDriveFileManager, navigationController: navigationController)
+            }
+
+            sharedWithMeService.clearLastSharedWithMe()
         }
     }
 
@@ -162,6 +204,7 @@ public struct AppRouter: AppNavigable {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
                 deeplinkService.processDeeplinksPostAuthentication()
+                sharedWithMeService.processSharedWithMePostAuthentication()
             }
         case .onboarding:
             showOnboarding()

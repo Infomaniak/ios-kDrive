@@ -29,6 +29,7 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     var didStartLoginCallback: (() -> Void)?
     var didCompleteLoginCallback: (() -> Void)?
@@ -68,6 +69,7 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
         UserDefaults.shared.numberOfConnections = 1
         _ = router.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
         deeplinkService.processDeeplinksPostAuthentication()
+        sharedWithMeService.processSharedWithMePostAuthentication()
     }
 
     private func didCompleteLoginWithError(_ error: Error,
