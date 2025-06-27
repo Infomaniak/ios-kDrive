@@ -37,40 +37,39 @@ public extension AppRouter {
         navigationController: UINavigationController,
         driveId: Int,
         fileId: Int
-    ) {
+    ) async {
         let rawPresentationOrigin = "fileList"
-        guard let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin) else {
+        guard let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin),
+              let frozenFile = await driveFileManager.getFrozenFileFromAPI(
+                  driveFileManager: driveFileManager,
+                  driveId: driveId,
+                  fileId: fileId
+              )
+        else {
             return
         }
 
-        let abstractFile = ProxyFile(driveId: driveId, id: fileId)
-        let endpoint = Endpoint.file(abstractFile)
-
-        Task {
-            let file: File = try await driveFileManager.apiFetcher
-                .perform(request: driveFileManager.apiFetcher.authenticatedRequest(endpoint))
-
-            presentPreviewViewController(
-                frozenFiles: [file],
-                index: 0,
-                driveFileManager: driveFileManager,
-                normalFolderHierarchy: true,
-                presentationOrigin: presentationOrigin,
-                navigationController: navigationController,
-                animated: true
-            )
-        }
+        presentPreviewViewController(
+            frozenFiles: [frozenFile],
+            index: 0,
+            driveFileManager: driveFileManager,
+            normalFolderHierarchy: true,
+            presentationOrigin: presentationOrigin,
+            navigationController: navigationController,
+            animated: true
+        )
     }
 
     @MainActor func showSharedFolderIdView(driveFileManager: DriveFileManager,
                                            navigationController: UINavigationController,
-                                           folderId: Int) {
-        let database = driveFileManager.database
-        let matchedFrozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
-            lazyCollection
-                .filter("id == %@", folderId)
-                .first?
-                .freezeIfNeeded()
+                                           driveId: Int,
+                                           folderId: Int) async {
+        guard let frozenFolder = await driveFileManager.getFrozenFileFromAPI(
+            driveFileManager: driveFileManager,
+            driveId: driveId,
+            fileId: folderId
+        ) else {
+            return
         }
 
         let configuration = FileListViewModel.Configuration(
@@ -81,7 +80,7 @@ public extension AppRouter {
         let destinationViewModel = ConcreteFileListViewModel(
             configuration: configuration,
             driveFileManager: driveFileManager,
-            currentDirectory: matchedFrozenFolder
+            currentDirectory: frozenFolder
         )
 
         Task {
