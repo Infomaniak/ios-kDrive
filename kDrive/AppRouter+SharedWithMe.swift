@@ -73,10 +73,20 @@ public extension AppRouter {
                 .freezeIfNeeded()
         }
 
-        let destinationViewModel = SharedWithMeViewModel(
+        let configuration = FileListViewModel.Configuration(
+            emptyViewType: .emptyFolder,
+            supportsDrop: true,
+            rightBarButtons: [.search]
+        )
+        let destinationViewModel = ConcreteFileListViewModel(
+            configuration: configuration,
             driveFileManager: driveFileManager,
             currentDirectory: matchedFrozenFolder
         )
+
+        Task {
+            try await destinationViewModel.loadFiles()
+        }
 
         let destinationViewController = FileListViewController(viewModel: destinationViewModel)
         navigationController.pushViewController(destinationViewController, animated: true)
