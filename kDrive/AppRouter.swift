@@ -77,7 +77,7 @@ public struct AppRouter: AppNavigable {
 
     // MARK: Routable
 
-    public func navigate(to route: NavigationRoutes) {
+    public func navigate(to route: NavigationRoutes) async {
         guard let window, let rootViewController = window.rootViewController else {
             SentryDebug.captureNoWindow()
             Log.sceneDelegate("NavigationManager: Unable to navigate without a root view controller", level: .error)
