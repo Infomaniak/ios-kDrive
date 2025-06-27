@@ -39,75 +39,12 @@ final class ITAppLaunchTest: XCTestCase {
         expirationDate: Date()
     ))
 
-    override func setUpWithError() throws {
+    override func setUp() {
+        super.setUp()
+
         MockingHelper.clearRegisteredTypes()
         MockingHelper.registerConcreteTypes(configuration: .realApp)
 
-        let factoriesWithIdentifier = FactoryService.debugServices + FactoryService.transactionableServices
-        SimpleResolver.register(factoriesWithIdentifier)
-        let services = [
-            Factory(type: KeychainHelper.self) { _, _ in
-                KeychainHelper(accessGroup: AccountManager.accessGroup)
-            },
-            Factory(type: TokenStore.self) { _, _ in
-                TokenStore()
-            },
-            Factory(type: AppContextServiceable.self) { _, _ in
-                // We fake the main app context
-                return AppContextService(context: .app)
-            },
-            Factory(type: InfomaniakNetworkLogin.self) { _, _ in
-                return InfomaniakNetworkLogin(config: self.loginConfig)
-            },
-            Factory(type: UploadServiceable.self) { _, _ in
-                UploadService()
-            },
-            Factory(type: DownloadQueueable.self) { _, _ in
-                DownloadQueue()
-            },
-            Factory(type: InfomaniakNetworkLoginable.self) { _, resolver in
-                try resolver.resolve(type: InfomaniakNetworkLogin.self,
-                                     forCustomTypeIdentifier: nil,
-                                     factoryParameters: nil,
-                                     resolver: resolver)
-            },
-            Factory(type: InfomaniakLoginable.self) { _, _ in
-                InfomaniakLogin(config: self.loginConfig)
-            },
-            Factory(type: AppLockHelper.self) { _, _ in
-                AppLockHelper()
-            },
-            Factory(type: PhotoLibraryUploadable.self) { _, _ in
-                MCKPhotoLibraryUploadable()
-            },
-            Factory(type: PhotoLibraryQueryable.self) { _, _ in
-                MCKPhotoLibraryQueryable()
-            },
-            Factory(type: PhotoLibrarySyncable.self) { _, _ in
-                MCKPhotoLibrarySyncable()
-            },
-            Factory(type: PhotoLibraryScanable.self) { _, _ in
-                MCKPhotoLibraryScanable()
-            },
-            Factory(type: DriveInfosManager.self) { _, _ in
-                DriveInfosManager()
-            },
-            Factory(type: AppNavigable.self) { _, _ in
-                AppRouter()
-            },
-            Factory(type: AppExtensionRoutable.self) { _, _ in
-                AppExtensionRouter()
-            },
-            Factory(type: AvailableOfflineManageable.self) { _, _ in
-                MCKAvailableOfflineManager()
-            }
-        ]
-        SimpleResolver.register(services)
-    }
-
-    @MainActor func testUnlock() async throws {
-        // GIVEN applock enabled
-        UserDefaults.shared.isAppLockEnabled = true
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()
             accountManager.accounts.append(self.fakeAccount)
@@ -120,12 +57,11 @@ final class ITAppLaunchTest: XCTestCase {
             return accountManager
         }
         SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
+    }
 
-        // We need to wait for the app to settle for this test to be stable
-        try await Task.sleep(nanoseconds: 5_000_000_000)
-
-        @InjectService var accountManager: AccountManageable
-        XCTAssertNotNil(accountManager.currentAccount, "expecting a user logged in")
+    @MainActor func testUnlock() throws {
+        // GIVEN applock enabled
+        UserDefaults.shared.isAppLockEnabled = true
 
         @InjectService var router: AppNavigable
         router.showAppLock()

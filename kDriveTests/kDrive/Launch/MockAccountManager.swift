@@ -72,7 +72,13 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func createAndSetCurrentAccount(token: ApiToken) async throws -> Account { fatalError("Not implemented") }
 
-    func updateUser(for account: Account, registerToken: Bool) async throws -> Account { fatalError("Not implemented") }
+    func updateUser(for account: Account, registerToken: Bool) async throws -> Account {
+        guard let currentAccount else {
+            fatalError("Set a currentAccount in the mock for this to work")
+        }
+
+        return currentAccount
+    }
 
     func loadAccounts() -> [Account] { fatalError("Not implemented") }
 
