@@ -1,3 +1,4 @@
+- Le téléversement de petits fichiers consomme moins d'énergie
 - Le changement de drive de destination de photo sync relance la syncro de zero
 - Ajout d'une selection en glissant sur les photos de la galerie
 - Gestion des videos non lisibles
