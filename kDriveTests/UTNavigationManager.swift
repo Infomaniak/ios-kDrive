@@ -46,7 +46,7 @@ final class UTNavigationManager: XCTestCase {
 
     // MARK: - Upload observation
 
-    @MainActor func testDeeplinkFileSharing() {
+    @MainActor func testDeeplinkFileSharing() async {
         // GIVEN
         let mckNavigation = MckRoutable_navigate()
         let routerFactory = Factory(type: Routable.self) { _, _ in
@@ -58,7 +58,7 @@ final class UTNavigationManager: XCTestCase {
 
         // WHEN
         @InjectService var router: Routable
-        router.navigate(to: expectedRoute)
+        await router.navigate(to: expectedRoute)
 
         // THEN
         XCTAssertEqual(mckNavigation.navigateToCount, 1, "navigate method should be called once")
@@ -69,7 +69,7 @@ final class UTNavigationManager: XCTestCase {
         XCTAssertEqual(fetchedRoute, expectedRoute, "should be the same route")
     }
 
-    @MainActor func testDeeplinkStore() {
+    @MainActor func testDeeplinkStore() async {
         // GIVEN
         let mckNavigation = MckRoutable_navigate()
         let routerFactory = Factory(type: Routable.self) { _, _ in
@@ -80,7 +80,7 @@ final class UTNavigationManager: XCTestCase {
 
         // WHEN
         @InjectService var router: Routable
-        router.navigate(to: expectedRoute)
+        await router.navigate(to: expectedRoute)
 
         // THEN
         XCTAssertEqual(mckNavigation.navigateToCount, 1, "navigate method should be called once")
