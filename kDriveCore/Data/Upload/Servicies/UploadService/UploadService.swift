@@ -57,6 +57,7 @@ public final class UploadService {
     lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
     var fileUploadedCount = 0
+    var fileUploadFailedCount = 0
     var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
         didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
