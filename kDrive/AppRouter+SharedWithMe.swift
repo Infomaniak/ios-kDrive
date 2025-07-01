@@ -20,6 +20,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
+import kDriveResources
 import UIKit
 
 public extension AppRouter {
@@ -46,6 +47,7 @@ public extension AppRouter {
                   fileId: fileId
               )
         else {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSharedWithMeLink)
             return
         }
 
@@ -69,6 +71,7 @@ public extension AppRouter {
             driveId: driveId,
             fileId: folderId
         ) else {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorSharedWithMeLink)
             return
         }
 

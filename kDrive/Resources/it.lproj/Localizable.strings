@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Matthieu Déglon
- * Exported at: Thu, 26 Jun 2025 09:05:57 +0200
+ * Exported by: Baptiste Griva
+ * Exported at: Tue, 01 Jul 2025 15:33:15 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -858,6 +858,9 @@
 
 /* loco:6049df4d5c2c3a04bc3979a6 */
 "errorShareLink" = "Errore durante la creazione del link";
+
+/* loco:6863dfc2e279ce3b0a0323e2 */
+"errorSharedWithMeLink" = "Si è verificato un errore durante l’apertura del link condiviso";
 
 /* loco:624e97877d7de2125354cfc2 */
 "errorStillUploading" = "L’articolo è ancora in fase di importazione";
