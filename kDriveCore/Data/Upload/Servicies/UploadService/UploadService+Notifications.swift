@@ -51,44 +51,34 @@ extension UploadService: UploadNotifiable {
         serialEventQueue.async { [weak self] in
             guard let self else { return }
             guard let uploadFile = result.uploadFile,
-                  uploadFile.error != .taskRescheduled,
-                  uploadFile.error != .taskCancelled,
                   !uploadFile.ownedByFileProvider else {
                 return
             }
 
             fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
             let currentOperationCount = operationCount
+
+            guard currentOperationCount == 0 else { return }
+
             if uploadFile.error != nil {
-                sendFileUploadStateNotificationErrorIfNeeded(
-                    result: result,
-                    uploadFile: uploadFile,
-                    currentOperationCount: currentOperationCount
-                )
-            } else if currentOperationCount == 0 {
+                sendUploadErrorNotification(for: uploadFile, result: result)
+            } else {
                 sendFileUploadStateNotificationSuccessIfNeeded(uploadFile: uploadFile, result: result)
             }
         }
     }
 
-    private func sendFileUploadStateNotificationErrorIfNeeded(
-        result: UploadCompletionResult,
-        uploadFile: UploadFile,
-        currentOperationCount: Int
-    ) {
+    private func sendUploadErrorNotification(for uploadFile: UploadFile, result: UploadCompletionResult) {
         let uploadedFileName = result.driveFile?.name ?? uploadFile.name
-        if let error = uploadFile.error {
-            if error.code == DriveError.LocalCode.errorDeviceStorage.rawValue {
-                notificationHelper.sendNotEnoughSpaceForUpload(filename: uploadedFileName)
-            } else {
-                fileUploadFailedCount += 1
-                if currentOperationCount == 0 {
-                    notificationHelper.sendFailedUpload(
-                        failedUpload: fileUploadFailedCount,
-                        totalUpload: fileUploadedCount + fileUploadFailedCount
-                    )
-                }
-            }
+
+        if !freeSpaceService.hasEnoughAvailableSpaceForChunkUpload {
+            notificationHelper.sendNotEnoughSpaceForUpload(filename: uploadedFileName)
+        } else {
+            fileUploadFailedCount += 1
+            notificationHelper.sendFailedUpload(
+                failedUpload: fileUploadFailedCount,
+                totalUpload: fileUploadedCount + fileUploadFailedCount
+            )
         }
     }
 
