@@ -36,6 +36,7 @@ public final class UploadService {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
+    @LazyInjectService var freeSpaceService: FreeSpaceService
 
     private let serialTransactionQueue = DispatchQueue(
         label: "com.infomaniak.drive.upload-service.rebuild-uploads",
