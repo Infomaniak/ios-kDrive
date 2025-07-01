@@ -41,9 +41,9 @@ class PhotoPickerDelegate: NSObject {
 
     @MainActor
     private func showUploadSnackbar(count: Int, filename: String) {
-//        let message = count > 1 ? KDriveResourcesStrings.Localizable.allUploadInProgressPlural(count) : KDriveResourcesStrings
-//            .Localizable.allUploadInProgress(filename)
-//        UIConstants.showSnackBar(message: message)
+        let message = count > 1 ? KDriveResourcesStrings.Localizable.allUploadInProgressPlural(count) : KDriveResourcesStrings
+            .Localizable.allUploadInProgress(filename)
+        UIConstants.showSnackBar(message: message)
     }
 }
 
