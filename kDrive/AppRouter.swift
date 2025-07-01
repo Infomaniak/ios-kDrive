@@ -115,6 +115,7 @@ public struct AppRouter: AppNavigable {
                     "NavigationManager: Unable to navigate to .sharedWithMe without a matching DriveFileManager",
                     level: .error
                 )
+                sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
                 return
             }
 
