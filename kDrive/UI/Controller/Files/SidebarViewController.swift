@@ -385,7 +385,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             switch menuSection {
             case .recent:
                 guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: "FileCollectionViewCell",
+                    withReuseIdentifier: FileCollectionViewCell.identifier,
                     for: indexPath
                 ) as? FileCollectionViewCell else {
                     fatalError("Failed to dequeue cell")
@@ -401,7 +401,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     selectionMode: false
                 )
                 cell.configure(with: viewModel)
-                cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+                cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast, custom: true)
                 cell.setEnabled(true)
                 cell.moreButton.isHidden = true
 
@@ -504,7 +504,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             }
 
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                    heightDimension: .estimated(0))
+                                                    heightDimension: .estimated(8))
+            // margin ? contentInsets
 
             if sectionIndex == 0 && !selectMode {
                 let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
