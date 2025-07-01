@@ -453,7 +453,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     func hideFloatingPanel(_ hide: Bool) {
         if hide {
             floatingPanelViewController.dismiss(animated: true)
-        } else {
+        } else if floatingPanelViewController.presentingViewController == nil {
             present(floatingPanelViewController, animated: true)
         }
     }
