@@ -315,55 +315,45 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         viewModel?.thumbnailDownloadTask?.cancel()
     }
 
-    func initStyle(isFirst: Bool, isLast: Bool, custom: Bool) {
+    func initStyle(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
         if isLast && isFirst {
             contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-                radius: 10
+                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10
             )
-            if custom {
-                trailingConstraint.constant = UIConstants.Padding.mediumSmall
-                leadingConstraint.constant = UIConstants.Padding.mediumSmall
-                logoWidthConstraint.constant = 26
-                logoHeightConstraint.constant = 26
-                topConstraint.constant = 8
-                logoLeadingConstraint.constant = 16
-            }
+            addConstraint(isFirst: isFirst, isLast: isLast, inFolderSelectMode: inFolderSelectMode)
         } else if isFirst {
             contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: 10)
-            if custom {
-                trailingConstraint.constant = UIConstants.Padding.mediumSmall
-                leadingConstraint.constant = UIConstants.Padding.mediumSmall
-                logoWidthConstraint.constant = 26
-                logoHeightConstraint.constant = 26
-                topConstraint.constant = 8
-                logoLeadingConstraint.constant = 16
-            }
+            addConstraint(isFirst: isFirst, isLast: isLast, inFolderSelectMode: inFolderSelectMode)
         } else if isLast {
             contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMinXMaxYCorner], radius: 10)
-            if custom {
-                trailingConstraint.constant = UIConstants.Padding.mediumSmall
-                leadingConstraint.constant = UIConstants.Padding.mediumSmall
-                logoWidthConstraint.constant = 26
-                logoHeightConstraint.constant = 26
-                topConstraint.constant = 0
-                logoLeadingConstraint.constant = 16
-            }
+            addConstraint(isFirst: isFirst, isLast: isLast, inFolderSelectMode: inFolderSelectMode)
         } else {
             contentInsetView.roundCorners(
                 corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
                 radius: 0
             )
-            if custom {
-                trailingConstraint.constant = UIConstants.Padding.mediumSmall
-                leadingConstraint.constant = UIConstants.Padding.mediumSmall
-                logoWidthConstraint.constant = 26
-                logoHeightConstraint.constant = 26
-                topConstraint.constant = 0
-                logoLeadingConstraint.constant = 16
-            }
+            addConstraint(isFirst: isFirst, isLast: isLast, inFolderSelectMode: inFolderSelectMode)
         }
         contentInsetView.clipsToBounds = true
+    }
+
+    func addConstraint(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
+        guard inFolderSelectMode else { return }
+        if isLast && isFirst || isFirst {
+            trailingConstraint.constant = UIConstants.Padding.mediumSmall
+            leadingConstraint.constant = UIConstants.Padding.mediumSmall
+            logoWidthConstraint.constant = 26
+            logoHeightConstraint.constant = 26
+            topConstraint.constant = 8
+            logoLeadingConstraint.constant = 16
+        } else {
+            trailingConstraint.constant = UIConstants.Padding.mediumSmall
+            leadingConstraint.constant = UIConstants.Padding.mediumSmall
+            logoWidthConstraint.constant = 26
+            logoHeightConstraint.constant = 26
+            topConstraint.constant = 0
+            logoLeadingConstraint.constant = 16
+        }
     }
 
     func setEnabled(_ enabled: Bool) {

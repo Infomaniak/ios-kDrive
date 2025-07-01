@@ -401,7 +401,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     selectionMode: false
                 )
                 cell.configure(with: viewModel)
-                cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast, custom: true)
+                cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast, inFolderSelectMode: true)
                 cell.setEnabled(true)
                 cell.moreButton.isHidden = true
 
@@ -505,7 +505,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                     heightDimension: .estimated(8))
-            // margin ? contentInsets
 
             if sectionIndex == 0 && !selectMode {
                 let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
