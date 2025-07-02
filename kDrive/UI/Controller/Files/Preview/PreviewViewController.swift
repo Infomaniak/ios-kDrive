@@ -266,6 +266,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        hideFloatingPanel(true)
         navigationController?.setNavigationBarHidden(false, animated: true)
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
