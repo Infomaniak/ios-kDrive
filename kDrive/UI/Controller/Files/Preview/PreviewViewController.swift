@@ -254,7 +254,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        present(floatingPanelViewController, animated: true)
+        hideFloatingPanel(false)
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
@@ -842,6 +842,6 @@ extension PreviewViewController: UIDocumentInteractionControllerDelegate {
     }
 
     func documentInteractionControllerDidDismissOpenInMenu(_ controller: UIDocumentInteractionController) {
-        present(floatingPanelViewController, animated: true)
+        hideFloatingPanel(false)
     }
 }
