@@ -768,7 +768,9 @@ public struct AppRouter: AppNavigable {
             publicShareNavigationController.modalPresentationStyle = .fullScreen
             publicShareNavigationController.modalTransitionStyle = .coverVertical
 
-            rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
+            rootViewController.dismiss(animated: false) {
+                rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
+            }
         }
     }
 
