@@ -22,6 +22,7 @@ import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
+import kDriveResources
 import MyKSuite
 import RealmSwift
 import Sentry
@@ -232,6 +233,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 currentState: RootViewControllerState.getCurrentState(),
                 restoration: false
             )
+            return nil
+        }
+
+        guard let driveFileManager else {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.wrongAccountConnected)
             return nil
         }
 
