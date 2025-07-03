@@ -2,9 +2,9 @@
  * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
  * Locale: de, German
- * Tagged: ios
+ * Tagged: ios, !ios-action-info-plist, !ios-info-plist
  * Exported by: Baptiste Griva
- * Exported at: Tue, 01 Jul 2025 15:33:15 +0200
+ * Exported at: Thu, 03 Jul 2025 09:57:17 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -2307,3 +2307,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a95 */
 "userPermissionWriteDescription" = "Änderung der Datei\nDownload\nHinzufügen eines Kommentars\nHinzufügen und Anlegen einer Datei / eines Ordners\nLöschen der Datei";
+
+/* loco:686635d0305e7db9190569a2 */
+"wrongAccountConnected" = "Sie sind nicht mit dem richtigen Konto angemeldet";
