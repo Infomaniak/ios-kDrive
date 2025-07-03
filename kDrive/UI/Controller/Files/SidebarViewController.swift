@@ -323,6 +323,15 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        guard let previousTraitCollection else { return }
+        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
+            || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
+        forceRefresh()
+    }
+
     private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
         let iconSize = UIConstants.Button.profileImageSize
 

@@ -254,7 +254,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        present(floatingPanelViewController, animated: true)
+        hideFloatingPanel(false)
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
@@ -266,6 +266,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        hideFloatingPanel(true)
         navigationController?.setNavigationBarHidden(false, animated: true)
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
@@ -453,7 +454,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     func hideFloatingPanel(_ hide: Bool) {
         if hide {
             floatingPanelViewController.dismiss(animated: true)
-        } else {
+        } else if floatingPanelViewController.presentingViewController == nil {
             present(floatingPanelViewController, animated: true)
         }
     }
@@ -842,6 +843,6 @@ extension PreviewViewController: UIDocumentInteractionControllerDelegate {
     }
 
     func documentInteractionControllerDidDismissOpenInMenu(_ controller: UIDocumentInteractionController) {
-        present(floatingPanelViewController, animated: true)
+        hideFloatingPanel(false)
     }
 }
