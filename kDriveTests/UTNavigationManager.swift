@@ -40,7 +40,8 @@ final class MckRoutable_navigate: Routable {
 
 final class UTNavigationManager: XCTestCase {
     override func setUp() {
-        SimpleResolver.sharedResolver.removeAll()
+        MockingHelper.clearRegisteredTypes()
+        MockingHelper.registerConcreteTypes(configuration: .minimal)
         super.setUp()
     }
 
