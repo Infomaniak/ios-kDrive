@@ -227,6 +227,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
+            DDLogInfo("switching to account \(matchingAccount.userId) to accommodate sharedWithMeLink navigation")
             sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
             switchAccount(newAccount: matchingAccount)
             appNavigable.prepareRootViewController(
