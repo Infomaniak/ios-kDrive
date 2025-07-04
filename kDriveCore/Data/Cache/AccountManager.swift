@@ -22,6 +22,7 @@ import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
+import kDriveResources
 import MyKSuite
 import RealmSwift
 import Sentry
@@ -193,8 +194,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
         let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
 
-        if let mailboxManager = driveFileManagers[objectId] {
-            return mailboxManager
+        if let driveFileManager = driveFileManagers[objectId] {
+            return driveFileManager
         } else if account(for: userId) != nil,
                   let token = tokenStore.tokenFor(userId: userId),
                   let drive = driveInfosManager.getDrive(id: driveId, userId: userId) {
@@ -226,12 +227,33 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
+            DDLogInfo("switching to account \(matchingAccount.userId) to accommodate sharedWithMeLink navigation")
             sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
             switchAccount(newAccount: matchingAccount)
             appNavigable.prepareRootViewController(
                 currentState: RootViewControllerState.getCurrentState(),
                 restoration: false
             )
+            return nil
+        }
+
+        if driveFileManager == nil, !accounts.isEmpty {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.wrongAccountConnected)
+        }
+
+        guard let driveFileManager, let matchingAccount else {
+            return nil
+        }
+
+        if sharedWithMeLink.driveId != currentDriveId {
+            DDLogInfo("switching to drive \(sharedWithMeLink.driveId) to accommodate sharedWithMeLink navigation")
+            Task {
+                try await driveFileManager.initRoot()
+                @InjectService var appRestorationService: AppRestorationServiceable
+                await appRestorationService.reloadAppUI(for: sharedWithMeLink.driveId, userId: matchingAccount.userId)
+                sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+                sharedWithMeService.processSharedWithMePostAuthentication()
+            }
             return nil
         }
 

@@ -42,5 +42,5 @@ public enum NavigationRoutes: Equatable {
 /// Abstract app routing protocol
 public protocol Routable {
     /// Navigate to a specified abstracted location
-    @MainActor func navigate(to route: NavigationRoutes)
+    @MainActor func navigate(to route: NavigationRoutes) async
 }

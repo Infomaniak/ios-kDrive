@@ -112,6 +112,12 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
+    override var debugDescription: String {
+        """
+        <\(super.debugDescription) title:'\(viewModel.title)' folder id:'\(viewModel.currentDirectory.id)'>
+        """
+    }
+
     // MARK: - View controller lifecycle
 
     deinit {

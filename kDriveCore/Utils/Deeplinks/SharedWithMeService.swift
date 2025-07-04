@@ -44,7 +44,7 @@ public class SharedWithMeService: SharedWithMeServiceable {
         }
 
         Task { @MainActor in
-            router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
+            await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
             clearLastSharedWithMe()
         }
     }
