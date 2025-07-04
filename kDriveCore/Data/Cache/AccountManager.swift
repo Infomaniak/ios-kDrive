@@ -241,7 +241,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.wrongAccountConnected)
         }
 
-        guard let driveFileManager else {
+        guard let driveFileManager, let matchingAccount else {
+            return nil
+        }
+
+        if sharedWithMeLink.driveId != currentDriveId {
+            DDLogInfo("switching to drive \(sharedWithMeLink.driveId) to accommodate sharedWithMeLink navigation")
+            Task {
+                try await driveFileManager.initRoot()
+                @InjectService var appRestorationService: AppRestorationServiceable
+                await appRestorationService.reloadAppUI(for: sharedWithMeLink.driveId, userId: matchingAccount.userId)
+                sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+                sharedWithMeService.processSharedWithMePostAuthentication()
+            }
             return nil
         }
 
