@@ -194,8 +194,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
         let objectId = DriveInfosManager.getObjectId(driveId: driveId, userId: userId)
 
-        if let mailboxManager = driveFileManagers[objectId] {
-            return mailboxManager
+        if let driveFileManager = driveFileManagers[objectId] {
+            return driveFileManager
         } else if account(for: userId) != nil,
                   let token = tokenStore.tokenFor(userId: userId),
                   let drive = driveInfosManager.getDrive(id: driveId, userId: userId) {
