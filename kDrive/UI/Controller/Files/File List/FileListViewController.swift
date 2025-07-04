@@ -114,7 +114,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     override var debugDescription: String {
         """
-        <\(type(of: Self.self)) title:\(viewModel.title) folder id:\(viewModel.currentDirectory.id)>
+        <\(super.debugDescription) title:'\(viewModel.title)' folder id:'\(viewModel.currentDirectory.id)'>
         """
     }
 
