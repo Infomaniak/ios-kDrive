@@ -121,15 +121,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         SentryDebug.uploadOperationBeginBreadcrumb(uploadFileId)
 
         await catching {
-//            try await Task.sleep(nanoseconds: 4_000_000_000)
-//
-//            try self.transactionWithFile { file in
-//                file.maxRetryCount = 0
-//                file.progress = nil
-//                file.error = DriveError.unknownToken
-//                self.result.uploadFile = UploadFile(value: file)
-//            }
-
             try self.checkCancelation()
             try self.freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
 
