@@ -19,14 +19,14 @@
 import InfomaniakCore
 
 public extension DriveFileManager {
-    func getFrozenFileFromAPI(driveFileManager: DriveFileManager, driveId: Int, fileId: Int) async -> File? {
+    func getFrozenFileFromAPI(driveId: Int, fileId: Int) async -> File? {
         let abstractFile = ProxyFile(driveId: driveId, id: fileId)
         let endpoint = Endpoint.file(abstractFile)
 
         do {
-            let file: File = try await driveFileManager.apiFetcher
-                .perform(request: driveFileManager.apiFetcher.authenticatedRequest(endpoint))
-            try driveFileManager.database.writeTransaction { mutableRealm in
+            let file: File = try await apiFetcher
+                .perform(request: apiFetcher.authenticatedRequest(endpoint))
+            try database.writeTransaction { mutableRealm in
                 mutableRealm.add(file, update: .modified)
             }
 

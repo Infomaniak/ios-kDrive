@@ -42,7 +42,6 @@ public extension AppRouter {
         let rawPresentationOrigin = "fileList"
         guard let presentationOrigin = PresentationOrigin(rawValue: rawPresentationOrigin),
               let frozenFile = await driveFileManager.getFrozenFileFromAPI(
-                  driveFileManager: driveFileManager,
                   driveId: driveId,
                   fileId: fileId
               )
@@ -67,7 +66,6 @@ public extension AppRouter {
                                            driveId: Int,
                                            folderId: Int) async {
         guard let frozenFolder = await driveFileManager.getFrozenFileFromAPI(
-            driveFileManager: driveFileManager,
             driveId: driveId,
             fileId: folderId
         ) else {
