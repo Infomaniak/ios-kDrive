@@ -51,6 +51,8 @@ extension UploadService: UploadNotifiable {
         serialEventQueue.async { [weak self] in
             guard let self else { return }
             guard let uploadFile = result.uploadFile,
+                  uploadFile.error != .taskRescheduled,
+                  uploadFile.error != .taskCancelled,
                   !uploadFile.ownedByFileProvider else {
                 return
             }
