@@ -40,13 +40,16 @@ final class UTSharedWithMeLink: XCTestCase {
         XCTAssertEqual(driveId, sharedWithMeLink.driveId)
         XCTAssertNil(sharedWithMeLink.fileId)
         XCTAssertNil(sharedWithMeLink.folderId)
+        XCTAssertNil(sharedWithMeLink.sharedDriveId)
     }
 
     func testSharedWithMeFolder() async {
         // GIVEN
         let driveId = 12345
+        let sharedDriveId = 140_946
         let folderId = 98765
-        let urlString = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/shared-with-me/140946/\(folderId)"
+        let urlString =
+            "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/shared-with-me/\(sharedDriveId)/\(folderId)"
         let url = URL(string: urlString)!
 
         // WHEN
@@ -61,16 +64,18 @@ final class UTSharedWithMeLink: XCTestCase {
         XCTAssertEqual(url, sharedWithMeLink.sharedWithMeURL)
         XCTAssertEqual(driveId, sharedWithMeLink.driveId)
         XCTAssertEqual(folderId, sharedWithMeLink.folderId)
+        XCTAssertEqual(sharedDriveId, sharedWithMeLink.sharedDriveId)
         XCTAssertNil(sharedWithMeLink.fileId)
     }
 
     func testSharedWithMeFile() async {
         // GIVEN
         let driveId = 12345
+        let sharedDriveId = 140_946
         let folderId = 98765
         let fileId = 54321
         let urlString =
-            "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/shared-with-me/11111/\(folderId)/preview/email/\(fileId)"
+            "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/shared-with-me/\(sharedDriveId)/\(folderId)/preview/email/\(fileId)"
         let url = URL(string: urlString)!
 
         // WHEN
@@ -85,6 +90,7 @@ final class UTSharedWithMeLink: XCTestCase {
         XCTAssertEqual(url, sharedWithMeLink.sharedWithMeURL)
         XCTAssertEqual(driveId, sharedWithMeLink.driveId)
         XCTAssertEqual(folderId, sharedWithMeLink.folderId)
+        XCTAssertEqual(sharedDriveId, sharedWithMeLink.sharedDriveId)
         XCTAssertEqual(fileId, sharedWithMeLink.fileId)
     }
 

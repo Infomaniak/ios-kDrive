@@ -2,9 +2,9 @@
  * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
  * Locale: es, Spanish
- * Tagged: ios
- * Exported by: Matthieu Déglon
- * Exported at: Thu, 26 Jun 2025 08:52:23 +0200
+ * Tagged: ios, !ios-action-info-plist, !ios-info-plist
+ * Exported by: Baptiste Griva
+ * Exported at: Thu, 03 Jul 2025 09:57:17 +0200
  */
 
 /* loco:610a8791fa12ab20713c09e4 */
@@ -858,6 +858,9 @@
 
 /* loco:6049df4d5c2c3a04bc3979a6 */
 "errorShareLink" = "Error al crear el enlace";
+
+/* loco:6863dfc2e279ce3b0a0323e2 */
+"errorSharedWithMeLink" = "Se ha producido un error al abrir el enlace compartido";
 
 /* loco:624e97877d7de2125354cfc2 */
 "errorStillUploading" = "El artículo se sigue importando";
@@ -2304,3 +2307,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a95 */
 "userPermissionWriteDescription" = "Modificar el archivo\nDescargar\nAñadir comentario\nAñadir y crear archivo/carpeta\nEliminar el archivo";
+
+/* loco:686635d0305e7db9190569a2 */
+"wrongAccountConnected" = "No ha iniciado sesión en la cuenta correcta";
