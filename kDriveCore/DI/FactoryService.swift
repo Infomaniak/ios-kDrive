@@ -30,12 +30,16 @@ import os.log
 /// Something that can associate a custom identifier with a `Factory`
 public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
-private let appGroupName = "group.com.infomaniak.drive"
-private let realmRootPath = "drives"
-private let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
-
 /// Something that setups the service factories
 public enum FactoryService {
+    private static let appGroupName = "group.com.infomaniak.drive"
+    private static let realmRootPath = "drives"
+    public static let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68",
+                                                           loginURL: URL(
+                                                               string: "https://login.\(ApiEnvironment.current.host)/"
+                                                           )!,
+                                                           accessType: nil)
+
     public static func setupDependencyInjection(other: [Factory] = []) {
         // TODO: revert me
         ApiEnvironment.current = .preprod
