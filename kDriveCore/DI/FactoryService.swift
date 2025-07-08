@@ -37,6 +37,9 @@ private let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9
 /// Something that setups the service factories
 public enum FactoryService {
     public static func setupDependencyInjection(other: [Factory] = []) {
+        // TODO: revert me
+        ApiEnvironment.current = .preprod
+
         let factoriesWithIdentifier = debugServices + transactionableServices + uploadQueues
         SimpleResolver.register(factoriesWithIdentifier)
         let factories = networkingServices + miscServices + other
