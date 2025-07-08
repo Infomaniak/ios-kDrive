@@ -24,6 +24,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
+import InterAppLogin
 import MyKSuite
 import os.log
 
@@ -125,6 +126,9 @@ public enum FactoryService {
             },
             Factory(type: TokenStore.self) { _, _ in
                 TokenStore()
+            },
+            Factory(type: ConnectedAccountManagerable.self) { _, _ in
+                ConnectedAccountManager(currentAppKeychainIdentifier: AppIdentifierBuilder.driveKeychainIdentifier)
             },
             Factory(type: DownloadQueueable.self) { _, _ in
                 DownloadQueue()
