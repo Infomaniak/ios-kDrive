@@ -22,9 +22,11 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import InfomaniakLogin
 import InfomaniakOnboarding
+import InterAppLogin
 import kDriveCore
 import kDriveResources
 import Lottie
+import SwiftUI
 import UIKit
 
 class WaveViewController: UIViewController {
@@ -81,19 +83,19 @@ class WaveViewController: UIViewController {
         ])
     }
 
-    private func loginDelegateHandler(signInButton: IKLargeButton, registerButton: IKLargeButton) -> LoginDelegateHandler {
+    private func loginDelegateHandler(signInButton: IKLargeButton?, registerButton: IKLargeButton?) -> LoginDelegateHandler {
         let loginDelegateHandler = LoginDelegateHandler()
         loginDelegateHandler.didStartLoginCallback = {
-            signInButton.setLoading(true)
-            registerButton.isEnabled = false
+            signInButton?.setLoading(true)
+            registerButton?.isEnabled = false
         }
         loginDelegateHandler.didCompleteLoginCallback = {
-            signInButton.setLoading(false)
-            registerButton.isEnabled = true
+            signInButton?.setLoading(false)
+            registerButton?.isEnabled = true
         }
         loginDelegateHandler.didFailLoginWithErrorCallback = { _ in
-            signInButton.setLoading(false)
-            registerButton.isEnabled = true
+            signInButton?.setLoading(false)
+            registerButton?.isEnabled = true
         }
         return loginDelegateHandler
     }
@@ -194,10 +196,26 @@ extension WaveViewController: OnboardingViewControllerDelegate {
         if index != slideCount - 1 {
             createNextButton(in: containerView)
         } else {
-            createSignInRegisterButton(in: containerView)
+            return nil
         }
 
         return containerView
+    }
+
+    func bottomViewForIndex(_ index: Int) -> (any View)? {
+        if index != slideCount - 1 {
+            return nil
+        } else {
+            let loginDelegateHandler = loginDelegateHandler(signInButton: nil, registerButton: nil)
+            return ContinueWithAccountView(isLoading: false) {
+                self.appNavigable.showLogin(delegate: loginDelegateHandler)
+            } onLoginWithAccountsPressed: { accounts in
+                loginDelegateHandler.login(with: accounts)
+            } onCreateAccountPressed: {
+                self.appNavigable.showRegister(delegate: loginDelegateHandler)
+            }
+            .padding(24)
+        }
     }
 
     func currentIndexChanged(newIndex: Int) {}
