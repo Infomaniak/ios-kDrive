@@ -36,6 +36,7 @@ public final class UploadService {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
+    @LazyInjectService var freeSpaceService: FreeSpaceService
 
     private let serialTransactionQueue = DispatchQueue(
         label: "com.infomaniak.drive.upload-service.rebuild-uploads",
@@ -57,6 +58,7 @@ public final class UploadService {
     lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
     var fileUploadedCount = 0
+    var fileUploadFailedCount = 0
     var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
         didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
