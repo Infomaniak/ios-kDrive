@@ -63,7 +63,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         ImageCache.default.diskStorage.config.sizeLimit = Constants.ImageCache.diskSizeLimit
 
         reachabilityListener = ReachabilityListener.instance
-        ApiEnvironment.current = .prod
 
         // Start audio session
         do {
