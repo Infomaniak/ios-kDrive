@@ -214,7 +214,7 @@ extension WaveViewController: OnboardingViewControllerDelegate {
             } onCreateAccountPressed: {
                 self.appNavigable.showRegister(delegate: loginDelegateHandler)
             }
-            .padding(24)
+            .padding(IKPadding.large)
         }
     }
 
