@@ -130,7 +130,7 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
         return try await InfomaniakDeviceCheck(environment: deviceCheckEnvironment)
             .generateAttestationFor(
                 targetUrl: FactoryService.loginConfig.loginURL.appendingPathComponent("token"),
-                bundleId: "com.infomaniak.drive",
+                bundleId: FactoryService.bundleId,
                 bypassValidation: ApiEnvironment.current == .prod ? false : true
             )
     }
