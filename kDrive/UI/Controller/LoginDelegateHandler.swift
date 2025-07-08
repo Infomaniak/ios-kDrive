@@ -19,8 +19,10 @@
 import CocoaLumberjackSwift
 import InfomaniakCore
 import InfomaniakCoreCommonUI
+import InfomaniakDeviceCheck
 import InfomaniakDI
 import InfomaniakLogin
+import InterAppLogin
 import kDriveCore
 import kDriveResources
 
@@ -29,7 +31,20 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
+    @LazyInjectService var tokenService: InfomaniakNetworkLoginable
 
+    private var deviceCheckEnvironment: InfomaniakDeviceCheck.Environment {
+        switch ApiEnvironment.current {
+        case .prod:
+            return .prod
+        case .preprod:
+            return .preprod
+        default:
+            fatalError("Unknown environment")
+        }
+    }
+  
     var didStartLoginCallback: (() -> Void)?
     var didCompleteLoginCallback: (() -> Void)?
     var didFailLoginWithErrorCallback: ((Error) -> Void)?
@@ -61,6 +76,63 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
 
             didCompleteLoginCallback?()
         }
+    }
+
+    @MainActor
+    public func login(with accounts: [ConnectedAccount]) {
+        guard let topMostViewController = router.topMostViewController else { return }
+
+        matomo.track(eventWithCategory: .account, name: "loggedIn")
+
+        didStartLoginCallback?()
+
+        Task {
+            await deviceAttestationAndLogin(with: accounts, topMostViewController: topMostViewController)
+        }
+    }
+
+    private func deviceAttestationAndLogin(with accounts: [ConnectedAccount], topMostViewController: UIViewController) async {
+        let previousAccount = accountManager.currentAccount
+
+        do {
+            let attestationToken = try await generateAttestationTokenForDevice()
+
+            for account in accounts {
+                let derivatedToken = try await tokenService.derivateApiToken(
+                    using: account.token,
+                    attestationToken: attestationToken
+                )
+
+                _ = try await accountManager.createAndSetCurrentAccount(token: derivatedToken)
+                guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+                    throw DriveError.NoDriveError.noDriveFileManager
+                }
+
+                matomo.connectUser(userId: accountManager.currentUserId.description)
+                await goToMainScreen(with: currentDriveFileManager)
+            }
+
+            Task { @MainActor in
+                didCompleteLoginCallback?()
+            }
+        } catch {
+            Task { @MainActor in
+                didCompleteLoginWithError(
+                    error,
+                    previousAccount: previousAccount,
+                    topMostViewController: topMostViewController
+                )
+            }
+        }
+    }
+
+    private func generateAttestationTokenForDevice() async throws -> String {
+        return try await InfomaniakDeviceCheck(environment: deviceCheckEnvironment)
+            .generateAttestationFor(
+                targetUrl: FactoryService.loginConfig.loginURL.appendingPathComponent("token"),
+                bundleId: "com.infomaniak.drive",
+                bypassValidation: ApiEnvironment.current == .prod ? false : true
+            )
     }
 
     @MainActor private func goToMainScreen(with driveFileManager: DriveFileManager) {
