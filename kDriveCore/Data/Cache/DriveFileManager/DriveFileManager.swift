@@ -245,6 +245,15 @@ public final class DriveFileManager {
             return false
         }
     }
+    
+    public var isSharedWithMe: Bool {
+        switch context {
+        case .sharedWithMe:
+            return true
+        default:
+            return false
+        }
+    }
 
     public var publicShareProxy: PublicShareProxy? {
         switch context {
