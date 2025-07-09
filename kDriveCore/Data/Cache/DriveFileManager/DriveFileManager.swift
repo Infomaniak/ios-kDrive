@@ -245,7 +245,7 @@ public final class DriveFileManager {
             return false
         }
     }
-    
+
     public var isSharedWithMe: Bool {
         switch context {
         case .sharedWithMe:
