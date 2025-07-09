@@ -89,7 +89,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         static func getRows(for file: File,
                             fileAccess: FileAccess?,
                             contentCount: FileCount?,
-                            categoryRights: CategoryRights) -> [FileInformationRow] {
+                            categoryRights: CategoryRights,
+                            isSharedWithMe: Bool) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
             if fileAccess != nil || !file.users.isEmpty {
                 rows.append(.users)
@@ -97,7 +98,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
             if file.capabilities.canShare {
                 rows.append(.share)
             }
-            if categoryRights.canReadOnFile {
+            if categoryRights.canReadOnFile, !isSharedWithMe {
                 rows.append(.categories)
             }
             rows.append(.owner)
@@ -218,7 +219,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         fileInformationRows = FileInformationRow.getRows(for: file,
                                                          fileAccess: fileAccess,
                                                          contentCount: contentCount,
-                                                         categoryRights: driveFileManager.drive.categoryRights)
+                                                         categoryRights: driveFileManager.drive.categoryRights,
+                                                         isSharedWithMe: driveFileManager.isSharedWithMe)
 
         loadFileInformation()
 
@@ -249,7 +251,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
                                                                                 fileAccess: currentFileAccess,
                                                                                 contentCount: folderContentCount,
                                                                                 categoryRights: driveFileManager.drive
-                                                                                    .categoryRights)
+                                                                                    .categoryRights,
+                                                                                isSharedWithMe: driveFileManager.isSharedWithMe)
                 self.file = try await currentFile
                 self.fileAccess = try await currentFileAccess
                 self.contentCount = try await folderContentCount
