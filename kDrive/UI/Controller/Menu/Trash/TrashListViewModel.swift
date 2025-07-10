@@ -155,6 +155,19 @@ class TrashListViewModel: InMemoryFileListViewModel {
         sortingChanged()
     }
 
+    override func didSelectFile(at indexPath: IndexPath) {
+        guard let file: File = getFile(at: indexPath) else { return }
+        if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
+            return
+        }
+
+        if file.isDirectory {
+            onFilePresented?(file)
+        } else {
+            onPresentQuickActionPanel?([file], .trash)
+        }
+    }
+
     override func shouldShowEmptyView() -> Bool {
         currentDirectory.children.isEmpty
     }
