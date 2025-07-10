@@ -100,7 +100,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         floatingPanelViewController = DriveFloatingPanelController()
         floatingPanelViewController.isRemovalInteractionEnabled = false
-        fileInformationsViewController = FileActionsFloatingPanelViewController()
+        fileInformationsViewController = FileActionsFloatingPanelViewController(
+            frozenFile: currentFile,
+            driveFileManager: driveFileManager
+        )
+
         fileInformationsViewController.presentingParent = self
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
         fileInformationsViewController.presentationOrigin = presentationOrigin

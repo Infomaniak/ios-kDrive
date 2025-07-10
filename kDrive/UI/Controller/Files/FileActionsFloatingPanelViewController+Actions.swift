@@ -387,7 +387,6 @@ extension FileActionsFloatingPanelViewController {
             present(alert, animated: true)
         } else {
             downloadFile(action: action, indexPath: indexPath) { [weak self, frozenFile] in
-                guard let frozenFile else { return }
                 FileActionsHelper.save(file: frozenFile, from: self)
             }
         }

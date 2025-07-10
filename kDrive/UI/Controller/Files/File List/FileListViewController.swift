@@ -466,17 +466,20 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         var floatingPanelViewController: DriveFloatingPanelController
         switch actionType {
         case .file:
+            guard let file = files.first else {
+                DDLogError("[FileListViewController] Unable to show quick actions panel without a file")
+                return
+            }
+
             floatingPanelViewController = DriveFloatingPanelController()
-            let fileInformationsViewController = FileActionsFloatingPanelViewController()
+            let fileInformationsViewController = FileActionsFloatingPanelViewController(frozenFile: file,
+                                                                                        driveFileManager: driveFileManager)
 
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
             floatingPanelViewController.layout = fileFloatingPanelLayout(files: files)
-
-            if let file = files.first {
-                fileInformationsViewController.setFile(from: file.uid, driveFileManager: driveFileManager)
-            }
+            fileInformationsViewController.updateFile(from: file.uid, driveFileManager: driveFileManager)
 
             floatingPanelViewController.set(contentViewController: fileInformationsViewController)
             floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
