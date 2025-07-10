@@ -71,7 +71,6 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     // MARK: - Public methods
 
     init(frozenFile: File, driveFileManager: DriveFileManager) {
-        assert(frozenFile.isFrozen, "expecting to set a frozen initially")
         self.frozenFile = frozenFile
         self.driveFileManager = driveFileManager
         super.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
