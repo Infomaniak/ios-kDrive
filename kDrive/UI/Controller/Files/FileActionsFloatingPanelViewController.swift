@@ -34,8 +34,8 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         frozenFile.uid
     }
 
-    private(set) var frozenFile: File!
-    private(set) var driveFileManager: DriveFileManager!
+    private(set) var frozenFile: File
+    private(set) var driveFileManager: DriveFileManager
 
     var normalFolderHierarchy = true
     var presentationOrigin = PresentationOrigin.fileList
@@ -70,8 +70,16 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     // MARK: - Public methods
 
-    convenience init() {
-        self.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
+    init(frozenFile: File, driveFileManager: DriveFileManager) {
+        assert(frozenFile.isFrozen, "expecting to set a frozen initially")
+        self.frozenFile = frozenFile
+        self.driveFileManager = driveFileManager
+        super.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {
