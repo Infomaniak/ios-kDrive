@@ -253,7 +253,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func updateFileForCurrentIndex() {
-        fileInformationsViewController.updateFile(from: currentFile.uid, driveFileManager: driveFileManager)
+        fileInformationsViewController.updateAndObserveFile(withFileUid: currentFile.uid, driveFileManager: driveFileManager)
     }
 
     override func viewDidAppear(_ animated: Bool) {

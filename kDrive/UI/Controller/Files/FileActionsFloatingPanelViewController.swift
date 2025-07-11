@@ -74,6 +74,11 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         self.frozenFile = frozenFile
         self.driveFileManager = driveFileManager
         super.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
+
+        let frozenFileUid = frozenFile.uid
+        Task { @MainActor in
+            updateAndObserveFile(withFileUid: frozenFileUid, driveFileManager: driveFileManager)
+        }
     }
 
     @available(*, unavailable)
@@ -106,7 +111,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func updateFile(from fileUid: String, driveFileManager: DriveFileManager) {
+    func updateAndObserveFile(withFileUid fileUid: String, driveFileManager: DriveFileManager) {
         guard let freshFrozenFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: fileUid)?.freeze()
         else {
             DDLogError("Failed to fetch the file in database for fileUid: \(fileUid)")
