@@ -89,7 +89,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         static func getRows(for file: File,
                             fileAccess: FileAccess?,
                             contentCount: FileCount?,
-                            categoryRights: CategoryRights) -> [FileInformationRow] {
+                            categoryRights: CategoryRights,
+                            isSharedWithMe: Bool) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
             if fileAccess != nil || !file.users.isEmpty {
                 rows.append(.users)
@@ -97,7 +98,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
             if file.capabilities.canShare {
                 rows.append(.share)
             }
-            if categoryRights.canReadOnFile {
+            if categoryRights.canReadOnFile, !isSharedWithMe {
                 rows.append(.categories)
             }
             rows.append(.owner)
@@ -218,7 +219,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         fileInformationRows = FileInformationRow.getRows(for: file,
                                                          fileAccess: fileAccess,
                                                          contentCount: contentCount,
-                                                         categoryRights: driveFileManager.drive.categoryRights)
+                                                         categoryRights: driveFileManager.drive.categoryRights,
+                                                         isSharedWithMe: driveFileManager.isSharedWithMe)
 
         loadFileInformation()
 
@@ -241,18 +243,19 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private func loadFileInformation() {
         Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
-                async let currentFile = driveFileManager.file(id: proxyFile.id, forceRefresh: true)
-                async let currentFileAccess = driveFileManager.apiFetcher.access(for: proxyFile)
-                async let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
+                let currentFile = try await driveFileManager.file(id: proxyFile.id, forceRefresh: true)
+                let currentFileAccess = try await driveFileManager.apiFetcher.access(for: proxyFile)
+                let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
-                self.fileInformationRows = try await FileInformationRow.getRows(for: currentFile,
-                                                                                fileAccess: currentFileAccess,
-                                                                                contentCount: folderContentCount,
-                                                                                categoryRights: driveFileManager.drive
-                                                                                    .categoryRights)
-                self.file = try await currentFile
-                self.fileAccess = try await currentFileAccess
-                self.contentCount = try await folderContentCount
+                self.fileInformationRows = FileInformationRow.getRows(for: currentFile,
+                                                                      fileAccess: currentFileAccess,
+                                                                      contentCount: folderContentCount,
+                                                                      categoryRights: driveFileManager.drive
+                                                                          .categoryRights,
+                                                                      isSharedWithMe: driveFileManager.isSharedWithMe)
+                self.file = currentFile
+                self.fileAccess = currentFileAccess
+                self.contentCount = folderContentCount
 
                 self.reloadTableView()
             } catch {

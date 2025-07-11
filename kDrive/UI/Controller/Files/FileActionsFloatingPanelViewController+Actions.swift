@@ -75,6 +75,11 @@ extension FileActionsFloatingPanelViewController {
             return
         }
 
+        guard !driveFileManager.isSharedWithMe else {
+            actions = [.download]
+            return
+        }
+
         actions = (frozenFile.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions)
             .filter { action in
                 switch action {
