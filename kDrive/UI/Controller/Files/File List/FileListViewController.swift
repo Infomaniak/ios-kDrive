@@ -179,6 +179,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         (tabBarController as? PlusButtonObserver)?.updateCenterButton()
 
         tryLoadingFilesOrDisplayError()
+        collectionView?.collectionViewLayout.invalidateLayout()
     }
 
     override func viewDidAppear(_ animated: Bool) {
