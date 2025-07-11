@@ -331,6 +331,22 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 // - MARK: MainTabBarDelegate
 extension MainTabViewController: MainTabBarDelegate {
     func plusButtonPressed() {
+        print("plusButtonPressed")
+
+        Task {
+            guard let currentToken = driveFileManager.apiFetcher.currentToken else {
+                fatalError("woops")
+            }
+            do {
+                let deviceMetadata = DeviceMetaData(make: "Apple", model: "17 pro maxxor", platform: "iOS", type: "Darwin", uid: "7777")
+                let result = try await driveFileManager.apiFetcher.attachDevice(toAPIToken: currentToken, deviceMetaData: deviceMetadata)
+                print("result \(result)")
+            } catch {
+                print(error)
+            }
+        }
+
+        return
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
         guard let currentDirectory else { return }
 
