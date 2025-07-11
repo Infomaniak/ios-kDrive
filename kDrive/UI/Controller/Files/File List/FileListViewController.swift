@@ -479,8 +479,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
             floatingPanelViewController.layout = fileFloatingPanelLayout(files: files)
-            fileInformationsViewController.updateFile(from: file.uid, driveFileManager: driveFileManager)
-
             floatingPanelViewController.set(contentViewController: fileInformationsViewController)
             floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
         case .trash:
