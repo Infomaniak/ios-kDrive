@@ -507,7 +507,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     @objc func forceRefresh() {
-        Task {
+        Task { @MainActor in
+            setItemsSnapshot(for: collectionView)
             try? await driveFileManager.initRoot()
             refreshControl.endRefreshing()
         }
