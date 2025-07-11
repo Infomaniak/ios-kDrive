@@ -258,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "56fb914f14922efeda6c744c0125696552b6d2b5",
-        "version" : "8.53.1"
+        "revision" : "ca92efeb24b10052cd2a79e5205f42c5a16770ec",
+        "version" : "8.53.2"
       }
     },
     {
@@ -393,8 +393,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/siteline/SwiftUI-Introspect",
       "state" : {
-        "revision" : "c2b0625d0ef385994e4c6bc36116c0e7bfa6dafa",
-        "version" : "1.4.0-beta.2"
+        "revision" : "d2987affc5482a94d94aa730914aa26b124648a6",
+        "version" : "1.4.0-beta.3"
       }
     },
     {
