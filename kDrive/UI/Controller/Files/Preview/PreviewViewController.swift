@@ -100,7 +100,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         floatingPanelViewController = DriveFloatingPanelController()
         floatingPanelViewController.isRemovalInteractionEnabled = false
-        fileInformationsViewController = FileActionsFloatingPanelViewController()
+        fileInformationsViewController = FileActionsFloatingPanelViewController(
+            frozenFile: currentFile,
+            driveFileManager: driveFileManager
+        )
+
         fileInformationsViewController.presentingParent = self
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
         fileInformationsViewController.presentationOrigin = presentationOrigin
@@ -249,7 +253,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func updateFileForCurrentIndex() {
-        fileInformationsViewController.setFile(from: currentFile.uid, driveFileManager: driveFileManager)
+        fileInformationsViewController.updateAndObserveFile(withFileUid: currentFile.uid, driveFileManager: driveFileManager)
     }
 
     override func viewDidAppear(_ animated: Bool) {

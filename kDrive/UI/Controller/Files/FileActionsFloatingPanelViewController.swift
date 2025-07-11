@@ -34,8 +34,8 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         frozenFile.uid
     }
 
-    private(set) var frozenFile: File!
-    private(set) var driveFileManager: DriveFileManager!
+    private(set) var frozenFile: File
+    private(set) var driveFileManager: DriveFileManager
 
     var normalFolderHierarchy = true
     var presentationOrigin = PresentationOrigin.fileList
@@ -70,8 +70,20 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     // MARK: - Public methods
 
-    convenience init() {
-        self.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
+    init(frozenFile: File, driveFileManager: DriveFileManager) {
+        self.frozenFile = frozenFile
+        self.driveFileManager = driveFileManager
+        super.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
+
+        let frozenFileUid = frozenFile.uid
+        Task { @MainActor in
+            updateAndObserveFile(withFileUid: frozenFileUid, driveFileManager: driveFileManager)
+        }
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {
@@ -99,9 +111,10 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func setFile(from fileUid: String, driveFileManager: DriveFileManager) {
+    func updateAndObserveFile(withFileUid fileUid: String, driveFileManager: DriveFileManager) {
         guard let freshFrozenFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: fileUid)?.freeze()
         else {
+            DDLogError("Failed to fetch the file in database for fileUid: \(fileUid)")
             dismiss(animated: true)
             return
         }
