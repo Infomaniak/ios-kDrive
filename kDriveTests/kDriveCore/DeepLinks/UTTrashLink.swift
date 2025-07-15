@@ -31,6 +31,7 @@ struct UTTrashLink {
             return
         }
 
+        #expect(parsedResult.trashURL == url)
         #expect(parsedResult.driveId == driveIdInt)
         #expect(parsedResult.folderId == nil)
     }
@@ -44,6 +45,7 @@ struct UTTrashLink {
             return
         }
 
+        #expect(parsedResult.trashURL == url)
         #expect(parsedResult.driveId == driveIdInt)
         #expect(parsedResult.folderId == folderIdInt)
     }
