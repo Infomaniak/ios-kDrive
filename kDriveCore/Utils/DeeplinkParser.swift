@@ -52,7 +52,10 @@ public struct DeeplinkParser: DeeplinkParsable {
             if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
                 await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
                 return true
-
+            }
+            if let trashLink = TrashLink(trashURL: url) {
+                await router.navigate(to: .trash(trashLink: trashLink))
+                return true
             } else {
                 Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
                 return false

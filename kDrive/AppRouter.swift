@@ -151,6 +151,46 @@ public struct AppRouter: AppNavigable {
             }
 
             sharedWithMeService.clearLastSharedWithMe()
+
+        case .trash(let trashLink):
+            guard let currentAccount = accountManager.currentAccount,
+                  let driveFileManager = try? accountManager.getFirstMatchingDriveFileManager(
+                      for: currentAccount.id,
+                      driveId: trashLink.driveId
+                  ) else {
+                Log.sceneDelegate(
+                    "NavigationManager: Unable to navigate to .trashFiles without a DriveFileManager",
+                    level: .error
+                )
+                return
+            }
+
+            let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+            window.rootViewController = freshRootViewController
+
+            guard let navigationController =
+                getControllerForRestoration(
+                    tabBarViewController: freshRootViewController
+                ) as? UINavigationController
+            else {
+                return
+            }
+
+            if let folderId = trashLink.folderId {
+                guard let fetchResponse = try? await driveFileManager.apiFetcher.trashedFiles(
+                    drive: driveFileManager.drive
+                ), let test = fetchResponse.validApiResponse.data.first(where: { $0.id == folderId }) else { return }
+
+                let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: test)
+                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+
+                navigationController.pushViewController(destinationViewController, animated: true)
+            } else {
+                let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager)
+                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+
+                navigationController.pushViewController(destinationViewController, animated: true)
+            }
         }
     }
 
