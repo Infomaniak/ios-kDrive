@@ -59,16 +59,15 @@ public enum DeviceOS: String {
 }
 
 public struct DeviceMetaData {
-    let make: String?
+    let make: String = "Apple"
     let model: String?
     let platform: DeviceOS
     let type: DeviceType
     let uid: String
 
     public init() {
-        make = "Apple"
         model = Self.deviceIdentifier
-        platform = DeviceOS.current // working on getting a static Apple here
+        platform = DeviceOS.current
         type = DeviceType.current
         uid = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
     }
@@ -89,6 +88,7 @@ public struct DeviceMetaData {
         return parameters
     }
 
+    // todo factorise with UserAgentBuilder.modelIdentifier
     static var deviceIdentifier: String {
         var systemInfo = utsname()
         uname(&systemInfo)
