@@ -22,6 +22,7 @@ import SwiftRegex
 public struct TrashLink: Sendable {
     public static let parsingRegex = Regex(pattern: #"^/all/kdrive/app/drive/([0-9]+)/trash/?([0-9]+)?$"#)
 
+    public let trashURL: URL
     public let driveId: Int
     public let folderId: Int?
 
@@ -41,6 +42,7 @@ public struct TrashLink: Sendable {
             return nil
         }
 
+        self.trashURL = trashURL
         self.driveId = driveIdInt
         folderId = Int(firstMatch[safe: 2] ?? "")
     }
