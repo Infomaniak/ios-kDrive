@@ -23,11 +23,6 @@ import UIKit
 
 // TODO: Move to ios-core
 
-public struct AttachCallback: Codable {
-    let result: String
-    let data: Bool
-}
-
 public enum DeviceType: String {
     case computer
     case phone
@@ -108,7 +103,7 @@ public struct DeviceMetaData {
 
 public extension DriveApiFetcher {
     func attachDevice(toAPIToken token: ApiToken,
-                      deviceMetaData: DeviceMetaData) async throws -> ValidServerResponse<AttachCallback> {
+                      deviceMetaData: DeviceMetaData) async throws -> ValidServerResponse<Bool> {
         return try await perform(request: authenticatedRequest(
             .attachDevice(toApiToken: token),
             method: .post,
