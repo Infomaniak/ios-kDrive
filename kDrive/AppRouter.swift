@@ -42,8 +42,6 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
     @LazyInjectService private var matomo: MatomoUtils
-    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
-    @LazyInjectService var trashService: TrashServiceable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -116,7 +114,7 @@ public struct AppRouter: AppNavigable {
                     "NavigationManager: Unable to navigate to .sharedWithMe without a matching DriveFileManager",
                     level: .error
                 )
-                sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+                deeplinkService.setLastPublicShare(sharedWithMeLink)
                 return
             }
 
@@ -151,7 +149,7 @@ public struct AppRouter: AppNavigable {
                 showSharedWithMeView(driveFileManager: sharedWithMeDriveFileManager, navigationController: navigationController)
             }
 
-            sharedWithMeService.clearLastSharedWithMe()
+            deeplinkService.clearLastPublicShare()
 
         case .trash(let trashLink):
             guard let driveFileManager = accountManager
@@ -160,7 +158,7 @@ public struct AppRouter: AppNavigable {
                     "NavigationManager: Unable to navigate to .trashFiles without a DriveFileManager",
                     level: .error
                 )
-                trashService.setTrashLink(trashLink)
+                deeplinkService.setLastPublicShare(trashLink)
                 return
             }
 
@@ -191,7 +189,7 @@ public struct AppRouter: AppNavigable {
                 navigationController.pushViewController(destinationViewController, animated: true)
             }
 
-            trashService.clearTrashLink()
+            deeplinkService.clearLastPublicShare()
         }
     }
 
@@ -248,8 +246,6 @@ public struct AppRouter: AppNavigable {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
                 deeplinkService.processDeeplinksPostAuthentication()
-                sharedWithMeService.processSharedWithMePostAuthentication()
-                trashService.processTrashLinkPostAuthentication()
             }
         case .onboarding:
             showOnboarding()
