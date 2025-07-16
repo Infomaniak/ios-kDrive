@@ -100,7 +100,7 @@ class HomeRecentActivitiesController {
 
                 self.nextCursor = activitiesResponse.cursor
             } catch {
-                let frozenActivities = self.driveFileManager.getLocalRecentActivities()
+                let frozenActivities = self.driveFileManager.getFrozenLocalRecentActivities()
                 self.empty = frozenActivities.isEmpty
                 self.moreComing = false
 
