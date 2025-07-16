@@ -188,6 +188,9 @@ public enum FactoryService {
                 }
                 return provider
             },
+            Factory(type: DeviceManagerable.self) { _, _ in
+                DeviceManager(appGroupIdentifier: appGroupName)
+            },
             Factory(type: PhotoLibrarySavable.self) { _, _ in
                 PhotoLibrarySaver()
             },
