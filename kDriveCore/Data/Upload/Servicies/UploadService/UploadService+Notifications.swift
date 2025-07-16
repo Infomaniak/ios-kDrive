@@ -57,17 +57,22 @@ extension UploadService: UploadNotifiable {
                 return
             }
 
-            fileUploadedCount += (uploadFile.error == nil ? 1 : 0)
-            let currentOperationCount = operationCount
+            if uploadFile.error == nil {
+                fileUploadedCount += 1
+            } else {
+                fileUploadFailedCount += 1
+            }
 
-            fileUploadFailedCount += 1
-            guard currentOperationCount == 0 else { return }
+            guard operationCount == 0 else { return }
 
             if fileUploadFailedCount > 0 {
                 sendUploadErrorNotification(for: uploadFile, result: result)
             } else {
                 sendUploadSuccessNotification(uploadFile: uploadFile, result: result)
             }
+
+            fileUploadedCount = 0
+            fileUploadFailedCount = 0
         }
     }
 
