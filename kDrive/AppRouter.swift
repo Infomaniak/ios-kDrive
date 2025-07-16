@@ -43,6 +43,7 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
+    @LazyInjectService var trashService: TrashServiceable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -153,15 +154,13 @@ public struct AppRouter: AppNavigable {
             sharedWithMeService.clearLastSharedWithMe()
 
         case .trash(let trashLink):
-            guard let currentAccount = accountManager.currentAccount,
-                  let driveFileManager = try? accountManager.getFirstMatchingDriveFileManager(
-                      for: currentAccount.id,
-                      driveId: trashLink.driveId
-                  ) else {
+            guard let driveFileManager = accountManager
+                .getMatchingDriveFileManagerOrSwitchAccountForTrashLink(trashLink: trashLink) else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .trashFiles without a DriveFileManager",
                     level: .error
                 )
+                trashService.setTrashLink(trashLink)
                 return
             }
 
@@ -179,9 +178,9 @@ public struct AppRouter: AppNavigable {
             if let folderId = trashLink.folderId {
                 guard let fetchResponse = try? await driveFileManager.apiFetcher.trashedFiles(
                     drive: driveFileManager.drive
-                ), let test = fetchResponse.validApiResponse.data.first(where: { $0.id == folderId }) else { return }
+                ), let folder = fetchResponse.validApiResponse.data.first(where: { $0.id == folderId }) else { return }
 
-                let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: test)
+                let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: folder)
                 let destinationViewController = FileListViewController(viewModel: destinationViewModel)
 
                 navigationController.pushViewController(destinationViewController, animated: true)
@@ -191,6 +190,8 @@ public struct AppRouter: AppNavigable {
 
                 navigationController.pushViewController(destinationViewController, animated: true)
             }
+
+            trashService.clearTrashLink()
         }
     }
 
@@ -248,6 +249,7 @@ public struct AppRouter: AppNavigable {
                 await askUserToRemovePicturesIfNecessary()
                 deeplinkService.processDeeplinksPostAuthentication()
                 sharedWithMeService.processSharedWithMePostAuthentication()
+                trashService.processTrashLinkPostAuthentication()
             }
         case .onboarding:
             showOnboarding()

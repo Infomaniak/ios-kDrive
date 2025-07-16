@@ -71,6 +71,7 @@ public protocol AccountManageable: AnyObject {
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     @MainActor func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccountForTrashLink(trashLink: TrashLink) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -108,6 +109,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var myKSuiteStore: MyKSuiteStore
     @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
+    @LazyInjectService var trashService: TrashServiceable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -209,6 +211,54 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         } else {
             return nil
         }
+    }
+
+    @MainActor public func getMatchingDriveFileManagerOrSwitchAccountForTrashLink(trashLink: TrashLink) -> DriveFileManager? {
+        var driveFileManager: DriveFileManager?
+        var matchingAccount: Account?
+
+        for account in accounts {
+            if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
+                for: account.userId,
+                driveId: trashLink.driveId
+            ) {
+                driveFileManager = matchingDriveFileManager
+                matchingAccount = account
+            }
+        }
+
+        if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
+            DDLogInfo("switching to account \(matchingAccount.userId) to accommodate trashLink navigation")
+            trashService.setTrashLink(trashLink)
+            switchAccount(newAccount: matchingAccount)
+            appNavigable.prepareRootViewController(
+                currentState: RootViewControllerState.getCurrentState(),
+                restoration: false
+            )
+            return nil
+        }
+
+        if driveFileManager == nil, !accounts.isEmpty {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.wrongAccountConnected)
+        }
+
+        guard let driveFileManager, let matchingAccount else {
+            return nil
+        }
+
+        if trashLink.driveId != currentDriveId {
+            DDLogInfo("switching to drive \(trashLink.driveId) to accommodate trashLink navigation")
+            Task {
+                try await driveFileManager.initRoot()
+                @InjectService var appRestorationService: AppRestorationServiceable
+                await appRestorationService.reloadAppUI(for: trashLink.driveId, userId: matchingAccount.userId)
+                trashService.setTrashLink(trashLink)
+                trashService.processTrashLinkPostAuthentication()
+            }
+            return nil
+        }
+
+        return driveFileManager
     }
 
     @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink)

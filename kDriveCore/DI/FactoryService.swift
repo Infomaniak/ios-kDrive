@@ -108,6 +108,9 @@ public enum FactoryService {
             },
             Factory(type: SharedWithMeServiceable.self) { _, _ in
                 SharedWithMeService()
+            },
+            Factory(type: TrashServiceable.self) { _, _ in
+                TrashService()
             }
         ]
         return services
