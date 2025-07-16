@@ -45,6 +45,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     public enum RootMenuSection {
         case main
+        case recent
         case first
         case second
         case third
@@ -52,7 +53,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         var title: String {
             switch self {
             case .main: return KDriveResourcesStrings.Localizable.allFilesTitle
-            case .first: return KDriveResourcesStrings.Localizable.recentTitle
+            case .recent: return KDriveResourcesStrings.Localizable.recentTitle
             default: return ""
             }
         }
@@ -168,6 +169,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                                         image: KDriveResourcesAsset.delete.image,
                                                                         destination: .file(DriveFileManager.trashRootFile))]
 
+    public var sections: [RootMenuSection] {
+        [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
+    }
+
     weak var delegate: SidebarViewControllerDelegate?
 
     let driveFileManager: DriveFileManager
@@ -226,7 +231,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         let secondSectionItems = userRootFolders + SidebarViewController.sharedItems
         let thirdSectionItems = SidebarViewController.trashItem
         let sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
-        let sections = [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
 
         for i in 0 ... sectionsItems.count - 1 {
             if !sections.isEmpty {
@@ -277,6 +281,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
         collectionView.refreshControl = refreshControl
 
+        collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
@@ -372,18 +377,47 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     func configureDataSource(for collectionView: UICollectionView)
         -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
         dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
-            collectionView, indexPath, menuItem -> RootMenuCell?
-            in
-            guard let rootMenuCell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: RootMenuCell.identifier,
-                for: indexPath
-            ) as? RootMenuCell else {
-                fatalError("Failed to dequeue cell")
+            collectionView, indexPath, menuItem -> UICollectionViewCell? in
+            guard let menuSection = self.getSection(for: indexPath.section) else {
+                fatalError("Unknown section")
             }
 
-            rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-            rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
-            return rootMenuCell
+            switch menuSection {
+            case .recent:
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: FileCollectionViewCell.identifier,
+                    for: indexPath
+                ) as? FileCollectionViewCell else {
+                    fatalError("Failed to dequeue cell")
+                }
+
+                guard case .file(let destinationFile) = menuItem.destination else {
+                    fatalError("Unable to find a matching file")
+                }
+
+                let viewModel = FileViewModel(
+                    driveFileManager: self.driveFileManager,
+                    file: destinationFile,
+                    selectionMode: false
+                )
+                cell.configure(with: viewModel)
+                cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast, inFolderSelectMode: true)
+                cell.setEnabled(true)
+                cell.moreButton.isHidden = true
+
+                return cell
+            case .main, .first, .second, .third:
+                guard let rootMenuCell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: RootMenuCell.identifier,
+                    for: indexPath
+                ) as? RootMenuCell else {
+                    fatalError("Failed to dequeue cell")
+                }
+
+                rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
+                rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+                return rootMenuCell
+            }
         }
 
         dataSource.supplementaryViewProvider = { [weak self] collectionView, kind, indexPath in
@@ -453,15 +487,24 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                            subitems: [item])
 
             let section = NSCollectionLayoutSection(group: group)
-            section.contentInsets = NSDirectionalEdgeInsets(
-                top: -UIConstants.Padding.small,
-                leading: UIConstants.Padding.none,
-                bottom: UIConstants.Padding.standard,
-                trailing: UIConstants.Padding.none
-            )
+            if selectMode {
+                section.contentInsets = NSDirectionalEdgeInsets(
+                    top: -UIConstants.Padding.small,
+                    leading: UIConstants.Padding.mediumSmall,
+                    bottom: UIConstants.Padding.standard,
+                    trailing: UIConstants.Padding.mediumSmall
+                )
+            } else {
+                section.contentInsets = NSDirectionalEdgeInsets(
+                    top: -UIConstants.Padding.small,
+                    leading: UIConstants.Padding.none,
+                    bottom: UIConstants.Padding.standard,
+                    trailing: UIConstants.Padding.none
+                )
+            }
 
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                    heightDimension: .estimated(0))
+                                                    heightDimension: .estimated(8))
 
             if sectionIndex == 0 && !selectMode {
                 let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
@@ -566,6 +609,14 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
 
         return destinationViewModel
+    }
+
+    func getSection(for index: Int) -> RootMenuSection? {
+        return sections[safe: index]
+    }
+
+    func getIndexOfSection(for menuSection: RootMenuSection) -> Int? {
+        return sections.firstIndex(of: menuSection)
     }
 
     func buttonAddClicked() {

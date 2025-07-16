@@ -198,6 +198,8 @@ protocol FileCellDelegate: AnyObject {
 }
 
 class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
+    static let identifier = String(describing: FileCollectionViewCell.self)
+
     var swipeStartPoint: CGPoint = .zero
     var initialTrailingConstraintValue: CGFloat = 0
 
@@ -220,8 +222,21 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet var importProgressView: RPCircularProgress?
     @IBOutlet var downloadProgressView: RPCircularProgress?
     @IBOutlet var highlightedView: UIView!
+    @IBOutlet var trailingConstraint: NSLayoutConstraint!
+    @IBOutlet var leadingConstraint: NSLayoutConstraint!
+    @IBOutlet var logoWidthConstraint: NSLayoutConstraint!
+    @IBOutlet var logoHeightConstraint: NSLayoutConstraint!
+    @IBOutlet var topConstraint: NSLayoutConstraint!
+    @IBOutlet var logoLeadingConstraint: NSLayoutConstraint!
 
     var viewModel: FileViewModel?
+
+    private let separatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
 
     weak var delegate: FileCellDelegate?
 
@@ -271,6 +286,14 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         collectionView?.delegate = self
         collectionView?.dataSource = self
         collectionView?.register(cellView: CategoryBadgeCollectionViewCell.self)
+
+        contentInsetView.addSubview(separatorView)
+        NSLayoutConstraint.activate([
+            separatorView.leadingAnchor.constraint(equalTo: contentInsetView.leadingAnchor),
+            separatorView.trailingAnchor.constraint(equalTo: contentInsetView.trailingAnchor),
+            separatorView.bottomAnchor.constraint(equalTo: contentInsetView.bottomAnchor),
+            separatorView.heightAnchor.constraint(equalToConstant: 1)
+        ])
     }
 
     override func prepareForReuse() {
@@ -292,11 +315,10 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         viewModel?.thumbnailDownloadTask?.cancel()
     }
 
-    func initStyle(isFirst: Bool, isLast: Bool) {
+    func initStyle(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
         if isLast && isFirst {
             contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-                radius: 10
+                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10
             )
         } else if isFirst {
             contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: 10)
@@ -308,7 +330,19 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
                 radius: 0
             )
         }
+        addConstraint(isFirst: isFirst, isLast: isLast, inFolderSelectMode: inFolderSelectMode)
         contentInsetView.clipsToBounds = true
+    }
+
+    func addConstraint(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
+        guard inFolderSelectMode else { return }
+
+        trailingConstraint.constant = UIConstants.Padding.mediumSmall
+        leadingConstraint.constant = UIConstants.Padding.mediumSmall
+        logoWidthConstraint.constant = 26
+        logoHeightConstraint.constant = 26
+        logoLeadingConstraint.constant = 16
+        topConstraint.constant = 0
     }
 
     func setEnabled(_ enabled: Bool) {
@@ -454,5 +488,9 @@ extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewData
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
         return CGSize(width: 16, height: 16)
+    }
+
+    func setIsLastCell(_ isLast: Bool) {
+        separatorView.isHidden = isLast
     }
 }
