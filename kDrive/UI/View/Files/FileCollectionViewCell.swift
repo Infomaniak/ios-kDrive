@@ -336,21 +336,13 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
 
     func addConstraint(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
         guard inFolderSelectMode else { return }
-        if isLast && isFirst || isFirst {
-            trailingConstraint.constant = UIConstants.Padding.mediumSmall
-            leadingConstraint.constant = UIConstants.Padding.mediumSmall
-            logoWidthConstraint.constant = 26
-            logoHeightConstraint.constant = 26
-            topConstraint.constant = 8
-            logoLeadingConstraint.constant = 16
-        } else {
-            trailingConstraint.constant = UIConstants.Padding.mediumSmall
-            leadingConstraint.constant = UIConstants.Padding.mediumSmall
-            logoWidthConstraint.constant = 26
-            logoHeightConstraint.constant = 26
-            topConstraint.constant = 0
-            logoLeadingConstraint.constant = 16
-        }
+
+        trailingConstraint.constant = UIConstants.Padding.mediumSmall
+        leadingConstraint.constant = UIConstants.Padding.mediumSmall
+        logoWidthConstraint.constant = 26
+        logoHeightConstraint.constant = 26
+        logoLeadingConstraint.constant = 16
+        topConstraint.constant = 0
     }
 
     func setEnabled(_ enabled: Bool) {
