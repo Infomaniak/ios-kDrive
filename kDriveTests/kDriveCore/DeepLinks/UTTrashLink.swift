@@ -23,7 +23,7 @@ import Testing
 @Suite("UTTrashLink")
 struct UTTrashLink {
     @Test("Parse the driveId of a deeplink to the trash", arguments: ["123456"])
-    func testTrashLinkRoot(driveId: String) async throws {
+    func trashLinkRoot(driveId: String) throws {
         let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/trash"
         guard let url = URL(string: givenLink), let driveIdInt = Int(driveId),
               let parsedResult = TrashLink(trashURL: url) else {
@@ -37,7 +37,7 @@ struct UTTrashLink {
     }
 
     @Test("Parse the driveId and the folderId of a deeplink to the trash", arguments: zip(["123456"], ["8763402"]))
-    func testTrashLinkFolder(driveId: String, folderId: String) async throws {
+    func trashLinkFolder(driveId: String, folderId: String) throws {
         let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/trash/\(folderId)"
         guard let url = URL(string: givenLink), let driveIdInt = Int(driveId),
               let folderIdInt = Int(folderId), let parsedResult = TrashLink(trashURL: url) else {
@@ -51,7 +51,7 @@ struct UTTrashLink {
     }
 
     @Test("Fail to parse a deeplink to the trash if the URL is invalid", arguments: ["834FAE21-1D5C"])
-    func testTrashLinkInvalidURL(_ invalidDriveId: String) async throws {
+    func trashLinkInvalidURL(_ invalidDriveId: String) throws {
         let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(invalidDriveId)/trash"
         guard let url = URL(string: givenLink) else {
             Issue.record("Failed to create URL")
