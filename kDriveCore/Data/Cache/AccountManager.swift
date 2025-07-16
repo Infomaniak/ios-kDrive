@@ -70,8 +70,7 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
-    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
-    @MainActor func getMatchingDriveFileManagerOrSwitchAccountForTrashLink(trashLink: TrashLink) -> DriveFileManager?
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -211,63 +210,27 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    @MainActor public func getMatchingDriveFileManagerOrSwitchAccountForTrashLink(trashLink: TrashLink) -> DriveFileManager? {
-        var driveFileManager: DriveFileManager?
-        var matchingAccount: Account?
-
-        for account in accounts {
-            if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
-                for: account.userId,
-                driveId: trashLink.driveId
-            ) {
-                driveFileManager = matchingDriveFileManager
-                matchingAccount = account
-            }
-        }
-
-        if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
-            DDLogInfo("switching to account \(matchingAccount.userId) to accommodate trashLink navigation")
-            deeplinkService.setLastPublicShare(trashLink)
-            switchAccount(newAccount: matchingAccount)
-            appNavigable.prepareRootViewController(
-                currentState: RootViewControllerState.getCurrentState(),
-                restoration: false
-            )
-            return nil
-        }
-
-        if driveFileManager == nil, !accounts.isEmpty {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.wrongAccountConnected)
-        }
-
-        guard let driveFileManager, let matchingAccount else {
-            return nil
-        }
-
-        if trashLink.driveId != currentDriveId {
-            DDLogInfo("switching to drive \(trashLink.driveId) to accommodate trashLink navigation")
-            Task {
-                try await driveFileManager.initRoot()
-                @InjectService var appRestorationService: AppRestorationServiceable
-                await appRestorationService.reloadAppUI(for: trashLink.driveId, userId: matchingAccount.userId)
-                deeplinkService.setLastPublicShare(trashLink)
-                deeplinkService.processDeeplinksPostAuthentication()
-            }
-            return nil
-        }
-
-        return driveFileManager
-    }
-
-    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink)
+    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any)
         -> DriveFileManager? {
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
+        let driveId: Int
+
+        switch deeplink {
+        case is PublicShareLink:
+            driveId = (deeplink as! PublicShareLink).driveId
+        case is SharedWithMeLink:
+            driveId = (deeplink as! SharedWithMeLink).driveId
+        case is TrashLink:
+            driveId = (deeplink as! TrashLink).driveId
+        default:
+            return nil
+        }
 
         for account in accounts {
             if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
                 for: account.userId,
-                driveId: sharedWithMeLink.driveId
+                driveId: driveId
             ) {
                 driveFileManager = matchingDriveFileManager
                 matchingAccount = account
@@ -276,7 +239,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
             DDLogInfo("switching to account \(matchingAccount.userId) to accommodate sharedWithMeLink navigation")
-            deeplinkService.setLastPublicShare(sharedWithMeLink)
+            deeplinkService.setLastPublicShare(deeplink)
             switchAccount(newAccount: matchingAccount)
             appNavigable.prepareRootViewController(
                 currentState: RootViewControllerState.getCurrentState(),
@@ -293,13 +256,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return nil
         }
 
-        if sharedWithMeLink.driveId != currentDriveId {
-            DDLogInfo("switching to drive \(sharedWithMeLink.driveId) to accommodate sharedWithMeLink navigation")
+        if driveId != currentDriveId {
+            DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
             Task {
                 try await driveFileManager.initRoot()
                 @InjectService var appRestorationService: AppRestorationServiceable
-                await appRestorationService.reloadAppUI(for: sharedWithMeLink.driveId, userId: matchingAccount.userId)
-                deeplinkService.setLastPublicShare(sharedWithMeLink)
+                await appRestorationService.reloadAppUI(for: driveId, userId: matchingAccount.userId)
+                deeplinkService.setLastPublicShare(deeplink)
                 deeplinkService.processDeeplinksPostAuthentication()
             }
             return nil
