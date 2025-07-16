@@ -109,7 +109,7 @@ public struct AppRouter: AppNavigable {
 
         case .sharedWithMe(let sharedWithMeLink):
             guard let driveFileManager = accountManager
-                .getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: sharedWithMeLink) else {
+                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: sharedWithMeLink) else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .sharedWithMe without a matching DriveFileManager",
                     level: .error
@@ -153,7 +153,7 @@ public struct AppRouter: AppNavigable {
 
         case .trash(let trashLink):
             guard let driveFileManager = accountManager
-                .getMatchingDriveFileManagerOrSwitchAccountForTrashLink(trashLink: trashLink) else {
+                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: trashLink) else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .trashFiles without a DriveFileManager",
                     level: .error
