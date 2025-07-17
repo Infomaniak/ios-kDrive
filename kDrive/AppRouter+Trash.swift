@@ -41,7 +41,7 @@ public extension AppRouter {
         if let fetchResponse = try? await driveFileManager.apiFetcher.trashedFiles(
             drive: driveFileManager.drive
         ) {
-            folder = fetchResponse.validApiResponse.data.first(where: { $0.id == trashLink.folderId })
+            folder = fetchResponse.validApiResponse.data.first { $0.id == trashLink.folderId }
         }
 
         let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: folder)
