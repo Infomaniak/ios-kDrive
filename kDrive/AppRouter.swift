@@ -121,35 +121,11 @@ public struct AppRouter: AppNavigable {
             let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
             window.rootViewController = freshRootViewController
 
-            guard let navigationController =
-                getControllerForRestoration(
-                    tabBarViewController: freshRootViewController
-                ) as? UINavigationController
-            else {
-                return
-            }
-
-            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
-
-            if let fileId = sharedWithMeLink.fileId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
-                await showSharedFileIdView(
-                    driveFileManager: sharedWithMeDriveFileManager,
-                    navigationController: navigationController,
-                    driveId: sharedDriveId,
-                    fileId: fileId
-                )
-            } else if let folderId = sharedWithMeLink.folderId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
-                await showSharedFolderIdView(
-                    driveFileManager: sharedWithMeDriveFileManager,
-                    navigationController: navigationController,
-                    driveId: sharedDriveId,
-                    folderId: folderId
-                )
-            } else {
-                showSharedWithMeView(driveFileManager: sharedWithMeDriveFileManager, navigationController: navigationController)
-            }
-
-            deeplinkService.clearLastPublicShare()
+            await showSharedWithMe(
+                driveFileManager: driveFileManager,
+                viewController: freshRootViewController,
+                sharedWithMeLink: sharedWithMeLink
+            )
 
         case .trash(let trashLink):
             guard let driveFileManager = accountManager
@@ -256,7 +232,7 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    @MainActor private func getControllerForRestoration(tabBarViewController: UISplitViewController?) -> UIViewController? {
+    @MainActor public func getControllerForRestoration(tabBarViewController: UISplitViewController?) -> UIViewController? {
         guard let rootViewController = window?.rootViewController else { return nil }
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
         if rootHorizontalSizeClass == .compact {
