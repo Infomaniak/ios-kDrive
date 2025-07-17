@@ -69,7 +69,7 @@ public extension DriveFileManager {
         return freeze ? file.freeze() : file
     }
 
-    func getLocalRecentActivities() -> [FileActivity] {
+    func getFrozenLocalRecentActivities() -> [FileActivity] {
         let frozenFileActivities = database.fetchResults(ofType: FileActivity.self) { lazyCollection in
             lazyCollection.sorted(by: \.createdAt, ascending: false).freeze()
         }

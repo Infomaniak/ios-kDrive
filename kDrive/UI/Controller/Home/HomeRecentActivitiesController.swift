@@ -90,18 +90,21 @@ class HomeRecentActivitiesController {
                 self.empty = self.nextCursor == nil && activitiesResponse.data.isEmpty
                 self.moreComing = activitiesResponse.hasMore
 
-                display(activities: activitiesResponse.data)
-                // Update cache
+                let activities = activitiesResponse.data
                 if nextCursor == nil {
-                    await self.driveFileManager.setLocalRecentActivities(detachedActivities: activitiesResponse.data)
+                    await self.driveFileManager.setLocalRecentActivities(detachedActivities: activities)
                 }
+
+                let frozenOrDetachedActivities = activities.map { $0.freezeIfNeeded() }
+                display(activities: frozenOrDetachedActivities)
+
                 self.nextCursor = activitiesResponse.cursor
             } catch {
-                let activities = self.driveFileManager.getLocalRecentActivities()
-                self.empty = activities.isEmpty
+                let frozenActivities = self.driveFileManager.getFrozenLocalRecentActivities()
+                self.empty = frozenActivities.isEmpty
                 self.moreComing = false
 
-                display(activities: activities)
+                display(activities: frozenActivities)
             }
         }
     }
