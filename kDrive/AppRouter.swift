@@ -141,31 +141,7 @@ public struct AppRouter: AppNavigable {
             let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
             window.rootViewController = freshRootViewController
 
-            guard let navigationController =
-                getControllerForRestoration(
-                    tabBarViewController: freshRootViewController
-                ) as? UINavigationController
-            else {
-                return
-            }
-
-            if let folderId = trashLink.folderId {
-                guard let fetchResponse = try? await driveFileManager.apiFetcher.trashedFiles(
-                    drive: driveFileManager.drive
-                ), let folder = fetchResponse.validApiResponse.data.first(where: { $0.id == folderId }) else { return }
-
-                let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: folder)
-                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
-
-                navigationController.pushViewController(destinationViewController, animated: true)
-            } else {
-                let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager)
-                let destinationViewController = FileListViewController(viewModel: destinationViewModel)
-
-                navigationController.pushViewController(destinationViewController, animated: true)
-            }
-
-            deeplinkService.clearLastPublicShare()
+            await showTrash(driveFileManager: driveFileManager, viewController: freshRootViewController, trashLink: trashLink)
         }
     }
 
