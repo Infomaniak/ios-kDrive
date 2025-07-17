@@ -91,4 +91,42 @@ public extension AppRouter {
         let destinationViewController = FileListViewController(viewModel: destinationViewModel)
         navigationController.pushViewController(destinationViewController, animated: true)
     }
+
+    @MainActor func showSharedWithMe(
+        driveFileManager: DriveFileManager,
+        viewController: UISplitViewController,
+        sharedWithMeLink: SharedWithMeLink
+    ) async {
+        @LazyInjectService var deeplinkService: DeeplinkServiceable
+
+        guard let navigationController =
+            getControllerForRestoration(
+                tabBarViewController: viewController
+            ) as? UINavigationController
+        else {
+            return
+        }
+
+        let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+
+        if let fileId = sharedWithMeLink.fileId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
+            await showSharedFileIdView(
+                driveFileManager: sharedWithMeDriveFileManager,
+                navigationController: navigationController,
+                driveId: sharedDriveId,
+                fileId: fileId
+            )
+        } else if let folderId = sharedWithMeLink.folderId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
+            await showSharedFolderIdView(
+                driveFileManager: sharedWithMeDriveFileManager,
+                navigationController: navigationController,
+                driveId: sharedDriveId,
+                folderId: folderId
+            )
+        } else {
+            showSharedWithMeView(driveFileManager: sharedWithMeDriveFileManager, navigationController: navigationController)
+        }
+
+        deeplinkService.clearLastPublicShare()
+    }
 }
