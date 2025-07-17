@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import DesignSystem
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
