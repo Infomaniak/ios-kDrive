@@ -259,11 +259,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if driveId != currentDriveId {
             DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
 
-            Task {
-                try await driveFileManager.switchDriveAndReloadUI()
-                deeplinkService.setLastPublicShare(deeplink)
-                deeplinkService.processDeeplinksPostAuthentication()
-            }
+            try? await driveFileManager.switchDriveAndReloadUI()
+            deeplinkService.setLastPublicShare(deeplink)
+            deeplinkService.processDeeplinksPostAuthentication()
 
             return nil
         }
