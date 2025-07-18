@@ -465,7 +465,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         Task {
             do {
                 let device = try await deviceManager.getOrCreateCurrentDevice()
-                try await deviceManager.attachDevice(device, to: token, apiFetcher: apiFetcher)
+                try await deviceManager.attachDeviceIfNeeded(device, to: token, apiFetcher: apiFetcher)
             } catch {
                 SentryDebug.capture(message: SentryDebug.ErrorNames.failedToAttachDeviceError,
                                     context: ["error": error],
@@ -652,6 +652,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             deeplinkService.clearLastPublicShare()
 
             if let currentAccount {
+                deviceManager.forgetLocalDeviceHash(forUserId: currentAccount.userId)
                 removeTokenAndAccount(account: currentAccount)
             }
 
