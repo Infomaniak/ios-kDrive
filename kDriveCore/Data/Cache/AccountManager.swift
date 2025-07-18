@@ -217,12 +217,12 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let driveId: Int
 
         switch deeplink {
-        case is PublicShareLink:
-            driveId = (deeplink as! PublicShareLink).driveId
-        case is SharedWithMeLink:
-            driveId = (deeplink as! SharedWithMeLink).driveId
-        case is TrashLink:
-            driveId = (deeplink as! TrashLink).driveId
+        case let deeplink as PublicShareLink:
+            driveId = deeplink.driveId
+        case let deeplink as SharedWithMeLink:
+            driveId = deeplink.driveId
+        case let deeplink as TrashLink:
+            driveId = deeplink.driveId
         default:
             return nil
         }
