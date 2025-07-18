@@ -1,6 +1,2 @@
-- Le téléversement de petits fichiers consomme moins d'énergie
-- Fix d'actions sur fichier diverses
-- Fix de navigation spécifiques à l'iPad
-- Le changement de drive de destination de photo sync relance la syncro de zero
-- Ajout d'une selection en glissant sur les photos de la galerie
-- Gestion des videos non lisibles
+- Notifications plus claires sur les téléversements en échec
+- Meilleur affichage des dossiers récents
