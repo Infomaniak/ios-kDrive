@@ -16,7 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@testable import DeviceAssociation
 import Foundation
+@testable import InfomaniakCore
 @testable import InfomaniakDI
 @testable import kDrive
 @testable import kDriveCore
@@ -101,6 +103,9 @@ public enum MockingHelper {
                 },
                 Factory(type: PhotoLibrarySyncable.self) { _, _ in
                     MCKPhotoLibrarySyncable()
+                },
+                Factory(type: DeviceManagerable.self) { _, _ in
+                    MCKDeviceManagerable()
                 }
             ]
         }
