@@ -17,6 +17,7 @@
  */
 
 import Alamofire
+import DeviceAssociation
 import Foundation
 @testable import InfomaniakCore
 import InfomaniakLogin
