@@ -17,6 +17,7 @@
  */
 
 import CocoaLumberjackSwift
+import DeviceAssociation
 import Foundation
 import InfomaniakBugTracker
 import InfomaniakCore

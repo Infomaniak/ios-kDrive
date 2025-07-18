@@ -17,6 +17,7 @@
  */
 
 import BackgroundTasks
+import DeviceAssociation
 import Foundation
 import InfomaniakBugTracker
 import InfomaniakCore

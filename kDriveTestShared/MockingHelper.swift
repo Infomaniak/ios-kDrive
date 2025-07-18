@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@testable import DeviceAssociation
 import Foundation
 @testable import InfomaniakCore
 @testable import InfomaniakDI
