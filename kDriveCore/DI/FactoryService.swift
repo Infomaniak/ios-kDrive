@@ -105,9 +105,6 @@ public enum FactoryService {
             },
             Factory(type: DeeplinkParsable.self) { _, _ in
                 DeeplinkParser()
-            },
-            Factory(type: DriveManageable.self) { _, _ in
-                DriveManager()
             }
         ]
         return services

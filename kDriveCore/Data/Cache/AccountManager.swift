@@ -107,7 +107,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var myKSuiteStore: MyKSuiteStore
-    @LazyInjectService var driveManager: DriveManageable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -261,11 +260,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
 
             Task {
-                try await driveManager.driveDidSwitch(
-                    to: driveFileManager.drive,
-                    driveFileManager: driveFileManager,
-                    deeplink: deeplink
-                )
+                try await driveFileManager.switchDriveAndReloadUI()
+                deeplinkService.setLastPublicShare(deeplink)
+                deeplinkService.processDeeplinksPostAuthentication()
             }
 
             return nil
