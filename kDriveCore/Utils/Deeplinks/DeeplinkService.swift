@@ -17,17 +17,20 @@
  */
 
 import Foundation
+import InfomaniakDI
 
 public protocol DeeplinkServiceable: AnyObject {
-    func setLastPublicShare(_ link: PublicShareLink)
+    func setLastPublicShare(_ link: Any)
     func clearLastPublicShare()
     func processDeeplinksPostAuthentication()
 }
 
 public class DeeplinkService: DeeplinkServiceable {
-    private var lastPublicShareLink: PublicShareLink?
+    @LazyInjectService var router: AppNavigable
 
-    public func setLastPublicShare(_ link: PublicShareLink) {
+    private var lastPublicShareLink: Any?
+
+    public func setLastPublicShare(_ link: Any) {
         lastPublicShareLink = link
     }
 
@@ -41,7 +44,17 @@ public class DeeplinkService: DeeplinkServiceable {
         }
 
         Task { @MainActor in
-            await UniversalLinksHelper.processPublicShareLink(lastPublicShareLink)
+            switch lastPublicShareLink {
+            case let lastPublicShareLink as PublicShareLink:
+                await UniversalLinksHelper.processPublicShareLink(lastPublicShareLink)
+            case let lastPublicShareLink as SharedWithMeLink:
+                await router.navigate(to: .sharedWithMe(sharedWithMeLink: lastPublicShareLink))
+            case let lastPublicShareLink as TrashLink:
+                await router.navigate(to: .trash(trashLink: lastPublicShareLink))
+            default:
+                break
+            }
+
             clearLastPublicShare()
         }
     }
