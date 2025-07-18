@@ -70,7 +70,7 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
-    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) -> DriveFileManager?
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) async -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -210,7 +210,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any)
+    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) async
         -> DriveFileManager? {
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
@@ -252,19 +252,17 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.wrongAccountConnected)
         }
 
-        guard let driveFileManager, let matchingAccount else {
+        guard let driveFileManager else {
             return nil
         }
 
         if driveId != currentDriveId {
             DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
-            Task {
-                try await driveFileManager.initRoot()
-                @InjectService var appRestorationService: AppRestorationServiceable
-                await appRestorationService.reloadAppUI(for: driveId, userId: matchingAccount.userId)
-                deeplinkService.setLastPublicShare(deeplink)
-                deeplinkService.processDeeplinksPostAuthentication()
-            }
+
+            try? await driveFileManager.switchDriveAndReloadUI()
+            deeplinkService.setLastPublicShare(deeplink)
+            deeplinkService.processDeeplinksPostAuthentication()
+
             return nil
         }
 
