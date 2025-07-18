@@ -1210,7 +1210,6 @@ public final class DriveFileManager {
 
     public func switchDriveAndReloadUI() async throws {
         try await initRoot()
-        let drive = self.drive
         @InjectService var appRestorationService: AppRestorationServiceable
         await appRestorationService.reloadAppUI(for: drive.id, userId: drive.userId)
     }
