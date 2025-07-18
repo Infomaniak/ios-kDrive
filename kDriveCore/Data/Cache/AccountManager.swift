@@ -27,19 +27,6 @@ import MyKSuite
 import RealmSwift
 import Sentry
 
-// TODO: Delete
-public class SomeRefreshTokenDelegate: RefreshTokenDelegate {
-    public init() {}
-
-    public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
-        print("noop")
-    }
-
-    public func didFailRefreshToken(_ token: ApiToken) {
-        print("noop")
-    }
-}
-
 public protocol UpdateAccountDelegate: AnyObject {
     @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account)
 }
@@ -97,6 +84,7 @@ public protocol AccountManageable: AnyObject {
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
+    @LazyInjectService var deviceManager: DeviceManagerable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
     @LazyInjectService var photoLibrarySync: PhotoLibrarySyncable
@@ -391,6 +379,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let apiFetcher = DriveApiFetcher(token: token, delegate: self)
         let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
 
+        attachDeviceToApiToken(token, apiFetcher: apiFetcher)
+
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.filter(\.isDriveUser).isEmpty else {
             try? await networkLogin.deleteApiToken(token: token)
@@ -434,6 +424,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
         account.user = user
 
+        attachDeviceToApiToken(token, apiFetcher: apiFetcher)
+
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty,
               let firstDrive = driveResponse.drives.first(where: { $0.isDriveUser }) else {
@@ -467,6 +459,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         return account
+    }
+
+    private func attachDeviceToApiToken(_ token: ApiToken, apiFetcher: ApiFetcher) {
+        Task {
+            do {
+                let device = try await deviceManager.getOrCreateCurrentDevice()
+                try await deviceManager.attachDevice(device, to: token, apiFetcher: apiFetcher)
+            } catch {
+                SentryDebug.capture(message: SentryDebug.ErrorNames.failedToAttachDeviceError,
+                                    context: ["error": error],
+                                    level: .error)
+            }
+        }
     }
 
     private func updateMyKSuiteIfNeeded(for drives: [Drive], userId: Int, apiFetcher: DriveApiFetcher) async {
