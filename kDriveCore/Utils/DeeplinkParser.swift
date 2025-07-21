@@ -55,6 +55,10 @@ public struct DeeplinkParser: DeeplinkParsable {
             if let trashLink = TrashLink(trashURL: url) {
                 await router.navigate(to: .trash(trashLink: trashLink))
                 return true
+            }
+            if let officeLink = OfficeLink(officeURL: url) {
+                await router.navigate(to: .office(officeLink: officeLink))
+                return true
             } else {
                 Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
                 return false

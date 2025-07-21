@@ -25,6 +25,7 @@ public enum NavigationRoutes: Equatable {
     case saveFiles(files: [ImportedFile])
     case sharedWithMe(sharedWithMeLink: SharedWithMeLink)
     case trash(trashLink: TrashLink)
+    case office(officeLink: OfficeLink)
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
         switch (lhs, rhs) {
@@ -36,6 +37,8 @@ public enum NavigationRoutes: Equatable {
             return lhdSharedWithMeLink.driveId == rhdSharedWithMeLink.driveId
         case(.trash(let lhdTrashLink), .trash(let rhdTrashLink)):
             return lhdTrashLink.driveId == rhdTrashLink.driveId
+        case(.office(let lhdOfficeLink), .office(let rhdOfficeLink)):
+            return lhdOfficeLink.driveId == rhdOfficeLink.driveId
         default:
             return false
         }

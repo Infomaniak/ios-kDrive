@@ -51,6 +51,8 @@ public class DeeplinkService: DeeplinkServiceable {
                 await router.navigate(to: .sharedWithMe(sharedWithMeLink: lastPublicShareLink))
             case let lastPublicShareLink as TrashLink:
                 await router.navigate(to: .trash(trashLink: lastPublicShareLink))
+            case let lastPublicShareLink as OfficeLink:
+                await router.navigate(to: .office(officeLink: lastPublicShareLink))
             default:
                 break
             }
