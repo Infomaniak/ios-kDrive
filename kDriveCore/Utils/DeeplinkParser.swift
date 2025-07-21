@@ -41,6 +41,24 @@ public struct DeeplinkParser: DeeplinkParsable {
         // META: keep SonarCloud happy
     }
 
+    private func handleDeeplink(url: URL) async -> Bool {
+        if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
+            await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
+            return true
+        }
+        if let trashLink = TrashLink(trashURL: url) {
+            await router.navigate(to: .trash(trashLink: trashLink))
+            return true
+        }
+        if let officeLink = OfficeLink(officeURL: url) {
+            await router.navigate(to: .office(officeLink: officeLink))
+            return true
+        } else {
+            Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
+            return false
+        }
+    }
+
     public func parse(url: URL) async -> Bool {
         guard await !UniversalLinksHelper.handleURL(url) else {
             return true
@@ -48,21 +66,7 @@ public struct DeeplinkParser: DeeplinkParsable {
 
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
-            if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
-                await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
-                return true
-            }
-            if let trashLink = TrashLink(trashURL: url) {
-                await router.navigate(to: .trash(trashLink: trashLink))
-                return true
-            }
-            if let officeLink = OfficeLink(officeURL: url) {
-                await router.navigate(to: .office(officeLink: officeLink))
-                return true
-            } else {
-                Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
-                return false
-            }
+            return await handleDeeplink(url: url)
         }
 
         if components.path == DeeplinkPath.store.rawValue,
