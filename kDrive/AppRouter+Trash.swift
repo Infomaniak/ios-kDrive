@@ -29,6 +29,8 @@ public extension AppRouter {
     ) async {
         @LazyInjectService var deeplinkService: DeeplinkServiceable
 
+        defer { deeplinkService.clearLastPublicShare() }
+
         guard let navigationController =
             getControllerForRestoration(
                 tabBarViewController: viewController
@@ -37,18 +39,35 @@ public extension AppRouter {
             return
         }
 
+        let rootTrash = DriveFileManager.trashRootFile
+        let myTrashViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: rootTrash)
+        let myTrashViewController = FileListViewController(viewModel: myTrashViewModel)
+        navigationController.pushViewController(myTrashViewController, animated: true)
+
+        guard let trashedFolderId = trashLink.folderId else {
+            return
+        }
+
+        await showFolderInTrash(folderId: trashedFolderId,
+                                driveFileManager: driveFileManager,
+                                navigationController: navigationController)
+    }
+
+    @MainActor private func showFolderInTrash(
+        folderId: Int,
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController
+    ) async {
         var folder: File?
         if let fetchResponse = try? await driveFileManager.apiFetcher.trashedFiles(
             drive: driveFileManager.drive
         ) {
-            folder = fetchResponse.validApiResponse.data.first { $0.id == trashLink.folderId }
+            folder = fetchResponse.validApiResponse.data.first { $0.id == folderId }
         }
 
         let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: folder)
         let destinationViewController = FileListViewController(viewModel: destinationViewModel)
 
         navigationController.pushViewController(destinationViewController, animated: true)
-
-        deeplinkService.clearLastPublicShare()
     }
 }
