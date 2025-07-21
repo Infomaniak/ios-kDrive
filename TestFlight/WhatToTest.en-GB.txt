@@ -1,2 +1,2 @@
-- Clearer notifications about failed uploads
 - Better display of recent files
+- Clearer notifications about failed uploads
