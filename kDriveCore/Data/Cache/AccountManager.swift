@@ -576,6 +576,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         currentAccount = account
         currentUserId = account.userId
         enableBugTrackerIfAvailable()
+
+        guard let token = account.token else { return }
+        let apiFetcher = getApiFetcher(for: account.userId, token: token)
+        attachDeviceToApiToken(token, apiFetcher: apiFetcher)
     }
 
     private func setSentryUserId(userId: Int) {
