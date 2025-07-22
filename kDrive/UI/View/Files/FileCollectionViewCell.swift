@@ -342,7 +342,9 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         logoWidthConstraint.constant = 26
         logoHeightConstraint.constant = 26
         logoLeadingConstraint.constant = 16
-        topConstraint.constant = 0
+        if isFirst {
+            topConstraint.constant = 8
+        }
     }
 
     func setEnabled(_ enabled: Bool) {
