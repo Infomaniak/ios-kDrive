@@ -29,8 +29,8 @@ public struct MCKDeviceManagerable: DeviceManagerable {
     }
 
     @discardableResult
-    public func attachDevice(_ device: UserDevice, to token: ApiToken,
-                             apiFetcher: ApiFetcher) async throws -> ValidServerResponse<Bool> {
+    public func attachDeviceIfNeeded(_ device: UserDevice, to token: ApiToken,
+                                     apiFetcher: ApiFetcher) async throws -> ValidServerResponse<Bool>? {
         let headers = HTTPHeaders()
         let content = ValidApiResponse<Bool>(result: ApiResult.success,
                                              data: true,
@@ -46,6 +46,8 @@ public struct MCKDeviceManagerable: DeviceManagerable {
                                                  validApiResponse: content)
         return response
     }
+
+    public func forgetLocalDeviceHash(forUserId userId: Int) {}
 }
 
 public extension UUID {
