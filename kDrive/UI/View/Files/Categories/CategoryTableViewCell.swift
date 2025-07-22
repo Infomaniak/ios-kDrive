@@ -64,7 +64,12 @@ class CategoryTableViewCell: InsetTableViewCell {
 
     func configure(with category: kDriveCore.Category, showMoreButton: Bool) {
         self.category = category
+        label.numberOfLines = 1
+        label.lineBreakMode = .byTruncatingTail
         label.text = category.localizedName
+        NSLayoutConstraint.activate([
+            label.trailingAnchor.constraint(equalTo: moreButton.leadingAnchor)
+        ])
         moreButton.isHidden = !showMoreButton
         generateIcon(for: category, selected: isSelected)
     }
