@@ -54,8 +54,6 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
     }
 
     @MainActor public func didCompleteLoginWith(code: String, verifier: String) {
-        guard let topMostViewController = router.topMostViewController else { return }
-
         matomo.track(eventWithCategory: .account, name: "loggedIn")
         let previousAccount = accountManager.currentAccount
 
@@ -71,7 +69,7 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
                 self.matomo.connectUser(userId: accountManager.currentUserId.description)
                 goToMainScreen(with: currentDriveFileManager)
             } catch {
-                didCompleteLoginWithError(error, previousAccount: previousAccount, topMostViewController: topMostViewController)
+                didCompleteLoginWithError(error, previousAccount: previousAccount)
             }
 
             await performDidCompleteLoginCallback()
@@ -79,18 +77,16 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
     }
 
     @MainActor public func login(with accounts: [ConnectedAccount]) {
-        guard let topMostViewController = router.topMostViewController else { return }
-
         matomo.track(eventWithCategory: .account, name: "loggedIn")
 
         didStartLoginCallback?()
 
         Task {
-            await deviceAttestationAndLogin(with: accounts, topMostViewController: topMostViewController)
+            await deviceAttestationAndLogin(with: accounts)
         }
     }
 
-    private func deviceAttestationAndLogin(with accounts: [ConnectedAccount], topMostViewController: UIViewController) async {
+    private func deviceAttestationAndLogin(with accounts: [ConnectedAccount]) async {
         let previousAccount = accountManager.currentAccount
 
         do {
@@ -112,11 +108,7 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
                 await performDidCompleteLoginCallback()
             }
         } catch {
-            await didCompleteLoginWithError(
-                error,
-                previousAccount: previousAccount,
-                topMostViewController: topMostViewController
-            )
+            await didCompleteLoginWithError(error, previousAccount: previousAccount)
             await performDidCompleteLoginCallback()
         }
     }
@@ -137,10 +129,10 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
         deeplinkService.processDeeplinksPostAuthentication()
     }
 
-    @MainActor private func didCompleteLoginWithError(_ error: Error,
-                                                      previousAccount: Account?,
-                                                      topMostViewController: UIViewController) {
+    @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: Account?) {
         DDLogError("Error on didCompleteLoginWith \(error)")
+
+        guard let topMostViewController = router.topMostViewController else { return }
 
         if let previousAccount {
             accountManager.switchAccount(newAccount: previousAccount)
