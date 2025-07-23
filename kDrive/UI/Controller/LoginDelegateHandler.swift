@@ -26,7 +26,7 @@ import InterAppLogin
 import kDriveCore
 import kDriveResources
 
-public final class LoginDelegateHandler: InfomaniakLoginDelegate {
+public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate {
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
@@ -110,10 +110,7 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
 
                 matomo.connectUser(userId: accountManager.currentUserId.description)
                 await goToMainScreen(with: currentDriveFileManager)
-            }
-
-            Task { @MainActor in
-                didCompleteLoginCallback?()
+                await awaitDidCompleteLoginCallback()
             }
         } catch {
             Task { @MainActor in
@@ -123,7 +120,12 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
                     topMostViewController: topMostViewController
                 )
             }
+            await awaitDidCompleteLoginCallback()
         }
+    }
+
+    @MainActor private func awaitDidCompleteLoginCallback() async {
+        didCompleteLoginCallback?()
     }
 
     private func generateAttestationTokenForDevice() async throws -> String {
