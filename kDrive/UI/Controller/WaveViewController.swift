@@ -209,7 +209,11 @@ extension WaveViewController: OnboardingViewControllerDelegate {
         } else {
             let loginDelegateHandler = loginDelegateHandler(signInButton: nil, registerButton: nil)
             return ContinueWithAccountView(isLoading: false) {
-                self.appNavigable.showLogin(delegate: loginDelegateHandler)
+                Task { @MainActor in
+                    // We have to wait for closing animation before opening the login WebView modally
+                    try? await Task.sleep(nanoseconds: 500_000_000)
+                    self.appNavigable.showLogin(delegate: loginDelegateHandler)
+                }
             } onLoginWithAccountsPressed: { accounts in
                 loginDelegateHandler.login(with: accounts)
             } onCreateAccountPressed: {
