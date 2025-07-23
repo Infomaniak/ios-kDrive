@@ -74,12 +74,11 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
                 didCompleteLoginWithError(error, previousAccount: previousAccount, topMostViewController: topMostViewController)
             }
 
-            didCompleteLoginCallback?()
+            await performDidCompleteLoginCallback()
         }
     }
 
-    @MainActor
-    public func login(with accounts: [ConnectedAccount]) {
+    @MainActor public func login(with accounts: [ConnectedAccount]) {
         guard let topMostViewController = router.topMostViewController else { return }
 
         matomo.track(eventWithCategory: .account, name: "loggedIn")
@@ -110,7 +109,7 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
 
                 matomo.connectUser(userId: accountManager.currentUserId.description)
                 await goToMainScreen(with: currentDriveFileManager)
-                await awaitDidCompleteLoginCallback()
+                await performDidCompleteLoginCallback()
             }
         } catch {
             await didCompleteLoginWithError(
@@ -118,12 +117,8 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
                 previousAccount: previousAccount,
                 topMostViewController: topMostViewController
             )
-            await awaitDidCompleteLoginCallback()
+            await performDidCompleteLoginCallback()
         }
-    }
-
-    @MainActor private func awaitDidCompleteLoginCallback() async {
-        didCompleteLoginCallback?()
     }
 
     private func generateAttestationTokenForDevice() async throws -> String {
@@ -187,7 +182,11 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
         }
     }
 
-    public func didFailLoginWith(error: Error) {
+    @MainActor public func didFailLoginWith(error: Error) {
         didFailLoginWithErrorCallback?(error)
+    }
+
+    @MainActor func performDidCompleteLoginCallback() async {
+        didCompleteLoginCallback?()
     }
 }
