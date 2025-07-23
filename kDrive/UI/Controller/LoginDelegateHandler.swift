@@ -113,13 +113,11 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
                 await awaitDidCompleteLoginCallback()
             }
         } catch {
-            Task { @MainActor in
-                didCompleteLoginWithError(
-                    error,
-                    previousAccount: previousAccount,
-                    topMostViewController: topMostViewController
-                )
-            }
+            await didCompleteLoginWithError(
+                error,
+                previousAccount: previousAccount,
+                topMostViewController: topMostViewController
+            )
             await awaitDidCompleteLoginCallback()
         }
     }
@@ -144,9 +142,9 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
         deeplinkService.processDeeplinksPostAuthentication()
     }
 
-    private func didCompleteLoginWithError(_ error: Error,
-                                           previousAccount: Account?,
-                                           topMostViewController: UIViewController) {
+    @MainActor private func didCompleteLoginWithError(_ error: Error,
+                                                      previousAccount: Account?,
+                                                      topMostViewController: UIViewController) {
         DDLogError("Error on didCompleteLoginWith \(error)")
 
         if let previousAccount {
