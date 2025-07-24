@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import DesignSystem
 import InfomaniakCore
 import InfomaniakCoreCommonUI
+import InfomaniakCoreSwiftUI
 import InfomaniakDI
 import InfomaniakLogin
 import InfomaniakOnboarding
@@ -181,6 +182,19 @@ class WaveViewController: UIViewController {
     }
 }
 
+extension IKButtonTheme {
+    static let drive = IKButtonTheme(
+        primary: KDriveResourcesAsset.infomaniakColor.swiftUIColor,
+        secondary: .white,
+        tertiary: KDriveResourcesAsset.backgroundCardViewColor.swiftUIColor,
+        disabledPrimary: Color.green,
+        disabledSecondary: Color.green,
+        error: KDriveResourcesAsset.binColor.swiftUIColor,
+        smallFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)),
+        mediumFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium))
+    )
+}
+
 extension WaveViewController: OnboardingViewControllerDelegate {
     func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
         guard slides.count > 1 else { return false }
@@ -220,6 +234,7 @@ extension WaveViewController: OnboardingViewControllerDelegate {
                 self.appNavigable.showRegister(delegate: loginDelegateHandler)
             }
             .padding(IKPadding.large)
+            .ikButtonTheme(.drive)
         }
     }
 
