@@ -44,8 +44,7 @@ public enum FactoryService {
                                                            accessType: nil)
 
     public static func setupDependencyInjection(other: [Factory] = []) {
-        // TODO: revert me
-        ApiEnvironment.current = .preprod
+        ApiEnvironment.current = .prod
 
         let factoriesWithIdentifier = debugServices + transactionableServices + uploadQueues
         SimpleResolver.register(factoriesWithIdentifier)
