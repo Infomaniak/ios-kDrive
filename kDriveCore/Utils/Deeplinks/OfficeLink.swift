@@ -19,7 +19,7 @@
 import Foundation
 import SwiftRegex
 
-public struct OfficeLink: Sendable {
+public struct OfficeLink: Sendable, Equatable {
     public static let parsingRegex = Regex(pattern: #"^/app/office/([0-9]+)/([0-9]+)$"#)
 
     public let officeURL: URL
