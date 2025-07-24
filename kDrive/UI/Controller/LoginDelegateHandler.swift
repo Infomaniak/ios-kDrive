@@ -90,9 +90,9 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
         let previousAccount = accountManager.currentAccount
 
         do {
-            let attestationToken = try await generateAttestationTokenForDevice()
-
             for account in accounts {
+                let attestationToken = try await generateAttestationTokenForDevice()
+
                 let derivatedToken = try await tokenService.derivateApiToken(
                     using: account.token,
                     attestationToken: attestationToken
