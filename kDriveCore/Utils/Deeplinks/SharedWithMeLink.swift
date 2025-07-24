@@ -19,7 +19,7 @@
 import Foundation
 import SwiftRegex
 
-public struct SharedWithMeLink: Sendable {
+public struct SharedWithMeLink: Sendable, Equatable {
     public static let validationRegex =
         Regex(pattern: #"^/all/kdrive/app/drive/([0-9]+)/shared-with-me(?:/.*)?$"#)
 
