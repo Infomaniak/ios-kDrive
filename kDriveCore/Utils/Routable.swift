@@ -34,11 +34,11 @@ public enum NavigationRoutes: Equatable {
         case (.saveFiles(let lhdFile), .saveFiles(let rhdDile)):
             return lhdFile == rhdDile
         case (.sharedWithMe(let lhdSharedWithMeLink), .sharedWithMe(let rhdSharedWithMeLink)):
-            return lhdSharedWithMeLink.driveId == rhdSharedWithMeLink.driveId
+            return lhdSharedWithMeLink == rhdSharedWithMeLink
         case(.trash(let lhdTrashLink), .trash(let rhdTrashLink)):
-            return lhdTrashLink.driveId == rhdTrashLink.driveId
+            return lhdTrashLink == rhdTrashLink
         case(.office(let lhdOfficeLink), .office(let rhdOfficeLink)):
-            return lhdOfficeLink.driveId == rhdOfficeLink.driveId
+            return lhdOfficeLink == rhdOfficeLink
         default:
             return false
         }
