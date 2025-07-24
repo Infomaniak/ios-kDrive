@@ -42,7 +42,7 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
             return .preprod
         }
     }
-  
+
     var didStartLoginCallback: (() -> Void)?
     var didCompleteLoginCallback: (() -> Void)?
     var didFailLoginWithErrorCallback: ((Error) -> Void)?
