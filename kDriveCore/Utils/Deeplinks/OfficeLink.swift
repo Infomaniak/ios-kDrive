@@ -19,15 +19,15 @@
 import Foundation
 import SwiftRegex
 
-public struct TrashLink: Sendable, Equatable {
-    public static let parsingRegex = Regex(pattern: #"^/all/kdrive/app/drive/([0-9]+)/trash/?([0-9]+)?$"#)
+public struct OfficeLink: Sendable, Equatable {
+    public static let parsingRegex = Regex(pattern: #"^/app/office/([0-9]+)/([0-9]+)$"#)
 
-    public let trashURL: URL
+    public let officeURL: URL
     public let driveId: Int
-    public let folderId: Int?
+    public let fileId: Int
 
-    public init?(trashURL: URL) {
-        guard let components = URLComponents(url: trashURL, resolvingAgainstBaseURL: true) else {
+    public init?(officeURL: URL) {
+        guard let components = URLComponents(url: officeURL, resolvingAgainstBaseURL: true) else {
             return nil
         }
 
@@ -38,12 +38,14 @@ public struct TrashLink: Sendable, Equatable {
 
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
-              let driveIdInt = Int(driveId) else {
+              let driveIdInt = Int(driveId),
+              let fileId = firstMatch[safe: 2],
+              let fileIdInt = Int(fileId) else {
             return nil
         }
 
-        self.trashURL = trashURL
         self.driveId = driveIdInt
-        folderId = Int(firstMatch[safe: 2] ?? "")
+        self.fileId = fileIdInt
+        self.officeURL = officeURL
     }
 }

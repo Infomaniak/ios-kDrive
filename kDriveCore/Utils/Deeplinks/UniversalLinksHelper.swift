@@ -46,10 +46,7 @@ public enum UniversalLinksHelper {
             displayMode: .file
         )
 
-        /// Matches an office file link
-        static let officeLink = Link(regex: Regex(pattern: #"^/app/office/([0-9]+)/([0-9]+)$"#)!, displayMode: .office)
-
-        static let all = [privateShareLink, directoryLink, filePreview, officeLink]
+        static let all = [privateShareLink, directoryLink, filePreview]
     }
 
     private enum DisplayMode {
@@ -234,7 +231,7 @@ public enum UniversalLinksHelper {
         }
     }
 
-    private static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
+    public static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
         Task {
             do {
                 let file = try await driveFileManager.file(id: id)

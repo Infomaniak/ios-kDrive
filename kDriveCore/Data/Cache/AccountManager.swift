@@ -223,6 +223,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             driveId = deeplink.driveId
         case let deeplink as TrashLink:
             driveId = deeplink.driveId
+        case let deeplink as OfficeLink:
+            driveId = deeplink.driveId
         default:
             return nil
         }

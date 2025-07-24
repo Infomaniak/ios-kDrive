@@ -142,6 +142,22 @@ public struct AppRouter: AppNavigable {
             window.rootViewController = freshRootViewController
 
             await showTrash(driveFileManager: driveFileManager, viewController: freshRootViewController, trashLink: trashLink)
+
+        case .office(let officeLink):
+            guard let driveFileManager = await accountManager
+                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: officeLink) else {
+                Log.sceneDelegate(
+                    "NavigationManager: Unable to navigate to .office without a DriveFileManager",
+                    level: .error
+                )
+                deeplinkService.setLastPublicShare(officeLink)
+                return
+            }
+
+            let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+            window.rootViewController = freshRootViewController
+
+            UniversalLinksHelper.openFile(id: officeLink.fileId, driveFileManager: driveFileManager, office: true)
         }
     }
 
