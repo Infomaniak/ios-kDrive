@@ -54,7 +54,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/ios-bug-tracker", .upToNextMajor(from: "12.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "15.3.0")),
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "19.0.0")),
-        .package(url: "https://github.com/Infomaniak/ios-features", branch: "feat/interapp-login"),
+        .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "2.1.0")),
         .package(url: "https://github.com/Infomaniak/ios-onboarding", .upToNextMajor(from: "1.2.3")),
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
         .package(url: "https://github.com/Infomaniak/ios-device-check", .upToNextMajor(from: "1.1.0")),
