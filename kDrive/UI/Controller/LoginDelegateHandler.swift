@@ -40,8 +40,6 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
             return .prod
         case .preprod:
             return .preprod
-        default:
-            fatalError("Unknown environment")
         }
     }
   
