@@ -118,7 +118,7 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
             .generateAttestationFor(
                 targetUrl: FactoryService.loginConfig.loginURL.appendingPathComponent("token"),
                 bundleId: FactoryService.bundleId,
-                bypassValidation: ApiEnvironment.current == .prod ? false : true
+                bypassValidation: ApiEnvironment.current == .preprod
             )
     }
 
