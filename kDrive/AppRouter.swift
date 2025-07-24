@@ -42,7 +42,6 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
     @LazyInjectService private var deeplinkService: DeeplinkServiceable
     @LazyInjectService private var matomo: MatomoUtils
-    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -109,48 +108,40 @@ public struct AppRouter: AppNavigable {
             showStore(from: viewController, driveFileManager: driveFileManager)
 
         case .sharedWithMe(let sharedWithMeLink):
-            guard let driveFileManager = accountManager
-                .getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: sharedWithMeLink) else {
+            guard let driveFileManager = await accountManager
+                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: sharedWithMeLink) else {
                 Log.sceneDelegate(
                     "NavigationManager: Unable to navigate to .sharedWithMe without a matching DriveFileManager",
                     level: .error
                 )
-                sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+                deeplinkService.setLastPublicShare(sharedWithMeLink)
                 return
             }
 
             let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
             window.rootViewController = freshRootViewController
 
-            guard let navigationController =
-                getControllerForRestoration(
-                    tabBarViewController: freshRootViewController
-                ) as? UINavigationController
-            else {
+            await showSharedWithMe(
+                driveFileManager: driveFileManager,
+                viewController: freshRootViewController,
+                sharedWithMeLink: sharedWithMeLink
+            )
+
+        case .trash(let trashLink):
+            guard let driveFileManager = await accountManager
+                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: trashLink) else {
+                Log.sceneDelegate(
+                    "NavigationManager: Unable to navigate to .trashFiles without a DriveFileManager",
+                    level: .error
+                )
+                deeplinkService.setLastPublicShare(trashLink)
                 return
             }
 
-            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+            let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+            window.rootViewController = freshRootViewController
 
-            if let fileId = sharedWithMeLink.fileId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
-                await showSharedFileIdView(
-                    driveFileManager: sharedWithMeDriveFileManager,
-                    navigationController: navigationController,
-                    driveId: sharedDriveId,
-                    fileId: fileId
-                )
-            } else if let folderId = sharedWithMeLink.folderId, let sharedDriveId = sharedWithMeLink.sharedDriveId {
-                await showSharedFolderIdView(
-                    driveFileManager: sharedWithMeDriveFileManager,
-                    navigationController: navigationController,
-                    driveId: sharedDriveId,
-                    folderId: folderId
-                )
-            } else {
-                showSharedWithMeView(driveFileManager: sharedWithMeDriveFileManager, navigationController: navigationController)
-            }
-
-            sharedWithMeService.clearLastSharedWithMe()
+            await showTrash(driveFileManager: driveFileManager, viewController: freshRootViewController, trashLink: trashLink)
         }
     }
 
@@ -207,7 +198,6 @@ public struct AppRouter: AppNavigable {
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
                 deeplinkService.processDeeplinksPostAuthentication()
-                sharedWithMeService.processSharedWithMePostAuthentication()
             }
         case .onboarding:
             showOnboarding()
@@ -218,7 +208,7 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    @MainActor private func getControllerForRestoration(tabBarViewController: UISplitViewController?) -> UIViewController? {
+    @MainActor public func getControllerForRestoration(tabBarViewController: UISplitViewController?) -> UIViewController? {
         guard let rootViewController = window?.rootViewController else { return nil }
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
         if rootHorizontalSizeClass == .compact {

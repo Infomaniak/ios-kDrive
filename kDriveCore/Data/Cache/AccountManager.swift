@@ -70,7 +70,7 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
-    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink) -> DriveFileManager?
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) async -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -107,7 +107,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var myKSuiteStore: MyKSuiteStore
-    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -211,15 +210,27 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(sharedWithMeLink: SharedWithMeLink)
+    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) async
         -> DriveFileManager? {
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
+        let driveId: Int
+
+        switch deeplink {
+        case let deeplink as PublicShareLink:
+            driveId = deeplink.driveId
+        case let deeplink as SharedWithMeLink:
+            driveId = deeplink.driveId
+        case let deeplink as TrashLink:
+            driveId = deeplink.driveId
+        default:
+            return nil
+        }
 
         for account in accounts {
             if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
                 for: account.userId,
-                driveId: sharedWithMeLink.driveId
+                driveId: driveId
             ) {
                 driveFileManager = matchingDriveFileManager
                 matchingAccount = account
@@ -228,7 +239,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
             DDLogInfo("switching to account \(matchingAccount.userId) to accommodate sharedWithMeLink navigation")
-            sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
+            deeplinkService.setLastPublicShare(deeplink)
             switchAccount(newAccount: matchingAccount)
             appNavigable.prepareRootViewController(
                 currentState: RootViewControllerState.getCurrentState(),
@@ -241,19 +252,17 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.wrongAccountConnected)
         }
 
-        guard let driveFileManager, let matchingAccount else {
+        guard let driveFileManager else {
             return nil
         }
 
-        if sharedWithMeLink.driveId != currentDriveId {
-            DDLogInfo("switching to drive \(sharedWithMeLink.driveId) to accommodate sharedWithMeLink navigation")
-            Task {
-                try await driveFileManager.initRoot()
-                @InjectService var appRestorationService: AppRestorationServiceable
-                await appRestorationService.reloadAppUI(for: sharedWithMeLink.driveId, userId: matchingAccount.userId)
-                sharedWithMeService.setLastSharedWithMe(sharedWithMeLink)
-                sharedWithMeService.processSharedWithMePostAuthentication()
-            }
+        if driveId != currentDriveId {
+            DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
+
+            try? await driveFileManager.switchDriveAndReloadUI()
+            deeplinkService.setLastPublicShare(deeplink)
+            deeplinkService.processDeeplinksPostAuthentication()
+
             return nil
         }
 
@@ -634,7 +643,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public func logoutCurrentAccountAndSwitchToNextIfPossible() {
         Task { @MainActor in
             deeplinkService.clearLastPublicShare()
-            sharedWithMeService.clearLastSharedWithMe()
 
             if let currentAccount {
                 removeTokenAndAccount(account: currentAccount)
