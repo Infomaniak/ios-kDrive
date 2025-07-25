@@ -31,7 +31,6 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService var sharedWithMeService: SharedWithMeServiceable
     @LazyInjectService var tokenService: InfomaniakNetworkLoginable
 
     private var deviceCheckEnvironment: InfomaniakDeviceCheck.Environment {
