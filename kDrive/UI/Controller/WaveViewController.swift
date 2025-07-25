@@ -17,14 +17,18 @@
  */
 
 import CocoaLumberjackSwift
+import DesignSystem
 import InfomaniakCore
 import InfomaniakCoreCommonUI
+import InfomaniakCoreSwiftUI
 import InfomaniakDI
 import InfomaniakLogin
 import InfomaniakOnboarding
+import InterAppLogin
 import kDriveCore
 import kDriveResources
 import Lottie
+import SwiftUI
 import UIKit
 
 class WaveViewController: UIViewController {
@@ -81,19 +85,19 @@ class WaveViewController: UIViewController {
         ])
     }
 
-    private func loginDelegateHandler(signInButton: IKLargeButton, registerButton: IKLargeButton) -> LoginDelegateHandler {
+    private func loginDelegateHandler(signInButton: IKLargeButton?, registerButton: IKLargeButton?) -> LoginDelegateHandler {
         let loginDelegateHandler = LoginDelegateHandler()
         loginDelegateHandler.didStartLoginCallback = {
-            signInButton.setLoading(true)
-            registerButton.isEnabled = false
+            signInButton?.setLoading(true)
+            registerButton?.isEnabled = false
         }
         loginDelegateHandler.didCompleteLoginCallback = {
-            signInButton.setLoading(false)
-            registerButton.isEnabled = true
+            signInButton?.setLoading(false)
+            registerButton?.isEnabled = true
         }
         loginDelegateHandler.didFailLoginWithErrorCallback = { _ in
-            signInButton.setLoading(false)
-            registerButton.isEnabled = true
+            signInButton?.setLoading(false)
+            registerButton?.isEnabled = true
         }
         return loginDelegateHandler
     }
@@ -178,6 +182,19 @@ class WaveViewController: UIViewController {
     }
 }
 
+extension IKButtonTheme {
+    static let drive = IKButtonTheme(
+        primary: KDriveResourcesAsset.infomaniakColor.swiftUIColor,
+        secondary: .white,
+        tertiary: KDriveResourcesAsset.backgroundCardViewColor.swiftUIColor,
+        disabledPrimary: Color.green,
+        disabledSecondary: Color.green,
+        error: KDriveResourcesAsset.binColor.swiftUIColor,
+        smallFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)),
+        mediumFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium))
+    )
+}
+
 extension WaveViewController: OnboardingViewControllerDelegate {
     func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
         guard slides.count > 1 else { return false }
@@ -194,10 +211,31 @@ extension WaveViewController: OnboardingViewControllerDelegate {
         if index != slideCount - 1 {
             createNextButton(in: containerView)
         } else {
-            createSignInRegisterButton(in: containerView)
+            return nil
         }
 
         return containerView
+    }
+
+    func bottomViewForIndex(_ index: Int) -> (any View)? {
+        if index != slideCount - 1 {
+            return nil
+        } else {
+            let loginDelegateHandler = LoginDelegateHandler()
+            return ContinueWithAccountView(isLoading: false) {
+                Task { @MainActor in
+                    // We have to wait for closing animation before opening the login WebView modally
+                    try? await Task.sleep(nanoseconds: 500_000_000)
+                    self.appNavigable.showLogin(delegate: loginDelegateHandler)
+                }
+            } onLoginWithAccountsPressed: { accounts in
+                loginDelegateHandler.login(with: accounts)
+            } onCreateAccountPressed: {
+                self.appNavigable.showRegister(delegate: loginDelegateHandler)
+            }
+            .padding(IKPadding.large)
+            .ikButtonTheme(.drive)
+        }
     }
 
     func currentIndexChanged(newIndex: Int) {}

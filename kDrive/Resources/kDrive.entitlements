@@ -18,6 +18,7 @@
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)com.infomaniak.drive</string>
+		<string>$(AppIdentifierPrefix)com.infomaniak.mail</string>
 	</array>
 </dict>
 </plist>

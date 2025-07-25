@@ -19,16 +19,28 @@
 import CocoaLumberjackSwift
 import InfomaniakCore
 import InfomaniakCoreCommonUI
+import InfomaniakDeviceCheck
 import InfomaniakDI
 import InfomaniakLogin
+import InterAppLogin
 import kDriveCore
 import kDriveResources
 
-public final class LoginDelegateHandler: InfomaniakLoginDelegate {
+public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate {
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var tokenService: InfomaniakNetworkLoginable
+
+    private var deviceCheckEnvironment: InfomaniakDeviceCheck.Environment {
+        switch ApiEnvironment.current {
+        case .prod:
+            return .prod
+        case .preprod:
+            return .preprod
+        }
+    }
 
     var didStartLoginCallback: (() -> Void)?
     var didCompleteLoginCallback: (() -> Void)?
@@ -39,8 +51,6 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
     }
 
     @MainActor public func didCompleteLoginWith(code: String, verifier: String) {
-        guard let topMostViewController = router.topMostViewController else { return }
-
         matomo.track(eventWithCategory: .account, name: "loggedIn")
         let previousAccount = accountManager.currentAccount
 
@@ -56,11 +66,57 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
                 self.matomo.connectUser(userId: accountManager.currentUserId.description)
                 goToMainScreen(with: currentDriveFileManager)
             } catch {
-                didCompleteLoginWithError(error, previousAccount: previousAccount, topMostViewController: topMostViewController)
+                didCompleteLoginWithError(error, previousAccount: previousAccount)
             }
 
-            didCompleteLoginCallback?()
+            await performDidCompleteLoginCallback()
         }
+    }
+
+    @MainActor public func login(with accounts: [ConnectedAccount]) {
+        matomo.track(eventWithCategory: .account, name: "loggedIn")
+
+        didStartLoginCallback?()
+
+        Task {
+            await deviceAttestationAndLogin(with: accounts)
+        }
+    }
+
+    private func deviceAttestationAndLogin(with accounts: [ConnectedAccount]) async {
+        let previousAccount = accountManager.currentAccount
+
+        do {
+            for account in accounts {
+                let attestationToken = try await generateAttestationTokenForDevice()
+
+                let derivatedToken = try await tokenService.derivateApiToken(
+                    using: account.token,
+                    attestationToken: attestationToken
+                )
+
+                _ = try await accountManager.createAndSetCurrentAccount(token: derivatedToken)
+                guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+                    throw DriveError.NoDriveError.noDriveFileManager
+                }
+
+                matomo.connectUser(userId: accountManager.currentUserId.description)
+                await goToMainScreen(with: currentDriveFileManager)
+                await performDidCompleteLoginCallback()
+            }
+        } catch {
+            await didCompleteLoginWithError(error, previousAccount: previousAccount)
+            await performDidCompleteLoginCallback()
+        }
+    }
+
+    private func generateAttestationTokenForDevice() async throws -> String {
+        return try await InfomaniakDeviceCheck(environment: deviceCheckEnvironment)
+            .generateAttestationFor(
+                targetUrl: FactoryService.loginConfig.loginURL.appendingPathComponent("token"),
+                bundleId: FactoryService.bundleId,
+                bypassValidation: ApiEnvironment.current == .preprod
+            )
     }
 
     @MainActor private func goToMainScreen(with driveFileManager: DriveFileManager) {
@@ -70,10 +126,10 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
         deeplinkService.processDeeplinksPostAuthentication()
     }
 
-    private func didCompleteLoginWithError(_ error: Error,
-                                           previousAccount: Account?,
-                                           topMostViewController: UIViewController) {
+    @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: Account?) {
         DDLogError("Error on didCompleteLoginWith \(error)")
+
+        guard let topMostViewController = router.topMostViewController else { return }
 
         if let previousAccount {
             accountManager.switchAccount(newAccount: previousAccount)
@@ -115,7 +171,11 @@ public final class LoginDelegateHandler: InfomaniakLoginDelegate {
         }
     }
 
-    public func didFailLoginWith(error: Error) {
+    @MainActor public func didFailLoginWith(error: Error) {
         didFailLoginWithErrorCallback?(error)
+    }
+
+    @MainActor func performDidCompleteLoginCallback() async {
+        didCompleteLoginCallback?()
     }
 }
