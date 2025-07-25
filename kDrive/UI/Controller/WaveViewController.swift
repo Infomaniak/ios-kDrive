@@ -221,7 +221,7 @@ extension WaveViewController: OnboardingViewControllerDelegate {
         if index != slideCount - 1 {
             return nil
         } else {
-            let loginDelegateHandler = loginDelegateHandler(signInButton: nil, registerButton: nil)
+            let loginDelegateHandler = LoginDelegateHandler()
             return ContinueWithAccountView(isLoading: false) {
                 Task { @MainActor in
                     // We have to wait for closing animation before opening the login WebView modally
