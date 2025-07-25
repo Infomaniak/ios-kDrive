@@ -52,7 +52,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-algorithms", .upToNextMajor(from: "1.2.0")),
         .package(url: "https://github.com/Alamofire/Alamofire", .upToNextMajor(from: "5.2.2")),
         .package(url: "https://github.com/Infomaniak/ios-bug-tracker", .upToNextMajor(from: "12.0.0")),
-        .package(url: "https://github.com/Infomaniak/ios-core", branch: "feat/interapp-login/devicemanager"),
+        .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "15.4.3")),
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "19.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "2.1.0")),
         .package(url: "https://github.com/Infomaniak/ios-onboarding", .upToNextMajor(from: "1.2.3")),
