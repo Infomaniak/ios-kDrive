@@ -17,6 +17,7 @@
  */
 
 import BackgroundTasks
+import DeviceAssociation
 import Foundation
 import InfomaniakBugTracker
 import InfomaniakCore
@@ -187,6 +188,9 @@ public enum FactoryService {
                     fatalError("unable to initialise AppGroupPathProvider securely")
                 }
                 return provider
+            },
+            Factory(type: DeviceManagerable.self) { _, _ in
+                DeviceManager(appGroupIdentifier: appGroupName)
             },
             Factory(type: PhotoLibrarySavable.self) { _, _ in
                 PhotoLibrarySaver()
