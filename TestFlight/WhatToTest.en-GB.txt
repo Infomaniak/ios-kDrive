@@ -1,2 +1,3 @@
+- Login inter app (staff only)
 - Better display of recent files
 - Clearer notifications about failed uploads

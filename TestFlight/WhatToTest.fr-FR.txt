@@ -1,2 +1,3 @@
+- Login inter app (staff only)
 - Meilleur affichage des dossiers récents
 - Notifications plus claires sur les téléversements en échec
