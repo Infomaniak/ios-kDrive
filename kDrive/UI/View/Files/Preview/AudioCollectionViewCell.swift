@@ -96,9 +96,9 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         setUpPlayButtons()
 
         Task { @MainActor in
+            setupObservationFor(frozenFile: frozenFile)
             await singleTrackPlayer.setup(with: frozenFile)
             setControls(enabled: true)
-            setupObservationFor(frozenFile: frozenFile)
         }
     }
 
