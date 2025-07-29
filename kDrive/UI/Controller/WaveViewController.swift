@@ -222,7 +222,9 @@ extension WaveViewController: OnboardingViewControllerDelegate {
             return nil
         } else {
             let loginDelegateHandler = LoginDelegateHandler()
-            return ContinueWithAccountView(isLoading: false) {
+            @InjectService var accountManager: AccountManageable
+            let accountIds = accountManager.accountIds
+            return ContinueWithAccountView(isLoading: false, excludingUserIds: accountIds) {
                 Task { @MainActor in
                     // We have to wait for closing animation before opening the login WebView modally
                     try? await Task.sleep(nanoseconds: 500_000_000)

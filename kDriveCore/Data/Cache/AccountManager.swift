@@ -47,6 +47,7 @@ public extension InfomaniakLogin {
 public protocol AccountManageable: AnyObject {
     var currentAccount: Account? { get }
     var accounts: SendableArray<Account> { get }
+    var accountIds: [Int] { get }
     var currentUserId: Int { get }
     var currentDriveId: Int { get }
     var drives: [Drive] { get }
@@ -132,6 +133,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         } else {
             return nil
         }
+    }
+
+    public var accountIds: [Int] {
+        return Array(accounts.map(\.userId))
     }
 
     public let accounts = SendableArray<Account>()
