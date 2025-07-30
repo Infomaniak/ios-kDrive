@@ -7,9 +7,6 @@
  * Exported at: Thu, 03 Jul 2025 09:57:17 +0200
  */
 
-/* loco:610a8791fa12ab20713c09e4 */
-"NotificationsDisabledDescription" = "Anwendungsbenachrichtigungen sind deaktiviert, Sie können diesen Parameter unter Einstellungen ändern";
-
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "Anwendung kDrive";
 
@@ -54,9 +51,6 @@
 
 /* loco:6049df4d5c2c3a04bc39790d */
 "allActivated" = "Aktiviert";
-
-/* loco:6049df4d5c2c3a04bc39790e */
-"allActivityNotFoundError" = "Diese Datei wird von keiner installierten Anwendung unterstützt";
 
 /* loco:6049df4d5c2c3a04bc39790f */
 "allAddExpirationDateTitle" = "Ablaufdatum hinzufügen";
@@ -733,15 +727,6 @@
 /* loco:6049df4d5c2c3a04bc397992 */
 "dropBoxTitle" = "Briefkasten";
 
-/* loco:6708c590f8f4d36ec100ef42 */
-"dropboxPublicShareOutdatedDescription" = "Der Link wurde deaktiviert oder ist abgelaufen.\nUm Ihre Dateien einzureichen, senden Sie eine Nachricht an den Nutzer, der die Dropbox für Sie freigegeben hat, damit er sie wieder aktiviert.";
-
-/* loco:6708c5155b4785a798019472 */
-"dropboxPublicShareOutdatedTitle" = "Diese Dropbox ist nicht mehr verfügbar";
-
-/* loco:6707c8d16e460cb6a304b692 */
-"dropboxPublicShareTitleUploadButton" = "%@ lädt Sie ein, Ihre Dateien auf sein kDrive zu importieren";
-
 /* loco:618b870b92fff1241d67e713 */
 "dropboxSharedLinkDescription" = "Sie können keinen Freigabelink für einen Briefkasten erstellen.";
 
@@ -813,9 +798,6 @@
 
 /* loco:67f4dd4c65f3979e8004d539 */
 "errorLimitExceeded" = "Limit erreicht";
-
-/* loco:6298868323a9de35a129f1f2 */
-"errorLoadingInfomaniakManager" = "Der Infomaniak-Manager kann nicht geladen werden";
 
 /* loco:6049df4d5c2c3a04bc39799b */
 "errorLoadingOfficeEditor" = "Der Dokumenteneditor kann nicht geladen werden";
@@ -1252,9 +1234,6 @@
 /* loco:6049df4d5c2c3a04bc3979e6 */
 "fileShareDetailsFolderTitle" = "Freigabe und Rechte des Ordners %@";
 
-/* loco:6049df4d5c2c3a04bc3979e7 */
-"fileShareDetailsShareLinkTitle" = "Freigabelinks";
-
 /* loco:6049df4d5c2c3a04bc3979e8 */
 "fileShareDetailsUsersAccesTitle" = "Benutzer mit Zugang";
 
@@ -1287,9 +1266,6 @@
 
 /* loco:62e01023bdd522033953b8c5 */
 "galleryTitle" = "Galerie";
-
-/* loco:60c75903284c670edb7a7b72 */
-"goToInfomaniakWebsite" = "Um ein Konto zu erstellen, gehen Sie auf die offizielle Infomaniak Webseite";
 
 /* loco:6281fb1abfdfb513f5356323 */
 "heicRecommandation" = "Wir empfehlen das Speichern im JPEG-Format, da viele Dienste im HEIC-Fotos nicht darstellen können.";
@@ -1327,10 +1303,10 @@
 /* loco:6049df4d5c2c3a04bc3979f9 */
 "homeTitle" = "Start";
 
-/* loco:665f25aff2cdb8afe902d122 */
+/* loco:6889c36b7cef77ada70ae2d3 */
 "imageCache" = "Bild-Cache";
 
-/* loco:614c87900f32e257ec7c34b5 */
+/* loco:6889c331e5ba3eb6640d7e22 */
 "importDirectory" = "Einfuhren";
 
 /* loco:6049df4d5c2c3a04bc3979fb */
@@ -1338,12 +1314,6 @@
 
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Verfallszeit";
-
-/* loco:604a24e398f36a2fa97de36a */
-"ios12LimitationPhotoSyncDescription" = "Die erste Sicherung Ihrer Fotos kann nur dann ordnungsgemäss erfolgen, wenn die Anwendung im Vordergrund ist. Die Sicherung künftiger Fotos erfolgt im Hintergrund.";
-
-/* loco:604a2468f32e550ab01a8e5d */
-"ios12LimitationPhotoSyncTitle" = "Eingeschränkte Funktionalität";
 
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Letzte Änderungen";
@@ -1549,6 +1519,9 @@
 /* loco:6049dfb2105eca5bbd0801b4 */
 "notificationUploadServiceChannelName" = "Dienst für den Dateiimport";
 
+/* loco:6889c8fad38cd378d8019882 */
+"notificationsDisabledDescription" = "Anwendungsbenachrichtigungen sind deaktiviert, Sie können diesen Parameter unter Einstellungen ändern";
+
 /* loco:66f658cbb0e522d4f50cc2f2 */
 "obtainkDriveAdAlreadyGotAccount" = "Ich habe bereits ein Konto";
 
@@ -1642,14 +1615,8 @@
 /* loco:6049df4d5c2c3a04bc397a28 */
 "previewVideoSourceError" = "Videodatei wird vom Videoplayer nicht unterstützt";
 
-/* loco:6707af761017cac6e10d85b4 */
-"publicShareBadLinkError" = "Keine diesem Link zugeordneten Freigaben";
-
 /* loco:66ffbbcd294f6022e60948f3 */
 "publicShareImportationInProgress" = "Laufender Download im ausgewählten Ordner";
-
-/* loco:6707ca3c9b41ff114e052962 */
-"publicShareLinkValidityDescription" = "Dieser Link ist gültig bis zum %@";
 
 /* loco:66e0295f01da3c1ab90c2d72 */
 "publicShareOutdatedLinkDescription" = "Der Link wurde deaktiviert oder ist abgelaufen.\nUm auf die Dateien zuzugreifen, senden Sie eine Nachricht an den Nutzer, der den Link für Sie freigegeben hat, damit er ihn wieder aktiviert.";
@@ -1722,12 +1689,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a33 */
 "searchViewHint" = "Datei suchen…";
-
-/* loco:6049df4d5c2c3a04bc397a34 */
-"secureLinkShareDescription" = "Sichern Sie Ihre Freigaben mit einem Passwort und legen Sie für noch mehr Sicherheit ein Gültigkeitsdatum für Ihre Links fest.";
-
-/* loco:6049df4d5c2c3a04bc397a35 */
-"secureLinkShareTitle" = "Sichere Freigabelinks";
 
 /* loco:610a8f8e03e07e47d539af82 */
 "securityTitle" = "Sicherheit";
