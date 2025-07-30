@@ -34,6 +34,7 @@ import UIKit
 class WaveViewController: UIViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
+    let loginViewProvider: OnboardingViewProviderController
     let onboardingViewController: OnboardingViewController
     let slideCount: Int
 
@@ -58,6 +59,8 @@ class WaveViewController: UIViewController {
         )
         onboardingViewController = OnboardingViewController(configuration: configuration)
         slideCount = slides.count
+        loginViewProvider = OnboardingViewProviderController(slideCount: slides.count)
+
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -71,7 +74,7 @@ class WaveViewController: UIViewController {
 
         view.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
-        onboardingViewController.delegate = self
+        onboardingViewController.delegate = loginViewProvider.coordinator
         addChild(onboardingViewController)
         onboardingViewController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(onboardingViewController.view)
@@ -195,29 +198,73 @@ extension IKButtonTheme {
     )
 }
 
-extension WaveViewController: OnboardingViewControllerDelegate {
-    func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
-        guard slides.count > 1 else { return false }
+class OnboardingViewProviderController: UIViewController {
+    let swiftUIView: OnboardingViewProvider
 
+    init(slideCount: Int) {
+        swiftUIView = OnboardingViewProvider(slideCount: slideCount)
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    public var coordinator: OnboardingViewProvider.OnboardingDelegatePassthrew {
+        swiftUIView.coordinator!
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        let hostingController = UIHostingController(rootView: swiftUIView)
+
+        addChild(hostingController)
+        view.addSubview(hostingController.view)
+
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+
+        hostingController.didMove(toParent: self)
+    }
+}
+
+struct OnboardingViewProvider: View {
+    @InjectService private var appNavigable: AppNavigable
+
+    @State var isLoading: Bool = false
+    let slideCount: Int
+
+    public var coordinator: OnboardingDelegatePassthrew?
+
+    init(slideCount: Int) {
+        self.slideCount = slideCount
+        coordinator = OnboardingDelegatePassthrew(onCurrentIndexChanged: onCurrentIndexChanged,
+                                                  onShouldAnimateBottomViewForIndex: onShouldAnimateBottomViewForIndex,
+                                                  onWillDisplaySlideViewCell: onWillDisplaySlideViewCell,
+                                                  onBottomViewForIndex: onBottomViewForIndex)
+    }
+
+    var body: some View {
+        EmptyView()
+    }
+
+    func onCurrentIndexChanged(index: Int) {}
+
+    func onShouldAnimateBottomViewForIndex(index: Int) -> Bool {
+        guard slideCount > 1 else { return false }
         return index == slideCount - 1
     }
 
-    func willDisplaySlideViewCell(_ slideViewCell: InfomaniakOnboarding.SlideCollectionViewCell, at index: Int) {}
+    func onWillDisplaySlideViewCell(cell: InfomaniakOnboarding.SlideCollectionViewCell, index: Int) {}
 
-    func bottomUIViewForIndex(_ index: Int) -> UIView? {
-        let containerView = UIView()
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-
-        if index != slideCount - 1 {
-            createNextButton(in: containerView)
-        } else {
-            return nil
-        }
-
-        return containerView
-    }
-
-    func bottomViewForIndex(_ index: Int) -> (any View)? {
+    func onBottomViewForIndex(index: Int) -> (any View)? {
         if index != slideCount - 1 {
             return nil
         } else {
@@ -226,7 +273,7 @@ extension WaveViewController: OnboardingViewControllerDelegate {
                 Task { @MainActor in
                     // We have to wait for closing animation before opening the login WebView modally
                     try? await Task.sleep(nanoseconds: 500_000_000)
-                    self.appNavigable.showLogin(delegate: loginDelegateHandler)
+                    appNavigable.showLogin(delegate: loginDelegateHandler)
                 }
             } onLoginWithAccountsPressed: { accounts in
                 loginDelegateHandler.login(with: accounts)
@@ -238,7 +285,40 @@ extension WaveViewController: OnboardingViewControllerDelegate {
         }
     }
 
-    func currentIndexChanged(newIndex: Int) {}
+    class OnboardingDelegatePassthrew: OnboardingViewControllerDelegate {
+        let onCurrentIndexChanged: (Int) -> Void
+        let onShouldAnimateBottomViewForIndex: (Int) -> Bool
+        let onWillDisplaySlideViewCell: (InfomaniakOnboarding.SlideCollectionViewCell, Int) -> Void
+        let onBottomViewForIndex: (Int) -> (any View)?
+
+        init(
+            onCurrentIndexChanged: @escaping (Int) -> Void = { _ in },
+            onShouldAnimateBottomViewForIndex: @escaping (Int) -> Bool = { _ in true },
+            onWillDisplaySlideViewCell: @escaping (InfomaniakOnboarding.SlideCollectionViewCell, Int) -> Void = { _, _ in },
+            onBottomViewForIndex: @escaping (Int) -> (any View)? = { _ in nil }
+        ) {
+            self.onCurrentIndexChanged = onCurrentIndexChanged
+            self.onShouldAnimateBottomViewForIndex = onShouldAnimateBottomViewForIndex
+            self.onWillDisplaySlideViewCell = onWillDisplaySlideViewCell
+            self.onBottomViewForIndex = onBottomViewForIndex
+        }
+
+        func currentIndexChanged(newIndex: Int) {
+            onCurrentIndexChanged(newIndex)
+        }
+
+        func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
+            return onShouldAnimateBottomViewForIndex(index)
+        }
+
+        func willDisplaySlideViewCell(_ slideViewCell: InfomaniakOnboarding.SlideCollectionViewCell, at index: Int) {
+            onWillDisplaySlideViewCell(slideViewCell, index)
+        }
+
+        func bottomViewForIndex(_ index: Int) -> (any View)? {
+            return onBottomViewForIndex(index)
+        }
+    }
 }
 
 extension Slide {
