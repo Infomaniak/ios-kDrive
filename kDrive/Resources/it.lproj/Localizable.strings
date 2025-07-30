@@ -7,9 +7,6 @@
  * Exported at: Thu, 03 Jul 2025 09:57:17 +0200
  */
 
-/* loco:610a8791fa12ab20713c09e4 */
-"NotificationsDisabledDescription" = "Le notifiche delle applicazioni sono disabilitate. Puoi modificare questo parametro nelle impostazioni";
-
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "Applicazione kDrive";
 
@@ -54,9 +51,6 @@
 
 /* loco:6049df4d5c2c3a04bc39790d */
 "allActivated" = "Attivato";
-
-/* loco:6049df4d5c2c3a04bc39790e */
-"allActivityNotFoundError" = "Il file non è supportato da nessuna delle applicazioni installate";
 
 /* loco:6049df4d5c2c3a04bc39790f */
 "allAddExpirationDateTitle" = "Aggiungi una data di scadenza";
@@ -733,15 +727,6 @@
 /* loco:6049df4d5c2c3a04bc397992 */
 "dropBoxTitle" = "Deposito file";
 
-/* loco:6708c590f8f4d36ec100ef42 */
-"dropboxPublicShareOutdatedDescription" = "Il link è stato disattivato o è scaduto.\nPer caricare i vostri file, inviate un messaggio all’utente che ha condiviso il Dropbox con te in modo che possa riattivarlo.";
-
-/* loco:6708c5155b4785a798019472 */
-"dropboxPublicShareOutdatedTitle" = "Questo dropbox non è più disponibile";
-
-/* loco:6707c8d16e460cb6a304b692 */
-"dropboxPublicShareTitleUploadButton" = "%@ ti invita a importare i tuoi file sul loro kDrive";
-
 /* loco:618b870b92fff1241d67e713 */
 "dropboxSharedLinkDescription" = "Non è possibile creare un link di condivisione su un deposito file.";
 
@@ -813,9 +798,6 @@
 
 /* loco:67f4dd4c65f3979e8004d539 */
 "errorLimitExceeded" = "Limite raggiunto";
-
-/* loco:6298868323a9de35a129f1f2 */
-"errorLoadingInfomaniakManager" = "Impossibile caricare il Manager di Infomaniak";
 
 /* loco:6049df4d5c2c3a04bc39799b */
 "errorLoadingOfficeEditor" = "Impossibile caricare l’editor dei documenti";
@@ -1252,9 +1234,6 @@
 /* loco:6049df4d5c2c3a04bc3979e6 */
 "fileShareDetailsFolderTitle" = "Condivisione e diritti della cartella %@";
 
-/* loco:6049df4d5c2c3a04bc3979e7 */
-"fileShareDetailsShareLinkTitle" = "Link di condivisione";
-
 /* loco:6049df4d5c2c3a04bc3979e8 */
 "fileShareDetailsUsersAccesTitle" = "Utenti con accesso";
 
@@ -1287,9 +1266,6 @@
 
 /* loco:62e01023bdd522033953b8c5 */
 "galleryTitle" = "Galleria";
-
-/* loco:60c75903284c670edb7a7b72 */
-"goToInfomaniakWebsite" = "Per creare un account, vai al sito ufficiale di Infomaniak";
 
 /* loco:6281fb1abfdfb513f5356323 */
 "heicRecommandation" = "Si consiglia di salvare in formato JPEG, perché molti servizi non possono visualizzare le foto in HEIC.";
@@ -1327,10 +1303,10 @@
 /* loco:6049df4d5c2c3a04bc3979f9 */
 "homeTitle" = "Home";
 
-/* loco:665f25aff2cdb8afe902d122 */
+/* loco:6889c36b7cef77ada70ae2d3 */
 "imageCache" = "Cache immagini";
 
-/* loco:614c87900f32e257ec7c34b5 */
+/* loco:6889c331e5ba3eb6640d7e22 */
 "importDirectory" = "Importazioni";
 
 /* loco:6049df4d5c2c3a04bc3979fb */
@@ -1338,12 +1314,6 @@
 
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Tempo di scadenza";
-
-/* loco:604a24e398f36a2fa97de36a */
-"ios12LimitationPhotoSyncDescription" = "Il backup iniziale delle tue foto non può essere effettuato correttamente quando l’applicazione è in primo piano. Il backup delle foto future verrà eseguito in background.";
-
-/* loco:604a2468f32e550ab01a8e5d */
-"ios12LimitationPhotoSyncTitle" = "Funzionalità limitata";
 
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Ultime modifiche";
@@ -1549,6 +1519,9 @@
 /* loco:6049dfb2105eca5bbd0801b4 */
 "notificationUploadServiceChannelName" = "Servizi per l’importazione di file";
 
+/* loco:6889c8fad38cd378d8019882 */
+"notificationsDisabledDescription" = "Le notifiche delle applicazioni sono disabilitate. Puoi modificare questo parametro nelle impostazioni";
+
 /* loco:66f658cbb0e522d4f50cc2f2 */
 "obtainkDriveAdAlreadyGotAccount" = "Ho già un account";
 
@@ -1642,14 +1615,8 @@
 /* loco:6049df4d5c2c3a04bc397a28 */
 "previewVideoSourceError" = "File video non supportato dal lettore";
 
-/* loco:6707af761017cac6e10d85b4 */
-"publicShareBadLinkError" = "Nessuna condivisione associata a questo link";
-
 /* loco:66ffbbcd294f6022e60948f3 */
 "publicShareImportationInProgress" = "Download in corso nella cartella selezionata";
-
-/* loco:6707ca3c9b41ff114e052962 */
-"publicShareLinkValidityDescription" = "Questo link è valido fino al %@";
 
 /* loco:66e0295f01da3c1ab90c2d72 */
 "publicShareOutdatedLinkDescription" = "Il link è stato disattivato o è scaduto.\nPer accedere ai file, invia un messaggio all’utente che ha condiviso il link in modo che possa riattivarlo.";
@@ -1722,12 +1689,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a33 */
 "searchViewHint" = "Cerca un file…";
-
-/* loco:6049df4d5c2c3a04bc397a34 */
-"secureLinkShareDescription" = "Proteggi le tue condivisioni con una password e fissa una data di validità dei tuoi link a garanzia di una maggiore sicurezza.";
-
-/* loco:6049df4d5c2c3a04bc397a35 */
-"secureLinkShareTitle" = "Link di condivisione protetti";
 
 /* loco:610a8f8e03e07e47d539af82 */
 "securityTitle" = "Sicurezza";
