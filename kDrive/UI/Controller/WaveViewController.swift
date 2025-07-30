@@ -245,9 +245,7 @@ struct OnboardingViewProvider: View {
 
     init(slideCount: Int) {
         self.slideCount = slideCount
-        coordinator = OnboardingDelegatePassthrew(onCurrentIndexChanged: onCurrentIndexChanged,
-                                                  onShouldAnimateBottomViewForIndex: onShouldAnimateBottomViewForIndex,
-                                                  onWillDisplaySlideViewCell: onWillDisplaySlideViewCell,
+        coordinator = OnboardingDelegatePassthrew(onShouldAnimateBottomViewForIndex: onShouldAnimateBottomViewForIndex,
                                                   onBottomViewForIndex: onBottomViewForIndex)
     }
 
@@ -255,14 +253,10 @@ struct OnboardingViewProvider: View {
         EmptyView()
     }
 
-    func onCurrentIndexChanged(index: Int) {}
-
     func onShouldAnimateBottomViewForIndex(index: Int) -> Bool {
         guard slideCount > 1 else { return false }
         return index == slideCount - 1
     }
-
-    func onWillDisplaySlideViewCell(cell: InfomaniakOnboarding.SlideCollectionViewCell, index: Int) {}
 
     func onBottomViewForIndex(index: Int) -> (any View)? {
         if index != slideCount - 1 {
@@ -286,34 +280,24 @@ struct OnboardingViewProvider: View {
     }
 
     class OnboardingDelegatePassthrew: OnboardingViewControllerDelegate {
-        let onCurrentIndexChanged: (Int) -> Void
         let onShouldAnimateBottomViewForIndex: (Int) -> Bool
-        let onWillDisplaySlideViewCell: (InfomaniakOnboarding.SlideCollectionViewCell, Int) -> Void
         let onBottomViewForIndex: (Int) -> (any View)?
 
         init(
-            onCurrentIndexChanged: @escaping (Int) -> Void = { _ in },
             onShouldAnimateBottomViewForIndex: @escaping (Int) -> Bool = { _ in true },
-            onWillDisplaySlideViewCell: @escaping (InfomaniakOnboarding.SlideCollectionViewCell, Int) -> Void = { _, _ in },
             onBottomViewForIndex: @escaping (Int) -> (any View)? = { _ in nil }
         ) {
-            self.onCurrentIndexChanged = onCurrentIndexChanged
             self.onShouldAnimateBottomViewForIndex = onShouldAnimateBottomViewForIndex
-            self.onWillDisplaySlideViewCell = onWillDisplaySlideViewCell
             self.onBottomViewForIndex = onBottomViewForIndex
         }
 
-        func currentIndexChanged(newIndex: Int) {
-            onCurrentIndexChanged(newIndex)
-        }
+        func currentIndexChanged(newIndex: Int) { }
 
         func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
             return onShouldAnimateBottomViewForIndex(index)
         }
 
-        func willDisplaySlideViewCell(_ slideViewCell: InfomaniakOnboarding.SlideCollectionViewCell, at index: Int) {
-            onWillDisplaySlideViewCell(slideViewCell, index)
-        }
+        func willDisplaySlideViewCell(_ slideViewCell: InfomaniakOnboarding.SlideCollectionViewCell, at index: Int) { }
 
         func bottomViewForIndex(_ index: Int) -> (any View)? {
             return onBottomViewForIndex(index)
