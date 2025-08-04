@@ -214,18 +214,6 @@ public extension Endpoint {
         return .fileInfo(file).appending(path: "/copy/\(destination.id)", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
-    static func copyToDrive(destinationDrive: AbstractDrive,
-                            destinationFolder: AbstractDrive,
-                            sourceDrive: AbstractDrive,
-                            sourceFile: AbstractDrive) -> Endpoint {
-        let parameters = [URLQueryItem(name: "source_drive_id", value: "\(sourceDrive.id)"),
-                          URLQueryItem(name: "source_file_id", value: "\(sourceFile.id)")]
-        return .driveInfo(drive: destinationDrive).appending(
-            path: "/files/\(destinationFolder.id)/copy-to-drive",
-            queryItems: parameters
-        )
-    }
-
     static func rename(file: AbstractFile) -> Endpoint {
         return .fileInfoV2(file).appending(path: "/rename", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
