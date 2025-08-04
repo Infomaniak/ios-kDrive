@@ -186,7 +186,7 @@ public final class FileActionsHelper {
             .instantiateInNavigationController(driveFileManager: driveFileManager,
                                                startDirectory: currentDirectory,
                                                disabledDirectoriesIdsSelection: disabledDirectoriesIds,
-                                               hideSharedWithMe: true) { destinationDirectory in
+                                               hideSharedWithMeRootFolder: true) { destinationDirectory in
                 Task {
                     await moveToDestination(destinationDirectory,
                                             from: currentDirectory,

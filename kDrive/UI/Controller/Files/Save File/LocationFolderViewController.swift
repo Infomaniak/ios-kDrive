@@ -35,7 +35,7 @@ class LocationFolderViewController: SidebarViewController {
         buffer.append(RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                    image: KDriveResourcesAsset.favorite.image,
                                    destination: .file(DriveFileManager.favoriteRootFile)))
-        if !hideSharedWithMe {
+        if !hideSharedWithMeRootFolder {
             buffer.append(RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
                                        image: KDriveResourcesAsset.folderSelect2.image,
                                        destination: .file(DriveFileManager.sharedWithMeRootFile)))
@@ -53,7 +53,7 @@ class LocationFolderViewController: SidebarViewController {
     private var selectedIndexPath: IndexPath?
     private let selectHandler: ((File) -> Void)?
     private let disabledDirectoriesSelection: [Int]
-    private let hideSharedWithMe: Bool
+    private let hideSharedWithMeRootFolder: Bool
     private let fileToMove: Int?
     private weak var locationDelegate: SelectFolderDelegate?
     private let viewModel: FileListViewModel
@@ -116,7 +116,7 @@ class LocationFolderViewController: SidebarViewController {
         selectMode: Bool,
         isCompactView: Bool,
         disabledDirectoriesSelection: [Int],
-        hideSharedWithMe: Bool,
+        hideSharedWithMeRootFolder: Bool,
         fileToMove: Int?,
         locationDelegate: SelectFolderDelegate? = nil,
         selectHandler: ((File) -> Void)? = nil
@@ -124,7 +124,7 @@ class LocationFolderViewController: SidebarViewController {
         self.viewModel = viewModel
         self.locationDelegate = locationDelegate
         self.disabledDirectoriesSelection = disabledDirectoriesSelection
-        self.hideSharedWithMe = hideSharedWithMe
+        self.hideSharedWithMeRootFolder = hideSharedWithMeRootFolder
         self.fileToMove = fileToMove
         self.selectHandler = selectHandler
         super.init(driveFileManager: driveFileManager, selectMode: selectMode, isCompactView: isCompactView)
