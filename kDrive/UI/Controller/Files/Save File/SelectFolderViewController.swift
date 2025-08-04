@@ -112,6 +112,7 @@ final class SelectFolderViewController: FileListViewController {
                                                   startDirectory: File? = nil,
                                                   fileToMove: Int? = nil,
                                                   disabledDirectoriesIdsSelection: [Int],
+                                                  hideSharedWithMe: Bool,
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
@@ -128,6 +129,7 @@ final class SelectFolderViewController: FileListViewController {
             selectMode: true,
             isCompactView: isCompactView,
             disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
+            hideSharedWithMe: hideSharedWithMe,
             fileToMove: fileToMove,
             locationDelegate: delegate,
             selectHandler: selectHandler
@@ -163,6 +165,7 @@ final class SelectFolderViewController: FileListViewController {
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
                                                   startDirectory: File? = nil, fileToMove: Int? = nil,
                                                   disabledDirectoriesSelection: [File] = [],
+                                                  hideSharedWithMe: Bool = false,
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
@@ -172,6 +175,7 @@ final class SelectFolderViewController: FileListViewController {
             startDirectory: startDirectory,
             fileToMove: fileToMove,
             disabledDirectoriesIdsSelection: disabledDirectoriesIdsSelection,
+            hideSharedWithMe: hideSharedWithMe,
             delegate: delegate,
             selectHandler: selectHandler
         )

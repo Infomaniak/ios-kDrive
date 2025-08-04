@@ -30,15 +30,21 @@ class LocationFolderViewController: SidebarViewController {
                                                                    destination: .file(DriveFileManager
                                                                        .lastModificationsRootFile))]
 
-    private static let mainItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
-                                                                 image: KDriveResourcesAsset.favorite.image,
-                                                                 destination: .file(DriveFileManager.favoriteRootFile)),
-                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
-                                                                 image: KDriveResourcesAsset.folderSelect2.image,
-                                                                 destination: .file(DriveFileManager.sharedWithMeRootFile)),
-                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
-                                                                 image: KDriveResourcesAsset.folderSelect.image,
-                                                                 destination: .file(DriveFileManager.mySharedRootFile))]
+    private var mainItems: [RootMenuItem] {
+        var buffer = [RootMenuItem]()
+        buffer.append(RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
+                                   image: KDriveResourcesAsset.favorite.image,
+                                   destination: .file(DriveFileManager.favoriteRootFile)))
+        if !hideSharedWithMe {
+            buffer.append(RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
+                                       image: KDriveResourcesAsset.folderSelect2.image,
+                                       destination: .file(DriveFileManager.sharedWithMeRootFile)))
+        }
+        buffer.append(RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
+                                   image: KDriveResourcesAsset.folderSelect.image,
+                                   destination: .file(DriveFileManager.mySharedRootFile)))
+        return buffer
+    }
 
     override var sections: [RootMenuSection] {
         [RootMenuSection.recent, RootMenuSection.main]
@@ -47,6 +53,7 @@ class LocationFolderViewController: SidebarViewController {
     private var selectedIndexPath: IndexPath?
     private let selectHandler: ((File) -> Void)?
     private let disabledDirectoriesSelection: [Int]
+    private let hideSharedWithMe: Bool
     private let fileToMove: Int?
     private weak var locationDelegate: SelectFolderDelegate?
     private let viewModel: FileListViewModel
@@ -85,7 +92,7 @@ class LocationFolderViewController: SidebarViewController {
         }
 
         let firstSectionItems = recentDirectories
-        let secondSectionItems = userRootFolders + LocationFolderViewController.mainItems
+        let secondSectionItems = userRootFolders + mainItems
         let sectionItems = [firstSectionItems, secondSectionItems]
 
         for i in 0 ... sectionItems.count - 1 {
@@ -109,6 +116,7 @@ class LocationFolderViewController: SidebarViewController {
         selectMode: Bool,
         isCompactView: Bool,
         disabledDirectoriesSelection: [Int],
+        hideSharedWithMe: Bool,
         fileToMove: Int?,
         locationDelegate: SelectFolderDelegate? = nil,
         selectHandler: ((File) -> Void)? = nil
@@ -116,6 +124,7 @@ class LocationFolderViewController: SidebarViewController {
         self.viewModel = viewModel
         self.locationDelegate = locationDelegate
         self.disabledDirectoriesSelection = disabledDirectoriesSelection
+        self.hideSharedWithMe = hideSharedWithMe
         self.fileToMove = fileToMove
         self.selectHandler = selectHandler
         super.init(driveFileManager: driveFileManager, selectMode: selectMode, isCompactView: isCompactView)
