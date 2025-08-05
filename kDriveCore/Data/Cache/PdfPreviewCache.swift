@@ -85,7 +85,7 @@ public class PdfPreviewCache {
     }
 
     private func retrievePdf(
-        for file: File,
+        for file: AbstractFile,
         urlRequest: URLRequest,
         downloadTaskCreated: @escaping (URLSessionDownloadTask) -> Void,
         completion: @escaping (URL?, Error?) -> Void
