@@ -185,7 +185,8 @@ public final class FileActionsHelper {
         let selectFolderNavigationController = SelectFolderViewController
             .instantiateInNavigationController(driveFileManager: driveFileManager,
                                                startDirectory: currentDirectory,
-                                               disabledDirectoriesIdsSelection: disabledDirectoriesIds) { destinationDirectory in
+                                               disabledDirectoriesIdsSelection: disabledDirectoriesIds,
+                                               hideSharedWithMeRootFolder: true) { destinationDirectory in
                 Task {
                     await moveToDestination(destinationDirectory,
                                             from: currentDirectory,

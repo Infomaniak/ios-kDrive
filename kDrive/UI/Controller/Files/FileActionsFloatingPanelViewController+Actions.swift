@@ -397,7 +397,8 @@ extension FileActionsFloatingPanelViewController {
             driveFileManager: driveFileManager,
             startDirectory: frozenFile.parent?.freeze(),
             fileToMove: frozenFile.id,
-            disabledDirectoriesSelection: [frozenFile.parent ?? driveFileManager.getCachedRootFile()]
+            disabledDirectoriesSelection: [frozenFile.parent ?? driveFileManager.getCachedRootFile()],
+            hideSharedWithMeRootFolder: true,
         ) { [weak self] selectedFolder in
             guard let self else { return }
             FileActionsHelper.instance.move(file: frozenFile, to: selectedFolder, driveFileManager: driveFileManager) { success in
