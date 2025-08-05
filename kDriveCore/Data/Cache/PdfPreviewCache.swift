@@ -53,13 +53,21 @@ public class PdfPreviewCache {
             .appendingPathExtension("pdf")
     }
 
-    public func retrievePdf(for file: File, driveFileManager: DriveFileManager,
+    public func retrievePdf(forSafeFile safeFile: File,
+                            driveFileManager: DriveFileManager,
                             downloadTaskCreated: @escaping (URLSessionDownloadTask) -> Void,
                             completion: @escaping (URL?, Error?) -> Void) {
-        if isLocalVersionOlderThanRemote(for: file) {
+        assert(safeFile.isFrozen || safeFile.realm == nil, "safeFile is expected to be frozen or detached")
+        if isLocalVersionOlderThanRemote(for: safeFile) {
             if let publicShareProxy = driveFileManager.publicShareProxy {
-                let urlRequest = URLRequest(url: Endpoint.download(file: file, publicShareProxy: publicShareProxy, as: "pdf").url)
-                retrievePdf(for: file, urlRequest: urlRequest, downloadTaskCreated: downloadTaskCreated, completion: completion)
+                let urlRequest = URLRequest(url: Endpoint.download(file: safeFile, publicShareProxy: publicShareProxy, as: "pdf")
+                    .url)
+                retrievePdf(
+                    for: safeFile,
+                    urlRequest: urlRequest,
+                    downloadTaskCreated: downloadTaskCreated,
+                    completion: completion
+                )
             } else {
                 guard let token = driveFileManager.apiFetcher.currentToken else {
                     completion(nil, DriveError.unknownToken)
@@ -68,10 +76,10 @@ public class PdfPreviewCache {
 
                 driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
                     guard let token else { return }
-                    var urlRequest = URLRequest(url: Endpoint.download(file: file, as: "pdf").url)
+                    var urlRequest = URLRequest(url: Endpoint.download(file: safeFile, as: "pdf").url)
                     urlRequest.addValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
                     self.retrievePdf(
-                        for: file,
+                        for: safeFile,
                         urlRequest: urlRequest,
                         downloadTaskCreated: downloadTaskCreated,
                         completion: completion
@@ -79,7 +87,7 @@ public class PdfPreviewCache {
                 }
             }
         } else {
-            let pdfUrl = pdfPreviewUrl(for: file)
+            let pdfUrl = pdfPreviewUrl(for: safeFile)
             completion(pdfUrl, nil)
         }
     }
