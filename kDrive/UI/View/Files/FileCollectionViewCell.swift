@@ -294,6 +294,7 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
             separatorView.bottomAnchor.constraint(equalTo: contentInsetView.bottomAnchor),
             separatorView.heightAnchor.constraint(equalToConstant: 1)
         ])
+        separatorView.isHidden = true
     }
 
     override func prepareForReuse() {
@@ -313,9 +314,12 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         downloadProgressView?.isHidden = true
         downloadProgressView?.updateProgress(0, animated: false)
         viewModel?.thumbnailDownloadTask?.cancel()
+        separatorView.isHidden = true
     }
 
     func initStyle(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
+        separatorView.isHidden = !inFolderSelectMode
+
         if isLast && isFirst {
             contentInsetView.roundCorners(
                 corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10
