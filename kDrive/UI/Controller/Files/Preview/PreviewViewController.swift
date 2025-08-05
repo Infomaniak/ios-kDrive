@@ -214,6 +214,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         driveFileManager?.observeFileUpdated(self, fileId: nil) { [weak self] file in
             Task { @MainActor in
                 guard let self,
+                      !self.currentFile.isInvalidated,
                       !file.isInvalidated,
                       self.currentFile.id == file.id else {
                     return
