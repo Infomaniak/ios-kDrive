@@ -480,7 +480,7 @@ public struct AppRouter: AppNavigable {
             driveInfosManager.deleteAllFileProviderDomains()
         }
 
-        let isNotPresentingOnboarding = window.rootViewController?.isKind(of: OnboardingViewController.self) != true
+        let isNotPresentingOnboarding = window.rootViewController?.isKind(of: WaveViewController.self) != true
         guard isNotPresentingOnboarding else {
             return
         }
