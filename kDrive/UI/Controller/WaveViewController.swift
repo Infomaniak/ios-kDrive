@@ -34,6 +34,7 @@ import UIKit
 class WaveViewController: UIViewController {
     @LazyInjectService private var appNavigable: AppNavigable
 
+    let loginDelegateHandler = LoginDelegateHandler()
     let onboardingViewController: OnboardingViewController
     let slideCount: Int
 
@@ -85,23 +86,6 @@ class WaveViewController: UIViewController {
         ])
     }
 
-    private func loginDelegateHandler(signInButton: IKLargeButton?, registerButton: IKLargeButton?) -> LoginDelegateHandler {
-        let loginDelegateHandler = LoginDelegateHandler()
-        loginDelegateHandler.didStartLoginCallback = {
-            signInButton?.setLoading(true)
-            registerButton?.isEnabled = false
-        }
-        loginDelegateHandler.didCompleteLoginCallback = {
-            signInButton?.setLoading(false)
-            registerButton?.isEnabled = true
-        }
-        loginDelegateHandler.didFailLoginWithErrorCallback = { _ in
-            signInButton?.setLoading(false)
-            registerButton?.isEnabled = true
-        }
-        return loginDelegateHandler
-    }
-
     func createNextButton(in containerView: UIView) {
         let nextButton = IKRoundButton()
         let nextButtonHeight = 80.0
@@ -129,57 +113,6 @@ class WaveViewController: UIViewController {
             nextButton.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: 0)
         ])
     }
-
-    func createSignInRegisterButton(in containerView: UIView) {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = UIConstants.Padding.mediumSmall
-        stackView.distribution = .fillProportionally
-        stackView.alignment = .fill
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.isLayoutMarginsRelativeArrangement = true
-        stackView.layoutMargins = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.Padding.medium, right: 0)
-
-        let signInButton = IKLargeButton()
-        let registerButton = IKLargeButton()
-        let loginDelegateHandler = loginDelegateHandler(signInButton: signInButton, registerButton: registerButton)
-
-        signInButton.style = .primaryButton
-        signInButton.elevated = true
-        signInButton.setTitle(KDriveResourcesStrings.Localizable.buttonLogin, for: .normal)
-        signInButton.addAction(UIAction { [weak self] _ in
-            guard let self else { return }
-            appNavigable.showLogin(delegate: loginDelegateHandler)
-        }, for: .touchUpInside)
-
-        registerButton.style = .plainButton
-        registerButton.setTitle(KDriveCoreStrings.Localizable.buttonSignIn, for: .normal)
-        registerButton.addAction(UIAction { [weak self] _ in
-            guard let self else { return }
-            appNavigable.showRegister(delegate: loginDelegateHandler)
-        }, for: .touchUpInside)
-
-        stackView.addArrangedSubview(signInButton)
-        stackView.addArrangedSubview(registerButton)
-        containerView.addSubview(stackView)
-
-        let leadingAnchorConstraint = stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor,
-                                                                         constant: UIConstants.Padding.standard)
-        leadingAnchorConstraint.priority = .defaultHigh
-        let trailingAnchorConstraint = stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor,
-                                                                           constant: -UIConstants.Padding.standard)
-        trailingAnchorConstraint.priority = .defaultHigh
-
-        NSLayoutConstraint.activate([
-            registerButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
-            signInButton.heightAnchor.constraint(equalToConstant: UIConstants.Button.largeHeight),
-            stackView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            stackView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            leadingAnchorConstraint,
-            trailingAnchorConstraint,
-            stackView.widthAnchor.constraint(lessThanOrEqualToConstant: 350)
-        ])
-    }
 }
 
 extension IKButtonTheme {
@@ -187,8 +120,8 @@ extension IKButtonTheme {
         primary: KDriveResourcesAsset.infomaniakColor.swiftUIColor,
         secondary: .white,
         tertiary: KDriveResourcesAsset.backgroundCardViewColor.swiftUIColor,
-        disabledPrimary: Color.green,
-        disabledSecondary: Color.green,
+        disabledPrimary: KDriveResourcesAsset.buttonDisabledBackgroundColor.swiftUIColor,
+        disabledSecondary: KDriveResourcesAsset.buttonDisabledBackgroundColor.swiftUIColor,
         error: KDriveResourcesAsset.binColor.swiftUIColor,
         smallFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)),
         mediumFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium))
@@ -221,22 +154,7 @@ extension WaveViewController: OnboardingViewControllerDelegate {
         if index != slideCount - 1 {
             return nil
         } else {
-            let loginDelegateHandler = LoginDelegateHandler()
-            @InjectService var accountManager: AccountManageable
-            let accountIds = accountManager.accountIds
-            return ContinueWithAccountView(isLoading: false, excludingUserIds: accountIds) {
-                Task { @MainActor in
-                    // We have to wait for closing animation before opening the login WebView modally
-                    try? await Task.sleep(nanoseconds: 500_000_000)
-                    self.appNavigable.showLogin(delegate: loginDelegateHandler)
-                }
-            } onLoginWithAccountsPressed: { accounts in
-                loginDelegateHandler.login(with: accounts)
-            } onCreateAccountPressed: {
-                self.appNavigable.showRegister(delegate: loginDelegateHandler)
-            }
-            .padding(IKPadding.large)
-            .ikButtonTheme(.drive)
+            return OnboardingBottomButtonsView(loginDelegateHandler: loginDelegateHandler)
         }
     }
 

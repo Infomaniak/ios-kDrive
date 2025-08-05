@@ -26,7 +26,7 @@ import InterAppLogin
 import kDriveCore
 import kDriveResources
 
-public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate {
+public final class LoginDelegateHandler: ObservableObject, @preconcurrency InfomaniakLoginDelegate {
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var accountManager: AccountManageable
@@ -42,19 +42,15 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
         }
     }
 
-    var didStartLoginCallback: (() -> Void)?
-    var didCompleteLoginCallback: (() -> Void)?
-    var didFailLoginWithErrorCallback: ((Error) -> Void)?
+    @Published var isLoading = false
 
-    public init(didCompleteLoginCallback: (() -> Void)? = nil) {
-        self.didCompleteLoginCallback = didCompleteLoginCallback
-    }
+    public init() {}
 
     @MainActor public func didCompleteLoginWith(code: String, verifier: String) {
         matomo.track(eventWithCategory: .account, name: "loggedIn")
         let previousAccount = accountManager.currentAccount
 
-        didStartLoginCallback?()
+        setLoading(true)
 
         Task {
             do {
@@ -69,14 +65,14 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
                 didCompleteLoginWithError(error, previousAccount: previousAccount)
             }
 
-            await performDidCompleteLoginCallback()
+            setLoading(false)
         }
     }
 
     @MainActor public func login(with accounts: [ConnectedAccount]) {
         matomo.track(eventWithCategory: .account, name: "loggedIn")
 
-        didStartLoginCallback?()
+        setLoading(true)
 
         Task {
             await deviceAttestationAndLogin(with: accounts)
@@ -102,11 +98,11 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
 
                 matomo.connectUser(userId: accountManager.currentUserId.description)
                 await goToMainScreen(with: currentDriveFileManager)
-                await performDidCompleteLoginCallback()
+                await setLoading(false)
             }
         } catch {
             await didCompleteLoginWithError(error, previousAccount: previousAccount)
-            await performDidCompleteLoginCallback()
+            await setLoading(false)
         }
     }
 
@@ -171,11 +167,13 @@ public final class LoginDelegateHandler: @preconcurrency InfomaniakLoginDelegate
         }
     }
 
-    @MainActor public func didFailLoginWith(error: Error) {
-        didFailLoginWithErrorCallback?(error)
+    public func didFailLoginWith(error: Error) {
+        Task { @MainActor in
+            setLoading(false)
+        }
     }
 
-    @MainActor func performDidCompleteLoginCallback() async {
-        didCompleteLoginCallback?()
+    @MainActor func setLoading(_ loading: Bool) {
+        isLoading = loading
     }
 }
