@@ -212,15 +212,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     func observeFileUpdated() {
         driveFileManager?.observeFileUpdated(self, fileId: nil) { [weak self] file in
+            guard !file.isInvalidated else { return }
+            let frozenFile = file.freeze()
             Task { @MainActor in
                 guard let self,
                       !self.currentFile.isInvalidated,
                       !file.isInvalidated,
-                      self.currentFile.id == file.id else {
+                      self.currentFile.id == frozenFile.id else {
                     return
                 }
 
-                self.currentFile = file
+                self.currentFile = frozenFile
 
                 self.collectionView.endEditing(true)
                 self.collectionView.reloadItems(at: [self.currentIndex])
