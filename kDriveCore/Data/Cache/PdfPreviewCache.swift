@@ -46,8 +46,10 @@ public class PdfPreviewCache {
         }
     }
 
-    private func pdfPreviewUrl(for file: File) -> URL {
-        return pdfCacheDirectory.appendingPathComponent("\(file.driveId)").appendingPathComponent("\(file.id)")
+    private func pdfPreviewUrl(for file: AbstractFile) -> URL {
+        return pdfCacheDirectory
+            .appendingPathComponent("\(file.driveId)")
+            .appendingPathComponent("\(file.id)")
             .appendingPathExtension("pdf")
     }
 
