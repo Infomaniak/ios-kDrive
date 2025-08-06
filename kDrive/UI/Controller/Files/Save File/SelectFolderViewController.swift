@@ -103,9 +103,18 @@ final class SelectFolderViewController: FileListViewController {
     }
 
     private func setUpDirectory() {
-        selectFolderButton.isEnabled = !disabledDirectoriesSelection
-            .contains(viewModel.currentDirectory.id) &&
-            (viewModel.currentDirectory.capabilities.canMoveInto || viewModel.currentDirectory.capabilities.canCreateFile)
+        let isNotExcluded = !disabledDirectoriesSelection.contains(viewModel.currentDirectory.id)
+        let currentDirectory = viewModel.currentDirectory
+        let canMoveOrCreate = currentDirectory.capabilities.canMoveInto || currentDirectory.capabilities.canCreateFile
+        let selectButtonEnabled = isNotExcluded && canMoveOrCreate
+
+        guard let fileToMove else {
+            selectFolderButton.isEnabled = isNotExcluded && canMoveOrCreate
+            return
+        }
+
+        let withinSameDrive = currentDirectory.driveId == fileToMove.driveId
+        selectFolderButton.isEnabled = withinSameDrive && isNotExcluded && canMoveOrCreate
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
