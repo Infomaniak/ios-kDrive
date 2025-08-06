@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build and Test project
+    name: Build project
     runs-on: [ self-hosted, iOS ]
 
     steps:
@@ -34,7 +34,53 @@ jobs:
         run: tuist inspect implicit-imports
       - name: Build
         run: tuist build --clean kDrive
+
+  local_tests:
+    name: Local Tests
+    runs-on: [ self-hosted, iOS ]
+
+    steps:
+      - uses: jdx/mise-action@v2
+        with:
+          cache: false
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Create test env
+        env:
+          ENV_PATH: "kDriveTestShared/Env.swift"
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          USER_ID: ${{ secrets.USER_ID }}
+          INVITE_USER_ID: ${{ secrets.INVITE_USER_ID }}
+          INVITE_EMAIL: ${{ secrets.INVITE_EMAIL }}
+        run: |
+          touch $ENV_PATH
+          echo -e "enum Env {\n    static let token = \"$ACCESS_TOKEN\"\n\n    static let driveId = 420132\n\n    static let userId = $USER_ID\n\n    static let inviteUserId = $INVITE_USER_ID\n\n    static let inviteMail = \"$INVITE_EMAIL\"\n\n    static let inviteTeam = 0\n\n    static let commonDocumentsId = 3\n}" > $ENV_PATH
+      - name: Generate
+        run: tuist install && tuist generate
       - name: Test Local
         run: tuist test kDriveTests
+
+  api_tests:
+    name: API Tests
+    runs-on: [ self-hosted, iOS ]
+
+    steps:
+      - uses: jdx/mise-action@v2
+        with:
+          cache: false
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Create test env
+        env:
+          ENV_PATH: "kDriveTestShared/Env.swift"
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          USER_ID: ${{ secrets.USER_ID }}
+          INVITE_USER_ID: ${{ secrets.INVITE_USER_ID }}
+          INVITE_EMAIL: ${{ secrets.INVITE_EMAIL }}
+        run: |
+          touch $ENV_PATH
+          echo -e "enum Env {\n    static let token = \"$ACCESS_TOKEN\"\n\n    static let driveId = 420132\n\n    static let userId = $USER_ID\n\n    static let inviteUserId = $INVITE_USER_ID\n\n    static let inviteMail = \"$INVITE_EMAIL\"\n\n    static let inviteTeam = 0\n\n    static let commonDocumentsId = 3\n}" > $ENV_PATH
+      - name: Generate
+        run: tuist install && tuist generate
       - name: Test API
         run: tuist test kDriveAPITests --test-targets kDriveAPITests/DriveApiTests
