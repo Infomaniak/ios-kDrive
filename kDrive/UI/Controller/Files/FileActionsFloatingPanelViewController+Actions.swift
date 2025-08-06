@@ -396,7 +396,7 @@ extension FileActionsFloatingPanelViewController {
         let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
             driveFileManager: driveFileManager,
             startDirectory: frozenFile.parent?.freeze(),
-            fileToMove: frozenFile.id,
+            fileToMove: ProxyFile(abstractFile: frozenFile),
             disabledDirectoriesSelection: [frozenFile.parent ?? driveFileManager.getCachedRootFile()]
         ) { [weak self] selectedFolder in
             guard let self else { return }

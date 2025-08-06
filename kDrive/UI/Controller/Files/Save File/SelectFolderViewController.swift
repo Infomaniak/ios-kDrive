@@ -61,14 +61,14 @@ final class SelectFolderViewController: FileListViewController {
     }()
 
     let disabledDirectoriesSelection: [Int]
-    let fileToMove: Int?
+    let fileToMove: ProxyFile?
     weak var delegate: SelectFolderDelegate?
     let selectHandler: ((File) -> Void)?
 
     init(
         viewModel: FileListViewModel,
         disabledDirectoriesSelection: [Int] = [Int](),
-        fileToMove: Int? = nil,
+        fileToMove: ProxyFile? = nil,
         delegate: SelectFolderDelegate? = nil,
         selectHandler: ((File) -> Void)? = nil
     ) {
@@ -110,7 +110,7 @@ final class SelectFolderViewController: FileListViewController {
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
                                                   startDirectory: File? = nil,
-                                                  fileToMove: Int? = nil,
+                                                  fileToMove: ProxyFile? = nil,
                                                   disabledDirectoriesIdsSelection: [Int],
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
@@ -161,7 +161,8 @@ final class SelectFolderViewController: FileListViewController {
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
-                                                  startDirectory: File? = nil, fileToMove: Int? = nil,
+                                                  startDirectory: File? = nil,
+                                                  fileToMove: ProxyFile? = nil,
                                                   disabledDirectoriesSelection: [File] = [],
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
@@ -211,7 +212,7 @@ final class SelectFolderViewController: FileListViewController {
         let file = displayedFiles[indexPath.row]
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! FileCollectionViewCell
 
-        cell.setEnabled(file.isDirectory && file.id != fileToMove)
+        cell.setEnabled(file.isDirectory && file.id != fileToMove?.id)
         cell.moreButton.isHidden = true
         return cell
     }
