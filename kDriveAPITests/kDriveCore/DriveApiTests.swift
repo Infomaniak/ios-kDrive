@@ -48,19 +48,12 @@ final class DriveApiTests: XCTestCase {
         MockingHelper.registerConcreteTypes(configuration: .realApp)
     }
 
-    override static func tearDown() {
-        let group = DispatchGroup()
-        group.enter()
-        Task {
-            let drive = ProxyDrive(id: Env.driveId)
-            let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
-            apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = defaultTimeout
-            _ = try await apiFetcher.emptyTrash(drive: drive)
-            group.leave()
-        }
-        group.wait()
-
-        super.tearDown()
+    override func tearDown() async throws {
+        let drive = ProxyDrive(id: Env.driveId)
+        let apiFetcher = DriveApiFetcher(token: Self.token, delegate: MCKTokenDelegate())
+        apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = Self.defaultTimeout
+        _ = try? await apiFetcher.emptyTrash(drive: drive)
+        try? await Task.sleep(nanoseconds: 1_000_000_000) // Try to sleep to prevent Network stress and timeouts
     }
 
     // MARK: - Tests setup
