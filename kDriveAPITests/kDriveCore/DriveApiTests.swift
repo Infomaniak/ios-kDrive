@@ -53,7 +53,6 @@ final class DriveApiTests: XCTestCase {
         let apiFetcher = DriveApiFetcher(token: Self.token, delegate: MCKTokenDelegate())
         apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = Self.defaultTimeout
         _ = try? await apiFetcher.emptyTrash(drive: drive)
-        try? await Task.sleep(nanoseconds: 1_000_000_000) // Try to sleep to prevent Network stress and timeouts
     }
 
     // MARK: - Tests setup
