@@ -35,6 +35,7 @@ public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 /// Something that setups the service factories
 public enum FactoryService {
     private static let appGroupName = "group.\(bundleId)"
+    private static let sharedAppGroupName = "group.com.infomaniak"
     private static let realmRootPath = "drives"
 
     public static let bundleId = "com.infomaniak.drive"
@@ -190,7 +191,7 @@ public enum FactoryService {
                 return provider
             },
             Factory(type: DeviceManagerable.self) { _, _ in
-                DeviceManager(appGroupIdentifier: appGroupName)
+                DeviceManager(appGroupIdentifier: sharedAppGroupName)
             },
             Factory(type: PhotoLibrarySavable.self) { _, _ in
                 PhotoLibrarySaver()
