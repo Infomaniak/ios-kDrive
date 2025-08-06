@@ -133,6 +133,11 @@ public struct ProxyFile: AbstractFile, Sendable {
         self.id = id
     }
 
+    public init(abstractFile: AbstractFile) {
+        driveId = abstractFile.driveId
+        id = abstractFile.id
+    }
+
     /// Resolve an abstract file within a `DriveFileManager`.
     func resolve(within driveFileManager: DriveFileManager) throws -> File {
         let liveFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: uid)
