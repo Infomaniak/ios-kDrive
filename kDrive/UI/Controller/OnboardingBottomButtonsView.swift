@@ -30,11 +30,7 @@ struct OnboardingBottomButtonsView: View {
 
     var body: some View {
         ContinueWithAccountView(isLoading: loginDelegateHandler.isLoading, excludingUserIds: accountManager.accountIds) {
-            Task { @MainActor in
-                // We have to wait for closing animation before opening the login WebView modally
-                try? await Task.sleep(nanoseconds: 500_000_000)
-                appNavigable.showLogin(delegate: loginDelegateHandler)
-            }
+            appNavigable.showLogin(delegate: loginDelegateHandler)
         } onLoginWithAccountsPressed: { accounts in
             loginDelegateHandler.login(with: accounts)
         } onCreateAccountPressed: {
