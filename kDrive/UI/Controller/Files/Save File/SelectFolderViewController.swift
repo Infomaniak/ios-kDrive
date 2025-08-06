@@ -112,7 +112,6 @@ final class SelectFolderViewController: FileListViewController {
                                                   startDirectory: File? = nil,
                                                   fileToMove: Int? = nil,
                                                   disabledDirectoriesIdsSelection: [Int],
-                                                  hideSharedWithMeRootFolder: Bool,
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
@@ -129,7 +128,6 @@ final class SelectFolderViewController: FileListViewController {
             selectMode: true,
             isCompactView: isCompactView,
             disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
-            hideSharedWithMeRootFolder: hideSharedWithMeRootFolder,
             fileToMove: fileToMove,
             locationDelegate: delegate,
             selectHandler: selectHandler
@@ -165,7 +163,6 @@ final class SelectFolderViewController: FileListViewController {
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
                                                   startDirectory: File? = nil, fileToMove: Int? = nil,
                                                   disabledDirectoriesSelection: [File] = [],
-                                                  hideSharedWithMeRootFolder: Bool = false,
                                                   delegate: SelectFolderDelegate? = nil,
                                                   selectHandler: ((File) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
@@ -175,7 +172,6 @@ final class SelectFolderViewController: FileListViewController {
             startDirectory: startDirectory,
             fileToMove: fileToMove,
             disabledDirectoriesIdsSelection: disabledDirectoriesIdsSelection,
-            hideSharedWithMeRootFolder: hideSharedWithMeRootFolder,
             delegate: delegate,
             selectHandler: selectHandler
         )
