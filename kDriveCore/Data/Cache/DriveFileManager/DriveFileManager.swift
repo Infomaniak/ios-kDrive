@@ -838,6 +838,50 @@ public final class DriveFileManager {
         return response
     }
 
+    public static func move(file: ProxyFile,
+                            to destination: ProxyFile,
+                            sourceDriveFileManager: DriveFileManager,
+                            destinationDriveFileManager: DriveFileManager) async throws -> (CancelableResponse, File) {
+        let response = try await destinationDriveFileManager.apiFetcher.move(file: file, to: destination)
+
+        var currentFile: File?
+        try sourceDriveFileManager.database.writeTransaction { writableRealm in
+            let liveFile = try file.resolve(using: writableRealm)
+            let oldParent = liveFile.parent
+
+            oldParent?.children.remove(liveFile)
+            if let oldParent {
+                oldParent.signalChanges(userId: sourceDriveFileManager.drive.userId)
+                sourceDriveFileManager.notifyObserversWith(file: oldParent)
+            }
+
+            currentFile = liveFile.freeze()
+        }
+
+        guard let currentFile else {
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
+        }
+
+        var updatedFile: File?
+        try destinationDriveFileManager.database.writeTransaction { writableRealm in
+            let duplicatedFile = File(value: currentFile).detached()
+            writableRealm.add(duplicatedFile, update: .modified)
+            let newParent = try destination.resolve(using: writableRealm)
+
+            newParent.children.insert(duplicatedFile)
+            newParent.signalChanges(userId: destinationDriveFileManager.drive.userId)
+            destinationDriveFileManager.notifyObserversWith(file: newParent)
+
+            updatedFile = duplicatedFile
+        }
+
+        guard let updatedFile else {
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
+        }
+
+        return (response, updatedFile.freeze())
+    }
+
     public func move(file: ProxyFile, to destination: ProxyFile) async throws -> (CancelableResponse, File) {
         let response = try await apiFetcher.move(file: file, to: destination)
 

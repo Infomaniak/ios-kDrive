@@ -106,7 +106,8 @@ final class DroppableFileListViewModel {
                             FileActionsHelper.instance.move(
                                 file: file,
                                 to: frozenDestinationDirectory,
-                                driveFileManager: destinationDriveFileManager
+                                sourceDriveFileManager: destinationDriveFileManager,
+                                destinationDriveFileManager: destinationDriveFileManager
                             )
                         } else {
                             Task { @MainActor in
