@@ -45,7 +45,7 @@ class LocationFolderViewController: SidebarViewController {
     }
 
     private var selectedIndexPath: IndexPath?
-    private let selectHandler: ((File) -> Void)?
+    private let selectHandler: ((File, DriveFileManager) -> Void)?
     private let disabledDirectoriesSelection: [Int]
     private let fileToMove: ProxyFile?
     private weak var locationDelegate: SelectFolderDelegate?
@@ -111,7 +111,7 @@ class LocationFolderViewController: SidebarViewController {
         disabledDirectoriesSelection: [Int],
         fileToMove: ProxyFile?,
         locationDelegate: SelectFolderDelegate? = nil,
-        selectHandler: ((File) -> Void)? = nil
+        selectHandler: ((File, DriveFileManager) -> Void)? = nil
     ) {
         self.viewModel = viewModel
         self.locationDelegate = locationDelegate

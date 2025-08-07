@@ -76,7 +76,8 @@ public final class FileActionsHelper {
     public func move(
         file: File,
         to destinationDirectory: File,
-        driveFileManager: DriveFileManager,
+        sourceDriveFileManager: DriveFileManager,
+        destinationDriveFileManager: DriveFileManager,
         completion: ((Bool) -> Void)? = nil
     ) {
         guard destinationDirectory.id != file.parentId else { return }
@@ -87,13 +88,18 @@ public final class FileActionsHelper {
             destinationName = destinationDirectory.name
         ] in
             do {
-                let (cancelResponse, _) = try await driveFileManager.move(file: proxyFile, to: proxyDestination)
+                let (cancelResponse, _) = try await DriveFileManager.move(
+                    file: proxyFile,
+                    to: proxyDestination,
+                    sourceDriveFileManager: sourceDriveFileManager,
+                    destinationDriveFileManager: destinationDriveFileManager
+                )
                 UIConstants.showCancelableSnackBar(
                     message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationName),
                     cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
                     cancelableResponse: cancelResponse,
                     parentFile: proxyParent,
-                    driveFileManager: driveFileManager
+                    driveFileManager: destinationDriveFileManager
                 )
                 completion?(true)
             } catch {
@@ -183,9 +189,11 @@ public final class FileActionsHelper {
             disabledDirectoriesIds.append(firstSelectedParentId)
         }
         let selectFolderNavigationController = SelectFolderViewController
-            .instantiateInNavigationController(driveFileManager: driveFileManager,
-                                               startDirectory: currentDirectory,
-                                               disabledDirectoriesIdsSelection: disabledDirectoriesIds) { destinationDirectory in
+            .instantiateInNavigationController(
+                driveFileManager: driveFileManager,
+                startDirectory: currentDirectory,
+                disabledDirectoriesIdsSelection: disabledDirectoriesIds
+            ) { destinationDirectory, destinationDriveFileManager in
                 Task {
                     await moveToDestination(destinationDirectory,
                                             from: currentDirectory,
@@ -194,7 +202,7 @@ public final class FileActionsHelper {
                                             allItemsSelected: allItemsSelected,
                                             forceMoveDistinctFiles: forceMoveDistinctFiles,
                                             observer: observer,
-                                            driveFileManager: driveFileManager,
+                                            driveFileManager: destinationDriveFileManager,
                                             completion: completion)
                 }
             }

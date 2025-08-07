@@ -63,14 +63,14 @@ final class SelectFolderViewController: FileListViewController {
     let disabledDirectoriesSelection: [Int]
     let fileToMove: ProxyFile?
     weak var delegate: SelectFolderDelegate?
-    let selectHandler: ((File) -> Void)?
+    let selectHandler: ((File, DriveFileManager) -> Void)?
 
     init(
         viewModel: FileListViewModel,
         disabledDirectoriesSelection: [Int] = [Int](),
         fileToMove: ProxyFile? = nil,
         delegate: SelectFolderDelegate? = nil,
-        selectHandler: ((File) -> Void)? = nil
+        selectHandler: ((File, DriveFileManager) -> Void)? = nil
     ) {
         self.disabledDirectoriesSelection = disabledDirectoriesSelection
         self.fileToMove = fileToMove
@@ -122,7 +122,7 @@ final class SelectFolderViewController: FileListViewController {
                                                   fileToMove: ProxyFile? = nil,
                                                   disabledDirectoriesIdsSelection: [Int],
                                                   delegate: SelectFolderDelegate? = nil,
-                                                  selectHandler: ((File) -> Void)? = nil)
+                                                  selectHandler: ((File, DriveFileManager) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
         @InjectService var appRouter: AppNavigable
         var viewControllers = [UIViewController]()
@@ -174,7 +174,7 @@ final class SelectFolderViewController: FileListViewController {
                                                   fileToMove: ProxyFile? = nil,
                                                   disabledDirectoriesSelection: [File] = [],
                                                   delegate: SelectFolderDelegate? = nil,
-                                                  selectHandler: ((File) -> Void)? = nil)
+                                                  selectHandler: ((File, DriveFileManager) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
         let disabledDirectoriesIdsSelection = disabledDirectoriesSelection.map(\.id)
         return instantiateInNavigationController(
@@ -211,7 +211,7 @@ final class SelectFolderViewController: FileListViewController {
             frozenSelectedDirectory = parent.freezeIfNeeded()
         }
         delegate?.didSelectFolder(frozenSelectedDirectory)
-        selectHandler?(frozenSelectedDirectory)
+        selectHandler?(frozenSelectedDirectory, viewModel.driveFileManager)
         navigationController?.dismiss(animated: true)
     }
 
