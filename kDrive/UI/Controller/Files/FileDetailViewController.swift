@@ -243,8 +243,11 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private func loadFileInformation() {
         Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
-                let currentFile = try await driveFileManager.file(id: proxyFile.id, forceRefresh: true)
-                let currentFileAccess = try await driveFileManager.apiFetcher.access(for: proxyFile)
+                let currentFile = try await driveFileManager.file(proxyFile, forceRefresh: true)
+
+                let isFileSharedWithMe = driveFileManager.driveId != proxyFile.driveId
+                let currentFileAccess = isFileSharedWithMe ? nil : try await driveFileManager.apiFetcher.access(for: proxyFile)
+
                 let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
                 self.fileInformationRows = FileInformationRow.getRows(for: currentFile,
