@@ -530,11 +530,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func handleOfficePreviewError(_ error: Error, previewIndex: Int) {
-        let file = previewFiles[previewIndex]
+        let frozenFile = previewFiles[previewIndex].freeze()
+        let previewError = OfficePreviewError(fileId: frozenFile.id, pdfGenerationProgress: Progress(totalUnitCount: 10))
 
-        let previewError = OfficePreviewError(fileId: file.id, pdfGenerationProgress: Progress(totalUnitCount: 10))
-
-        PdfPreviewCache.shared.retrievePdf(for: file, driveFileManager: driveFileManager) { downloadTask in
+        PdfPreviewCache.shared.retrievePdf(forSafeFile: frozenFile, driveFileManager: driveFileManager) { downloadTask in
             previewError.addDownloadTask(downloadTask)
             Task { @MainActor [weak self] in
                 self?.collectionView.reloadItems(at: [IndexPath(item: previewIndex, section: 0)])
@@ -551,7 +550,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             }
         }
 
-        previewErrors[file.id] = previewError
+        previewErrors[frozenFile.id] = previewError
     }
 
     func openWith(from: UIView) {
