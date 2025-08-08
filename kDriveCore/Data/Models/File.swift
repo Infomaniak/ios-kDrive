@@ -333,9 +333,11 @@ public enum FileVisibility: String {
 }
 
 public enum FileStatus: String {
+    case available
     case erasing
     case locked
     case trashed
+    case trashInherited = "trash_inherited"
     case uploading
 }
 
@@ -560,7 +562,7 @@ public final class File: Object, Codable {
     }
 
     public var isTrashed: Bool {
-        return status == .trashed
+        return status == .trashed || status == .trashInherited
     }
 
     public var isDisabled: Bool {
