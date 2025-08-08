@@ -69,7 +69,7 @@ final class FilePresenter {
         } else if file.parentId != 0 {
             Task {
                 do {
-                    let parent = try await driveFileManager.file(id: file.parentId)
+                    let parent = try await driveFileManager.file(ProxyFile(driveId: driveFileManager.driveId, id: file.parentId))
                     present(for: parent,
                             files: [],
                             driveFileManager: driveFileManager,

@@ -234,7 +234,7 @@ public enum UniversalLinksHelper {
     public static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
         Task {
             do {
-                let file = try await driveFileManager.file(id: id)
+                let file = try await driveFileManager.file(ProxyFile(driveId: driveFileManager.driveId, id: id))
                 @InjectService var appNavigable: AppNavigable
                 await appNavigable.present(file: file, driveFileManager: driveFileManager, office: office)
             } catch {
