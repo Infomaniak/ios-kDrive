@@ -92,7 +92,9 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
                             categoryRights: CategoryRights,
                             isSharedWithMe: Bool) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
-            if fileAccess != nil || !file.users.isEmpty {
+
+            if let fileAccess,
+               !fileAccess.users.isEmpty || !fileAccess.teams.isEmpty {
                 rows.append(.users)
             }
             if file.capabilities.canShare {
