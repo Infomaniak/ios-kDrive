@@ -348,7 +348,10 @@ extension SceneDelegate {
                         } else {
                             // Update file to get the new modification date
                             Task {
-                                let file = try await driveFileManager.file(id: fileId, forceRefresh: true)
+                                let file = try await driveFileManager.file(
+                                    ProxyFile(driveId: driveFileManager.driveId, id: fileId),
+                                    forceRefresh: true
+                                )
                                 try? FileManager.default.setAttributes([.modificationDate: file.revisedAt],
                                                                        ofItemAtPath: file.localUrl.path)
                                 driveFileManager.notifyObserversWith(file: file)
