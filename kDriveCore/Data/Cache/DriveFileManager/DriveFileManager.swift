@@ -387,14 +387,14 @@ public final class DriveFileManager {
         }
     }
 
-    public func file(id: Int, forceRefresh: Bool = false) async throws -> File {
-        if let cachedFile = getCachedFile(id: id),
+    public func file(_ proxyFile: ProxyFile, forceRefresh: Bool = false) async throws -> File {
+        if let cachedFile = getCachedFile(id: proxyFile.id),
            // We have cache and we show it before fetching activities OR we are not connected to internet and we show what we have
            // anyway
            (cachedFile.responseAt > 0 && !forceRefresh) || ReachabilityListener.instance.currentStatus == .offline {
             return cachedFile
         } else {
-            let response = try await apiFetcher.fileInfo(ProxyFile(driveId: drive.id, id: id))
+            let response = try await apiFetcher.fileInfo(proxyFile)
             let file = response.validApiResponse.data
 
             try? database.writeTransaction { writableRealm in

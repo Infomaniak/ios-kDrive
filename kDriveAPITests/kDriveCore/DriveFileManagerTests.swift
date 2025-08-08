@@ -75,7 +75,7 @@ final class DriveFileManagerTests: XCTestCase {
     // MARK: - Helping methods
 
     func getRootDirectory() async throws -> ProxyFile {
-        try await DriveFileManagerTests.driveFileManager.file(id: DriveFileManager.constants.rootID).proxify()
+        return ProxyFile(driveId: DriveFileManagerTests.driveFileManager.driveId, id: DriveFileManager.constants.rootID)
     }
 
     func createTestDirectory(name: String, parentDirectory: ProxyFile) async throws -> ProxyFile {
@@ -128,11 +128,19 @@ final class DriveFileManagerTests: XCTestCase {
     // MARK: - Test methods
 
     func testGetRootFile() async throws {
-        _ = try await DriveFileManagerTests.driveFileManager.file(id: DriveFileManager.constants.rootID)
+        let rootProxyFile = ProxyFile(
+            driveId: DriveFileManagerTests.driveFileManager.driveId,
+            id: DriveFileManager.constants.rootID
+        )
+        _ = try await DriveFileManagerTests.driveFileManager.file(rootProxyFile)
     }
 
     func testGetCommonDocuments() async throws {
-        _ = try await DriveFileManagerTests.driveFileManager.file(id: Env.commonDocumentsId)
+        let commonDocumentsProxyFile = ProxyFile(
+            driveId: DriveFileManagerTests.driveFileManager.driveId,
+            id: Env.commonDocumentsId
+        )
+        _ = try await DriveFileManagerTests.driveFileManager.file(commonDocumentsProxyFile)
     }
 
     func testFavorites() async throws {

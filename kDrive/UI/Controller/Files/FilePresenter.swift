@@ -69,7 +69,7 @@ final class FilePresenter {
         } else if file.parentId != 0 {
             Task {
                 do {
-                    let parent = try await driveFileManager.file(id: file.parentId)
+                    let parent = try await driveFileManager.file(ProxyFile(driveId: driveFileManager.driveId, id: file.parentId))
                     present(for: parent,
                             files: [],
                             driveFileManager: driveFileManager,
@@ -146,7 +146,8 @@ final class FilePresenter {
 
         let viewModel: FileListViewModel
         if driveFileManager.drive.sharedWithMe {
-            viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+            viewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager, currentDirectory: file)
         } else if let publicShareProxy = driveFileManager.publicShareProxy {
             let configuration = FileListViewModel.Configuration(selectAllSupported: true,
                                                                 rootTitle: nil,
