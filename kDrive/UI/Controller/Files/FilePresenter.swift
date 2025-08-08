@@ -146,7 +146,8 @@ final class FilePresenter {
 
         let viewModel: FileListViewModel
         if driveFileManager.drive.sharedWithMe {
-            viewModel = SharedWithMeViewModel(driveFileManager: driveFileManager, currentDirectory: file)
+            let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+            viewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager, currentDirectory: file)
         } else if let publicShareProxy = driveFileManager.publicShareProxy {
             let configuration = FileListViewModel.Configuration(selectAllSupported: true,
                                                                 rootTitle: nil,
