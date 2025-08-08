@@ -214,7 +214,12 @@ extension FileProviderExtension {
             let proxyFile = file.proxify()
             let proxyParent = parent.proxify()
             do {
-                let (_, file) = try await self.driveFileManager.move(file: proxyFile, to: proxyParent)
+                let (_, file) = try await DriveFileManager.move(
+                    file: proxyFile,
+                    to: proxyParent,
+                    sourceDriveFileManager: driveFileManager,
+                    destinationDriveFileManager: driveFileManager
+                )
                 completionHandler(
                     file.freeze().toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain), nil
                 )
