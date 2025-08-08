@@ -178,7 +178,7 @@ public final class FileActionsHelper {
                             allItemsSelected: Bool,
                             forceMoveDistinctFiles: Bool = false,
                             observer: AnyObject,
-                            driveFileManager: DriveFileManager,
+                            sourceDriveFileManager: DriveFileManager,
                             presentViewController: (UIViewController) -> Void,
                             completion: (() -> Void)? = nil) {
         // Current directory is always disabled.
@@ -190,7 +190,7 @@ public final class FileActionsHelper {
         }
         let selectFolderNavigationController = SelectFolderViewController
             .instantiateInNavigationController(
-                driveFileManager: driveFileManager,
+                driveFileManager: sourceDriveFileManager,
                 startDirectory: currentDirectory,
                 disabledDirectoriesIdsSelection: disabledDirectoriesIds
             ) { destinationDirectory, destinationDriveFileManager in
@@ -202,7 +202,8 @@ public final class FileActionsHelper {
                                             allItemsSelected: allItemsSelected,
                                             forceMoveDistinctFiles: forceMoveDistinctFiles,
                                             observer: observer,
-                                            driveFileManager: destinationDriveFileManager,
+                                            sourceDriveFileManager: sourceDriveFileManager,
+                                            destinationDriveFileManager: destinationDriveFileManager,
                                             completion: completion)
                 }
             }
@@ -217,21 +218,22 @@ public final class FileActionsHelper {
                                           allItemsSelected: Bool,
                                           forceMoveDistinctFiles: Bool = false,
                                           observer: AnyObject,
-                                          driveFileManager: DriveFileManager,
+                                          sourceDriveFileManager: DriveFileManager,
+                                          destinationDriveFileManager: DriveFileManager,
                                           completion: (() -> Void)?) async {
         if allItemsSelected && !forceMoveDistinctFiles {
             await bulkMove(exceptFileIds: exceptFileIds,
                            from: currentDirectory,
                            to: destinationDirectory,
                            observer: observer,
-                           driveFileManager: driveFileManager,
+                           driveFileManager: destinationDriveFileManager,
                            completion: completion)
         } else if files.count > Constants.bulkActionThreshold && !forceMoveDistinctFiles {
             await bulkMove(files,
                            from: currentDirectory,
                            to: destinationDirectory,
                            observer: observer,
-                           driveFileManager: driveFileManager,
+                           driveFileManager: destinationDriveFileManager,
                            completion: completion)
         } else {
             do {
@@ -243,8 +245,8 @@ public final class FileActionsHelper {
                     try await DriveFileManager.move(
                         file: proxyFile,
                         to: proxyDestinationDirectory,
-                        sourceDriveFileManager: driveFileManager,
-                        destinationDriveFileManager: driveFileManager
+                        sourceDriveFileManager: sourceDriveFileManager,
+                        destinationDriveFileManager: destinationDriveFileManager
                     )
                 }
 
