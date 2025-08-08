@@ -1,3 +1,4 @@
 - Login inter app
 - Meilleur affichage des dossiers récents
 - Notifications plus claires sur les téléversements en échec
+- Améliorations de la stabilité et corrections de bugs

@@ -1,3 +1,4 @@
 - Login inter app
 - Better display of recent files
 - Clearer notifications about failed uploads
+- Stability improvements and bug fixes
