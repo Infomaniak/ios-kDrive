@@ -240,7 +240,12 @@ public final class FileActionsHelper {
                 let proxyDestinationDirectory = destinationDirectory.proxify()
 
                 try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
-                    _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
+                    try await DriveFileManager.move(
+                        file: proxyFile,
+                        to: proxyDestinationDirectory,
+                        sourceDriveFileManager: driveFileManager,
+                        destinationDriveFileManager: driveFileManager
+                    )
                 }
 
                 UIConstants

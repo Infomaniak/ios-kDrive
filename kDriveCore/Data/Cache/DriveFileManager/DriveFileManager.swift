@@ -838,6 +838,7 @@ public final class DriveFileManager {
         return response
     }
 
+    @discardableResult
     public static func move(file: ProxyFile,
                             to destination: ProxyFile,
                             sourceDriveFileManager: DriveFileManager,
@@ -880,37 +881,6 @@ public final class DriveFileManager {
         }
 
         return (response, updatedFile.freeze())
-    }
-
-    public func move(file: ProxyFile, to destination: ProxyFile) async throws -> (CancelableResponse, File) {
-        let response = try await apiFetcher.move(file: file, to: destination)
-
-        // Add the moved file to Realm
-        var updatedFile: File?
-        try database.writeTransaction { writableRealm in
-            let liveFile = try file.resolve(using: writableRealm)
-            let newParent = try destination.resolve(using: writableRealm)
-            let oldParent = liveFile.parent
-
-            oldParent?.children.remove(liveFile)
-            newParent.children.insert(liveFile)
-
-            if let oldParent {
-                oldParent.signalChanges(userId: drive.userId)
-                notifyObserversWith(file: oldParent)
-            }
-
-            newParent.signalChanges(userId: drive.userId)
-            notifyObserversWith(file: newParent)
-
-            updatedFile = liveFile
-        }
-
-        guard let updatedFile else {
-            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
-        }
-
-        return (response, updatedFile)
     }
 
     public func rename(file: ProxyFile, newName: String) async throws -> File {
