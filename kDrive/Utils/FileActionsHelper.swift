@@ -76,7 +76,8 @@ public final class FileActionsHelper {
     public func move(
         file: File,
         to destinationDirectory: File,
-        driveFileManager: DriveFileManager,
+        sourceDriveFileManager: DriveFileManager,
+        destinationDriveFileManager: DriveFileManager,
         completion: ((Bool) -> Void)? = nil
     ) {
         guard destinationDirectory.id != file.parentId else { return }
@@ -87,13 +88,18 @@ public final class FileActionsHelper {
             destinationName = destinationDirectory.name
         ] in
             do {
-                let (cancelResponse, _) = try await driveFileManager.move(file: proxyFile, to: proxyDestination)
+                let (cancelResponse, _) = try await DriveFileManager.move(
+                    file: proxyFile,
+                    to: proxyDestination,
+                    sourceDriveFileManager: sourceDriveFileManager,
+                    destinationDriveFileManager: destinationDriveFileManager
+                )
                 UIConstants.showCancelableSnackBar(
                     message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationName),
                     cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
                     cancelableResponse: cancelResponse,
                     parentFile: proxyParent,
-                    driveFileManager: driveFileManager
+                    driveFileManager: destinationDriveFileManager
                 )
                 completion?(true)
             } catch {
@@ -172,7 +178,7 @@ public final class FileActionsHelper {
                             allItemsSelected: Bool,
                             forceMoveDistinctFiles: Bool = false,
                             observer: AnyObject,
-                            driveFileManager: DriveFileManager,
+                            sourceDriveFileManager: DriveFileManager,
                             presentViewController: (UIViewController) -> Void,
                             completion: (() -> Void)? = nil) {
         // Current directory is always disabled.
@@ -183,9 +189,11 @@ public final class FileActionsHelper {
             disabledDirectoriesIds.append(firstSelectedParentId)
         }
         let selectFolderNavigationController = SelectFolderViewController
-            .instantiateInNavigationController(driveFileManager: driveFileManager,
-                                               startDirectory: currentDirectory,
-                                               disabledDirectoriesIdsSelection: disabledDirectoriesIds) { destinationDirectory in
+            .instantiateInNavigationController(
+                driveFileManager: sourceDriveFileManager,
+                startDirectory: currentDirectory,
+                disabledDirectoriesIdsSelection: disabledDirectoriesIds
+            ) { destinationDirectory, destinationDriveFileManager in
                 Task {
                     await moveToDestination(destinationDirectory,
                                             from: currentDirectory,
@@ -194,7 +202,8 @@ public final class FileActionsHelper {
                                             allItemsSelected: allItemsSelected,
                                             forceMoveDistinctFiles: forceMoveDistinctFiles,
                                             observer: observer,
-                                            driveFileManager: driveFileManager,
+                                            sourceDriveFileManager: sourceDriveFileManager,
+                                            destinationDriveFileManager: destinationDriveFileManager,
                                             completion: completion)
                 }
             }
@@ -209,21 +218,22 @@ public final class FileActionsHelper {
                                           allItemsSelected: Bool,
                                           forceMoveDistinctFiles: Bool = false,
                                           observer: AnyObject,
-                                          driveFileManager: DriveFileManager,
+                                          sourceDriveFileManager: DriveFileManager,
+                                          destinationDriveFileManager: DriveFileManager,
                                           completion: (() -> Void)?) async {
         if allItemsSelected && !forceMoveDistinctFiles {
             await bulkMove(exceptFileIds: exceptFileIds,
                            from: currentDirectory,
                            to: destinationDirectory,
                            observer: observer,
-                           driveFileManager: driveFileManager,
+                           driveFileManager: destinationDriveFileManager,
                            completion: completion)
         } else if files.count > Constants.bulkActionThreshold && !forceMoveDistinctFiles {
             await bulkMove(files,
                            from: currentDirectory,
                            to: destinationDirectory,
                            observer: observer,
-                           driveFileManager: driveFileManager,
+                           driveFileManager: destinationDriveFileManager,
                            completion: completion)
         } else {
             do {
@@ -232,7 +242,12 @@ public final class FileActionsHelper {
                 let proxyDestinationDirectory = destinationDirectory.proxify()
 
                 try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
-                    _ = try await driveFileManager.move(file: proxyFile, to: proxyDestinationDirectory)
+                    try await DriveFileManager.move(
+                        file: proxyFile,
+                        to: proxyDestinationDirectory,
+                        sourceDriveFileManager: sourceDriveFileManager,
+                        destinationDriveFileManager: destinationDriveFileManager
+                    )
                 }
 
                 UIConstants
