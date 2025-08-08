@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import Foundation
 import InfomaniakCore
 import InfomaniakLogin
@@ -23,8 +24,61 @@ import InfomaniakLogin
 import kDriveCore
 import XCTest
 
+final class TestNetworkRequestRetrier: RequestInterceptor {
+    let maxRetry: Int
+    private var retriedRequests: [String: Int] = [:]
+
+    init(maxRetry: Int = 20) {
+        self.maxRetry = maxRetry
+    }
+
+    func retry(_ request: Alamofire.Request,
+               for session: Session,
+               dueTo error: Error,
+               completion: @escaping (RetryResult) -> Void) {
+        guard
+            request.task?.response == nil,
+            let url = request.request?.url?.absoluteString
+        else {
+            removeCachedUrlRequest(url: request.request?.url?.absoluteString)
+            completion(.doNotRetry)
+            return
+        }
+
+        let errorGenerated = error as NSError
+        switch errorGenerated.code {
+        // -1001 = timeout | -1005 = connection lost
+        case -1001, -1005:
+            guard let retryCount = retriedRequests[url] else {
+                retriedRequests[url] = 1
+                completion(.retryWithDelay(10))
+                return
+            }
+
+            if retryCount < maxRetry {
+                retriedRequests[url] = retryCount + 1
+                completion(.retryWithDelay(10))
+            } else {
+                removeCachedUrlRequest(url: url)
+                completion(.doNotRetry)
+            }
+
+        default:
+            removeCachedUrlRequest(url: url)
+            completion(.doNotRetry)
+        }
+    }
+
+    private func removeCachedUrlRequest(url: String?) {
+        guard let url = url else {
+            return
+        }
+        retriedRequests.removeValue(forKey: url)
+    }
+}
+
 final class DriveApiTests: XCTestCase {
-    private static let defaultTimeout = 120.0
+    private static let defaultTimeout = 60.0
     private static let token = ApiToken(accessToken: Env.token,
                                         expiresIn: Int.max,
                                         refreshToken: "",
@@ -33,11 +87,27 @@ final class DriveApiTests: XCTestCase {
                                         userId: Env.userId,
                                         expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
 
-    private var currentApiFetcher: DriveApiFetcher = {
-        let apiFetcher = DriveApiFetcher(token: token, delegate: MCKTokenDelegate())
-        apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = defaultTimeout
+    private var currentApiFetcher: DriveApiFetcher = createDriveApiFetcher()
+
+    private static func createDriveApiFetcher() -> DriveApiFetcher {
+        let tokenDelegate = MCKTokenDelegate()
+        let apiFetcher = DriveApiFetcher(token: token, delegate: tokenDelegate)
+
+        let authenticator = OAuthAuthenticator(refreshTokenDelegate: tokenDelegate)
+
+        let authenticationInterceptor = AuthenticationInterceptor(authenticator: authenticator, credential: token)
+
+        let retrier = TestNetworkRequestRetrier()
+
+        let interceptor = Interceptor(adapters: [],
+                                      retriers: [retrier],
+                                      interceptors: [authenticationInterceptor])
+        let sessionConfiguration = URLSessionConfiguration.ephemeral
+        sessionConfiguration.timeoutIntervalForRequest = Self.defaultTimeout
+        apiFetcher.authenticatedSession = Session(configuration: sessionConfiguration, interceptor: interceptor)
+
         return apiFetcher
-    }()
+    }
 
     private let proxyDrive = ProxyDrive(id: Env.driveId)
     private let isFreeDrive = false
@@ -50,10 +120,10 @@ final class DriveApiTests: XCTestCase {
 
     override func tearDown() async throws {
         let drive = ProxyDrive(id: Env.driveId)
-        let apiFetcher = DriveApiFetcher(token: Self.token, delegate: MCKTokenDelegate())
-        apiFetcher.authenticatedSession.session.configuration.timeoutIntervalForRequest = Self.defaultTimeout
+
+        let apiFetcher = Self.createDriveApiFetcher()
+
         _ = try? await apiFetcher.emptyTrash(drive: drive)
-        try? await Task.sleep(nanoseconds: 1_000_000_000) // Try to sleep to prevent Network stress and timeouts
     }
 
     // MARK: - Tests setup
