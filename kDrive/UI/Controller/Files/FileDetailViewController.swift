@@ -247,8 +247,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
             do {
                 let currentFile = try await driveFileManager.file(proxyFile, forceRefresh: true)
 
-                let isFileSharedWithMe = driveFileManager.driveId != proxyFile.driveId
-                let currentFileAccess = isFileSharedWithMe ? nil : try await driveFileManager.apiFetcher.access(for: proxyFile)
+                let isWithinSameDrive = driveFileManager.driveId == proxyFile.driveId
+                let currentFileAccess = isWithinSameDrive ? try await driveFileManager.apiFetcher.access(for: proxyFile) : nil
 
                 let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
