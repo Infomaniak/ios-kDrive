@@ -845,6 +845,25 @@ public final class DriveFileManager {
                             destinationDriveFileManager: DriveFileManager) async throws -> (CancelableResponse, File) {
         let response = try await destinationDriveFileManager.apiFetcher.move(file: file, to: destination)
 
+        guard !(sourceDriveFileManager === destinationDriveFileManager) else {
+            let updatedFile = try move(file: file, to: destination, driveFileManager: sourceDriveFileManager)
+            return (response, updatedFile)
+        }
+
+        let updatedFile = try moveToDifferentDriveFileManager(
+            file: file,
+            to: destination,
+            sourceDriveFileManager: sourceDriveFileManager,
+            destinationDriveFileManager: destinationDriveFileManager
+        )
+        return (response, updatedFile)
+    }
+
+    private static func moveToDifferentDriveFileManager(file: ProxyFile,
+                                                        to destination: ProxyFile,
+                                                        sourceDriveFileManager: DriveFileManager,
+                                                        destinationDriveFileManager: DriveFileManager) throws
+        -> File {
         var currentFile: File?
         try sourceDriveFileManager.database.writeTransaction { writableRealm in
             let liveFile = try file.resolve(using: writableRealm)
@@ -855,8 +874,8 @@ public final class DriveFileManager {
                 oldParent.signalChanges(userId: sourceDriveFileManager.drive.userId)
                 sourceDriveFileManager.notifyObserversWith(file: oldParent)
             }
-
             currentFile = liveFile.freeze()
+            writableRealm.delete(liveFile)
         }
 
         guard let currentFile else {
@@ -880,7 +899,35 @@ public final class DriveFileManager {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
         }
 
-        return (response, updatedFile.freeze())
+        return updatedFile.freeze()
+    }
+
+    private static func move(file: ProxyFile, to destination: ProxyFile, driveFileManager: DriveFileManager) throws -> File {
+        var updatedFile: File?
+        try driveFileManager.database.writeTransaction { writableRealm in
+            let liveFile = try file.resolve(using: writableRealm)
+            let newParent = try destination.resolve(using: writableRealm)
+            let oldParent = liveFile.parent
+
+            oldParent?.children.remove(liveFile)
+            newParent.children.insert(liveFile)
+
+            if let oldParent {
+                oldParent.signalChanges(userId: driveFileManager.drive.userId)
+                driveFileManager.notifyObserversWith(file: oldParent)
+            }
+
+            newParent.signalChanges(userId: driveFileManager.drive.userId)
+            driveFileManager.notifyObserversWith(file: newParent)
+
+            updatedFile = liveFile
+        }
+
+        guard let updatedFile else {
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
+        }
+
+        return updatedFile.freeze()
     }
 
     public func rename(file: ProxyFile, newName: String) async throws -> File {
