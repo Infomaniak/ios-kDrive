@@ -1,4 +1,3 @@
-- Login inter app
+- Connexion simplifiée à partir des autres apps Infomaniak installées (corrections 2)
 - Meilleur affichage des dossiers récents
 - Notifications plus claires sur les téléversements en échec
-- Améliorations de la stabilité et corrections de bugs
