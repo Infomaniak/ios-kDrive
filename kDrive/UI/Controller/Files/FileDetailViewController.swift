@@ -92,7 +92,9 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
                             categoryRights: CategoryRights,
                             isSharedWithMe: Bool) -> [FileInformationRow] {
             var rows = [FileInformationRow]()
-            if fileAccess != nil || !file.users.isEmpty {
+
+            if let fileAccess,
+               !fileAccess.users.isEmpty || !fileAccess.teams.isEmpty {
                 rows.append(.users)
             }
             if file.capabilities.canShare {
@@ -243,8 +245,11 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private func loadFileInformation() {
         Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
-                let currentFile = try await driveFileManager.file(id: proxyFile.id, forceRefresh: true)
-                let currentFileAccess = try await driveFileManager.apiFetcher.access(for: proxyFile)
+                let currentFile = try await driveFileManager.file(proxyFile, forceRefresh: true)
+
+                let isWithinSameDrive = driveFileManager.driveId == proxyFile.driveId
+                let currentFileAccess = isWithinSameDrive ? try await driveFileManager.apiFetcher.access(for: proxyFile) : nil
+
                 let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
                 self.fileInformationRows = FileInformationRow.getRows(for: currentFile,

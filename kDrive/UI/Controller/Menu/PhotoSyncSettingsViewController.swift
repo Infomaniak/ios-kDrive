@@ -137,8 +137,13 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
                 updateSaveButtonState()
             } else {
                 Task {
-                    let file = try await driveFileManager?.file(id: liveNewSyncSettings.parentDirectoryId)
-                    self.selectedDirectory = file?.freeze()
+                    guard let driveFileManager else { return }
+
+                    let file = try await driveFileManager.file(ProxyFile(
+                        driveId: driveFileManager.driveId,
+                        id: liveNewSyncSettings.parentDirectoryId
+                    ))
+                    self.selectedDirectory = file.freeze()
                     self.tableView.reloadRows(at: [IndexPath(row: 1, section: 1)], with: .none)
                 }
             }
