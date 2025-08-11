@@ -106,7 +106,6 @@ final class SelectFolderViewController: FileListViewController {
         let isNotExcluded = !disabledDirectoriesSelection.contains(viewModel.currentDirectory.id)
         let currentDirectory = viewModel.currentDirectory
         let canMoveOrCreate = currentDirectory.capabilities.canMoveInto || currentDirectory.capabilities.canCreateFile
-        let selectButtonEnabled = isNotExcluded && canMoveOrCreate
 
         guard let fileToMove else {
             selectFolderButton.isEnabled = isNotExcluded && canMoveOrCreate
