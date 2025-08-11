@@ -1,4 +1,3 @@
-- Login inter app
+- Simplified login from other installed Infomaniak apps (fixes 2)
 - Better display of recent files
 - Clearer notifications about failed uploads
-- Stability improvements and bug fixes
