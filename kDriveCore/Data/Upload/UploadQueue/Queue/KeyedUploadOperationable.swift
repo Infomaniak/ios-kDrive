@@ -29,25 +29,25 @@ final class KeyedUploadOperationable {
     /// a FileId to Operation map, bound to `queue` for access
     private var operationsInQueue: [String: UploadOperationable] = [:]
 
-    public func getObject(forKey key: String) -> UploadOperationable? {
+    func getObject(forKey key: String) -> UploadOperationable? {
         queue.sync {
             self.operationsInQueue[key]
         }
     }
 
-    public func setObject(_ object: UploadOperationable, key: String) {
+    func setObject(_ object: UploadOperationable, key: String) {
         queue.sync {
             self.operationsInQueue[key] = object
         }
     }
 
-    public func removeObject(forKey key: String) {
+    func removeObject(forKey key: String) {
         _ = queue.sync {
             self.operationsInQueue.removeValue(forKey: key)
         }
     }
 
-    public var isEmpty: Bool {
+    var isEmpty: Bool {
         var empty = true
         queue.sync {
             empty = self.operationsInQueue.isEmpty
@@ -55,7 +55,7 @@ final class KeyedUploadOperationable {
         return empty
     }
 
-    public func removeAll() {
+    func removeAll() {
         queue.sync {
             self.operationsInQueue.removeAll()
         }

@@ -63,7 +63,7 @@ class LockedFolderViewController: BaseInfoViewController {
         ])
     }
 
-    @objc public func openWebBrowser() {
+    @objc func openWebBrowser() {
         guard let destinationURL else {
             return
         }

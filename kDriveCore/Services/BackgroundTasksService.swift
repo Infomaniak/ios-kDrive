@@ -51,17 +51,17 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var photoScan: PhotoLibraryScanable
 
-    public init() {
+    init() {
         // META: keep SonarCloud happy
     }
 
-    public func registerBackgroundTasks() {
+    func registerBackgroundTasks() {
         Log.backgroundTaskScheduling("registerBackgroundTasks")
         registerBackgroundTask(identifier: Constants.backgroundRefreshIdentifier)
         registerBackgroundTask(identifier: Constants.longBackgroundRefreshIdentifier)
     }
 
-    public func buildBackgroundTask(_ task: BGTask, identifier: String) {
+    func buildBackgroundTask(_ task: BGTask, identifier: String) {
         scheduleBackgroundRefresh()
 
         if UIApplication.shared.applicationState != .background {

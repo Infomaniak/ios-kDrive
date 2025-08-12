@@ -50,7 +50,7 @@ class CategoryFloatingPanelAction: Equatable {
         return [edit, delete]
     }
 
-    public static func == (lhs: CategoryFloatingPanelAction, rhs: CategoryFloatingPanelAction) -> Bool {
+    static func == (lhs: CategoryFloatingPanelAction, rhs: CategoryFloatingPanelAction) -> Bool {
         return lhs.id == rhs.id
     }
 }

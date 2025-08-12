@@ -1,7 +1,6 @@
 [tools]
-tuist = '4.55.0'
-periphery = '2.21.1'
-swiftformat = '0.56.2'
+tuist = '4.59.2'
+swiftformat = '0.57.2'
 swiftlint = '0.59.1'
 sentry-cli = "latest"
 

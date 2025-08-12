@@ -318,7 +318,7 @@ class MultipleSelectionFileListViewModel {
         await performAndObserve(bulkAction: action)
     }
 
-    public func performAndObserve(bulkAction: BulkAction) async {
+    func performAndObserve(bulkAction: BulkAction) async {
         await FileActionsHelper.performAndObserve(bulkAction: bulkAction,
                                                   from: currentDirectory,
                                                   observer: self,

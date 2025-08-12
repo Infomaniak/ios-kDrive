@@ -35,10 +35,17 @@ opt_in_rules:
  - unneeded_parentheses_in_closure_argument
 analyzer_rules:
  - unused_import
-excluded:
- - .tuist-bin/*
- - Derived/Sources/*
- - DerivedData/
- - Derived/
- - Tuist/.build/
+included:
+ - kDrive
+ - kDriveActionExtension
+ - kDriveAPITests
+ - kDriveCore
+ - kDriveFileProvider
+ - kDriveShareExtension
+ - kDriveTests
+ - kDriveTestShared
+ - kDriveUITests
+ - Project.swift
+ - Tuist/Package.swift
+ - Tuist/ProjectDescriptionHelpers
 function_parameter_count: 7

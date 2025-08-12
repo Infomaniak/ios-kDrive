@@ -30,7 +30,7 @@ final class ShareNavigationViewController: TitleSizeAdjustingNavigationControlle
     // Not lazy to force init of the object early, and set a userID in Sentry
     @InjectService var accountManager: AccountManageable
 
-    override public func viewDidLoad() {
+    override func viewDidLoad() {
         // log
         super.viewDidLoad()
         // Modify sheet size on iPadOS, property is ignored on iOS
