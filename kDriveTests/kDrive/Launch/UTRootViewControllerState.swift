@@ -29,7 +29,7 @@ import XCTest
 final class UTRootViewControllerState: XCTestCase {
     let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
 
-    public static let fakeAccount = Account(apiToken: ApiToken(
+    static let fakeAccount = Account(apiToken: ApiToken(
         accessToken: "",
         expiresIn: 0,
         refreshToken: "",

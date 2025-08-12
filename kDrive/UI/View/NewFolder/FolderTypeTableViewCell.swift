@@ -29,7 +29,7 @@ class FolderTypeTableViewCell: InsetTableViewCell {
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
     }
 
-    public func setMykSuiteChip() {
+    func setMykSuiteChip() {
         let chipView = MyKSuiteChip.instantiateGrayChip()
         chipView.translatesAutoresizingMaskIntoConstraints = false
         chipContainerView.addSubview(chipView)

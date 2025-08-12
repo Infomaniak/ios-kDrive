@@ -35,7 +35,7 @@ struct PHAssetNameProvider {
         "\(Self.noName)-\(URL.defaultFileName(date: now))\(burstString).\(fileExtension)"
     }
 
-    public func isPictureWithChanges(originalFilename: String) -> Bool {
+    func isPictureWithChanges(originalFilename: String) -> Bool {
         // Require a valid originalFilename
         guard !originalFilename.isEmpty else {
             return false
@@ -53,13 +53,13 @@ struct PHAssetNameProvider {
     }
 
     /// Get a filename that can be used by kDrive, taking into consideration burst and edits of a PHAsset.
-    public func getFilename(fileExtension: String,
-                            originalFilename: String?,
-                            creationDate: Date?,
-                            modificationDate: Date?,
-                            burstCount: Int?,
-                            burstIdentifier: String?,
-                            now: Date = Date()) -> String {
+    func getFilename(fileExtension: String,
+                     originalFilename: String?,
+                     creationDate: Date?,
+                     modificationDate: Date?,
+                     burstCount: Int?,
+                     burstIdentifier: String?,
+                     now: Date = Date()) -> String {
         let fileExtension = fileExtension.lowercased()
         let burstString: String
         if let burstCount,

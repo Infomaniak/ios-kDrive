@@ -478,7 +478,7 @@ final class UTRangeProviderGuts: XCTestCase {
     }
 
     /// Check that the chunks provided are continuously describing chunks without gaps.
-    public static func checkContinuity(ranges: [DataRange]) throws {
+    static func checkContinuity(ranges: [DataRange]) throws {
         /// Create an offseted sequence
         let offsetedRanges = ranges.dropFirst()
 

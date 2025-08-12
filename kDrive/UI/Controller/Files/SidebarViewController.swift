@@ -27,8 +27,8 @@ import UIKit
 
 class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwitchDriveDelegate {
     @LazyInjectService private var accountManager: AccountManageable
-    public typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
-    public typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
+    typealias MenuDataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>
+    typealias DataSourceSnapshot = NSDiffableDataSourceSnapshot<RootMenuSection, RootMenuItem>
     private var selectedIndexPath: IndexPath?
     private let menuIndexPath: IndexPath = [-1, -1]
     private var plusButtonTableViewController: UITableViewController?
@@ -43,7 +43,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return true
     }
 
-    public enum RootMenuSection {
+    enum RootMenuSection {
         case main
         case recent
         case first
@@ -59,7 +59,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
-    public struct RootMenuItem: Equatable, Hashable {
+    struct RootMenuItem: Equatable, Hashable {
         var id: Int {
             return destination.hashValue
         }
@@ -169,7 +169,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                                         image: KDriveResourcesAsset.delete.image,
                                                                         destination: .file(DriveFileManager.trashRootFile))]
 
-    public var sections: [RootMenuSection] {
+    var sections: [RootMenuSection] {
         [RootMenuSection.first, RootMenuSection.second, RootMenuSection.third]
     }
 
@@ -177,7 +177,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
-    public var rootViewChildren: [File]?
+    var rootViewChildren: [File]?
     private lazy var dataSource: MenuDataSource = configureDataSource(for: collectionView)
     private let refreshControl = UIRefreshControl()
 

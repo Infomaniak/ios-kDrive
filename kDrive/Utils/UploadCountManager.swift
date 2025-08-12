@@ -40,7 +40,7 @@ final class UploadCountManager {
     private lazy var driveIds = [driveFileManager.driveId] + driveInfosManager
         .getDrives(for: userId, sharedWithMe: true).map(\.id)
 
-    public var uploadCount = 0
+    var uploadCount = 0
 
     private var uploadsObserver: NotificationToken?
 

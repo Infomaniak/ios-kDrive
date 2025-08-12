@@ -134,7 +134,7 @@ final class FilePresenter {
         }
     }
 
-    public func presentDirectory(
+    func presentDirectory(
         for file: File,
         driveFileManager: DriveFileManager,
         animated: Bool,

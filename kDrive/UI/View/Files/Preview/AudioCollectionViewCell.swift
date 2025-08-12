@@ -41,7 +41,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     var driveFileManager: DriveFileManager!
 
-    public lazy var singleTrackPlayer = SingleTrackPlayer(driveFileManager: driveFileManager)
+    lazy var singleTrackPlayer = SingleTrackPlayer(driveFileManager: driveFileManager)
 
     private var cancellables = Set<AnyCancellable>()
     private var thumbnailDownloadTask: Kingfisher.DownloadTask?

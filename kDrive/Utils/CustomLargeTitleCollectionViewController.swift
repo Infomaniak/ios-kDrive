@@ -22,7 +22,7 @@ import kDriveCore
 import UIKit
 
 class CustomLargeTitleCollectionViewController: UICollectionViewController {
-    @InjectService public var appRouter: AppNavigable
+    @InjectService var appRouter: AppNavigable
 
     private var navigationBarHeight: CGFloat {
         return navigationController?.navigationBar.frame.height ?? 0
@@ -32,7 +32,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
 
     private var originalTitle: String?
 
-    public var isCompactView: Bool {
+    var isCompactView: Bool {
         guard let rootViewController = appRouter.rootViewController else { return false }
         return rootViewController.traitCollection.horizontalSizeClass == .compact
     }

@@ -24,7 +24,7 @@ import SwiftUI
 import UIKit
 
 enum MyKSuiteBridgeViewController {
-    public static func instantiate() -> UIViewController {
+    static func instantiate() -> UIViewController {
         let swiftUIView = MyKSuiteView(configuration: .kDrive)
         return UIHostingController(rootView: ScrollView { swiftUIView })
     }
