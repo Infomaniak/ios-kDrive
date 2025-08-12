@@ -32,6 +32,7 @@ let packageSettings = PackageSettings(
         "LocalizeKit": .framework,
         "Lottie": .framework,
         "MyKSuite": .framework,
+        "KSuiteUtils": .framework,
         "NIOConcurrencyHelpers": .framework,
         "NIOCore": .framework,
         "NIOTransportServices": .framework,
