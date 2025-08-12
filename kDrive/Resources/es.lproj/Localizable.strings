@@ -2,9 +2,9 @@
  * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
  * Locale: es, Spanish
- * Tagged: ios, !ios-action-info-plist, !ios-info-plist
+ * Tagged: ios
  * Exported by: Baptiste Griva
- * Exported at: Thu, 03 Jul 2025 09:57:17 +0200
+ * Exported at: Tue, 12 Aug 2025 08:12:18 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -1465,6 +1465,9 @@
 /* loco:60c11597ba8b664750680ca2 */
 "noMediaFolderTitle" = "No hay carpetas de medios disponibles";
 
+/* loco:68775c45dfd520437c08bed3 */
+"noRightsToOfficeLink" = "Ninguna cuenta tiene acceso a este archivo";
+
 /* loco:6049df4d5c2c3a04bc397a0d */
 "notEnoughStorageDescription1" = "Casi todo el espacio de almacenamiento de tu kDrive está ocupado. Mejora tu oferta y desbloquea nuevas funciones.";
 
@@ -2268,6 +2271,3 @@
 
 /* loco:6049df4d5c2c3a04bc397a95 */
 "userPermissionWriteDescription" = "Modificar el archivo\nDescargar\nAñadir comentario\nAñadir y crear archivo/carpeta\nEliminar el archivo";
-
-/* loco:686635d0305e7db9190569a2 */
-"wrongAccountConnected" = "No ha iniciado sesión en la cuenta correcta";

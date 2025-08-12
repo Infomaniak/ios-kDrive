@@ -245,7 +245,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         if driveFileManager == nil, !accounts.isEmpty {
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.wrongAccountConnected)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.noRightsToOfficeLink)
         }
 
         guard let driveFileManager else {
