@@ -53,6 +53,10 @@ public struct DeeplinkParser: DeeplinkParsable {
         if let officeLink = OfficeLink(officeURL: url) {
             await router.navigate(to: .office(officeLink: officeLink))
             return true
+        }
+        if let privateShareLink = PrivateShareLink(privateShareUrl: url) {
+            await router.navigate(to: .privateShare(privateShareLink: privateShareLink))
+            return true
         } else {
             Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
             return false

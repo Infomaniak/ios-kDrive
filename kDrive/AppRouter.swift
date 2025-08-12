@@ -158,6 +158,9 @@ public struct AppRouter: AppNavigable {
             window.rootViewController = freshRootViewController
 
             UniversalLinksHelper.openFile(id: officeLink.fileId, driveFileManager: driveFileManager, office: true)
+
+        case .privateShare(let privateShareLink):
+            Log.sceneDelegate("NavigationManager: .privateShare not yet implemented", level: .debug)
         }
     }
 
