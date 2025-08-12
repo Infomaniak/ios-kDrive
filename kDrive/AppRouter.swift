@@ -160,7 +160,23 @@ public struct AppRouter: AppNavigable {
             UniversalLinksHelper.openFile(id: officeLink.fileId, driveFileManager: driveFileManager, office: true)
 
         case .privateShare(let privateShareLink):
-            Log.sceneDelegate("NavigationManager: .privateShare not yet implemented", level: .debug)
+            guard let driveFileManager = await accountManager
+                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: privateShareLink) else {
+                Log.sceneDelegate(
+                    "NavigationManager: Unable to navigate to .office without a DriveFileManager",
+                    level: .error
+                )
+                deeplinkService.setLastPublicShare(privateShareLink)
+                return
+            }
+            guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+                return
+            }
+
+            let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
+            window.rootViewController = freshRootViewController
+
+            UniversalLinksHelper.openFile(id: privateShareLink.redirectLinkId, driveFileManager: driveFileManager, office: false)
         }
     }
 

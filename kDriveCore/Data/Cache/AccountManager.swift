@@ -219,17 +219,36 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             driveId = deeplink.driveId
         case let deeplink as OfficeLink:
             driveId = deeplink.driveId
+        case let deeplink as PrivateShareLink:
+            driveId = deeplink.driveId
         default:
             return nil
         }
 
-        for account in accounts {
-            if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
-                for: account.userId,
-                driveId: driveId
-            ) {
-                driveFileManager = matchingDriveFileManager
-                matchingAccount = account
+        if let privateShareLink = deeplink as? PrivateShareLink {
+            for account in accounts {
+                guard let matchingDriveFileManager = getDriveFileManager(for: driveId, userId: account.userId) else { return nil }
+                do {
+                    _ = try await matchingDriveFileManager.file(ProxyFile(
+                        driveId: matchingDriveFileManager.driveId,
+                        id: privateShareLink.redirectLinkId
+                    ))
+
+                    driveFileManager = matchingDriveFileManager
+                    matchingAccount = account
+                    break
+
+                } catch {}
+            }
+        } else {
+            for account in accounts {
+                if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
+                    for: account.userId,
+                    driveId: driveId
+                ) {
+                    driveFileManager = matchingDriveFileManager
+                    matchingAccount = account
+                }
             }
         }
 
@@ -252,7 +271,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return nil
         }
 
-        if driveId != currentDriveId {
+        if driveId != currentDriveId && !(deeplink is PrivateShareLink) {
             DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
 
             try? await driveFileManager.switchDriveAndReloadUI()
