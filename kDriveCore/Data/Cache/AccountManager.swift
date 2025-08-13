@@ -212,7 +212,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         if let privateShareLink = deeplink as? PrivateShareLink {
             for account in accounts {
-                guard let matchingDriveFileManager = getDriveFileManager(for: driveId, userId: account.userId) else { return nil }
+                guard let matchingDriveFileManager = getDriveFileManager(for: driveId, userId: account.userId) else { continue }
                 do {
                     _ = try await matchingDriveFileManager.file(ProxyFile(
                         driveId: matchingDriveFileManager.driveId,
