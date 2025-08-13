@@ -21,7 +21,7 @@ import SwiftRegex
 
 public struct SharedWithMeLink: Sendable, Equatable {
     public static let validationRegex =
-        Regex(pattern: #"^/all/kdrive/app/drive/([0-9]+)/shared-with-me(?:/.*)?$"#)
+        Regex(pattern: #"^(.*?)/app/drive/([0-9]+)/shared-with-me(.*)?$"#)
 
     public let sharedWithMeURL: URL
     public let driveId: Int
@@ -40,13 +40,12 @@ public struct SharedWithMeLink: Sendable, Equatable {
         }
 
         guard let mandatoryMatch = matches.first,
-              let driveId = mandatoryMatch[safe: 1],
-              let driveIdInt = Int(driveId) else {
+              let driveId = mandatoryMatch[safe: 2],
+              let driveIdInt = Int(driveId),
+              let tail = mandatoryMatch[safe: 3] else {
             return nil
         }
 
-        let baseUrl = "/all/kdrive/app/drive/\(driveId)/shared-with-me"
-        let tail = path.replacingOccurrences(of: baseUrl, with: "")
         let parameters = tail.split(separator: "/").map { String($0) }
 
         sharedDriveId = Int(parameters[safe: 0] ?? "")
