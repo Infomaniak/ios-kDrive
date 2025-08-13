@@ -205,24 +205,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     private func getMatchingDriveAndAccount(deeplink: Any,
-                                            driveId: Int) async
+                                            driveId: Int, accounts: [Account]) async
         -> (driveFileManager: DriveFileManager?, matchingAccount: Account?)? {
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
 
-        let orderedAccounts = accounts.sorted { account1, account2 in
-            let isAccount1Connected = account1 == currentAccount
-            let isAccount2Connected = account2 == currentAccount
-
-            if isAccount1Connected && !isAccount2Connected {
-                return true
-            } else {
-                return false
-            }
-        }
-
         if let privateShareLink = deeplink as? PrivateShareLink {
-            for account in orderedAccounts {
+            for account in accounts {
                 guard let matchingDriveFileManager = getDriveFileManager(for: driveId, userId: account.userId) else { return nil }
                 do {
                     _ = try await matchingDriveFileManager.file(ProxyFile(
@@ -237,7 +226,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 } catch {}
             }
         } else {
-            for account in orderedAccounts {
+            for account in accounts {
                 if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
                     for: account.userId,
                     driveId: driveId
@@ -272,7 +261,18 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return nil
         }
 
-        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId) {
+        let orderedAccounts = accounts.sorted { account1, account2 in
+            let isAccount1Connected = account1 == currentAccount
+            let isAccount2Connected = account2 == currentAccount
+
+            if isAccount1Connected && !isAccount2Connected {
+                return true
+            } else {
+                return false
+            }
+        }
+
+        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId, accounts: orderedAccounts) {
             driveFileManager = match.driveFileManager
             matchingAccount = match.matchingAccount
         }
