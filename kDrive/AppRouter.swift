@@ -204,7 +204,7 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    @MainActor public func getControllerForRestoration(tabBarViewController: UISplitViewController?) -> UIViewController? {
+    @MainActor public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? {
         guard let rootViewController = window?.rootViewController else { return nil }
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
         if rootHorizontalSizeClass == .compact {
@@ -255,7 +255,7 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            guard let viewController = getControllerForRestoration(tabBarViewController: tabBarViewController) else {
+            guard let viewController = getCurrentController(tabBarViewController: tabBarViewController) else {
                 Log.sceneDelegate("unable to access viewControllers", level: .error)
                 return
             }
@@ -870,7 +870,7 @@ public struct AppRouter: AppNavigable {
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager, office: Bool) {
         guard let rootViewController = window?.rootViewController as? UISplitViewController else { return }
-        guard let viewController = getControllerForRestoration(tabBarViewController: rootViewController) else { return }
+        guard let viewController = getCurrentController(tabBarViewController: rootViewController) else { return }
 
         viewController.dismiss(animated: false) {
             guard let navController = viewController as? UINavigationController else {
