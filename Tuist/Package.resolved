@@ -1,5 +1,5 @@
 {
-  "originHash" : "83a0a3adc8c996d394fa46006676d34c889508b0a36f85ea3a40aa2d6e8d2e07",
+  "originHash" : "a55ce2d15d206bd97a58a509132bc30a26ee86d3c770ded086067374d319ce3c",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "branch" : "ksuite-utils",
-        "revision" : "9e3b65ac2baa8e5b2041f2d5a6ad24a1bf578ea9"
+        "branch" : "ksuite",
+        "revision" : "e17242e896686317d87a4bcc1f7936dc8fa8aa90"
       }
     },
     {
