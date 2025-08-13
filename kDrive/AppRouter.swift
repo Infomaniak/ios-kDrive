@@ -114,40 +114,31 @@ public struct AppRouter: AppNavigable {
             await handleTrashLink(trashLink: trashLink)
 
         case .office(let officeLink):
-            guard let driveFileManager = await accountManager
-                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: officeLink) else {
-                Log.sceneDelegate(
-                    "NavigationManager: Unable to navigate to .office without a DriveFileManager",
-                    level: .error
-                )
-                deeplinkService.setLastPublicShare(officeLink)
-                return
-            }
-
-            let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
-            window.rootViewController = freshRootViewController
-
-            UniversalLinksHelper.openFile(id: officeLink.fileId, driveFileManager: driveFileManager, office: true)
+            await handleSimpleLink(deeplink: officeLink, fileId: officeLink.fileId, isOfficeLink: true)
 
         case .privateShare(let privateShareLink):
-            guard let driveFileManager = await accountManager
-                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: privateShareLink) else {
-                Log.sceneDelegate(
-                    "NavigationManager: Unable to navigate to .office without a DriveFileManager",
-                    level: .error
-                )
-                deeplinkService.setLastPublicShare(privateShareLink)
-                return
-            }
-            guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
-                return
-            }
-
-            let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
-            window.rootViewController = freshRootViewController
-
-            UniversalLinksHelper.openFile(id: privateShareLink.redirectLinkId, driveFileManager: driveFileManager, office: false)
+            await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.redirectLinkId, isOfficeLink: false)
         }
+    }
+
+    @MainActor private func handleSimpleLink(deeplink: Any, fileId: Int, isOfficeLink: Bool) async {
+        guard let driveFileManager = await accountManager
+            .getMatchingDriveFileManagerOrSwitchAccount(deeplink: deeplink) else {
+            Log.sceneDelegate(
+                "NavigationManager: Unable to navigate without a DriveFileManager",
+                level: .error
+            )
+            deeplinkService.setLastPublicShare(deeplink)
+            return
+        }
+        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
+        let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
+        window?.rootViewController = freshRootViewController
+
+        UniversalLinksHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
     }
 
     // MARK: TopmostViewControllerFetchable
