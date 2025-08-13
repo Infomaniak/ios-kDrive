@@ -45,6 +45,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     var currentArchiveId: String?
     var downloadError: DriveError?
 
+    enum DomainError: Error {
+        case missingViewModel
+    }
+
     weak var presentingParent: UIViewController?
 
     var sharedWithMe: Bool {
@@ -155,10 +159,17 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             } else {
                 action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
             }
-            let tabBarController = presentingViewController as? MainTabViewController
-            let navigationController = tabBarController?.selectedViewController as? UINavigationController
-            await (navigationController?.topViewController as? FileListViewController)?.viewModel.multipleSelectionViewModel?
-                .performAndObserve(bulkAction: action)
+
+            guard let splitViewController = presentingViewController as? RootSplitViewController,
+                  let navigationController = appNavigable
+                  .getCurrentController(tabBarViewController: splitViewController) as? UINavigationController,
+                  let fileListViewController = navigationController.topViewController as? FileListViewController,
+                  let multipleSelectionViewModel = fileListViewController.viewModel.multipleSelectionViewModel else {
+                throw DomainError.missingViewModel
+            }
+
+            await multipleSelectionViewModel.performAndObserve(bulkAction: action)
+
         } else {
             // MainActor should ensure that this call is safe as file was created on the main thread ?
             let proxyFiles = files.map { $0.proxify() }
