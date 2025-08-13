@@ -38,16 +38,16 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService private var keychainHelper: KeychainHelper
     @LazyInjectService private var reviewManager: ReviewManageable
     @LazyInjectService private var availableOfflineManager: AvailableOfflineManageable
-    @LazyInjectService private var accountManager: AccountManageable
+    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService private var infomaniakLogin: InfomaniakLoginable
-    @LazyInjectService private var deeplinkService: DeeplinkServiceable
+    @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService private var matomo: MatomoUtils
 
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
 
     /// Get the current window from the app scene
-    @MainActor private var window: UIWindow? {
+    @MainActor var window: UIWindow? {
         let scene = UIApplication.shared.connectedScenes.first { scene in
             guard let delegate = scene.delegate,
                   delegate is SceneDelegate else {
@@ -108,24 +108,7 @@ public struct AppRouter: AppNavigable {
             showStore(from: viewController, driveFileManager: driveFileManager)
 
         case .sharedWithMe(let sharedWithMeLink):
-            guard let driveFileManager = await accountManager
-                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: sharedWithMeLink) else {
-                Log.sceneDelegate(
-                    "NavigationManager: Unable to navigate to .sharedWithMe without a matching DriveFileManager",
-                    level: .error
-                )
-                deeplinkService.setLastPublicShare(sharedWithMeLink)
-                return
-            }
-
-            let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
-            window.rootViewController = freshRootViewController
-
-            await showSharedWithMe(
-                driveFileManager: driveFileManager,
-                viewController: freshRootViewController,
-                sharedWithMeLink: sharedWithMeLink
-            )
+            await handleSharedWithMeLink(sharedWithMeLink: sharedWithMeLink)
 
         case .trash(let trashLink):
             guard let driveFileManager = await accountManager

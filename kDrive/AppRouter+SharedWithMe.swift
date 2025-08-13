@@ -129,4 +129,25 @@ public extension AppRouter {
 
         deeplinkService.clearLastPublicShare()
     }
+
+    @MainActor func handleSharedWithMeLink(sharedWithMeLink: SharedWithMeLink) async {
+        guard let driveFileManager = await accountManager
+            .getMatchingDriveFileManagerOrSwitchAccount(deeplink: sharedWithMeLink) else {
+            Log.sceneDelegate(
+                "NavigationManager: Unable to navigate to .sharedWithMe without a matching DriveFileManager",
+                level: .error
+            )
+            deeplinkService.setLastPublicShare(sharedWithMeLink)
+            return
+        }
+
+        let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+        window?.rootViewController = freshRootViewController
+
+        await showSharedWithMe(
+            driveFileManager: driveFileManager,
+            viewController: freshRootViewController,
+            sharedWithMeLink: sharedWithMeLink
+        )
+    }
 }
