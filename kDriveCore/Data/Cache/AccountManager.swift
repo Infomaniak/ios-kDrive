@@ -225,8 +225,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return nil
         }
 
+        let orderedAccounts = accounts.sorted { account1, account2 in
+            let isAccount1Connected = account1 == currentAccount
+            let isAccount2Connected = account2 == currentAccount
+
+            if isAccount1Connected && !isAccount2Connected {
+                return true
+            } else {
+                return false
+            }
+        }
+
         if let privateShareLink = deeplink as? PrivateShareLink {
-            for account in accounts {
+            for account in orderedAccounts {
                 guard let matchingDriveFileManager = getDriveFileManager(for: driveId, userId: account.userId) else { return nil }
                 do {
                     _ = try await matchingDriveFileManager.file(ProxyFile(
@@ -241,7 +252,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 } catch {}
             }
         } else {
-            for account in accounts {
+            for account in orderedAccounts {
                 if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
                     for: account.userId,
                     driveId: driveId
