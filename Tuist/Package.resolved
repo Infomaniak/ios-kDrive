@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "branch" : "ksuite-utils",
-        "revision" : "9e3b65ac2baa8e5b2041f2d5a6ad24a1bf578ea9"
+        "branch" : "ksuite",
+        "revision" : "e17242e896686317d87a4bcc1f7936dc8fa8aa90"
       }
     },
     {
