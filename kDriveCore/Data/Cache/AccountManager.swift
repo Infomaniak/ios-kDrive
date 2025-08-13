@@ -204,26 +204,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) async
-        -> DriveFileManager? {
+    private func getMatchingDriveAndAccount(deeplink: Any,
+                                            driveId: Int) async
+        -> (driveFileManager: DriveFileManager?, matchingAccount: Account?)? {
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
-        let driveId: Int
-
-        switch deeplink {
-        case let deeplink as PublicShareLink:
-            driveId = deeplink.driveId
-        case let deeplink as SharedWithMeLink:
-            driveId = deeplink.driveId
-        case let deeplink as TrashLink:
-            driveId = deeplink.driveId
-        case let deeplink as OfficeLink:
-            driveId = deeplink.driveId
-        case let deeplink as PrivateShareLink:
-            driveId = deeplink.driveId
-        default:
-            return nil
-        }
 
         let orderedAccounts = accounts.sorted { account1, account2 in
             let isAccount1Connected = account1 == currentAccount
@@ -261,6 +246,35 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                     matchingAccount = account
                 }
             }
+        }
+
+        return (driveFileManager, matchingAccount)
+    }
+
+    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) async
+        -> DriveFileManager? {
+        var driveFileManager: DriveFileManager?
+        var matchingAccount: Account?
+        let driveId: Int
+
+        switch deeplink {
+        case let deeplink as PublicShareLink:
+            driveId = deeplink.driveId
+        case let deeplink as SharedWithMeLink:
+            driveId = deeplink.driveId
+        case let deeplink as TrashLink:
+            driveId = deeplink.driveId
+        case let deeplink as OfficeLink:
+            driveId = deeplink.driveId
+        case let deeplink as PrivateShareLink:
+            driveId = deeplink.driveId
+        default:
+            return nil
+        }
+
+        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId) {
+            driveFileManager = match.driveFileManager
+            matchingAccount = match.matchingAccount
         }
 
         if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
