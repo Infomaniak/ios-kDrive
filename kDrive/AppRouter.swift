@@ -111,20 +111,7 @@ public struct AppRouter: AppNavigable {
             await handleSharedWithMeLink(sharedWithMeLink: sharedWithMeLink)
 
         case .trash(let trashLink):
-            guard let driveFileManager = await accountManager
-                .getMatchingDriveFileManagerOrSwitchAccount(deeplink: trashLink) else {
-                Log.sceneDelegate(
-                    "NavigationManager: Unable to navigate to .trashFiles without a DriveFileManager",
-                    level: .error
-                )
-                deeplinkService.setLastPublicShare(trashLink)
-                return
-            }
-
-            let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
-            window.rootViewController = freshRootViewController
-
-            await showTrash(driveFileManager: driveFileManager, viewController: freshRootViewController, trashLink: trashLink)
+            await handleTrashLink(trashLink: trashLink)
 
         case .office(let officeLink):
             guard let driveFileManager = await accountManager

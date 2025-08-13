@@ -70,4 +70,21 @@ public extension AppRouter {
 
         navigationController.pushViewController(destinationViewController, animated: true)
     }
+
+    @MainActor func handleTrashLink(trashLink: TrashLink) async {
+        guard let driveFileManager = await accountManager
+            .getMatchingDriveFileManagerOrSwitchAccount(deeplink: trashLink) else {
+            Log.sceneDelegate(
+                "NavigationManager: Unable to navigate to .trashFiles without a DriveFileManager",
+                level: .error
+            )
+            deeplinkService.setLastPublicShare(trashLink)
+            return
+        }
+
+        let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+        window?.rootViewController = freshRootViewController
+
+        await showTrash(driveFileManager: driveFileManager, viewController: freshRootViewController, trashLink: trashLink)
+    }
 }
