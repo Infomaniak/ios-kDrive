@@ -26,7 +26,7 @@ class KSuiteProChipController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let kSuiteView = KSuiteUpgradeButtonView()
+        let kSuiteView = KSuiteProUpgradeChip()
         let hostingController = UIHostingController(rootView: kSuiteView)
 
         addChild(hostingController)
