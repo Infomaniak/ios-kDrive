@@ -213,6 +213,8 @@ public protocol RouterActionable {
 
     @MainActor func presentUpSaleSheet()
 
+    @MainActor func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager)
+
     func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async
 }
 
