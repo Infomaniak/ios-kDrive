@@ -20,7 +20,7 @@ import Foundation
 import SwiftRegex
 
 public struct TrashLink: Sendable, Equatable {
-    public static let parsingRegex = Regex(pattern: #"^/all/kdrive/app/drive/([0-9]+)/trash/?([0-9]+)?$"#)
+    public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/trash/?([0-9]+)?$"#)
 
     public let trashURL: URL
     public let driveId: Int
