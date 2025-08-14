@@ -57,6 +57,10 @@ public struct DeeplinkParser: DeeplinkParsable {
         if let privateShareLink = PrivateShareLink(privateShareUrl: url) {
             await router.navigate(to: .privateShare(privateShareLink: privateShareLink))
             return true
+        }
+        if let directoryLink = DirectoryLink(directoryURL: url) {
+            await router.navigate(to: .directory(directoryLink: directoryLink))
+            return true
         } else {
             Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
             return false
