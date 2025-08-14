@@ -31,13 +31,6 @@ public enum UniversalLinksHelper {
         let regex: Regex
         let displayMode: DisplayMode
 
-        /// Matches a file preview link
-        static let filePreview = Link(
-            regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+/)?preview/[a-z]+/([0-9]+)$"#)!,
-            displayMode: .file
-        )
-
-        static let all = [filePreview]
     }
 
     private enum DisplayMode {
