@@ -31,12 +31,6 @@ public enum UniversalLinksHelper {
         let regex: Regex
         let displayMode: DisplayMode
 
-        /// Matches a private share link
-        static let privateShareLink = Link(
-            regex: Regex(pattern: #"^/app/drive/([0-9]+)/redirect/([0-9]+)$"#)!,
-            displayMode: .file
-        )
-
         /// Matches a directory list link
         static let directoryLink = Link(regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+)$"#)!, displayMode: .file)
 
@@ -46,7 +40,7 @@ public enum UniversalLinksHelper {
             displayMode: .file
         )
 
-        static let all = [privateShareLink, directoryLink, filePreview]
+        static let all = [directoryLink, filePreview]
     }
 
     private enum DisplayMode {
