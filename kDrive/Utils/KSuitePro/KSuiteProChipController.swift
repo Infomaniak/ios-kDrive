@@ -32,6 +32,7 @@ class KSuiteProChipController: UIViewController {
         addChild(hostingController)
         view.addSubview(hostingController.view)
 
+        hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
