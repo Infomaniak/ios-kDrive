@@ -620,6 +620,11 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func presentUpSaleSheet() {
+        let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
+        nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
+    }
+
+    @MainActor private func nativeLargeSheetPresentation(viewControllerToPresent: UIViewController, customOffset: CGFloat) {
         guard let window,
               let rootViewController = window.rootViewController else {
             return
