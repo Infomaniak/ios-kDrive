@@ -25,6 +25,7 @@ import InfomaniakLogin
 import InfomaniakOnboarding
 import kDriveCore
 import kDriveResources
+import KSuite
 import MyKSuite
 import SafariServices
 import SwiftUI
@@ -621,6 +622,11 @@ public struct AppRouter: AppNavigable {
 
     @MainActor public func presentUpSaleSheet() {
         let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
+        nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
+    }
+
+    @MainActor public func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager) {
+        let viewControllerToPresent = KSuiteViewController(configuration: .business, isAdmin: true)
         nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
     }
 
