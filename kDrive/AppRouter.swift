@@ -603,18 +603,22 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func presentUpSaleSheet() {
+        let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
+        nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
+    }
+
+    @MainActor private func nativeLargeSheetPresentation(viewControllerToPresent: UIViewController, customOffset: CGFloat) {
         guard let window,
               let rootViewController = window.rootViewController else {
             return
         }
 
         rootViewController.dismiss(animated: true) {
-            let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
             if let sheet = viewControllerToPresent.sheetPresentationController {
                 if #available(iOS 16.0, *) {
                     sheet.detents = [
                         .custom { _ in
-                            return 560
+                            return customOffset
                         }
                     ]
                 } else {
