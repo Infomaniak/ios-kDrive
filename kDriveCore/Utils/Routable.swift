@@ -28,6 +28,7 @@ public enum NavigationRoutes: Equatable {
     case office(officeLink: OfficeLink)
     case privateShare(privateShareLink: PrivateShareLink)
     case directory(directoryLink: DirectoryLink)
+    case filePreview(filePreviewLink: FilePreviewLink)
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
         switch (lhs, rhs) {
