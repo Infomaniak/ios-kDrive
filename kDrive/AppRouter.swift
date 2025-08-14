@@ -120,7 +120,7 @@ public struct AppRouter: AppNavigable {
             await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.fileId, isOfficeLink: false)
 
         case .directory(let directoryLink):
-            Log.sceneDelegate("NavigationManager: .directory not yet implemented", level: .debug)
+            await handleSimpleLink(deeplink: directoryLink, fileId: directoryLink.folderId, isOfficeLink: false)
         }
     }
 
