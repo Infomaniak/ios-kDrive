@@ -111,7 +111,7 @@ final class DroppableFileListViewModel {
                             file: file,
                             to: frozenDestinationDirectory,
                             sourceDriveFileManager: destinationDriveFileManager,
-                            destinationDriveFileManager: destinationDriveFileManager
+                            destinationDriveFileManager: nil
                         )
                     }
                 }

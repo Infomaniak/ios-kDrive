@@ -27,20 +27,24 @@ public struct MoveCoordinator {
         file: ProxyFile,
         to destination: ProxyFile,
         sourceDriveFileManager: DriveFileManager,
-        destinationDriveFileManager: DriveFileManager
+        destinationDriveFileManager: DriveFileManager?
     ) async throws -> (CancelableResponse, File) {
         guard file.driveId == destination.driveId else {
             throw DriveError.moveLocalError // Move to different drive is not supported
         }
 
-        if sourceDriveFileManager.context == destinationDriveFileManager.context {
-            return try await sourceDriveFileManager.move(file: file, to: destination)
+        if let destinationDriveFileManager {
+            if sourceDriveFileManager.context == destinationDriveFileManager.context {
+                return try await sourceDriveFileManager.move(file: file, to: destination)
+            } else {
+                return try await sourceDriveFileManager.moveToDifferentDriveFileManager(
+                    file: file,
+                    to: destination,
+                    destinationDriveFileManager: destinationDriveFileManager
+                )
+            }
         } else {
-            return try await sourceDriveFileManager.moveToDifferentDriveFileManager(
-                file: file,
-                to: destination,
-                destinationDriveFileManager: destinationDriveFileManager
-            )
+            return try await sourceDriveFileManager.move(file: file, to: destination)
         }
     }
 }

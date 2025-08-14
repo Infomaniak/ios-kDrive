@@ -77,7 +77,7 @@ public final class FileActionsHelper {
         file: File,
         to destinationDirectory: File,
         sourceDriveFileManager: DriveFileManager,
-        destinationDriveFileManager: DriveFileManager,
+        destinationDriveFileManager: DriveFileManager?,
         completion: ((Bool) -> Void)? = nil
     ) {
         guard destinationDirectory.id != file.parentId else { return }
@@ -101,7 +101,7 @@ public final class FileActionsHelper {
                     cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
                     cancelableResponse: cancelResponse,
                     parentFile: proxyParent,
-                    driveFileManager: destinationDriveFileManager
+                    driveFileManager: sourceDriveFileManager
                 )
                 completion?(true)
             } catch {
