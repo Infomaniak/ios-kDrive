@@ -216,7 +216,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 do {
                     _ = try await matchingDriveFileManager.file(ProxyFile(
                         driveId: matchingDriveFileManager.driveId,
-                        id: privateShareLink.redirectLinkId
+                        id: privateShareLink.fileId
                     ))
 
                     driveFileManager = matchingDriveFileManager

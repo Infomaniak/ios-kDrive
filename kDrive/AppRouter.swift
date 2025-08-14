@@ -117,7 +117,7 @@ public struct AppRouter: AppNavigable {
             await handleSimpleLink(deeplink: officeLink, fileId: officeLink.fileId, isOfficeLink: true)
 
         case .privateShare(let privateShareLink):
-            await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.redirectLinkId, isOfficeLink: false)
+            await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.fileId, isOfficeLink: false)
         }
     }
 

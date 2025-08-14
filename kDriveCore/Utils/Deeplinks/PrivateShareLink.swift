@@ -23,8 +23,8 @@ public struct PrivateShareLink: Sendable, Equatable {
     public static let parsingRegex = Regex(pattern: #"^/app/drive/([0-9]+)/redirect/([0-9]+)$"#)
 
     public let privateShareUrl: URL
-    public let redirectLinkId: Int
     public let driveId: Int
+    public let fileId: Int
 
     public init?(privateShareUrl: URL) {
         guard let components = URLComponents(url: privateShareUrl, resolvingAgainstBaseURL: true) else {
@@ -39,14 +39,14 @@ public struct PrivateShareLink: Sendable, Equatable {
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
               let driveIdInt = Int(driveId),
-              let redirectLinkId = firstMatch[safe: 2],
-              let redirectLinkIdInt = Int(redirectLinkId)
+              let fileId = firstMatch[safe: 2],
+              let fileIdInt = Int(fileId)
         else {
             return nil
         }
 
         self.privateShareUrl = privateShareUrl
-        self.redirectLinkId = redirectLinkIdInt
         self.driveId = driveIdInt
+        self.fileId = fileIdInt
     }
 }
