@@ -88,12 +88,14 @@ public final class FileActionsHelper {
             destinationName = destinationDirectory.name
         ] in
             do {
-                let (cancelResponse, _) = try await DriveFileManager.move(
+                let moveCoordinator = MoveCoordinator()
+                let (cancelResponse, _) = try await moveCoordinator.move(
                     file: proxyFile,
                     to: proxyDestination,
                     sourceDriveFileManager: sourceDriveFileManager,
                     destinationDriveFileManager: destinationDriveFileManager
                 )
+
                 UIConstants.showCancelableSnackBar(
                     message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(1, destinationName),
                     cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
@@ -241,8 +243,9 @@ public final class FileActionsHelper {
                 let proxySelectedItems = files.filter { $0.parentId != destinationDirectory.id }.map { $0.proxify() }
                 let proxyDestinationDirectory = destinationDirectory.proxify()
 
+                let moveCoordinator = MoveCoordinator()
                 try await proxySelectedItems.concurrentForEach(customConcurrency: Constants.networkParallelism) { proxyFile in
-                    try await DriveFileManager.move(
+                    try await moveCoordinator.move(
                         file: proxyFile,
                         to: proxyDestinationDirectory,
                         sourceDriveFileManager: sourceDriveFileManager,

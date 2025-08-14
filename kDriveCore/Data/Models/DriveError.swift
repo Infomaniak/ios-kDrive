@@ -145,6 +145,9 @@ public struct DriveError: Error, Equatable {
                                                                  code: "uploadOverDataRestrictedError",
                                                                  localizedString: KDriveResourcesStrings.Localizable
                                                                      .uploadOverDataRestrictedError)
+    public static let moveLocalError = DriveError(type: .localError,
+                                                  code: "localMoveError",
+                                                  localizedString: KDriveResourcesStrings.Localizable.errorMove)
 
     // MARK: - Server
 

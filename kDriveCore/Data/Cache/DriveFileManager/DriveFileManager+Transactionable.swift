@@ -19,7 +19,7 @@
 import Foundation
 
 /// Wrapping the DriveFileManager context and the linked Realm DB together
-public enum DriveFileManagerContext {
+public enum DriveFileManagerContext: Equatable {
     /// Main app dataset
     case drive
 
@@ -43,6 +43,17 @@ public enum DriveFileManagerContext {
         case .publicShare:
             // Public share are stored in memory only
             return nil
+        }
+    }
+
+    public static func == (lhs: DriveFileManagerContext, rhs: DriveFileManagerContext) -> Bool {
+        switch (lhs, rhs) {
+        case (.drive, .drive), (.fileProvider, .fileProvider), (.sharedWithMe, .sharedWithMe):
+            return true
+        case (.publicShare(let lhsShareProxy), .publicShare(let rhsShareProxy)):
+            return lhsShareProxy == rhsShareProxy
+        default:
+            return false
         }
     }
 }

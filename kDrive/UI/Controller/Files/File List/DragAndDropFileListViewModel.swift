@@ -99,26 +99,20 @@ final class DroppableFileListViewModel {
         for localFile in localItemProviders {
             localFile
                 .loadObject(ofClass: DragAndDropFile.self) { [destinationDriveFileManager = driveFileManager] itemProvider, _ in
-                    if let itemProvider = itemProvider as? DragAndDropFile,
-                       let file = itemProvider.file {
-                        if itemProvider.driveId == destinationDriveFileManager.driveId && itemProvider
-                            .userId == destinationDriveFileManager.drive.userId {
-                            FileActionsHelper.instance.move(
-                                file: file,
-                                to: frozenDestinationDirectory,
-                                sourceDriveFileManager: destinationDriveFileManager,
-                                destinationDriveFileManager: destinationDriveFileManager
-                            )
-                        } else {
-                            Task { @MainActor in
-                                // TODO: enable copy from different driveFileManager
-                                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorMove)
-                            }
-                        }
-                    } else {
-                        Task { @MainActor in
+                    Task { @MainActor in
+                        guard let itemProvider = itemProvider as? DragAndDropFile,
+                              let file = itemProvider.file else {
                             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+
+                            return
                         }
+
+                        FileActionsHelper.instance.move(
+                            file: file,
+                            to: frozenDestinationDirectory,
+                            sourceDriveFileManager: destinationDriveFileManager,
+                            destinationDriveFileManager: destinationDriveFileManager
+                        )
                     }
                 }
         }
