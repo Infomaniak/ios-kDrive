@@ -32,7 +32,7 @@ public extension AppRouter {
         defer { deeplinkService.clearLastPublicShare() }
 
         guard let navigationController =
-            getControllerForRestoration(
+            getCurrentController(
                 tabBarViewController: viewController
             ) as? UINavigationController
         else {

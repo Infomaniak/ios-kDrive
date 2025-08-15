@@ -202,4 +202,9 @@ public final class MCKRouter: AppNavigable {
     ) {
         logNoop()
     }
+
+    public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? {
+        logNoop()
+        return nil
+    }
 }

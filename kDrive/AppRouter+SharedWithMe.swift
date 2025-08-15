@@ -100,7 +100,7 @@ public extension AppRouter {
         @LazyInjectService var deeplinkService: DeeplinkServiceable
 
         guard let navigationController =
-            getControllerForRestoration(
+            getCurrentController(
                 tabBarViewController: viewController
             ) as? UINavigationController
         else {
