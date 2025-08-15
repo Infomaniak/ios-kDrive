@@ -26,6 +26,7 @@ public enum DrivePackId: String {
     case free
     case kSuiteStandard = "ksuite_standard"
     case kSuitePro = "ksuite_pro"
+    case kSuiteEssential = "ksuite_essential"
     case kSuiteEntreprise = "ksuite_entreprise"
     case myKSuite = "my_ksuite"
     case myKSuitePlus = "my_ksuite_plus"
