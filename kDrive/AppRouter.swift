@@ -121,6 +121,9 @@ public struct AppRouter: AppNavigable {
 
         case .directory(let directoryLink):
             await handleSimpleLink(deeplink: directoryLink, fileId: directoryLink.folderId, isOfficeLink: false)
+
+        case .filePreview(let filePreviewLink):
+            await handleSimpleLink(deeplink: filePreviewLink, fileId: filePreviewLink.fileId, isOfficeLink: false)
         }
     }
 

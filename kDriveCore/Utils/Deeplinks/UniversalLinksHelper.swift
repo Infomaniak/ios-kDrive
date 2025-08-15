@@ -30,14 +30,6 @@ public enum UniversalLinksHelper {
     private struct Link {
         let regex: Regex
         let displayMode: DisplayMode
-
-        /// Matches a file preview link
-        static let filePreview = Link(
-            regex: Regex(pattern: #"^/app/drive/([0-9]+)/files/([0-9]+/)?preview/[a-z]+/([0-9]+)$"#)!,
-            displayMode: .file
-        )
-
-        static let all = [filePreview]
     }
 
     private enum DisplayMode {
@@ -57,14 +49,6 @@ public enum UniversalLinksHelper {
         if let publicShare = await PublicShareLink(publicShareURL: url),
            await processPublicShareLink(publicShare) {
             return true
-        }
-
-        // Common regex
-        for link in Link.all {
-            let matches = link.regex.matches(in: path)
-            if processRegex(matches: matches, displayMode: link.displayMode) {
-                return true
-            }
         }
 
         DDLogWarn("[UniversalLinksHelper] Unable to process link with path: \(path)")
@@ -140,23 +124,6 @@ public enum UniversalLinksHelper {
                         fileId: metadata.fileId,
                         driveFileManager: publicShareDriveFileManager,
                         apiFetcher: apiFetcher)
-
-        return true
-    }
-
-    private static func processRegex(matches: [[String]], displayMode: DisplayMode) -> Bool {
-        @InjectService var accountManager: AccountManageable
-
-        guard let firstMatch = matches.first,
-              firstMatch.count > 2,
-              let driveId = Int(firstMatch[1]),
-              let last = firstMatch.last,
-              let uploadFileId = Int(last),
-              let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId)
-        else { return false }
-
-        openFile(id: uploadFileId, driveFileManager: driveFileManager, office: displayMode == .office)
 
         return true
     }
