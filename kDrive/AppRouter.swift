@@ -124,6 +124,7 @@ public struct AppRouter: AppNavigable {
                     "NavigationManager: Unable to navigate to .publicShare without a DriveFileManager",
                     level: .error
                 )
+                deeplinkService.setLastPublicShare(publicShareLink)
                 return
             }
             await AppRouter.processPublicShareLink(publicShareLink)
