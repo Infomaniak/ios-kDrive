@@ -65,11 +65,10 @@ public struct AppRouter: AppNavigable {
         return window
     }
 
-    @MainActor var sceneUserInfo: [AnyHashable: Any]? {
-        guard let scene = window?.windowScene,
-              let userInfo = scene.userActivity?.userInfo else {
-            return nil
-        }
+    @MainActor var sceneRestorationUserInfo: [AnyHashable: Any]? {
+        guard let scene = window?.windowScene else { return nil }
+
+        let userInfo = scene.session.stateRestorationActivity?.userInfo
 
         return userInfo
     }
@@ -232,8 +231,8 @@ public struct AppRouter: AppNavigable {
         let shouldRestoreApplicationState = appRestorationService.shouldRestoreApplicationState
         var indexToUse: Int?
         if shouldRestoreApplicationState,
-           let sceneUserInfo,
-           let index = sceneUserInfo[SceneRestorationKeys.selectedIndex.rawValue] as? Int {
+           let sceneRestorationUserInfo,
+           let index = sceneRestorationUserInfo[SceneRestorationKeys.selectedIndex.rawValue] as? Int {
             indexToUse = index
         }
 
@@ -250,14 +249,15 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            guard let sceneUserInfo,
-                  let lastViewControllerString = sceneUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
+            guard let sceneRestorationUserInfo,
+                  let lastViewControllerString =
+                  sceneRestorationUserInfo[SceneRestorationKeys.lastViewController.rawValue] as? String,
                   let lastViewController = SceneRestorationScreens(rawValue: lastViewControllerString) else {
                 return
             }
-            guard let previousDriveId = sceneUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
+            guard let previousDriveId = sceneRestorationUserInfo[SceneRestorationValues.driveId.rawValue] as? Int,
                   previousDriveId == driveFileManager.driveId else {
-                Log.sceneDelegate("driveId do not match for restore :\(sceneUserInfo)", level: .error)
+                Log.sceneDelegate("driveId do not match for restore :\(sceneRestorationUserInfo)", level: .error)
                 return
             }
 
@@ -275,28 +275,28 @@ public struct AppRouter: AppNavigable {
                 await restoreFileDetailViewController(
                     driveFileManager: driveFileManager,
                     navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
+                    sceneUserInfo: sceneRestorationUserInfo
                 )
 
             case .FileListViewController:
                 await restoreFileListViewController(
                     driveFileManager: driveFileManager,
                     navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
+                    sceneUserInfo: sceneRestorationUserInfo
                 )
 
             case .PreviewViewController:
                 await restorePreviewViewController(
                     driveFileManager: driveFileManager,
                     navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
+                    sceneUserInfo: sceneRestorationUserInfo
                 )
 
             case .StoreViewController:
                 await restoreStoreViewController(
                     driveFileManager: driveFileManager,
                     navigationController: rootNavigationController,
-                    sceneUserInfo: sceneUserInfo
+                    sceneUserInfo: sceneRestorationUserInfo
                 )
             }
         }
