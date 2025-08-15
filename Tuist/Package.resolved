@@ -150,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-onboarding",
       "state" : {
-        "revision" : "4852806cba8001d56ded1d305f6427851ec74a48",
-        "version" : "1.2.4"
+        "revision" : "f5c44c976e2818b6e4f6c8946a4ffe0e6e7f0776",
+        "version" : "1.3.0"
       }
     },
     {
@@ -276,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "ca92efeb24b10052cd2a79e5205f42c5a16770ec",
-        "version" : "8.53.2"
+        "revision" : "3c2eee7773df58bdfb9e10e72d9a4be44253e0d9",
+        "version" : "8.55.0"
       }
     },
     {
