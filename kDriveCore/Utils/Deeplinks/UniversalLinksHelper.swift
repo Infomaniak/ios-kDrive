@@ -128,23 +128,6 @@ public enum UniversalLinksHelper {
         return true
     }
 
-    private static func processRegex(matches: [[String]], displayMode: DisplayMode) -> Bool {
-        @InjectService var accountManager: AccountManageable
-
-        guard let firstMatch = matches.first,
-              firstMatch.count > 2,
-              let driveId = Int(firstMatch[1]),
-              let last = firstMatch.last,
-              let uploadFileId = Int(last),
-              let driveFileManager = accountManager.getDriveFileManager(for: driveId,
-                                                                        userId: accountManager.currentUserId)
-        else { return false }
-
-        openFile(id: uploadFileId, driveFileManager: driveFileManager, office: displayMode == .office)
-
-        return true
-    }
-
     private static func openPublicShare(driveId: Int,
                                         linkUuid: String,
                                         fileId: Int,
