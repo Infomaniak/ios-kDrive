@@ -30,9 +30,6 @@ import UIKit
 public extension AppRouter {
     @discardableResult
     static func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
-        @InjectService var deeplinkService: DeeplinkServiceable
-        deeplinkService.setLastPublicShare(link)
-
         let apiFetcher = PublicShareApiFetcher()
         do {
             let metadata = try await apiFetcher.getMetadata(driveId: link.driveId, shareLinkUid: link.shareLinkUid)
