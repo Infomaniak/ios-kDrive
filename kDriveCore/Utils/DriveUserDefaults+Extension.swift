@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 public extension UserDefaults.Keys {
     static let currentDriveId = UserDefaults.Keys(rawValue: "currentDriveId")
