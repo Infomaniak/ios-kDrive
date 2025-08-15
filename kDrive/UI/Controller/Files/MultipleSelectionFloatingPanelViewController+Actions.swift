@@ -213,7 +213,7 @@ extension MultipleSelectionFloatingPanelViewController {
                                allItemsSelected: allItemsSelected,
                                forceMoveDistinctFiles: forceMoveDistinctFiles,
                                observer: self,
-                               driveFileManager: driveFileManager) { [weak self] viewController in
+                               sourceDriveFileManager: driveFileManager) { [weak self] viewController in
             guard let self else {
                 return
             }
@@ -228,7 +228,7 @@ extension MultipleSelectionFloatingPanelViewController {
         let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
             driveFileManager: driveFileManager,
             disabledDirectoriesSelection: files.compactMap(\.parent)
-        ) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory in
+        ) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory, _ in
             Task {
                 do {
                     try await self.copy(files: files, to: selectedDirectory)

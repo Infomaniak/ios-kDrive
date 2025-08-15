@@ -159,7 +159,7 @@ class MultipleSelectionFileListViewModel {
                                    allItemsSelected: isSelectAllModeEnabled,
                                    forceMoveDistinctFiles: forceMoveDistinctFiles,
                                    observer: self,
-                                   driveFileManager: driveFileManager) { [weak self] viewController in
+                                   sourceDriveFileManager: driveFileManager) { [weak self] viewController in
                 self?.onPresentViewController?(.modal, viewController, true)
             } completion: { [weak self] in
                 self?.isMultipleSelectionEnabled = false

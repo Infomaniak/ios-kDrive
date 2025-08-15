@@ -838,10 +838,10 @@ public final class DriveFileManager {
         return response
     }
 
+    @discardableResult
     public func move(file: ProxyFile, to destination: ProxyFile) async throws -> (CancelableResponse, File) {
         let response = try await apiFetcher.move(file: file, to: destination)
 
-        // Add the moved file to Realm
         var updatedFile: File?
         try database.writeTransaction { writableRealm in
             let liveFile = try file.resolve(using: writableRealm)
@@ -866,7 +866,51 @@ public final class DriveFileManager {
             throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
         }
 
-        return (response, updatedFile)
+        return (response, updatedFile.freeze())
+    }
+
+    public func moveToDifferentDriveFileManager(file: ProxyFile,
+                                                to destination: ProxyFile,
+                                                destinationDriveFileManager: DriveFileManager) async throws
+        -> (CancelableResponse, File) {
+        let response = try await apiFetcher.move(file: file, to: destination)
+
+        var currentFile: File?
+        try database.writeTransaction { writableRealm in
+            let liveFile = try file.resolve(using: writableRealm)
+            let oldParent = liveFile.parent
+
+            oldParent?.children.remove(liveFile)
+            if let oldParent {
+                oldParent.signalChanges(userId: drive.userId)
+                notifyObserversWith(file: oldParent)
+            }
+            currentFile = liveFile.freeze()
+            writableRealm.delete(liveFile)
+        }
+
+        guard let currentFile else {
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
+        }
+
+        var updatedFile: File?
+        try destinationDriveFileManager.database.writeTransaction { writableRealm in
+            let duplicatedFile = File(value: currentFile).detached()
+            writableRealm.add(duplicatedFile, update: .modified)
+            let newParent = try destination.resolve(using: writableRealm)
+
+            newParent.children.insert(duplicatedFile)
+            newParent.signalChanges(userId: destinationDriveFileManager.drive.userId)
+            destinationDriveFileManager.notifyObserversWith(file: newParent)
+
+            updatedFile = duplicatedFile
+        }
+
+        guard let updatedFile else {
+            throw DriveError.errorWithUserInfo(.fileNotFound, info: [.fileId: ErrorUserInfo(intValue: file.id)])
+        }
+
+        return (response, updatedFile.freeze())
     }
 
     public func rename(file: ProxyFile, newName: String) async throws -> File {

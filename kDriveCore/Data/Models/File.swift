@@ -204,7 +204,7 @@ public enum ConvertedType: String, CaseIterable {
 }
 
 /// Minimal data needed to query a PublicShare
-public struct PublicShareProxy {
+public struct PublicShareProxy: Equatable {
     public let driveId: Int
     public let fileId: Int
     public let shareLinkUid: String

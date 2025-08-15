@@ -226,7 +226,7 @@ extension TrashListViewModel: TrashOptionsDelegate {
             matomo.track(eventWithCategory: .trash, name: "restoreGivenFolder")
             let selectFolderNavigationViewController: TitleSizeAdjustingNavigationController
             selectFolderNavigationViewController = SelectFolderViewController
-                .instantiateInNavigationController(driveFileManager: driveFileManager) { directory in
+                .instantiateInNavigationController(driveFileManager: driveFileManager) { directory, _ in
                     Task { [weak self, directoryProxy = directory.proxify(), directoryName = directory.name] in
                         await self?.restoreTrashedFiles(
                             proxyFiles,

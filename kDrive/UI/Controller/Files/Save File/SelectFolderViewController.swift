@@ -61,16 +61,16 @@ final class SelectFolderViewController: FileListViewController {
     }()
 
     let disabledDirectoriesSelection: [Int]
-    let fileToMove: Int?
+    let fileToMove: ProxyFile?
     weak var delegate: SelectFolderDelegate?
-    let selectHandler: ((File) -> Void)?
+    let selectHandler: ((File, DriveFileManager) -> Void)?
 
     init(
         viewModel: FileListViewModel,
         disabledDirectoriesSelection: [Int] = [Int](),
-        fileToMove: Int? = nil,
+        fileToMove: ProxyFile? = nil,
         delegate: SelectFolderDelegate? = nil,
-        selectHandler: ((File) -> Void)? = nil
+        selectHandler: ((File, DriveFileManager) -> Void)? = nil
     ) {
         self.disabledDirectoriesSelection = disabledDirectoriesSelection
         self.fileToMove = fileToMove
@@ -103,17 +103,25 @@ final class SelectFolderViewController: FileListViewController {
     }
 
     private func setUpDirectory() {
-        selectFolderButton.isEnabled = !disabledDirectoriesSelection
-            .contains(viewModel.currentDirectory.id) &&
-            (viewModel.currentDirectory.capabilities.canMoveInto || viewModel.currentDirectory.capabilities.canCreateFile)
+        let isNotExcluded = !disabledDirectoriesSelection.contains(viewModel.currentDirectory.id)
+        let currentDirectory = viewModel.currentDirectory
+        let canMoveOrCreate = currentDirectory.capabilities.canMoveInto || currentDirectory.capabilities.canCreateFile
+
+        guard let fileToMove else {
+            selectFolderButton.isEnabled = isNotExcluded && canMoveOrCreate
+            return
+        }
+
+        let withinSameDrive = currentDirectory.driveId == fileToMove.driveId
+        selectFolderButton.isEnabled = withinSameDrive && isNotExcluded && canMoveOrCreate
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
                                                   startDirectory: File? = nil,
-                                                  fileToMove: Int? = nil,
+                                                  fileToMove: ProxyFile? = nil,
                                                   disabledDirectoriesIdsSelection: [Int],
                                                   delegate: SelectFolderDelegate? = nil,
-                                                  selectHandler: ((File) -> Void)? = nil)
+                                                  selectHandler: ((File, DriveFileManager) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
         @InjectService var appRouter: AppNavigable
         var viewControllers = [UIViewController]()
@@ -161,10 +169,11 @@ final class SelectFolderViewController: FileListViewController {
     }
 
     static func instantiateInNavigationController(driveFileManager: DriveFileManager,
-                                                  startDirectory: File? = nil, fileToMove: Int? = nil,
+                                                  startDirectory: File? = nil,
+                                                  fileToMove: ProxyFile? = nil,
                                                   disabledDirectoriesSelection: [File] = [],
                                                   delegate: SelectFolderDelegate? = nil,
-                                                  selectHandler: ((File) -> Void)? = nil)
+                                                  selectHandler: ((File, DriveFileManager) -> Void)? = nil)
         -> TitleSizeAdjustingNavigationController {
         let disabledDirectoriesIdsSelection = disabledDirectoriesSelection.map(\.id)
         return instantiateInNavigationController(
@@ -201,7 +210,7 @@ final class SelectFolderViewController: FileListViewController {
             frozenSelectedDirectory = parent.freezeIfNeeded()
         }
         delegate?.didSelectFolder(frozenSelectedDirectory)
-        selectHandler?(frozenSelectedDirectory)
+        selectHandler?(frozenSelectedDirectory, viewModel.driveFileManager)
         navigationController?.dismiss(animated: true)
     }
 
@@ -211,7 +220,7 @@ final class SelectFolderViewController: FileListViewController {
         let file = displayedFiles[indexPath.row]
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! FileCollectionViewCell
 
-        cell.setEnabled(file.isDirectory && file.id != fileToMove)
+        cell.setEnabled(file.isDirectory && file.id != fileToMove?.id)
         cell.moreButton.isHidden = true
         return cell
     }
