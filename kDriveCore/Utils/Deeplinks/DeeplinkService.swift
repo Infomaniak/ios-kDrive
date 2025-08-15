@@ -46,7 +46,7 @@ public class DeeplinkService: DeeplinkServiceable {
         Task { @MainActor in
             switch lastPublicShareLink {
             case let lastPublicShareLink as PublicShareLink:
-                await UniversalLinksHelper.processPublicShareLink(lastPublicShareLink)
+                await router.navigate(to: .publicShare(publicShareLink: lastPublicShareLink))
             case let lastPublicShareLink as SharedWithMeLink:
                 await router.navigate(to: .sharedWithMe(sharedWithMeLink: lastPublicShareLink))
             case let lastPublicShareLink as TrashLink:

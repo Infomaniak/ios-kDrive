@@ -119,6 +119,17 @@ public struct AppRouter: AppNavigable {
         case .privateShare(let privateShareLink):
             await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.fileId, isOfficeLink: false)
 
+        case .publicShare(let publicShareLink):
+            guard accountManager.currentDriveFileManager != nil else {
+                Log.sceneDelegate(
+                    "NavigationManager: Unable to navigate to .publicShare without a DriveFileManager",
+                    level: .error
+                )
+                deeplinkService.setLastPublicShare(publicShareLink)
+                return
+            }
+            await AppRouter.processPublicShareLink(publicShareLink)
+
         case .directory(let directoryLink):
             await handleSimpleLink(deeplink: directoryLink, fileId: directoryLink.folderId, isOfficeLink: false)
 
@@ -144,7 +155,7 @@ public struct AppRouter: AppNavigable {
         let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
         window?.rootViewController = freshRootViewController
 
-        UniversalLinksHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
+        FileActionsHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
     }
 
     // MARK: TopmostViewControllerFetchable

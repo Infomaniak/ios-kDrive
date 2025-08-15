@@ -73,6 +73,19 @@ public final class FileActionsHelper {
         }
     }
 
+    public static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
+        Task {
+            do {
+                let file = try await driveFileManager.file(ProxyFile(driveId: driveFileManager.driveId, id: id))
+                @InjectService var appNavigable: AppNavigable
+                appNavigable.present(file: file, driveFileManager: driveFileManager, office: office)
+            } catch {
+                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.driveId) - \(id)]: \(error)")
+                UIConstants.showSnackBarIfNeeded(error: error)
+            }
+        }
+    }
+
     public func move(
         file: File,
         to destinationDirectory: File,

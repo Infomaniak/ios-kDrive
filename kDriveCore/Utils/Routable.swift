@@ -27,6 +27,7 @@ public enum NavigationRoutes: Equatable {
     case trash(trashLink: TrashLink)
     case office(officeLink: OfficeLink)
     case privateShare(privateShareLink: PrivateShareLink)
+    case publicShare(publicShareLink: PublicShareLink)
     case directory(directoryLink: DirectoryLink)
     case filePreview(filePreviewLink: FilePreviewLink)
 
