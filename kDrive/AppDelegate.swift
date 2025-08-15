@@ -157,7 +157,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
                      open url: URL,
                      sourceApplication: String?,
                      annotation: Any) -> Bool {
-        Log.appDelegate("application open url:\(url)) sourceApplication:\(sourceApplication)")
+        Log.appDelegate("application open url:\(url)) sourceApplication:\(String(describing: sourceApplication))")
         return infomaniakLogin.handleRedirectUri(url: url)
     }
 

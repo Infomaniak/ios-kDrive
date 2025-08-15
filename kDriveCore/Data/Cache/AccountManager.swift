@@ -415,7 +415,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         if accountToDelete == currentAccount {
-            DDLogInfo("matched \(currentAccount) to \(accountToDelete), removing current account")
+            DDLogInfo("matched \(String(describing: currentAccount)) to \(accountToDelete), removing current account")
             notificationHelper.sendDisconnectedNotification()
             logoutCurrentAccountAndSwitchToNextIfPossible()
         } else {

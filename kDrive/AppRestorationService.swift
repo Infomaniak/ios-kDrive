@@ -56,7 +56,9 @@ public final class AppRestorationService: AppRestorationServiceable {
         let shouldRestore = Self.currentStateVersion == storedVersion &&
             !(UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty)
 
-        Log.sceneDelegate("shouldRestoreApplicationState:\(shouldRestore) appRestorationVersion:\(storedVersion)")
+        Log.sceneDelegate(
+            "shouldRestoreApplicationState:\(shouldRestore) appRestorationVersion:\(String(describing: storedVersion))"
+        )
         return shouldRestore
     }
 

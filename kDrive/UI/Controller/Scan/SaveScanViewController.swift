@@ -143,6 +143,6 @@ extension SaveScanViewController: SaveScanWorkerDelegate {
     }
 
     func errorWhileProcessing(_ error: Error?) {
-        DDLogError("[Scan] failed with error: \(error).")
+        DDLogError("[Scan] failed with error: \(String(describing: error)).")
     }
 }
