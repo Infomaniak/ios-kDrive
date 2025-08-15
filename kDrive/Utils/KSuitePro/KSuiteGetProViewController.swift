@@ -22,24 +22,13 @@ import KSuite
 import SwiftUI
 import UIKit
 
-class KSuiteGetProViewController: UIViewController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
+class KSuiteGetProViewController: GenericHostingViewController<KSuiteGetProView> {
+    init() {
+        super.init(contentView: KSuiteGetProView())
+    }
 
-        let kSuiteView = KSuiteGetProView()
-        let hostingController = UIHostingController(rootView: kSuiteView)
-
-        addChild(hostingController)
-        view.addSubview(hostingController.view)
-
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
-
-        hostingController.didMove(toParent: self)
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
