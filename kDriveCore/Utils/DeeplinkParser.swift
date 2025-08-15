@@ -58,6 +58,10 @@ public struct DeeplinkParser: DeeplinkParsable {
             await router.navigate(to: .privateShare(privateShareLink: privateShareLink))
             return true
         }
+        if let publicShareLink = PublicShareLink(publicShareURL: url) {
+            await router.navigate(to: .publicShare(publicShareLink: publicShareLink))
+            return true
+        }
         if let directoryLink = DirectoryLink(directoryURL: url) {
             await router.navigate(to: .directory(directoryLink: directoryLink))
             return true
