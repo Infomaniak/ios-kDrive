@@ -22,39 +22,18 @@ import KSuite
 import SwiftUI
 import UIKit
 
-class KSuiteViewController: UIViewController {
+class KSuiteViewController: GenericHostingViewController<KSuiteView> {
     let configuration: KSuiteConfiguration
     let isAdmin: Bool
 
     init(configuration: KSuiteConfiguration, isAdmin: Bool) {
         self.configuration = configuration
         self.isAdmin = isAdmin
-
-        super.init(nibName: nil, bundle: nil)
+        super.init(contentView: KSuiteView(configuration: configuration, isAdmin: isAdmin))
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        let kSuiteView = KSuiteView(configuration: configuration, isAdmin: isAdmin)
-        let hostingController = UIHostingController(rootView: kSuiteView)
-
-        addChild(hostingController)
-        view.addSubview(hostingController.view)
-
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
-
-        hostingController.didMove(toParent: self)
     }
 }
