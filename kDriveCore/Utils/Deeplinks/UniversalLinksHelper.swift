@@ -30,7 +30,6 @@ public enum UniversalLinksHelper {
     private struct Link {
         let regex: Regex
         let displayMode: DisplayMode
-
     }
 
     private enum DisplayMode {
@@ -50,14 +49,6 @@ public enum UniversalLinksHelper {
         if let publicShare = await PublicShareLink(publicShareURL: url),
            await processPublicShareLink(publicShare) {
             return true
-        }
-
-        // Common regex
-        for link in Link.all {
-            let matches = link.regex.matches(in: path)
-            if processRegex(matches: matches, displayMode: link.displayMode) {
-                return true
-            }
         }
 
         DDLogWarn("[UniversalLinksHelper] Unable to process link with path: \(path)")
