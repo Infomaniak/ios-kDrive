@@ -64,10 +64,12 @@ public protocol DownloadQueueable {
 
     func hasOperation(for fileId: Int) -> Bool
 
+    @discardableResult
     func observeFileDownloaded<T: AnyObject>(_ observer: T,
                                              fileId: Int?,
                                              using closure: @escaping (DownloadedFileId, DriveError?) -> Void) -> ObservationToken
 
+    @discardableResult
     func observeArchiveDownloaded<T: AnyObject>(_ observer: T,
                                                 archiveId: String?,
                                                 using closure: @escaping (DownloadedArchiveId, URL?, DriveError?) -> Void)

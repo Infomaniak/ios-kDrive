@@ -97,9 +97,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] _ in
             Task { @MainActor in
-                guard let self, self.frozenFile != nil else {
-                    return
-                }
+                guard let self else { return }
 
                 guard !self.frozenFile.isInvalidated else {
                     self.dismiss(animated: true)

@@ -138,7 +138,7 @@ open class RPCircularProgress: UIView {
     // MARK: - Custom Base Layer
 
     fileprivate var progressLayer: ProgressLayer! {
-        return layer as! ProgressLayer
+        return layer as? ProgressLayer
     }
 
     override open class var layerClass: AnyClass {

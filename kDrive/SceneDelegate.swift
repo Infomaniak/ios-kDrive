@@ -66,7 +66,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         )
 
         let isRestoration: Bool = session.stateRestorationActivity != nil
-        Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(session.stateRestorationActivity)")
+        Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(String(describing: session.stateRestorationActivity))")
 
         guard let userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity else {
             Log.sceneDelegate("no user activity")
@@ -91,7 +91,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             }
 
             Log.sceneDelegate("restore from \(userActivity.activityType)")
-            Log.sceneDelegate("selectedIndex:\(userInfo[SceneRestorationKeys.selectedIndex.rawValue])")
+            Log.sceneDelegate("selectedIndex:\(String(describing: userInfo[SceneRestorationKeys.selectedIndex.rawValue]))")
         }
     }
 
@@ -119,13 +119,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
-        Log.sceneDelegate("sceneWillEnterForeground \(scene) \(window)")
+        Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
         uploadNotifications.setPausedNotificationSent(false)
 
         let currentState = RootViewControllerState.getCurrentState()
         let session = scene.session
         let isRestoration: Bool = session.stateRestorationActivity != nil
-        Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(session.stateRestorationActivity)")
+        Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(String(describing: session.stateRestorationActivity))")
         appNavigable.prepareRootViewController(currentState: currentState, restoration: isRestoration)
 
         switch currentState {

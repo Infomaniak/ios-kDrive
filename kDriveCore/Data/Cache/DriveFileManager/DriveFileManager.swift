@@ -33,8 +33,8 @@ extension TransactionExecutor: CustomStringConvertible {
         try? writeTransaction { realm in
             render = """
             TransactionExecutor:
-            realmURL:\(realm.configuration.fileURL)
-            inMemory:\(realm.configuration.inMemoryIdentifier)
+            realmURL:\(String(describing: realm.configuration.fileURL))
+            inMemory:\(String(describing: realm.configuration.inMemoryIdentifier))
             """
         }
         return render
