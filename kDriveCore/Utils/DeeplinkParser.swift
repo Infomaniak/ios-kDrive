@@ -76,10 +76,6 @@ public struct DeeplinkParser: DeeplinkParsable {
     }
 
     public func parse(url: URL) async -> Bool {
-        guard await !UniversalLinksHelper.handleURL(url) else {
-            return true
-        }
-
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
             return await handleDeeplink(url: url)
