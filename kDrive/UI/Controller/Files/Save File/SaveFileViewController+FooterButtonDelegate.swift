@@ -30,8 +30,7 @@ extension SaveFileViewController: FooterButtonDelegate {
             return
         }
         let drive = selectedDriveFileManager.drive
-        let button = sender as? IKLargeButton
-        button?.setLoading(true)
+        sender.setLoading(true)
 
         guard let publicShareProxy else {
             guard !items.isEmpty else {
