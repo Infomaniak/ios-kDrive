@@ -33,16 +33,13 @@ public struct MoveCoordinator {
             throw DriveError.moveLocalError // Move to different drive is not supported
         }
 
-        if let destinationDriveFileManager {
-            if sourceDriveFileManager.context == destinationDriveFileManager.context {
-                return try await sourceDriveFileManager.move(file: file, to: destination)
-            } else {
-                return try await sourceDriveFileManager.moveToDifferentDriveFileManager(
-                    file: file,
-                    to: destination,
-                    destinationDriveFileManager: destinationDriveFileManager
-                )
-            }
+        if let destinationDriveFileManager,
+           sourceDriveFileManager.context != destinationDriveFileManager.context {
+            return try await sourceDriveFileManager.moveToDifferentDriveFileManager(
+                file: file,
+                to: destination,
+                destinationDriveFileManager: destinationDriveFileManager
+            )
         } else {
             return try await sourceDriveFileManager.move(file: file, to: destination)
         }
