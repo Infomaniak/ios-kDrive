@@ -22,32 +22,31 @@ import Testing
 
 @Suite("UTTrashLink")
 struct UTTrashLink {
-    @Test("Parse the driveId of a deeplink to the trash", arguments: ["123456"])
-    func trashLinkRoot(driveId: String) throws {
+    @Test("Parse the driveId of a deeplink to the trash", arguments: [123_456])
+    func trashLinkRoot(driveId: Int) throws {
         let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/trash"
-        guard let url = URL(string: givenLink), let driveIdInt = Int(driveId),
+        guard let url = URL(string: givenLink),
               let parsedResult = TrashLink(trashURL: url) else {
             Issue.record("Failed to parse URL")
             return
         }
 
         #expect(parsedResult.trashURL == url)
-        #expect(parsedResult.driveId == driveIdInt)
+        #expect(parsedResult.driveId == driveId)
         #expect(parsedResult.folderId == nil)
     }
 
-    @Test("Parse the driveId and the folderId of a deeplink to the trash", arguments: zip(["123456"], ["8763402"]))
-    func trashLinkFolder(driveId: String, folderId: String) throws {
+    @Test("Parse the driveId and the folderId of a deeplink to the trash", arguments: zip([123_456], [8_763_402]))
+    func trashLinkFolder(driveId: Int, folderId: Int) throws {
         let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/trash/\(folderId)"
-        guard let url = URL(string: givenLink), let driveIdInt = Int(driveId),
-              let folderIdInt = Int(folderId), let parsedResult = TrashLink(trashURL: url) else {
+        guard let url = URL(string: givenLink), let parsedResult = TrashLink(trashURL: url) else {
             Issue.record("Failed to parse URL")
             return
         }
 
         #expect(parsedResult.trashURL == url)
-        #expect(parsedResult.driveId == driveIdInt)
-        #expect(parsedResult.folderId == folderIdInt)
+        #expect(parsedResult.driveId == driveId)
+        #expect(parsedResult.folderId == folderId)
     }
 
     @Test("Fail to parse a deeplink to the trash if the URL is invalid", arguments: ["834FAE21-1D5C"])

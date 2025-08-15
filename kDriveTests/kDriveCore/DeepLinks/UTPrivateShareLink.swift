@@ -22,18 +22,18 @@ import Testing
 
 @Suite("UTPrivateShareLink")
 struct UTPrivateShareLink {
-    @Test("Parse driveId and fileId of a deeplink to a private share", arguments: zip(["1634145"], ["234"]))
-    func privateShareLink(driveId: String, fileId: String) throws {
+    @Test("Parse driveId and fileId of a deeplink to a private share", arguments: zip([1_634_145], [234]))
+    func parsePrivateShareLink(driveId: Int, fileId: Int) throws {
         let givenLink = "https://kdrive.infomaniak.com/app/drive/\(driveId)/redirect/\(fileId)"
-        guard let url = URL(string: givenLink), let driveIdInt = Int(driveId), let fileIdInt = Int(fileId),
+        guard let url = URL(string: givenLink),
               let parsedResult = PrivateShareLink(privateShareUrl: url) else {
             Issue.record("Failed to parse URL")
             return
         }
 
         #expect(parsedResult.privateShareUrl == url)
-        #expect(parsedResult.driveId == driveIdInt)
-        #expect(parsedResult.fileId == fileIdInt)
+        #expect(parsedResult.driveId == driveId)
+        #expect(parsedResult.fileId == fileId)
     }
 
     @Test(

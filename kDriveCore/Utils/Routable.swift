@@ -27,6 +27,7 @@ public enum NavigationRoutes: Equatable {
     case trash(trashLink: TrashLink)
     case office(officeLink: OfficeLink)
     case privateShare(privateShareLink: PrivateShareLink)
+    case directory(directoryLink: DirectoryLink)
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
         switch (lhs, rhs) {
@@ -42,6 +43,8 @@ public enum NavigationRoutes: Equatable {
             return lhdOfficeLink == rhdOfficeLink
         case(.privateShare(let lhdPrivateShareLink), .privateShare(let rhdprivateShareLink)):
             return lhdPrivateShareLink == rhdprivateShareLink
+        case(.directory(let lhdDirectoryLink), .directory(let rhdDirectoryLink)):
+            return lhdDirectoryLink == rhdDirectoryLink
         default:
             return false
         }

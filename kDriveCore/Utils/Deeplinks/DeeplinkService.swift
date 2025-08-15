@@ -55,6 +55,8 @@ public class DeeplinkService: DeeplinkServiceable {
                 await router.navigate(to: .office(officeLink: lastPublicShareLink))
             case let lastPublicShareLink as PrivateShareLink:
                 await router.navigate(to: .privateShare(privateShareLink: lastPublicShareLink))
+            case let lastPublicShareLink as DirectoryLink:
+                await router.navigate(to: .directory(directoryLink: lastPublicShareLink))
             default:
                 break
             }
