@@ -62,8 +62,7 @@ class HomeLargeTitleHeaderView: UICollectionReusableView {
         if addLeadingConstraint {
             leadingConstraint.constant = 16
         }
-        titleButtonPressedHandler = { [weak self] _ in
-            guard let self else { return }
+        titleButtonPressedHandler = { _ in
             let drives = accountManager.drives
             let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
                 options: drives,
