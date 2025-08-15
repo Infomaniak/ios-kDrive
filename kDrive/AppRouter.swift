@@ -66,10 +66,9 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor var sceneUserInfo: [AnyHashable: Any]? {
-        guard let scene = window?.windowScene,
-              let userInfo = scene.userActivity?.userInfo else {
-            return nil
-        }
+        guard let scene = window?.windowScene else { return nil }
+
+        let userInfo = scene.session.stateRestorationActivity?.userInfo
 
         return userInfo
     }
