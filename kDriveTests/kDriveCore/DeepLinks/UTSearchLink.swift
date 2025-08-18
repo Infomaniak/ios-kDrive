@@ -20,36 +20,39 @@ import Foundation
 import kDriveCore
 import Testing
 
-@Suite("UTPublicShareLink")
-struct UTPublicShareLink {
-    @Test("Parse driveId and fileUid from a publicShare link", arguments: [129_842], ["133b2ea4-e41b-4e4f-a41e-d466e41b133b"])
-    func parsePublicShareLink(driveId: Int, fileUid: String) async throws {
-        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(fileUid)"
+@Suite("UTSearchLink")
+struct UTSearchLink {
+    @Test(
+        "Parse driveId and query from a search link",
+        arguments: [143_883], ["projet"]
+    )
+    func parseSearchLink(driveId: Int, query: String) async throws {
+        let givenLink =
+            "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/search?q=%7B%22kind%22%3A%22default%22%2C%22directory_id%22%3A1%2C%22query%22%3A%22\(query)%22%7D"
 
-        guard let url = URL(string: givenLink), let parsedResult = PublicShareLink(publicShareURL: url) else {
+        guard let url = URL(string: givenLink), let parsedResult = SearchLink(searchURL: url) else {
             Issue.record("Failed to parse the URL")
             return
         }
 
-        #expect(parsedResult.publicShareURL == url)
+        #expect(parsedResult.searchURL == url)
         #expect(parsedResult.driveId == driveId)
-        #expect(parsedResult.shareLinkUid == fileUid)
+        #expect(parsedResult.query == query)
     }
 
-    @Test("Fail to parse a publicShareLink if the URL is invalid", arguments: zip(
-        ["", "2894230", "foo", "2393dz-212957-34de2-a29v-d293824"],
-        ["1293ad-eo342-4321-a321-e321e321e321", "", "24239824", "2324ac3-a48v-43d3-a243-d234e23"]
-
-    ))
-    func publicShareLinkInvalidURL(driveId: String, fileUid: String) async throws {
-        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(fileUid)"
+    @Test(
+        "Fail to parse a non-valid search link",
+        arguments: ["foo"], ["%7B%22kind%22%3A%22default%22%2C%22directory_id%22%3A1%2C%22query%22%3A%22testSearch%22%7D"]
+    )
+    func searchLinkInvalidURL(driveId: String, query: String) async throws {
+        let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/search?q=\(query)"
 
         guard let url = URL(string: givenLink) else {
             Issue.record("Failed to create URL")
             return
         }
 
-        let parsedResult = PublicShareLink(publicShareURL: url)
+        let parsedResult = SearchLink(searchURL: url)
         #expect(parsedResult == nil)
     }
 }
