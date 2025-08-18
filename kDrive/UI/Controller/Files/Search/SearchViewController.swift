@@ -68,6 +68,7 @@ class SearchViewController: FileListViewController {
         searchController.searchResultsUpdater = self
         searchController.searchBar.placeholder = KDriveResourcesStrings.Localizable.searchViewHint
         searchController.searchBar.delegate = self
+        searchController.searchBar.text = searchViewModel.currentSearchText
 
         navigationItem.searchController = searchController
         navigationItem.hidesSearchBarWhenScrolling = false
