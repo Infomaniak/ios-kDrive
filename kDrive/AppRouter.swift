@@ -127,6 +127,18 @@ public struct AppRouter: AppNavigable {
         case .filePreview(let filePreviewLink):
             await handleSimpleLink(deeplink: filePreviewLink, fileId: filePreviewLink.fileId, isOfficeLink: false)
 
+        case .search(let searchLink):
+            guard let driveFileManager = accountManager.currentDriveFileManager else {
+                Log.sceneDelegate("NavigationManager: Unable to navigate to .saveFile without a DriveFileManager", level: .error)
+                return
+            }
+            let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+            viewModel.currentSearchText = searchLink.query
+            let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
+            rootViewController.present(searchViewController, animated: true)
+        }
+    }
+
         case .basic(let basicLink):
             await handleBasicLink(basicLink: basicLink)
         }

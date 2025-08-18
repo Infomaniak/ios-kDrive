@@ -57,6 +57,8 @@ public class DeeplinkService: DeeplinkServiceable {
                 await router.navigate(to: .directory(directoryLink: lastDeeplink))
             case let lastDeeplink as FilePreviewLink:
                 await router.navigate(to: .filePreview(filePreviewLink: lastDeeplink))
+            case let lastDeeplink as SearchLink:
+                await router.navigate(to: .search(searchLink: lastDeeplink))
             case let lastDeeplink as BasicLink:
                 await router.navigate(to: .basic(basicLink: lastDeeplink))
             default:

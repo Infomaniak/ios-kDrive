@@ -29,6 +29,7 @@ public enum NavigationRoutes: Equatable {
     case publicShare(publicShareLink: PublicShareLink)
     case directory(directoryLink: DirectoryLink)
     case filePreview(filePreviewLink: FilePreviewLink)
+    case search(searchLink: SearchLink)
     case basic(basicLink: BasicLink)
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
