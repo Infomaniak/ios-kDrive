@@ -9,6 +9,8 @@
 		<string>applinks:drive.infomaniak.com</string>
 		<string>applinks:kdrive.infomaniak.com</string>
 		<string>activitycontinuation:drive.infomaniak.com</string>
+		<string>applinks:ksuite.infomaniak.com</string>
+		<string>activitycontinuation:ksuite.infomaniak.com</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>
