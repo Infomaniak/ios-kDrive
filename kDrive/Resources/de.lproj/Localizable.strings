@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: de, German
  * Tagged: ios
- * Exported by: Baptiste Griva
- * Exported at: Tue, 12 Aug 2025 08:12:18 +0200
+ * Exported by: Philippe Weidmann
+ * Exported at: Tue, 19 Aug 2025 14:17:55 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -578,7 +578,7 @@
 "categoryWork" = "Arbeit";
 
 /* loco:6548a6eb63ec2f8b5001ac32 */
-"commonDocumentsDescription" = "Dieser Bereich gehört %s und zentralisiert die gemeinsamen Dateien Ihrer Organisation.";
+"commonDocumentsDescription" = "Dieser Bereich gehört %@ und zentralisiert die gemeinsamen Dateien Ihrer Organisation.";
 
 /* loco:6049df4d5c2c3a04bc397974 */
 "commonFolderDescription" = "Teilen Sie diesen Ordner mit den Benutzern des kDrive %@";
