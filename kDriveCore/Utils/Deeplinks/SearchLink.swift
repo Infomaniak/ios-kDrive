@@ -29,7 +29,7 @@ public struct SearchLink: Sendable, Equatable {
     public let type: ConvertedType?
     public let modifiedBefore: Int?
     public let modifiedAfter: Int?
-    public let categoryIds: [Int]?
+    public let categoryIds: [Int]
     public let categoryOperator: String?
 
     public init?(searchURL: URL) {
@@ -64,7 +64,7 @@ public struct SearchLink: Sendable, Equatable {
         type = ConvertedType(apiRawValue: jsonDict["type"] as? String ?? "")
         modifiedBefore = jsonDict["modified_before"] as? Int
         modifiedAfter = jsonDict["modified_after"] as? Int
-        categoryIds = jsonDict["category_ids"] as? [Int]
+        categoryIds = jsonDict["category_ids"] as? [Int] ?? []
         categoryOperator = jsonDict["category_operator"] as? String
     }
 }
