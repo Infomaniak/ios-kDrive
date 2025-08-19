@@ -30,6 +30,7 @@ protocol FilesHeaderViewDelegate: AnyObject {
     func uploadCardSelected()
     func removeFilterButtonPressed(_ filter: Filterable)
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton)
+    func upsaleButtonPressed()
 }
 
 extension FilesHeaderViewDelegate {
@@ -37,9 +38,6 @@ extension FilesHeaderViewDelegate {
 }
 
 class FilesHeaderView: UICollectionReusableView {
-    @LazyInjectService private var router: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
-
     @IBOutlet var containerStackView: UIStackView!
     @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
     @IBOutlet var sortView: UIView!
@@ -138,8 +136,7 @@ class FilesHeaderView: UICollectionReusableView {
     }
 
     @objc func didTapOnTrashHeaderView() {
-        router.presentUpSaleSheet()
-        matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
+        delegate?.upsaleButtonPressed()
     }
 
     @objc private func didTapOnCard() {
