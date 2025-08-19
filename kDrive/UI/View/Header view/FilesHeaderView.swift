@@ -96,13 +96,17 @@ class FilesHeaderView: UICollectionReusableView {
         let displayInformation = isTrash && (drivePackId == .myKSuite || drivePackId == .kSuiteEssential)
         trashInformationView.isHidden = !displayInformation
 
-        let chipView: UIView
+        let chipView: UIView?
         if drivePackId == .myKSuite {
             chipView = MyKSuiteChip.instantiateWhiteChip()
         } else if drivePackId == .kSuiteEssential {
             let chip = KSuiteProChipController()
-            chipView = chip.view!
+            chipView = chip.view
         } else {
+            chipView = nil
+        }
+
+        guard let chipView else {
             return
         }
 
