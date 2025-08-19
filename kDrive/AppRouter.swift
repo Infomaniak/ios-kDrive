@@ -128,39 +128,43 @@ public struct AppRouter: AppNavigable {
             await handleSimpleLink(deeplink: filePreviewLink, fileId: filePreviewLink.fileId, isOfficeLink: false)
 
         case .search(let searchLink):
-            guard let driveFileManager = accountManager.currentDriveFileManager else {
-                Log.sceneDelegate("NavigationManager: Unable to navigate to .search without a DriveFileManager", level: .error)
-                return
-            }
-            let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
-
-            if let startTimestamp = searchLink.modifiedAfter, let endTimeStamp = searchLink.modifiedBefore {
-                let startDate = Date(timeIntervalSince1970: TimeInterval(startTimestamp))
-                let endDate = Date(timeIntervalSince1970: TimeInterval(endTimeStamp))
-                let dateInterval = DateInterval(start: startDate, end: endDate)
-                viewModel.filters.date = DateOption.custom(dateInterval)
-            }
-
-            var searchCategories = Set<kDriveCore.Category>()
-            let allCategories = Array(driveFileManager.drive.categories)
-            for categoryId in searchLink.categoryIds {
-                if let category = allCategories.first(where: { $0.id == categoryId }) {
-                    searchCategories.insert(category)
-                }
-            }
-            viewModel.filters.categories = searchCategories
-            viewModel.currentSearchText = searchLink.searchQuery
-            viewModel.filters.belongToAllCategories = searchLink.categoryOperator == nil
-            viewModel.filters.fileType = searchLink.type
-
-            let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
-            rootViewController.present(searchViewController, animated: true)
+            handleSearchLink(searchLink: searchLink)
         }
     }
 
         case .basic(let basicLink):
             await handleBasicLink(basicLink: basicLink)
         }
+    }
+
+    @MainActor private func handleSearchLink(searchLink: SearchLink) {
+        guard let driveFileManager = accountManager.currentDriveFileManager else {
+            Log.sceneDelegate("NavigationManager: Unable to navigate to .search without a DriveFileManager", level: .error)
+            return
+        }
+        let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
+
+        if let startTimestamp = searchLink.modifiedAfter, let endTimeStamp = searchLink.modifiedBefore {
+            let startDate = Date(timeIntervalSince1970: TimeInterval(startTimestamp))
+            let endDate = Date(timeIntervalSince1970: TimeInterval(endTimeStamp))
+            let dateInterval = DateInterval(start: startDate, end: endDate)
+            viewModel.filters.date = DateOption.custom(dateInterval)
+        }
+
+        var searchCategories = Set<kDriveCore.Category>()
+        let allCategories = Array(driveFileManager.drive.categories)
+        for categoryId in searchLink.categoryIds {
+            if let category = allCategories.first(where: { $0.id == categoryId }) {
+                searchCategories.insert(category)
+            }
+        }
+        viewModel.filters.categories = searchCategories
+        viewModel.currentSearchText = searchLink.searchQuery
+        viewModel.filters.belongToAllCategories = searchLink.categoryOperator == nil
+        viewModel.filters.fileType = searchLink.type
+
+        let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
+        rootViewController?.present(searchViewController, animated: true)
     }
 
     // MARK: TopmostViewControllerFetchable
