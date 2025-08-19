@@ -128,7 +128,11 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         } else if sharedWithMe {
             return FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
-            return FloatingPanelAction.selectAllActions
+            if currentDirectory.name == "Offline" {
+                return FloatingPanelAction.selectAllOfflineActions
+            } else {
+                return FloatingPanelAction.selectAllActions
+            }
         } else if files.count > Constants.bulkActionThreshold || allItemsSelected {
             return FloatingPanelAction.multipleSelectionBulkActions
         } else if presentingParent is PhotoListViewController {
