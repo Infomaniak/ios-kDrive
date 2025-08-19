@@ -92,6 +92,32 @@ class FilesHeaderView: UICollectionReusableView {
         containerStackView.addArrangedSubview(selectView)
     }
 
+    public func updateInformationView(drivePackId: DrivePackId?, isTrash: Bool) {
+        let displayInformation = isTrash && (drivePackId == .myKSuite || drivePackId == .kSuiteEssential)
+        trashInformationView.isHidden = !displayInformation
+
+        let chipView: UIView
+        if drivePackId == .myKSuite {
+            chipView = MyKSuiteChip.instantiateWhiteChip()
+        } else if drivePackId == .kSuiteEssential {
+            let chip = KSuiteProChipController()
+            chipView = chip.view!
+        } else {
+            return
+        }
+
+        trashInformationChip.subviews.forEach { $0.removeFromSuperview() }
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        trashInformationChip.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.leadingAnchor),
+            chipView.trailingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
+        ])
+    }
+
     private func setupTrashView() {
         trashInformationView.isHidden = true
 
@@ -102,17 +128,6 @@ class FilesHeaderView: UICollectionReusableView {
 
         trashInformationTitle.text = KDriveResourcesStrings.Localizable.trashAutoClearDescription
         trashInformationSubtitle.text = KDriveResourcesStrings.Localizable.buttonUpgrade
-
-        let chipView = MyKSuiteChip.instantiateWhiteChip()
-        chipView.translatesAutoresizingMaskIntoConstraints = false
-        trashInformationChip.addSubview(chipView)
-
-        NSLayoutConstraint.activate([
-            chipView.leadingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.leadingAnchor),
-            chipView.trailingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.trailingAnchor),
-            chipView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
-            chipView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
-        ])
 
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnTrashHeaderView))
         trashInformationView.addGestureRecognizer(tapRecognizer)
