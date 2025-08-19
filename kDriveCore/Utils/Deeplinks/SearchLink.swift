@@ -61,7 +61,7 @@ public struct SearchLink: Sendable, Equatable {
         self.driveId = driveIdInt
         self.queryJson = queryJson
         searchQuery = jsonDict["query"] as? String ?? ""
-        type = ConvertedType(apiRawValue: jsonDict["type"] as! String)
+        type = ConvertedType(apiRawValue: jsonDict["type"] as? String ?? "")
         modifiedBefore = jsonDict["modified_before"] as? Int
         modifiedAfter = jsonDict["modified_after"] as? Int
         categoryIds = jsonDict["category_ids"] as? [Int]
