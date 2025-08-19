@@ -859,8 +859,16 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     func upsaleButtonPressed() {
-        router.presentUpSaleSheet()
-        matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
+        if packId == .myKSuite {
+            router.presentUpSaleSheet()
+            matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
+        } else if packId == .kSuiteEssential {
+            router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+            // TODO: Sentry
+            // matomo.track(eventWithCategory: .kDriveEssentialUpgradeBottomSheet, name: "trashStorageLimit")
+        } else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+        }
     }
 }
 
