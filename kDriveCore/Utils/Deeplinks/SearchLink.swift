@@ -24,7 +24,13 @@ public struct SearchLink: Sendable, Equatable {
 
     public let searchURL: URL
     public let driveId: Int
-    public let query: String
+    public let queryJson: String
+    public let searchQuery: String
+    public let type: ConvertedType?
+    public let modifiedBefore: Int?
+    public let modifiedAfter: Int?
+    public let categoryIds: [Int]?
+    public let categoryOperator: String?
 
     public init?(searchURL: URL) {
         guard let components = URLComponents(url: searchURL, resolvingAgainstBaseURL: true) else {
@@ -38,15 +44,27 @@ public struct SearchLink: Sendable, Equatable {
 
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
-              let driveIdInt = Int(driveId),
-              let query = components.query,
-              let queryValue = query.split(separator: "\"").dropLast().last
+              let driveIdInt = Int(driveId)
+        else {
+            return nil
+        }
+
+        guard let queryItem = components.queryItems?.first(where: { $0.name == "q" }),
+              let queryJson = queryItem.value,
+              let data = queryJson.data(using: .utf8),
+              let jsonDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
         else {
             return nil
         }
 
         self.searchURL = searchURL
         self.driveId = driveIdInt
-        self.query = String(queryValue)
+        self.queryJson = queryJson
+        searchQuery = jsonDict["query"] as? String ?? ""
+        type = ConvertedType(apiRawValue: jsonDict["type"] as! String)
+        modifiedBefore = jsonDict["modified_before"] as? Int
+        modifiedAfter = jsonDict["modified_after"] as? Int
+        categoryIds = jsonDict["category_ids"] as? [Int]
+        categoryOperator = jsonDict["category_operator"] as? String
     }
 }
