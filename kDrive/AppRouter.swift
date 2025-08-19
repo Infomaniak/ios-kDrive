@@ -626,7 +626,11 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager) {
-        guard let configuration = driveFileManager.drive.pack.kSuiteProUpgradePath else { return } // TODO non faillable
+        guard let configuration = driveFileManager.drive.pack.kSuiteProUpgradePath else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            return
+        }
+
         let isAdmin = driveFileManager.drive.accountAdmin
         let viewControllerToPresent = KSuiteViewController(configuration: configuration, isAdmin: isAdmin)
         nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
