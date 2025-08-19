@@ -857,6 +857,11 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     func removeFilterButtonPressed(_ filter: Filterable) {
         // Overriden in subclasses
     }
+
+    func upsaleButtonPressed() {
+        router.presentUpSaleSheet()
+        matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
+    }
 }
 
 // MARK: - Collection view delegate flow layout
