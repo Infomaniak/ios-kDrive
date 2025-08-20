@@ -1,0 +1,31 @@
+name: Validate localization files
+
+on:
+  pull_request:
+    branches: [ master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Validate localization files
+    runs-on: [ self-hosted, iOS ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v2
+        with:
+          cache: false
+          experimental: true
+      - name: Create configuration file
+        env:
+          LOCO_KEY: ${{ secrets.LOCO_KEY }}
+        run: |
+          touch ${GITHUB_WORKSPACE}/.import_loco
+          echo -e "[mail]\nlocalizable_path = ${GITHUB_WORKSPACE}/kDrive/Resources\nmain_target_localizable_path = ${GITHUB_WORKSPACE}/kDrive/Resources\nloco_key = $LOCO_KEY" > ${GITHUB_WORKSPACE}/.import_loco
+      - name: Validate
+        run: import_loco mail -c --config-file ${GITHUB_WORKSPACE}/.import_loco
