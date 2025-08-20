@@ -16,6 +16,7 @@ jobs:
       - uses: jdx/mise-action@v2
         with:
           cache: false
+          experimental: true
       - name: Checkout
         uses: actions/checkout@v2
       - name: Create test env

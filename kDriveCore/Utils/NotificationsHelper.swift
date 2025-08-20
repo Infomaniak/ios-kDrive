@@ -220,7 +220,11 @@ public struct NotificationsHelper: NotificationsHelpable {
         content.categoryIdentifier = CategoryIdentifier.upload
         content.sound = .default
         content.title = KDriveResourcesStrings.Localizable.errorGeneric
-        content.body = KDriveResourcesStrings.Localizable.uploadImportedFailedAmountPlural(totalUpload, failedUpload)
+        if failedUpload <= 1 {
+            content.body = KDriveResourcesStrings.Localizable.uploadImportedFailedAmount(totalUpload)
+        } else {
+            content.body = KDriveResourcesStrings.Localizable.uploadImportedFailedAmountPlural(totalUpload, failedUpload)
+        }
 
         sendImmediately(notification: content, id: UUID().uuidString)
     }

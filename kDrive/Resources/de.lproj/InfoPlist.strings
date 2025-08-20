@@ -1,39 +1,38 @@
 /*
- * Loco ios export: iOS InfoPlist.strings
+ * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
- * Release: Working copy
  * Locale: de, German
  * Tagged: ios-info-plist
- * Exported by: elena willen
- * Exported at: Mon, 04 Dec 2023 16:55:22 +0100
+ * Exported by: Valentin Perignon
+ * Exported at: Wed, 20 Aug 2025 13:14:10 +0200
  */
 
 /* loco:6051c6293b16e53c684172c2 */
-NSCameraUsageDescription = "Der Zugriff auf die Kamera ist erforderlich, um Dokumente zu scannen und Fotos aufzunehmen.";
+"NSCameraUsageDescription" = "Der Zugriff auf die Kamera ist erforderlich, um Dokumente zu scannen und Fotos aufzunehmen.";
 
 /* loco:6051c6293b16e53c684172c7 */
-NSFaceIDUsageDescription = "Face ID wird für die Entsperrung der Anwendung verwendet.";
+"NSFaceIDUsageDescription" = "Face ID wird für die Entsperrung der Anwendung verwendet.";
 
 /* loco:6051c6293b16e53c684172c4 */
-NSLocalNetworkUsageDescription = "Nur im Debugging-Modus verwendet.";
+"NSLocalNetworkUsageDescription" = "Nur im Debugging-Modus verwendet.";
 
 /* loco:6051c6293b16e53c684172c3 */
-NSMicrophoneUsageDescription = "Der Zugriff auf das Mikrofon ist erforderlich, um Videos aufzunehmen.";
+"NSMicrophoneUsageDescription" = "Der Zugriff auf das Mikrofon ist erforderlich, um Videos aufzunehmen.";
 
 /* loco:6051c6293b16e53c684172c6 */
-NSPhotoLibraryAddUsageDescription = "Der Zugriff auf Ihre Bilderdatenbank ist erforderlich, um Ihre Fotos und Videos aufzunehmen.";
+"NSPhotoLibraryAddUsageDescription" = "Der Zugriff auf Ihre Bilderdatenbank ist erforderlich, um Ihre Fotos und Videos aufzunehmen.";
 
 /* loco:6051c6293b16e53c684172c5 */
-NSPhotoLibraryUsageDescription = "Der Zugriff auf Ihre Bilderdatenbank ist erforderlich, um Ihre Fotos zu speichern.";
+"NSPhotoLibraryUsageDescription" = "Der Zugriff auf Ihre Bilderdatenbank ist erforderlich, um Ihre Fotos zu speichern.";
 
 /* loco:655f5d8a12b8465261012282 */
-shortcutScanTitle = "Dokument Scannen";
+"shortcutScanTitle" = "Dokument Scannen";
 
 /* loco:655f62ccebeba55f0b034b52 */
-shortcutSearchTitle = "Suchen";
+"shortcutSearchTitle" = "Suchen";
 
 /* loco:655f6694d9b5e3e5ac054202 */
-shortcutSupportTitle = "Hilfe & Unterstützung";
+"shortcutSupportTitle" = "Hilfe & Unterstützung";
 
 /* loco:655f61c4a3c734176c08ce82 */
-shortcutUploadTitle = "Foto Oder Video Hochladen";
+"shortcutUploadTitle" = "Foto Oder Video Hochladen";

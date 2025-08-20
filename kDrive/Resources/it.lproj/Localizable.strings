@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Philippe Weidmann
- * Exported at: Tue, 19 Aug 2025 14:17:55 +0200
+ * Exported by: Valentin Perignon
+ * Exported at: Wed, 20 Aug 2025 13:14:09 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -880,62 +880,8 @@
 /* loco:62385b138941da20b53b8853 */
 "fileActivityCollaborativeUserDelete" = "ha eliminato una cartella dal deposito file nella quale un utente ha lasciato dei documenti";
 
-/* loco:6049df4d5c2c3a04bc397ab6 */
-"fileActivityCommentCreate" = "ha commentato il seguente file";
-
-/* loco:6049df4d5c2c3a04bc397ab7 */
-"fileActivityCommentCreate-plural" = "ha commentato %d file";
-
-/* loco:6049df4d5c2c3a04bc397aa8 */
-"fileActivityFileCreate" = "ha importato il seguente file";
-
-/* loco:6049df4d5c2c3a04bc397aa9 */
-"fileActivityFileCreate-plural" = "ha importato %d nuovi file";
-
-/* loco:6049df4d5c2c3a04bc397ab0 */
-"fileActivityFileRestore" = "ha ripristinato il seguente file";
-
-/* loco:6049df4d5c2c3a04bc397ab1 */
-"fileActivityFileRestore-plural" = "ha ripristinato %d file";
-
-/* loco:6049df4d5c2c3a04bc397aac */
-"fileActivityFileTrash" = "ha spostato il seguente file nella cartella";
-
-/* loco:6049df4d5c2c3a04bc397aad */
-"fileActivityFileTrash-plural" = "ha spostato %d file nella cartella";
-
-/* loco:6049df4d5c2c3a04bc397ab4 */
-"fileActivityFileUpdate" = "ha modificato il seguente file";
-
-/* loco:6049df4d5c2c3a04bc397ab5 */
-"fileActivityFileUpdate-plural" = "ha modificato %d file";
-
-/* loco:6049df4d5c2c3a04bc397aaa */
-"fileActivityFolderCreate" = "ha creato la seguente cartella";
-
-/* loco:6049df4d5c2c3a04bc397aab */
-"fileActivityFolderCreate-plural" = "ha creato %d nuove cartelle";
-
-/* loco:6049df4d5c2c3a04bc397ab2 */
-"fileActivityFolderRestore" = "ha ripristinato la seguente cartella";
-
-/* loco:6049df4d5c2c3a04bc397ab3 */
-"fileActivityFolderRestore-plural" = "ha ripristinato %d cartelle";
-
-/* loco:6049df4d5c2c3a04bc397aae */
-"fileActivityFolderTrash" = "ha spostato la seguente cartella nel cestino";
-
-/* loco:6049df4d5c2c3a04bc397aaf */
-"fileActivityFolderTrash-plural" = "ha spostato %d cartelle nel cestino";
-
 /* loco:60632ee2a6d3b46038170024 */
 "fileActivityOtherFiles" = "%d altri file";
-
-/* loco:6049df4d5c2c3a04bc397ab8 */
-"fileActivityUnknown" = "ha effettuato un’operazione sul seguente file";
-
-/* loco:6049df4d5c2c3a04bc397ab9 */
-"fileActivityUnknown-plural" = "ha effettuato un’operazione su %d file";
 
 /* loco:6049df4d5c2c3a04bc3979ab */
 "fileDetailsActivitiesTitle" = "Attività";
@@ -1090,18 +1036,6 @@
 /* loco:6239bfa182666831bc78f4f2 */
 "fileDetailsInfoEmptyFolder" = "Cartella vuota";
 
-/* loco:6239c00b21f18367cc667a92 */
-"fileDetailsInfoFile" = "1 file";
-
-/* loco:6239c04c487205605612f782 */
-"fileDetailsInfoFile-plural" = "%d file";
-
-/* loco:6239d158a7d1030039251a42 */
-"fileDetailsInfoFolder" = "1 cartella";
-
-/* loco:6239d19142240e69657724d2 */
-"fileDetailsInfoFolder-plural" = "%d cartelle";
-
 /* loco:6065c93ed104784cae1aac12 */
 "fileDetailsInfosAddedDateTitle" = "Aggiungi al drive";
 
@@ -1132,24 +1066,6 @@
 /* loco:6049df4d5c2c3a04bc3979df */
 "fileInfoInputDuplicateFile" = "Nome della copia";
 
-/* loco:6049df4d5c2c3a04bc397a9e */
-"fileListAddFavoritesConfirmationSnackbar" = "File aggiunto ai preferiti con successo";
-
-/* loco:6049df4d5c2c3a04bc397a9f */
-"fileListAddFavoritesConfirmationSnackbar-plural" = "%d file aggiunti ai preferiti con successo";
-
-/* loco:6049df4d5c2c3a04bc397aa0 */
-"fileListAddOfflineConfirmationSnackbar" = "Un file è disponibile offline";
-
-/* loco:6049df4d5c2c3a04bc397aa1 */
-"fileListAddOfflineConfirmationSnackbar-plural" = "%d file sono disponibili offline";
-
-/* loco:61d70432a51b8045fd7fbd62 */
-"fileListColorFolderConfirmationSnackbar" = "Una cartella colorata con successo";
-
-/* loco:61d704938b53ce4fd005f3d3 */
-"fileListColorFolderConfirmationSnackbar-plural" = "%d cartelle colorate con successo";
-
 /* loco:614b15f40740a72bd13f4ff5 */
 "fileListCopyDoneSnackbar" = "Copie concluse con successo";
 
@@ -1168,12 +1084,6 @@
 /* loco:611b6cc2f8370857fd1d1182 */
 "fileListDeletionStartedSnackbar" = "Inizio delle cancellazioni";
 
-/* loco:6049df4d5c2c3a04bc397aa2 */
-"fileListDuplicationConfirmationSnackbar" = "File duplicato con successo";
-
-/* loco:6049df4d5c2c3a04bc397aa3 */
-"fileListDuplicationConfirmationSnackbar-plural" = "%d file duplicati con successo";
-
 /* loco:611b6e5b3d3bce39f32434e2 */
 "fileListMoveDoneSnackbar" = "Spostamenti conclusi con successo";
 
@@ -1188,30 +1098,6 @@
 
 /* loco:611b6e2b9ad5ad3c690608e3 */
 "fileListMoveStartedSnackbar" = "Inizio degli spostamenti";
-
-/* loco:62eaa060d01213511f5281e3 */
-"fileListMoveTrashConfirmationSnackbar" = "Un elemento spostato nel cestino";
-
-/* loco:62ea9ff6026cf83c626561b3 */
-"fileListMoveTrashConfirmationSnackbar-plural" = "%d elementi spostati nel cestino";
-
-/* loco:6049df4d5c2c3a04bc397aa6 */
-"fileListMultiSelectedTitle" = "%d selezionato";
-
-/* loco:6049df4d5c2c3a04bc397aa7 */
-"fileListMultiSelectedTitle-plural" = "%d selezionati";
-
-/* loco:620a0d7a6e12783968716a82 */
-"fileListRemoveFavoritesConfirmationSnackbar" = "File rimosso ai preferiti con successo";
-
-/* loco:620a0e3949144a2b38548d72 */
-"fileListRemoveFavoritesConfirmationSnackbar-plural" = "%d file rimosso ai preferiti con successo";
-
-/* loco:620a0ee08d5b225e1b1b1962 */
-"fileListRemoveOfflineConfirmationSnackbar" = "Un file rimosso dalla disponibilità offline";
-
-/* loco:620a0f2aeea0c053c14a46e2 */
-"fileListRemoveOfflineConfirmationSnackbar-plural" = "%d file rimossi dalla disponibilità offline";
 
 /* loco:6049df4d5c2c3a04bc3979e1 */
 "fileListTitle" = "File";
@@ -1807,12 +1693,6 @@
 /* loco:6049df4d5c2c3a04bc397a4f */
 "shareUserNotAccepted" = "L’utente non ha ancora accettato la condivisione ed è un utente esterno del kDrive.";
 
-/* loco:612cbe3692067747ae0fde53 */
-"shareUsersCount" = "%d utente";
-
-/* loco:612cbf100e7edb04f331b586 */
-"shareUsersCount-plural" = "%d utenti";
-
 /* loco:604a2f6d3949bd0d7330a633 */
 "sharedConflictDescription" = "L’utente %1$@ può già accedere a questa cartella con un diritto di \"%2$@\". Se effettui la condivisione, accederanno alla cartella con un diritto di \"%3$@\"";
 
@@ -1839,12 +1719,6 @@
 
 /* loco:62a8409e5803ef33d9677572 */
 "snackBarImageVideoSaved" = "%d file salvati nella libreria fotografica";
-
-/* loco:619f6999f44e9d3a394a6d62 */
-"snackBarUploadError" = "Non è stato possibile importare un file";
-
-/* loco:619f6d4fa8936206e56afe32 */
-"snackBarUploadError-plural" = "%d file non possono essere importati";
 
 /* loco:6049df4d5c2c3a04bc397a9c */
 "snackbarDeleteConfirmation" = "%@ eliminato definitivamente";
@@ -2131,12 +2005,6 @@
 /* loco:6049df4d5c2c3a04bc397a7c */
 "trashTitle" = "Cestino";
 
-/* loco:62ea9dff60bfdf445359b452 */
-"trashedFileDeletedPermanentlyConfirmationSnackbar" = "Un elemento eliminato definitivamente";
-
-/* loco:62ea981f2f0ec46bf97ff552 */
-"trashedFileDeletedPermanentlyConfirmationSnackbar-plural" = "%d elementi eliminati definitivamente";
-
 /* loco:6049df4d5c2c3a04bc397a79 */
 "trashedFileRestoreFileInSuccess" = "%1$@ ripristinato in %2$@";
 
@@ -2188,12 +2056,6 @@
 /* loco:62a874566f1e5662420d2b82 */
 "uploadImportedFailedAmount-plural" = "%2$d importazioni fallite su un totale di %1$d";
 
-/* loco:62a870e797825a742960c0b2 */
-"uploadImportedOtherAmount" = "+1 altro file";
-
-/* loco:62a8723e5ef00d1ebd2e30f4 */
-"uploadImportedOtherAmount-plural" = "%d altri file";
-
 /* loco:6049df4d5c2c3a04bc397a83 */
 "uploadInProgressCancelAllUploadTitle" = "Annulla le importazioni";
 
@@ -2202,12 +2064,6 @@
 
 /* loco:6049df4d5c2c3a04bc3979fa */
 "uploadInProgressNoFile" = "Nessun caricamento in corso";
-
-/* loco:6049df4d5c2c3a04bc397aba */
-"uploadInProgressNumberFile" = "Un file restante";
-
-/* loco:6049df4d5c2c3a04bc397abb */
-"uploadInProgressNumberFile-plural" = "%d file restanti";
 
 /* loco:6049df4d5c2c3a04bc397a85 */
 "uploadInProgressPending" = "In attesa";
