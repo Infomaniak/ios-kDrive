@@ -135,7 +135,7 @@ class NewFolderTypeTableViewController: UITableViewController {
                 matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             } else if driveFileManager.drive.pack.kSuiteProUpgradePath != nil, driveFileManager.drive.dropboxQuotaExceeded {
                 router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
-                matomo.track(eventWithCategory: .KSuiteProUpgradeBottomSheet, name: "dropboxQuotaExceeded")
+                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             } else if !driveFileManager.drive.pack.capabilities.useDropbox {
                 let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController
