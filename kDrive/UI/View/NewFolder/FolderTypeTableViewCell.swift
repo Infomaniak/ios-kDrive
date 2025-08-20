@@ -21,12 +21,28 @@ import UIKit
 
 class FolderTypeTableViewCell: InsetTableViewCell {
     @IBOutlet var descriptionLabel: UILabel!
+    @IBOutlet var upgradeLabel: UILabel!
     @IBOutlet var chipContainerView: UIView!
+    @IBOutlet var lowerConstraint: NSLayoutConstraint!
 
     override func prepareForReuse() {
         super.prepareForReuse()
         descriptionLabel.text = nil
+        upgradeLabel.text = nil
+        upgradeLabel.isHidden = true
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
+        lowerConstraint.constant = 20
+    }
+
+    override func initWithPositionAndShadow(
+        isFirst: Bool = false,
+        isLast: Bool = false,
+        elevation: Double = 0,
+        radius: CGFloat = 6
+    ) {
+        upgradeLabel.isHidden = true
+        lowerConstraint.constant = 0
+        super.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast, elevation: elevation, radius: radius)
     }
 
     func setMykSuiteChip() {
@@ -57,5 +73,11 @@ class FolderTypeTableViewCell: InsetTableViewCell {
             chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
             chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
         ])
+    }
+
+    func setKSuiteEnterpriseUpgrade() {
+        upgradeLabel.isHidden = false
+        upgradeLabel.text = "TODO: i18n - Evolve enterprise offer on the web"
+        lowerConstraint.constant = 20
     }
 }

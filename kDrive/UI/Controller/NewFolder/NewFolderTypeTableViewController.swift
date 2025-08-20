@@ -121,6 +121,8 @@ class NewFolderTypeTableViewController: UITableViewController {
                 cell.setMykSuiteChip()
             } else if drive.pack.kSuiteProUpgradePath != nil, drive.dropboxQuotaExceeded {
                 cell.setKSuiteProChip()
+            } else if drive.pack.drivePackId == .kSuiteEntreprise, drive.dropboxQuotaExceeded {
+                cell.setKSuiteEnterpriseUpgrade()
             }
         }
         return cell
