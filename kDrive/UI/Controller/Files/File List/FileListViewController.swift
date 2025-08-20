@@ -864,7 +864,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
         } else if packId == .kSuiteEssential {
             router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
-            matomo.track(eventWithCategory: .KSuiteProUpgradeBottomSheet, name: "trashStorageLimit")
+            matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "trashStorageLimit")
         } else {
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
         }
