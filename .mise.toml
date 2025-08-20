@@ -3,4 +3,6 @@ tuist = '4.59.2'
 swiftformat = '0.57.2'
 swiftlint = '0.59.1'
 sentry-cli = "latest"
+pipx = "latest"
+"pipx:infomaniak/importloco" = "1.1.0"
 
