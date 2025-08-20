@@ -55,6 +55,10 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func presentKDriveProUpSaleSheet(driveFileManager: kDriveCore.DriveFileManager) {
+        logNoop()
+    }
+
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
         logNoop()
     }
