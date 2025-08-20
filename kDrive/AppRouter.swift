@@ -129,10 +129,13 @@ public struct AppRouter: AppNavigable {
 
         case .filePreview(let filePreviewLink):
             await handleSimpleLink(deeplink: filePreviewLink, fileId: filePreviewLink.fileId, isOfficeLink: false)
+
+        case .recent(let recentLink):
+            await handleRecentLink(recentLink: recentLink)
         }
     }
 
-    @MainActor private func handleSimpleLink(deeplink: Any, fileId: Int, isOfficeLink: Bool) async {
+    @MainActor func handleSimpleLink(deeplink: Any, fileId: Int, isOfficeLink: Bool) async {
         guard let driveFileManager = await accountManager
             .getMatchingDriveFileManagerOrSwitchAccount(deeplink: deeplink) else {
             Log.sceneDelegate(

@@ -30,6 +30,7 @@ public enum NavigationRoutes: Equatable {
     case publicShare(publicShareLink: PublicShareLink)
     case directory(directoryLink: DirectoryLink)
     case filePreview(filePreviewLink: FilePreviewLink)
+    case recent(recentLink: RecentLink)
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
         switch (lhs, rhs) {
@@ -43,10 +44,12 @@ public enum NavigationRoutes: Equatable {
             return lhdTrashLink == rhdTrashLink
         case(.office(let lhdOfficeLink), .office(let rhdOfficeLink)):
             return lhdOfficeLink == rhdOfficeLink
-        case(.privateShare(let lhdPrivateShareLink), .privateShare(let rhdprivateShareLink)):
-            return lhdPrivateShareLink == rhdprivateShareLink
+        case(.privateShare(let lhdPrivateShareLink), .privateShare(let rhdPrivateShareLink)):
+            return lhdPrivateShareLink == rhdPrivateShareLink
         case(.directory(let lhdDirectoryLink), .directory(let rhdDirectoryLink)):
             return lhdDirectoryLink == rhdDirectoryLink
+        case(.recent(let lhdRecentLink), .recent(let rhdRecentLink)):
+            return lhdRecentLink == rhdRecentLink
         default:
             return false
         }

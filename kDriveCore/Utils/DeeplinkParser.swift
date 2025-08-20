@@ -69,6 +69,10 @@ public struct DeeplinkParser: DeeplinkParsable {
         if let filePreviewLink = FilePreviewLink(filePreviewURL: url) {
             await router.navigate(to: .filePreview(filePreviewLink: filePreviewLink))
             return true
+        }
+        if let recentLink = RecentLink(recentURL: url) {
+            await router.navigate(to: .recent(recentLink: recentLink))
+            return true
         } else {
             Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
             return false
