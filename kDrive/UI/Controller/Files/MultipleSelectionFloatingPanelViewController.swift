@@ -128,7 +128,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
         } else if sharedWithMe {
             return FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if allItemsSelected {
-            if currentDirectory.name == "Offline" {
+            if currentDirectory.id == DriveFileManager.offlineRoot.id {
                 return FloatingPanelAction.selectAllOfflineActions
             } else {
                 return FloatingPanelAction.selectAllActions
