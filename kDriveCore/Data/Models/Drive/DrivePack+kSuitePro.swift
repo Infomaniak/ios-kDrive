@@ -22,7 +22,7 @@ import KSuite
 import RealmSwift
 
 public extension DrivePack {
-    var isKSuitePro: Bool {
+    var isKSuiteProGalaxy: Bool {
         switch drivePackId {
         case .kSuiteStandard, .kSuitePro, .kSuiteEssential, .kSuiteEntreprise:
             return true
