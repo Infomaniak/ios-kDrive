@@ -56,6 +56,7 @@ public extension MatomoUtils.EventCategory {
     static let publicShareAction = MatomoUtils.EventCategory(displayName: "publicShareAction")
     static let myKSuite = MatomoUtils.EventCategory(displayName: "myKSuite")
     static let myKSuiteUpgradeBottomSheet = MatomoUtils.EventCategory(displayName: "myKSuiteUpgradeBottomSheet")
+    static let KSuiteProUpgradeBottomSheet = MatomoUtils.EventCategory(displayName: "KSuiteProUpgradeBottomSheet")
 }
 
 public extension MatomoUtils {
