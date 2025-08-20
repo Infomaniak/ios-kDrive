@@ -312,9 +312,14 @@ extension FileActionsFloatingPanelViewController {
             return
         }
 
-        if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
+        let drive = driveFileManager.drive
+        if packId == .myKSuite, drive.dropboxQuotaExceeded {
             router.presentUpSaleSheet()
             matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
+            return
+        } else if drive.pack.kSuiteProUpgradePath != nil, drive.dropboxQuotaExceeded {
+            router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+            matomo.track(eventWithCategory: .KSuiteProUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             return
         }
 

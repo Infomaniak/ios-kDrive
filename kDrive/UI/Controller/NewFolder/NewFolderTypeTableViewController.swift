@@ -104,11 +104,23 @@ class NewFolderTypeTableViewController: UITableViewController {
                 boldText: driveFileManager.drive.name
             )
         case .dropbox:
-            cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
+            let drive = driveFileManager.drive
+            let title: String
+            if drive.pack.isKSuiteProGalaxy {
+                title = KDriveResourcesStrings.Localizable.dropBoxTitle
+                    + " "
+                    + drive.dropboxQuotaFormatted
+            } else {
+                title = KDriveResourcesStrings.Localizable.dropBoxTitle
+            }
+
+            cell.titleLabel.text = title
             cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
             cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
-            if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
+            if packId == .myKSuite, drive.dropboxQuotaExceeded {
                 cell.setMykSuiteChip()
+            } else if drive.pack.kSuiteProUpgradePath != nil, drive.dropboxQuotaExceeded {
+                cell.setKSuiteProChip()
             }
         }
         return cell
@@ -119,6 +131,9 @@ class NewFolderTypeTableViewController: UITableViewController {
             if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
                 router.presentUpSaleSheet()
                 matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
+            } else if driveFileManager.drive.pack.kSuiteProUpgradePath != nil, driveFileManager.drive.dropboxQuotaExceeded {
+                router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+                matomo.track(eventWithCategory: .KSuiteProUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             } else if !driveFileManager.drive.pack.capabilities.useDropbox {
                 let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
                 let floatingPanelViewController = driveFloatingPanelController

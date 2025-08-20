@@ -41,4 +41,21 @@ class FolderTypeTableViewCell: InsetTableViewCell {
             chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
         ])
     }
+
+    func setKSuiteProChip() {
+        let chip = KSuiteProChipController()
+        guard let chipView = chip.view else {
+            return
+        }
+
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
+    }
 }

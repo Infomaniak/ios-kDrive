@@ -46,7 +46,7 @@ public final class DriveQuota: EmbeddedObject, Codable {
 }
 
 public extension Drive {
-    var dropboxQuotaFormated: String {
+    var dropboxQuotaFormatted: String {
         guard let quota, let dropbox = quota.dropbox else { return "" }
         let current = dropbox.current ?? 0
         let max = dropbox.max
