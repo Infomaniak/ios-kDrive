@@ -261,6 +261,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             driveId = deeplink.driveId
         case let deeplink as FilePreviewLink:
             driveId = deeplink.driveId
+        case let deeplink as RecentLink:
+            driveId = deeplink.driveId
         default:
             return nil
         }
