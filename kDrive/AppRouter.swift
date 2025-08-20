@@ -127,7 +127,7 @@ public struct AppRouter: AppNavigable {
                 deeplinkService.setLastPublicShare(publicShareLink)
                 return
             }
-            await AppRouter.processPublicShareLink(publicShareLink)
+            await processPublicShareLink(publicShareLink)
 
         case .directory(let directoryLink):
             await handleSimpleLink(deeplink: directoryLink, fileId: directoryLink.folderId, isOfficeLink: false)
@@ -154,7 +154,8 @@ public struct AppRouter: AppNavigable {
         let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
         window?.rootViewController = freshRootViewController
 
-        FileActionsHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
+        let fileActionHelper = FileActionsHelper()
+        fileActionHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
     }
 
     // MARK: TopmostViewControllerFetchable

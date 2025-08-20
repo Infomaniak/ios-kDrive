@@ -73,7 +73,7 @@ public final class FileActionsHelper {
         }
     }
 
-    public static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
+    public func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
         Task {
             do {
                 let file = try await driveFileManager.file(ProxyFile(driveId: driveFileManager.driveId, id: id))

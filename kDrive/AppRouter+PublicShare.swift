@@ -29,7 +29,7 @@ import UIKit
 
 public extension AppRouter {
     @discardableResult
-    static func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
+    func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
         let apiFetcher = PublicShareApiFetcher()
         do {
             let metadata = try await apiFetcher.getMetadata(driveId: link.driveId, shareLinkUid: link.shareLinkUid)
@@ -53,8 +53,8 @@ public extension AppRouter {
         }
     }
 
-    private static func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
-                                                             publicShareURL: URL?) async -> Bool {
+    private func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
+                                                      publicShareURL: URL?) async -> Bool {
         @InjectService var appNavigable: AppNavigable
         @InjectService var matomo: MatomoUtils
         switch limitation {
@@ -72,10 +72,10 @@ public extension AppRouter {
         return true
     }
 
-    private static func processPublicShareMetadata(_ metadata: PublicShareMetadata,
-                                                   driveId: Int,
-                                                   shareLinkUid: String,
-                                                   apiFetcher: PublicShareApiFetcher) async -> Bool {
+    private func processPublicShareMetadata(_ metadata: PublicShareMetadata,
+                                            driveId: Int,
+                                            shareLinkUid: String,
+                                            apiFetcher: PublicShareApiFetcher) async -> Bool {
         @InjectService var accountManager: AccountManageable
         @InjectService var matomo: MatomoUtils
 
@@ -98,11 +98,11 @@ public extension AppRouter {
         return true
     }
 
-    private static func openPublicShare(driveId: Int,
-                                        linkUuid: String,
-                                        fileId: Int,
-                                        driveFileManager: DriveFileManager,
-                                        apiFetcher: PublicShareApiFetcher) {
+    private func openPublicShare(driveId: Int,
+                                 linkUuid: String,
+                                 fileId: Int,
+                                 driveFileManager: DriveFileManager,
+                                 apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
                 let publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
