@@ -90,7 +90,7 @@ class FilesHeaderView: UICollectionReusableView {
         containerStackView.addArrangedSubview(selectView)
     }
 
-    public func updateInformationView(drivePackId: DrivePackId?, isTrash: Bool) {
+    func updateInformationView(drivePackId: DrivePackId?, isTrash: Bool) {
         let displayInformation = isTrash && (drivePackId == .myKSuite || drivePackId == .kSuiteEssential)
         trashInformationView.isHidden = !displayInformation
 
