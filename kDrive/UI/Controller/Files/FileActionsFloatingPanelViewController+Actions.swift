@@ -319,7 +319,7 @@ extension FileActionsFloatingPanelViewController {
             return
         } else if drive.pack.kSuiteProUpgradePath != nil, drive.dropboxQuotaExceeded {
             router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
-            matomo.track(eventWithCategory: .KSuiteProUpgradeBottomSheet, name: "dropboxQuotaExceeded")
+            matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             return
         }
 
