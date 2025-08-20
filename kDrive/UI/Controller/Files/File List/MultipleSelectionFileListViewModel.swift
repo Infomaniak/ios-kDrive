@@ -124,7 +124,7 @@ class MultipleSelectionFileListViewModel {
         isMultipleSelectionEnabled = false
         selectedCount = 0
 
-        if driveFileManager.isPublicShare || currentDirectory.name == "Offline" {
+        if driveFileManager.isPublicShare || currentDirectory.id == DriveFileManager.offlineRoot.id {
             multipleSelectionActions = [.more]
         } else {
             multipleSelectionActions = [.move, .delete, .more]
