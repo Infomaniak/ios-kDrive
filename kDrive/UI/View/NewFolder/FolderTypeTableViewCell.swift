@@ -30,8 +30,8 @@ class FolderTypeTableViewCell: InsetTableViewCell {
         descriptionLabel.text = nil
         upgradeLabel.text = nil
         upgradeLabel.isHidden = true
+        lowerConstraint.constant = 0
         chipContainerView.subviews.forEach { $0.removeFromSuperview() }
-        lowerConstraint.constant = 20
     }
 
     override func initWithPositionAndShadow(
