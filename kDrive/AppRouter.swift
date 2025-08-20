@@ -119,13 +119,8 @@ public struct AppRouter: AppNavigable {
             await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.fileId, isOfficeLink: false)
 
         case .publicShare(let publicShareLink):
-            guard accountManager.currentDriveFileManager != nil else {
-                Log.sceneDelegate(
-                    "NavigationManager: Unable to navigate to .publicShare without a DriveFileManager",
-                    level: .error
-                )
+            if accountManager.currentDriveFileManager == nil {
                 deeplinkService.setLastPublicShare(publicShareLink)
-                return
             }
             await processPublicShareLink(publicShareLink)
 
