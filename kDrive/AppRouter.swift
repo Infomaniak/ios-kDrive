@@ -132,27 +132,6 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    @MainActor func handleSimpleLink(deeplink: Any, fileId: Int, isOfficeLink: Bool) async {
-        guard let driveFileManager = await accountManager
-            .getMatchingDriveFileManagerOrSwitchAccount(deeplink: deeplink) else {
-            Log.sceneDelegate(
-                "NavigationManager: Unable to navigate without a DriveFileManager",
-                level: .error
-            )
-            deeplinkService.setLastPublicShare(deeplink)
-            return
-        }
-        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
-            return
-        }
-
-        let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
-        window?.rootViewController = freshRootViewController
-
-        let fileActionHelper = FileActionsHelper()
-        fileActionHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
-    }
-
     // MARK: TopmostViewControllerFetchable
 
     @MainActor public var topMostViewController: UIViewController? {
