@@ -20,36 +20,47 @@ import Foundation
 import kDriveCore
 import Testing
 
-@Suite("UTRecentLink")
-struct UTRecentLink {
-    @Test("Parse the driveId of a link to the recents files", arguments: [192_834])
-    func parseRecentLinkRoot(driveId: Int) async throws {
-        let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/recents"
+@Suite("UTBasicLink")
+struct UTBasicLink {
+    @Test(
+        "Parse the driveId of a link to a basic tab",
+        arguments: zip(
+            [192_834, 2_932_094, 392_842, 298_232],
+            ["recents", "trash", "favorites", "my-shares"]
+        )
+    )
+    func parseBasicLinkRoot(driveId: Int, destination: String) async throws {
+        let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/\(destination)"
 
-        guard let url = URL(string: givenLink), let parsedResult = RecentLink(recentURL: url) else {
+        guard let url = URL(string: givenLink), let parsedResult = BasicLink(basicURL: url) else {
             Issue.record("Failed to parse the URL")
             return
         }
 
-        #expect(parsedResult.recentURL == url)
+        #expect(parsedResult.basicURL == url)
         #expect(parsedResult.driveId == driveId)
+        #expect(parsedResult.destination == destination)
     }
 
-    @Test("Parse the driveId and the fileId of a link to the recents files", arguments: zip([732_322], [294_394_394]))
-    func parseRecentLinkFile(driveId: Int, fileId: Int) async throws {
-        let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/recents/preview/image/\(fileId)"
+    @Test("Parse the driveId and the fileId of a link to a basic tab", arguments: [
+        (732_322, "trash", 294_394_394),
+        (293_823, "my-shares", 9_033_242)
+    ])
+    func parseRecentLinkFile(driveId: Int, destination: String, fileId: Int) async throws {
+        let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/\(destination)/preview/image/\(fileId)"
 
-        guard let url = URL(string: givenLink), let parsedResult = RecentLink(recentURL: url) else {
+        guard let url = URL(string: givenLink), let parsedResult = BasicLink(basicURL: url) else {
             Issue.record("Failed to parse the URL")
             return
         }
 
-        #expect(parsedResult.recentURL == url)
+        #expect(parsedResult.basicURL == url)
         #expect(parsedResult.driveId == driveId)
+        #expect(parsedResult.destination == destination)
         #expect(parsedResult.fileId == fileId)
     }
 
-    @Test("Fail to parse a deeplink to the recents files if the URL is invalid", arguments: ["AD49-243DV-3DB"])
+    @Test("Fail to parse a deeplink to a basic tab if the URL is invalid", arguments: ["AD49-243DV-3DB"])
     func recentLinkInvalidURL(invalidDriveId: String) async throws {
         let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(invalidDriveId)/recents"
 
@@ -58,7 +69,7 @@ struct UTRecentLink {
             return
         }
 
-        let parsedResult = RecentLink(recentURL: url)
+        let parsedResult = BasicLink(basicURL: url)
         #expect(parsedResult == nil)
     }
 }

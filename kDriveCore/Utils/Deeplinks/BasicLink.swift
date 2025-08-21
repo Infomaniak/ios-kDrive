@@ -19,15 +19,16 @@
 import Foundation
 import SwiftRegex
 
-public struct RecentLink: Sendable, Equatable {
-    public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/recents(?:.*/([0-9]+))?$"#)
+public struct BasicLink: Sendable, Equatable {
+    public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/([a-z-]+)(?:.*/([0-9]+))?$"#)
 
-    public let recentURL: URL
+    public let basicURL: URL
     public let driveId: Int
+    public let destination: String
     public let fileId: Int?
 
-    public init?(recentURL: URL) {
-        guard let components = URLComponents(url: recentURL, resolvingAgainstBaseURL: true) else {
+    public init?(basicURL: URL) {
+        guard let components = URLComponents(url: basicURL, resolvingAgainstBaseURL: true) else {
             return nil
         }
 
@@ -38,13 +39,15 @@ public struct RecentLink: Sendable, Equatable {
 
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
-              let driveIdInt = Int(driveId)
+              let driveIdInt = Int(driveId),
+              let destination = firstMatch[safe: 2]
         else {
             return nil
         }
 
-        self.recentURL = recentURL
+        self.basicURL = basicURL
         self.driveId = driveIdInt
-        fileId = Int(firstMatch[safe: 2] ?? "")
+        self.destination = destination
+        fileId = Int(firstMatch[safe: 3] ?? "")
     }
 }
