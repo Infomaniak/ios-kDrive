@@ -104,6 +104,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         tableView.register(cellView: MenuTopTableViewCell.self)
         tableView.register(cellView: UploadsInProgressTableViewCell.self)
         tableView.register(cellView: UploadsPausedTableViewCell.self)
+        tableView.register(KSuiteGetProViewCell.self, forCellReuseIdentifier: KSuiteGetProViewCell.reuseIdentifier)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
 
         updateTableContent()
@@ -204,7 +205,12 @@ extension MenuViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let section = sections[section]
-        if section == .header || section == .uploads {
+        if section == .header {
+            guard driveFileManager.drive.pack.drivePackId == .kSuiteEssential else {
+                return 1
+            }
+            return 2
+        } else if section == .uploads {
             return 1
         } else {
             return section.actions.count
@@ -214,15 +220,20 @@ extension MenuViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let section = sections[indexPath.section]
         if section == .header {
-            let cell = tableView.dequeueReusableCell(type: MenuTopTableViewCell.self, for: indexPath)
-            cell.selectionStyle = .none
-            if let currentAccount {
-                cell.configureCell(with: driveFileManager.drive, and: currentAccount)
+            if indexPath.row == 1 {
+                let cell = tableView.dequeueReusableCell(type: KSuiteGetProViewCell.self, for: indexPath)
+                return cell
+            } else {
+                let cell = tableView.dequeueReusableCell(type: MenuTopTableViewCell.self, for: indexPath)
+                cell.selectionStyle = .none
+                if let currentAccount {
+                    cell.configureCell(with: driveFileManager.drive, and: currentAccount)
+                }
+                let tap = UITapGestureRecognizer(target: self, action: #selector(switchDriveButtonPressed(_:)))
+                cell.switchDriveStackView.addGestureRecognizer(tap)
+                cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
+                return cell
             }
-            let tap = UITapGestureRecognizer(target: self, action: #selector(switchDriveButtonPressed(_:)))
-            cell.switchDriveStackView.addGestureRecognizer(tap)
-            cell.switchDriveButton.addTarget(self, action: #selector(switchDriveButtonPressed(_:)), for: .touchUpInside)
-            return cell
         } else if section == .uploads {
             if photoLibraryUploader.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
                 let cell = tableView.dequeueReusableCell(type: UploadsPausedTableViewCell.self, for: indexPath)
@@ -252,6 +263,8 @@ extension MenuViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         let section = sections[indexPath.section]
         if section == .header {
+            guard indexPath.row == 1 else { return }
+            appNavigable.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
             return
         } else if section == .uploads {
             let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
