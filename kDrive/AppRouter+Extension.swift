@@ -72,6 +72,13 @@ public extension AppRouter {
             return
         }
 
+        guard basicLink.destination != BasicLinkTab.trash.rawValue else {
+            await showFolderInTrash(folderId: fileId,
+                                    driveFileManager: driveFileManager,
+                                    navigationController: navigationController)
+            return
+        }
+
         await handleSimpleLink(deeplink: basicLink, fileId: fileId, isOfficeLink: false)
     }
 
@@ -94,5 +101,43 @@ public extension AppRouter {
             viewController: freshRootViewController,
             basicLink: basicLink
         )
+    }
+
+    @MainActor func handleSimpleLink(deeplink: Any, fileId: Int, isOfficeLink: Bool) async {
+        guard let driveFileManager = await accountManager
+            .getMatchingDriveFileManagerOrSwitchAccount(deeplink: deeplink) else {
+            Log.sceneDelegate(
+                "NavigationManager: Unable to navigate without a DriveFileManager",
+                level: .error
+            )
+            deeplinkService.setLastPublicShare(deeplink)
+            return
+        }
+        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+            return
+        }
+
+        let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
+        window?.rootViewController = freshRootViewController
+
+        UniversalLinksHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
+    }
+
+    @MainActor private func showFolderInTrash(
+        folderId: Int,
+        driveFileManager: DriveFileManager,
+        navigationController: UINavigationController
+    ) async {
+        var folder: File?
+        if let fetchResponse = try? await driveFileManager.apiFetcher.trashedFiles(
+            drive: driveFileManager.drive
+        ) {
+            folder = fetchResponse.validApiResponse.data.first { $0.id == folderId }
+        }
+
+        let destinationViewModel = TrashListViewModel(driveFileManager: driveFileManager, currentDirectory: folder)
+        let destinationViewController = FileListViewController(viewModel: destinationViewModel)
+
+        navigationController.pushViewController(destinationViewController, animated: true)
     }
 }
