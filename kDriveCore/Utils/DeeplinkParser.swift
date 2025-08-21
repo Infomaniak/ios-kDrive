@@ -58,6 +58,10 @@ public struct DeeplinkParser: DeeplinkParsable {
             await router.navigate(to: .privateShare(privateShareLink: privateShareLink))
             return true
         }
+        if let publicShareLink = PublicShareLink(publicShareURL: url) {
+            await router.navigate(to: .publicShare(publicShareLink: publicShareLink))
+            return true
+        }
         if let directoryLink = DirectoryLink(directoryURL: url) {
             await router.navigate(to: .directory(directoryLink: directoryLink))
             return true
@@ -72,10 +76,6 @@ public struct DeeplinkParser: DeeplinkParsable {
     }
 
     public func parse(url: URL) async -> Bool {
-        guard await !UniversalLinksHelper.handleURL(url) else {
-            return true
-        }
-
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
               let params = components.queryItems else {
             return await handleDeeplink(url: url)

@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2025 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,45 +21,15 @@ import Foundation
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
+import kDriveCore
 import kDriveResources
 import RealmSwift
 import SwiftRegex
 import UIKit
 
-public enum UniversalLinksHelper {
-    private struct Link {
-        let regex: Regex
-        let displayMode: DisplayMode
-    }
-
-    private enum DisplayMode {
-        case office, file
-    }
-
+public extension AppRouter {
     @discardableResult
-    public static func handleURL(_ url: URL) async -> Bool {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
-            DDLogError("[UniversalLinksHelper] Failed to process url:\(url)")
-            return false
-        }
-
-        let path = components.path
-        DDLogInfo("[UniversalLinksHelper] Trying to open link with path: \(path)")
-
-        if let publicShare = await PublicShareLink(publicShareURL: url),
-           await processPublicShareLink(publicShare) {
-            return true
-        }
-
-        DDLogWarn("[UniversalLinksHelper] Unable to process link with path: \(path)")
-        return false
-    }
-
-    @discardableResult
-    public static func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
-        @InjectService var deeplinkService: DeeplinkServiceable
-        deeplinkService.setLastPublicShare(link)
-
+    func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
         let apiFetcher = PublicShareApiFetcher()
         do {
             let metadata = try await apiFetcher.getMetadata(driveId: link.driveId, shareLinkUid: link.shareLinkUid)
@@ -83,8 +53,8 @@ public enum UniversalLinksHelper {
         }
     }
 
-    private static func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
-                                                             publicShareURL: URL?) async -> Bool {
+    private func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
+                                                      publicShareURL: URL?) async -> Bool {
         @InjectService var appNavigable: AppNavigable
         @InjectService var matomo: MatomoUtils
         switch limitation {
@@ -102,10 +72,10 @@ public enum UniversalLinksHelper {
         return true
     }
 
-    private static func processPublicShareMetadata(_ metadata: PublicShareMetadata,
-                                                   driveId: Int,
-                                                   shareLinkUid: String,
-                                                   apiFetcher: PublicShareApiFetcher) async -> Bool {
+    private func processPublicShareMetadata(_ metadata: PublicShareMetadata,
+                                            driveId: Int,
+                                            shareLinkUid: String,
+                                            apiFetcher: PublicShareApiFetcher) async -> Bool {
         @InjectService var accountManager: AccountManageable
         @InjectService var matomo: MatomoUtils
 
@@ -128,11 +98,11 @@ public enum UniversalLinksHelper {
         return true
     }
 
-    private static func openPublicShare(driveId: Int,
-                                        linkUuid: String,
-                                        fileId: Int,
-                                        driveFileManager: DriveFileManager,
-                                        apiFetcher: PublicShareApiFetcher) {
+    private func openPublicShare(driveId: Int,
+                                 linkUuid: String,
+                                 fileId: Int,
+                                 driveFileManager: DriveFileManager,
+                                 apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
                 let publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
@@ -182,21 +152,8 @@ public enum UniversalLinksHelper {
 
             } catch {
                 DDLogError(
-                    "[UniversalLinksHelper] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)"
+                    "[AppRouter+PublicShare] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)"
                 )
-                await UIConstants.showSnackBarIfNeeded(error: error)
-            }
-        }
-    }
-
-    public static func openFile(id: Int, driveFileManager: DriveFileManager, office: Bool) {
-        Task {
-            do {
-                let file = try await driveFileManager.file(ProxyFile(driveId: driveFileManager.driveId, id: id))
-                @InjectService var appNavigable: AppNavigable
-                await appNavigable.present(file: file, driveFileManager: driveFileManager, office: office)
-            } catch {
-                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.driveId) - \(id)]: \(error)")
                 await UIConstants.showSnackBarIfNeeded(error: error)
             }
         }

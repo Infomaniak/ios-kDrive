@@ -898,7 +898,7 @@ public final class File: Object, Codable {
         // primary key is set as default value
     }
 
-    convenience init(id: Int, name: String, driveId: Int? = nil, visibility: FileVisibility? = nil) {
+    public convenience init(id: Int, name: String, driveId: Int? = nil, visibility: FileVisibility? = nil) {
         self.init()
         self.id = id
         self.name = name
