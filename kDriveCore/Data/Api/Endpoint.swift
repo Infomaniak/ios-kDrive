@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import OSLog
 import RealmSwift
 
 // MARK: - Type definition
@@ -41,6 +42,9 @@ public extension ApiEnvironment {
             return "info-mq.infomaniak.com"
         case .preprod:
             return "preprod-info-mq.infomaniak.com"
+        case .customHost:
+            Logger.general.error("Cannot guess mqttHost for customHost will fallback to preprod")
+            return "preprod-info-mq.infomaniak.com"
         }
     }
 
@@ -49,6 +53,9 @@ public extension ApiEnvironment {
         case .prod:
             return "8QC5EwBqpZ2Z"
         case .preprod:
+            return "4fBt5AdC2P"
+        case .customHost:
+            Logger.general.error("Cannot guess mqttPass for customHost will fallback to preprod")
             return "4fBt5AdC2P"
         }
     }

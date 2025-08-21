@@ -39,6 +39,8 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
             return .prod
         case .preprod:
             return .preprod
+        case .customHost(let host):
+            return .init(url: URL(string: "https://\(host)/1/attest")!)
         }
     }
 
