@@ -366,11 +366,18 @@ extension HomeViewController {
             case .insufficientStorage:
                 let cell = collectionView.dequeueReusableCell(type: InsufficientStorageCollectionViewCell.self, for: indexPath)
                 cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                cell.configureCell(with: driveFileManager.drive)
+                cell.configureCell(with: driveFileManager)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }
-                    appRouter.presentUpSaleSheet()
-                    matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
+                    if driveFileManager.drive.pack.drivePackId == .myKSuite {
+                        appRouter.presentUpSaleSheet()
+                        matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
+                    } else if driveFileManager.drive.pack.kSuiteProUpgradePath != nil {
+                        appRouter.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+                        matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
+                    } else {
+                        UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+                    }
                 }
                 cell.closeHandler = { [weak self] _ in
                     guard let self else { return }
