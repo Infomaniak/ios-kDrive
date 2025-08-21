@@ -46,10 +46,6 @@ public struct DeeplinkParser: DeeplinkParsable {
             await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
             return true
         }
-        if let trashLink = TrashLink(trashURL: url) {
-            await router.navigate(to: .trash(trashLink: trashLink))
-            return true
-        }
         if let officeLink = OfficeLink(officeURL: url) {
             await router.navigate(to: .office(officeLink: officeLink))
             return true
@@ -70,8 +66,8 @@ public struct DeeplinkParser: DeeplinkParsable {
             await router.navigate(to: .filePreview(filePreviewLink: filePreviewLink))
             return true
         }
-        if let recentLink = RecentLink(recentURL: url) {
-            await router.navigate(to: .recent(recentLink: recentLink))
+        if let basicLink = BasicLink(basicURL: url) {
+            await router.navigate(to: .basic(basicLink: basicLink))
             return true
         } else {
             Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)

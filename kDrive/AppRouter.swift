@@ -109,9 +109,6 @@ public struct AppRouter: AppNavigable {
         case .sharedWithMe(let sharedWithMeLink):
             await handleSharedWithMeLink(sharedWithMeLink: sharedWithMeLink)
 
-        case .trash(let trashLink):
-            await handleTrashLink(trashLink: trashLink)
-
         case .office(let officeLink):
             await handleSimpleLink(deeplink: officeLink, fileId: officeLink.fileId, isOfficeLink: true)
 
@@ -130,8 +127,8 @@ public struct AppRouter: AppNavigable {
         case .filePreview(let filePreviewLink):
             await handleSimpleLink(deeplink: filePreviewLink, fileId: filePreviewLink.fileId, isOfficeLink: false)
 
-        case .recent(let recentLink):
-            await handleRecentLink(recentLink: recentLink)
+        case .basic(let basicLink):
+            await handleBasicLink(basicLink: basicLink)
         }
     }
 
