@@ -251,8 +251,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             driveId = deeplink.driveId
         case let deeplink as SharedWithMeLink:
             driveId = deeplink.driveId
-        case let deeplink as TrashLink:
-            driveId = deeplink.driveId
         case let deeplink as OfficeLink:
             driveId = deeplink.driveId
         case let deeplink as PrivateShareLink:
@@ -261,7 +259,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             driveId = deeplink.driveId
         case let deeplink as FilePreviewLink:
             driveId = deeplink.driveId
-        case let deeplink as RecentLink:
+        case let deeplink as BasicLink:
             driveId = deeplink.driveId
         default:
             return nil
