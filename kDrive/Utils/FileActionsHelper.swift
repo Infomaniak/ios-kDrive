@@ -80,7 +80,7 @@ public final class FileActionsHelper {
                 @InjectService var appNavigable: AppNavigable
                 appNavigable.present(file: file, driveFileManager: driveFileManager, office: office)
             } catch {
-                DDLogError("[UniversalLinksHelper] Failed to get file [\(driveFileManager.driveId) - \(id)]: \(error)")
+                DDLogError("[FileActionsHelper] Failed to get file [\(driveFileManager.driveId) - \(id)]: \(error)")
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
