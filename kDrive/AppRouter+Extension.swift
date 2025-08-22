@@ -120,7 +120,8 @@ public extension AppRouter {
         let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
         window?.rootViewController = freshRootViewController
 
-        UniversalLinksHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
+        let fileActionsHelper = FileActionsHelper()
+        fileActionsHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
     }
 
     @MainActor private func showFolderInTrash(
