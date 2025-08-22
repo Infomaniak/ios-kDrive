@@ -1,2 +1,2 @@
-- Deeplinks fixes
+- Deeplinks refactor
 - Stability improvements and bug fixes

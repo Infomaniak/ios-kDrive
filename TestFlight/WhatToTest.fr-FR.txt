@@ -1,2 +1,2 @@
-- Corrections relatives aux Deeplinks
+- Changements relatifs aux Deeplinks
 - Améliorations de la stabilité et corrections de bugs
