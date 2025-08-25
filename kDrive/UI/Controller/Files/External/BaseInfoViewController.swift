@@ -101,7 +101,7 @@ class BaseInfoViewController: UIViewController {
     }
 
     @objc open func closeButtonPressed() {
-        deeplinkService.clearLastPublicShare()
+        deeplinkService.clearLastDeeplink()
         dismiss(animated: true)
     }
 }
