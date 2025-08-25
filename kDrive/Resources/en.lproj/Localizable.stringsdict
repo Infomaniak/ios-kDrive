@@ -1,390 +1,398 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+ Loco ios export: Xcode Stringsdict (legacy)
+ Project: kDrive
+ Locale: en, English
+ Tagged: ios-stringsdict
+ Exported by: Valentin Perignon
+ Exported at: Wed, 20 Aug 2025 13:14:10 +0200
+-->
 <plist version="1.0">
-<dict>
-	<key>trashedFileDeletedPermanentlyConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One item permanently deleted</string>
-			<key>other</key>
-			<string>%d items deleted permanently</string>
-		</dict>
-	</dict>
-	<key>fileListMoveTrashConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>An item moved to the trash</string>
-			<key>other</key>
-			<string>%d items moved to the trash</string>
-		</dict>
-	</dict>
-	<key>fileActivityCommentCreate</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>commented the following file</string>
-			<key>other</key>
-			<string>commented %d files</string>
-		</dict>
-	</dict>
-	<key>fileActivityFileCreate</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>uploaded the following file</string>
-			<key>other</key>
-			<string>uploaded %d new files</string>
-		</dict>
-	</dict>
-	<key>fileActivityFileRestore</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>recovered the following file</string>
-			<key>other</key>
-			<string>recovered %d files</string>
-		</dict>
-	</dict>
-	<key>fileActivityFileTrash</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>moved the following file to the trash</string>
-			<key>other</key>
-			<string>moved %d files to the trash</string>
-		</dict>
-	</dict>
-	<key>fileActivityFileUpdate</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>changed the following file</string>
-			<key>other</key>
-			<string>changed %d files</string>
-		</dict>
-	</dict>
-	<key>fileActivityFolderCreate</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>created the following folder</string>
-			<key>other</key>
-			<string>created %d new folders</string>
-		</dict>
-	</dict>
-	<key>fileActivityFolderRestore</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>recovered the following folder</string>
-			<key>other</key>
-			<string>recovered %d folders</string>
-		</dict>
-	</dict>
-	<key>fileActivityFolderTrash</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>moved the following folder to the trash</string>
-			<key>other</key>
-			<string>moved %d folders to the trash</string>
-		</dict>
-	</dict>
-	<key>fileActivityUnknown</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>performed an action on the following file</string>
-			<key>other</key>
-			<string>performed an action on %d files</string>
-		</dict>
-	</dict>
-	<key>fileListAddOfflineConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One file available offline</string>
-			<key>other</key>
-			<string>%d files available offline</string>
-		</dict>
-	</dict>
-	<key>fileListColorFolderConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One folder coloured successfully</string>
-			<key>other</key>
-			<string>%d folders coloured successfully</string>
-		</dict>
-	</dict>
-	<key>fileListDuplicationConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One file duplicated successfully</string>
-			<key>other</key>
-			<string>%d files duplicated successfully</string>
-		</dict>
-	</dict>
-	<key>fileListMoveFileConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@ to %2$@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One file was moved</string>
-			<key>other</key>
-			<string>%1$d files were moved</string>
-		</dict>
-	</dict>
-	<key>fileListMultiSelectedTitle</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>%d selected</string>
-			<key>other</key>
-			<string>%d selected</string>
-		</dict>
-	</dict>
-	<key>shareUsersCount</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>%d user</string>
-			<key>other</key>
-			<string>%d users</string>
-		</dict>
-	</dict>
-	<key>snackBarUploadError</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>A file could not be imported</string>
-			<key>other</key>
-			<string>%d files could not be imported</string>
-		</dict>
-	</dict>
-	<key>uploadInProgressNumberFile</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One file left</string>
-			<key>other</key>
-			<string>%d files left</string>
-		</dict>
-	</dict>
-	<key>fileDetailsInfoFile</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>1 file</string>
-			<key>other</key>
-			<string>%d files</string>
-		</dict>
-	</dict>
-	<key>fileDetailsInfoFolder</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>1 folder</string>
-			<key>other</key>
-			<string>%d folders</string>
-		</dict>
-	</dict>
-	<key>fileListAddFavoritesConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One file successfully added to favorites</string>
-			<key>other</key>
-			<string>%d files successfully added to favorites</string>
-		</dict>
-	</dict>
-	<key>fileListRemoveFavoritesConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One file successfully removed from favorites</string>
-			<key>other</key>
-			<string>%d files successfully removed from favorites</string>
-		</dict>
-	</dict>
-	<key>fileListRemoveOfflineConfirmationSnackbar</key>
-	<dict>
-		<key>NSStringLocalizedFormatKey</key>
-		<string>%#@items@</string>
-		<key>items</key>
-		<dict>
-			<key>NSStringFormatSpecTypeKey</key>
-			<string>NSStringPluralRuleType</string>
-			<key>NSStringFormatValueTypeKey</key>
-			<string>d</string>
-			<key>one</key>
-			<string>One file removed from offline availability</string>
-			<key>other</key>
-			<string>%d files removed from offline availability</string>
-		</dict>
-	</dict>
-</dict>
+  <dict>
+    <key>fileActivityCommentCreate</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>commented the following file</string>
+        <key>other</key>
+        <string>commented %d files</string>
+      </dict>
+    </dict>
+    <key>fileActivityFileCreate</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>uploaded the following file</string>
+        <key>other</key>
+        <string>uploaded %d new files</string>
+      </dict>
+    </dict>
+    <key>fileActivityFileRestore</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>recovered the following file</string>
+        <key>other</key>
+        <string>recovered %d files</string>
+      </dict>
+    </dict>
+    <key>fileActivityFileTrash</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>moved the following file to the trash</string>
+        <key>other</key>
+        <string>moved %d files to the trash</string>
+      </dict>
+    </dict>
+    <key>fileActivityFileUpdate</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>changed the following file</string>
+        <key>other</key>
+        <string>changed %d files</string>
+      </dict>
+    </dict>
+    <key>fileActivityFolderCreate</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>created the following folder</string>
+        <key>other</key>
+        <string>created %d new folders</string>
+      </dict>
+    </dict>
+    <key>fileActivityFolderRestore</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>recovered the following folder</string>
+        <key>other</key>
+        <string>recovered %d folders</string>
+      </dict>
+    </dict>
+    <key>fileActivityFolderTrash</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>moved the following folder to the trash</string>
+        <key>other</key>
+        <string>moved %d folders to the trash</string>
+      </dict>
+    </dict>
+    <key>fileActivityUnknown</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>performed an action on the following file</string>
+        <key>other</key>
+        <string>performed an action on %d files</string>
+      </dict>
+    </dict>
+    <key>fileDetailsInfoFile</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>1 file</string>
+        <key>other</key>
+        <string>%d files</string>
+      </dict>
+    </dict>
+    <key>fileDetailsInfoFolder</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>1 folder</string>
+        <key>other</key>
+        <string>%d folders</string>
+      </dict>
+    </dict>
+    <key>fileListAddFavoritesConfirmationSnackbar</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>One file successfully added to favorites</string>
+        <key>other</key>
+        <string>%d files successfully added to favorites</string>
+      </dict>
+    </dict>
+    <key>fileListAddOfflineConfirmationSnackbar</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>One file available offline</string>
+        <key>other</key>
+        <string>%d files available offline</string>
+      </dict>
+    </dict>
+    <key>fileListColorFolderConfirmationSnackbar</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>One folder coloured successfully</string>
+        <key>other</key>
+        <string>%d folders coloured successfully</string>
+      </dict>
+    </dict>
+    <key>fileListDuplicationConfirmationSnackbar</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>One file duplicated successfully</string>
+        <key>other</key>
+        <string>%d files duplicated successfully</string>
+      </dict>
+    </dict>
+    <key>fileListMoveTrashConfirmationSnackbar</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>An item moved to the trash</string>
+        <key>other</key>
+        <string>%d items moved to the trash</string>
+      </dict>
+    </dict>
+    <key>fileListMultiSelectedTitle</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>%d selected</string>
+        <key>other</key>
+        <string>%d selected</string>
+      </dict>
+    </dict>
+    <key>fileListRemoveFavoritesConfirmationSnackbar</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>One file successfully removed from favorites</string>
+        <key>other</key>
+        <string>%d files successfully removed from favorites</string>
+      </dict>
+    </dict>
+    <key>fileListRemoveOfflineConfirmationSnackbar</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>One file removed from offline availability</string>
+        <key>other</key>
+        <string>%d files removed from offline availability</string>
+      </dict>
+    </dict>
+    <key>shareUsersCount</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>%d user</string>
+        <key>other</key>
+        <string>%d users</string>
+      </dict>
+    </dict>
+    <key>snackBarUploadError</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>A file could not be imported</string>
+        <key>other</key>
+        <string>%d files could not be imported</string>
+      </dict>
+    </dict>
+    <key>trashedFileDeletedPermanentlyConfirmationSnackbar</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>One item permanently deleted</string>
+        <key>other</key>
+        <string>%d items deleted permanently</string>
+      </dict>
+    </dict>
+    <key>uploadImportedOtherAmount</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>+1 other file</string>
+        <key>other</key>
+        <string>+%d other files</string>
+      </dict>
+    </dict>
+    <key>uploadInProgressNumberFile</key>
+    <dict>
+      <key>NSStringLocalizedFormatKey</key>
+      <string>%#@value@</string>
+      <key>value</key>
+      <dict>
+        <key>NSStringFormatSpecTypeKey</key>
+        <string>NSStringPluralRuleType</string>
+        <key>NSStringFormatValueTypeKey</key>
+        <string>d</string>
+        <key>one</key>
+        <string>One file left</string>
+        <key>other</key>
+        <string>%d files left</string>
+      </dict>
+    </dict>
+  </dict>
 </plist>

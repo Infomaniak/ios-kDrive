@@ -1,39 +1,38 @@
 /*
- * Loco ios export: iOS InfoPlist.strings
+ * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
- * Release: Working copy
  * Locale: it, Italian
  * Tagged: ios-info-plist
- * Exported by: elena willen
- * Exported at: Mon, 04 Dec 2023 16:55:22 +0100
+ * Exported by: Valentin Perignon
+ * Exported at: Wed, 20 Aug 2025 13:14:10 +0200
  */
 
 /* loco:6051c6293b16e53c684172c2 */
-NSCameraUsageDescription = "L’accesso alla fotocamera e necessario per effettuare la scansione dei documenti e scattare foto.";
+"NSCameraUsageDescription" = "L’accesso alla fotocamera e necessario per effettuare la scansione dei documenti e scattare foto.";
 
 /* loco:6051c6293b16e53c684172c7 */
-NSFaceIDUsageDescription = "Per sbloccare l’applicazione verrà utilizzato Face ID.";
+"NSFaceIDUsageDescription" = "Per sbloccare l’applicazione verrà utilizzato Face ID.";
 
 /* loco:6051c6293b16e53c684172c4 */
-NSLocalNetworkUsageDescription = "Utilizzato soltanto in modalità debug.";
+"NSLocalNetworkUsageDescription" = "Utilizzato soltanto in modalità debug.";
 
 /* loco:6051c6293b16e53c684172c3 */
-NSMicrophoneUsageDescription = "L’accesso al microfono è necessario per registrare i video.";
+"NSMicrophoneUsageDescription" = "L’accesso al microfono è necessario per registrare i video.";
 
 /* loco:6051c6293b16e53c684172c6 */
-NSPhotoLibraryAddUsageDescription = "L‘accesso alla galleria fotografica è necessario per salvare foto e video.";
+"NSPhotoLibraryAddUsageDescription" = "L‘accesso alla galleria fotografica è necessario per salvare foto e video.";
 
 /* loco:6051c6293b16e53c684172c5 */
-NSPhotoLibraryUsageDescription = "L‘accesso alla galleria fotografica è necessario per effettuare il backup delle foto.";
+"NSPhotoLibraryUsageDescription" = "L‘accesso alla galleria fotografica è necessario per effettuare il backup delle foto.";
 
 /* loco:655f5d8a12b8465261012282 */
-shortcutScanTitle = "Scansione Documento";
+"shortcutScanTitle" = "Scansione Documento";
 
 /* loco:655f62ccebeba55f0b034b52 */
-shortcutSearchTitle = "Ricercare";
+"shortcutSearchTitle" = "Ricercare";
 
 /* loco:655f6694d9b5e3e5ac054202 */
-shortcutSupportTitle = "Aiuto & Supporto";
+"shortcutSupportTitle" = "Aiuto & Supporto";
 
 /* loco:655f61c4a3c734176c08ce82 */
-shortcutUploadTitle = "Caricare Foto o Video";
+"shortcutUploadTitle" = "Caricare Foto o Video";

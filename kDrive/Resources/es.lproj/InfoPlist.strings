@@ -1,39 +1,38 @@
 /*
- * Loco ios export: iOS InfoPlist.strings
+ * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
- * Release: Working copy
  * Locale: es, Spanish
  * Tagged: ios-info-plist
- * Exported by: elena willen
- * Exported at: Mon, 04 Dec 2023 16:55:22 +0100
+ * Exported by: Valentin Perignon
+ * Exported at: Wed, 20 Aug 2025 13:14:10 +0200
  */
 
 /* loco:6051c6293b16e53c684172c2 */
-NSCameraUsageDescription = "El acceso a la cámara es necesario para escanear documentos y hacer fotos.";
+"NSCameraUsageDescription" = "El acceso a la cámara es necesario para escanear documentos y hacer fotos.";
 
 /* loco:6051c6293b16e53c684172c7 */
-NSFaceIDUsageDescription = "Face ID se utilizará para desbloquear la aplicación.";
+"NSFaceIDUsageDescription" = "Face ID se utilizará para desbloquear la aplicación.";
 
 /* loco:6051c6293b16e53c684172c4 */
-NSLocalNetworkUsageDescription = "Utilizado únicamente en modo debug.";
+"NSLocalNetworkUsageDescription" = "Utilizado únicamente en modo debug.";
 
 /* loco:6051c6293b16e53c684172c3 */
-NSMicrophoneUsageDescription = "El acceso al micrófono es necesario para hacer vídeos.";
+"NSMicrophoneUsageDescription" = "El acceso al micrófono es necesario para hacer vídeos.";
 
 /* loco:6051c6293b16e53c684172c6 */
-NSPhotoLibraryAddUsageDescription = "El acceso a tu galería de fotos es necesario para guardar tus fotos y vídeos.";
+"NSPhotoLibraryAddUsageDescription" = "El acceso a tu galería de fotos es necesario para guardar tus fotos y vídeos.";
 
 /* loco:6051c6293b16e53c684172c5 */
-NSPhotoLibraryUsageDescription = "El acceso a tu galería de fotos es necesario para guardar tus fotos.";
+"NSPhotoLibraryUsageDescription" = "El acceso a tu galería de fotos es necesario para guardar tus fotos.";
 
 /* loco:655f5d8a12b8465261012282 */
-shortcutScanTitle = "Escanear Documento";
+"shortcutScanTitle" = "Escanear Documento";
 
 /* loco:655f62ccebeba55f0b034b52 */
-shortcutSearchTitle = "Buscar";
+"shortcutSearchTitle" = "Buscar";
 
 /* loco:655f6694d9b5e3e5ac054202 */
-shortcutSupportTitle = "Ayuda & Asistencia";
+"shortcutSupportTitle" = "Ayuda & Asistencia";
 
 /* loco:655f61c4a3c734176c08ce82 */
-shortcutUploadTitle = "Subir Foto o Vídeo";
+"shortcutUploadTitle" = "Subir Foto o Vídeo";
