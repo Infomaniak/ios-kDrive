@@ -421,26 +421,28 @@ extension FileActionsFloatingPanelViewController {
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             return
         }
-        let fileName = frozenFile.name
-        let alert = AlertFieldViewController(title: KDriveResourcesStrings.Localizable.buttonDuplicate,
-                                             placeholder: KDriveResourcesStrings.Localizable.fileInfoInputDuplicateFile,
-                                             text: fileName,
-                                             action: KDriveResourcesStrings.Localizable.buttonCopy,
-                                             loading: true) { [proxyFile = frozenFile.proxify()] duplicateName in
-            do {
-                _ = try await self.driveFileManager.duplicate(file: proxyFile, duplicateName: duplicateName)
-                UIConstants
-                    .showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
-            } catch {
-                UIConstants.showSnackBarIfNeeded(error: error)
+        let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
+            driveFileManager: driveFileManager,
+        ) { [proxyFile = frozenFile.proxify()] selectedDirectory, _ in
+            Task {
+                do {
+                    let proxySelectedDirectory = selectedDirectory.proxify()
+                    _ = try await self.driveFileManager.apiFetcher.copy(file: proxyFile, to: proxySelectedDirectory)
+                    if let presentingParent = self.presentingParent {
+                        try await (presentingParent as? FileListViewController)?.viewModel.loadActivities()
+                        if presentingParent is PreviewViewController {
+                            presentingParent.navigationController?.popViewController(animated: true)
+                        }
+                        self.dismiss(animated: true)
+                    }
+                    UIConstants
+                        .showSnackBar(message: KDriveResourcesStrings.Localizable.fileListDuplicationConfirmationSnackbar(1))
+                } catch {
+                    UIConstants.showSnackBarIfNeeded(error: error)
+                }
             }
         }
-        alert.textFieldConfiguration = .fileNameConfiguration
-        if !frozenFile.isDirectory {
-            alert.textFieldConfiguration.selectedRange = fileName
-                .startIndex ..< (fileName.lastIndex { $0 == "." } ?? fileName.endIndex)
-        }
-        present(alert, animated: true)
+        present(selectFolderNavigationController, animated: true)
     }
 
     private func renameAction() {
