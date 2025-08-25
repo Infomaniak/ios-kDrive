@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -131,6 +132,7 @@ public extension AppRouter {
     }
 
     @MainActor func handleSharedWithMeLink(sharedWithMeLink: SharedWithMeLink) async {
+        @InjectService var matomo: MatomoUtils
         guard let driveFileManager = await accountManager
             .getMatchingDriveFileManagerOrSwitchAccount(deeplink: sharedWithMeLink) else {
             Log.sceneDelegate(
@@ -144,6 +146,7 @@ public extension AppRouter {
         let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
         window?.rootViewController = freshRootViewController
 
+        matomo.track(eventWithCategory: .deeplink, name: "internal")
         await showSharedWithMe(
             driveFileManager: driveFileManager,
             viewController: freshRootViewController,

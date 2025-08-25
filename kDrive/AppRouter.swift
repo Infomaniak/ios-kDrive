@@ -133,6 +133,7 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor private func handleSimpleLink(deeplink: Any, fileId: Int, isOfficeLink: Bool) async {
+        @InjectService var matomo: MatomoUtils
         guard let driveFileManager = await accountManager
             .getMatchingDriveFileManagerOrSwitchAccount(deeplink: deeplink) else {
             Log.sceneDelegate(
@@ -150,6 +151,7 @@ public struct AppRouter: AppNavigable {
         window?.rootViewController = freshRootViewController
 
         let fileActionHelper = FileActionsHelper()
+        matomo.track(eventWithCategory: .deeplink, name: "internal")
         fileActionHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
     }
 

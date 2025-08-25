@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import UIKit
@@ -72,6 +73,7 @@ public extension AppRouter {
     }
 
     @MainActor func handleTrashLink(trashLink: TrashLink) async {
+        @InjectService var matomo: MatomoUtils
         guard let driveFileManager = await accountManager
             .getMatchingDriveFileManagerOrSwitchAccount(deeplink: trashLink) else {
             Log.sceneDelegate(
@@ -85,6 +87,7 @@ public extension AppRouter {
         let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
         window?.rootViewController = freshRootViewController
 
+        matomo.track(eventWithCategory: .deeplink, name: "internal")
         await showTrash(driveFileManager: driveFileManager, viewController: freshRootViewController, trashLink: trashLink)
     }
 }
