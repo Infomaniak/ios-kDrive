@@ -24,12 +24,12 @@ public enum NavigationRoutes: Equatable {
     case store(driveId: Int, userId: Int)
     case saveFiles(files: [ImportedFile])
     case sharedWithMe(sharedWithMeLink: SharedWithMeLink)
-    case trash(trashLink: TrashLink)
     case office(officeLink: OfficeLink)
     case privateShare(privateShareLink: PrivateShareLink)
     case publicShare(publicShareLink: PublicShareLink)
     case directory(directoryLink: DirectoryLink)
     case filePreview(filePreviewLink: FilePreviewLink)
+    case basic(basicLink: BasicLink)
 
     public static func == (lhs: NavigationRoutes, rhs: NavigationRoutes) -> Bool {
         switch (lhs, rhs) {
@@ -39,14 +39,14 @@ public enum NavigationRoutes: Equatable {
             return lhdFile == rhdDile
         case (.sharedWithMe(let lhdSharedWithMeLink), .sharedWithMe(let rhdSharedWithMeLink)):
             return lhdSharedWithMeLink == rhdSharedWithMeLink
-        case(.trash(let lhdTrashLink), .trash(let rhdTrashLink)):
-            return lhdTrashLink == rhdTrashLink
         case(.office(let lhdOfficeLink), .office(let rhdOfficeLink)):
             return lhdOfficeLink == rhdOfficeLink
-        case(.privateShare(let lhdPrivateShareLink), .privateShare(let rhdprivateShareLink)):
-            return lhdPrivateShareLink == rhdprivateShareLink
+        case(.privateShare(let lhdPrivateShareLink), .privateShare(let rhdPrivateShareLink)):
+            return lhdPrivateShareLink == rhdPrivateShareLink
         case(.directory(let lhdDirectoryLink), .directory(let rhdDirectoryLink)):
             return lhdDirectoryLink == rhdDirectoryLink
+        case(.basic(let lhdBasicLink), .basic(let rhdBasicLink)):
+            return lhdBasicLink == rhdBasicLink
         default:
             return false
         }

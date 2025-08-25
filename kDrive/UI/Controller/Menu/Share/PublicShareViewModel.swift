@@ -98,7 +98,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
         } else if type == .addToMyDrive {
             addToMyDrive(sender: sender, publicShareProxy: publicShareProxy)
         } else if type == .cancel, !(multipleSelectionViewModel?.isMultipleSelectionEnabled ?? true) {
-            deeplinkService.clearLastPublicShare()
+            deeplinkService.clearLastDeeplink()
             onDismissViewController?()
         } else {
             super.barButtonPressed(sender: sender, type: type)
