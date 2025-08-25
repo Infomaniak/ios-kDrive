@@ -132,7 +132,21 @@ public extension UIConstants {
         } else if (error as? DriveError) == .taskCancelled || (error as? DriveError) == .taskRescheduled {
             // Task was rescheduled
         } else {
-            UIConstants.showSnackBar(message: error.localizedDescription)
+            @InjectService var accountManager: AccountManager
+            guard let driveError = error as? DriveError,
+                  driveError == DriveError.errorDeviceStorage,
+                  let currentDriveFileManager = accountManager.currentDriveFileManager,
+                  currentDriveFileManager.drive.pack.kSuiteProUpgradePath != nil else {
+                UIConstants.showSnackBar(message: error.localizedDescription)
+                return
+            }
+
+            let upgradeAction = IKSnackBar.Action(title: "i18n: Evolve") {
+                @InjectService var router: AppNavigable
+                router.presentKDriveProUpSaleSheet(driveFileManager: currentDriveFileManager)
+            }
+
+            UIConstants.showSnackBar(message: error.localizedDescription, action: upgradeAction)
         }
     }
 

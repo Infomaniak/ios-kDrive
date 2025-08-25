@@ -25,6 +25,7 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
     @IBOutlet var progressView: RPCircularProgress!
     @IBOutlet var storageLabel: UILabel!
     @IBOutlet var storageDescription: UILabel!
+    @IBOutlet var upgradeLabel: UILabel!
     @IBOutlet var upgradeButton: UIButton!
 
     var actionHandler: ((UIButton) -> Void)?
@@ -32,24 +33,53 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        upgradeButton.isHidden = true
+        upgradeLabel.isHidden = true
+
         progressView.setInfomaniakStyle()
         progressView.progressTintColor = KDriveResourcesAsset.binColor.color
     }
 
-    func configureCell(with drive: Drive) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        storageDescription.text = nil
+        upgradeButton.isHidden = true
+        upgradeLabel.isHidden = true
+    }
+
+    func configureCell(with driveFileManager: DriveFileManager) {
+        let drive = driveFileManager.drive
         progressView.updateProgress(CGFloat(drive.usedSize) / CGFloat(drive.size))
 
         storageLabel
             .text =
             "\(Constants.formatFileSize(drive.usedSize, decimals: 1, unit: false)) / \(Constants.formatFileSize(drive.size))"
 
+        guard drive.pack.drivePackId == .kSuiteEntreprise else {
+            configureCell(drive: drive)
+            return
+        }
+
+        configureKSuiteEnterpriseCell(drive: drive)
+    }
+
+    func configureCell(drive: Drive) {
         if drive.accountAdmin {
             storageDescription.text = KDriveResourcesStrings.Localizable.notEnoughStorageDescription1
             upgradeButton.isHidden = false
         } else {
             storageDescription.text = KDriveResourcesStrings.Localizable.notEnoughStorageDescription2
             upgradeButton.isHidden = true
+        }
+    }
+
+    func configureKSuiteEnterpriseCell(drive: Drive) {
+        upgradeButton.isHidden = true
+        upgradeLabel.isHidden = false
+        if drive.isUserAdmin {
+            upgradeLabel.text = "TODO: i18n - Upgrade on the website"
+        } else {
+            upgradeLabel.text = "TODO: i18n - Contact Admin to upgrade"
         }
     }
 

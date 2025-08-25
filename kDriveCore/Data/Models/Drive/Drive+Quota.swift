@@ -62,4 +62,11 @@ public extension Drive {
         guard let quota, let sharedLink = quota.sharedLink else { return false }
         return sharedLink.current ?? 0 >= sharedLink.max
     }
+
+    var sharedLinkQuotaFormatted: String {
+        guard let quota, let sharedLink = quota.sharedLink else { return "" }
+        let current = sharedLink.current ?? 0
+        let max = sharedLink.max
+        return "(\(current) / \(max))"
+    }
 }
