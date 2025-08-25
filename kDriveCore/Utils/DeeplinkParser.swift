@@ -31,6 +31,7 @@ public struct DeeplinkParser: DeeplinkParsable {
     private enum DeeplinkPath: String {
         case store
         case file
+        case search
     }
 
     @LazyInjectService private var matomo: MatomoUtils
@@ -81,10 +82,15 @@ public struct DeeplinkParser: DeeplinkParsable {
             return await handleDeeplink(url: url)
         }
 
-        if components.path == DeeplinkPath.store.rawValue,
-           let userId = params.first(where: { $0.name == "userId" })?.value,
-           let driveId = params.first(where: { $0.name == "driveId" })?.value,
-           let driveIdInt = Int(driveId), let userIdInt = Int(userId) {
+        if components.path.split(separator: "/").last ?? "" == DeeplinkPath.search.rawValue {
+            if let searchLink = SearchLink(searchURL: url) {
+                await router.navigate(to: .search(searchLink: searchLink))
+                return true
+            }
+        } else if components.path == DeeplinkPath.store.rawValue,
+                  let userId = params.first(where: { $0.name == "userId" })?.value,
+                  let driveId = params.first(where: { $0.name == "driveId" })?.value,
+                  let driveIdInt = Int(driveId), let userIdInt = Int(userId) {
             await router.navigate(to: .store(driveId: driveIdInt, userId: userIdInt))
             matomo.track(eventWithCategory: .deeplink, name: DeeplinkPath.store.rawValue)
             return true

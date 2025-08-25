@@ -59,6 +59,8 @@ public class DeeplinkService: DeeplinkServiceable {
                 await router.navigate(to: .directory(directoryLink: lastPublicShareLink))
             case let lastPublicShareLink as FilePreviewLink:
                 await router.navigate(to: .filePreview(filePreviewLink: lastPublicShareLink))
+            case let lastPublicShareLink as SearchLink:
+                await router.navigate(to: .search(searchLink: lastPublicShareLink))
             default:
                 break
             }
