@@ -117,7 +117,7 @@ public struct AppRouter: AppNavigable {
 
         case .publicShare(let publicShareLink):
             if accountManager.currentDriveFileManager == nil {
-                deeplinkService.setLastPublicShare(publicShareLink)
+                deeplinkService.setLastDeeplink(publicShareLink)
             }
             await processPublicShareLink(publicShareLink)
 

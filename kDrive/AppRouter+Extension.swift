@@ -54,7 +54,7 @@ public extension AppRouter {
     ) async {
         @LazyInjectService var deeplinkService: DeeplinkServiceable
 
-        defer { deeplinkService.clearLastPublicShare() }
+        defer { deeplinkService.clearLastDeeplink() }
 
         guard let navigationController =
             getCurrentController(
@@ -89,7 +89,7 @@ public extension AppRouter {
                 "NavigationManager: Unable to navigate to a tab without a DriveFileManager",
                 level: .error
             )
-            deeplinkService.setLastPublicShare(basicLink)
+            deeplinkService.setLastDeeplink(basicLink)
             return
         }
 
@@ -110,7 +110,7 @@ public extension AppRouter {
                 "NavigationManager: Unable to navigate without a DriveFileManager",
                 level: .error
             )
-            deeplinkService.setLastPublicShare(deeplink)
+            deeplinkService.setLastDeeplink(deeplink)
             return
         }
         guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
