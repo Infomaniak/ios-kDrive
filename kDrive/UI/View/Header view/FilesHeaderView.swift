@@ -30,6 +30,7 @@ protocol FilesHeaderViewDelegate: AnyObject {
     func uploadCardSelected()
     func removeFilterButtonPressed(_ filter: Filterable)
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton)
+    func upsaleButtonPressed()
 }
 
 extension FilesHeaderViewDelegate {
@@ -37,9 +38,6 @@ extension FilesHeaderViewDelegate {
 }
 
 class FilesHeaderView: UICollectionReusableView {
-    @LazyInjectService private var router: AppNavigable
-    @LazyInjectService private var matomo: MatomoUtils
-
     @IBOutlet var containerStackView: UIStackView!
     @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
     @IBOutlet var sortView: UIView!
@@ -92,6 +90,36 @@ class FilesHeaderView: UICollectionReusableView {
         containerStackView.addArrangedSubview(selectView)
     }
 
+    func updateInformationView(drivePackId: DrivePackId?, isTrash: Bool) {
+        let displayInformation = isTrash && (drivePackId == .myKSuite || drivePackId == .kSuiteEssential)
+        trashInformationView.isHidden = !displayInformation
+
+        let chipView: UIView?
+        if drivePackId == .myKSuite {
+            chipView = MyKSuiteChip.instantiateWhiteChip()
+        } else if drivePackId == .kSuiteEssential {
+            let chip = KSuiteProChipController()
+            chipView = chip.view
+        } else {
+            chipView = nil
+        }
+
+        guard let chipView else {
+            return
+        }
+
+        trashInformationChip.subviews.forEach { $0.removeFromSuperview() }
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        trashInformationChip.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.leadingAnchor),
+            chipView.trailingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
+        ])
+    }
+
     private func setupTrashView() {
         trashInformationView.isHidden = true
 
@@ -103,24 +131,12 @@ class FilesHeaderView: UICollectionReusableView {
         trashInformationTitle.text = KDriveResourcesStrings.Localizable.trashAutoClearDescription
         trashInformationSubtitle.text = KDriveResourcesStrings.Localizable.buttonUpgrade
 
-        let chipView = MyKSuiteChip.instantiateWhiteChip()
-        chipView.translatesAutoresizingMaskIntoConstraints = false
-        trashInformationChip.addSubview(chipView)
-
-        NSLayoutConstraint.activate([
-            chipView.leadingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.leadingAnchor),
-            chipView.trailingAnchor.constraint(greaterThanOrEqualTo: trashInformationChip.trailingAnchor),
-            chipView.topAnchor.constraint(equalTo: trashInformationChip.topAnchor),
-            chipView.bottomAnchor.constraint(equalTo: trashInformationChip.bottomAnchor)
-        ])
-
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnTrashHeaderView))
         trashInformationView.addGestureRecognizer(tapRecognizer)
     }
 
     @objc func didTapOnTrashHeaderView() {
-        router.presentUpSaleSheet()
-        matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
+        delegate?.upsaleButtonPressed()
     }
 
     @objc private func didTapOnCard() {
