@@ -21,13 +21,9 @@ import InfomaniakDI
 import kDriveCore
 import UIKit
 
-public enum BasicLinkTab: String {
-    case recents
-    case trash
-    case myShares = "my-shares"
-    case favorites
-
-    @MainActor func makeViewModel(driveFileManager: DriveFileManager) -> FileListViewModel {
+@MainActor
+extension BasicLinkTab {
+    func makeViewModel(driveFileManager: DriveFileManager) -> FileListViewModel {
         switch self {
         case .recents:
             return LastModificationsViewModel(driveFileManager: driveFileManager)
@@ -40,7 +36,7 @@ public enum BasicLinkTab: String {
         }
     }
 
-    @MainActor func makeViewController(driveFileManager: DriveFileManager) -> UIViewController {
+    func makeViewController(driveFileManager: DriveFileManager) -> UIViewController {
         let viewModel = makeViewModel(driveFileManager: driveFileManager)
         return FileListViewController(viewModel: viewModel)
     }
@@ -65,14 +61,13 @@ public extension AppRouter {
         }
 
         guard let fileId = basicLink.fileId else {
-            if let tab = BasicLinkTab(rawValue: basicLink.destination) {
-                let fileListViewController = tab.makeViewController(driveFileManager: driveFileManager)
-                navigationController.pushViewController(fileListViewController, animated: true)
-            }
+            let tab = basicLink.destination
+            let fileListViewController = tab.makeViewController(driveFileManager: driveFileManager)
+            navigationController.pushViewController(fileListViewController, animated: true)
             return
         }
 
-        guard basicLink.destination != BasicLinkTab.trash.rawValue else {
+        guard basicLink.destination != BasicLinkTab.trash else {
             await showFolderInTrash(folderId: fileId,
                                     driveFileManager: driveFileManager,
                                     navigationController: navigationController)

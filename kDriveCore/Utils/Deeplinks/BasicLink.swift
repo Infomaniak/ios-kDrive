@@ -19,12 +19,19 @@
 import Foundation
 import SwiftRegex
 
+public enum BasicLinkTab: String, Sendable {
+    case recents
+    case trash
+    case myShares = "my-shares"
+    case favorites
+}
+
 public struct BasicLink: Sendable, Equatable {
     public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/([a-z-]+)(?:.*/([0-9]+))?$"#)
 
     public let basicURL: URL
     public let driveId: Int
-    public let destination: String
+    public let destination: BasicLinkTab
     public let fileId: Int?
 
     public init?(basicURL: URL) {
@@ -40,14 +47,15 @@ public struct BasicLink: Sendable, Equatable {
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
               let driveIdInt = Int(driveId),
-              let destination = firstMatch[safe: 2]
+              let destination = firstMatch[safe: 2],
+              let destinationTab = BasicLinkTab(rawValue: destination)
         else {
             return nil
         }
 
         self.basicURL = basicURL
         self.driveId = driveIdInt
-        self.destination = destination
+        self.destination = destinationTab
         fileId = Int(firstMatch[safe: 3] ?? "")
     }
 }
