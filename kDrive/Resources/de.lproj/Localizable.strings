@@ -4,7 +4,7 @@
  * Locale: de, German
  * Tagged: ios
  * Exported by: Matthieu Déglon
- * Exported at: Tue, 26 Aug 2025 09:56:37 +0200
+ * Exported at: Tue, 26 Aug 2025 10:44:09 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -1505,7 +1505,7 @@
 "previewVideoSourceError" = "Videodatei wird vom Videoplayer nicht unterstützt";
 
 /* loco:6049df4d5c2c3a04bc397a3b */
-"privateSharedLinkTitle" = "Privater Link zum Teilen";
+"privateSharedLinkTitle" = "Privater Freigabelink";
 
 /* loco:66ffbbcd294f6022e60948f3 */
 "publicShareImportationInProgress" = "Laufender Download im ausgewählten Ordner";
