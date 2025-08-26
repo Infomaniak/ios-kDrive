@@ -20,7 +20,7 @@ import Foundation
 import SwiftRegex
 
 public struct PrivateShareLink: Sendable, Equatable {
-    public static let parsingRegex = Regex(pattern: #"^/app/drive/([0-9]+)/redirect/([0-9]+)$"#)
+    public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/redirect/([0-9]+)$"#)
 
     public let privateShareUrl: URL
     public let driveId: Int
