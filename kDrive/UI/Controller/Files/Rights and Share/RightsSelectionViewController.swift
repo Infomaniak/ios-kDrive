@@ -47,21 +47,52 @@ struct Right {
     var fileDescription: String
     var folderDescription: String
     var documentDescription: String
+    var upgradeDescription: String?
+    var detailDescription: String?
 
-    static let shareLinkRights = [
-        Right(key: ShareLinkPermission.restricted.rawValue,
-              title: KDriveResourcesStrings.Localizable.shareLinkPrivateRightTitle,
-              icon: KDriveResourcesAsset.lock.image,
-              fileDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort,
-              folderDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort,
-              documentDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort),
-        Right(key: ShareLinkPermission.public.rawValue,
-              title: KDriveResourcesStrings.Localizable.shareLinkPublicRightTitle,
-              icon: KDriveResourcesAsset.unlock.image,
-              fileDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightFileDescriptionShort,
-              folderDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightFolderDescriptionShort,
-              documentDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightDocumentDescriptionShort)
-    ]
+    static func shareLinkRights(driveFileManager: DriveFileManager) -> [Right] {
+        var upgradeDescription: String?
+        var detailDescription: String?
+        let publicTitle: String
+        if driveFileManager.drive.pack.kSuiteProUpgradePath != nil {
+            publicTitle = kSuiteTitle(driveFileManager: driveFileManager)
+
+            if driveFileManager.drive.sharedLinkQuotaExceeded {
+                if driveFileManager.drive.accountAdmin {
+                    upgradeDescription = "i18n: Go web to upgrade"
+                } else {
+                    upgradeDescription = "i18n: Contact admin to upgrade"
+                }
+            }
+        } else if driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise {
+            publicTitle = kSuiteTitle(driveFileManager: driveFileManager)
+
+            if driveFileManager.drive.sharedLinkQuotaExceeded {
+                if driveFileManager.drive.accountAdmin {
+                    detailDescription = "i18n: Go web to upgrade"
+                } else {
+                    detailDescription = "i18n: Contact admin to upgrade"
+                }
+            }
+        } else {
+            publicTitle = KDriveResourcesStrings.Localizable.shareLinkPublicRightTitle
+        }
+
+        return [Right(key: ShareLinkPermission.restricted.rawValue,
+                      title: KDriveResourcesStrings.Localizable.shareLinkPrivateRightTitle,
+                      icon: KDriveResourcesAsset.lock.image,
+                      fileDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFileDescriptionShort,
+                      folderDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort,
+                      documentDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort),
+                Right(key: ShareLinkPermission.public.rawValue,
+                      title: publicTitle,
+                      icon: KDriveResourcesAsset.unlock.image,
+                      fileDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightFileDescriptionShort,
+                      folderDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightFolderDescriptionShort,
+                      documentDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightDocumentDescriptionShort,
+                      upgradeDescription: upgradeDescription,
+                      detailDescription: detailDescription)]
+    }
 
     static let onlyOfficeRights = [
         Right(key: EditPermission.read.rawValue,
@@ -77,6 +108,12 @@ struct Right {
               folderDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteFolderDescription,
               documentDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteFileDescription)
     ]
+
+    private static func kSuiteTitle(driveFileManager: DriveFileManager) -> String {
+        return KDriveResourcesStrings.Localizable.shareLinkPublicRightTitle
+            + " "
+            + driveFileManager.drive.sharedLinkQuotaFormatted
+    }
 }
 
 class RightsSelectionViewController: UIViewController {
@@ -84,6 +121,7 @@ class RightsSelectionViewController: UIViewController {
     @IBOutlet var closeButton: UIButton!
 
     @LazyInjectService private var matomo: MatomoUtils
+    @LazyInjectService var router: AppNavigable
 
     var fileAccessElement: FileAccessElement?
 
@@ -132,7 +170,7 @@ class RightsSelectionViewController: UIViewController {
     private func setupView() {
         switch rightSelectionType {
         case .shareLinkSettings:
-            rights = Right.shareLinkRights
+            rights = Right.shareLinkRights(driveFileManager: driveFileManager)
         case .addUserRights:
             let getUserRightDescription = { (permission: UserPermission) -> (String) in
                 switch permission {
@@ -218,7 +256,12 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
                 disable = !driveFileManager.drive.users.internalUsers.contains(userId)
             }
         }
-        cell.configureCell(right: right, type: rightSelectionType, disable: disable, file: file)
+        cell.configureCell(
+            right: right,
+            type: rightSelectionType,
+            disable: disable,
+            file: file
+        )
 
         return cell
     }
@@ -232,6 +275,18 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if driveFileManager.drive.pack.isKSuiteProGalaxy,
+           driveFileManager.drive.sharedLinkQuotaExceeded,
+           indexPath.row == 1 {
+            if driveFileManager.drive.pack.kSuiteProUpgradePath != nil {
+                router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
+            }
+
+            tableView.selectRow(at: IndexPath(row: 0, section: 0), animated: true, scrollPosition: .top)
+            return
+        }
+
         let right = rights[indexPath.row]
         if right.key == UserPermission.delete.rawValue {
             let deleteUser = fileAccessElement?.name ?? ""
