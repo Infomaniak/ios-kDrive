@@ -19,6 +19,7 @@
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveResources
 import LinkPresentation
 import SnackBar
