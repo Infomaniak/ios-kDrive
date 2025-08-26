@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import UIKit
@@ -78,6 +79,7 @@ public extension AppRouter {
     }
 
     @MainActor func handleBasicLink(basicLink: BasicLink) async {
+        @InjectService var matomo: MatomoUtils
         guard let driveFileManager = await accountManager
             .getMatchingDriveFileManagerOrSwitchAccount(deeplink: basicLink) else {
             Log.sceneDelegate(
@@ -91,6 +93,7 @@ public extension AppRouter {
         let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
         window?.rootViewController = freshRootViewController
 
+        matomo.track(eventWithCategory: .deeplink, name: "internal")
         await showBasicTab(
             driveFileManager: driveFileManager,
             viewController: freshRootViewController,

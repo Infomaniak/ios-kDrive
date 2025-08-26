@@ -110,9 +110,11 @@ public struct AppRouter: AppNavigable {
             await handleSharedWithMeLink(sharedWithMeLink: sharedWithMeLink)
 
         case .office(let officeLink):
+            matomo.track(eventWithCategory: .deeplink, name: "internal")
             await handleSimpleLink(deeplink: officeLink, fileId: officeLink.fileId, isOfficeLink: true)
 
         case .privateShare(let privateShareLink):
+            matomo.track(eventWithCategory: .deeplink, name: "internal")
             await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.fileId, isOfficeLink: false)
 
         case .publicShare(let publicShareLink):
@@ -122,9 +124,11 @@ public struct AppRouter: AppNavigable {
             await processPublicShareLink(publicShareLink)
 
         case .directory(let directoryLink):
+            matomo.track(eventWithCategory: .deeplink, name: "internal")
             await handleSimpleLink(deeplink: directoryLink, fileId: directoryLink.folderId, isOfficeLink: false)
 
         case .filePreview(let filePreviewLink):
+            matomo.track(eventWithCategory: .deeplink, name: "internal")
             await handleSimpleLink(deeplink: filePreviewLink, fileId: filePreviewLink.fileId, isOfficeLink: false)
 
         case .search(let searchLink):
@@ -162,6 +166,7 @@ public struct AppRouter: AppNavigable {
         viewModel.filters.fileType = searchLink.type
 
         let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
+        matomo.track(eventWithCategory: .deeplink, name: "internal")
         rootViewController?.present(searchViewController, animated: true)
     }
 
