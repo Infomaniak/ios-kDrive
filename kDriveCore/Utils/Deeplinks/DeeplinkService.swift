@@ -20,50 +20,50 @@ import Foundation
 import InfomaniakDI
 
 public protocol DeeplinkServiceable: AnyObject {
-    func setLastPublicShare(_ link: Any)
-    func clearLastPublicShare()
+    func setLastDeeplink(_ link: Any)
+    func clearLastDeeplink()
     func processDeeplinksPostAuthentication()
 }
 
 public class DeeplinkService: DeeplinkServiceable {
     @LazyInjectService var router: AppNavigable
 
-    private var lastPublicShareLink: Any?
+    private var lastDeeplink: Any?
 
-    public func setLastPublicShare(_ link: Any) {
-        lastPublicShareLink = link
+    public func setLastDeeplink(_ link: Any) {
+        lastDeeplink = link
     }
 
-    public func clearLastPublicShare() {
-        lastPublicShareLink = nil
+    public func clearLastDeeplink() {
+        lastDeeplink = nil
     }
 
     public func processDeeplinksPostAuthentication() {
-        guard let lastPublicShareLink else {
+        guard let lastDeeplink else {
             return
         }
 
         Task { @MainActor in
-            switch lastPublicShareLink {
-            case let lastPublicShareLink as PublicShareLink:
-                await router.navigate(to: .publicShare(publicShareLink: lastPublicShareLink))
-            case let lastPublicShareLink as SharedWithMeLink:
-                await router.navigate(to: .sharedWithMe(sharedWithMeLink: lastPublicShareLink))
-            case let lastPublicShareLink as TrashLink:
-                await router.navigate(to: .trash(trashLink: lastPublicShareLink))
-            case let lastPublicShareLink as OfficeLink:
-                await router.navigate(to: .office(officeLink: lastPublicShareLink))
-            case let lastPublicShareLink as PrivateShareLink:
-                await router.navigate(to: .privateShare(privateShareLink: lastPublicShareLink))
-            case let lastPublicShareLink as DirectoryLink:
-                await router.navigate(to: .directory(directoryLink: lastPublicShareLink))
-            case let lastPublicShareLink as FilePreviewLink:
-                await router.navigate(to: .filePreview(filePreviewLink: lastPublicShareLink))
+            switch lastDeeplink {
+            case let lastDeeplink as PublicShareLink:
+                await router.navigate(to: .publicShare(publicShareLink: lastDeeplink))
+            case let lastDeeplink as SharedWithMeLink:
+                await router.navigate(to: .sharedWithMe(sharedWithMeLink: lastDeeplink))
+            case let lastDeeplink as OfficeLink:
+                await router.navigate(to: .office(officeLink: lastDeeplink))
+            case let lastDeeplink as PrivateShareLink:
+                await router.navigate(to: .privateShare(privateShareLink: lastDeeplink))
+            case let lastDeeplink as DirectoryLink:
+                await router.navigate(to: .directory(directoryLink: lastDeeplink))
+            case let lastDeeplink as FilePreviewLink:
+                await router.navigate(to: .filePreview(filePreviewLink: lastDeeplink))
+            case let lastDeeplink as BasicLink:
+                await router.navigate(to: .basic(basicLink: lastDeeplink))
             default:
                 break
             }
 
-            clearLastPublicShare()
+            clearLastDeeplink()
         }
     }
 }

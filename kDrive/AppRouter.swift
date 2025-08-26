@@ -109,9 +109,6 @@ public struct AppRouter: AppNavigable {
         case .sharedWithMe(let sharedWithMeLink):
             await handleSharedWithMeLink(sharedWithMeLink: sharedWithMeLink)
 
-        case .trash(let trashLink):
-            await handleTrashLink(trashLink: trashLink)
-
         case .office(let officeLink):
             await handleSimpleLink(deeplink: officeLink, fileId: officeLink.fileId, isOfficeLink: true)
 
@@ -120,7 +117,7 @@ public struct AppRouter: AppNavigable {
 
         case .publicShare(let publicShareLink):
             if accountManager.currentDriveFileManager == nil {
-                deeplinkService.setLastPublicShare(publicShareLink)
+                deeplinkService.setLastDeeplink(publicShareLink)
             }
             await processPublicShareLink(publicShareLink)
 
@@ -129,28 +126,10 @@ public struct AppRouter: AppNavigable {
 
         case .filePreview(let filePreviewLink):
             await handleSimpleLink(deeplink: filePreviewLink, fileId: filePreviewLink.fileId, isOfficeLink: false)
-        }
-    }
 
-    @MainActor private func handleSimpleLink(deeplink: Any, fileId: Int, isOfficeLink: Bool) async {
-        guard let driveFileManager = await accountManager
-            .getMatchingDriveFileManagerOrSwitchAccount(deeplink: deeplink) else {
-            Log.sceneDelegate(
-                "NavigationManager: Unable to navigate without a DriveFileManager",
-                level: .error
-            )
-            deeplinkService.setLastPublicShare(deeplink)
-            return
+        case .basic(let basicLink):
+            await handleBasicLink(basicLink: basicLink)
         }
-        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
-            return
-        }
-
-        let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
-        window?.rootViewController = freshRootViewController
-
-        let fileActionHelper = FileActionsHelper()
-        fileActionHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
     }
 
     // MARK: TopmostViewControllerFetchable

@@ -251,8 +251,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             driveId = deeplink.driveId
         case let deeplink as SharedWithMeLink:
             driveId = deeplink.driveId
-        case let deeplink as TrashLink:
-            driveId = deeplink.driveId
         case let deeplink as OfficeLink:
             driveId = deeplink.driveId
         case let deeplink as PrivateShareLink:
@@ -260,6 +258,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         case let deeplink as DirectoryLink:
             driveId = deeplink.driveId
         case let deeplink as FilePreviewLink:
+            driveId = deeplink.driveId
+        case let deeplink as BasicLink:
             driveId = deeplink.driveId
         default:
             return nil
@@ -283,7 +283,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         if let matchingAccount, let currentAccount, matchingAccount != currentAccount {
             DDLogInfo("switching to account \(matchingAccount.userId) to accommodate sharedWithMeLink navigation")
-            deeplinkService.setLastPublicShare(deeplink)
+            deeplinkService.setLastDeeplink(deeplink)
             switchAccount(newAccount: matchingAccount)
             appNavigable.prepareRootViewController(
                 currentState: RootViewControllerState.getCurrentState(),
@@ -304,7 +304,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
 
             try? await driveFileManager.switchDriveAndReloadUI()
-            deeplinkService.setLastPublicShare(deeplink)
+            deeplinkService.setLastDeeplink(deeplink)
             deeplinkService.processDeeplinksPostAuthentication()
 
             return nil
@@ -707,7 +707,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     public func logoutCurrentAccountAndSwitchToNextIfPossible() {
         Task { @MainActor in
-            deeplinkService.clearLastPublicShare()
+            deeplinkService.clearLastDeeplink()
 
             if let currentAccount {
                 deviceManager.forgetLocalDeviceHash(forUserId: currentAccount.userId)
