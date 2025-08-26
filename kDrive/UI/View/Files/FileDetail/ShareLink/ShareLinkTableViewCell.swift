@@ -143,7 +143,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             rightArrow.isHidden = true
             shareIconImageView.image = KDriveResourcesAsset.folderDropBox.image
         } else {
-            shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.restrictedSharedLinkTitle
+            shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.privateSharedLinkTitle
             shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable
                 .shareLinkRestrictedRightFolderDescriptionShort : file.isOfficeFile ? KDriveResourcesStrings.Localizable
                 .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable

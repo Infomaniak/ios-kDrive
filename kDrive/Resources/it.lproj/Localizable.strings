@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Wed, 20 Aug 2025 13:14:09 +0200
+ * Exported by: Matthieu Déglon
+ * Exported at: Tue, 26 Aug 2025 09:56:37 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -1504,6 +1504,9 @@
 /* loco:6049df4d5c2c3a04bc397a28 */
 "previewVideoSourceError" = "File video non supportato dal lettore";
 
+/* loco:6049df4d5c2c3a04bc397a3b */
+"privateSharedLinkTitle" = "Link di condivisione privato";
+
 /* loco:66ffbbcd294f6022e60948f3 */
 "publicShareImportationInProgress" = "Download in corso nella cartella selezionata";
 
@@ -1539,9 +1542,6 @@
 
 /* loco:6049df4d5c2c3a04bc397a2c */
 "refreshTokenError" = "Siete stati disconnessi";
-
-/* loco:6049df4d5c2c3a04bc397a3b */
-"restrictedSharedLinkTitle" = "Link di condivisione limitato";
 
 /* loco:65d76b35ab978ba1c5014122 */
 "reviewAlertTitle" = "Ti piace kDrive?";
@@ -1633,6 +1633,9 @@
 /* loco:6049df4d5c2c3a04bc397a42 */
 "shareLinkPasswordRightTitle" = "Con la password";
 
+/* loco:6049df4d5c2c3a04bc397a40 */
+"shareLinkPrivateRightTitle" = "Privato";
+
 /* loco:618e3208c0cdbb2371438302 */
 "shareLinkPublicRightDescription" = "Tutti coloro che dispongono del link possono %1$@ questo %2$@%3$@%4$@.";
 
@@ -1665,9 +1668,6 @@
 
 /* loco:618e592000a6e0021b1da285 */
 "shareLinkRestrictedRightFolderDescriptionShort" = "Solo gli utenti aggiunti possono accedere alla cartella.";
-
-/* loco:6049df4d5c2c3a04bc397a40 */
-"shareLinkRestrictedRightTitle" = "Limitato";
 
 /* loco:6049df4d5c2c3a04bc397a49 */
 "shareLinkSettingsAddExpirationDateDescription" = "Il link di condivisione non potrà più essere utilizzato successivamente alla data.";
