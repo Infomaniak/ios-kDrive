@@ -26,7 +26,7 @@ struct UTPublicShareLink {
     func parsePublicShareLink(driveId: Int, fileUid: String) async throws {
         let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(fileUid)"
 
-        guard let url = URL(string: givenLink), let parsedResult = await PublicShareLink(publicShareURL: url) else {
+        guard let url = URL(string: givenLink), let parsedResult = PublicShareLink(publicShareURL: url) else {
             Issue.record("Failed to parse the URL")
             return
         }
@@ -49,7 +49,7 @@ struct UTPublicShareLink {
             return
         }
 
-        let parsedResult = await PublicShareLink(publicShareURL: url)
+        let parsedResult = PublicShareLink(publicShareURL: url)
         #expect(parsedResult == nil)
     }
 }

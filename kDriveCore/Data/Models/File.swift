@@ -27,7 +27,7 @@ import Photos
 import QuickLook
 import RealmSwift
 
-public enum ConvertedType: String, CaseIterable {
+public enum ConvertedType: String, CaseIterable, Sendable {
     case archive
     case audio
     case code
