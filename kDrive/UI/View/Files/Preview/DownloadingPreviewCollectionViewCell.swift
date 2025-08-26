@@ -47,11 +47,14 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
     override func awakeFromNib() {
         super.awakeFromNib()
         previewZoomView.delegate = self
-        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCell))
-        addGestureRecognizer(tapGestureRecognizer)
+
         tapToZoomRecognizer = UITapGestureRecognizer(target: self, action: #selector(didDoubleTap))
         tapToZoomRecognizer.numberOfTapsRequired = 2
         previewZoomView.addGestureRecognizer(tapToZoomRecognizer)
+
+        tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCell))
+        tapGestureRecognizer.require(toFail: tapToZoomRecognizer)
+        addGestureRecognizer(tapGestureRecognizer)
 
         progressView.layer.cornerRadius = progressView.frame.height / 2
         progressView.backgroundColor = .white
