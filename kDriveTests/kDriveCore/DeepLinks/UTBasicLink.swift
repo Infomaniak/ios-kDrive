@@ -39,14 +39,14 @@ struct UTBasicLink {
 
         #expect(parsedResult.basicURL == url)
         #expect(parsedResult.driveId == driveId)
-        #expect(parsedResult.destination == destination)
+        #expect(parsedResult.destination.rawValue == destination)
     }
 
     @Test("Parse the driveId and the fileId of a link to a basic tab", arguments: [
         (732_322, "trash", 294_394_394),
         (293_823, "my-shares", 9_033_242)
     ])
-    func parseRecentLinkFile(driveId: Int, destination: String, fileId: Int) async throws {
+    func parseBasicLinkFile(driveId: Int, destination: String, fileId: Int) async throws {
         let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(driveId)/\(destination)/preview/image/\(fileId)"
 
         guard let url = URL(string: givenLink), let parsedResult = BasicLink(basicURL: url) else {
@@ -56,13 +56,26 @@ struct UTBasicLink {
 
         #expect(parsedResult.basicURL == url)
         #expect(parsedResult.driveId == driveId)
-        #expect(parsedResult.destination == destination)
+        #expect(parsedResult.destination.rawValue == destination)
         #expect(parsedResult.fileId == fileId)
     }
 
     @Test("Fail to parse a deeplink to a basic tab if the URL is invalid", arguments: ["AD49-243DV-3DB"])
-    func recentLinkInvalidURL(invalidDriveId: String) async throws {
+    func basicLinkInvalidURL(invalidDriveId: String) async throws {
         let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/\(invalidDriveId)/recents"
+
+        guard let url = URL(string: givenLink) else {
+            Issue.record("Failed to create the URL")
+            return
+        }
+
+        let parsedResult = BasicLink(basicURL: url)
+        #expect(parsedResult == nil)
+    }
+
+    @Test("Fail to parse a deeplink to a basic tab if the destination is invalid", arguments: ["home", "publicShares"])
+    func invalidDestinationURL(invalidDestination: String) async throws {
+        let givenLink = "https://ksuite.infomaniak.com/all/kdrive/app/drive/192834/\(invalidDestination)"
 
         guard let url = URL(string: givenLink) else {
             Issue.record("Failed to create the URL")
