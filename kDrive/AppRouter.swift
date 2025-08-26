@@ -129,8 +129,6 @@ public struct AppRouter: AppNavigable {
 
         case .search(let searchLink):
             handleSearchLink(searchLink: searchLink)
-        }
-    }
 
         case .basic(let basicLink):
             await handleBasicLink(basicLink: basicLink)
