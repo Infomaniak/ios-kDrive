@@ -71,13 +71,16 @@ class ShareLinkSettingsViewController: UIViewController {
         }
 
         func isEnabled(drive: Drive) -> Bool {
-            if self == .optionDate && drive.isFreePack {
+            let allowedOptions = (self == .optionDate || self == .optionPassword)
+            if allowedOptions && drive.pack.drivePackId == .kSuiteEssential {
                 return false
-            } else if self == .optionPassword && drive.isFreePack {
-                return false
-            } else {
-                return true
             }
+
+            if allowedOptions && drive.isFreePack {
+                return false
+            }
+
+            return true
         }
     }
 
@@ -252,6 +255,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             isFolder: file.isDirectory
         )
 
+        // FIXME: myKsuite switch to entire cell selection like android
         if !option.isEnabled(drive: driveFileManager.drive) {
             cell.actionHandler = { [weak self] _ in
                 self?.router.presentUpSaleSheet()
