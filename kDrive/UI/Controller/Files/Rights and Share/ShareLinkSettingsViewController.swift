@@ -255,18 +255,6 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             isFolder: file.isDirectory
         )
 
-        // FIXME: myKsuite switch to entire cell selection like android
-        if !option.isEnabled(drive: driveFileManager.drive) {
-            cell.actionHandler = { [weak self] _ in
-                self?.router.presentUpSaleSheet()
-                if option == .optionPassword {
-                    self?.matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkPassword")
-                } else if option == .optionDate {
-                    self?.matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkExpiryDate")
-                }
-            }
-        }
-
         return cell
     }
 
@@ -289,18 +277,30 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if driveFileManager.drive.pack.drivePackId == .kSuiteEssential,
-           indexPath.row == optionsRows.firstIndex(of: .optionDate) || indexPath.row == optionsRows
-           .firstIndex(of: .optionPassword) {
-            router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+        if let cell = tableView.cellForRow(at: indexPath) as? ShareLinkSettingTableViewCell,
+           let option = cell.option,
+           !option.isEnabled(drive: driveFileManager.drive) {
+            if driveFileManager.drive.isFreePack {
+                router.presentUpSaleSheet()
 
-            if indexPath.row == optionsRows.firstIndex(of: .optionDate) {
-                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkExpiryDate")
-            } else if indexPath.row == optionsRows.firstIndex(of: .optionPassword) {
-                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkPassword")
+                if indexPath.row == optionsRows.firstIndex(of: .optionDate) {
+                    matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkExpiryDate")
+                } else if indexPath.row == optionsRows.firstIndex(of: .optionPassword) {
+                    matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkPassword")
+                }
+                return
             }
 
-            return
+            if driveFileManager.drive.pack.drivePackId == .kSuiteEssential {
+                router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+
+                if indexPath.row == optionsRows.firstIndex(of: .optionDate) {
+                    matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkExpiryDate")
+                } else if indexPath.row == optionsRows.firstIndex(of: .optionPassword) {
+                    matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkPassword")
+                }
+                return
+            }
         }
 
         if indexPath.row == 0 && (file.isOfficeFile || file.isDirectory) {
