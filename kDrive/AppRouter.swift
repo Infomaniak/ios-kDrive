@@ -538,14 +538,15 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showPhotoSyncSettings() {
-        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
+        guard let rootViewController = window?.rootViewController as? RootSplitViewController,
+              let mainTabViewController = rootViewController.mainTabViewController else {
             return
         }
 
-        rootViewController.dismiss(animated: false)
-        rootViewController.selectedIndex = MainTabBarIndex.profile.rawValue
+        mainTabViewController.dismiss(animated: false)
+        mainTabViewController.selectedIndex = MainTabBarIndex.profile.rawValue
 
-        guard let navController = rootViewController.selectedViewController as? UINavigationController else {
+        guard let navController = mainTabViewController.selectedViewController as? UINavigationController else {
             return
         }
 
@@ -626,7 +627,7 @@ public struct AppRouter: AppNavigable {
                 if #available(iOS 16.0, *) {
                     sheet.detents = [
                         .custom { _ in
-                            return 560
+                            560
                         }
                     ]
                 } else {
