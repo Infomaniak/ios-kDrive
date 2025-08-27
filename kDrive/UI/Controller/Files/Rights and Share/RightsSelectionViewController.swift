@@ -21,6 +21,7 @@ import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import KSuite
 import UIKit
 
 enum RightsSelectionType {
@@ -58,20 +59,16 @@ struct Right {
             publicTitle = kSuiteTitle(driveFileManager: driveFileManager)
 
             if driveFileManager.drive.sharedLinkQuotaExceeded {
-                if driveFileManager.drive.accountAdmin {
-                    upgradeDescription = "i18n: Go web to upgrade"
-                } else {
-                    upgradeDescription = "i18n: Contact admin to upgrade"
-                }
+                upgradeDescription = KDriveResourcesStrings.Localizable.buttonUpgradeOffer
             }
         } else if driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise {
             publicTitle = kSuiteTitle(driveFileManager: driveFileManager)
 
             if driveFileManager.drive.sharedLinkQuotaExceeded {
                 if driveFileManager.drive.accountAdmin {
-                    detailDescription = "i18n: Go web to upgrade"
+                    detailDescription = KSuiteLocalizable.kSuiteUpgradeDetails
                 } else {
-                    detailDescription = "i18n: Contact admin to upgrade"
+                    detailDescription = KSuiteLocalizable.kSuiteUpgradeDetailsContactAdmin
                 }
             }
         } else {
