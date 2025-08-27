@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCoreUIKit
+import KSuite
 import UIKit
 
 class FolderTypeTableViewCell: InsetTableViewCell {
@@ -75,9 +76,13 @@ class FolderTypeTableViewCell: InsetTableViewCell {
         ])
     }
 
-    func setKSuiteEnterpriseUpgrade() {
+    func setKSuiteEnterpriseUpgrade(isAdmin: Bool) {
+        if isAdmin {
+            upgradeLabel.text = KSuiteLocalizable.kSuiteUpgradeDetails
+        } else {
+            upgradeLabel.text = KSuiteLocalizable.kSuiteUpgradeDetailsContactAdmin
+        }
         upgradeLabel.isHidden = false
-        upgradeLabel.text = "TODO: i18n - Evolve enterprise offer on the web"
         lowerConstraint.constant = 20
     }
 }
