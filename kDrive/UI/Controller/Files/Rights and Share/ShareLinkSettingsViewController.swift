@@ -289,6 +289,20 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if driveFileManager.drive.pack.drivePackId == .kSuiteEssential,
+           indexPath.row == optionsRows.firstIndex(of: .optionDate) || indexPath.row == optionsRows
+           .firstIndex(of: .optionPassword) {
+            router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+
+            if indexPath.row == optionsRows.firstIndex(of: .optionDate) {
+                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkExpiryDate")
+            } else if indexPath.row == optionsRows.firstIndex(of: .optionPassword) {
+                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkPassword")
+            }
+
+            return
+        }
+
         if indexPath.row == 0 && (file.isOfficeFile || file.isDirectory) {
             let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(
                 file: file,
