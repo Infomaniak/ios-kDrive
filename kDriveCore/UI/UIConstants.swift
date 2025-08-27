@@ -21,6 +21,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveResources
+import KSuite
 import LinkPresentation
 import SnackBar
 import UIKit
@@ -142,7 +143,7 @@ public extension UIConstants {
                 return
             }
 
-            let upgradeAction = IKSnackBar.Action(title: "i18n: Evolve") {
+            let upgradeAction = IKSnackBar.Action(title: KSuiteLocalizable.kSuiteUpgradeButton) {
                 @InjectService var router: AppNavigable
                 router.presentKDriveProUpSaleSheet(driveFileManager: currentDriveFileManager)
             }
