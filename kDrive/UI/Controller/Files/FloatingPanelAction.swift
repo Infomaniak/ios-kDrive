@@ -271,12 +271,12 @@ public class FloatingPanelAction: Equatable {
         return [offline, download, move, duplicate].map { $0.reset() }
     }
 
-    static var selectAllActions: [FloatingPanelAction] {
-        return [.offline, download, move, duplicate].map { $0.reset() }
+    static var multipleSelectionOfflineActions: [FloatingPanelAction] {
+        return [.offline, download].map { $0.reset() }
     }
 
-    static var selectAllOfflineActions: [FloatingPanelAction] {
-        return [.offline, download].map { $0.reset() }
+    static var selectAllActions: [FloatingPanelAction] {
+        return [.offline, download, move, duplicate].map { $0.reset() }
     }
 
     public static func == (lhs: FloatingPanelAction, rhs: FloatingPanelAction) -> Bool {
