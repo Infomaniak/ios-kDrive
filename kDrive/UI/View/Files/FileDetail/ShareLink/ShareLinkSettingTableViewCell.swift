@@ -81,11 +81,19 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         rightView.addSubview(overlayButton)
         passwordTextField.rightView = rightView
         passwordTextField.rightViewMode = .always
-
-        prepareChip()
     }
 
-    private func prepareChip() {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        passwordTextField.isHidden = true
+        compactDatePicker.isHidden = true
+        updateView.isHidden = true
+        newPasswordButton.isHidden = true
+        compactDatePicker.minimumDate = Date()
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
+    }
+
+    private func setupMykSuiteChip() {
         let chipView = MyKSuiteChip.instantiateGrayChip()
 
         chipView.translatesAutoresizingMaskIntoConstraints = false
@@ -94,6 +102,24 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         NSLayoutConstraint.activate([
             chipView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
             chipView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
+    }
+
+    func setupKSuiteProChipView() {
+        let chip = KSuiteProChipController()
+        guard let chipView = chip.view else {
+            return
+        }
+
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+        chipContainerView.isHidden = false
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
             chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
             chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
         ])
@@ -126,8 +152,12 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         titleLabel.text = option.title
         settingDetail.text = isFolder ? option.folderDescription : option.fileDescription
         settingSwitch.isOn = switchValue
-        settingSwitch.isEnabled = option.isEnabled(drive: drive)
-        updateView.isHidden = option.isEnabled(drive: drive)
+        
+        let isEnabled = option.isEnabled(drive: drive)
+        settingSwitch.isEnabled = isEnabled
+        updateView.isHidden = isEnabled
+        setupUpdateView(isEnabled: isEnabled, drive: drive)
+
         passwordTextField.isHidden = true
         newPasswordButton.isHidden = true
         compactDatePicker.isHidden = true
@@ -146,6 +176,16 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         }
         if option == .optionPassword {
             togglePasswordTextField(newPassword: actionButtonVisible)
+        }
+    }
+
+    private func setupUpdateView(isEnabled: Bool, drive: Drive) {
+        updateView.isHidden = isEnabled
+        guard !isEnabled else { return }
+        if drive.pack.drivePackId == .kSuiteEssential {
+            setupKSuiteProChipView()
+        } else {
+            setupMykSuiteChip()
         }
     }
 
