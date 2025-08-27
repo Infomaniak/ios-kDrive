@@ -22,9 +22,9 @@
                         <rect key="frame" x="24" y="8" width="289" height="359"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="0.0" y="5" width="36" height="21"/>
-                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                <color key="textColor" name="titleColor"/>
+                                <rect key="frame" x="0.0" y="5" width="40.5" height="21"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
+                                <color key="textColor" name="orca"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
@@ -41,16 +41,16 @@
                                 <rect key="frame" x="0.0" y="41" width="289" height="304"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K1i-a0-oIy" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                        <rect key="frame" x="0.0" y="0.0" width="289" height="14.5"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                        <color key="textColor" name="primaryTextColor"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="289" height="19.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                        <color key="textColor" name="elephant"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="TIN-sh-74m" customClass="MaterialOutlinedTextField" customModule="MaterialOutlinedTextField">
-                                        <rect key="frame" x="0.0" y="30.5" width="289" height="50"/>
+                                        <rect key="frame" x="0.0" y="35.5" width="289" height="50"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="50" id="mBZ-iz-3S2"/>
                                         </constraints>
@@ -61,7 +61,7 @@
                                         </connections>
                                     </textField>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mNc-Na-0mD" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="96.5" width="46" height="89.5"/>
+                                        <rect key="frame" x="0.0" y="101.5" width="46" height="89.5"/>
                                         <state key="normal" title="Button"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonNewPassword"/>
@@ -72,53 +72,27 @@
                                         </connections>
                                     </button>
                                     <datePicker contentMode="scaleToFill" verticalHuggingPriority="251" contentHorizontalAlignment="leading" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="30" style="compact" translatesAutoresizingMaskIntoConstraints="NO" id="Em4-Ij-GbM">
-                                        <rect key="frame" x="0.0" y="202" width="196" height="50"/>
+                                        <rect key="frame" x="0.0" y="207" width="196" height="50"/>
                                         <connections>
                                             <action selector="compactDatePickerChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="WEy-d9-ajH"/>
                                         </connections>
                                     </datePicker>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OhU-uH-GaZ" userLabel="UpdateView">
-                                        <rect key="frame" x="0.0" y="268" width="240" height="36"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" spacing="13" translatesAutoresizingMaskIntoConstraints="NO" id="A7k-4Y-HmF">
+                                        <rect key="frame" x="0.0" y="273" width="205" height="31"/>
                                         <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2ju-Mt-PMJ">
-                                                <rect key="frame" x="0.0" y="0.0" width="149" height="36"/>
-                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="height" constant="36" id="eHu-JC-Am2"/>
-                                                </constraints>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Update Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="as6-QG-lFk">
+                                                <rect key="frame" x="55" y="14" width="87" height="17"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                                <state key="normal" title="Faire évoluer mon offre">
-                                                    <color key="titleColor" name="infomaniakColor"/>
-                                                </state>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
-                                                        <real key="value" value="18"/>
-                                                    </userDefinedRuntimeAttribute>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonUpgradeOffer"/>
-                                                </userDefinedRuntimeAttributes>
-                                                <connections>
-                                                    <action selector="updateButtonPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="w2G-aU-fKm"/>
-                                                </connections>
-                                            </button>
+                                                <color key="textColor" name="infomaniakColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3bI-0o-fhJ">
-                                                <rect key="frame" x="161" y="8" width="20" height="20"/>
+                                                <rect key="frame" x="155" y="14" width="50" height="17"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="width" constant="20" placeholder="YES" id="2Sr-ip-kwP"/>
-                                                    <constraint firstAttribute="height" constant="20" placeholder="YES" id="JHu-V9-VWG"/>
-                                                </constraints>
                                             </view>
                                         </subviews>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <constraints>
-                                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="3bI-0o-fhJ" secondAttribute="trailing" constant="20" id="5dP-UA-2eL"/>
-                                            <constraint firstItem="3bI-0o-fhJ" firstAttribute="centerY" secondItem="2ju-Mt-PMJ" secondAttribute="centerY" id="GkM-oB-uic"/>
-                                            <constraint firstItem="2ju-Mt-PMJ" firstAttribute="leading" secondItem="OhU-uH-GaZ" secondAttribute="leading" id="VLG-DN-JN5"/>
-                                            <constraint firstAttribute="bottom" secondItem="2ju-Mt-PMJ" secondAttribute="bottom" id="frg-wq-gGP"/>
-                                            <constraint firstItem="3bI-0o-fhJ" firstAttribute="leading" secondItem="2ju-Mt-PMJ" secondAttribute="trailing" constant="12" id="hHD-up-AfZ"/>
-                                            <constraint firstItem="2ju-Mt-PMJ" firstAttribute="top" secondItem="OhU-uH-GaZ" secondAttribute="top" id="jlv-uk-2qh"/>
-                                        </constraints>
-                                    </view>
+                                    </stackView>
                                 </subviews>
                                 <constraints>
                                     <constraint firstItem="TIN-sh-74m" firstAttribute="leading" secondItem="1Xm-Dy-4ti" secondAttribute="leading" id="1uf-vI-Lak"/>
@@ -164,8 +138,8 @@
                 <outlet property="settingSwitch" destination="LR0-uD-ggb" id="Klu-2N-Y6R"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
                 <outlet property="topConstraint" destination="eo3-Nh-xzM" id="zKn-C5-K50"/>
-                <outlet property="updateButton" destination="2ju-Mt-PMJ" id="GR1-2E-f95"/>
-                <outlet property="updateView" destination="OhU-uH-GaZ" id="RVy-CA-OYk"/>
+                <outlet property="updateLabel" destination="as6-QG-lFk" id="7ug-W2-ex1"/>
+                <outlet property="updateView" destination="A7k-4Y-HmF" id="p1D-8C-5zH"/>
             </connections>
             <point key="canvasLocation" x="148.55072463768118" y="253.45982142857142"/>
         </tableViewCell>
@@ -174,13 +148,13 @@
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
+        <namedColor name="elephant">
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="infomaniakColor">
             <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
+        <namedColor name="orca">
             <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>

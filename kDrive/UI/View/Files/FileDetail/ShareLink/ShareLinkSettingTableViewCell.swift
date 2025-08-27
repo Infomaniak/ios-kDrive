@@ -35,13 +35,11 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     @IBOutlet var newPasswordButton: IKButton!
     @IBOutlet var compactDatePicker: UIDatePicker!
     @IBOutlet var updateView: UIView!
-    @IBOutlet var updateButton: UIButton!
+    @IBOutlet var updateLabel: UILabel!
     @IBOutlet var chipContainerView: UIView!
 
     var option: ShareLinkSettingsViewController.OptionsRow?
     weak var delegate: ShareLinkSettingsDelegate?
-
-    var actionHandler: ((UIButton) -> Void)?
 
     var showPassword = false
     var index: Int!
@@ -152,7 +150,7 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
         titleLabel.text = option.title
         settingDetail.text = isFolder ? option.folderDescription : option.fileDescription
         settingSwitch.isOn = switchValue
-        
+
         let isEnabled = option.isEnabled(drive: drive)
         settingSwitch.isEnabled = isEnabled
         updateView.isHidden = isEnabled
@@ -182,6 +180,8 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
     private func setupUpdateView(isEnabled: Bool, drive: Drive) {
         updateView.isHidden = isEnabled
         guard !isEnabled else { return }
+
+        updateLabel.text = KDriveResourcesStrings.Localizable.buttonUpgradeOffer
         if drive.pack.drivePackId == .kSuiteEssential {
             setupKSuiteProChipView()
         } else {
@@ -191,10 +191,6 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     @IBAction func switchValueChanged(_ sender: UISwitch) {
         delegate?.didUpdateSettings(index: index, isOn: settingSwitch.isOn)
-    }
-
-    @IBAction func updateButtonPressed(_ sender: UIButton) {
-        actionHandler?(sender)
     }
 
     @IBAction func textFieldUpdated(_ sender: MaterialOutlinedTextField) {
