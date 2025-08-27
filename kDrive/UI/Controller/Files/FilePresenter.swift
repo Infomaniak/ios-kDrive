@@ -39,16 +39,17 @@ final class FilePresenter {
     }
 
     static func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
-        guard let rootViewController = viewController.view.window?.rootViewController as? MainTabViewController else {
+        guard let rootViewController = viewController.view.window?.rootViewController as? RootSplitViewController,
+              let mainTabViewController = rootViewController.mainTabViewController else {
             return
         }
 
         viewController.navigationController?.popToRootViewController(animated: false)
 
-        rootViewController.dismiss(animated: false) {
-            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
+        mainTabViewController.dismiss(animated: false) {
+            mainTabViewController.selectedIndex = MainTabBarIndex.files.rawValue
 
-            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
+            guard let navigationController = mainTabViewController.selectedViewController as? UINavigationController else {
                 return
             }
 
