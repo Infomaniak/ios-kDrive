@@ -19,6 +19,7 @@
 import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
+import KSuite
 import UIKit
 
 class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
@@ -76,10 +77,16 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
     func configureKSuiteEnterpriseCell(drive: Drive) {
         upgradeButton.isHidden = true
         upgradeLabel.isHidden = false
+
+        guard drive.pack.drivePackId != .kSuiteEssential else {
+            upgradeLabel.text = KDriveResourcesStrings.Localizable.buttonUpgradeOffer
+            return
+        }
+
         if drive.isUserAdmin {
-            upgradeLabel.text = "TODO: i18n - Upgrade on the website"
+            upgradeLabel.text = KSuiteLocalizable.kSuiteUpgradeDetails
         } else {
-            upgradeLabel.text = "TODO: i18n - Contact Admin to upgrade"
+            upgradeLabel.text = KSuiteLocalizable.kSuiteUpgradeDetailsContactAdmin
         }
     }
 
