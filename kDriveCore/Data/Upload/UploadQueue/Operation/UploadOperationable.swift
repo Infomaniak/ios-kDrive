@@ -38,7 +38,7 @@ public protocol Operationable: AnyObject {
     func removeDependency(_ op: Operation)
     var dependencies: [Operation] { get }
     var queuePriority: Operation.QueuePriority { get set }
-    var completionBlock: (() -> Void)? { get set }
+    var completionBlock: (@Sendable () -> Void)? { get set }
     func waitUntilFinished()
     var threadPriority: Double { get }
     var qualityOfService: QualityOfService { get }
