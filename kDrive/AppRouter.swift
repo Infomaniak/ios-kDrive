@@ -103,7 +103,7 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            // Show store
+            matomo.track(eventWithCategory: .deeplink, name: "store")
             showStore(from: viewController, driveFileManager: driveFileManager)
 
         case .sharedWithMe(let sharedWithMeLink):
