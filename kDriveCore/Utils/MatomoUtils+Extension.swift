@@ -45,7 +45,6 @@ public extension MatomoUtils.EventCategory {
     static let drive = MatomoUtils.EventCategory(displayName: "drive")
     static let settings = MatomoUtils.EventCategory(displayName: "settings")
     static let photoSync = MatomoUtils.EventCategory(displayName: "photoSync")
-    static let home = MatomoUtils.EventCategory(displayName: "home")
     static let displayList = MatomoUtils.EventCategory(displayName: "displayList")
     static let inApp = MatomoUtils.EventCategory(displayName: "inApp")
     static let trash = MatomoUtils.EventCategory(displayName: "trash")
@@ -55,7 +54,6 @@ public extension MatomoUtils.EventCategory {
     static let shortcuts = MatomoUtils.EventCategory(displayName: "shortcuts")
     static let deeplink = MatomoUtils.EventCategory(displayName: "deeplink")
     static let publicShareAction = MatomoUtils.EventCategory(displayName: "publicShareAction")
-    static let publicSharePasswordAction = MatomoUtils.EventCategory(displayName: "publicSharePasswordAction")
     static let myKSuite = MatomoUtils.EventCategory(displayName: "myKSuite")
     static let myKSuiteUpgradeBottomSheet = MatomoUtils.EventCategory(displayName: "myKSuiteUpgradeBottomSheet")
 }
