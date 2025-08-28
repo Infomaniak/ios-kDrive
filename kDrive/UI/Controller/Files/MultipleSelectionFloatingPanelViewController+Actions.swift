@@ -231,12 +231,8 @@ extension MultipleSelectionFloatingPanelViewController {
             Task {
                 do {
                     try await self.copy(files: files, to: selectedDirectory)
-                    if let presentingParent = self.presentingParent {
-                        try await (presentingParent as? FileListViewController)?.viewModel.loadActivities()
-                        if presentingParent is PreviewViewController {
-                            presentingParent.navigationController?.popViewController(animated: true)
-                        }
-                        self.dismiss(animated: true)
+                    if let presentingParent = self.presentingParent as? FileListViewController {
+                        try await presentingParent.viewModel.loadActivities()
                     }
                 } catch {
                     self.success = false
