@@ -134,7 +134,7 @@ public extension UIConstants {
         } else if (error as? DriveError) == .taskCancelled || (error as? DriveError) == .taskRescheduled {
             // Task was rescheduled
         } else {
-            @InjectService var accountManager: AccountManager
+            @InjectService var accountManager: AccountManageable
             guard let driveError = error as? DriveError,
                   driveError == DriveError.errorDeviceStorage,
                   let currentDriveFileManager = accountManager.currentDriveFileManager,
