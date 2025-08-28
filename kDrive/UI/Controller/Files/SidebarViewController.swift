@@ -569,18 +569,24 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             }
 
             navigationController?.pushViewController(destinationViewController, animated: true)
-        } else if selectedIndexPath != indexPath {
-            switch destination {
-            case .home:
-                delegate?.didSelectItem(destination: .home)
-            case .photoList:
-                delegate?.didSelectItem(destination: .photoList)
-            case .file(let selectedRootFile):
-                let destinationViewModel = getViewModelForRootFile(selectedRootFile)
-                delegate?.didSelectItem(destination: .file(destinationViewModel))
-            }
+        } else {
+            guard let detailNavigationController = splitViewController?.viewControllers.last as? UINavigationController
+            else { return }
+            let isDetailAtRoot = detailNavigationController.viewControllers.count == 1
 
-            selectedIndexPath = indexPath
+            if selectedIndexPath != indexPath || !isDetailAtRoot {
+                switch destination {
+                case .home:
+                    delegate?.didSelectItem(destination: .home)
+                case .photoList:
+                    delegate?.didSelectItem(destination: .photoList)
+                case .file(let selectedRootFile):
+                    let destinationViewModel = getViewModelForRootFile(selectedRootFile)
+                    delegate?.didSelectItem(destination: .file(destinationViewModel))
+                }
+
+                selectedIndexPath = indexPath
+            }
         }
     }
 
