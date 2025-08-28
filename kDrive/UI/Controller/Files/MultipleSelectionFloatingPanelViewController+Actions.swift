@@ -226,12 +226,14 @@ extension MultipleSelectionFloatingPanelViewController {
 
     private func duplicateAction(group: DispatchGroup, at indexPath: IndexPath) {
         let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
-            driveFileManager: driveFileManager,
-            disabledDirectoriesSelection: files.compactMap(\.parent)
+            driveFileManager: driveFileManager
         ) { [files = files.map { $0.freezeIfNeeded() }] selectedDirectory, _ in
             Task {
                 do {
                     try await self.copy(files: files, to: selectedDirectory)
+                    if let presentingParent = self.presentingParent as? FileListViewController {
+                        try await presentingParent.viewModel.loadActivities()
+                    }
                 } catch {
                     self.success = false
                 }
