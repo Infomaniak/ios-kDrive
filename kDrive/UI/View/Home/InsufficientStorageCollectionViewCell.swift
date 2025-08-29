@@ -56,15 +56,6 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
             .text =
             "\(Constants.formatFileSize(drive.usedSize, decimals: 1, unit: false)) / \(Constants.formatFileSize(drive.size))"
 
-        guard drive.pack.drivePackId == .kSuiteEntreprise else {
-            configureCell(drive: drive)
-            return
-        }
-
-        configureKSuiteEnterpriseCell(drive: drive)
-    }
-
-    func configureCell(drive: Drive) {
         if drive.accountAdmin {
             storageDescription.text = KDriveResourcesStrings.Localizable.notEnoughStorageDescription1
             upgradeButton.isHidden = false
@@ -72,21 +63,19 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
             storageDescription.text = KDriveResourcesStrings.Localizable.notEnoughStorageDescription2
             upgradeButton.isHidden = true
         }
+
+        guard drive.pack.isKSuiteProGalaxy else { return }
+        configureKSuiteCell(drive: drive)
     }
 
-    func configureKSuiteEnterpriseCell(drive: Drive) {
-        upgradeButton.isHidden = true
-        upgradeLabel.isHidden = false
-
-        guard drive.pack.drivePackId != .kSuiteEssential else {
-            upgradeLabel.text = KDriveResourcesStrings.Localizable.buttonUpgradeOffer
-            return
-        }
-
-        if drive.isUserAdmin {
-            upgradeLabel.text = KSuiteLocalizable.kSuiteUpgradeDetails
+    func configureKSuiteCell(drive: Drive) {
+        if drive.pack.drivePackId == .kSuiteEssential {
+            upgradeButton.isHidden = false
+            upgradeLabel.isHidden = true
         } else {
-            upgradeLabel.text = KSuiteLocalizable.kSuiteUpgradeDetailsContactAdmin
+            upgradeLabel.text = KSuiteLocalizable.kSuiteUpgradeDetails
+            upgradeLabel.isHidden = false
+            upgradeButton.isHidden = true
         }
     }
 
