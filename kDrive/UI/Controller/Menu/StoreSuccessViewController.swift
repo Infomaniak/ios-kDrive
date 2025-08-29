@@ -29,10 +29,11 @@ class StoreSuccessViewController: UIViewController {
     }
 
     @IBAction func homeButtonPressed(_ sender: IKLargeButton) {
-        if let rootViewController = sender.window?.rootViewController as? MainTabViewController {
-            rootViewController.dismiss(animated: true)
-            (rootViewController.selectedViewController as? UINavigationController)?.popToRootViewController(animated: true)
-            rootViewController.selectedIndex = MainTabBarIndex.home.rawValue
+        if let rootViewController = sender.window?.rootViewController as? RootSplitViewController,
+           let mainTabViewController = rootViewController.mainTabViewController {
+            mainTabViewController.dismiss(animated: true)
+            (mainTabViewController.selectedViewController as? UINavigationController)?.popToRootViewController(animated: true)
+            mainTabViewController.selectedIndex = MainTabBarIndex.home.rawValue
         } else {
             dismiss(animated: true)
         }
