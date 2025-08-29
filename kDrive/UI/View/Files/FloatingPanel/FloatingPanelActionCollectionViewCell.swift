@@ -82,8 +82,12 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
             guard currentPackId == .myKSuite else { return }
             configureChip()
         case .convertToDropbox:
-            guard currentPackId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded else { return }
-            configureChip()
+            guard driveFileManager.drive.dropboxQuotaExceeded else { return }
+            if currentPackId == .myKSuite {
+                configureChip()
+            } else if driveFileManager.drive.pack.kSuiteProUpgradePath != nil {
+                configureKSuiteProChip()
+            }
         case .download:
             guard let file else { return }
             observeProgress(showProgress, file: file)
@@ -133,6 +137,23 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
     func configureChip() {
         let chipView = MyKSuiteChip.instantiateGrayChip()
+
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
+    }
+
+    func configureKSuiteProChip() {
+        let chip = KSuiteProChipController()
+        guard let chipView = chip.view else {
+            return
+        }
 
         chipView.translatesAutoresizingMaskIntoConstraints = false
         chipContainerView.addSubview(chipView)

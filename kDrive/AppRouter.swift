@@ -25,6 +25,7 @@ import InfomaniakLogin
 import InfomaniakOnboarding
 import kDriveCore
 import kDriveResources
+import KSuite
 import MyKSuite
 import SafariServices
 import SwiftUI
@@ -620,18 +621,33 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func presentUpSaleSheet() {
+        let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
+        nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
+    }
+
+    @MainActor public func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager) {
+        guard let configuration = driveFileManager.drive.pack.kSuiteProUpgradePath else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            return
+        }
+
+        let isAdmin = driveFileManager.drive.accountAdmin
+        let viewControllerToPresent = KSuiteViewController(configuration: configuration, isAdmin: isAdmin)
+        nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
+    }
+
+    @MainActor private func nativeLargeSheetPresentation(viewControllerToPresent: UIViewController, customOffset: CGFloat) {
         guard let window,
               let rootViewController = window.rootViewController else {
             return
         }
 
         rootViewController.dismiss(animated: true) {
-            let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
             if let sheet = viewControllerToPresent.sheetPresentationController {
                 if #available(iOS 16.0, *) {
                     sheet.detents = [
                         .custom { _ in
-                            return 560
+                            return customOffset
                         }
                     ]
                 } else {

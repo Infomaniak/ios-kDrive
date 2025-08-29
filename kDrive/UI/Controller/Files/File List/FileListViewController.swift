@@ -620,9 +620,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
 
         let isTrash = viewModel.currentDirectory.id == DriveFileManager.trashRootFile.id
-        let isMykSuite = packId == .myKSuite
-        headerView.trashInformationView.isHidden = !(isTrash && isMykSuite)
-
+        headerView.updateInformationView(drivePackId: packId, isTrash: isTrash)
         headerView.sortView.isHidden = !isEmptyViewHidden
 
         headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
@@ -858,6 +856,18 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
     func removeFilterButtonPressed(_ filter: Filterable) {
         // Overriden in subclasses
+    }
+
+    func upsaleButtonPressed() {
+        if packId == .myKSuite {
+            router.presentUpSaleSheet()
+            matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
+        } else if packId == .kSuiteEssential {
+            router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+            matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "trashStorageLimit")
+        } else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+        }
     }
 }
 
