@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "16808ff5535c607feb16eddc815201da80fb973e",
-        "version" : "1.29.2"
+        "revision" : "faad61d6f227531f8fa97ed49ef5732f7eee55d2",
+        "version" : "1.30.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "3cc3b2be6b8f938564a8dbd3ecbf9f80324f5a96",
-        "version" : "16.0.0"
+        "revision" : "d2dfb4c434816bae2b1e12dc748e72c15f12ef27",
+        "version" : "16.0.1"
       }
     },
     {
@@ -375,8 +375,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-numerics.git",
       "state" : {
-        "revision" : "e0ec0f5f3af6f3e4d5e7a19d2af26b481acb6ba8",
-        "version" : "1.0.3"
+        "revision" : "bbadd4b853a33fd78c4ae977d17bb2af15eb3f2a",
+        "version" : "1.1.0"
       }
     },
     {
