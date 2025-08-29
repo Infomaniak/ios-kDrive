@@ -1,2 +1,3 @@
+- Correction des actions rapides sur iPad
 - Changements relatifs aux Deeplinks
 - Améliorations de la stabilité et corrections de bugs
