@@ -92,6 +92,11 @@ extension FileActionsFloatingPanelViewController {
                 case .favorite:
                     return frozenFile.capabilities.canUseFavorite
                 case .convertToDropbox:
+                    let isEnterprise = driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise
+                    let quotaExceeded = driveFileManager.drive.dropboxQuotaExceeded
+                    guard !(isEnterprise && quotaExceeded) else {
+                        return false
+                    }
                     return frozenFile.capabilities.canBecomeDropbox
                 case .manageDropbox:
                     return frozenFile.isDropbox

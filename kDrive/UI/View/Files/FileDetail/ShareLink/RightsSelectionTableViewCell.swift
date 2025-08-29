@@ -29,6 +29,10 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
     @IBOutlet var bannerBackgroundView: UIView!
     @IBOutlet var bannerLabel: UILabel!
     @IBOutlet var updateButton: UIButton!
+    @IBOutlet var chipContainerView: UIView!
+    @IBOutlet var upgradeLabel: UILabel!
+    @IBOutlet var upgradeStackView: UIStackView!
+    @IBOutlet var detailLabel: UILabel!
 
     var isSelectable = true
     var actionHandler: ((UIButton) -> Void)?
@@ -38,6 +42,11 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
 
         bannerView.isHidden = true
         updateButton.isHidden = true
+        upgradeStackView.isHidden = true
+        chipContainerView.isHidden = true
+        detailLabel.isHidden = true
+        upgradeLabel.text = nil
+        detailLabel.text = nil
     }
 
     override func prepareForReuse() {
@@ -45,6 +54,12 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
 
         bannerView.isHidden = true
         updateButton.isHidden = true
+        upgradeStackView.isHidden = true
+        chipContainerView.isHidden = true
+        detailLabel.isHidden = true
+        chipContainerView.subviews.forEach { $0.removeFromSuperview() }
+        upgradeLabel.text = nil
+        detailLabel.text = nil
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -67,6 +82,15 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
             .documentDescription : right.fileDescription
         rightsIconImageView.image = right.icon
 
+        if let upgradeDescription = right.upgradeDescription {
+            upgradeLabel.text = upgradeDescription
+            upgradeStackView.isHidden = false
+            setupChipView()
+        } else if let detailDescription = right.detailDescription {
+            detailLabel.text = detailDescription
+            detailLabel.isHidden = false
+        }
+
         if disable {
             disableCell()
             if type == .shareLinkSettings {
@@ -80,6 +104,24 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         if right.key == UserPermission.delete.rawValue {
             rightsIconImageView.tintColor = KDriveResourcesAsset.binColor.color
         }
+    }
+
+    func setupChipView() {
+        let chip = KSuiteProChipController()
+        guard let chipView = chip.view else {
+            return
+        }
+
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+        chipContainerView.isHidden = false
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
     }
 
     func disableCell() {
