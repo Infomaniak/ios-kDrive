@@ -372,11 +372,9 @@ extension HomeViewController {
                     if driveFileManager.drive.pack.drivePackId == .myKSuite {
                         appRouter.presentUpSaleSheet()
                         matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
-                    } else if driveFileManager.drive.pack.kSuiteProUpgradePath != nil {
+                    } else if driveFileManager.drive.pack.drivePackId == .kSuiteEssential {
                         appRouter.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
                         matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "notEnoughStorageUpgrade")
-                    } else {
-                        UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
                     }
                 }
                 cell.closeHandler = { [weak self] _ in
