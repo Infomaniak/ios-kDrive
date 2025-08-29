@@ -1,2 +1,3 @@
+- Fix quick actions on iPad
 - Deeplinks refactor
 - Stability improvements and bug fixes
