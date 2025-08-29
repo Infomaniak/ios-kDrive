@@ -154,15 +154,17 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return
         }
 
-        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
+        guard let rootViewController = window?.rootViewController as? UISplitViewController else {
+            return
+        }
+
+        guard let viewController = appNavigable.getCurrentController(tabBarViewController: rootViewController) else {
             return
         }
 
         rootViewController.dismiss(animated: false)
 
-        guard let navController = rootViewController.selectedViewController as? UINavigationController,
-              let viewController = navController.topViewController,
-              let driveFileManager = accountManager.currentDriveFileManager else {
+        guard let driveFileManager = accountManager.currentDriveFileManager else {
             return
         }
 
