@@ -38,6 +38,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var uploadObservation: UploadObservable
 
+    private var mediaHelper: OpenMediaHelper?
     var shortcutItemToProcess: UIApplicationShortcutItem?
 
     var window: UIWindow?
@@ -150,19 +151,23 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func sceneDidBecomeActive(_ scene: UIScene) {
         Log.sceneDelegate("sceneDidBecomeActive \(scene)")
+        mediaHelper = nil
+
         guard let shortcutItem = shortcutItemToProcess else {
             return
         }
 
-        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
+        guard let rootViewController = window?.rootViewController as? UISplitViewController else {
+            return
+        }
+
+        guard let viewController = appNavigable.getCurrentController(tabBarViewController: rootViewController) else {
             return
         }
 
         rootViewController.dismiss(animated: false)
 
-        guard let navController = rootViewController.selectedViewController as? UINavigationController,
-              let viewController = navController.topViewController,
-              let driveFileManager = accountManager.currentDriveFileManager else {
+        guard let driveFileManager = accountManager.currentDriveFileManager else {
             return
         }
 
@@ -170,6 +175,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         case Constants.applicationShortcutScan:
             let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
             openMediaHelper.openScan(rootViewController, false)
+            mediaHelper = openMediaHelper
             matomo.track(eventWithCategory: .shortcuts, name: "scan")
         case Constants.applicationShortcutSearch:
             let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
@@ -180,7 +186,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             matomo.track(eventWithCategory: .shortcuts, name: "search")
         case Constants.applicationShortcutUpload:
             let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
-            openMediaHelper.openMedia(rootViewController, .library)
+            openMediaHelper.openMedia(viewController, .library)
+            mediaHelper = openMediaHelper
             matomo.track(eventWithCategory: .shortcuts, name: "upload")
         case Constants.applicationShortcutSupport:
             UIApplication.shared.open(URLConstants.support.url)

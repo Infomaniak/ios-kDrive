@@ -100,16 +100,22 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
 
 extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        picker.dismiss(animated: true)
+        picker.dismiss(animated: true) {
+            guard !results.isEmpty else {
+                return
+            }
 
-        if !results.isEmpty {
             let saveNavigationViewController = SaveFileViewController
-                .instantiateInNavigationController(driveFileManager: driveFileManager)
+                .instantiateInNavigationController(driveFileManager: self.driveFileManager)
             if let saveViewController = saveNavigationViewController.viewControllers.first as? SaveFileViewController {
                 saveViewController.assetIdentifiers = results.compactMap(\.assetIdentifier)
-                saveViewController.selectedDirectory = currentDirectory
-                viewController?.present(saveNavigationViewController, animated: true)
+                saveViewController.selectedDirectory = self.currentDirectory
+                self.viewController?.present(saveNavigationViewController, animated: true)
             }
         }
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
     }
 }
