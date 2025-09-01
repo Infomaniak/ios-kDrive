@@ -1,5 +1,5 @@
 {
-  "originHash" : "9493b2959506a778ec8a75246a6f5af919ae83083e719a08e29668fafe16dbf7",
+  "originHash" : "559895cd3c6549642d4416178a5de6f142519d37554c00c628556f7a1154c86c",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-bug-tracker",
       "state" : {
-        "revision" : "daff2b849a5a60b993658268ab8d5bdf37d53499",
-        "version" : "14.0.0"
+        "revision" : "b3a43cbccd2e3387da5771e72671fca3c356571a",
+        "version" : "15.0.0"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "f30394a548b36cdb2ee0ad67bf70cdaf0529294b",
-        "version" : "21.0.0"
+        "revision" : "e4192ab70e0d776d0a48dad56e63bb9536d41f75",
+        "version" : "22.1.0"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "revision" : "34ee58d08004174f1ab23fc151bbb134dcd81091",
-        "version" : "4.0.0"
+        "revision" : "29c263fd2bdb0059f74f904c3c6b2d3a5c71a6e3",
+        "version" : "6.0.1"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "6f85d884b112259b1b790b6bdf27267bffd908c3",
-        "version" : "13.0.0"
+        "revision" : "b5a3b8f1119a84faebb1a876dd8b3ab3d271bb80",
+        "version" : "14.0.0"
       }
     },
     {
@@ -195,8 +195,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/airbnb/lottie-spm.git",
       "state" : {
-        "revision" : "1d29eccc24cc8b75bff9f6804155112c0ffc9605",
-        "version" : "4.4.3"
+        "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
+        "version" : "4.5.2"
       }
     },
     {
