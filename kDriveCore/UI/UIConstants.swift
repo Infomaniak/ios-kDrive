@@ -138,7 +138,7 @@ public extension UIConstants {
             guard let driveError = error as? DriveError,
                   driveError == DriveError.errorDeviceStorage,
                   let currentDriveFileManager = accountManager.currentDriveFileManager,
-                  currentDriveFileManager.drive.pack.kSuiteProUpgradePath != nil else {
+                  currentDriveFileManager.drive.pack.drivePackId == .kSuiteEssential else {
                 UIConstants.showSnackBar(message: error.localizedDescription)
                 return
             }
