@@ -37,6 +37,10 @@ public enum MainTabBarIndex: Int {
 class RootSplitViewController: UISplitViewController, SidebarViewControllerDelegate {
     let driveFileManager: DriveFileManager
 
+    var mainTabViewController: MainTabViewController? {
+        viewControllers.first { $0 is MainTabViewController } as? MainTabViewController
+    }
+
     init(driveFileManager: DriveFileManager, selectedIndex: Int? = nil) {
         self.driveFileManager = driveFileManager
         super.init(style: .doubleColumn)

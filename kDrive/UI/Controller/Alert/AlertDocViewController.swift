@@ -114,7 +114,8 @@ class AlertDocViewController: AlertFieldViewController {
             let currentRootViewController = self.view.window?.rootViewController
             self.dismiss(animated: true) {
                 if let file,
-                   let mainTabViewController = currentRootViewController as? MainTabViewController {
+                   let rootViewController = currentRootViewController as? RootSplitViewController,
+                   let mainTabViewController = rootViewController.mainTabViewController {
                     OnlyOfficeViewController.open(
                         driveFileManager: self.driveFileManager,
                         file: file,
