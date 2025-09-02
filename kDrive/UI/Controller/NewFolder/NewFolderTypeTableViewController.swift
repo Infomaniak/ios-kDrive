@@ -106,7 +106,7 @@ class NewFolderTypeTableViewController: UITableViewController {
         case .dropbox:
             let drive = driveFileManager.drive
             let title: String
-            if drive.pack.isKSuiteProGalaxy {
+            if drive.pack.isAnyKSuiteProOffer {
                 title = KDriveResourcesStrings.Localizable.dropBoxTitle
                     + " "
                     + drive.dropboxQuotaFormatted
