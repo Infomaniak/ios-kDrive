@@ -64,7 +64,7 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
             upgradeButton.isHidden = true
         }
 
-        guard drive.pack.isKSuiteProGalaxy else { return }
+        guard drive.pack.isAnyKSuiteProOffer else { return }
         configureKSuiteCell(drive: drive)
     }
 

@@ -272,7 +272,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if driveFileManager.drive.pack.isKSuiteProGalaxy,
+        if driveFileManager.drive.pack.isAnyKSuiteProOffer,
            driveFileManager.drive.sharedLinkQuotaExceeded,
            indexPath.row == 1 {
             if driveFileManager.drive.pack.kSuiteProUpgradePath != nil {
