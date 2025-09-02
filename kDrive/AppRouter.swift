@@ -621,8 +621,8 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func presentUpSaleSheet() {
-        let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
-        nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
+        let myKSuiteViewController = MyKSuiteBridgeViewController.instantiate()
+        nativeLargeSheetPresentation(viewControllerToPresent: myKSuiteViewController)
     }
 
     @MainActor public func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager) {
@@ -632,19 +632,18 @@ public struct AppRouter: AppNavigable {
         }
 
         let isAdmin = driveFileManager.drive.accountAdmin
-        let viewControllerToPresent = KSuiteViewController(configuration: configuration, isAdmin: isAdmin)
-        nativeLargeSheetPresentation(viewControllerToPresent: viewControllerToPresent, customOffset: 560)
+        let kSuiteProViewController = KSuiteBridgeViewController.instantiate(configuration: configuration, isAdmin: isAdmin)
+        nativeLargeSheetPresentation(viewControllerToPresent: kSuiteProViewController)
     }
 
-    @MainActor private func nativeLargeSheetPresentation(viewControllerToPresent: UIViewController, customOffset: CGFloat) {
+    @MainActor private func nativeLargeSheetPresentation(viewControllerToPresent: UIViewController) {
         guard let window,
               let rootViewController = window.rootViewController else {
             return
         }
 
         rootViewController.dismiss(animated: true) {
-            let myKSuiteViewController = MyKSuiteBridgeViewController.instantiate()
-            let selfSizingViewController = SelfSizingPanelViewController(contentViewController: myKSuiteViewController)
+            let selfSizingViewController = SelfSizingPanelViewController(contentViewController: viewControllerToPresent)
             rootViewController.present(selfSizingViewController, animated: true)
         }
     }
