@@ -22,18 +22,11 @@ import KSuite
 import SwiftUI
 import UIKit
 
-class KSuiteViewController: GenericHostingViewController<KSuiteView> {
-    let configuration: KSuiteConfiguration
-    let isAdmin: Bool
+enum KSuiteBridgeViewController {
+    static func instantiate(configuration: KSuiteConfiguration, isAdmin: Bool) -> UIViewController {
+        let swiftUIView = KSuiteView(configuration: configuration, isAdmin: isAdmin)
+            .fixedSize(horizontal: false, vertical: true)
 
-    init(configuration: KSuiteConfiguration, isAdmin: Bool) {
-        self.configuration = configuration
-        self.isAdmin = isAdmin
-        super.init(contentView: KSuiteView(configuration: configuration, isAdmin: isAdmin))
-    }
-
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        return UIHostingController(rootView: swiftUIView)
     }
 }
