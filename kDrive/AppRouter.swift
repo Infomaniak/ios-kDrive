@@ -626,25 +626,9 @@ public struct AppRouter: AppNavigable {
         }
 
         rootViewController.dismiss(animated: true) {
-            let viewControllerToPresent = MyKSuiteBridgeViewController.instantiate()
-            if let sheet = viewControllerToPresent.sheetPresentationController {
-                if #available(iOS 16.0, *) {
-                    sheet.detents = [
-                        .custom { _ in
-                            return 560
-                        }
-                    ]
-                } else {
-                    sheet.detents = [.large()]
-                    sheet.largestUndimmedDetentIdentifier = .large
-                }
-
-                sheet.prefersScrollingExpandsWhenScrolledToEdge = false
-                sheet.prefersEdgeAttachedInCompactHeight = true
-                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
-                sheet.prefersGrabberVisible = true
-            }
-            rootViewController.present(viewControllerToPresent, animated: true)
+            let myKSuiteViewController = MyKSuiteBridgeViewController.instantiate()
+            let selfSizingViewController = SelfSizingPanelViewController(contentViewController: myKSuiteViewController)
+            rootViewController.present(selfSizingViewController, animated: true)
         }
     }
 

@@ -26,6 +26,8 @@ import UIKit
 enum MyKSuiteBridgeViewController {
     static func instantiate() -> UIViewController {
         let swiftUIView = MyKSuiteView(configuration: .kDrive)
-        return UIHostingController(rootView: ScrollView { swiftUIView })
+            .fixedSize(horizontal: false, vertical: true)
+
+        return UIHostingController(rootView: swiftUIView)
     }
 }
