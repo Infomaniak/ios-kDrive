@@ -22,39 +22,14 @@ import KSuite
 import SwiftUI
 import UIKit
 
-class GenericHostingViewController<Content: View>: UIViewController {
-    private let contentView: Content
-
+class GenericHostingViewController<Content: View>: UIHostingController<Content> {
     init(contentView: Content) {
-        self.contentView = contentView
-        super.init(nibName: nil, bundle: nil)
+        super.init(rootView: contentView)
+        view.backgroundColor = .clear
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setupHostingController()
-    }
-
-    private func setupHostingController() {
-        let hostingController = UIHostingController(rootView: contentView)
-        hostingController.view.backgroundColor = .clear
-
-        addChild(hostingController)
-        view.addSubview(hostingController.view)
-
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
-
-        hostingController.didMove(toParent: self)
     }
 }
