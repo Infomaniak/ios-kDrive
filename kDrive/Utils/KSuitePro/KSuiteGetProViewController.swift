@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DesignSystem
 import kDriveCore
 import kDriveResources
 import KSuite
@@ -30,5 +31,39 @@ class KSuiteGetProViewController: GenericHostingViewController<KSuiteGetProView>
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class KSuiteGetProViewCell: UITableViewCell {
+    static let reuseIdentifier = "KSuiteGetProViewCell"
+
+    private let customView = KSuiteGetProViewController().view!
+
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setup()
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setup() {
+        selectionStyle = .none
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        contentView.addSubview(customView)
+
+        customView.translatesAutoresizingMaskIntoConstraints = false
+        customView.backgroundColor = .clear
+
+        NSLayoutConstraint.activate([
+            customView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: -IKPadding.mini),
+            customView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            customView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: IKPadding.large),
+            customView.trailingAnchor.constraint(greaterThanOrEqualTo: contentView.trailingAnchor, constant: -IKPadding.large),
+            customView.heightAnchor.constraint(greaterThanOrEqualToConstant: 112)
+        ])
     }
 }
