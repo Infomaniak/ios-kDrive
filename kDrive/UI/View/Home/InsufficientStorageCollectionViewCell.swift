@@ -19,12 +19,14 @@
 import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
+import KSuite
 import UIKit
 
 class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
     @IBOutlet var progressView: RPCircularProgress!
     @IBOutlet var storageLabel: UILabel!
     @IBOutlet var storageDescription: UILabel!
+    @IBOutlet var upgradeLabel: UILabel!
     @IBOutlet var upgradeButton: UIButton!
 
     var actionHandler: ((UIButton) -> Void)?
@@ -32,12 +34,22 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        upgradeButton.isHidden = true
+        upgradeLabel.isHidden = true
+
         progressView.setInfomaniakStyle()
         progressView.progressTintColor = KDriveResourcesAsset.binColor.color
     }
 
-    func configureCell(with drive: Drive) {
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        storageDescription.text = nil
+        upgradeButton.isHidden = true
+        upgradeLabel.isHidden = true
+    }
+
+    func configureCell(with driveFileManager: DriveFileManager) {
+        let drive = driveFileManager.drive
         progressView.updateProgress(CGFloat(drive.usedSize) / CGFloat(drive.size))
 
         storageLabel
@@ -49,6 +61,20 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
             upgradeButton.isHidden = false
         } else {
             storageDescription.text = KDriveResourcesStrings.Localizable.notEnoughStorageDescription2
+            upgradeButton.isHidden = true
+        }
+
+        guard drive.pack.isAnyKSuiteProOffer else { return }
+        configureKSuiteCell(drive: drive)
+    }
+
+    func configureKSuiteCell(drive: Drive) {
+        if drive.pack.drivePackId == .kSuiteEssential {
+            upgradeButton.isHidden = false
+            upgradeLabel.isHidden = true
+        } else {
+            upgradeLabel.text = KSuiteLocalizable.kSuiteUpgradeDetails
+            upgradeLabel.isHidden = false
             upgradeButton.isHidden = true
         }
     }

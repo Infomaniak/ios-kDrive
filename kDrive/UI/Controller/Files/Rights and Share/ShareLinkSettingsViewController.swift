@@ -71,13 +71,12 @@ class ShareLinkSettingsViewController: UIViewController {
         }
 
         func isEnabled(drive: Drive) -> Bool {
-            if self == .optionDate && drive.isFreePack {
+            let allowedOptions = (self == .optionDate || self == .optionPassword)
+            if allowedOptions && drive.isFreePack {
                 return false
-            } else if self == .optionPassword && drive.isFreePack {
-                return false
-            } else {
-                return true
             }
+
+            return true
         }
     }
 
@@ -252,17 +251,6 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             isFolder: file.isDirectory
         )
 
-        if !option.isEnabled(drive: driveFileManager.drive) {
-            cell.actionHandler = { [weak self] _ in
-                self?.router.presentUpSaleSheet()
-                if option == .optionPassword {
-                    self?.matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkPassword")
-                } else if option == .optionDate {
-                    self?.matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkExpiryDate")
-                }
-            }
-        }
-
         return cell
     }
 
@@ -285,6 +273,10 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard !handleUpsaleAction(didSelectRowAt: indexPath) else {
+            return
+        }
+
         if indexPath.row == 0 && (file.isOfficeFile || file.isDirectory) {
             let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(
                 file: file,
@@ -298,6 +290,36 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
             }
             present(rightsSelectionViewController, animated: true)
         }
+    }
+
+    private func handleUpsaleAction(didSelectRowAt indexPath: IndexPath) -> Bool {
+        guard let cell = tableView.cellForRow(at: indexPath) as? ShareLinkSettingTableViewCell,
+              let option = cell.option,
+              !option.isEnabled(drive: driveFileManager.drive) else {
+            return false
+        }
+
+        if driveFileManager.drive.pack.drivePackId == .kSuiteEssential {
+            router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+
+            if indexPath.row == optionsRows.firstIndex(of: .optionDate) {
+                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkExpiryDate")
+            } else if indexPath.row == optionsRows.firstIndex(of: .optionPassword) {
+                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkPassword")
+            }
+            return true
+        } else if driveFileManager.drive.isFreePack {
+            router.presentUpSaleSheet()
+
+            if indexPath.row == optionsRows.firstIndex(of: .optionDate) {
+                matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkExpiryDate")
+            } else if indexPath.row == optionsRows.firstIndex(of: .optionPassword) {
+                matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkPassword")
+            }
+            return true
+        }
+
+        return false
     }
 }
 

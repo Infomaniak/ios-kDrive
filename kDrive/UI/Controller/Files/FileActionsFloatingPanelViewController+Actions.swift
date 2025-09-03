@@ -92,11 +92,18 @@ extension FileActionsFloatingPanelViewController {
                 case .favorite:
                     return frozenFile.capabilities.canUseFavorite
                 case .convertToDropbox:
+                    let isEnterprise = driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise
+                    let quotaExceeded = driveFileManager.drive.dropboxQuotaExceeded
+                    guard !(isEnterprise && quotaExceeded) else {
+                        return false
+                    }
                     return frozenFile.capabilities.canBecomeDropbox
                 case .manageDropbox:
                     return frozenFile.isDropbox
                 case .upsaleColor:
-                    return frozenFile.isDirectory && driveFileManager.drive.isFreePack
+                    return frozenFile.isDirectory
+                        && driveFileManager.drive.isFreePack
+                        && !driveFileManager.drive.pack.isAnyKSuiteProOffer
                 case .folderColor:
                     return frozenFile.capabilities.canColor
                 case .seeFolder:
@@ -312,9 +319,14 @@ extension FileActionsFloatingPanelViewController {
             return
         }
 
-        if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
+        let drive = driveFileManager.drive
+        if packId == .myKSuite, drive.dropboxQuotaExceeded {
             router.presentUpSaleSheet()
             matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
+            return
+        } else if drive.pack.kSuiteProUpgradePath != nil, drive.dropboxQuotaExceeded {
+            router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+            matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             return
         }
 

@@ -16,16 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FloatingPanel
 import kDriveCore
 import kDriveResources
-import MyKSuite
+import KSuite
 import SwiftUI
 import UIKit
 
-enum MyKSuiteBridgeViewController {
-    static func instantiate() -> UIViewController {
-        let swiftUIView = MyKSuiteView(configuration: .kDrive)
+enum KSuiteBridgeViewController {
+    static func instantiate(configuration: KSuiteConfiguration, isAdmin: Bool) -> UIViewController {
+        let swiftUIView = KSuiteView(configuration: configuration, isAdmin: isAdmin)
         return UIHostingController(rootView: swiftUIView)
     }
 }

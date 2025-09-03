@@ -13,14 +13,14 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="InsufficientStorageCollectionViewCell" id="gTV-IL-0wX" customClass="InsufficientStorageCollectionViewCell" customModule="kDrive" customModuleProvider="target">
-            <rect key="frame" x="0.0" y="0.0" width="344" height="195"/>
+            <rect key="frame" x="0.0" y="0.0" width="344" height="273"/>
             <autoresizingMask key="autoresizingMask"/>
             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                <rect key="frame" x="0.0" y="0.0" width="344" height="195"/>
+                <rect key="frame" x="0.0" y="0.0" width="344" height="273"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="IaI-wJ-wCn">
-                        <rect key="frame" x="24" y="0.0" width="296" height="195"/>
+                        <rect key="frame" x="24" y="0.0" width="296" height="273"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3jU-IF-jGA" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
                                 <rect key="frame" x="24" y="24" width="28" height="28"/>
@@ -50,12 +50,12 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="idg-4N-q2p">
-                                <rect key="frame" x="24" y="60" width="248" height="119"/>
+                                <rect key="frame" x="24" y="60" width="248" height="197"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L’espace de stockage de votre kDrive est presque plein. Faites évoluer votre offre et débloquez de nouvelles fonctionnalités." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vnE-yx-RHy" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="0.0" y="0.0" width="248" height="67"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <color key="textColor" name="primaryTextColor"/>
+                                        <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notEnoughStorageDescription1"/>
@@ -63,7 +63,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2qe-le-aiX" customClass="IKButton" customModule="kDriveCore">
-                                        <rect key="frame" x="0.0" y="75" width="149" height="44"/>
+                                        <rect key="frame" x="0.0" y="75" width="149" height="97"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <state key="normal" title="Faire évoluer mon offre">
                                             <color key="titleColor" name="infomaniakColor"/>
@@ -79,6 +79,16 @@
                                             <action selector="upgradeButtonPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="dLJ-AV-2Pa"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="contactez votre admin" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1l1-Gq-3en" userLabel="Upgrade label" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
+                                        <rect key="frame" x="0.0" y="180" width="144.5" height="17"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <color key="textColor" name="primaryTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notEnoughStorageDescription1"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
+                                        </userDefinedRuntimeAttributes>
+                                    </label>
                                 </subviews>
                             </stackView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a7j-pf-fSH">
@@ -119,7 +129,7 @@
                 <constraint firstItem="IaI-wJ-wCn" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="c6M-7V-XAH"/>
                 <constraint firstAttribute="trailing" secondItem="IaI-wJ-wCn" secondAttribute="trailing" constant="24" id="rej-SB-3lB"/>
             </constraints>
-            <size key="customSize" width="344" height="195"/>
+            <size key="customSize" width="344" height="273"/>
             <connections>
                 <outlet property="bottomConstraint" destination="1FO-sF-L4f" id="kKp-8u-Vro"/>
                 <outlet property="contentInsetView" destination="IaI-wJ-wCn" id="gp7-Ah-TbV"/>
@@ -128,8 +138,9 @@
                 <outlet property="storageLabel" destination="gsM-Ac-mz2" id="q83-Sz-yBw"/>
                 <outlet property="topConstraint" destination="c6M-7V-XAH" id="eFn-Tn-JcJ"/>
                 <outlet property="upgradeButton" destination="2qe-le-aiX" id="bKH-nw-6nb"/>
+                <outlet property="upgradeLabel" destination="1l1-Gq-3en" id="yLq-98-YWh"/>
             </connections>
-            <point key="canvasLocation" x="350.72463768115944" y="140.29017857142856"/>
+            <point key="canvasLocation" x="350.72463768115944" y="165.73660714285714"/>
         </collectionViewCell>
     </objects>
     <resources>
@@ -138,7 +149,7 @@
             <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
             <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

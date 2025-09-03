@@ -16,16 +16,19 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FloatingPanel
 import kDriveCore
 import kDriveResources
-import MyKSuite
+import KSuite
 import SwiftUI
 import UIKit
 
-enum MyKSuiteBridgeViewController {
-    static func instantiate() -> UIViewController {
-        let swiftUIView = MyKSuiteView(configuration: .kDrive)
-        return UIHostingController(rootView: swiftUIView)
+class KSuiteProChipController: GenericHostingViewController<KSuiteProUpgradeChip> {
+    init() {
+        super.init(contentView: KSuiteProUpgradeChip())
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

@@ -25,6 +25,7 @@ import InfomaniakLogin
 import InfomaniakOnboarding
 import kDriveCore
 import kDriveResources
+import KSuite
 import MyKSuite
 import SafariServices
 import SwiftUI
@@ -620,14 +621,29 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func presentUpSaleSheet() {
+        let myKSuiteViewController = MyKSuiteBridgeViewController.instantiate()
+        nativeLargeSheetPresentation(viewControllerToPresent: myKSuiteViewController)
+    }
+
+    @MainActor public func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager) {
+        guard let configuration = driveFileManager.drive.pack.kSuiteProUpgradePath else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            return
+        }
+
+        let isAdmin = driveFileManager.drive.accountAdmin
+        let kSuiteProViewController = KSuiteBridgeViewController.instantiate(configuration: configuration, isAdmin: isAdmin)
+        nativeLargeSheetPresentation(viewControllerToPresent: kSuiteProViewController)
+    }
+
+    @MainActor private func nativeLargeSheetPresentation(viewControllerToPresent: UIViewController) {
         guard let window,
               let rootViewController = window.rootViewController else {
             return
         }
 
         rootViewController.dismiss(animated: true) {
-            let myKSuiteViewController = MyKSuiteBridgeViewController.instantiate()
-            let selfSizingViewController = SelfSizingPanelViewController(contentViewController: myKSuiteViewController)
+            let selfSizingViewController = SelfSizingPanelViewController(contentViewController: viewControllerToPresent)
             rootViewController.present(selfSizingViewController, animated: true)
         }
     }
