@@ -1,3 +1,2 @@
-- Correction des actions rapides sur iPad
-- Changements relatifs aux Deeplinks
+- Support kSuite
 - Améliorations de la stabilité et corrections de bugs

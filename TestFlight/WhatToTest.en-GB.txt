@@ -1,3 +1,2 @@
-- Fix quick actions on iPad
-- Deeplinks refactor
+- kSuite Support
 - Stability improvements and bug fixes
