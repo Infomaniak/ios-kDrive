@@ -101,7 +101,9 @@ extension FileActionsFloatingPanelViewController {
                 case .manageDropbox:
                     return frozenFile.isDropbox
                 case .upsaleColor:
-                    return frozenFile.isDirectory && driveFileManager.drive.isFreePack
+                    return frozenFile.isDirectory
+                        && driveFileManager.drive.isFreePack
+                        && !driveFileManager.drive.pack.isAnyKSuiteProOffer
                 case .folderColor:
                     return frozenFile.capabilities.canColor
                 case .seeFolder:

@@ -107,7 +107,9 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             switch action {
             case .upsaleColor:
                 return files.allSatisfy { file in
-                    file.isDirectory && self.driveFileManager.drive.isFreePack
+                    file.isDirectory
+                        && self.driveFileManager.drive.isFreePack
+                        && !self.driveFileManager.drive.pack.isAnyKSuiteProOffer
                 }
             case .folderColor:
                 return files.allSatisfy(\.capabilities.canColor)

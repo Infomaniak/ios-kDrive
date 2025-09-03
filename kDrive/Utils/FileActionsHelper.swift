@@ -504,7 +504,7 @@ public final class FileActionsHelper {
                                    presentingParent: UIViewController?, group: DispatchGroup? = nil,
                                    completion: @escaping (Bool) -> Void) {
         group?.enter()
-        guard !driveFileManager.drive.isFreePack else {
+        guard !(driveFileManager.drive.isFreePack && !driveFileManager.drive.pack.isAnyKSuiteProOffer) else {
             upsaleFolderColor()
             return
         }
