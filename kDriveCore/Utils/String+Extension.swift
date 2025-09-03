@@ -26,4 +26,9 @@ public extension String {
     func addingExtension(_ ext: String) -> String {
         return hasSuffix(".\(ext)") ? self : "\(self).\(ext)"
     }
+
+    var capitalizingFirstLetterOnly: String {
+        guard let first = first else { return self }
+        return first.uppercased() + dropFirst().lowercased()
+    }
 }

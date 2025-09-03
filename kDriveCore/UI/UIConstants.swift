@@ -143,7 +143,8 @@ public extension UIConstants {
                 return
             }
 
-            let upgradeAction = IKSnackBar.Action(title: KSuiteLocalizable.kSuiteUpgradeButton) {
+            let title = KSuiteLocalizable.kSuiteUpgradeButton.capitalizingFirstLetterOnly
+            let upgradeAction = IKSnackBar.Action(title: title) {
                 @InjectService var router: AppNavigable
                 router.presentKDriveProUpSaleSheet(driveFileManager: currentDriveFileManager)
             }
