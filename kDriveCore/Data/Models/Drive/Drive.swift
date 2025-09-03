@@ -175,7 +175,7 @@ public final class Drive: Object, Codable {
     }
 
     public var isFreePack: Bool {
-        return pack.drivePackId == .free || pack.drivePackId == .myKSuite
+        return pack.drivePackId == .free || pack.drivePackId == .myKSuite || pack.drivePackId == .kSuiteEssential
     }
 
     public var isInTechnicalMaintenance: Bool {
