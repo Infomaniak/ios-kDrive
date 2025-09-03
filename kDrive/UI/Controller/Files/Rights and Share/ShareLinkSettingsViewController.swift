@@ -72,9 +72,7 @@ class ShareLinkSettingsViewController: UIViewController {
 
         func isEnabled(drive: Drive) -> Bool {
             let allowedOptions = (self == .optionDate || self == .optionPassword)
-            if allowedOptions && drive.pack.drivePackId == .kSuiteEssential {
-                return false
-            } else if allowedOptions && drive.isFreePack {
+            if allowedOptions && drive.isFreePack {
                 return false
             }
 
