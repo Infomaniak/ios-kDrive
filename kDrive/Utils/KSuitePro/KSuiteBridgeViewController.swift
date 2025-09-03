@@ -25,8 +25,6 @@ import UIKit
 enum KSuiteBridgeViewController {
     static func instantiate(configuration: KSuiteConfiguration, isAdmin: Bool) -> UIViewController {
         let swiftUIView = KSuiteView(configuration: configuration, isAdmin: isAdmin)
-            .fixedSize(horizontal: false, vertical: true)
-
         return UIHostingController(rootView: swiftUIView)
     }
 }
