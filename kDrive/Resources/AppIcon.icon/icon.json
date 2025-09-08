@@ -21,7 +21,7 @@
           ],
           "image-name-specializations" : [
             {
-              "value" : "4 – Layer 2.svg"
+              "value" : "4 – Layer.svg"
             },
             {
               "idiom" : "square",
@@ -103,6 +103,9 @@
     }
   ],
   "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
     "squares" : "shared"
   }
 }
