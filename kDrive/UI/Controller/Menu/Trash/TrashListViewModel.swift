@@ -181,19 +181,30 @@ class TrashListViewModel: InMemoryFileListViewModel {
         do {
             try await restoredFiles.concurrentForEach(customConcurrency: Constants.networkParallelism) { file in
                 _ = try await self.driveFileManager.apiFetcher.restore(file: file, in: directory)
-                // We don't have an alert for moving multiple files, snackbar is spammed until end
-                if let directoryName {
-                    await UIConstants
-                        .showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(
-                            firstFilename,
-                            directoryName
-                        ))
+            }
 
-                } else {
-                    await UIConstants
+            let restoredFilesCount = restoredFiles.count
+            if restoredFilesCount > 1 {
+                guard let directoryName else {
+                    UIConstants
                         .showSnackBar(message: KDriveResourcesStrings.Localizable
-                            .trashedFileRestoreFileToOriginalPlaceSuccess(firstFilename))
+                            .trashedFileRestoreFileToOriginalPlaceSuccessPlural(restoredFilesCount))
+                    return
                 }
+
+                UIConstants
+                    .showSnackBar(message: KDriveResourcesStrings.Localizable
+                        .trashedFileRestoreFileInSuccessPlural(restoredFilesCount, directoryName))
+            } else if let directoryName {
+                UIConstants
+                    .showSnackBar(message: KDriveResourcesStrings.Localizable.trashedFileRestoreFileInSuccess(
+                        firstFilename,
+                        directoryName
+                    ))
+            } else {
+                UIConstants
+                    .showSnackBar(message: KDriveResourcesStrings.Localizable
+                        .trashedFileRestoreFileToOriginalPlaceSuccess(firstFilename))
             }
 
         } catch {
