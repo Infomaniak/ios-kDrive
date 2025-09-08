@@ -530,7 +530,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func handleOfficePreviewError(_ error: Error, previewIndex: Int) {
-        let frozenFile = previewFiles[previewIndex].freeze()
+        let frozenFile = previewFiles[previewIndex].freezeIfNeeded()
         let previewError = OfficePreviewError(fileId: frozenFile.id, pdfGenerationProgress: Progress(totalUnitCount: 10))
 
         PdfPreviewCache.shared.retrievePdf(forSafeFile: frozenFile, driveFileManager: driveFileManager) { downloadTask in
