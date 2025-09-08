@@ -5,8 +5,8 @@
  Project: kDrive
  Locale: fr, French
  Tagged: ios-stringsdict
- Exported by: Valentin Perignon
- Exported at: Wed, 20 Aug 2025 13:14:10 +0200
+ Exported by: Adrien Coye
+ Exported at: Mon, 08 Sep 2025 11:23:55 +0200
 -->
 <plist version="1.0">
   <dict>
@@ -355,11 +355,11 @@
         <key>NSStringFormatSpecTypeKey</key>
         <string>NSStringPluralRuleType</string>
         <key>NSStringFormatValueTypeKey</key>
-        <string>@</string>
+        <string>d</string>
         <key>one</key>
         <string>Un élément supprimé définitivement</string>
         <key>other</key>
-        <string>%@ éléments supprimés définitivement</string>
+        <string>%d éléments supprimés définitivement</string>
       </dict>
     </dict>
     <key>uploadImportedOtherAmount</key>
