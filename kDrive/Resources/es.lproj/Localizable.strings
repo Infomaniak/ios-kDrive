@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Matthieu Déglon
- * Exported at: Tue, 26 Aug 2025 10:44:09 +0200
+ * Exported by: Adrien Coye
+ * Exported at: Mon, 08 Sep 2025 15:02:21 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -771,6 +771,9 @@
 
 /* loco:616d68dab3af9f17301c15d4 */
 "errorDownloadPermission" = "Debe añadir al menos un archivo que tiene permiso para descargar";
+
+/* loco:68bed25fc40a03885b0cd043 */
+"errorDropboxLimitExceeded" = "Has alcanzado el límite del buzón de entrega.";
 
 /* loco:6049df4d5c2c3a04bc397999 */
 "errorDuplicate" = "Error al duplicar";
