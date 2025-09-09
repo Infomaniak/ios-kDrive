@@ -11,7 +11,7 @@
             {
               "appearance" : "dark",
               "value" : {
-                "solid" : "srgb:0.36070,0.53727,0.96861,1.00000"
+                "solid" : "srgb:0.36078,0.53725,0.96863,1.00000"
               }
             },
             {
@@ -35,10 +35,11 @@
             {
               "appearance" : "dark",
               "value" : {
-                "solid" : "srgb:0.20383,0.35296,0.75685,1.00000"
+                "solid" : "srgb:0.16863,0.29020,0.61961,1.00000"
               }
             }
           ],
+          "hidden" : false,
           "image-name-specializations" : [
             {
               "value" : "3 – Layer.svg"
@@ -55,10 +56,11 @@
             {
               "appearance" : "dark",
               "value" : {
-                "solid" : "srgb:0.36070,0.53727,0.96861,0.70000"
+                "solid" : "srgb:0.36070,0.53727,0.96861,0.60000"
               }
             }
           ],
+          "hidden" : false,
           "image-name-specializations" : [
             {
               "value" : "2 – Layer.svg"
@@ -79,6 +81,7 @@
               }
             }
           ],
+          "hidden" : false,
           "image-name-specializations" : [
             {
               "value" : "1 – Layer.svg"
@@ -98,14 +101,11 @@
       },
       "translucency" : {
         "enabled" : true,
-        "value" : 0.5
+        "value" : 0.4
       }
     }
   ],
   "supported-platforms" : {
-    "circles" : [
-      "watchOS"
-    ],
     "squares" : "shared"
   }
 }
