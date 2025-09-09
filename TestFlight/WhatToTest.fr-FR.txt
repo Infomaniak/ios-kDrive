@@ -1,2 +1,3 @@
 - Support kSuite
+- Correction d'un crash en lien avec la corbeille
 - Améliorations de la stabilité et corrections de bugs
