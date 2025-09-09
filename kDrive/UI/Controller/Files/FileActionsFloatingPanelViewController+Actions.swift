@@ -92,11 +92,6 @@ extension FileActionsFloatingPanelViewController {
                 case .favorite:
                     return frozenFile.capabilities.canUseFavorite
                 case .convertToDropbox:
-                    let isEnterprise = driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise
-                    let quotaExceeded = driveFileManager.drive.dropboxQuotaExceeded
-                    guard !(isEnterprise && quotaExceeded) else {
-                        return false
-                    }
                     return frozenFile.capabilities.canBecomeDropbox
                 case .manageDropbox:
                     return frozenFile.isDropbox
@@ -302,6 +297,13 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func convertToDropboxAction() {
+        let isEnterprise = driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise
+        let quotaExceeded = driveFileManager.drive.dropboxQuotaExceeded
+        guard !(isEnterprise && quotaExceeded) else {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDropboxLimitExceeded)
+            return
+        }
+
         @InjectService var matomo: MatomoUtils
         guard frozenFile.capabilities.canBecomeDropbox else {
             let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
