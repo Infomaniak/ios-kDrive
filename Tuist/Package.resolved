@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "faad61d6f227531f8fa97ed49ef5732f7eee55d2",
-        "version" : "1.30.0"
+        "revision" : "aae8dd0f3722c75d526f09fbb709bd1081d402db",
+        "version" : "1.30.1"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "revision" : "15adc4415e42459c1e503f568e9e5aea159ecdcc",
-        "version" : "6.0.2"
+        "revision" : "92aab54d6082b61b0e080ff04dc0a74251af35f5",
+        "version" : "6.0.3"
       }
     },
     {
@@ -141,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login",
       "state" : {
-        "revision" : "96cdc1803a52ae39c8301034d5c4917b63e6181d",
-        "version" : "7.3.0"
+        "revision" : "36d1c1886880695c735711c9e9226b07394e6035",
+        "version" : "7.3.1"
       }
     },
     {
@@ -276,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "3c2eee7773df58bdfb9e10e72d9a4be44253e0d9",
-        "version" : "8.55.0"
+        "revision" : "2c70925b98238b7efacde11d30075328c3cb6a2a",
+        "version" : "8.55.1"
       }
     },
     {
