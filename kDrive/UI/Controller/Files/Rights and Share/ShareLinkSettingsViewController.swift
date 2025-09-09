@@ -360,7 +360,7 @@ extension ShareLinkSettingsViewController: ShareLinkSettingsDelegate {
 extension ShareLinkSettingsViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         editRightValue = value
-        updateButton()
+        tableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
     }
 }
 
