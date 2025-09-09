@@ -1,2 +1,3 @@
 - kSuite Support
+- Fix a crash related to trash restoration
 - Stability improvements and bug fixes
