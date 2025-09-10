@@ -1,3 +1,2 @@
-- Support kSuite
-- Correction d'un crash en lien avec la corbeille
+- Icône iOS 26
 - Améliorations de la stabilité et corrections de bugs
