@@ -21,6 +21,7 @@ import InfomaniakCore
 import InfomaniakDI
 import Photos
 import RealmSwift
+import UIKit
 
 public protocol PhotoLibraryScanable {
     func scheduleNewPicturesForUpload() async
@@ -79,6 +80,12 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
     }
 
     private func earlyUploadWhatIsAvailableIfNecessary() async {
+        // The sync _must_ be synchronous in background refresh to work correctly.
+        guard await UIApplication.shared.applicationState == .active else {
+            Log.photoLibraryUploader("No early upload start. Only starting early when app is in foreground.")
+            return
+        }
+
         let filesToUploadCount = uploadDatasource.getAllUploadingFilesFrozen().count
         let activeUploadsCount = uploadService.operationCount
 
