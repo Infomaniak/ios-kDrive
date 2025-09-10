@@ -1,3 +1,2 @@
-- kSuite Support
-- Fix a crash related to trash restoration
+- iOS 26 icon
 - Stability improvements and bug fixes
