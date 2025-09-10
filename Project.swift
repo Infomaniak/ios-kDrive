@@ -37,6 +37,7 @@ let project = Project(name: "kDrive",
                                   resources: [
                                       "kDrive/**/*.storyboard",
                                       "kDrive/**/*.xcassets",
+                                      "kDrive/**/*.icon",
                                       "kDrive/**/*.strings",
                                       "kDrive/**/*.stringsdict",
                                       "kDrive/**/*.xib",
