@@ -235,6 +235,8 @@ public struct DriveError: Error, Equatable {
         localizedString: KDriveResourcesStrings.Localizable.errorNetwork
     )
 
+    public static let invalidCursorError = DriveError(type: .serverError, code: "invalid_cursor_error")
+
     private static let allErrors: [DriveError] = [fileNotFound,
                                                   photoAssetNoLongerExists,
                                                   refreshToken,
@@ -270,7 +272,8 @@ public struct DriveError: Error, Equatable {
                                                   fileAlreadyExistsError,
                                                   errorDeviceStorage,
                                                   limitExceededError,
-                                                  uploadOverDataRestrictedError]
+                                                  uploadOverDataRestrictedError,
+                                                  invalidCursorError]
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
