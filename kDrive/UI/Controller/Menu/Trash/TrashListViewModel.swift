@@ -238,7 +238,7 @@ extension TrashListViewModel: TrashOptionsDelegate {
             let selectFolderNavigationViewController: TitleSizeAdjustingNavigationController
             selectFolderNavigationViewController = SelectFolderViewController
                 .instantiateInNavigationController(driveFileManager: driveFileManager) { directory, _ in
-                    Task { [weak self, directoryProxy = directory.proxify(), directoryName = directory.name] in
+                    Task { [weak self, directoryProxy = directory.proxify(), directoryName = directory.formattedLocalizedName] in
                         await self?.restoreTrashedFiles(
                             proxyFiles,
                             firstFilename: firstFilename,
