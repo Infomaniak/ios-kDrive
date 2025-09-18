@@ -42,6 +42,8 @@ public enum SentryDebug {
         case DriveInfosManager
         /// Cleanup of cache used by the app
         case cacheCleanup
+
+        case tokenMigrator
     }
 
     public enum EventNames {
