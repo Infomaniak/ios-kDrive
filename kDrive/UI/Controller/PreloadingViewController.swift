@@ -93,6 +93,8 @@ class PreloadingViewController: UIViewController {
     func preloadAccountAndDrives() {
         Task {
             do {
+                await TokenMigrator().migrateTokensIfNeeded()
+
                 _ = try await accountManager.updateUser(for: currentAccount, registerToken: true)
                 _ = try accountManager.getFirstAvailableDriveFileManager(for: currentAccount.userId)
 
