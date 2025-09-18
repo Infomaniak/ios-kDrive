@@ -86,12 +86,7 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
 
         do {
             for account in accounts {
-                let attestationToken = try await generateAttestationTokenForDevice()
-
-                let derivatedToken = try await tokenService.derivateApiToken(
-                    using: account.token,
-                    attestationToken: attestationToken
-                )
+                let derivatedToken = try await tokenService.derivateApiToken(for: account)
 
                 _ = try await accountManager.createAndSetCurrentAccount(token: derivatedToken)
                 guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
@@ -106,15 +101,6 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
             await didCompleteLoginWithError(error, previousAccount: previousAccount)
             await setLoading(false)
         }
-    }
-
-    private func generateAttestationTokenForDevice() async throws -> String {
-        return try await InfomaniakDeviceCheck(environment: deviceCheckEnvironment)
-            .generateAttestationFor(
-                targetUrl: FactoryService.loginConfig.loginURL.appendingPathComponent("token"),
-                bundleId: FactoryService.bundleId,
-                bypassValidation: ApiEnvironment.current == .preprod
-            )
     }
 
     @MainActor private func goToMainScreen(with driveFileManager: DriveFileManager) {
