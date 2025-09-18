@@ -54,16 +54,11 @@ struct Right {
     static func shareLinkRights(driveFileManager: DriveFileManager) -> [Right] {
         var upgradeDescription: String?
         var detailDescription: String?
-        let publicTitle: String
         if driveFileManager.drive.pack.kSuiteProUpgradePath != nil {
-            publicTitle = kSuiteTitle(driveFileManager: driveFileManager)
-
             if driveFileManager.drive.sharedLinkQuotaExceeded {
                 upgradeDescription = KDriveResourcesStrings.Localizable.buttonUpgradeOffer
             }
         } else if driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise {
-            publicTitle = kSuiteTitle(driveFileManager: driveFileManager)
-
             if driveFileManager.drive.sharedLinkQuotaExceeded {
                 if driveFileManager.drive.accountAdmin {
                     detailDescription = KSuiteLocalizable.kSuiteUpgradeDetails
@@ -71,8 +66,6 @@ struct Right {
                     detailDescription = KSuiteLocalizable.kSuiteUpgradeDetailsContactAdmin
                 }
             }
-        } else {
-            publicTitle = KDriveResourcesStrings.Localizable.shareLinkPublicRightTitle
         }
 
         return [Right(key: ShareLinkPermission.restricted.rawValue,
@@ -82,7 +75,7 @@ struct Right {
                       folderDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightFolderDescriptionShort,
                       documentDescription: KDriveResourcesStrings.Localizable.shareLinkRestrictedRightDocumentDescriptionShort),
                 Right(key: ShareLinkPermission.public.rawValue,
-                      title: publicTitle,
+                      title: KDriveResourcesStrings.Localizable.shareLinkPublicRightTitle,
                       icon: KDriveResourcesAsset.unlock.image,
                       fileDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightFileDescriptionShort,
                       folderDescription: KDriveResourcesStrings.Localizable.shareLinkPublicRightFolderDescriptionShort,
@@ -105,12 +98,6 @@ struct Right {
               folderDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteFolderDescription,
               documentDescription: KDriveResourcesStrings.Localizable.shareLinkOfficePermissionWriteFileDescription)
     ]
-
-    private static func kSuiteTitle(driveFileManager: DriveFileManager) -> String {
-        return KDriveResourcesStrings.Localizable.shareLinkPublicRightTitle
-            + " "
-            + driveFileManager.drive.sharedLinkQuotaFormatted
-    }
 }
 
 class RightsSelectionViewController: UIViewController {

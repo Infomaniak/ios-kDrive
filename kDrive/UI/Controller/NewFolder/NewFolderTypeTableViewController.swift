@@ -105,16 +105,8 @@ class NewFolderTypeTableViewController: UITableViewController {
             )
         case .dropbox:
             let drive = driveFileManager.drive
-            let title: String
-            if drive.pack.isAnyKSuiteProOffer {
-                title = KDriveResourcesStrings.Localizable.dropBoxTitle
-                    + " "
-                    + drive.dropboxQuotaFormatted
-            } else {
-                title = KDriveResourcesStrings.Localizable.dropBoxTitle
-            }
 
-            cell.titleLabel.text = title
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxTitle
             cell.accessoryImageView.image = KDriveResourcesAsset.folderDropBox.image
             cell.descriptionLabel.text = KDriveResourcesStrings.Localizable.dropBoxDescription
             if packId == .myKSuite, drive.dropboxQuotaExceeded {
