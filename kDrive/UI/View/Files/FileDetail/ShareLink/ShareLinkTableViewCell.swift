@@ -158,6 +158,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         let showMykSuiteRestriction = MykSuiteRestrictions.sharedLinkRestricted(packId: currentPackId,
                                                                                 driveFileManager: driveFileManager,
                                                                                 fileHasShareLink: file.hasSharelink)
+        let showKSuiteRestriction = KSuiteRestrictions.sharedLinkRestricted(driveFileManager: driveFileManager)
+
         if showMykSuiteRestriction {
             let chipView = MyKSuiteChip.instantiateGrayChip()
 
@@ -170,9 +172,29 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                 chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
                 chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
             ])
+        } else if showKSuiteRestriction {
+            setupChipView()
         }
 
         layoutIfNeeded()
+    }
+
+    func setupChipView() {
+        let chip = KSuiteProChipController()
+        guard let chipView = chip.view else {
+            return
+        }
+
+        chipView.translatesAutoresizingMaskIntoConstraints = false
+        chipContainerView.addSubview(chipView)
+        chipContainerView.isHidden = false
+
+        NSLayoutConstraint.activate([
+            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
+            chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
+        ])
     }
 
     func initWithoutInsets() {

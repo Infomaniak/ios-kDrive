@@ -220,6 +220,11 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
                 matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
                 return
             }
+            guard !KSuiteRestrictions.sharedLinkRestricted(driveFileManager: driveFileManager) else {
+                router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
+                matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
+                return
+            }
 
             let canBecomeLink = file?.capabilities.canBecomeSharelink ?? false || file.hasSharelink
             if file.isDropbox || !canBecomeLink {
