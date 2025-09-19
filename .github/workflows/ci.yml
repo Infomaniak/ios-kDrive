@@ -61,7 +61,7 @@ jobs:
       - name: Generate
         run: tuist install && tuist generate
       - name: Test Local
-        run: tuist test kDriveTests
+        run: tuist test kDriveTests --no-selective-testing
 
   api_tests:
     name: API Tests
@@ -88,4 +88,4 @@ jobs:
       - name: Generate
         run: tuist install && tuist generate
       - name: Test API
-        run: tuist test kDriveAPITests --test-targets kDriveAPITests/DriveApiTests
+        run: tuist test kDriveAPITests --test-targets kDriveAPITests/DriveApiTests --no-selective-testing
