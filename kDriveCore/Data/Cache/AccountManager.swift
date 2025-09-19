@@ -77,7 +77,7 @@ public protocol AccountManageable: AnyObject {
     func switchAccount(newAccount: Account)
     func switchToNextAvailableAccount()
     func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int)
-    func addAccount(account: Account, token: ApiToken)
+    func addAccount(account: Account, token: ApiToken) async throws
     func removeAccount(toDeleteAccount: Account)
     func removeTokenAndAccount(account: Account)
     func account(for token: ApiToken) -> Account?
@@ -376,6 +376,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         driveFileManagers.removeAll()
     }
 
+    public func getApiFetcher(for userId: Int, token: AssociatedApiToken) -> DriveApiFetcher {
+        getApiFetcher(for: userId, token: token.apiToken)
+    }
+
     public func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher {
         if let apiFetcher = apiFetchers[userId] {
             return apiFetcher
@@ -387,12 +391,15 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func getTokenForUserId(_ id: Int) -> ApiToken? {
-        return tokenStore.tokenFor(userId: id)
+        return tokenStore.tokenFor(userId: id)?.apiToken
     }
 
     public func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {
         SentryDebug.logTokenMigration(newToken: newToken, oldToken: oldToken)
-        tokenStore.addToken(newToken: newToken)
+        Task {
+            let deviceId = try await deviceManager.getOrCreateCurrentDevice().uid
+            tokenStore.addToken(newToken: newToken, associatedDeviceId: deviceId)
+        }
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
@@ -445,7 +452,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         let newAccount = Account(apiToken: token)
         newAccount.user = user
-        addAccount(account: newAccount, token: token)
+        try await addAccount(account: newAccount, token: token)
         setCurrentAccount(account: newAccount)
 
         guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
@@ -478,7 +485,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
         account.user = user
 
-        attachDeviceToApiToken(token, apiFetcher: apiFetcher)
+        attachDeviceToApiToken(token.apiToken, apiFetcher: apiFetcher)
 
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty,
@@ -630,7 +637,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         currentUserId = account.userId
         enableBugTrackerIfAvailable()
 
-        guard let token = account.token else { return }
+        guard let token = tokenStore.tokenFor(userId: account.userId)?.apiToken ?? account.token else { return }
         let apiFetcher = getApiFetcher(for: account.userId, token: token)
         attachDeviceToApiToken(token, apiFetcher: apiFetcher)
     }
@@ -649,14 +656,16 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         getDriveFileManager(for: driveId, userId: userId)
     }
 
-    public func addAccount(account: Account, token: ApiToken) {
+    public func addAccount(account: Account, token: ApiToken) async throws {
         UserDefaults.shared.lastSelectedTab = nil
 
         if accounts.contains(account) {
             removeAccount(toDeleteAccount: account)
         }
         accounts.append(account)
-        tokenStore.addToken(newToken: token)
+
+        let deviceId = try await deviceManager.getOrCreateCurrentDevice().uid
+        tokenStore.addToken(newToken: token, associatedDeviceId: deviceId)
         saveAccounts()
     }
 
