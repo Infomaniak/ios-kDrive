@@ -1,2 +1,2 @@
-- Icône iOS 26
+- Correction login inter-app
 - Améliorations de la stabilité et corrections de bugs
