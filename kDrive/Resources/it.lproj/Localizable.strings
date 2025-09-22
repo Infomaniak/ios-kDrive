@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Mon, 08 Sep 2025 15:02:21 +0200
+ * Exported by: Baptiste Griva
+ * Exported at: Tue, 16 Sep 2025 15:18:44 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -681,6 +681,12 @@
 
 /* loco:60dc3e2e5ea2965b1152dc03 */
 "deletePicturesTitle" = "Cancellare le foto";
+
+/* loco:68c961c864c56326660094b2 */
+"deleteUploadedPhotosDescription" = "Fare clic per liberare spazio sul disco";
+
+/* loco:68c9617bf6bead14aa05ca53 */
+"deleteUploadedPhotosTitle" = "Hai %d foto da pulire";
 
 /* loco:614c887ba0ad81657c1e75a2 */
 "directoriesTitle" = "Dati";

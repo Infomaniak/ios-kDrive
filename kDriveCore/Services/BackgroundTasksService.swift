@@ -102,6 +102,7 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
     }
 
     func handleBackgroundRefresh(completion: @escaping (Bool) -> Void) {
+        @InjectService var router: AppNavigable
         Task {
             let expiringActivity = ExpiringActivity(id: UUID().uuidString, delegate: nil)
             expiringActivity.start()
@@ -114,6 +115,9 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
                 expiringActivity.endAll()
                 return
             }
+
+            Log.backgroundTaskScheduling("removePicturesIfNecessary")
+            await router.askUserToRemovePicturesIfNecessary()
 
             Log.backgroundTaskScheduling("Enqueue new pictures")
             await photoScan.scheduleNewPicturesForUpload()

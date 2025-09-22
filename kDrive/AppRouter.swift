@@ -597,14 +597,25 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterActionable
 
-    public func askUserToRemovePicturesIfNecessary() async {
+    @MainActor public func askUserToRemovePicturesIfNecessary() async {
         @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
+        @InjectService var appContextService: AppContextServiceable
         guard photoCleaner.hasPicturesToRemove else {
             Log.sceneDelegate("No pictures to remove", level: .info)
             return
         }
 
-        Task { @MainActor in
+        let isInBackground = appContextService.isExtension || UIApplication.shared.applicationState != .active
+        if isInBackground {
+            @InjectService var notificationHelper: NotificationsHelpable
+            @InjectService var uploadDataSource: UploadServiceDataSourceable
+            let photosToDeleteCount = uploadDataSource
+                .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
+                .count
+            notificationHelper.sendDeleteUploadedPhotosNotification(photosToDelete: photosToDeleteCount)
+        }
+
+        Task {
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
                                                 message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
                                                 action: KDriveResourcesStrings.Localizable.buttonDelete,
