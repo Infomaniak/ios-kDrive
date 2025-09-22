@@ -41,7 +41,7 @@ public final class PhotoLibraryUploader: PhotoLibraryUploadable {
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
 
-    static let startUploadWhileScanningThreshold = 1000
+    static let startUploadWhileScanningThreshold = 500
 
     /// Predicate to quickly narrow down on uploaded assets
     static let uploadedAssetPredicate = NSPredicate(format: "rawType = %@ AND uploadDate != nil", "phAsset")
