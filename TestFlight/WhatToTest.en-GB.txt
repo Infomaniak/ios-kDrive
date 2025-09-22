@@ -1,2 +1,2 @@
-- iOS 26 icon
+- Login inter-app fix
 - Stability improvements and bug fixes
