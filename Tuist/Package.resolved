@@ -1,5 +1,5 @@
 {
-  "originHash" : "80a700952c07b09b8f2c0e4c8a60c1e4e8b690d9c59a7641a83378fba02d5b47",
+  "originHash" : "2fd6241dae2b981e6e1383294312f05147bb15c4e8ca20de9a2bfd9caa33dc57",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "8dd5b29dc548876613ebe4de00023ba9ca219432",
-        "version" : "22.2.1"
+        "revision" : "964bd38cc8ee7399968b76bb55eee81db29337e2",
+        "version" : "22.3.0"
       }
     },
     {
@@ -123,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-device-check",
       "state" : {
-        "revision" : "15355528c3bc15a3acda78b6b040fde7a743eb8b",
-        "version" : "1.1.0"
+        "revision" : "d20a4959683e7c19faec674b1fd269e3167e5133",
+        "version" : "1.1.1"
       }
     },
     {
@@ -276,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "2c70925b98238b7efacde11d30075328c3cb6a2a",
-        "version" : "8.55.1"
+        "revision" : "3365d74b0ac74a10c87f41a1229526b3ba97a460",
+        "version" : "8.56.0"
       }
     },
     {
@@ -384,8 +384,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-system.git",
       "state" : {
-        "revision" : "890830fff1a577dc83134890c7984020c5f6b43b",
-        "version" : "1.6.2"
+        "revision" : "395a77f0aa927f0ff73941d7ac35f2b46d47c9db",
+        "version" : "1.6.3"
       }
     },
     {
@@ -411,8 +411,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/siteline/SwiftUI-Introspect",
       "state" : {
-        "revision" : "9bedf1e79c7b7c34b35b74bef126f56d2400ef7f",
-        "version" : "1.4.0-beta.4"
+        "revision" : "a08b87f96b41055577721a6e397562b21ad52454",
+        "version" : "26.0.0"
       }
     },
     {
