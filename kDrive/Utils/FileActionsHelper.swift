@@ -98,7 +98,7 @@ public final class FileActionsHelper {
             proxyFile = file.proxify(),
             proxyParent = file.parent?.proxify(),
             proxyDestination = destinationDirectory.proxify(),
-            destinationName = destinationDirectory.name
+            destinationName = destinationDirectory.formattedLocalizedName
         ] in
             do {
                 let moveCoordinator = MoveCoordinator()
@@ -268,7 +268,7 @@ public final class FileActionsHelper {
 
                 UIConstants
                     .showSnackBar(message: KDriveResourcesStrings.Localizable
-                        .fileListMoveFileConfirmationSnackbarPlural(files.count, destinationDirectory.name))
+                        .fileListMoveFileConfirmationSnackbarPlural(files.count, destinationDirectory.formattedLocalizedName))
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)
             }
