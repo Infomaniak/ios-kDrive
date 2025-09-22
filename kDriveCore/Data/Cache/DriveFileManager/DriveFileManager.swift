@@ -320,7 +320,11 @@ public final class DriveFileManager {
             }
         } else {
             fetchFiles = {
-                return try await self.apiFetcher.files(in: directory, cursor: cursor, sortType: sortType)
+                do {
+                    return try await self.apiFetcher.files(in: directory, cursor: cursor, sortType: sortType)
+                } catch let error as DriveError where error == DriveError.invalidCursorError {
+                    return try await self.apiFetcher.files(in: directory, cursor: nil, sortType: sortType)
+                }
             }
         }
         return try await files(in: directory,
