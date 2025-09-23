@@ -18,6 +18,7 @@
 
 import DeviceAssociation
 import Foundation
+import InfomaniakConcurrency
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
@@ -35,24 +36,14 @@ public struct TokenMigrator {
     public init() {}
 
     public func migrateTokensIfNeeded() async {
-        let migratedTokens = await withTaskGroup { group in
-            for token in tokenStore.getAllTokens().values {
-                group.addTask {
-                    await migrateTokenIfNeeded(token: token)
-                }
-            }
-
-            var migratedOneToken = false
-            for await migrated in group {
-                migratedOneToken = migratedOneToken || migrated
-            }
-
-            return migratedOneToken
+        let allTokens = tokenStore.getAllTokens().values
+        let migratedTokensSuccess = await allTokens.concurrentMap(customConcurrency: Constants.networkParallelism) { token in
+            return await migrateTokenIfNeeded(token: token)
         }
 
-        if migratedTokens {
-            accountManager.removeCachedProperties()
-        }
+        let migratedOneTokenAtLeast = migratedTokensSuccess.contains(true)
+        guard migratedOneTokenAtLeast else { return }
+        accountManager.removeCachedProperties()
     }
 
     private func migrateTokenIfNeeded(token: AssociatedApiToken) async -> Bool {
