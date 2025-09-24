@@ -276,7 +276,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
 // TODO: Refactor with router like pattern and split code away from this class
 extension SceneDelegate {
-    func finishSceneSetup(_ scene: UIScene) {
+    @MainActor func finishSceneSetup(_ scene: UIScene) {
         uploadNotifications.setPausedNotificationSent(false)
 
         let currentState = RootViewControllerState.getCurrentState()
