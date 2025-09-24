@@ -137,7 +137,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
                 await appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             }
             uploadEditedFiles()
-        case .onboarding, .updateRequired, .preloading: break
+        case .splashScreen, .onboarding, .updateRequired, .preloading: break
         }
 
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
