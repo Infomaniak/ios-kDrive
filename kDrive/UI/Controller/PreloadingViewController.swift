@@ -26,7 +26,12 @@ class PreloadingViewController: UIViewController {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var appNavigable: AppNavigable
 
-    private let currentAccount: Account
+    private let currentAccount: Account?
+
+    init() {
+        currentAccount = nil
+        super.init(nibName: nil, bundle: nil)
+    }
 
     init(currentAccount: Account) {
         self.currentAccount = currentAccount
@@ -65,7 +70,8 @@ class PreloadingViewController: UIViewController {
 
         setupViews()
 
-        preloadAccountAndDrives()
+        guard let currentAccount else { return }
+        preloadAccountAndDrives(account: currentAccount)
     }
 
     private func setupViews() {
@@ -90,13 +96,11 @@ class PreloadingViewController: UIViewController {
         ])
     }
 
-    func preloadAccountAndDrives() {
+    func preloadAccountAndDrives(account: Account) {
         Task {
             do {
-                await TokenMigrator().migrateTokensIfNeeded()
-
-                _ = try await accountManager.updateUser(for: currentAccount, registerToken: true)
-                _ = try accountManager.getFirstAvailableDriveFileManager(for: currentAccount.userId)
+                _ = try await accountManager.updateUser(for: account, registerToken: true)
+                _ = try accountManager.getFirstAvailableDriveFileManager(for: account.userId)
 
                 if let currentDriveFileManager = self.accountManager.currentDriveFileManager {
                     let state = RootViewControllerState.mainViewController(driveFileManager: currentDriveFileManager)
@@ -116,7 +120,7 @@ class PreloadingViewController: UIViewController {
                 present(driveErrorNavigationViewController, animated: true)
             } catch {
                 SentryDebug.logPreloadingAccountError(error: error, origin: "PreloadingViewController")
-                accountManager.removeTokenAndAccount(account: currentAccount)
+                accountManager.removeTokenAndAccount(account: account)
                 self.appNavigable.prepareRootViewController(currentState: .onboarding, restoration: false)
             }
         }
