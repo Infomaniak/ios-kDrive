@@ -597,25 +597,14 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterActionable
 
-    @MainActor public func askUserToRemovePicturesIfNecessary() async {
+    public func askUserToRemovePicturesIfNecessary() async {
         @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
-        @InjectService var appContextService: AppContextServiceable
         guard photoCleaner.hasPicturesToRemove else {
             Log.sceneDelegate("No pictures to remove", level: .info)
             return
         }
 
-        let isInBackground = appContextService.isExtension || UIApplication.shared.applicationState != .active
-        if isInBackground {
-            @InjectService var notificationHelper: NotificationsHelpable
-            @InjectService var uploadDataSource: UploadServiceDataSourceable
-            let photosToDeleteCount = uploadDataSource
-                .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
-                .count
-            notificationHelper.sendDeleteUploadedPhotosNotification(photosToDelete: photosToDeleteCount)
-        }
-
-        Task {
+        Task { @MainActor in
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.modalDeletePhotosTitle,
                                                 message: KDriveResourcesStrings.Localizable.modalDeletePhotosDescription,
                                                 action: KDriveResourcesStrings.Localizable.buttonDelete,
@@ -629,6 +618,22 @@ public struct AppRouter: AppNavigable {
 
             window?.rootViewController?.present(alert, animated: true)
         }
+    }
+
+    @MainActor public func askUserToRemovePicturesIfNecessaryNotification() {
+        @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
+        @InjectService var notificationHelper: NotificationsHelpable
+        @InjectService var uploadDataSource: UploadServiceDataSourceable
+
+        guard photoCleaner.hasPicturesToRemove else {
+            Log.sceneDelegate("No pictures to remove", level: .info)
+            return
+        }
+
+        let photosToDeleteCount = uploadDataSource
+            .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
+            .count
+        notificationHelper.sendDeleteUploadedPhotosNotification(photosToDelete: photosToDeleteCount)
     }
 
     @MainActor public func presentUpSaleSheet() {

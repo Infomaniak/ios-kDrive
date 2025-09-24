@@ -31,6 +31,8 @@ public struct InExtensionRouter: AppNavigable {
 
     public func askUserToRemovePicturesIfNecessary() async {}
 
+    public func askUserToRemovePicturesIfNecessaryNotification() {}
+
     public func presentUpSaleSheet() {}
 
     public func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager) {}

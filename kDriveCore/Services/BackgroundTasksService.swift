@@ -116,8 +116,8 @@ struct BackgroundTasksService: BackgroundTasksServiceable {
                 return
             }
 
-            Log.backgroundTaskScheduling("removePicturesIfNecessary")
-            await router.askUserToRemovePicturesIfNecessary()
+            Log.backgroundTaskScheduling("removePicturesIfNecessaryNotification")
+            await router.askUserToRemovePicturesIfNecessaryNotification()
 
             Log.backgroundTaskScheduling("Enqueue new pictures")
             await photoScan.scheduleNewPicturesForUpload()

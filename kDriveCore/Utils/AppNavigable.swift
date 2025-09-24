@@ -211,6 +211,9 @@ public protocol RouterActionable {
     /// Ask the user to remove pictures if configured
     func askUserToRemovePicturesIfNecessary() async
 
+    /// Send a notification to the user if pictures can be removed
+    @MainActor func askUserToRemovePicturesIfNecessaryNotification()
+
     @MainActor func presentUpSaleSheet()
 
     @MainActor func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager)
