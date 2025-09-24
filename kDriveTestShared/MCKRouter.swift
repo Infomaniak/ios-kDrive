@@ -51,6 +51,10 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func askUserToRemovePicturesIfNecessaryNotification() async {
+        logNoop()
+    }
+
     public func presentUpSaleSheet() {
         logNoop()
     }
