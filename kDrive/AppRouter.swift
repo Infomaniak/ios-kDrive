@@ -214,7 +214,7 @@ public struct AppRouter: AppNavigable {
     @MainActor public func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {
         switch currentState {
         case .splashScreen:
-            showInitialPreloading()
+            showSplashScreen()
         case .appLock:
             showAppLock()
         case .mainViewController(let driveFileManager):
@@ -513,7 +513,7 @@ public struct AppRouter: AppNavigable {
         window.makeKeyAndVisible()
     }
 
-    @MainActor func showInitialPreloading() {
+    @MainActor func showSplashScreen() {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
