@@ -155,43 +155,36 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             shareIconImageView.image = KDriveResourcesAsset.lock.image
         }
 
-        let showMykSuiteRestriction = MykSuiteRestrictions.sharedLinkRestricted(packId: currentPackId,
-                                                                                driveFileManager: driveFileManager,
-                                                                                fileHasShareLink: file.hasSharelink)
-        let showKSuiteRestriction = driveFileManager.drive.sharedLinkRestricted
-
-        if showMykSuiteRestriction {
-            let chipView = MyKSuiteChip.instantiateGrayChip()
-
-            chipView.translatesAutoresizingMaskIntoConstraints = false
-            chipContainerView.addSubview(chipView)
-
-            NSLayoutConstraint.activate([
-                chipView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
-                chipView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
-                chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
-                chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
-            ])
-        } else if showKSuiteRestriction {
-            setupChipView()
-        }
+        setupChipView(driveFileManager: driveFileManager, packId: currentPackId, fileHasShareLink: file.hasSharelink)
 
         layoutIfNeeded()
     }
 
-    func setupChipView() {
-        let chip = KSuiteProChipController()
-        guard let chipView = chip.view else {
-            return
-        }
+    func setupChipView(driveFileManager: DriveFileManager, packId: DrivePackId?, fileHasShareLink: Bool) {
+        let showMykSuiteRestriction = MykSuiteRestrictions.sharedLinkRestricted(packId: packId,
+                                                                                driveFileManager: driveFileManager,
+                                                                                fileHasShareLink: fileHasShareLink)
+        let showKSuiteRestriction = driveFileManager.drive.sharedLinkRestricted
+
+        let chipView: UIView
+
+        if showMykSuiteRestriction {
+            chipView = MyKSuiteChip.instantiateGrayChip()
+        } else if showKSuiteRestriction {
+            let chip = KSuiteProChipController()
+            guard let view = chip.view else {
+                return
+            }
+            chipView = view
+        } else { return }
 
         chipView.translatesAutoresizingMaskIntoConstraints = false
         chipContainerView.addSubview(chipView)
         chipContainerView.isHidden = false
 
         NSLayoutConstraint.activate([
-            chipView.leadingAnchor.constraint(equalTo: chipContainerView.leadingAnchor),
-            chipView.trailingAnchor.constraint(equalTo: chipContainerView.trailingAnchor),
+            chipView.leadingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.leadingAnchor),
+            chipView.trailingAnchor.constraint(greaterThanOrEqualTo: chipContainerView.trailingAnchor),
             chipView.topAnchor.constraint(equalTo: chipContainerView.topAnchor),
             chipView.bottomAnchor.constraint(equalTo: chipContainerView.bottomAnchor)
         ])
