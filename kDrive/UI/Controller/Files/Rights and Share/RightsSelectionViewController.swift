@@ -58,13 +58,11 @@ struct Right {
             if driveFileManager.drive.sharedLinkQuotaExceeded {
                 upgradeDescription = KDriveResourcesStrings.Localizable.buttonUpgradeOffer
             }
-        } else if driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise {
-            if driveFileManager.drive.sharedLinkQuotaExceeded {
-                if driveFileManager.drive.accountAdmin {
-                    detailDescription = KSuiteLocalizable.kSuiteUpgradeDetails
-                } else {
-                    detailDescription = KSuiteLocalizable.kSuiteUpgradeDetailsContactAdmin
-                }
+        } else if driveFileManager.drive.pack.drivePackId == .kSuiteEntreprise && driveFileManager.drive.sharedLinkQuotaExceeded {
+            if driveFileManager.drive.accountAdmin {
+                detailDescription = KSuiteLocalizable.kSuiteUpgradeDetails
+            } else {
+                detailDescription = KSuiteLocalizable.kSuiteUpgradeDetailsContactAdmin
             }
         }
 
