@@ -215,4 +215,8 @@ public final class MCKRouter: AppNavigable {
         logNoop()
         return nil
     }
+
+    public func askUserToRemovePicturesIfNecessaryNotification() {
+        logNoop()
+    }
 }
