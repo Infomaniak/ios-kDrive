@@ -220,7 +220,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
                 matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
                 return
             }
-            guard !KSuiteRestrictions.sharedLinkRestricted(driveFileManager: driveFileManager) else {
+            guard !driveFileManager.drive.sharedLinkRestricted else {
                 router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
                 matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
                 return

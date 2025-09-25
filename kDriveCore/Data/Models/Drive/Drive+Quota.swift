@@ -56,6 +56,10 @@ public extension Drive {
         return sharedLink.current ?? 0 >= sharedLink.max
     }
 
+    var sharedLinkRestricted: Bool {
+        return pack.kSuiteProUpgradePath != nil && sharedLinkQuotaExceeded
+    }
+
     var sharedLinkQuotaFormatted: String {
         guard let quota, let sharedLink = quota.sharedLink else { return "" }
         let current = sharedLink.current ?? 0
