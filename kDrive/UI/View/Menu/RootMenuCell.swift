@@ -132,7 +132,7 @@ class RootMenuCell: UICollectionViewCell {
         ])
     }
 
-    func configure(title: String, icon: UIImage) {
+    func configure(title: String, icon: UIImage?) {
         titleLabel.text = title
         iconImageView.image = icon
     }

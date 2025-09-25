@@ -65,11 +65,12 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
 
         let name: String
-        var image: UIImage
-        let destination: RootMenuDestination
+        var image: UIImage?
+        let destination: RootMenuDestination?
         var isFirst = false
         var isLast = false
         var priority = 0
+        var isHeader = false
 
         func hash(into hasher: inout Hasher) {
             hasher.combine(id)
@@ -128,24 +129,25 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                                                         image: KDriveResourcesAsset.clock.image,
                                                         destination: .file(DriveFileManager.lastModificationsRootFile)
                                                     ),
-                                                    RootMenuItem(
-                                                        name: KDriveResourcesStrings.Localizable.offlineFileTitle,
-                                                        image: KDriveResourcesAsset.availableOffline.image,
-                                                        destination: .file(DriveFileManager.offlineRoot)
-                                                    )]
+                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
+                                                                 image: KDriveResourcesAsset
+                                                                     .delete.image,
+                                                                 destination: .file(DriveFileManager
+                                                                     .trashRootFile))]
 
-    private static var sharedItems: [RootMenuItem] = [
+    private static var expandableItems: [RootMenuItem] = [
         RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
                      image: KDriveResourcesAsset.folderSelect2.image,
                      destination: .file(DriveFileManager.sharedWithMeRootFile)),
         RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
                      image: KDriveResourcesAsset.folderSelect.image,
-                     destination: .file(DriveFileManager.mySharedRootFile))
+                     destination: .file(DriveFileManager.mySharedRootFile)),
+        RootMenuItem(
+            name: KDriveResourcesStrings.Localizable.offlineFileTitle,
+            image: KDriveResourcesAsset.availableOffline.image,
+            destination: .file(DriveFileManager.offlineRoot)
+        )
     ]
-
-    private static var trashItem: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
-                                                                 image: KDriveResourcesAsset.delete.image,
-                                                                 destination: .file(DriveFileManager.trashRootFile))]
 
     private static let compactModeItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                                         image: KDriveResourcesAsset.favorite.image,
@@ -219,30 +221,55 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         } ?? []
 
         if !isCompactView {
-            return snapshotForCompactView(userRootFolders: userRootFolders)
+            return snapshotForCompactView()
         } else {
             return snapshotForLargeView(userRootFolders: userRootFolders)
         }
     }
 
-    private func snapshotForCompactView(userRootFolders: [SidebarViewController.RootMenuItem]) -> DataSourceSnapshot {
-        var snapshot = DataSourceSnapshot()
+    private func applySectionSnapshots() {
+        let userRootFolders = rootViewChildren?.compactMap {
+            RootMenuItem(
+                name: $0.formattedLocalizedName,
+                image: $0.icon,
+                destination: .file($0),
+                priority: 1
+            )
+        } ?? []
+        let header2 = RootMenuItem(
+            name: "Mes fichiers",
+            image: nil,
+            destination: nil,
+            isHeader: true
+        )
         let firstSectionItems = SidebarViewController.baseItems
-        let secondSectionItems = userRootFolders + SidebarViewController.sharedItems
-        let thirdSectionItems = SidebarViewController.trashItem
-        let sectionsItems = [firstSectionItems, secondSectionItems, thirdSectionItems]
+        let secondSectionItems = [header2] + userRootFolders + SidebarViewController.expandableItems
+        let sectionsItems = [firstSectionItems, secondSectionItems]
 
-        for i in 0 ... sectionsItems.count - 1 {
-            if !sections.isEmpty {
-                var sectionItems = sectionsItems[i]
-                let section = sections[i]
-                sectionItems[0].isFirst = true
-                sectionItems[sectionItems.count - 1].isLast = true
+        var firstSS = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
+        firstSS.append(firstSectionItems)
+        dataSource.apply(firstSS, to: .first, animatingDifferences: true)
 
-                snapshot.appendSections([section])
-                snapshot.appendItems(sectionItems, toSection: section)
+        for (section, items) in zip(sections, sectionsItems) {
+            guard let header = items.first, section != .first else { continue }
+            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
+            sectionSnapshot.append([header])
+            let children = Array(items.dropFirst())
+            if !children.isEmpty {
+                sectionSnapshot.append(children, to: header)
+                if UserDefaults.shared.isFilesSectionExtended {
+                    sectionSnapshot.expand([header])
+                }
             }
+            dataSource.apply(sectionSnapshot, to: section, animatingDifferences: true)
         }
+    }
+
+    private func snapshotForCompactView() -> DataSourceSnapshot {
+        var snapshot = DataSourceSnapshot()
+        snapshot.appendSections(sections)
+        dataSource.apply(snapshot, animatingDifferences: false)
+
         return snapshot
     }
 
@@ -294,6 +321,14 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         dataSource = configureDataSource(for: collectionView)
         setItemsSnapshot(for: collectionView)
+
+        dataSource.sectionSnapshotHandlers.willExpandItem = { _ in
+            UserDefaults.shared.isFilesSectionExtended = true
+        }
+
+        dataSource.sectionSnapshotHandlers.willCollapseItem = { _ in
+            UserDefaults.shared.isFilesSectionExtended = false
+        }
 
         guard !selectMode else { return }
         if !isCompactView {
@@ -363,10 +398,16 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             case .initial(let children):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
                 dataSource.apply(itemsSnapshot, animatingDifferences: false)
+                if !(isCompactView || selectMode) {
+                    applySectionSnapshots()
+                }
 
             case .update(let children, _, _, _):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
                 dataSource.apply(itemsSnapshot, animatingDifferences: true)
+                if !(isCompactView || selectMode) {
+                    applySectionSnapshots()
+                }
 
             case .error:
                 break
@@ -376,47 +417,80 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     func configureDataSource(for collectionView: UICollectionView)
         -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
-        dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
-            collectionView, indexPath, menuItem -> UICollectionViewCell? in
-            guard let menuSection = self.getSection(for: indexPath.section) else {
-                fatalError("Unknown section")
+        if !(isCompactView || selectMode) {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .clear
+            appearance.shadowColor = .clear
+            navigationItem.scrollEdgeAppearance = appearance
+
+            let cellRegistration = UICollectionView
+                .CellRegistration<UICollectionViewListCell, RootMenuItem> { cell, _, item in
+                    var content = item.isHeader ? UIListContentConfiguration.sidebarHeader() : UIListContentConfiguration
+                        .sidebarCell()
+                    content.text = item.name
+                    content.image = item.image
+                    cell.contentConfiguration = content
+                    cell.accessories = item.isHeader ? [
+                        .outlineDisclosure(
+                            options: .init(style: .header),
+                        )
+                    ] : []
+                    cell.indentationLevel = 0
+                }
+
+            dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
+                collectionView, indexPath, menuItem in
+                collectionView.dequeueConfiguredReusableCell(
+                    using: cellRegistration,
+                    for: indexPath,
+                    item: menuItem
+                )
             }
 
-            switch menuSection {
-            case .recent:
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: FileCollectionViewCell.identifier,
-                    for: indexPath
-                ) as? FileCollectionViewCell else {
-                    fatalError("Failed to dequeue cell")
+        } else {
+            dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
+                collectionView, indexPath, menuItem -> UICollectionViewCell? in
+                guard let menuSection = self.getSection(for: indexPath.section) else {
+                    fatalError("Unknown section")
                 }
 
-                guard case .file(let destinationFile) = menuItem.destination else {
-                    fatalError("Unable to find a matching file")
+                switch menuSection {
+                case .recent:
+                    guard let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: FileCollectionViewCell.identifier,
+                        for: indexPath
+                    ) as? FileCollectionViewCell else {
+                        fatalError("Failed to dequeue cell")
+                    }
+
+                    guard case .file(let destinationFile) = menuItem.destination else {
+                        fatalError("Unable to find a matching file")
+                    }
+
+                    let viewModel = FileViewModel(
+                        driveFileManager: self.driveFileManager,
+                        file: destinationFile,
+                        selectionMode: false
+                    )
+                    cell.configure(with: viewModel)
+                    cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast, inFolderSelectMode: true)
+                    cell.setEnabled(true)
+                    cell.moreButton.isHidden = true
+
+                    return cell
+                case .main, .first, .second, .third:
+                    guard let rootMenuCell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: RootMenuCell.identifier,
+                        for: indexPath
+                    ) as? RootMenuCell else {
+                        fatalError("Failed to dequeue cell")
+                    }
+
+                    rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
+                    rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
+                    return rootMenuCell
                 }
-
-                let viewModel = FileViewModel(
-                    driveFileManager: self.driveFileManager,
-                    file: destinationFile,
-                    selectionMode: false
-                )
-                cell.configure(with: viewModel)
-                cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast, inFolderSelectMode: true)
-                cell.setEnabled(true)
-                cell.moreButton.isHidden = true
-
-                return cell
-            case .main, .first, .second, .third:
-                guard let rootMenuCell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: RootMenuCell.identifier,
-                    for: indexPath
-                ) as? RootMenuCell else {
-                    fatalError("Failed to dequeue cell")
-                }
-
-                rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-                rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
-                return rootMenuCell
             }
         }
 
@@ -539,8 +613,17 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
         configuration
             .boundarySupplementaryItems = [generateHeaderItem(leading: isCompactView ? UIConstants.Padding.mediumSmall : 0)]
-        let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
-        return layout
+
+        if !(isCompactView || selectMode) {
+            let layout = UICollectionViewCompositionalLayout(sectionProvider: { _, layoutEnvironment in
+                let listConfig = UICollectionLayoutListConfiguration(appearance: .sidebar)
+                return NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
+            }, configuration: configuration)
+            return layout
+        } else {
+            let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
+            return layout
+        }
     }
 
     @objc func presentSearch() {
