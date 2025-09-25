@@ -164,7 +164,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         let showMykSuiteRestriction = MykSuiteRestrictions.sharedLinkRestricted(packId: packId,
                                                                                 driveFileManager: driveFileManager,
                                                                                 fileHasShareLink: fileHasShareLink)
-        let showKSuiteRestriction = driveFileManager.drive.sharedLinkRestricted
+        let showKSuiteRestriction = driveFileManager.drive.sharedLinkKSuiteRestricted
 
         let chipView: UIView
 
