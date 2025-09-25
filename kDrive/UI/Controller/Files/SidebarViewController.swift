@@ -207,48 +207,24 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }()
 
     var itemsSnapshot: DataSourceSnapshot {
-        getItemsSnapshot(isCompactView: isCompactView)
+        DataSourceSnapshot()
     }
 
-    private func getItemsSnapshot(isCompactView: Bool) -> DataSourceSnapshot {
-        let userRootFolders = rootViewChildren?.compactMap {
-            RootMenuItem(
-                name: $0.formattedLocalizedName,
-                image: $0.icon,
-                destination: .file($0),
-                priority: 1
-            )
-        } ?? []
-
-        if !isCompactView {
-            return snapshotForCompactView()
-        } else {
-            return snapshotForLargeView(userRootFolders: userRootFolders)
-        }
-    }
-
-    private func applySectionSnapshots() {
-        let userRootFolders = rootViewChildren?.compactMap {
-            RootMenuItem(
-                name: $0.formattedLocalizedName,
-                image: $0.icon,
-                destination: .file($0),
-                priority: 1
-            )
-        } ?? []
-        let header2 = RootMenuItem(
-            name: "Mes fichiers",
+    private func applySnapshotForLargeView(userRootFolders: [RootMenuItem]) {
+        let sectionHeader = RootMenuItem(
+            name: KDriveCoreStrings.Localizable.allFilesTitle,
             image: nil,
             destination: nil,
             isHeader: true
         )
+
         let firstSectionItems = SidebarViewController.baseItems
-        let secondSectionItems = [header2] + userRootFolders + SidebarViewController.expandableItems
+        let secondSectionItems = [sectionHeader] + userRootFolders + SidebarViewController.expandableItems
         let sectionsItems = [firstSectionItems, secondSectionItems]
 
-        var firstSS = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
-        firstSS.append(firstSectionItems)
-        dataSource.apply(firstSS, to: .first, animatingDifferences: true)
+        var firstSectionSnapshot = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
+        firstSectionSnapshot.append(firstSectionItems)
+        dataSource.apply(firstSectionSnapshot, to: .first, animatingDifferences: true)
 
         for (section, items) in zip(sections, sectionsItems) {
             guard let header = items.first, section != .first else { continue }
@@ -265,15 +241,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
-    private func snapshotForCompactView() -> DataSourceSnapshot {
-        var snapshot = DataSourceSnapshot()
-        snapshot.appendSections(sections)
-        dataSource.apply(snapshot, animatingDifferences: false)
-
-        return snapshot
-    }
-
-    private func snapshotForLargeView(userRootFolders: [SidebarViewController.RootMenuItem]) -> DataSourceSnapshot {
+    private func applySnapshotForCompactView(userRootFolders: [RootMenuItem]) {
         var snapshot = DataSourceSnapshot()
         var menuItems = userRootFolders + SidebarViewController.compactModeItems
         if !menuItems.isEmpty {
@@ -283,7 +251,26 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         snapshot.appendSections([RootMenuSection.main])
         snapshot.appendItems(menuItems)
-        return snapshot
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+
+    private func applySnapshot() {
+        let userRootFolders = rootViewChildren?.compactMap {
+            RootMenuItem(
+                name: $0.formattedLocalizedName,
+                image: $0.icon,
+                destination: .file($0),
+                priority: 1
+            )
+        } ?? []
+
+        if isCompactView && !selectMode {
+            applySnapshotForCompactView(userRootFolders: userRootFolders)
+        } else if !isCompactView && !selectMode {
+            applySnapshotForLargeView(userRootFolders: userRootFolders)
+        } else {
+            dataSource.apply(itemsSnapshot, animatingDifferences: true)
+        }
     }
 
     init(driveFileManager: DriveFileManager, selectMode: Bool, isCompactView: Bool) {
@@ -397,17 +384,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             switch changes {
             case .initial(let children):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource.apply(itemsSnapshot, animatingDifferences: false)
-                if !(isCompactView || selectMode) {
-                    applySectionSnapshots()
-                }
+                applySnapshot()
 
             case .update(let children, _, _, _):
                 rootViewChildren = Array(AnyRealmCollection(children).filesSorted(by: .nameAZ))
-                dataSource.apply(itemsSnapshot, animatingDifferences: true)
-                if !(isCompactView || selectMode) {
-                    applySectionSnapshots()
-                }
+                applySnapshot()
 
             case .error:
                 break
