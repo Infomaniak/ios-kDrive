@@ -620,6 +620,22 @@ public struct AppRouter: AppNavigable {
         }
     }
 
+    @MainActor public func askUserToRemovePicturesIfNecessaryNotification() {
+        @InjectService var photoCleaner: PhotoLibraryCleanerServiceable
+        @InjectService var notificationHelper: NotificationsHelpable
+        @InjectService var uploadDataSource: UploadServiceDataSourceable
+
+        guard photoCleaner.hasPicturesToRemove else {
+            Log.sceneDelegate("No pictures to remove", level: .info)
+            return
+        }
+
+        let photosToDeleteCount = uploadDataSource
+            .getUploadedFiles(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
+            .count
+        notificationHelper.sendDeleteUploadedPhotosNotification(photosToDelete: photosToDeleteCount)
+    }
+
     @MainActor public func presentUpSaleSheet() {
         let myKSuiteViewController = MyKSuiteBridgeViewController.instantiate()
         nativeLargeSheetPresentation(viewControllerToPresent: myKSuiteViewController)

@@ -45,6 +45,8 @@ public protocol NotificationsHelpable {
     func sendPhotoSyncErrorNotification()
 
     func sendFailedUpload(failedUpload: Int, totalUpload: Int)
+
+    func sendDeleteUploadedPhotosNotification(photosToDelete: Int)
 }
 
 public struct NotificationsHelper: NotificationsHelpable {
@@ -68,6 +70,7 @@ public struct NotificationsHelper: NotificationsHelpable {
         static let disconnected = "accountDisconnected"
         static let migrate = "migrate"
         static let photoSyncError = "photoSyncError"
+        static let deleteUploadedPhotos = "deleteUploadedPhotos"
     }
 
     public static var isNotificationEnabled: Bool {
@@ -227,6 +230,15 @@ public struct NotificationsHelper: NotificationsHelpable {
         }
 
         sendImmediately(notification: content, id: UUID().uuidString)
+    }
+
+    public func sendDeleteUploadedPhotosNotification(photosToDelete: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = KDriveResourcesStrings.Localizable.deleteUploadedPhotosTitle(photosToDelete)
+        content.body = KDriveResourcesStrings.Localizable.deleteUploadedPhotosDescription
+        content.categoryIdentifier = CategoryIdentifier.general
+        content.sound = .default
+        sendImmediately(notification: content, id: NotificationIdentifier.deleteUploadedPhotos)
     }
 
     // MARK: - Private

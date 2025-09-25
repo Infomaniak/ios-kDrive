@@ -51,6 +51,10 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func askUserToRemovePicturesIfNecessaryNotification() async {
+        logNoop()
+    }
+
     public func presentUpSaleSheet() {
         logNoop()
     }
@@ -210,5 +214,9 @@ public final class MCKRouter: AppNavigable {
     public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? {
         logNoop()
         return nil
+    }
+
+    public func askUserToRemovePicturesIfNecessaryNotification() {
+        logNoop()
     }
 }
