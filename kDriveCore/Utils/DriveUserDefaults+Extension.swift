@@ -53,6 +53,7 @@ public extension UserDefaults.Keys {
     static let syncOfflineMode = UserDefaults.Keys(rawValue: "syncOfflineMode")
     static let matomoAuthorized = UserDefaults.Keys(rawValue: "matomoAuthorized")
     static let sentryAuthorized = UserDefaults.Keys(rawValue: "sentryAuthorized")
+    static let filesSectionExtended = UserDefaults.Keys(rawValue: "filesSectionCollapsed")
 }
 
 public extension UserDefaults {
@@ -375,6 +376,15 @@ public extension UserDefaults {
         }
         set {
             set(newValue, forKey: key(.sentryAuthorized))
+        }
+    }
+
+    var isFilesSectionExtended: Bool {
+        get {
+            return bool(forKey: key(.filesSectionExtended))
+        }
+        set {
+            set(newValue, forKey: key(.filesSectionExtended))
         }
     }
 }
