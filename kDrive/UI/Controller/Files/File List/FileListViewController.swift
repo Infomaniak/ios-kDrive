@@ -405,6 +405,9 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             }
         } else {
             refreshControl.endRefreshing()
+            if collectionView.contentOffset.y <= collectionView.contentInset.top {
+                scrollToTop()
+            }
         }
     }
 
