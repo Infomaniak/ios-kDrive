@@ -111,29 +111,20 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
-    private static var baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.homeTitle,
-                                                                 image: KDriveResourcesAsset.house.image,
-                                                                 destination: .home,
-                                                                 priority: 3),
-                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.allPictures,
+    private static var baseItems: [RootMenuItem] = [RootMenuItem(name: "Galerie",
                                                                  image: KDriveResourcesAsset.mediaInline.image,
                                                                  destination: .photoList,
                                                                  priority: 2),
                                                     RootMenuItem(
-                                                        name: KDriveResourcesStrings.Localizable.favoritesTitle,
-                                                        image: KDriveResourcesAsset.favorite.image,
+                                                        name: "Mes favoris",
+                                                        image: KDriveResourcesAsset.star.image,
                                                         destination: .file(DriveFileManager.favoriteRootFile)
                                                     ),
                                                     RootMenuItem(
-                                                        name: KDriveResourcesStrings.Localizable.lastEditsTitle,
+                                                        name: "Mes dernières modifications",
                                                         image: KDriveResourcesAsset.clock.image,
                                                         destination: .file(DriveFileManager.lastModificationsRootFile)
-                                                    ),
-                                                    RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
-                                                                 image: KDriveResourcesAsset
-                                                                     .delete.image,
-                                                                 destination: .file(DriveFileManager
-                                                                     .trashRootFile))]
+                                                    )]
 
     private static var expandableItems: [RootMenuItem] = [
         RootMenuItem(name: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
@@ -141,13 +132,17 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                      destination: .file(DriveFileManager.sharedWithMeRootFile)),
         RootMenuItem(name: KDriveResourcesStrings.Localizable.mySharesTitle,
                      image: KDriveResourcesAsset.folderSelect.image,
-                     destination: .file(DriveFileManager.mySharedRootFile)),
-        RootMenuItem(
-            name: KDriveResourcesStrings.Localizable.offlineFileTitle,
-            image: KDriveResourcesAsset.availableOffline.image,
-            destination: .file(DriveFileManager.offlineRoot)
-        )
+                     destination: .file(DriveFileManager.mySharedRootFile))
     ]
+
+    private static var lastSectionItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.offlineFileTitle,
+                                                                        image: KDriveResourcesAsset.availableOffline.image,
+                                                                        destination: .file(DriveFileManager.offlineRoot)),
+                                                           RootMenuItem(name: KDriveResourcesStrings.Localizable.trashTitle,
+                                                                        image: KDriveResourcesAsset
+                                                                            .delete.image,
+                                                                        destination: .file(DriveFileManager
+                                                                            .trashRootFile))]
 
     private static let compactModeItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.favoritesTitle,
                                                                         image: KDriveResourcesAsset.favorite.image,
@@ -211,34 +206,43 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     private func applySnapshotForLargeView(userRootFolders: [RootMenuItem]) {
+        let current = dataSource.snapshot()
+        if current.sectionIdentifiers != sections {
+            var snapshot = DataSourceSnapshot()
+            snapshot.appendSections(sections)
+            dataSource.apply(snapshot, animatingDifferences: false)
+        }
+
+        let home = [RootMenuItem(name: KDriveResourcesStrings.Localizable.homeTitle,
+                                 image: KDriveResourcesAsset.house.image,
+                                 destination: .home,
+                                 priority: 3)]
+
+        let firstSectionItems = home + userRootFolders + SidebarViewController.baseItems
+        let secondSectionItems = SidebarViewController.expandableItems
+        let thirdSectionItems = SidebarViewController.lastSectionItems
+
+        var firstSectionSnapshot = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
+        firstSectionSnapshot.append(firstSectionItems)
+        dataSource.apply(firstSectionSnapshot, to: .first, animatingDifferences: false)
+
         let sectionHeader = RootMenuItem(
-            name: KDriveCoreStrings.Localizable.allFilesTitle,
+            name: "Partages",
             image: nil,
             destination: nil,
             isHeader: true
         )
-
-        let firstSectionItems = SidebarViewController.baseItems
-        let secondSectionItems = [sectionHeader] + userRootFolders + SidebarViewController.expandableItems
-        let sectionsItems = [firstSectionItems, secondSectionItems]
-
-        var firstSectionSnapshot = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
-        firstSectionSnapshot.append(firstSectionItems)
-        dataSource.apply(firstSectionSnapshot, to: .first, animatingDifferences: true)
-
-        for (section, items) in zip(sections, sectionsItems) {
-            guard let header = items.first, section != .first else { continue }
-            var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
-            sectionSnapshot.append([header])
-            let children = Array(items.dropFirst())
-            if !children.isEmpty {
-                sectionSnapshot.append(children, to: header)
-                if UserDefaults.shared.isFilesSectionExtended {
-                    sectionSnapshot.expand([header])
-                }
-            }
-            dataSource.apply(sectionSnapshot, to: section, animatingDifferences: true)
+        var secondSectionSnapshot = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
+        secondSectionSnapshot.append([sectionHeader])
+        secondSectionSnapshot.append(secondSectionItems, to: sectionHeader)
+        if UserDefaults.shared.isFilesSectionExtended {
+            secondSectionSnapshot.expand([sectionHeader])
         }
+        dataSource.apply(secondSectionSnapshot, to: .second, animatingDifferences: false)
+
+        var thirdSectionSnapshot = NSDiffableDataSourceSectionSnapshot<RootMenuItem>()
+        thirdSectionSnapshot.append(thirdSectionItems)
+        dataSource.apply(thirdSectionSnapshot, to: .third, animatingDifferences: false)
     }
 
     private func applySnapshotForCompactView(userRootFolders: [RootMenuItem]) {
@@ -251,7 +255,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         snapshot.appendSections([RootMenuSection.main])
         snapshot.appendItems(menuItems)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 
     private func applySnapshot() {
