@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "9269397a5974b8024124a15ffb34205a12090065",
-        "version" : "17.0.0"
+        "revision" : "1614c4604999356dfb580e1d568ad69e704e374c",
+        "version" : "17.1.0"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "1d0fe5f625c811e86c30fa764744733bf68b2ff1",
-        "version" : "23.0.0"
+        "revision" : "549c208b043dfe04c4f4238255aaaec90378af16",
+        "version" : "23.1.0"
       }
     },
     {
@@ -276,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "3365d74b0ac74a10c87f41a1229526b3ba97a460",
-        "version" : "8.56.0"
+        "revision" : "9e193ac0b71760603aa666bad7e9e303dd7031a8",
+        "version" : "8.56.2"
       }
     },
     {
@@ -348,8 +348,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "1c30f0f2053b654e3d1302492124aa6d242cdba7",
-        "version" : "2.86.0"
+        "revision" : "a18bddb0acf7a40d982b2f128ce73ce4ee31f352",
+        "version" : "2.86.2"
       }
     },
     {
@@ -357,8 +357,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "737e550e607d82bf15bdfddf158ec61652ce836f",
-        "version" : "2.34.0"
+        "revision" : "b2b043a8810ab6d51b3ff4df17f057d87ef1ec7c",
+        "version" : "2.34.1"
       }
     },
     {
@@ -375,8 +375,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-numerics.git",
       "state" : {
-        "revision" : "bbadd4b853a33fd78c4ae977d17bb2af15eb3f2a",
-        "version" : "1.1.0"
+        "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
+        "version" : "1.1.1"
       }
     },
     {
