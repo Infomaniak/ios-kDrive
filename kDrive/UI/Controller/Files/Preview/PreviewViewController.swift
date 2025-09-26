@@ -460,9 +460,20 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     func hideFloatingPanel(_ hide: Bool) {
         if hide {
+            if floatingPanelViewController.presentingViewController != nil {
+                floatingPanelViewController.dismiss(animated: true)
+            } else if floatingPanelViewController.parent != nil {
+                floatingPanelViewController.removePanelFromParent(animated: true)
+            }
             floatingPanelViewController.dismiss(animated: true)
-        } else if floatingPanelViewController.presentingViewController == nil {
-            present(floatingPanelViewController, animated: true)
+        } else {
+            if traitCollection.horizontalSizeClass == .regular {
+                guard floatingPanelViewController.parent == nil else { return }
+                floatingPanelViewController.addPanel(toParent: self, animated: true)
+            } else {
+                guard floatingPanelViewController.presentingViewController == nil else { return }
+                present(floatingPanelViewController, animated: true)
+            }
         }
     }
 
