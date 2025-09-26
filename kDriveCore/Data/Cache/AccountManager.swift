@@ -80,6 +80,7 @@ public protocol AccountManageable: AnyObject {
     func addAccount(account: Account, token: ApiToken) async throws
     func removeAccount(toDeleteAccount: Account)
     func removeTokenAndAccount(account: Account)
+    func removeCachedProperties()
     func account(for token: ApiToken) -> Account?
     func account(for userId: Int) -> Account?
     func logoutCurrentAccountAndSwitchToNextIfPossible()
@@ -374,6 +375,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     private func clearDriveFileManagers() {
         driveFileManagers.removeAll()
+    }
+
+    public func removeCachedProperties() {
+        driveFileManagers.removeAll()
+        apiFetchers.removeAll()
     }
 
     public func getApiFetcher(for userId: Int, token: AssociatedApiToken) -> DriveApiFetcher {
