@@ -1,2 +1,2 @@
-- Login inter-app fix
+- Token migration
 - Stability improvements and bug fixes
