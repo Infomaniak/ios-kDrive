@@ -32,7 +32,7 @@ TAG_NAME="Beta-$VERSION-b$CI_BUILD_NUMBER"
 # MARK: - GitHub Release
 
 gh auth login --with-token <<< "$GITHUB_LOCAL_TOKEN"
-RELEASE_URL=$(gh release create $TAG_NAME --generate-notes --target $CI_COMMIT)
+RELEASE_URL=$(gh release create $TAG_NAME --generate-notes --target $CI_COMMIT --prerelease)
 
 # MARK: - kChat Notification
 
