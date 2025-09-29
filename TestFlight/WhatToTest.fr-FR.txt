@@ -1,2 +1,2 @@
-- Correction login inter-app
+- Migration des tokens
 - Améliorations de la stabilité et corrections de bugs
