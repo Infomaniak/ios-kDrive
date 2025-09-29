@@ -26,4 +26,8 @@ public extension Logger {
     static let general = Logger(subsystem: subsystem, category: "general")
 
     static let debug = Logger(subsystem: subsystem, category: "debug")
+
+    init(category: String) {
+        self = Logger(subsystem: Logger.subsystem, category: category)
+    }
 }

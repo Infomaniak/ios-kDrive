@@ -121,31 +121,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func sceneWillEnterForeground(_ scene: UIScene) {
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
-        uploadNotifications.setPausedNotificationSent(false)
-
-        let currentState = RootViewControllerState.getCurrentState()
-        let session = scene.session
-        let isRestoration: Bool = session.stateRestorationActivity != nil
-        Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(String(describing: session.stateRestorationActivity))")
-        appNavigable.prepareRootViewController(currentState: currentState, restoration: isRestoration)
-
-        switch currentState {
-        case .mainViewController, .appLock:
-            UserDefaults.shared.numberOfConnections += 1
-            UserDefaults.shared.openingUntilReview -= 1
-            Task {
-                await appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
-            }
-            uploadEditedFiles()
-        case .onboarding, .updateRequired, .preloading: break
-        }
-
-        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        appNavigable.prepareRootViewController(currentState: .splashScreen, restoration: false)
 
         Task {
-            if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
-                appNavigable.prepareRootViewController(currentState: .updateRequired, restoration: false)
-            }
+            await TokenMigrator().migrateTokensIfNeeded()
+
+            finishSceneSetup(scene)
         }
     }
 
@@ -295,6 +276,35 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
 // TODO: Refactor with router like pattern and split code away from this class
 extension SceneDelegate {
+    @MainActor func finishSceneSetup(_ scene: UIScene) {
+        uploadNotifications.setPausedNotificationSent(false)
+
+        let currentState = RootViewControllerState.getCurrentState()
+        let session = scene.session
+        let isRestoration: Bool = session.stateRestorationActivity != nil
+        Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(String(describing: session.stateRestorationActivity))")
+        appNavigable.prepareRootViewController(currentState: currentState, restoration: isRestoration)
+
+        switch currentState {
+        case .mainViewController, .appLock:
+            UserDefaults.shared.numberOfConnections += 1
+            UserDefaults.shared.openingUntilReview -= 1
+            Task {
+                await appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+            }
+            uploadEditedFiles()
+        case .splashScreen, .onboarding, .updateRequired, .preloading: break
+        }
+
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+
+        Task {
+            if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
+                appNavigable.prepareRootViewController(currentState: .updateRequired, restoration: false)
+            }
+        }
+    }
+
     func uploadEditedFiles() {
         Log.sceneDelegate("uploadEditedFiles")
         guard let folderURL = DriveFileManager.constants.openInPlaceDirectoryURL,

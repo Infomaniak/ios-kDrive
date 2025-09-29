@@ -113,4 +113,6 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager? {
         fatalError("Not implemented")
     }
+
+    func removeCachedProperties() {}
 }

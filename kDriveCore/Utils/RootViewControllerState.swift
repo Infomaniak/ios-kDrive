@@ -22,6 +22,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 
 public enum RootViewControllerState {
+    case splashScreen
     case onboarding
     case appLock
     case mainViewController(driveFileManager: DriveFileManager)
