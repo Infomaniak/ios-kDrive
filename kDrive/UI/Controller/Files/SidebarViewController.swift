@@ -111,17 +111,17 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
-    private static var baseItems: [RootMenuItem] = [RootMenuItem(name: "Galerie",
+    private static var baseItems: [RootMenuItem] = [RootMenuItem(name: KDriveResourcesStrings.Localizable.allPictures,
                                                                  image: KDriveResourcesAsset.mediaInline.image,
                                                                  destination: .photoList,
                                                                  priority: 2),
                                                     RootMenuItem(
-                                                        name: "Mes favoris",
-                                                        image: KDriveResourcesAsset.star.image,
+                                                        name: KDriveResourcesStrings.Localizable.favoritesTitle,
+                                                        image: KDriveResourcesAsset.favorite.image,
                                                         destination: .file(DriveFileManager.favoriteRootFile)
                                                     ),
                                                     RootMenuItem(
-                                                        name: "Mes dernières modifications",
+                                                        name: KDriveResourcesStrings.Localizable.lastEditsTitle,
                                                         image: KDriveResourcesAsset.clock.image,
                                                         destination: .file(DriveFileManager.lastModificationsRootFile)
                                                     )]
@@ -227,7 +227,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         dataSource.apply(firstSectionSnapshot, to: .first, animatingDifferences: false)
 
         let sectionHeader = RootMenuItem(
-            name: "Partages",
+            name: KDriveResourcesStrings.Localizable.sharesTitle,
             image: nil,
             destination: nil,
             isHeader: true
