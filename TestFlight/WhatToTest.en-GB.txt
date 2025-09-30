@@ -1,2 +1,2 @@
-- Token migration
+- Token migration on initial launch
 - Stability improvements and bug fixes
