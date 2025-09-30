@@ -1,2 +1,2 @@
-- Migration des tokens
+- Migration des tokens au lancement initial
 - Améliorations de la stabilité et corrections de bugs
