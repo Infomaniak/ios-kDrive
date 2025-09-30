@@ -41,6 +41,16 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
     func invalidate() {}
 
+    func fetchDroppingCursorIfNeeded(in directory: ProxyFile,
+                                     cursor: FileCursor?) async throws -> ValidApiResponse<ListingResult> {
+        let apiFetcher = driveFileManager.apiFetcher
+        do {
+            return try await apiFetcher.files(in: directory, advancedListingCursor: cursor, sortType: .nameAZ).validApiResponse
+        } catch let error as DriveError where error == DriveError.invalidCursorError {
+            return try await apiFetcher.files(in: directory, advancedListingCursor: nil, sortType: .nameAZ).validApiResponse
+        }
+    }
+
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
         Log.fileProvider("enumerateItems \(String(decoding: page.rawValue, as: UTF8.self))")
         Task { [weak self] in
@@ -86,11 +96,9 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
             do {
                 let currentPageCursor = page.isInitialPage ? nil : page.toCursor
-                let response: ValidApiResponse<ListingResult> = try await driveFileManager.apiFetcher.files(
-                    in: parentDirectory.proxify(),
-                    advancedListingCursor: currentPageCursor,
-                    sortType: .nameAZ
-                ).validApiResponse
+
+                let response = try await fetchDroppingCursorIfNeeded(in: parentDirectory.proxify(), cursor: currentPageCursor)
+
                 let files = response.data.files
 
                 try driveFileManager.database.writeTransaction { writableRealm in
@@ -171,11 +179,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
             do {
                 let proxyFile = ProxyFile(driveId: driveFileManager.driveId, id: fileId)
-                let response = try await driveFileManager.apiFetcher.files(
-                    in: proxyFile,
-                    advancedListingCursor: cursor,
-                    sortType: .nameAZ
-                ).validApiResponse
+                let response = try await fetchDroppingCursorIfNeeded(in: proxyFile, cursor: cursor)
 
                 let (updatedFiles, deletedFiles) = handleActions(response.data.actions, actionsFiles: response.data.actionsFiles)
 
