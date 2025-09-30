@@ -121,11 +121,15 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func sceneWillEnterForeground(_ scene: UIScene) {
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
-        appNavigable.prepareRootViewController(currentState: .splashScreen, restoration: false)
+        if window?.rootViewController == nil {
+            appNavigable.prepareRootViewController(currentState: .splashScreen, restoration: false)
 
-        Task {
-            await TokenMigrator().migrateTokensIfNeeded()
+            Task {
+                await TokenMigrator().migrateTokensIfNeeded()
 
+                finishSceneSetup(scene)
+            }
+        } else {
             finishSceneSetup(scene)
         }
     }
