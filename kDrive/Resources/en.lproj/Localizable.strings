@@ -4,7 +4,7 @@
  * Locale: en, English
  * Tagged: ios
  * Exported by: Baptiste Griva
- * Exported at: Tue, 16 Sep 2025 15:18:44 +0200
+ * Exported at: Mon, 29 Sep 2025 09:00:48 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -1716,6 +1716,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a3d */
 "sharedWithMeTitle" = "Shared with me";
+
+/* loco:68da2ce6292e9175f608b042 */
+"sharesTitle" = "Shares";
 
 /* loco:629f1ad12117e31124690d64 */
 "snackBarAccountDeleted" = "Account deleted";
