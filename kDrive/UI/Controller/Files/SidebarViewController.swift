@@ -276,7 +276,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             )
         } ?? []
 
-        if isCompactView && !selectMode {
+        if (isCompactView || UIDevice.current.userInterfaceIdiom == .phone) && !selectMode {
             applySnapshotForCompactView(userRootFolders: userRootFolders)
         } else if !isCompactView && !selectMode {
             applySnapshotForLargeView(userRootFolders: userRootFolders)
@@ -678,7 +678,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let destination = dataSource.itemIdentifier(for: indexPath)?.destination else { return }
 
-        if isCompactView {
+        if isCompactView || UIDevice.current.userInterfaceIdiom == .phone {
             guard case .file(let selectedRootFile) = destination else { return }
             let destinationViewModel = getViewModelForRootFile(selectedRootFile)
             let destinationViewController = FileListViewController(viewModel: destinationViewModel)

@@ -239,8 +239,8 @@ public struct AppRouter: AppNavigable {
     @MainActor public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? {
         guard let rootViewController = window?.rootViewController else { return nil }
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
-        if rootHorizontalSizeClass == .compact {
-            guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            guard let mainTabViewController = rootViewController as? UITabBarController else {
                 Log.sceneDelegate("unable to access tabBarViewController", level: .error)
                 return nil
             }
@@ -249,7 +249,18 @@ public struct AppRouter: AppNavigable {
             let viewControllers = mainTabViewController.viewControllers
             return viewControllers?[safe: selectedIndex]
         } else {
-            return tabBarViewController?.viewControllers.last
+            if rootHorizontalSizeClass == .compact {
+                guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+                    Log.sceneDelegate("unable to access compact controller inside splitViewController", level: .error)
+                    return nil
+                }
+
+                let selectedIndex = mainTabViewController.selectedIndex
+                let viewControllers = mainTabViewController.viewControllers
+                return viewControllers?[safe: selectedIndex]
+            } else {
+                return tabBarViewController?.viewControllers.last
+            }
         }
     }
 
@@ -464,12 +475,20 @@ public struct AppRouter: AppNavigable {
             return nil
         }
 
-        let tabBarViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
-
-        window.rootViewController = tabBarViewController
-        window.makeKeyAndVisible()
-
-        return tabBarViewController
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            let rootSplitViewController = RootSplitViewController(
+                driveFileManager: driveFileManager,
+                selectedIndex: selectedIndex
+            )
+            window.rootViewController = rootSplitViewController
+            window.makeKeyAndVisible()
+            return rootSplitViewController
+        } else {
+            let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager)
+            window.rootViewController = tabBarViewController
+            window.makeKeyAndVisible()
+            return nil
+        }
     }
 
     @MainActor public func showPreloading(currentAccount: Account) {
