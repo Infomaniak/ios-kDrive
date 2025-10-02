@@ -201,6 +201,14 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return addButton
     }()
 
+    private let bottomOverlay: UIView = {
+        let buttonBackgroundView = UIView()
+        buttonBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+        return buttonBackgroundView
+    }()
+
+    private var bottomOverlayHeightConstraint: NSLayoutConstraint?
+
     var itemsSnapshot: DataSourceSnapshot {
         DataSourceSnapshot()
     }
@@ -331,15 +339,28 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 self.navigationItem.rightBarButtonItem = buttonMenu
             }
 
-            collectionView.addSubview(addButton)
-
+            collectionView.addSubview(bottomOverlay)
+            bottomOverlay.backgroundColor = KDriveResourcesAsset.backgroundColor.color
             NSLayoutConstraint.activate([
-                addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
-                addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
-                addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-                addButton.heightAnchor.constraint(equalToConstant: 54),
-                addButton.widthAnchor.constraint(lessThanOrEqualToConstant: 500)
+                bottomOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                bottomOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                bottomOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             ])
+
+            let buttonHeight = 54.0
+            let buttonPadding = 24.0
+            let backgroundHeight = buttonHeight + buttonPadding
+            bottomOverlayHeightConstraint = bottomOverlay.heightAnchor.constraint(equalToConstant: backgroundHeight)
+            bottomOverlayHeightConstraint?.isActive = true
+
+            collectionView.addSubview(addButton)
+            NSLayoutConstraint.activate([
+                addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: buttonPadding),
+                addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -buttonPadding),
+                addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -buttonPadding),
+                addButton.heightAnchor.constraint(equalToConstant: buttonHeight)
+            ])
+            collectionView.bringSubviewToFront(addButton)
         } else {
             navigationItem.rightBarButtonItem = FileListBarButton(
                 type: .search,
@@ -601,7 +622,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         if !(isCompactView || selectMode) {
             let layout = UICollectionViewCompositionalLayout(sectionProvider: { _, layoutEnvironment in
-                let listConfig = UICollectionLayoutListConfiguration(appearance: .sidebar)
+                var listConfig = UICollectionLayoutListConfiguration(appearance: .sidebar)
+                listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
                 return NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
             }, configuration: configuration)
             return layout
