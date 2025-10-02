@@ -201,13 +201,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return addButton
     }()
 
+    private var backgroundLayer: CALayer?
+    private var bottomOverlayHeightConstraint: NSLayoutConstraint?
     private let bottomOverlay: UIView = {
         let buttonBackgroundView = UIView()
         buttonBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         return buttonBackgroundView
     }()
-
-    private var bottomOverlayHeightConstraint: NSLayoutConstraint?
 
     var itemsSnapshot: DataSourceSnapshot {
         DataSourceSnapshot()
@@ -375,6 +375,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        setupBackgroundGradient()
+    }
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
 
@@ -382,6 +387,24 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
             || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
         forceRefresh()
+    }
+
+    private func setupBackgroundGradient() {
+        let gradient = CAGradientLayer()
+        let height = 120.0
+        let padding = 12.0
+        let inset = bottomOverlay.frame.height + padding
+        gradient.frame = CGRect(x: 0, y: -inset, width: bottomOverlay.frame.width, height: height)
+        gradient.colors = [
+            KDriveResourcesAsset.backgroundColor.color.withAlphaComponent(0).cgColor,
+            KDriveResourcesAsset.backgroundColor.color.cgColor
+        ]
+        if let oldBackgroundLayer = backgroundLayer {
+            bottomOverlay.layer.replaceSublayer(oldBackgroundLayer, with: gradient)
+        } else {
+            bottomOverlay.layer.insertSublayer(gradient, at: 0)
+        }
+        backgroundLayer = gradient
     }
 
     private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
