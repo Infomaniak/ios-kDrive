@@ -21,6 +21,7 @@ import InfomaniakCore
 import InfomaniakDI
 import Photos
 import RealmSwift
+import UIKit
 
 public protocol PhotoLibraryScanable {
     func scheduleNewPicturesForUpload() async
@@ -78,6 +79,25 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         await worker.value
     }
 
+    private func earlyUploadWhatIsAvailableIfNecessary() async {
+        // The sync _must_ be synchronous in background refresh to work correctly.
+        guard await UIApplication.shared.applicationState == .active else {
+            Log.photoLibraryUploader("No early upload start. Only starting early when app is in foreground.")
+            return
+        }
+
+        let filesToUploadCount = uploadDatasource.getAllUploadingFilesFrozen().count
+        let activeUploadsCount = uploadService.operationCount
+
+        guard filesToUploadCount >= Self.startUploadWhileScanningThreshold, activeUploadsCount == 0 else {
+            Log.photoLibraryUploader("No early upload start. Upload state:\(activeUploadsCount)/\(filesToUploadCount)")
+            return
+        }
+
+        Log.photoLibraryUploader("Starting uploads early while scanning")
+        uploadService.rebuildUploadQueue()
+    }
+
     public func cancelScan() async {
         guard let workerTask else {
             return
@@ -133,11 +153,17 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         var burstIdentifier: String?
         var burstCount = 0
 
-        assetsFetchResult.enumerateObjects { [self] asset, _, stop in
+        assetsFetchResult.enumerateObjects { [self] asset, index, stop in
             guard !expiringActivity.shouldTerminate else {
                 Log.photoLibraryUploader("system is asking to terminate")
                 stop.pointee = true
                 return
+            }
+
+            if index % Self.startUploadWhileScanningThreshold == 0 {
+                Task {
+                    await earlyUploadWhatIsAvailableIfNecessary()
+                }
             }
 
             @InjectService var photoLibrarySaver: PhotoLibrarySavable
