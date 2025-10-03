@@ -495,7 +495,7 @@ public struct AppRouter: AppNavigable {
             window.makeKeyAndVisible()
             return rootSplitViewController
         } else {
-            let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager)
+            let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
             window.rootViewController = tabBarViewController
             window.makeKeyAndVisible()
             return nil
