@@ -462,6 +462,17 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterAppNavigable
 
+    @MainActor private func currentDriveFileManagerForRoot() -> DriveFileManager? {
+        guard let rootViewController = window?.rootViewController else { return nil }
+        if let splitViewController = rootViewController as? RootSplitViewController {
+            return splitViewController.driveFileManager
+        } else if let mainTabViewController = rootViewController as? MainTabViewController {
+            return mainTabViewController.driveFileManager
+        } else {
+            return nil
+        }
+    }
+
     @discardableResult
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
                                                   selectedIndex: Int?) -> UISplitViewController? {
@@ -470,8 +481,8 @@ public struct AppRouter: AppNavigable {
             return nil
         }
 
-        let currentDriveObjectId = (window.rootViewController as? RootSplitViewController)?.driveFileManager.drive.objectId
-        guard currentDriveObjectId != driveFileManager.drive.objectId else {
+        if let currentDriveFileManager = currentDriveFileManagerForRoot(),
+           currentDriveFileManager.drive.objectId == driveFileManager.drive.objectId {
             return nil
         }
 
