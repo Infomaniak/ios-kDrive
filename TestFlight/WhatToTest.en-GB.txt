@@ -1,2 +1,2 @@
-- Token migration on initial launch
+- Improved and enhanced iPad experience
 - Stability improvements and bug fixes
