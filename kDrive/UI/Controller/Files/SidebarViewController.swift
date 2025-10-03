@@ -201,6 +201,14 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return addButton
     }()
 
+    private var backgroundLayer: CALayer?
+    private var bottomOverlayHeightConstraint: NSLayoutConstraint?
+    private let bottomOverlay: UIView = {
+        let buttonBackgroundView = UIView()
+        buttonBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+        return buttonBackgroundView
+    }()
+
     var itemsSnapshot: DataSourceSnapshot {
         DataSourceSnapshot()
     }
@@ -296,7 +304,12 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         navigationItem.title = driveFileManager.drive.name
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(
+            top: 0,
+            left: 0,
+            bottom: UIConstants.List.floatingButtonPaddingBottom,
+            right: 0
+        )
         collectionView.refreshControl = refreshControl
 
         collectionView.register(cellView: FileCollectionViewCell.self)
@@ -331,15 +344,28 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 self.navigationItem.rightBarButtonItem = buttonMenu
             }
 
-            collectionView.addSubview(addButton)
-
+            collectionView.addSubview(bottomOverlay)
+            bottomOverlay.backgroundColor = KDriveResourcesAsset.backgroundColor.color
             NSLayoutConstraint.activate([
-                addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
-                addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
-                addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
-                addButton.heightAnchor.constraint(equalToConstant: 54),
-                addButton.widthAnchor.constraint(lessThanOrEqualToConstant: 500)
+                bottomOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                bottomOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                bottomOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             ])
+
+            let buttonHeight = 50.0
+            let buttonPadding = 20.0
+            let backgroundHeight = buttonHeight + buttonPadding
+            bottomOverlayHeightConstraint = bottomOverlay.heightAnchor.constraint(equalToConstant: backgroundHeight)
+            bottomOverlayHeightConstraint?.isActive = true
+
+            collectionView.addSubview(addButton)
+            NSLayoutConstraint.activate([
+                addButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: buttonPadding),
+                addButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -buttonPadding),
+                addButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -buttonPadding),
+                addButton.heightAnchor.constraint(equalToConstant: buttonHeight)
+            ])
+            collectionView.bringSubviewToFront(addButton)
         } else {
             navigationItem.rightBarButtonItem = FileListBarButton(
                 type: .search,
@@ -354,6 +380,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        setupBackgroundGradient()
+    }
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
 
@@ -361,6 +392,24 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
             || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
         forceRefresh()
+    }
+
+    private func setupBackgroundGradient() {
+        let gradient = CAGradientLayer()
+        let height = 120.0
+        let padding = 12.0
+        let inset = bottomOverlay.frame.height + padding
+        gradient.frame = CGRect(x: 0, y: -inset, width: bottomOverlay.frame.width, height: height)
+        gradient.colors = [
+            KDriveResourcesAsset.backgroundColor.color.withAlphaComponent(0).cgColor,
+            KDriveResourcesAsset.backgroundColor.color.cgColor
+        ]
+        if let oldBackgroundLayer = backgroundLayer {
+            bottomOverlay.layer.replaceSublayer(oldBackgroundLayer, with: gradient)
+        } else {
+            bottomOverlay.layer.insertSublayer(gradient, at: 0)
+        }
+        backgroundLayer = gradient
     }
 
     private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
@@ -601,7 +650,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         if !(isCompactView || selectMode) {
             let layout = UICollectionViewCompositionalLayout(sectionProvider: { _, layoutEnvironment in
-                let listConfig = UICollectionLayoutListConfiguration(appearance: .sidebar)
+                var listConfig = UICollectionLayoutListConfiguration(appearance: .sidebar)
+                listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
                 return NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
             }, configuration: configuration)
             return layout
