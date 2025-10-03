@@ -127,7 +127,8 @@ final class SelectFolderViewController: FileListViewController {
         var viewControllers = [UIViewController]()
         var isCompactView: Bool {
             guard let rootViewController = appRouter.rootViewController else { return false }
-            return rootViewController.traitCollection.horizontalSizeClass == .compact
+            return rootViewController.traitCollection.horizontalSizeClass == .compact ||
+                UIDevice.current.userInterfaceIdiom == .phone
         }
 
         let locationFolderViewController = LocationFolderViewController(

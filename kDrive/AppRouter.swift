@@ -239,8 +239,8 @@ public struct AppRouter: AppNavigable {
     @MainActor public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? {
         guard let rootViewController = window?.rootViewController else { return nil }
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
-        if rootHorizontalSizeClass == .compact {
-            guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+        if UIDevice.current.userInterfaceIdiom == .phone {
+            guard let mainTabViewController = rootViewController as? UITabBarController else {
                 Log.sceneDelegate("unable to access tabBarViewController", level: .error)
                 return nil
             }
@@ -249,7 +249,18 @@ public struct AppRouter: AppNavigable {
             let viewControllers = mainTabViewController.viewControllers
             return viewControllers?[safe: selectedIndex]
         } else {
-            return tabBarViewController?.viewControllers.last
+            if rootHorizontalSizeClass == .compact {
+                guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+                    Log.sceneDelegate("unable to access compact controller inside splitViewController", level: .error)
+                    return nil
+                }
+
+                let selectedIndex = mainTabViewController.selectedIndex
+                let viewControllers = mainTabViewController.viewControllers
+                return viewControllers?[safe: selectedIndex]
+            } else {
+                return tabBarViewController?.viewControllers.last
+            }
         }
     }
 
@@ -451,6 +462,17 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterAppNavigable
 
+    @MainActor private func currentDriveFileManagerForRoot() -> DriveFileManager? {
+        guard let rootViewController = window?.rootViewController else { return nil }
+        if let splitViewController = rootViewController as? RootSplitViewController {
+            return splitViewController.driveFileManager
+        } else if let mainTabViewController = rootViewController as? MainTabViewController {
+            return mainTabViewController.driveFileManager
+        } else {
+            return nil
+        }
+    }
+
     @discardableResult
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
                                                   selectedIndex: Int?) -> UISplitViewController? {
@@ -459,17 +481,25 @@ public struct AppRouter: AppNavigable {
             return nil
         }
 
-        let currentDriveObjectId = (window.rootViewController as? RootSplitViewController)?.driveFileManager.drive.objectId
-        guard currentDriveObjectId != driveFileManager.drive.objectId else {
+        if let currentDriveFileManager = currentDriveFileManagerForRoot(),
+           currentDriveFileManager.drive.objectId == driveFileManager.drive.objectId {
             return nil
         }
 
-        let tabBarViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
-
-        window.rootViewController = tabBarViewController
-        window.makeKeyAndVisible()
-
-        return tabBarViewController
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            let rootSplitViewController = RootSplitViewController(
+                driveFileManager: driveFileManager,
+                selectedIndex: selectedIndex
+            )
+            window.rootViewController = rootSplitViewController
+            window.makeKeyAndVisible()
+            return rootSplitViewController
+        } else {
+            let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
+            window.rootViewController = tabBarViewController
+            window.makeKeyAndVisible()
+            return nil
+        }
     }
 
     @MainActor public func showPreloading(currentAccount: Account) {
