@@ -304,7 +304,12 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         navigationItem.title = driveFileManager.drive.name
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        collectionView.contentInset = UIEdgeInsets(
+            top: 0,
+            left: 0,
+            bottom: UIConstants.List.floatingButtonPaddingBottom,
+            right: 0
+        )
         collectionView.refreshControl = refreshControl
 
         collectionView.register(cellView: FileCollectionViewCell.self)
@@ -347,8 +352,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 bottomOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             ])
 
-            let buttonHeight = 54.0
-            let buttonPadding = 24.0
+            let buttonHeight = 50.0
+            let buttonPadding = 20.0
             let backgroundHeight = buttonHeight + buttonPadding
             bottomOverlayHeightConstraint = bottomOverlay.heightAnchor.constraint(equalToConstant: backgroundHeight)
             bottomOverlayHeightConstraint?.isActive = true
