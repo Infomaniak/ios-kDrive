@@ -28,8 +28,8 @@ import UIKit
 
 /// Enum to explicit tab names
 public enum MainTabBarIndex: Int {
-    case files = 0
-    case home = 1
+    case home = 0
+    case files = 1
     case gallery = 3
     case profile = 4
 }
@@ -69,22 +69,27 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
     // MARK: - SidebarViewControllerDelegate
 
     func didSelectItem(destination: SidebarDestination) {
-        guard let detailNavigationController = viewControllers.last as? UINavigationController else { return }
+        guard let detailNavigationController = viewControllers.last as? UINavigationController,
+              let compactTabBar = viewController(for: .compact) as? MainTabViewController else { return }
         detailNavigationController.setNavigationBarHidden(false, animated: true)
 
         switch destination {
         case .home:
             let homeViewController = HomeViewController(driveFileManager: driveFileManager)
+            compactTabBar.selectedIndex = MainTabBarIndex.home.rawValue
             detailNavigationController.setViewControllers([homeViewController], animated: false)
         case .photoList:
             let photoListViewModel = PhotoListViewModel(driveFileManager: driveFileManager)
             let photoListViewController = PhotoListViewController(viewModel: photoListViewModel)
+            compactTabBar.selectedIndex = MainTabBarIndex.gallery.rawValue
             detailNavigationController.setViewControllers([photoListViewController], animated: false)
         case .menu:
             let menuViewController = MenuViewController(driveFileManager: driveFileManager)
+            compactTabBar.selectedIndex = MainTabBarIndex.home.rawValue
             detailNavigationController.setViewControllers([menuViewController], animated: false)
         case .file(let fileListViewModel):
             let destinationViewController = FileListViewController(viewModel: fileListViewModel)
+            compactTabBar.selectedIndex = MainTabBarIndex.files.rawValue
             detailNavigationController.setViewControllers([destinationViewController], animated: false)
         }
     }
