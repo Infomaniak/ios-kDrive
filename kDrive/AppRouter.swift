@@ -239,7 +239,7 @@ public struct AppRouter: AppNavigable {
     @MainActor public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? {
         guard let rootViewController = window?.rootViewController else { return nil }
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
-        if rootHorizontalSizeClass == .compact || UIDevice.current.userInterfaceIdiom == .phone {
+        if rootHorizontalSizeClass.iskDriveCompactSize {
             guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
                 Log.sceneDelegate("unable to access compact controller inside splitViewController", level: .error)
                 return nil
