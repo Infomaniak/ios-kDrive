@@ -239,9 +239,9 @@ public struct AppRouter: AppNavigable {
     @MainActor public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? {
         guard let rootViewController = window?.rootViewController else { return nil }
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            guard let mainTabViewController = rootViewController as? UITabBarController else {
-                Log.sceneDelegate("unable to access tabBarViewController", level: .error)
+        if rootHorizontalSizeClass == .compact || UIDevice.current.userInterfaceIdiom == .phone {
+            guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+                Log.sceneDelegate("unable to access compact controller inside splitViewController", level: .error)
                 return nil
             }
 
@@ -249,18 +249,7 @@ public struct AppRouter: AppNavigable {
             let viewControllers = mainTabViewController.viewControllers
             return viewControllers?[safe: selectedIndex]
         } else {
-            if rootHorizontalSizeClass == .compact {
-                guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
-                    Log.sceneDelegate("unable to access compact controller inside splitViewController", level: .error)
-                    return nil
-                }
-
-                let selectedIndex = mainTabViewController.selectedIndex
-                let viewControllers = mainTabViewController.viewControllers
-                return viewControllers?[safe: selectedIndex]
-            } else {
-                return tabBarViewController?.viewControllers.last
-            }
+            return tabBarViewController?.viewControllers.last
         }
     }
 
