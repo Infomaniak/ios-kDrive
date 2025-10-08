@@ -287,7 +287,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     func setupFooterIfNeeded() {
-        guard driveFileManager.isPublicShare else { return }
+        guard case .publicShare(_, let metadata) = driveFileManager.context, metadata.capabilities.canDownload else { return }
 
         view.addSubview(addToKDriveButton)
         view.bringSubviewToFront(addToKDriveButton)
