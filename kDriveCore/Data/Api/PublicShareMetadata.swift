@@ -18,7 +18,7 @@
 
 import Foundation
 
-public struct PublicShareMetadata: Decodable {
+public struct PublicShareMetadata: Decodable, Equatable {
     public let url: URL
     public let fileId: Int
     public let right: String
