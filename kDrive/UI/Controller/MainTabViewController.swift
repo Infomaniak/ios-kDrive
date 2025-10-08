@@ -85,12 +85,15 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             detailNavigationController.setViewControllers([photoListViewController], animated: false)
         case .menu:
             let menuViewController = MenuViewController(driveFileManager: driveFileManager)
-            compactTabBar.selectedIndex = MainTabBarIndex.home.rawValue
             detailNavigationController.setViewControllers([menuViewController], animated: false)
         case .file(let fileListViewModel):
             let destinationViewController = FileListViewController(viewModel: fileListViewModel)
             compactTabBar.selectedIndex = MainTabBarIndex.files.rawValue
             detailNavigationController.setViewControllers([destinationViewController], animated: false)
+            if let filesNav = compactTabBar.viewControllers?[safe: 1] as? UINavigationController {
+                let destinationVC = FileListViewController(viewModel: fileListViewModel)
+                filesNav.pushViewController(destinationVC, animated: false)
+            }
         }
     }
 }
