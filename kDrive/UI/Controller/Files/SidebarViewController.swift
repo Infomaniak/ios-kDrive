@@ -280,6 +280,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             applySnapshotForCompactView(userRootFolders: userRootFolders)
         } else if !isCompactView && !selectMode {
             applySnapshotForLargeView(userRootFolders: userRootFolders)
+            collectionView.selectItem(at: selectedIndexPath, animated: false, scrollPosition: [])
         } else {
             dataSource.apply(itemsSnapshot, animatingDifferences: true)
         }
