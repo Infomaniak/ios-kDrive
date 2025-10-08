@@ -34,8 +34,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
 
     var isCompactView: Bool {
         guard let rootViewController = appRouter.rootViewController else { return false }
-        return rootViewController.traitCollection.horizontalSizeClass == .compact ||
-            UIDevice.current.userInterfaceIdiom == .phone
+        return rootViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
     }
 
     override func viewDidLoad() {
