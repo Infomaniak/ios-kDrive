@@ -30,7 +30,7 @@ public enum DriveFileManagerContext: Equatable {
     case sharedWithMe
 
     /// Dedicated in memory dataset for a public share link
-    case publicShare(shareProxy: PublicShareProxy)
+    case publicShare(shareProxy: PublicShareProxy, metadata: PublicShareMetadata)
 
     func realmURL(driveId: Int, driveUserId: Int) -> URL? {
         switch self {
@@ -50,8 +50,8 @@ public enum DriveFileManagerContext: Equatable {
         switch (lhs, rhs) {
         case (.drive, .drive), (.fileProvider, .fileProvider), (.sharedWithMe, .sharedWithMe):
             return true
-        case (.publicShare(let lhsShareProxy), .publicShare(let rhsShareProxy)):
-            return lhsShareProxy == rhsShareProxy
+        case (.publicShare(let lhsShareProxy, let lhsMetadata), .publicShare(let rhsShareProxy, let rhsMetadata)):
+            return lhsShareProxy == rhsShareProxy && lhsMetadata == rhsMetadata
         default:
             return false
         }
