@@ -314,7 +314,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return driveFileManager
     }
 
-    public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, metadata: PublicShareMetadata) -> DriveFileManager? {
+    public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int,
+                                            metadata: PublicShareMetadata) -> DriveFileManager? {
         if let inMemoryDriveFileManager = driveFileManagers[publicShareId] {
             return inMemoryDriveFileManager
         }
