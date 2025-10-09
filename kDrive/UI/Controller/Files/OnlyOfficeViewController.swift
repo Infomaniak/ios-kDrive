@@ -223,7 +223,8 @@ extension OnlyOfficeViewController: WKUIDelegate {
         windowFeatures: WKWindowFeatures
     ) -> WKWebView? {
         guard let url = navigationAction.request.url else { return nil }
-        if navigationAction.targetFrame == nil && url.host == ApiEnvironment.current.driveHost {
+        let matchingDomain = url.host == ApiEnvironment.current.driveHost || url.host == URLConstants.kSuiteWeb.url.host
+        if navigationAction.targetFrame == nil && matchingDomain {
             dismiss()
             return nil
         }
