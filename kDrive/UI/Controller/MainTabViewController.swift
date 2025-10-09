@@ -36,15 +36,27 @@ public enum MainTabBarIndex: Int {
 
 class RootSplitViewController: UISplitViewController, SidebarViewControllerDelegate {
     let driveFileManager: DriveFileManager
+    var lastSelectedDestination: SidebarDestination? {
+        didSet {
+            let destination = lastSelectedDestination
 
-    init(driveFileManager: DriveFileManager, selectedIndex: Int? = nil) {
+            let sidebarNavigationController = viewController(for: .primary) as? UINavigationController
+            let sidebarViewController = sidebarNavigationController?.viewControllers.first as? SidebarViewController
+
+            sidebarViewController?.lastSelectedDestination = destination
+        }
+    }
+
+    init(driveFileManager: DriveFileManager, selectedIndex: Int? = nil, lastSelectedDestination: SidebarDestination? = nil) {
         self.driveFileManager = driveFileManager
+        self.lastSelectedDestination = lastSelectedDestination
         super.init(style: .doubleColumn)
 
         let sidebarViewController = SidebarViewController(
             driveFileManager: driveFileManager,
             selectMode: false,
-            isCompactView: false
+            isCompactView: false,
+            lastSelectedDestination: lastSelectedDestination
         )
         let detailViewController = HomeViewController(driveFileManager: driveFileManager)
 
@@ -154,6 +166,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
                 filesNav.pushViewController(destinationVC, animated: false)
             }
         }
+        lastSelectedDestination = nil
     }
 }
 
@@ -497,8 +510,15 @@ extension MainTabViewController: UITabBarControllerDelegate {
 
         UserDefaults.shared.lastSelectedTab = selectedIndex
         saveSelectedTabUserActivity(selectedIndex)
-
         updateCenterButton()
+
+        guard let rootViewController = tabBarController.parent as? RootSplitViewController else { return }
+        switch selectedIndex {
+        case MainTabBarIndex.gallery.rawValue:
+            rootViewController.lastSelectedDestination = .photoList
+        default:
+            rootViewController.lastSelectedDestination = .home
+        }
     }
 
     // MARK: - State restoration

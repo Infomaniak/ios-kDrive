@@ -33,6 +33,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private let menuIndexPath: IndexPath = [-1, -1]
     private var plusButtonTableViewController: UITableViewController?
     let selectMode: Bool
+    var lastSelectedDestination: SidebarDestination?
 
     private var isMenuIndexPathSelected: Bool {
         if selectedIndexPath != menuIndexPath {
@@ -286,9 +287,15 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         }
     }
 
-    init(driveFileManager: DriveFileManager, selectMode: Bool, isCompactView: Bool) {
+    init(
+        driveFileManager: DriveFileManager,
+        selectMode: Bool,
+        isCompactView: Bool,
+        lastSelectedDestination: SidebarDestination? = nil
+    ) {
         self.driveFileManager = driveFileManager
         self.selectMode = selectMode
+        self.lastSelectedDestination = lastSelectedDestination
         super.init(collectionViewLayout: SidebarViewController.createListLayout(
             selectMode: selectMode,
             isCompactView: isCompactView
@@ -389,11 +396,21 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
+        applySnapshot()
+        if let lastSelectedDestination {
+            delegate?.didSelectItem(destination: lastSelectedDestination)
 
-        guard let previousTraitCollection else { return }
-        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
-            || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
-        forceRefresh()
+            guard let rootMenuDestination = lastSelectedDestination.rootMenuDestination else { return }
+            let snapshot = dataSource.snapshot()
+            let item = snapshot.itemIdentifiers.first { item in
+                item.destination == rootMenuDestination
+            }
+            if let item,
+               let indexPath = dataSource.indexPath(for: item) {
+                selectedIndexPath = indexPath
+                collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+            }
+
     }
 
     private func setupBackgroundGradient() {
@@ -805,6 +822,20 @@ enum SidebarDestination {
     case menu
     case photoList
     case file(FileListViewModel)
+
+    @MainActor
+    var rootMenuDestination: SidebarViewController.RootMenuDestination? {
+        switch self {
+        case .home:
+            return .home
+        case .photoList:
+            return .photoList
+        case .file(let viewModel):
+            return .file(viewModel.currentDirectory)
+        case .menu:
+            return nil
+        }
+    }
 }
 
 protocol SidebarViewControllerDelegate: AnyObject {
