@@ -172,6 +172,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     weak var delegate: SidebarViewControllerDelegate?
+    weak var mainTabViewControllerDelegate: MainTabViewControllerDelegate?
 
     let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
@@ -409,8 +410,23 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                let indexPath = dataSource.indexPath(for: item) {
                 selectedIndexPath = indexPath
                 collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
-            }
+            } else {
+                let matchedItem = snapshot.itemIdentifiers.first { item in
+                    guard case .file(let itemFile) = item.destination,
+                          case .file(let targetFile) = rootMenuDestination else {
+                        return false
+                    }
+                    return itemFile.id == targetFile.id
+                }
 
+                if let matchedItem,
+                   let indexPath = dataSource.indexPath(for: matchedItem) {
+                    selectedIndexPath = indexPath
+                    collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+                }
+            }
+        }
+        forceRefresh()
     }
 
     private func setupBackgroundGradient() {
@@ -695,6 +711,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        @InjectService var appRouter: AppNavigable
         guard let destination = dataSource.itemIdentifier(for: indexPath)?.destination else { return }
 
         if isCompactView {
@@ -704,6 +721,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             destinationViewModel.onDismissViewController = { [weak destinationViewController] in
                 destinationViewController?.dismiss(animated: true)
             }
+
+            mainTabViewControllerDelegate?.setLastSelectedDestination(.file(destinationViewModel))
 
             navigationController?.pushViewController(destinationViewController, animated: true)
         } else {
@@ -840,4 +859,8 @@ enum SidebarDestination {
 
 protocol SidebarViewControllerDelegate: AnyObject {
     func didSelectItem(destination: SidebarDestination)
+}
+
+protocol MainTabViewControllerDelegate: AnyObject {
+    func setLastSelectedDestination(_ destination: SidebarDestination?)
 }
