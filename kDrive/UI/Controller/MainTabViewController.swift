@@ -212,6 +212,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.init(nibName: nil, bundle: nil)
         viewControllers = rootViewControllers
 
+        if let filesNav = viewControllers?[safe: MainTabBarIndex.files.rawValue] as? UINavigationController,
+           let sideBarVC = filesNav.viewControllers.first as? SidebarViewController {
+            sideBarVC.mainTabViewControllerDelegate = self
+        }
+
         if let selectedIndex {
             self.selectedIndex = selectedIndex
         }
@@ -541,5 +546,14 @@ extension MainTabViewController: UpdateAccountDelegate {
             ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?
                 .didUpdateCurrentAccountInformations(currentAccount)
         }
+    }
+}
+
+// MARK: - MainTabViewControllerDelegate
+
+extension MainTabViewController: MainTabViewControllerDelegate {
+    func setLastSelectedDestination(_ destination: SidebarDestination?) {
+        guard let rootSplitViewController = parent as? RootSplitViewController else { return }
+        rootSplitViewController.lastSelectedDestination = destination
     }
 }
