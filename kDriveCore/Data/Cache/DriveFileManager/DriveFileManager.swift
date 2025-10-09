@@ -121,7 +121,7 @@ public final class DriveFileManager {
         let realmURL = context.realmURL(driveId: driveId, driveUserId: driveUserId)
 
         let inMemoryIdentifier: String?
-        if case .publicShare(let identifier) = context {
+        if case .publicShare(let identifier, _) = context {
             inMemoryIdentifier = "inMemory:\(identifier)"
         } else {
             inMemoryIdentifier = nil
@@ -256,12 +256,17 @@ public final class DriveFileManager {
     }
 
     public var publicShareProxy: PublicShareProxy? {
-        switch context {
-        case .publicShare(let shareProxy):
-            return shareProxy
-        default:
+        guard case .publicShare(let proxy, _) = context else {
             return nil
         }
+        return proxy
+    }
+
+    public var publicShareMetadata: PublicShareMetadata? {
+        guard case .publicShare(_, let metadata) = context else {
+            return nil
+        }
+        return metadata
     }
 
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {

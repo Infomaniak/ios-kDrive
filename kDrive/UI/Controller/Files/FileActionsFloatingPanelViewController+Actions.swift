@@ -66,65 +66,62 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func setupActions() {
-        guard !driveFileManager.isPublicShare else {
+        switch driveFileManager.context {
+        case .publicShare(_, let metadata):
             if frozenFile.isDirectory {
                 actions = FloatingPanelAction.publicShareFolderActions
             } else {
-                actions = FloatingPanelAction.publicShareActions
+                actions = metadata.capabilities.canDownload ? FloatingPanelAction.publicShareActions : []
             }
-            return
-        }
-
-        guard !driveFileManager.isSharedWithMe else {
+        case .sharedWithMe:
             actions = [.download]
-            return
-        }
-
-        actions = (frozenFile.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions)
-            .filter { action in
-                switch action {
-                case .openWith:
-                    return frozenFile.capabilities.canWrite
-                case .edit:
-                    return frozenFile.isOfficeFile && frozenFile.capabilities.canWrite
-                case .manageCategories:
-                    return driveFileManager.drive.categoryRights.canPutOnFile && !frozenFile.isDisabled
-                case .favorite:
-                    return frozenFile.capabilities.canUseFavorite
-                case .convertToDropbox:
-                    return frozenFile.capabilities.canBecomeDropbox
-                case .manageDropbox:
-                    return frozenFile.isDropbox
-                case .upsaleColor:
-                    return frozenFile.isDirectory
-                        && driveFileManager.drive.isFreePack
-                        && !driveFileManager.drive.pack.isAnyKSuiteProOffer
-                case .folderColor:
-                    return frozenFile.capabilities.canColor
-                case .seeFolder:
-                    return !normalFolderHierarchy && (frozenFile.parent != nil || frozenFile.parentId != 0)
-                case .offline:
-                    return !sharedWithMe && presentationOrigin != .photoList
-                case .download:
-                    return frozenFile.capabilities.canRead
-                case .move:
-                    return frozenFile.capabilities.canMove && !sharedWithMe
-                case .duplicate:
-                    return !sharedWithMe && frozenFile.capabilities.canRead && frozenFile
-                        .visibility != .isSharedSpace && frozenFile
-                        .visibility != .isTeamSpace
-                case .rename:
-                    return frozenFile.capabilities.canRename && !sharedWithMe && !frozenFile.isImporting
-                case .delete:
-                    return frozenFile.capabilities.canDelete && !frozenFile.isImporting
-                case .leaveShare:
-                    return frozenFile.capabilities.canLeave
-                case .cancelImport:
-                    return frozenFile.isImporting
-                default:
-                    return true
+        default:
+            actions = (frozenFile.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions)
+                .filter { action in
+                    switch action {
+                    case .openWith:
+                        return frozenFile.capabilities.canWrite
+                    case .edit:
+                        return frozenFile.isOfficeFile && frozenFile.capabilities.canWrite
+                    case .manageCategories:
+                        return driveFileManager.drive.categoryRights.canPutOnFile && !frozenFile.isDisabled
+                    case .favorite:
+                        return frozenFile.capabilities.canUseFavorite
+                    case .convertToDropbox:
+                        return frozenFile.capabilities.canBecomeDropbox
+                    case .manageDropbox:
+                        return frozenFile.isDropbox
+                    case .upsaleColor:
+                        return frozenFile.isDirectory
+                            && driveFileManager.drive.isFreePack
+                            && !driveFileManager.drive.pack.isAnyKSuiteProOffer
+                    case .folderColor:
+                        return frozenFile.capabilities.canColor
+                    case .seeFolder:
+                        return !normalFolderHierarchy && (frozenFile.parent != nil || frozenFile.parentId != 0)
+                    case .offline:
+                        return !sharedWithMe && presentationOrigin != .photoList
+                    case .download:
+                        return frozenFile.capabilities.canRead
+                    case .move:
+                        return frozenFile.capabilities.canMove && !sharedWithMe
+                    case .duplicate:
+                        return !sharedWithMe && frozenFile.capabilities.canRead && frozenFile
+                            .visibility != .isSharedSpace && frozenFile
+                            .visibility != .isTeamSpace
+                    case .rename:
+                        return frozenFile.capabilities.canRename && !sharedWithMe && !frozenFile.isImporting
+                    case .delete:
+                        return frozenFile.capabilities.canDelete && !frozenFile.isImporting
+                    case .leaveShare:
+                        return frozenFile.capabilities.canLeave
+                    case .cancelImport:
+                        return frozenFile.isImporting
+                    default:
+                        return true
+                    }
                 }
-            }
+        }
     }
 
     // MARK: Handling
