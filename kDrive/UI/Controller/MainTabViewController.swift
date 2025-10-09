@@ -66,6 +66,44 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        @InjectService var router: AppNavigable
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        guard let previousTraitCollection else { return }
+        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
+            || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
+
+        guard let detailNavigationController = viewController(for: .secondary) as? UINavigationController,
+              let previewViewController = detailNavigationController.topViewController as? PreviewViewController,
+              let mainTabViewController = viewController(for: .compact) as? MainTabViewController else { return }
+
+        mainTabViewController.selectedIndex = MainTabBarIndex.files.rawValue
+
+        guard let filesNavigationController = mainTabViewController
+            .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
+
+        let fileId = previewViewController.currentPreviewedFileId
+        let database = driveFileManager.database
+        let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
+            lazyCollection.filter("id == %@ ", fileId)
+                .first?
+                .freezeIfNeeded()
+        }
+
+        guard let frozenFile else { return }
+
+        router.presentPreviewViewController(
+            frozenFiles: [frozenFile],
+            index: 0,
+            driveFileManager: driveFileManager,
+            normalFolderHierarchy: true,
+            presentationOrigin: .fileList,
+            navigationController: filesNavigationController,
+            animated: false
+        )
+    }
+
     // MARK: - SidebarViewControllerDelegate
 
     func didSelectItem(destination: SidebarDestination) {
