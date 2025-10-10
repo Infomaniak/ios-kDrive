@@ -215,7 +215,8 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             let destinationViewController = FileListViewController(viewModel: fileListViewModel)
             mainTabBarViewController.selectedIndex = MainTabBarIndex.files.rawValue
             detailNavigationController.setViewControllers([destinationViewController], animated: false)
-            if let filesNav = mainTabBarViewController.viewControllers?[safe: 1] as? UINavigationController {
+            if let filesNav = mainTabBarViewController
+                .viewControllers?[safe: mainTabBarViewController.selectedIndex] as? UINavigationController {
                 let destinationVC = FileListViewController(viewModel: fileListViewModel)
                 filesNav.popToRootViewController(animated: false)
                 filesNav.pushViewController(destinationVC, animated: false)
