@@ -101,6 +101,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         guard let filesNavigationController = mainTabViewController
             .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
 
+        detailNavigationController.popToRootViewController(animated: false)
         if let previewViewController = filesNavigationController.topViewController as? PreviewViewController {
             let fileId = previewViewController.currentPreviewedFileId
             let database = driveFileManager.database
@@ -145,12 +146,12 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
     private func switchToCompactRestoration() {
         @InjectService var appRouter: AppNavigable
         guard let detailNavigationController = viewController(for: .secondary) as? UINavigationController,
-              let mainTabViewController = viewController(for: .compact) as? MainTabViewController else { return }
+              let mainTabViewController = viewController(for: .compact) as? MainTabViewController,
+              let filesNavigationController = mainTabViewController
+              .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
 
+        filesNavigationController.popToRootViewController(animated: false)
         if let previewViewController = detailNavigationController.topViewController as? PreviewViewController {
-            guard let filesNavigationController = mainTabViewController
-                .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
-
             let fileId = previewViewController.currentPreviewedFileId
             let database = driveFileManager.database
             let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
@@ -174,9 +175,6 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             let currentDirectory = fileListViewController.viewModel.currentDirectory
             if currentDirectory.id > DriveFileManager.constants.rootID &&
                 currentDirectory.parentId > DriveFileManager.constants.rootID {
-                guard let filesNavigationController = mainTabViewController
-                    .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
-
                 let database = driveFileManager.database
                 let frozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
                     lazyCollection.filter("id == %@ ", currentDirectory.id)
