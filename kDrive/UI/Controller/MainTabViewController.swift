@@ -197,28 +197,29 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
 
     func didSelectItem(destination: SidebarDestination) {
         guard let detailNavigationController = viewControllers.last as? UINavigationController,
-              let compactTabBar = viewController(for: .compact) as? MainTabViewController else { return }
+              let mainTabBarViewController = viewController(for: .compact) as? MainTabViewController else { return }
         detailNavigationController.setNavigationBarHidden(false, animated: true)
 
         switch destination {
         case .home:
             let homeViewController = HomeViewController(driveFileManager: driveFileManager)
-            compactTabBar.selectedIndex = MainTabBarIndex.home.rawValue
+            mainTabBarViewController.selectedIndex = MainTabBarIndex.home.rawValue
             detailNavigationController.setViewControllers([homeViewController], animated: false)
         case .photoList:
             let photoListViewModel = PhotoListViewModel(driveFileManager: driveFileManager)
             let photoListViewController = PhotoListViewController(viewModel: photoListViewModel)
-            compactTabBar.selectedIndex = MainTabBarIndex.gallery.rawValue
+            mainTabBarViewController.selectedIndex = MainTabBarIndex.gallery.rawValue
             detailNavigationController.setViewControllers([photoListViewController], animated: false)
         case .menu:
             let menuViewController = MenuViewController(driveFileManager: driveFileManager)
             detailNavigationController.setViewControllers([menuViewController], animated: false)
         case .file(let fileListViewModel):
             let destinationViewController = FileListViewController(viewModel: fileListViewModel)
-            compactTabBar.selectedIndex = MainTabBarIndex.files.rawValue
+            mainTabBarViewController.selectedIndex = MainTabBarIndex.files.rawValue
             detailNavigationController.setViewControllers([destinationViewController], animated: false)
-            if let filesNav = compactTabBar.viewControllers?[safe: 1] as? UINavigationController {
+            if let filesNav = mainTabBarViewController.viewControllers?[safe: 1] as? UINavigationController {
                 let destinationVC = FileListViewController(viewModel: fileListViewModel)
+                filesNav.popToRootViewController(animated: false)
                 filesNav.pushViewController(destinationVC, animated: false)
             }
         }
