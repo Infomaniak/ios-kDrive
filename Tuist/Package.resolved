@@ -1,5 +1,5 @@
 {
-  "originHash" : "0fda3f25b31ede9693750bf8b7873ad30465daa5ff9f68978492ac0fcc7ccb4b",
+  "originHash" : "861c4971754050042854c7b4e352b843a906017ab24771bf7d7b9664c94ec522",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-bug-tracker",
       "state" : {
-        "revision" : "005daba38fb677116d3db3ae37ba539ba10b2bee",
-        "version" : "16.0.0"
+        "revision" : "18597dcd3a3585c352a25d847108ec6ce55518a1",
+        "version" : "17.0.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "1614c4604999356dfb580e1d568ad69e704e374c",
-        "version" : "17.1.0"
+        "revision" : "6de479a2b1532d13ee7794d29aebe7ed9b568129",
+        "version" : "18.1.0"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "298079322ab92798f20e683483693d1aa14c3405",
-        "version" : "23.1.1"
+        "revision" : "16663433d134f70bf1dbd966b0f292a0941018ea",
+        "version" : "24.0.0"
       }
     },
     {
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-dependency-injection",
       "state" : {
-        "revision" : "86f3b77f71547b7778d2819d4d1c2d77847f2069",
-        "version" : "2.0.4"
+        "revision" : "f6aa8ebc6fe1311deb5eb5ec09ccc695ba84a265",
+        "version" : "2.0.5"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "revision" : "2cdd8b08e143144c850ad8590e918c1135d51c61",
-        "version" : "7.0.0"
+        "revision" : "e3202a3a07e50bdf06d1909d1b7f0b40cc560ebb",
+        "version" : "8.1.0"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "f8862031c5201e9a7b69a866abb39295f0f5283a",
-        "version" : "15.0.0"
+        "revision" : "ec1b031ef4115e80e79216b9127d3f6d87e949a6",
+        "version" : "16.0.0"
       }
     },
     {
@@ -366,8 +366,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-transport-services.git",
       "state" : {
-        "revision" : "e645014baea2ec1c2db564410c51a656cf47c923",
-        "version" : "1.25.1"
+        "revision" : "df6c28355051c72c884574a6c858bc54f7311ff9",
+        "version" : "1.25.2"
       }
     },
     {

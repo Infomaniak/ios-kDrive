@@ -303,6 +303,10 @@ extension SceneDelegate {
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
 
         Task {
+            await InAppTwoFactorAuthenticationHelper().checkTwoFAChallenges()
+        }
+
+        Task {
             if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
                 appNavigable.prepareRootViewController(currentState: .updateRequired, restoration: false)
             }

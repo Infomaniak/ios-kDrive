@@ -19,6 +19,7 @@
 import BackgroundTasks
 import DeviceAssociation
 import Foundation
+import InAppTwoFactorAuthentication
 import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakCoreCommonUI
@@ -191,7 +192,13 @@ public enum FactoryService {
                 return provider
             },
             Factory(type: DeviceManagerable.self) { _, _ in
-                DeviceManager(appGroupIdentifier: sharedAppGroupName)
+                let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String? ?? "x.x"
+                return DeviceManager(appGroupIdentifier: sharedAppGroupName,
+                                     appMarketingVersion: version,
+                                     capabilities: [.twoFactorAuthenticationChallengeApproval])
+            },
+            Factory(type: InAppTwoFactorAuthenticationManagerable.self) { _, _ in
+                InAppTwoFactorAuthenticationManager()
             },
             Factory(type: PhotoLibrarySavable.self) { _, _ in
                 PhotoLibrarySaver()

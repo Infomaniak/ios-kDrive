@@ -25,7 +25,7 @@ import kDriveCore
 
 public struct MCKDeviceManagerable: DeviceManagerable {
     public func getOrCreateCurrentDevice() async throws -> UserDevice {
-        await UserDevice(uid: UUID.emptyUUIDString)
+        await UserDevice(uid: UUID.emptyUUIDString, appMarketingVersion: "1.0.0", capabilities: [])
     }
 
     @discardableResult

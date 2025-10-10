@@ -42,7 +42,7 @@ public class ErrorUserInfo: Codable {
     }
 }
 
-public struct DriveError: Error, Equatable {
+public struct DriveError: Error, Equatable, ErrorWithCode {
     public enum DriveErrorType: String, Codable {
         case localError
         case networkError
