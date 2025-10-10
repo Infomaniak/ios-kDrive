@@ -1,2 +1,3 @@
+- Fix navigation issues
 - Improved and enhanced iPad experience
 - Stability improvements and bug fixes
