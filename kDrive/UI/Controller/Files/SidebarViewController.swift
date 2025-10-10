@@ -33,6 +33,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private let menuIndexPath: IndexPath = [-1, -1]
     private var plusButtonTableViewController: UITableViewController?
     let selectMode: Bool
+    var lastSelectedDestination: SidebarDestination?
 
     private var isMenuIndexPathSelected: Bool {
         if selectedIndexPath != menuIndexPath {
@@ -171,6 +172,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     weak var delegate: SidebarViewControllerDelegate?
+    weak var mainTabViewControllerDelegate: MainTabViewControllerDelegate?
 
     let driveFileManager: DriveFileManager
     private var rootChildrenObservationToken: NotificationToken?
@@ -280,14 +282,21 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             applySnapshotForCompactView(userRootFolders: userRootFolders)
         } else if !isCompactView && !selectMode {
             applySnapshotForLargeView(userRootFolders: userRootFolders)
+            collectionView.selectItem(at: selectedIndexPath, animated: false, scrollPosition: [])
         } else {
             dataSource.apply(itemsSnapshot, animatingDifferences: true)
         }
     }
 
-    init(driveFileManager: DriveFileManager, selectMode: Bool, isCompactView: Bool) {
+    init(
+        driveFileManager: DriveFileManager,
+        selectMode: Bool,
+        isCompactView: Bool,
+        lastSelectedDestination: SidebarDestination? = nil
+    ) {
         self.driveFileManager = driveFileManager
         self.selectMode = selectMode
+        self.lastSelectedDestination = lastSelectedDestination
         super.init(collectionViewLayout: SidebarViewController.createListLayout(
             selectMode: selectMode,
             isCompactView: isCompactView
@@ -387,10 +396,34 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
+        applySnapshot()
+        if let lastSelectedDestination {
+            guard let rootMenuDestination = lastSelectedDestination.rootMenuDestination else { return }
+            let snapshot = dataSource.snapshot()
+            let item = snapshot.itemIdentifiers.first { item in
+                item.destination == rootMenuDestination
+            }
+            if let item,
+               let indexPath = dataSource.indexPath(for: item) {
+                selectedIndexPath = indexPath
+                collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+            } else {
+                let matchedItem = snapshot.itemIdentifiers.first { item in
+                    guard case .file(let itemFile) = item.destination,
+                          case .file(let targetFile) = rootMenuDestination else {
+                        return false
+                    }
+                    return itemFile.id == targetFile.id
+                }
 
-        guard let previousTraitCollection else { return }
-        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
-            || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
+                if let matchedItem,
+                   let indexPath = dataSource.indexPath(for: matchedItem) {
+                    selectedIndexPath = indexPath
+                    collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+                }
+            }
+        }
+        delegate?.setLastSelectedDestination(nil)
         forceRefresh()
     }
 
@@ -676,6 +709,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        @InjectService var appRouter: AppNavigable
         guard let destination = dataSource.itemIdentifier(for: indexPath)?.destination else { return }
 
         if isCompactView {
@@ -685,6 +719,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             destinationViewModel.onDismissViewController = { [weak destinationViewController] in
                 destinationViewController?.dismiss(animated: true)
             }
+
+            mainTabViewControllerDelegate?.setLastSelectedDestination(.file(destinationViewModel))
 
             navigationController?.pushViewController(destinationViewController, animated: true)
         } else {
@@ -803,8 +839,27 @@ enum SidebarDestination {
     case menu
     case photoList
     case file(FileListViewModel)
+
+    @MainActor
+    var rootMenuDestination: SidebarViewController.RootMenuDestination? {
+        switch self {
+        case .home:
+            return .home
+        case .photoList:
+            return .photoList
+        case .file(let viewModel):
+            return .file(viewModel.currentDirectory)
+        case .menu:
+            return nil
+        }
+    }
 }
 
 protocol SidebarViewControllerDelegate: AnyObject {
     func didSelectItem(destination: SidebarDestination)
+    func setLastSelectedDestination(_ destination: SidebarDestination?)
+}
+
+protocol MainTabViewControllerDelegate: AnyObject {
+    func setLastSelectedDestination(_ destination: SidebarDestination?)
 }

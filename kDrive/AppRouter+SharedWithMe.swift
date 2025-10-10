@@ -143,7 +143,10 @@ public extension AppRouter {
             return
         }
 
-        let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+        let freshRootViewController = RootSplitViewController(
+            driveFileManager: driveFileManager,
+            selectedIndex: MainTabBarIndex.files.rawValue
+        )
         window?.rootViewController = freshRootViewController
 
         matomo.track(eventWithCategory: .deeplink, name: "internal")
