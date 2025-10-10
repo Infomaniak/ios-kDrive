@@ -54,7 +54,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
-    public var currentPreviewedFileId: Int {
+    var currentPreviewedFileId: Int {
         return currentFile.id
     }
 
