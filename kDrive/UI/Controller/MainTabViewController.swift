@@ -150,8 +150,8 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
               let filesNavigationController = mainTabViewController
               .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
 
-        filesNavigationController.popToRootViewController(animated: false)
         if let previewViewController = detailNavigationController.topViewController as? PreviewViewController {
+            filesNavigationController.popToRootViewController(animated: false)
             let fileId = previewViewController.currentPreviewedFileId
             let database = driveFileManager.database
             let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
@@ -175,6 +175,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             let currentDirectory = fileListViewController.viewModel.currentDirectory
             if currentDirectory.id > DriveFileManager.constants.rootID &&
                 currentDirectory.parentId > DriveFileManager.constants.rootID {
+                filesNavigationController.popToRootViewController(animated: false)
                 let database = driveFileManager.database
                 let frozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
                     lazyCollection.filter("id == %@ ", currentDirectory.id)
@@ -187,8 +188,8 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
                 appRouter.presentFileList(frozenFolder: frozenFolder,
                                           driveFileManager: driveFileManager,
                                           navigationController: filesNavigationController)
-            } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
-        } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
+            }
+        }
     }
 
     // MARK: - SidebarViewControllerDelegate
