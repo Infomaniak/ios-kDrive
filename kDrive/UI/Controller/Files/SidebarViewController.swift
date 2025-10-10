@@ -310,7 +310,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        clearsSelectionOnViewWillAppear = false
         navigationItem.title = driveFileManager.drive.name
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
