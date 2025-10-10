@@ -399,8 +399,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         super.traitCollectionDidChange(previousTraitCollection)
         applySnapshot()
         if let lastSelectedDestination {
-            delegate?.didSelectItem(destination: lastSelectedDestination)
-
             guard let rootMenuDestination = lastSelectedDestination.rootMenuDestination else { return }
             let snapshot = dataSource.snapshot()
             let item = snapshot.itemIdentifiers.first { item in
@@ -426,6 +424,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 }
             }
         }
+        delegate?.setLastSelectedDestination(nil)
         forceRefresh()
     }
 
@@ -859,6 +858,7 @@ enum SidebarDestination {
 
 protocol SidebarViewControllerDelegate: AnyObject {
     func didSelectItem(destination: SidebarDestination)
+    func setLastSelectedDestination(_ destination: SidebarDestination?)
 }
 
 protocol MainTabViewControllerDelegate: AnyObject {
