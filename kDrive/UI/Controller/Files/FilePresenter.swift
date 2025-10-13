@@ -148,18 +148,19 @@ final class FilePresenter {
         if driveFileManager.drive.sharedWithMe {
             let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
             viewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager, currentDirectory: file)
-        } else if let publicShareProxy = driveFileManager.publicShareProxy {
+        } else if case .publicShare(let proxy, let metadata) = driveFileManager.context {
             let configuration = FileListViewModel.Configuration(selectAllSupported: true,
                                                                 rootTitle: nil,
                                                                 emptyViewType: .emptyFolder,
                                                                 supportsDrop: false,
-                                                                rightBarButtons: [.downloadAll],
+                                                                rightBarButtons: metadata.capabilities
+                                                                    .canDownload ? [.downloadAll] : [],
                                                                 matomoViewPath: [
                                                                     MatomoUtils.View.menu.displayName,
                                                                     "publicShare"
                                                                 ])
 
-            viewModel = PublicShareViewModel(publicShareProxy: publicShareProxy,
+            viewModel = PublicShareViewModel(publicShareProxy: proxy,
                                              sortType: .nameAZ,
                                              driveFileManager: driveFileManager,
                                              currentDirectory: file,

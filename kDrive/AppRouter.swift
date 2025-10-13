@@ -898,12 +898,13 @@ public struct AppRouter: AppNavigable {
                                                  publicShareProxy: PublicShareProxy,
                                                  driveFileManager: DriveFileManager,
                                                  apiFetcher: PublicShareApiFetcher) -> PublicShareViewModel {
+        let canDownload = driveFileManager.publicShareMetadata?.capabilities.canDownload == true
         let configuration = FileListViewModel.Configuration(selectAllSupported: true,
                                                             rootTitle: nil,
                                                             emptyViewType: .emptyFolder,
                                                             supportsDrop: false,
                                                             leftBarButtons: [.cancel],
-                                                            rightBarButtons: [.downloadAll],
+                                                            rightBarButtons: canDownload ? [.downloadAll] : [],
                                                             matomoViewPath: [
                                                                 MatomoUtils.View.menu.displayName,
                                                                 "publicShare"

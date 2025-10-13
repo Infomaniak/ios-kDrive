@@ -287,7 +287,7 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     }
 
     func setupFooterIfNeeded() {
-        guard driveFileManager.isPublicShare else { return }
+        guard case .publicShare(_, let metadata) = driveFileManager.context, metadata.capabilities.canDownload else { return }
 
         view.addSubview(addToKDriveButton)
         view.bringSubviewToFront(addToKDriveButton)
@@ -447,7 +447,14 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             )
         }
 
-        if files.first?.isDirectory == true {
+        if let publicShareMetadata = driveFileManager.publicShareMetadata,
+           !publicShareMetadata.capabilities.canDownload {
+            return FileFloatingPanelLayout(
+                initialState: .tip,
+                hideTip: false,
+                backdropAlpha: 0.2
+            )
+        } else if files.first?.isDirectory == true {
             return PublicShareFolderFloatingPanelLayout(
                 initialState: .half,
                 hideTip: true,
