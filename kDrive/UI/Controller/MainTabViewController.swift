@@ -188,14 +188,14 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
                 appRouter.presentFileList(frozenFolder: frozenFolder,
                                           driveFileManager: driveFileManager,
                                           navigationController: filesNavigationController)
-            }
-        }
+            } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
+        } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
     }
 
     // MARK: - SidebarViewControllerDelegate
 
     func didSelectItem(destination: SidebarDestination) {
-        guard let detailNavigationController = viewControllers.last as? UINavigationController,
+        guard let detailNavigationController = viewController(for: .secondary) as? UINavigationController,
               let mainTabBarViewController = viewController(for: .compact) as? MainTabViewController else { return }
         detailNavigationController.setNavigationBarHidden(false, animated: true)
 
@@ -223,9 +223,6 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
                 filesNav.pushViewController(destinationVC, animated: false)
             }
         }
-    }
-
-    func setLastSelectedDestination(_ destination: SidebarDestination?) {
         lastSelectedDestination = destination
     }
 }

@@ -423,7 +423,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 }
             }
         }
-        delegate?.setLastSelectedDestination(nil)
         forceRefresh()
     }
 
@@ -857,7 +856,6 @@ enum SidebarDestination {
 
 protocol SidebarViewControllerDelegate: AnyObject {
     func didSelectItem(destination: SidebarDestination)
-    func setLastSelectedDestination(_ destination: SidebarDestination?)
 }
 
 protocol MainTabViewControllerDelegate: AnyObject {
