@@ -112,7 +112,9 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
                     .freezeIfNeeded()
             }
 
-            guard let frozenFile else { return }
+            guard let frozenFile, let parent = frozenFile.parent else { return }
+
+            presentPathToFileList(frozenFolder: parent, navigationController: detailNavigationController, toRoot: false)
 
             appRouter.presentPreviewViewController(
                 frozenFiles: [frozenFile],
@@ -155,7 +157,9 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
                     .freezeIfNeeded()
             }
 
-            guard let frozenFile else { return }
+            guard let frozenFile, let parent = frozenFile.parent else { return }
+
+            presentPathToFileList(frozenFolder: parent, navigationController: filesNavigationController)
 
             appRouter.presentPreviewViewController(
                 frozenFiles: [frozenFile],
