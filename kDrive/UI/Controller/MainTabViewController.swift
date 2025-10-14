@@ -102,6 +102,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
 
         detailNavigationController.popToRootViewController(animated: false)
+
         if let previewViewController = filesNavigationController.topViewController as? PreviewViewController {
             let fileId = previewViewController.currentPreviewedFileId
             let database = driveFileManager.database
@@ -127,9 +128,11 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             let currentDirectory = fileListViewController.viewModel.currentDirectory
             if currentDirectory.id > DriveFileManager.constants.rootID &&
                 currentDirectory.parentId > DriveFileManager.constants.rootID {
-                appRouter.presentFileList(frozenFolder: currentDirectory,
-                                          driveFileManager: driveFileManager,
-                                          navigationController: detailNavigationController)
+                presentPathToFileList(
+                    frozenFolder: currentDirectory,
+                    navigationController: detailNavigationController,
+                    toRoot: false
+                )
             } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
         } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
     }
@@ -141,8 +144,9 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
               let filesNavigationController = mainTabViewController
               .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
 
+        filesNavigationController.popToRootViewController(animated: false)
+
         if let previewViewController = detailNavigationController.topViewController as? PreviewViewController {
-            filesNavigationController.popToRootViewController(animated: false)
             let fileId = previewViewController.currentPreviewedFileId
             let database = driveFileManager.database
             let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
@@ -166,13 +170,36 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             let currentDirectory = fileListViewController.viewModel.currentDirectory
             if currentDirectory.id > DriveFileManager.constants.rootID &&
                 currentDirectory.parentId > DriveFileManager.constants.rootID {
-                filesNavigationController.popToRootViewController(animated: false)
-
-                appRouter.presentFileList(frozenFolder: currentDirectory,
-                                          driveFileManager: driveFileManager,
-                                          navigationController: filesNavigationController)
+                presentPathToFileList(frozenFolder: currentDirectory, navigationController: filesNavigationController)
             } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
         } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
+    }
+
+    private func presentPathToFileList(frozenFolder: File, navigationController: UINavigationController, toRoot: Bool = true) {
+        guard let topViewController = navigationController.topViewController else {
+            Log.sceneDelegate("unable to presentFileList, no topViewController", level: .error)
+            return
+        }
+
+        var currentFolder = frozenFolder
+        var filePath = [currentFolder]
+        while currentFolder.parentId > DriveFileManager.constants.rootID {
+            guard let parentFolder = currentFolder.parent else { break }
+
+            filePath.append(parentFolder)
+            currentFolder = parentFolder
+        }
+
+        if !toRoot {
+            filePath.removeLast()
+        }
+        for folder in filePath.reversed() {
+            FilePresenter(viewController: topViewController)
+                .presentDirectory(for: folder,
+                                  driveFileManager: driveFileManager,
+                                  animated: false,
+                                  completion: nil)
+        }
     }
 
     // MARK: - SidebarViewControllerDelegate
