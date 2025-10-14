@@ -127,16 +127,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             let currentDirectory = fileListViewController.viewModel.currentDirectory
             if currentDirectory.id > DriveFileManager.constants.rootID &&
                 currentDirectory.parentId > DriveFileManager.constants.rootID {
-                let database = driveFileManager.database
-                let frozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
-                    lazyCollection.filter("id == %@ ", currentDirectory.id)
-                        .first?
-                        .freezeIfNeeded()
-                }
-
-                guard let frozenFolder else { return }
-
-                appRouter.presentFileList(frozenFolder: frozenFolder,
+                appRouter.presentFileList(frozenFolder: currentDirectory,
                                           driveFileManager: driveFileManager,
                                           navigationController: detailNavigationController)
             } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
@@ -176,16 +167,8 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             if currentDirectory.id > DriveFileManager.constants.rootID &&
                 currentDirectory.parentId > DriveFileManager.constants.rootID {
                 filesNavigationController.popToRootViewController(animated: false)
-                let database = driveFileManager.database
-                let frozenFolder = database.fetchObject(ofType: File.self) { lazyCollection in
-                    lazyCollection.filter("id == %@ ", currentDirectory.id)
-                        .first?
-                        .freezeIfNeeded()
-                }
 
-                guard let frozenFolder else { return }
-
-                appRouter.presentFileList(frozenFolder: frozenFolder,
+                appRouter.presentFileList(frozenFolder: currentDirectory,
                                           driveFileManager: driveFileManager,
                                           navigationController: filesNavigationController)
             } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
