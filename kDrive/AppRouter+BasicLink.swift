@@ -46,20 +46,12 @@ extension BasicLinkTab {
 public extension AppRouter {
     @MainActor func showBasicTab(
         driveFileManager: DriveFileManager,
-        viewController: UISplitViewController,
+        navigationController: UINavigationController,
         basicLink: BasicLink
     ) async {
         @LazyInjectService var deeplinkService: DeeplinkServiceable
 
         defer { deeplinkService.clearLastDeeplink() }
-
-        guard let navigationController =
-            getCurrentController(
-                tabBarViewController: viewController
-            ) as? UINavigationController
-        else {
-            return
-        }
 
         guard let fileId = basicLink.fileId else {
             let tab = basicLink.destination
@@ -90,13 +82,21 @@ public extension AppRouter {
             return
         }
 
-        let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
-        window?.rootViewController = freshRootViewController
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+        let freshRootViewController = window?.rootViewController
+
+        guard let navigationController =
+            getCurrentController(
+                rootSplitViewController: freshRootViewController as? UISplitViewController
+            ) as? UINavigationController
+        else {
+            return
+        }
 
         matomo.track(eventWithCategory: .deeplink, name: "internal")
         await showBasicTab(
             driveFileManager: driveFileManager,
-            viewController: freshRootViewController,
+            navigationController: navigationController,
             basicLink: basicLink
         )
     }
