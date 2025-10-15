@@ -470,11 +470,6 @@ public struct AppRouter: AppNavigable {
             return nil
         }
 
-        if let currentDriveFileManager = currentDriveFileManagerForRoot(),
-           currentDriveFileManager.drive.objectId == driveFileManager.drive.objectId {
-            return nil
-        }
-
         if UIDevice.current.userInterfaceIdiom == .pad {
             let rootSplitViewController = RootSplitViewController(
                 driveFileManager: driveFileManager,

@@ -95,18 +95,10 @@ public extension AppRouter {
 
     @MainActor func showSharedWithMe(
         driveFileManager: DriveFileManager,
-        viewController: UISplitViewController,
+        navigationController: UINavigationController,
         sharedWithMeLink: SharedWithMeLink
     ) async {
         @LazyInjectService var deeplinkService: DeeplinkServiceable
-
-        guard let navigationController =
-            getCurrentController(
-                rootSplitViewController: viewController
-            ) as? UINavigationController
-        else {
-            return
-        }
 
         let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
 
@@ -143,13 +135,21 @@ public extension AppRouter {
             return
         }
 
-        let freshRootViewController = RootSplitViewController(driveFileManager: driveFileManager, selectedIndex: 1)
-        window?.rootViewController = freshRootViewController
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+        let freshRootViewController = window?.rootViewController
+
+        guard let navigationController =
+            getCurrentController(
+                rootSplitViewController: freshRootViewController as? UISplitViewController,
+            ) as? UINavigationController
+        else {
+            return
+        }
 
         matomo.track(eventWithCategory: .deeplink, name: "internal")
         await showSharedWithMe(
             driveFileManager: driveFileManager,
-            viewController: freshRootViewController,
+            navigationController: navigationController,
             sharedWithMeLink: sharedWithMeLink
         )
     }

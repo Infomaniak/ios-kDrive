@@ -115,8 +115,7 @@ public extension AppRouter {
             return
         }
 
-        let freshRootViewController = RootSplitViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
-        window?.rootViewController = freshRootViewController
+        showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
 
         let fileActionsHelper = FileActionsHelper()
         fileActionsHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
