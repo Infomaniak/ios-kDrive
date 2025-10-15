@@ -102,7 +102,7 @@ public extension AppRouter {
 
         guard let navigationController =
             getCurrentController(
-                tabBarViewController: viewController
+                rootSplitViewController: viewController
             ) as? UINavigationController
         else {
             return

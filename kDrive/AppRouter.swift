@@ -236,11 +236,11 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    @MainActor public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? {
+    @MainActor public func getCurrentController(rootSplitViewController: UISplitViewController?) -> UIViewController? {
         guard let rootViewController = window?.rootViewController else { return nil }
         let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
         if rootHorizontalSizeClass.iskDriveCompactSize {
-            guard let mainTabViewController = tabBarViewController?.viewControllers.first as? UITabBarController else {
+            guard let mainTabViewController = rootViewController as? MainTabViewController else {
                 Log.sceneDelegate("unable to access compact controller inside splitViewController", level: .error)
                 return nil
             }
@@ -249,7 +249,7 @@ public struct AppRouter: AppNavigable {
             let viewControllers = mainTabViewController.viewControllers
             return viewControllers?[safe: selectedIndex]
         } else {
-            return tabBarViewController?.viewControllers.last
+            return rootSplitViewController?.viewControllers.last
         }
     }
 
@@ -263,7 +263,7 @@ public struct AppRouter: AppNavigable {
             indexToUse = index
         }
 
-        let tabBarViewController = showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
+        let rootViewController = showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
 
         guard shouldRestoreApplicationState else {
             Log.sceneDelegate("Restoration disabled", level: .error)
@@ -288,7 +288,7 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            guard let viewController = getCurrentController(tabBarViewController: tabBarViewController) else {
+            guard let viewController = getCurrentController(rootSplitViewController: rootViewController) else {
                 Log.sceneDelegate("unable to access viewControllers", level: .error)
                 return
             }
@@ -484,8 +484,8 @@ public struct AppRouter: AppNavigable {
             window.makeKeyAndVisible()
             return rootSplitViewController
         } else {
-            let tabBarViewController = MainTabViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
-            window.rootViewController = tabBarViewController
+            let mainTabViewController = MainTabViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
+            window.rootViewController = mainTabViewController
             window.makeKeyAndVisible()
             return nil
         }
@@ -947,8 +947,9 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager, office: Bool) {
-        guard let rootViewController = window?.rootViewController as? UISplitViewController else { return }
-        guard let viewController = getCurrentController(tabBarViewController: rootViewController) else { return }
+        guard let rootViewController = window?.rootViewController else { return }
+        guard let viewController = getCurrentController(rootSplitViewController: rootViewController as? UISplitViewController)
+        else { return }
 
         viewController.dismiss(animated: false) {
             guard let navController = viewController as? UINavigationController else {

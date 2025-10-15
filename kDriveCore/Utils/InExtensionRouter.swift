@@ -134,5 +134,5 @@ public struct InExtensionRouter: AppNavigable {
 
     public var rootViewController: UIViewController?
 
-    @MainActor public func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController? { nil }
+    @MainActor public func getCurrentController(rootSplitViewController: UISplitViewController?) -> UIViewController? { nil }
 }

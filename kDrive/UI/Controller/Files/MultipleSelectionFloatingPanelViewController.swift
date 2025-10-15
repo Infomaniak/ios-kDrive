@@ -166,7 +166,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
             guard let splitViewController = presentingViewController as? RootSplitViewController,
                   let navigationController = appNavigable
-                  .getCurrentController(tabBarViewController: splitViewController) as? UINavigationController,
+                  .getCurrentController(rootSplitViewController: splitViewController) as? UINavigationController,
                   let fileListViewController = navigationController.topViewController as? FileListViewController,
                   let multipleSelectionViewModel = fileListViewController.viewModel.multipleSelectionViewModel else {
                 throw DomainError.missingViewModel

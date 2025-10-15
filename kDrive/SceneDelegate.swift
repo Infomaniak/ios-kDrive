@@ -146,7 +146,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return
         }
 
-        guard let viewController = appNavigable.getCurrentController(tabBarViewController: rootViewController) else {
+        guard let viewController = appNavigable.getCurrentController(rootSplitViewController: rootViewController) else {
             return
         }
 
