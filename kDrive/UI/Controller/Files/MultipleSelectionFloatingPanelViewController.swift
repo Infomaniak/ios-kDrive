@@ -164,11 +164,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 action = BulkAction(action: .copy, fileIds: files.map(\.id), destinationDirectoryId: selectedDirectory.id)
             }
 
-            guard let splitViewController = presentingViewController as? RootSplitViewController,
-                  let navigationController = appNavigable
-                  .getCurrentController(rootSplitViewController: splitViewController) as? UINavigationController,
-                  let fileListViewController = navigationController.topViewController as? FileListViewController,
-                  let multipleSelectionViewModel = fileListViewController.viewModel.multipleSelectionViewModel else {
+            guard let navigationController = appNavigable
+                .getCurrentController() as? UINavigationController,
+                let fileListViewController = navigationController.topViewController as? FileListViewController,
+                let multipleSelectionViewModel = fileListViewController.viewModel.multipleSelectionViewModel else {
                 throw DomainError.missingViewModel
             }
 

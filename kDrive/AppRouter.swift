@@ -236,20 +236,26 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    @MainActor public func getCurrentController(rootSplitViewController: UISplitViewController?) -> UIViewController? {
-        guard let rootViewController = window?.rootViewController else { return nil }
-        let rootHorizontalSizeClass = rootViewController.traitCollection.horizontalSizeClass
-        if rootHorizontalSizeClass.iskDriveCompactSize {
-            guard let mainTabViewController = rootViewController as? MainTabViewController else {
-                Log.sceneDelegate("unable to access compact controller inside splitViewController", level: .error)
+    @MainActor public func getCurrentController() -> UIViewController? {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            guard let rootSplitViewController = window?.rootViewController as? RootSplitViewController else {
                 return nil
             }
-
+            if let mainTabViewController = rootSplitViewController.viewControllers.first as? MainTabViewController {
+                let selectedIndex = mainTabViewController.selectedIndex
+                let viewControllers = mainTabViewController.viewControllers
+                return viewControllers?[safe: selectedIndex]
+            } else {
+                return rootSplitViewController.viewControllers.last
+            }
+        } else {
+            guard let mainTabViewController = window?.rootViewController as? MainTabViewController else {
+                Log.sceneDelegate("unable to access mainTabViewController", level: .error)
+                return nil
+            }
             let selectedIndex = mainTabViewController.selectedIndex
             let viewControllers = mainTabViewController.viewControllers
             return viewControllers?[safe: selectedIndex]
-        } else {
-            return rootSplitViewController?.viewControllers.last
         }
     }
 
@@ -263,7 +269,7 @@ public struct AppRouter: AppNavigable {
             indexToUse = index
         }
 
-        let rootViewController = showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
 
         guard shouldRestoreApplicationState else {
             Log.sceneDelegate("Restoration disabled", level: .error)
@@ -288,7 +294,7 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            guard let viewController = getCurrentController(rootSplitViewController: rootViewController) else {
+            guard let viewController = getCurrentController() else {
                 Log.sceneDelegate("unable to access viewControllers", level: .error)
                 return
             }
@@ -942,8 +948,7 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager, office: Bool) {
-        guard let rootViewController = window?.rootViewController else { return }
-        guard let viewController = getCurrentController(rootSplitViewController: rootViewController as? UISplitViewController)
+        guard let viewController = getCurrentController()
         else { return }
 
         viewController.dismiss(animated: false) {

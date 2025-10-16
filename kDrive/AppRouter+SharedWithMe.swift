@@ -136,12 +136,9 @@ public extension AppRouter {
         }
 
         showMainViewController(driveFileManager: driveFileManager, selectedIndex: 1)
-        let freshRootViewController = window?.rootViewController
 
         guard let navigationController =
-            getCurrentController(
-                rootSplitViewController: freshRootViewController as? UISplitViewController,
-            ) as? UINavigationController
+            getCurrentController() as? UINavigationController
         else {
             return
         }

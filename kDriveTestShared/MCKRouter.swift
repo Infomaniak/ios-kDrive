@@ -211,7 +211,7 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
-    public func getCurrentController(rootSplitViewController: UISplitViewController?) -> UIViewController? {
+    public func getCurrentController() -> UIViewController? {
         logNoop()
         return nil
     }
