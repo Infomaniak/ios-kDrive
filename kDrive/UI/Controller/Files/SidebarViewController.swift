@@ -422,7 +422,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 }
             }
         }
-        forceRefresh()
+        if let previousTraitCollection, previousTraitCollection.userInterfaceStyle != traitCollection.userInterfaceStyle ||
+            previousTraitCollection.horizontalSizeClass != traitCollection.horizontalSizeClass ||
+            previousTraitCollection.verticalSizeClass != traitCollection.verticalSizeClass {
+            forceRefresh()
+        }
     }
 
     private func setupBackgroundGradient() {
