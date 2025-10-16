@@ -49,17 +49,12 @@ public class SelfSizingPanelViewController: UIViewController {
             sheetPresentationController.widthFollowsPreferredContentSizeWhenEdgeAttached = true
             sheetPresentationController.prefersGrabberVisible = true
 
-            if #available(iOS 16.0, *) {
-                setupScrollViewObservation(sheetPresentationController: sheetPresentationController)
-            } else {
-                sheetPresentationController.detents = [.large()]
-            }
+            setupScrollViewObservation(sheetPresentationController: sheetPresentationController)
         }
 
         embedContentViewController()
     }
 
-    @available(iOS 16.0, *)
     private func setupScrollViewObservation(sheetPresentationController: UISheetPresentationController) {
         contentSizeObservation = scrollView.observe(\.contentSize, options: [.new, .old]) { [weak self] _, _ in
             guard let self else { return }
