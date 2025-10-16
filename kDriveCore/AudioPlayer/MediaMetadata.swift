@@ -34,25 +34,28 @@ public struct MediaMetadata {
 
 public extension MediaMetadata {
     static func extractTrackMetadata(from metadata: [AVMetadataItem], playableFileName: String?) async -> MediaMetadata {
-        var title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
-        var artist = KDriveResourcesStrings.Localizable.unknownArtist
+        let title: String
+        let artist: String
         var artwork: UIImage?
 
-        for item in metadata {
-            guard let commonKey = item.commonKey else { continue }
+        let metadataDictionary = Dictionary(uniqueKeysWithValues: metadata.map { ($0.commonKey, $0) })
+        if let titleItem = metadataDictionary[.commonKeyTitle],
+           let titleString = try? await titleItem.load(.value) as? String {
+            title = titleString
+        } else {
+            title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
+        }
 
-            switch commonKey {
-            case .commonKeyTitle:
-                title = item.value as? String ?? title
-            case .commonKeyArtist:
-                artist = item.value as? String ?? artist
-            case .commonKeyArtwork:
-                if let data = item.value as? Data {
-                    artwork = UIImage(data: data)
-                }
-            default:
-                break
-            }
+        if let artistItem = metadataDictionary[.commonKeyArtist],
+           let artistString = try? await artistItem.load(.value) as? String {
+            artist = artistString
+        } else {
+            artist = KDriveResourcesStrings.Localizable.unknownArtist
+        }
+
+        if let artworkItem = metadataDictionary[.commonKeyArtwork],
+           let artworkData = try? await artworkItem.load(.value) as? Data {
+            artwork = UIImage(data: artworkData)
         }
 
         return MediaMetadata(title: title, artist: artist, artwork: artwork)
