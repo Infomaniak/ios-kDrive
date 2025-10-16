@@ -88,7 +88,17 @@ public final class UploadFileProviderItem: NSObject, NSFileProviderItem {
         itemIdentifier = NSFileProviderItemIdentifier(rawValue: "\(uploadFileUUID)")
         self.sourceUrl = sourceUrl
         typeIdentifier = sourceUrl.typeIdentifier ?? UTI.item.identifier
-        capabilities = .allowsAll
+        capabilities = [
+            .allowsReading,
+            .allowsWriting,
+            .allowsReparenting,
+            .allowsRenaming,
+            .allowsTrashing,
+            .allowsDeleting,
+            .allowsEvicting,
+            .allowsAddingSubItems,
+            .allowsContentEnumerating
+        ]
         self.conflictOption = conflictOption
 
         if let driveError {
