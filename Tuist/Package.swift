@@ -74,7 +74,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "24.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.5")),
         .package(url: "https://github.com/Infomaniak/ios-device-check", .upToNextMajor(from: "1.1.1")),
-        .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "8.1.0")),
+        .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "8.1.1")),
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
         .package(url: "https://github.com/Infomaniak/ios-onboarding", .upToNextMajor(from: "1.2.3")),
         .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "16.0.0")),
