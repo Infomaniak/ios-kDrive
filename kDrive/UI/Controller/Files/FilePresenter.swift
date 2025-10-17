@@ -25,6 +25,7 @@ import UIKit
 
 @MainActor
 final class FilePresenter {
+    @LazyInjectService private var router: AppNavigable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
@@ -39,20 +40,17 @@ final class FilePresenter {
     }
 
     static func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
-        guard let rootViewController = viewController.view.window?.rootViewController as? MainTabViewController else {
+        guard let rootViewController = router.getCurrentController() else {
             return
         }
 
         viewController.navigationController?.popToRootViewController(animated: false)
 
         rootViewController.dismiss(animated: false) {
-            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
-
-            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
-                return
-            }
-
-            navigationController.popToRootViewController(animated: false)
+            router.showMainViewController(
+                driveFileManager: accountManager.currentDriveFileManager,
+                selectedIndex: MainTabBarIndex.files.rawValue
+            )
 
             guard let fileListViewController = navigationController.topViewController else {
                 return
