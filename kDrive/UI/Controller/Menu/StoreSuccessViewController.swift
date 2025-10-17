@@ -22,6 +22,9 @@ import kDriveCore
 import UIKit
 
 class StoreSuccessViewController: UIViewController {
+    @LazyInjectService private var router: AppNavigable
+    @LazyInjectService private var accountManager: AccountManager
+
     override func viewDidAppear(_ animated: Bool) {
         @InjectService var matomo: MatomoUtils
         super.viewDidAppear(animated)
@@ -29,12 +32,17 @@ class StoreSuccessViewController: UIViewController {
     }
 
     @IBAction func homeButtonPressed(_ sender: IKLargeButton) {
-        if let rootViewController = sender.window?.rootViewController as? MainTabViewController {
-            rootViewController.dismiss(animated: true)
-            (rootViewController.selectedViewController as? UINavigationController)?.popToRootViewController(animated: true)
-            rootViewController.selectedIndex = MainTabBarIndex.home.rawValue
-        } else {
+        guard let rootViewController = router.getCurrentController(),
+              let currentDriveFileManager = accountManager.currentDriveFileManager else {
             dismiss(animated: true)
+            return
+        }
+
+        rootViewController.dismiss(animated: true) {
+            self.router.showMainViewController(
+                driveFileManager: currentDriveFileManager,
+                selectedIndex: MainTabBarIndex.home.rawValue
+            )
         }
     }
 
