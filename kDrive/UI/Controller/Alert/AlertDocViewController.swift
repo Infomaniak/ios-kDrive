@@ -23,8 +23,6 @@ import UIKit
 
 /// Alert to create a new office document
 class AlertDocViewController: AlertFieldViewController {
-    @LazyInjectService private var router: AppNavigable
-
     private let fileType: String
     private let directory: File
     private let driveFileManager: DriveFileManager
@@ -115,6 +113,7 @@ class AlertDocViewController: AlertFieldViewController {
             }
             self.setLoading(false)
             self.dismiss(animated: true) {
+                @InjectService var router: AppNavigable
                 if let file,
                    let mainTabViewController = router.getCurrentController() {
                     OnlyOfficeViewController.open(
