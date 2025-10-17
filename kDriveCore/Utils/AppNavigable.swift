@@ -200,7 +200,7 @@ public protocol TopmostViewControllerFetchable {
     /// Access the root controller of the app
     @MainActor var rootViewController: UIViewController? { get }
 
-    @MainActor func getCurrentController(tabBarViewController: UISplitViewController?) -> UIViewController?
+    @MainActor func getCurrentController() -> UIViewController?
 }
 
 /// Actions performed by router, `async` by design
