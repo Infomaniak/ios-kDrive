@@ -16,12 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
 
 /// Alert to create a new office document
 class AlertDocViewController: AlertFieldViewController {
+    @LazyInjectService private var router: AppNavigable
+
     private let fileType: String
     private let directory: File
     private let driveFileManager: DriveFileManager
@@ -111,10 +114,9 @@ class AlertDocViewController: AlertFieldViewController {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
             self.setLoading(false)
-            let currentRootViewController = self.view.window?.rootViewController
             self.dismiss(animated: true) {
                 if let file,
-                   let mainTabViewController = currentRootViewController as? MainTabViewController {
+                   let mainTabViewController = router.getCurrentController() {
                     OnlyOfficeViewController.open(
                         driveFileManager: self.driveFileManager,
                         file: file,
