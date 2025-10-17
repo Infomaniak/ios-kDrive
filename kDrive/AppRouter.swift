@@ -576,20 +576,19 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showPhotoSyncSettings() {
-        guard let rootViewController = window?.rootViewController as? MainTabViewController else {
+        guard let rootViewController = getCurrentController(),
+              let navController = rootViewController as? UINavigationController,
+              let currentDriveFileManager = currentDriveFileManagerForRoot() else {
             return
         }
 
-        rootViewController.dismiss(animated: false)
-        rootViewController.selectedIndex = MainTabBarIndex.profile.rawValue
+        rootViewController.dismiss(animated: false) {
+            showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: MainTabBarIndex.profile.rawValue)
 
-        guard let navController = rootViewController.selectedViewController as? UINavigationController else {
-            return
+            let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
+            navController.popToRootViewController(animated: false)
+            navController.pushViewController(photoSyncSettingsViewController, animated: true)
         }
-
-        let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
-        navController.popToRootViewController(animated: false)
-        navController.pushViewController(photoSyncSettingsViewController, animated: true)
     }
 
     public func showSaveFileVC(from viewController: UIViewController, driveFileManager: DriveFileManager, files: [ImportedFile]) {
