@@ -131,11 +131,18 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         } else if let fileListViewController = filesNavigationController.topViewController as? FileListViewController {
             let currentDirectory = fileListViewController.viewModel.currentDirectory
             if currentDirectory.id > DriveFileManager.constants.rootID {
-                presentPathToFileList(
-                    frozenFolder: currentDirectory,
-                    navigationController: detailNavigationController,
-                    toRoot: false
-                )
+                if currentDirectory.parent == nil {
+                    presentPathToFileList(
+                        frozenFolder: currentDirectory,
+                        navigationController: detailNavigationController
+                    )
+                } else {
+                    presentPathToFileList(
+                        frozenFolder: currentDirectory,
+                        navigationController: detailNavigationController,
+                        toRoot: false
+                    )
+                }
             } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
         } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
     }
@@ -196,7 +203,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             currentFolder = parentFolder
         }
 
-        if !toRoot && filePath.count > 1 {
+        if !toRoot {
             filePath.removeLast()
         }
         for folder in filePath.reversed() {
