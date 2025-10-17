@@ -142,15 +142,11 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return
         }
 
-        guard let rootViewController = window?.rootViewController as? UISplitViewController else {
-            return
-        }
-
         guard let viewController = appNavigable.getCurrentController() else {
             return
         }
 
-        rootViewController.dismiss(animated: false)
+        viewController.dismiss(animated: false)
 
         guard let driveFileManager = accountManager.currentDriveFileManager else {
             return
@@ -159,7 +155,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         switch shortcutItem.type {
         case Constants.applicationShortcutScan:
             let openMediaHelper = OpenMediaHelper(driveFileManager: driveFileManager)
-            openMediaHelper.openScan(rootViewController, false)
+            openMediaHelper.openScan(viewController, false)
             mediaHelper = openMediaHelper
             matomo.track(eventWithCategory: .shortcuts, name: "scan")
         case Constants.applicationShortcutSearch:
