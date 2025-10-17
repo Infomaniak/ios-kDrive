@@ -54,6 +54,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    var currentPreviewedFileId: Int {
+        return currentFile.id
+    }
+
     private var editButtonHidden: Bool {
         driveFileManager.isPublicShare
     }

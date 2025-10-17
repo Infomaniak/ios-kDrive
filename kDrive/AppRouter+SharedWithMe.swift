@@ -135,7 +135,7 @@ public extension AppRouter {
             return
         }
 
-        showMainViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
 
         guard let navigationController =
             getCurrentController() as? UINavigationController
