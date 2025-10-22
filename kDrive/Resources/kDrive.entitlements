@@ -21,6 +21,7 @@
 	<array>
 		<string>$(AppIdentifierPrefix)com.infomaniak.drive</string>
 		<string>$(AppIdentifierPrefix)com.infomaniak.mail</string>
+		<string>$(AppIdentifierPrefix)com.infomaniak.euria</string>
 	</array>
 </dict>
 </plist>
