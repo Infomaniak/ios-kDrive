@@ -1,3 +1,2 @@
-- Correction de problèmes de navigation
-- Amélioration de l'expérience iPad
+- Améliorations partage public
 - Améliorations de la stabilité et corrections de bugs
