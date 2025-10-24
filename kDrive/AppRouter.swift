@@ -576,15 +576,20 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showPhotoSyncSettings() {
-        guard let rootViewController = getCurrentController(),
-              let navController = rootViewController as? UINavigationController,
-              let currentDriveFileManager = currentDriveFileManagerForRoot() else {
+        guard let currentDriveFileManager = currentDriveFileManagerForRoot(),
+              let rootViewController = getCurrentController(),
+              rootViewController.traitCollection.horizontalSizeClass == .compact else {
+            return
+        }
+        showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: MainTabBarIndex.profile.rawValue)
+
+        guard
+            let freshRootViewController = getCurrentController(),
+            let navController = freshRootViewController as? UINavigationController else {
             return
         }
 
-        rootViewController.dismiss(animated: false) {
-            showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: MainTabBarIndex.profile.rawValue)
-
+        freshRootViewController.dismiss(animated: false) {
             let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
             navController.popToRootViewController(animated: false)
             navController.pushViewController(photoSyncSettingsViewController, animated: true)
