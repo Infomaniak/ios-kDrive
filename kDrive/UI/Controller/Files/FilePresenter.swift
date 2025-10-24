@@ -38,22 +38,25 @@ final class FilePresenter {
         self.viewController = viewController
     }
 
-    static func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
-        guard let rootViewController = viewController.view.window?.rootViewController as? MainTabViewController else {
+    static func presentParent(of file: File, driveFileManager: DriveFileManager) {
+        @InjectService var router: AppNavigable
+        @InjectService var accountManager: AccountManageable
+
+        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
             return
         }
 
-        viewController.navigationController?.popToRootViewController(animated: false)
+        router.showMainViewController(
+            driveFileManager: currentDriveFileManager,
+            selectedIndex: MainTabBarIndex.files.rawValue
+        )
+
+        guard let rootViewController = router.getCurrentController(),
+              let navigationController = rootViewController as? UINavigationController else {
+            return
+        }
 
         rootViewController.dismiss(animated: false) {
-            rootViewController.selectedIndex = MainTabBarIndex.files.rawValue
-
-            guard let navigationController = rootViewController.selectedViewController as? UINavigationController else {
-                return
-            }
-
-            navigationController.popToRootViewController(animated: false)
-
             guard let fileListViewController = navigationController.topViewController else {
                 return
             }

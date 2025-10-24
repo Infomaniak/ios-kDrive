@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -111,10 +112,10 @@ class AlertDocViewController: AlertFieldViewController {
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
             self.setLoading(false)
-            let currentRootViewController = self.view.window?.rootViewController
             self.dismiss(animated: true) {
+                @InjectService var router: AppNavigable
                 if let file,
-                   let mainTabViewController = currentRootViewController as? MainTabViewController {
+                   let mainTabViewController = router.getCurrentController() {
                     OnlyOfficeViewController.open(
                         driveFileManager: self.driveFileManager,
                         file: file,
