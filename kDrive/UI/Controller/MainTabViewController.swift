@@ -236,14 +236,14 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             let menuViewController = MenuViewController(driveFileManager: driveFileManager)
             detailNavigationController.setViewControllers([menuViewController], animated: false)
         case .file(let fileListViewModel):
-            let destinationViewController = FileListViewController(viewModel: fileListViewModel)
+            let regularDetailViewController = FileListViewController(viewModel: fileListViewModel)
             mainTabBarViewController.selectedIndex = MainTabBarIndex.files.rawValue
-            detailNavigationController.setViewControllers([destinationViewController], animated: false)
+            detailNavigationController.setViewControllers([regularDetailViewController], animated: false)
             if let filesNav = mainTabBarViewController
                 .viewControllers?[safe: mainTabBarViewController.selectedIndex] as? UINavigationController {
-                let destinationVC = FileListViewController(viewModel: fileListViewModel)
+                let compactViewController = FileListViewController(viewModel: fileListViewModel)
                 filesNav.popToRootViewController(animated: false)
-                filesNav.pushViewController(destinationVC, animated: false)
+                filesNav.pushViewController(compactViewController, animated: false)
             }
         }
         lastSelectedDestination = destination
