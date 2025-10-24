@@ -82,7 +82,7 @@ public extension AppRouter {
             return
         }
 
-        showMainViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
 
         guard let navigationController =
             getCurrentController() as? UINavigationController
@@ -112,7 +112,7 @@ public extension AppRouter {
             return
         }
 
-        showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: 1)
+        showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
 
         let fileActionsHelper = FileActionsHelper()
         fileActionsHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
