@@ -38,7 +38,7 @@ final class FilePresenter {
         self.viewController = viewController
     }
 
-    static func presentParent(of file: File, driveFileManager: DriveFileManager, viewController: UIViewController) {
+    static func presentParent(of file: File, driveFileManager: DriveFileManager) {
         @InjectService var router: AppNavigable
         @InjectService var accountManager: AccountManageable
 

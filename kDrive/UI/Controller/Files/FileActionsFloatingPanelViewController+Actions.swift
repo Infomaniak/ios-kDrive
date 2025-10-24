@@ -364,8 +364,7 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func seeFolderAction() {
-        guard let viewController = presentingParent else { return }
-        FilePresenter.presentParent(of: frozenFile, driveFileManager: driveFileManager, viewController: viewController)
+        FilePresenter.presentParent(of: frozenFile, driveFileManager: driveFileManager)
         dismiss(animated: true)
     }
 
