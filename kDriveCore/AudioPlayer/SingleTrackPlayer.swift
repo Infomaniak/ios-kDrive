@@ -346,6 +346,7 @@ public final class SingleTrackPlayer: Pausable {
     }
 
     public func pause() {
+        guard playerState == .playing else { return }
         playerState = .paused
         isInterrupted = false
         player?.pause()
