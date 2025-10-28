@@ -68,34 +68,9 @@ public extension FileImportHelper {
         let name = name.addingExtension(scanType.extension)
         switch scanType {
         case .pdf:
-            let pdfDocument = PDFDocument()
-            let pageIndexesToGenerate = 0 ..< scan.pageCount
-
-            let pages: [PDFPage] = await pageIndexesToGenerate.concurrentCompactMap { i in
-                autoreleasepool {
-                    let pageImage = scan.imageOfPage(at: i)
-                    // Compress page image before adding it to the PDF
-                    guard let pageData = pageImage.jpegData(compressionQuality: Self.imageCompression),
-                          let compressedPageImage = UIImage(data: pageData) else {
-                        return nil
-                    }
-
-                    guard let pdfPage = PDFPage(image: compressedPageImage) else {
-                        return nil
-                    }
-
-                    // Set page size to something printable
-                    pdfPage.setBounds(self.pdfPageRect, for: .mediaBox)
-
-                    return pdfPage
-                }
-            }
-
-            for (index, page) in pages.enumerated() {
-                pdfDocument.insert(page, at: index)
-            }
-
-            data = pdfDocument.dataRepresentation()
+            let scanImportHelper = ScanImportHelper()
+            let pdfDocument = scanImportHelper.convertScanToPDF(scan: scan)
+            data = pdfDocument?.dataRepresentation()
         case .image:
             let image = scan.imageOfPage(at: 0)
             data = image.jpegData(compressionQuality: Self.imageCompression)
