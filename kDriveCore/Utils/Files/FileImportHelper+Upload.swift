@@ -68,9 +68,8 @@ public extension FileImportHelper {
         let name = name.addingExtension(scanType.extension)
         switch scanType {
         case .pdf:
-            let scanImportHelper = ScanImportHelper()
-            let pdfDocument = scanImportHelper.convertScanToPDF(scan: scan)
-            data = pdfDocument?.dataRepresentation()
+            let pdfScanImportHelper = PDFScanImportHelper()
+            data = pdfScanImportHelper.convertScanToPDF(scan: scan)
         case .image:
             let image = scan.imageOfPage(at: 0)
             data = image.jpegData(compressionQuality: Self.imageCompression)
@@ -81,27 +80,6 @@ public extension FileImportHelper {
         }
 
         try upload(data: data, name: name, uti: scanType.uti, drive: drive, directory: directory)
-    }
-
-    /// Get a standard printable page size
-    private var pdfPageRect: CGRect {
-        let locale = NSLocale.current
-        let isMetric = locale.usesMetricSystem
-
-        // Size is expressed in PostScript points
-        let pageSize: CGSize
-        if isMetric {
-            // Using A4
-            let metricPageSize = CGSize(width: 595.28, height: 841.89)
-            pageSize = metricPageSize
-        } else {
-            // Using LETTER US
-            let freedomPageSize = CGSize(width: 612.00, height: 792.00)
-            pageSize = freedomPageSize
-        }
-
-        let pageRect = CGRect(origin: .zero, size: pageSize)
-        return pageRect
     }
 
     func upload(photo: UIImage, name: String, format: PhotoFileFormat, in directory: File, drive: Drive) throws {

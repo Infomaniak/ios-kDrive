@@ -17,10 +17,9 @@
  */
 
 import Foundation
-import PDFKit
 import VisionKit
 
-struct ScanImportHelper {
+struct PDFScanImportHelper {
     /// Get a standard printable page size
     private var pageRect: CGRect {
         let locale = NSLocale.current
@@ -42,7 +41,7 @@ struct ScanImportHelper {
         return pageRect
     }
 
-    func convertScanToPDF(scan: VNDocumentCameraScan) -> PDFDocument? {
+    func convertScanToPDF(scan: VNDocumentCameraScan) -> Data? {
         let pdfData = NSMutableData()
 
         guard let consumer = CGDataConsumer(data: pdfData),
@@ -58,34 +57,35 @@ struct ScanImportHelper {
             }
 
             guard let cgImage = compressedPageImage.cgImage else { continue }
+            autoreleasepool {
+                let imageSize = compressedPageImage.size
+                let aspectRatio = imageSize.width / imageSize.height
+                let pageAspectRatio = pageRect.width / pageRect.height
 
-            let imageSize = compressedPageImage.size
-            let aspectRatio = imageSize.width / imageSize.height
-            let pageAspectRatio = pageRect.width / pageRect.height
+                let aspectRatioTolerance: CGFloat = 0.1
+                let aspectRatioDifference = abs(aspectRatio - pageAspectRatio) / pageAspectRatio
 
-            let aspectRatioTolerance: CGFloat = 0.1
-            let aspectRatioDifference = abs(aspectRatio - pageAspectRatio) / pageAspectRatio
+                let drawRect: CGRect
+                if aspectRatioDifference <= aspectRatioTolerance {
+                    var mediaBox = pageRect
+                    pdfContext.beginPage(mediaBox: &mediaBox)
+                    drawRect = pageRect
+                } else {
+                    var mediaBox = CGRect(origin: .zero, size: compressedPageImage.size)
+                    pdfContext.beginPage(mediaBox: &mediaBox)
+                    let xOffset = (mediaBox.width - imageSize.width) / 2
+                    let yOffset = (mediaBox.height - imageSize.height) / 2
+                    drawRect = CGRect(x: xOffset, y: yOffset, width: imageSize.width, height: imageSize.height)
+                }
 
-            let drawRect: CGRect
-            if aspectRatioDifference <= aspectRatioTolerance {
-                var mediaBox = pageRect
-                pdfContext.beginPage(mediaBox: &mediaBox)
-                drawRect = pageRect
-            } else {
-                var mediaBox = CGRect(origin: .zero, size: compressedPageImage.size)
-                pdfContext.beginPage(mediaBox: &mediaBox)
-                let xOffset = (mediaBox.width - imageSize.width) / 2
-                let yOffset = (mediaBox.height - imageSize.height) / 2
-                drawRect = CGRect(x: xOffset, y: yOffset, width: imageSize.width, height: imageSize.height)
+                pdfContext.draw(cgImage, in: drawRect)
+
+                pdfContext.endPage()
             }
-
-            pdfContext.draw(cgImage, in: drawRect)
-
-            pdfContext.endPage()
         }
 
         pdfContext.closePDF()
 
-        return PDFDocument(data: pdfData as Data)
+        return pdfData as Data
     }
 }
