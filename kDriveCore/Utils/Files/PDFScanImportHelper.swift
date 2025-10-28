@@ -37,8 +37,7 @@ struct PDFScanImportHelper {
             pageSize = freedomPageSize
         }
 
-        let pageRect = CGRect(origin: .zero, size: pageSize)
-        return pageRect
+        return CGRect(origin: .zero, size: pageSize)
     }
 
     func convertScanToPDF(scan: VNDocumentCameraScan) -> Data? {

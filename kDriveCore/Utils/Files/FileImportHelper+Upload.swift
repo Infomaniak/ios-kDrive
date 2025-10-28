@@ -68,8 +68,7 @@ public extension FileImportHelper {
         let name = name.addingExtension(scanType.extension)
         switch scanType {
         case .pdf:
-            let pdfScanImportHelper = PDFScanImportHelper()
-            data = pdfScanImportHelper.convertScanToPDF(scan: scan)
+            data = PDFScanImportHelper().convertScanToPDF(scan: scan)
         case .image:
             let image = scan.imageOfPage(at: 0)
             data = image.jpegData(compressionQuality: Self.imageCompression)
