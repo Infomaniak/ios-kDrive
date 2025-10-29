@@ -36,7 +36,7 @@ final class OnlyOfficeViewController: UIViewController {
     private var progressObserver: NSKeyValueObservation?
 
     static func open(driveFileManager: DriveFileManager, file: File, viewController: UIViewController) {
-        guard file.isOfficeFile else { return }
+        guard file.isEditable else { return }
 
         if let newExtension = file.conversion?.onylofficeExtension {
             let driveFloatingPanelController = UnsupportedExtensionFloatingPanelViewController.instantiatePanel()

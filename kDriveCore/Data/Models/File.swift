@@ -646,6 +646,10 @@ public final class File: Object, Codable {
         return supportedBy.contains(.onlyOffice) || conversion?.whenOnlyoffice == true
     }
 
+    public var isEditable: Bool {
+        return (isOfficeFile || convertedType == .code) && capabilities.canWrite
+    }
+
     public var isBookmark: Bool {
         return self.extension == "url" || self.extension == "webloc"
     }

@@ -82,7 +82,7 @@ extension FileActionsFloatingPanelViewController {
                     case .openWith:
                         return frozenFile.capabilities.canWrite
                     case .edit:
-                        return frozenFile.isOfficeFile && frozenFile.capabilities.canWrite
+                        return frozenFile.isEditable
                     case .manageCategories:
                         return driveFileManager.drive.categoryRights.canPutOnFile && !frozenFile.isDisabled
                     case .favorite:
