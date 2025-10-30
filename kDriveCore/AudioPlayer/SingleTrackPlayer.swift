@@ -148,23 +148,6 @@ public final class SingleTrackPlayer: Pausable {
 
     // MARK: - MediaPlayer
 
-    private func setNowPlayingMetadata() {
-        var nowPlayingInfo = [String: Any]()
-        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
-        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
-
-        guard let currentTrackMetadata else { return }
-        nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
-        nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
-
-        if let artwork = currentTrackMetadata.artwork {
-            let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
-            nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
-        }
-
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-    }
-
     private func setPlaybackInfo(time: CMTime) {
         let elapsedTime = time.formattedText
         onElapsedTimeChange.send(elapsedTime)
@@ -177,14 +160,26 @@ public final class SingleTrackPlayer: Pausable {
         }
     }
 
-    private func setNowPlayingPlaybackInfo() {
+    private func updateNowPlayingInfo() {
         var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
-        if let position = player?.currentItem?.currentTime() {
+
+        print("JE JOUE MAINTENANT: \(nowPlayingInfo[MPMediaItemPropertyTitle] as? String ?? "NULL")")
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
+        nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
+
+        if let currentTrackMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = currentTrackMetadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = currentTrackMetadata.artist
+
+            if let artwork = currentTrackMetadata.artwork {
+                let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+                nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
+            }
+        }
+
+        if let position = player?.currentItem?.currentTime(), position.seconds.isFinite {
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Float(position.seconds)
-            let remainingTime = position.formattedText
-            onRemainingTimeChange.send(remainingTime)
-            let positionSlider = Float(position.seconds)
-            onPositionChange.send(positionSlider)
         }
 
         if let rate = player?.rate {
@@ -192,14 +187,14 @@ public final class SingleTrackPlayer: Pausable {
         }
         nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
 
-        if let player = player, let duration = player.currentItem?.duration {
+        if let duration = player?.currentItem?.duration, duration.seconds.isFinite, duration.seconds > 0 {
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = Float(duration.seconds)
-            let elapsedTime = player.currentItem?.currentTime() ?? .zero
+            let maximumPosition = Float(duration.seconds)
+            onPositionMaximumChange.send(maximumPosition)
 
+            let elapsedTime = player?.currentItem?.currentTime() ?? .zero
             let remainingTime = "−\((duration - elapsedTime).formattedText)"
             onRemainingTimeChange.send(remainingTime)
-            let maximumPosition = duration.seconds.isFinite ? Float(duration.seconds) : 1
-            onPositionMaximumChange.send(maximumPosition)
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
@@ -261,10 +256,10 @@ public final class SingleTrackPlayer: Pausable {
         }
 
         rateObserver = player.observe(\.rate, options: .initial) { [weak self] _, _ in
-            self?.setNowPlayingPlaybackInfo()
+            self?.updateNowPlayingInfo()
         }
         statusObserver = player.observe(\.currentItem?.status, options: .initial) { [weak self] _, _ in
-            self?.setNowPlayingPlaybackInfo()
+            self?.updateNowPlayingInfo()
         }
 
         if let currentItem = player.currentItem {
@@ -327,7 +322,7 @@ public final class SingleTrackPlayer: Pausable {
 
     public func play() {
         if playerState == .stopped {
-            setNowPlayingMetadata()
+            updateNowPlayingInfo()
             do {
                 try AVAudioSession.sharedInstance().setActive(true)
             } catch {
@@ -368,7 +363,7 @@ public final class SingleTrackPlayer: Pausable {
         player?.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { isFinished in
             guard isFinished else { return }
             self.startPlaybackObservationIfNeeded()
-            self.setNowPlayingPlaybackInfo()
+            self.updateNowPlayingInfo()
         }
     }
 
