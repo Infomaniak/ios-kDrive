@@ -401,7 +401,7 @@ public extension AVPlayer {
     }
 
     var progressPercentage: Double {
-        guard let currentItem else { return 0 }
+        guard let currentItem, currentItem.duration.seconds > 0 else { return 0 }
         return (currentItem.currentTime().seconds * 100) / currentItem.duration.seconds
     }
 }
