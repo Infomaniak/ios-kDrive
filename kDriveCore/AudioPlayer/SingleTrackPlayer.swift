@@ -125,7 +125,6 @@ public final class SingleTrackPlayer: Pausable {
     private func setupStreamingAsset(_ urlAsset: AVURLAsset, fileName: String) async {
         player = AVPlayer(playerItem: AVPlayerItem(asset: urlAsset))
         await setMetaData(from: urlAsset.commonMetadata, playableFileName: fileName)
-        setUpObservers()
 
         currentItemStatusObserver = player?.observe(\.currentItem?.status) { _, _ in
             self.handleItemStatusChange()
@@ -163,8 +162,6 @@ public final class SingleTrackPlayer: Pausable {
     private func updateNowPlayingInfo() {
         var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
 
-        print("JE JOUE MAINTENANT: \(nowPlayingInfo[MPMediaItemPropertyTitle] as? String ?? "NULL")")
-
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
 
@@ -175,6 +172,8 @@ public final class SingleTrackPlayer: Pausable {
             if let artwork = currentTrackMetadata.artwork {
                 let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
                 nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
+            } else {
+                nowPlayingInfo[MPMediaItemPropertyArtwork] = nil
             }
         }
 
@@ -322,6 +321,7 @@ public final class SingleTrackPlayer: Pausable {
 
     public func play() {
         if playerState == .stopped {
+            setUpObservers()
             updateNowPlayingInfo()
             do {
                 try AVAudioSession.sharedInstance().setActive(true)
@@ -368,6 +368,7 @@ public final class SingleTrackPlayer: Pausable {
     }
 
     public func seek(to position: TimeInterval) {
+        stopPlaybackObservation()
         seek(to: CMTime(seconds: position, preferredTimescale: 1))
     }
 
