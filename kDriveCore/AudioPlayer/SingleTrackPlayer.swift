@@ -137,6 +137,7 @@ public final class SingleTrackPlayer: Pausable {
         player?.pause()
         player = nil
         playerState = .stopped
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
     }
 
     private func setMetaData(from metadata: [AVMetadataItem], playableFileName: String?) async {
