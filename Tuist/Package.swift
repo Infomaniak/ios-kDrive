@@ -85,7 +85,7 @@ let package = Package(
         .package(url: "https://github.com/ProxymanApp/atlantis", .upToNextMajor(from: "1.3.0")),
         .package(url: "https://github.com/ra1028/DifferenceKit", .upToNextMajor(from: "1.3.0")),
         .package(url: "https://github.com/realm/realm-swift", .upToNextMajor(from: "10.52.0")),
-        .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "2.0.0")),
+        .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "3.0.0")),
         .package(url: "https://github.com/swift-server-community/mqtt-nio", .upToNextMajor(from: "2.12.0"))
     ]
 )
