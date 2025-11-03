@@ -1,2 +1,3 @@
-- Améliorations partage public
+- Améliorations du lecteur audio
+- Améliorations de la détection de taille des PDF
 - Améliorations de la stabilité et corrections de bugs

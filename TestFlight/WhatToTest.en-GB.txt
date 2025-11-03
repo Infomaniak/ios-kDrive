@@ -1,2 +1,3 @@
-- Improved public share
+- Improved PDF sizing
+- Improved Audio playback
 - Stability improvements and bug fixes

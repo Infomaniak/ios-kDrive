@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "aae8dd0f3722c75d526f09fbb709bd1081d402db",
-        "version" : "1.30.1"
+        "revision" : "a9fb8f7f5fe161ad56dc5169615f1870fcc4cd1b",
+        "version" : "1.31.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "6de479a2b1532d13ee7794d29aebe7ed9b568129",
-        "version" : "18.1.0"
+        "revision" : "0b7573c3ff0bedf57181a94196cc91973467accb",
+        "version" : "18.3.0"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "e9b96a8be33212357b73409d017305674e9a2bfc",
-        "version" : "24.0.1"
+        "revision" : "deff1ccfd90c632f513719a7582964d0285bab09",
+        "version" : "24.1.2"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "revision" : "7f492a7aea76096660aeeabd911ae90968fffc2b",
-        "version" : "8.1.1"
+        "revision" : "920f28ee2c417943ce9a4679f5e4f482a8c52c6d",
+        "version" : "8.3.0"
       }
     },
     {
@@ -141,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login",
       "state" : {
-        "revision" : "dce43ecfa6083f18489da82fc4a83b37268a72a8",
-        "version" : "7.4.0"
+        "revision" : "3862e03c6c3305ec59d3171dc1152b179d59c334",
+        "version" : "7.5.0"
       }
     },
     {
@@ -150,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-onboarding",
       "state" : {
-        "revision" : "f5c44c976e2818b6e4f6c8946a4ffe0e6e7f0776",
-        "version" : "1.3.0"
+        "revision" : "9abb167e652678ce56aba00deedb10a6d48b40cd",
+        "version" : "1.4.2"
       }
     },
     {
@@ -276,8 +276,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "e9bcb13a491c00da6c9d100fe73954aea9e9d8a6",
-        "version" : "8.57.0"
+        "revision" : "e1e94efb9d5a688af85c607ae34a8b56961ca118",
+        "version" : "8.57.1"
       }
     },
     {
@@ -348,8 +348,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "4e8f4b1c9adaa59315c523540c1ff2b38adc20a9",
-        "version" : "2.87.0"
+        "revision" : "a24771a4c228ff116df343c85fcf3dcfae31a06c",
+        "version" : "2.88.0"
       }
     },
     {
@@ -357,8 +357,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio-ssl.git",
       "state" : {
-        "revision" : "d3bad3847c53015fe8ec1e6c3ab54e53a5b6f15f",
-        "version" : "2.35.0"
+        "revision" : "173cc69a058623525a58ae6710e2f5727c663793",
+        "version" : "2.36.0"
       }
     },
     {
