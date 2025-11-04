@@ -20,21 +20,21 @@ import Foundation
 import VisionKit
 
 struct PDFScanImportHelper {
+    // Size is expressed in PostScript points for metric and imperial
+    static let metricPageSize = CGSize(width: 595.28, height: 841.89)
+    static let freedomPageSize = CGSize(width: 612.00, height: 792.00)
+
     /// Get a standard printable page size
     private var pageRect: CGRect {
         let locale = NSLocale.current
-        let isMetric = locale.usesMetricSystem
-
-        // Size is expressed in PostScript points
         let pageSize: CGSize
-        if isMetric {
-            // Using A4
-            let metricPageSize = CGSize(width: 595.28, height: 841.89)
-            pageSize = metricPageSize
-        } else {
-            // Using LETTER US
-            let freedomPageSize = CGSize(width: 612.00, height: 792.00)
-            pageSize = freedomPageSize
+        switch locale.measurementSystem {
+        case .metric, .uk:
+            pageSize = Self.metricPageSize
+        case .us:
+            pageSize = Self.freedomPageSize
+        default:
+            pageSize = Self.metricPageSize
         }
 
         return CGRect(origin: .zero, size: pageSize)
