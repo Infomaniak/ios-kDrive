@@ -219,6 +219,8 @@ public protocol RouterActionable {
     @MainActor func presentKDriveProUpSaleSheet(driveFileManager: DriveFileManager)
 
     func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async
+
+    func askForNotificationPermission() async
 }
 
 /// Something that can navigate within the kDrive app

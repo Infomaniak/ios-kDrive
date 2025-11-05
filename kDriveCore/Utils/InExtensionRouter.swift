@@ -29,6 +29,8 @@ public struct InExtensionRouter: AppNavigable {
 
     public func askForReview() async {}
 
+    public func askForNotificationPermission() async {}
+
     public func askUserToRemovePicturesIfNecessary() async {}
 
     public func askUserToRemovePicturesIfNecessaryNotification() {}

@@ -26,6 +26,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
+import InfomaniakNotifications
 import InterAppLogin
 import MyKSuite
 import os.log
@@ -199,6 +200,9 @@ public enum FactoryService {
             },
             Factory(type: InAppTwoFactorAuthenticationManagerable.self) { _, _ in
                 InAppTwoFactorAuthenticationManager()
+            },
+            Factory(type: InfomaniakNotifications.self) { _, _ in
+                InfomaniakNotifications(appGroup: appGroupName)
             },
             Factory(type: PhotoLibrarySavable.self) { _, _ in
                 PhotoLibrarySaver()

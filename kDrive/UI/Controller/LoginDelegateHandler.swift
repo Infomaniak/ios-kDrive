@@ -108,6 +108,9 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
         UserDefaults.shared.numberOfConnections = 1
         _ = router.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
         deeplinkService.processDeeplinksPostAuthentication()
+        Task {
+            await router.askForNotificationPermission()
+        }
     }
 
     @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: Account?) {
