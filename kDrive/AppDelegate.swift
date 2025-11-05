@@ -171,12 +171,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 // MARK: - User notification center delegate
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    // In Foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        _ = notification.request.content.userInfo
-
         completionHandler([.list, .banner, .sound])
     }
 
@@ -185,49 +182,27 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
 
-        switch response.notification.request.trigger {
-        case is UNPushNotificationTrigger:
-            processPushNotification(response.notification)
-        default:
-            if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
-                // Upload notification
-                let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
+        if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
+            // Upload notification
+            let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
 
-                switch response.actionIdentifier {
-                case UNNotificationDefaultActionIdentifier:
-                    // Notification tapped: open parent folder
-                    if let parentId,
-                       let driveFileManager = accountManager.currentDriveFileManager,
-                       let folder = driveFileManager.getCachedFile(id: parentId) {
-                        appNavigable.present(file: folder, driveFileManager: driveFileManager)
-                    }
-                default:
-                    break
+            switch response.actionIdentifier {
+            case UNNotificationDefaultActionIdentifier:
+                // Notification tapped: open parent folder
+                if let parentId,
+                   let driveFileManager = accountManager.currentDriveFileManager,
+                   let folder = driveFileManager.getCachedFile(id: parentId) {
+                    appNavigable.present(file: folder, driveFileManager: driveFileManager)
                 }
-            } else if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier
-                .photoSyncError {
-                // Show photo sync settings
-                appNavigable.showPhotoSyncSettings()
-            } else {
-                // Handle other notification types...
+            default:
+                break
             }
+        } else if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier
+            .photoSyncError {
+            // Show photo sync settings
+            appNavigable.showPhotoSyncSettings()
         }
 
         completionHandler()
-    }
-
-    private func processPushNotification(_ notification: UNNotification) {
-        UIApplication.shared.applicationIconBadgeNumber = 0
-//        PROCESS NOTIFICATION
-//        let userInfo = notification.request.content.userInfo
-//
-//        let parentId = Int(userInfo["parentId"] as? String ?? "")
-//        if let parentId = parentId,
-//           let driveFileManager = accountManager.currentDriveFileManager,
-//           let folder = driveFileManager.getCachedFile(id: parentId) {
-//            present(file: folder, driveFileManager: driveFileManager)
-//        }
-//
-//        Messaging.messaging().appDidReceiveMessage(userInfo)
     }
 }
