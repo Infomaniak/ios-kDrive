@@ -1,5 +1,5 @@
 {
-  "originHash" : "9fcdb51f3d234d46936eef6cebb8775ec9bd18d1e27a79cbdd605b0eb576a788",
+  "originHash" : "1b46a3fd3a67c87df6c463cc79ab5a44466085829442092accbd9ee1747aca04",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -143,6 +143,15 @@
       "state" : {
         "revision" : "3862e03c6c3305ec59d3171dc1152b179d59c334",
         "version" : "7.5.0"
+      }
+    },
+    {
+      "identity" : "ios-notifications",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-notifications",
+      "state" : {
+        "revision" : "bf0722c1392a783ac3e1fe2a69b10ae3e45350ff",
+        "version" : "15.1.0"
       }
     },
     {
