@@ -223,6 +223,7 @@ public struct AppRouter: AppNavigable {
             showLaunchFloatingPanel()
 
             Task {
+                await askForNotificationPermission()
                 await askForReview()
                 await askUserToRemovePicturesIfNecessary()
                 deeplinkService.processDeeplinksPostAuthentication()
@@ -698,6 +699,10 @@ public struct AppRouter: AppNavigable {
             let selfSizingViewController = SelfSizingPanelViewController(contentViewController: viewControllerToPresent)
             rootViewController.present(selfSizingViewController, animated: true)
         }
+    }
+
+    public func askForNotificationPermission() async {
+        _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
     }
 
     public func askForReview() async {

@@ -52,7 +52,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
             image: KDriveResourcesAsset.upgradeKdrive.image
         )
         static let switchUser = MenuAction(
-            name: KDriveResourcesStrings.Localizable.switchUserTitle,
+            name: KDriveResourcesStrings.Localizable.switchAccountTitle,
             image: KDriveResourcesAsset.userSwitch.image
         )
         static let parameters = MenuAction(

@@ -35,6 +35,10 @@ public final class MCKRouter: AppNavigable {
         print("MCKRouter: NOOP \(function) called")
     }
 
+    public func askForNotificationPermission() async {
+        logNoop()
+    }
+
     public func navigate(to route: NavigationRoutes) {
         logNoop()
     }

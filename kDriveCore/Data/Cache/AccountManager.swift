@@ -23,6 +23,7 @@ import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
+import InfomaniakNotifications
 import kDriveResources
 import MyKSuite
 import RealmSwift
@@ -98,6 +99,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var deeplinkService: DeeplinkServiceable
     @LazyInjectService var myKSuiteStore: MyKSuiteStore
+    @LazyInjectService var notificationService: InfomaniakNotifications
 
     private static let appIdentifierPrefix = Bundle.main.infoDictionary!["AppIdentifierPrefix"] as! String
     private static let group = "com.infomaniak.drive"
@@ -447,13 +449,14 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let apiFetcher = DriveApiFetcher(token: token, delegate: self)
         let user = try await apiFetcher.userProfile(ignoreDefaultAvatar: true)
 
-        attachDeviceToApiToken(token, apiFetcher: apiFetcher)
-
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.filter(\.isDriveUser).isEmpty else {
             try? await networkLogin.deleteApiToken(token: token)
             throw DriveError.noDrive
         }
+
+        attachDeviceToApiToken(token, apiFetcher: apiFetcher)
+        async let _ = notificationService.updateTopicsIfNeeded([Topic.twoFAPushChallenge], userApiFetcher: apiFetcher)
 
         await updateMyKSuiteIfNeeded(for: driveResponse.drives, userId: user.id, apiFetcher: apiFetcher)
 
@@ -493,6 +496,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         account.user = user
 
         attachDeviceToApiToken(token.apiToken, apiFetcher: apiFetcher)
+        async let _ = notificationService.updateTopicsIfNeeded([Topic.twoFAPushChallenge], userApiFetcher: apiFetcher)
 
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty,
@@ -700,6 +704,10 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public func removeTokenAndAccount(account: Account) {
         let removedToken = tokenStore.removeTokenFor(userId: account.userId) ?? account.token
         removeAccount(toDeleteAccount: account)
+
+        Task {
+            await notificationService.removeStoredTokenFor(userId: account.userId)
+        }
 
         guard let removedToken else { return }
 

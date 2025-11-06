@@ -20,10 +20,12 @@ import Atlantis
 import AVFoundation
 import BackgroundTasks
 import CocoaLumberjackSwift
+import InAppTwoFactorAuthentication
 import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import InfomaniakLogin
+import InfomaniakNotifications
 import kDriveCore
 import kDriveResources
 import Kingfisher
@@ -50,6 +52,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
     @LazyInjectService var downloadQueue: DownloadQueueable
+    @LazyInjectService var tokenStore: TokenStore
+    @LazyInjectService var notificationService: InfomaniakNotifications
 
     // MARK: - UIApplicationDelegate
 
@@ -93,15 +97,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         Log.appDelegate("application didFinishLaunchingWithOptions")
-        // Register for remote notifications. This shows a permission dialog on first run, to
-        // show the dialog at a more appropriate time move this registration accordingly.
-        // [START register_for_notifications]
-        // For iOS 10 display notification (sent via APNS)
+
         UNUserNotificationCenter.current().delegate = self
-        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { _, _ in
-            // META: keep SonarCloud happy
-        }
         application.registerForRemoteNotifications()
 
         return true
@@ -149,6 +146,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         group.wait()
     }
 
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        for token in tokenStore.getAllTokens().values {
+            Task {
+                /* Because of a backend issue we can't register the notification token directly after the creation or refresh of
+                 an API token. We wait at least 15 seconds before trying to register. */
+                try? await Task.sleep(nanoseconds: 15_000_000_000)
+
+                let userApiFetcher = accountManager.getApiFetcher(for: token.userId, token: token.apiToken)
+                await notificationService.updateRemoteNotificationsToken(tokenData: deviceToken,
+                                                                         userApiFetcher: userApiFetcher,
+                                                                         updatePolicy: .always)
+            }
+        }
+    }
+
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         Log.appDelegate("Unable to register for remote notifications: \(error.localizedDescription)", level: .error)
     }
@@ -171,13 +183,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 // MARK: - User notification center delegate
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    // In Foreground
     func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        _ = notification.request.content.userInfo
+                                willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+        let handledByTwoFA = await handleTwoFactorAuthenticationNotification(notification)
+        if handledByTwoFA {
+            return []
+        }
 
-        completionHandler([.list, .banner, .sound])
+        return [.list, .banner, .sound]
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter,
@@ -185,49 +198,56 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
 
-        switch response.notification.request.trigger {
-        case is UNPushNotificationTrigger:
-            processPushNotification(response.notification)
-        default:
-            if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
-                // Upload notification
-                let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
+        if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier.upload {
+            // Upload notification
+            let parentId = userInfo[NotificationsHelper.UserInfoKey.parentId] as? Int
 
-                switch response.actionIdentifier {
-                case UNNotificationDefaultActionIdentifier:
-                    // Notification tapped: open parent folder
-                    if let parentId,
-                       let driveFileManager = accountManager.currentDriveFileManager,
-                       let folder = driveFileManager.getCachedFile(id: parentId) {
-                        appNavigable.present(file: folder, driveFileManager: driveFileManager)
-                    }
-                default:
-                    break
+            switch response.actionIdentifier {
+            case UNNotificationDefaultActionIdentifier:
+                // Notification tapped: open parent folder
+                if let parentId,
+                   let driveFileManager = accountManager.currentDriveFileManager,
+                   let folder = driveFileManager.getCachedFile(id: parentId) {
+                    appNavigable.present(file: folder, driveFileManager: driveFileManager)
                 }
-            } else if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier
-                .photoSyncError {
-                // Show photo sync settings
-                appNavigable.showPhotoSyncSettings()
-            } else {
-                // Handle other notification types...
+            default:
+                break
             }
+        } else if response.notification.request.content.categoryIdentifier == NotificationsHelper.CategoryIdentifier
+            .photoSyncError {
+            // Show photo sync settings
+            appNavigable.showPhotoSyncSettings()
         }
 
         completionHandler()
     }
 
-    private func processPushNotification(_ notification: UNNotification) {
-        UIApplication.shared.applicationIconBadgeNumber = 0
-//        PROCESS NOTIFICATION
-//        let userInfo = notification.request.content.userInfo
-//
-//        let parentId = Int(userInfo["parentId"] as? String ?? "")
-//        if let parentId = parentId,
-//           let driveFileManager = accountManager.currentDriveFileManager,
-//           let folder = driveFileManager.getCachedFile(id: parentId) {
-//            present(file: folder, driveFileManager: driveFileManager)
-//        }
-//
-//        Messaging.messaging().appDidReceiveMessage(userInfo)
+    func handleTwoFactorAuthenticationNotification(_ notification: UNNotification) async -> Bool {
+        @InjectService var inAppTwoFactorAuthenticationManager: InAppTwoFactorAuthenticationManagerable
+
+        guard let userId = inAppTwoFactorAuthenticationManager.handleRemoteNotification(notification) else {
+            return false
+        }
+
+        let accounts = accountManager.accounts
+
+        guard !accounts.isEmpty else {
+            UIApplication.shared.unregisterForRemoteNotifications()
+            return false
+        }
+
+        guard let account = accounts.first(where: { $0.userId == userId }),
+              let token = account.token,
+              let user = account.user else {
+            return false
+        }
+
+        let apiFetcher = accountManager.getApiFetcher(for: userId, token: token)
+
+        let session = InAppTwoFactorAuthenticationSession(user: user, apiFetcher: apiFetcher)
+
+        inAppTwoFactorAuthenticationManager.checkConnectionAttempts(using: session)
+
+        return true
     }
 }
