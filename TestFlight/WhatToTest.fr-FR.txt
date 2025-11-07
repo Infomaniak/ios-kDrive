@@ -1,3 +1,2 @@
-- Améliorations du lecteur audio
-- Améliorations de la détection de taille des PDF
+- Notifications 2FA
 - Améliorations de la stabilité et corrections de bugs
