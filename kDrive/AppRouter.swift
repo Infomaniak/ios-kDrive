@@ -577,23 +577,40 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showPhotoSyncSettings() {
-        guard let currentDriveFileManager = currentDriveFileManagerForRoot(),
-              let rootViewController = getCurrentController(),
-              rootViewController.traitCollection.horizontalSizeClass == .compact else {
+        guard let currentDriveFileManager = currentDriveFileManagerForRoot() else {
             return
         }
         showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: MainTabBarIndex.profile.rawValue)
 
         guard
-            let freshRootViewController = getCurrentController(),
-            let navController = freshRootViewController as? UINavigationController else {
+            let rootViewController = getCurrentController(),
+            let navController = rootViewController as? UINavigationController else {
             return
         }
 
-        freshRootViewController.dismiss(animated: false) {
-            let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
-            navController.popToRootViewController(animated: false)
-            navController.pushViewController(photoSyncSettingsViewController, animated: true)
+        let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
+
+        if rootViewController.traitCollection.horizontalSizeClass == .compact {
+            rootViewController.dismiss(animated: false) {
+                navController.popToRootViewController(animated: false)
+                navController.pushViewController(photoSyncSettingsViewController, animated: true)
+            }
+        } else {
+            let menuViewController = MenuViewController(driveFileManager: currentDriveFileManager, isModallyPresented: true)
+
+            let menuNavigationController = UINavigationController(rootViewController: menuViewController)
+            menuViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
+                systemItem: .stop,
+                primaryAction: UIAction { _ in
+                    menuNavigationController.dismiss(animated: true)
+                }
+            )
+
+            rootViewController.dismiss(animated: false) {
+                menuNavigationController.modalPresentationStyle = .formSheet
+                navController.present(menuNavigationController, animated: true)
+                menuNavigationController.pushViewController(PhotoSyncSettingsViewController(), animated: true)
+            }
         }
     }
 
