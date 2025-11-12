@@ -52,7 +52,7 @@ struct UTFavoritePreviewLink {
     func parseFilePreviewFail(deeplink: String) async throws {
         // WHEN
         guard let url = URL(string: deeplink),
-              let parsedResult = FavoritePreviewLink(inputUrl: url) else {
+              let _ = FavoritePreviewLink(inputUrl: url) else {
             // THEN
             // success
             return
