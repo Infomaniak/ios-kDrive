@@ -19,7 +19,7 @@
 import Foundation
 import SwiftRegex
 
-public struct DirectoryLink: Sendable, Equatable {
+public struct DirectoryLink: Sendable, Equatable, LinkDriveProvider {
     public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/files/([0-9]+)$"#)
 
     public let directoryURL: URL
