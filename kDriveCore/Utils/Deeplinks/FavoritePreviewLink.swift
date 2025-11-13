@@ -19,15 +19,15 @@
 import Foundation
 import SwiftRegex
 
-public struct DirectoryLink: Sendable, Equatable, LinkDriveProvider {
-    public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/files/([0-9]+)$"#)
+public struct FavoritePreviewLink: Sendable, Equatable, LinkDriveProvider {
+    public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/favorites/preview/[a-z]+/([0-9]+)$"#)
 
-    public let directoryURL: URL
+    public let filePreviewURL: URL
     public let driveId: Int
-    public let folderId: Int
+    public let fileId: Int
 
-    public init?(directoryURL: URL) {
-        guard let components = URLComponents(url: directoryURL, resolvingAgainstBaseURL: true) else {
+    public init?(filePreviewURL: URL) {
+        guard let components = URLComponents(url: filePreviewURL, resolvingAgainstBaseURL: true) else {
             return nil
         }
 
@@ -39,13 +39,14 @@ public struct DirectoryLink: Sendable, Equatable, LinkDriveProvider {
         guard let firstMatch = matches.first,
               let driveId = firstMatch[safe: 1],
               let driveIdInt = Int(driveId),
-              let folderId = firstMatch[safe: 2],
-              let folderIdInt = Int(folderId) else {
+              let fileId = firstMatch[safe: 2],
+              let fileIdInt = Int(fileId)
+        else {
             return nil
         }
 
-        self.directoryURL = directoryURL
+        self.filePreviewURL = filePreviewURL
         self.driveId = driveIdInt
-        self.folderId = folderIdInt
+        self.fileId = fileIdInt
     }
 }

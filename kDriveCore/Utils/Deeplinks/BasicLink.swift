@@ -26,7 +26,7 @@ public enum BasicLinkTab: String, Sendable {
     case favorites
 }
 
-public struct BasicLink: Sendable, Equatable {
+public struct BasicLink: Sendable, Equatable, LinkDriveProvider {
     public static let parsingRegex = Regex(pattern: #"^.*/app/drive/([0-9]+)/([a-z-]+)(?:.*/([0-9]+))?$"#)
 
     public let basicURL: URL

@@ -60,7 +60,7 @@ public protocol AccountManageable: AnyObject {
     func forceReload()
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
-    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) async -> DriveFileManager?
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider) async -> DriveFileManager?
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -243,30 +243,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return (driveFileManager, matchingAccount)
     }
 
-    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any) async
+    @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider) async
         -> DriveFileManager? {
+        let driveId = deeplink.driveId
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
-        let driveId: Int
-
-        switch deeplink {
-        case let deeplink as PublicShareLink:
-            driveId = deeplink.driveId
-        case let deeplink as SharedWithMeLink:
-            driveId = deeplink.driveId
-        case let deeplink as OfficeLink:
-            driveId = deeplink.driveId
-        case let deeplink as PrivateShareLink:
-            driveId = deeplink.driveId
-        case let deeplink as DirectoryLink:
-            driveId = deeplink.driveId
-        case let deeplink as FilePreviewLink:
-            driveId = deeplink.driveId
-        case let deeplink as BasicLink:
-            driveId = deeplink.driveId
-        default:
-            return nil
-        }
 
         let orderedAccounts = accounts.sorted { account1, account2 in
             let isAccount1Connected = account1 == currentAccount

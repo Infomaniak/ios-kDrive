@@ -53,7 +53,7 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager { fatalError("Not implemented") }
 
-    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: Any)
+    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider)
         -> DriveFileManager? {
         fatalError("Not implemented")
     }

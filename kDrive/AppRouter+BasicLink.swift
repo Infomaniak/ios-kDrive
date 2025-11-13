@@ -98,7 +98,7 @@ public extension AppRouter {
         )
     }
 
-    @MainActor func handleSimpleLink(deeplink: Any, fileId: Int, isOfficeLink: Bool) async {
+    @MainActor func handleSimpleLink(deeplink: LinkDriveProvider, fileId: Int, isOfficeLink: Bool) async {
         guard let driveFileManager = await accountManager
             .getMatchingDriveFileManagerOrSwitchAccount(deeplink: deeplink) else {
             Log.sceneDelegate(

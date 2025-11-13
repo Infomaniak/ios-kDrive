@@ -132,6 +132,10 @@ public struct AppRouter: AppNavigable {
             matomo.track(eventWithCategory: .deeplink, name: "internal")
             await handleSimpleLink(deeplink: filePreviewLink, fileId: filePreviewLink.fileId, isOfficeLink: false)
 
+        case .favoritePreview(let favoritePreviewLink):
+            matomo.track(eventWithCategory: .deeplink, name: "internal")
+            await handleSimpleLink(deeplink: favoritePreviewLink, fileId: favoritePreviewLink.fileId, isOfficeLink: false)
+
         case .search(let searchLink):
             handleSearchLink(searchLink: searchLink)
 
