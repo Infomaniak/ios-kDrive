@@ -29,7 +29,7 @@ struct UTFavoritePreviewLink {
     func parseFavoritePreview(driveId: Int, fileId: Int, deeplink: String) async throws {
         // WHEN
         guard let url = URL(string: deeplink),
-              let parsedResult = FavoritePreviewLink(inputUrl: url) else {
+              let parsedResult = FavoritePreviewLink(filePreviewURL: url) else {
             Issue.record("Failed to parse the URL")
             return
         }
@@ -52,7 +52,7 @@ struct UTFavoritePreviewLink {
     func parseFilePreviewFail(deeplink: String) async throws {
         // WHEN
         guard let url = URL(string: deeplink),
-              let _ = FavoritePreviewLink(inputUrl: url) else {
+              FavoritePreviewLink(filePreviewURL: url) != nil else {
             // THEN
             // success
             return

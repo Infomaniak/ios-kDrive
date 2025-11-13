@@ -67,7 +67,7 @@ public struct DeeplinkParser: DeeplinkParsable {
             await router.navigate(to: .filePreview(filePreviewLink: filePreviewLink))
             return true
         }
-        if let favoritePreviewLink = FavoritePreviewLink(inputUrl: url) {
+        if let favoritePreviewLink = FavoritePreviewLink(filePreviewURL: url) {
             await router.navigate(to: .favoritePreview(favoritePreviewLink: favoritePreviewLink))
             return true
         }

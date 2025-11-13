@@ -26,8 +26,8 @@ public struct FavoritePreviewLink: Sendable, Equatable, LinkDriveProvider {
     public let driveId: Int
     public let fileId: Int
 
-    public init?(inputUrl: URL) {
-        guard let components = URLComponents(url: inputUrl, resolvingAgainstBaseURL: true) else {
+    public init?(filePreviewURL: URL) {
+        guard let components = URLComponents(url: filePreviewURL, resolvingAgainstBaseURL: true) else {
             return nil
         }
 
@@ -45,9 +45,8 @@ public struct FavoritePreviewLink: Sendable, Equatable, LinkDriveProvider {
             return nil
         }
 
-        self.filePreviewURL = inputUrl
+        self.filePreviewURL = filePreviewURL
         self.driveId = driveIdInt
         self.fileId = fileIdInt
     }
 }
-
