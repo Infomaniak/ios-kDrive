@@ -72,5 +72,6 @@ extension MainTabViewController: UINavigationControllerDelegate {
         animated: Bool
     ) {
         legacyTabBar.isHidden = viewController.hidesBottomBarWhenPushed
+        tabBar.isHidden = viewController.hidesBottomBarWhenPushed
     }
 }
