@@ -1,2 +1,2 @@
-- 2FA notifications
+- Add edit button on top of .TXT previews
 - Stability improvements and bug fixes
