@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SCENEE/FloatingPanel",
       "state" : {
-        "revision" : "a2646dd2704656fa5a679af68953249a70c77f40",
-        "version" : "3.0.1"
+        "revision" : "41d75802452e3fc6bf3a888ae83d122fd0e4ef18",
+        "version" : "3.1.0"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-onboarding",
       "state" : {
-        "revision" : "9abb167e652678ce56aba00deedb10a6d48b40cd",
-        "version" : "1.4.2"
+        "revision" : "a4591b91d977c33a5e2dd361dca2799a8815ce82",
+        "version" : "1.4.3"
       }
     },
     {
@@ -285,8 +285,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "bcd8bfb3eea22ac5d3fdd001751bbe19f25e892b",
-        "version" : "8.57.2"
+        "revision" : "8627bbc0e663238d516b541d8fc7edd62a627fde",
+        "version" : "8.57.3"
       }
     },
     {
@@ -357,8 +357,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "a24771a4c228ff116df343c85fcf3dcfae31a06c",
-        "version" : "2.88.0"
+        "revision" : "56724a2b6d8e2aed1b2c5f23865b9ea5c43f9977",
+        "version" : "2.89.0"
       }
     },
     {

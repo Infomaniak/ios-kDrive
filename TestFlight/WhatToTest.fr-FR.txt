@@ -1,2 +1,2 @@
-- Notifications 2FA
+- Ajout bouton d'édition sur la preview d'un fichier .TXT
 - Améliorations de la stabilité et corrections de bugs
