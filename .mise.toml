@@ -1,8 +1,7 @@
 [tools]
-tuist = '4.78.4'
-swiftformat = '0.57.2'
-swiftlint = '0.59.1'
+tuist = '4.104.6'
+swiftformat = '0.58.6'
+swiftlint = '0.62.2'
 sentry-cli = "latest"
 pipx = "latest"
-"pipx:infomaniak/importloco" = "1.1.0"
-
+"pipx:infomaniak/importloco" = "1.2.0"
