@@ -494,20 +494,19 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             appearance.shadowColor = .clear
             navigationItem.scrollEdgeAppearance = appearance
 
-            let cellRegistration = UICollectionView
-                .CellRegistration<UICollectionViewListCell, RootMenuItem> { cell, _, item in
-                    var content = item.isHeader ? UIListContentConfiguration.sidebarHeader() : UIListContentConfiguration
-                        .sidebarCell()
-                    content.text = item.name
-                    content.image = item.image
-                    cell.contentConfiguration = content
-                    cell.accessories = item.isHeader ? [
-                        .outlineDisclosure(
-                            options: .init(style: .header),
-                        )
-                    ] : []
-                    cell.indentationLevel = 0
-                }
+            let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, RootMenuItem> { cell, _, item in
+                var content = item.isHeader ? UIListContentConfiguration.sidebarHeader() : UIListContentConfiguration
+                    .sidebarCell()
+                content.text = item.name
+                content.image = item.image
+                cell.contentConfiguration = content
+                cell.accessories = item.isHeader ? [
+                    .outlineDisclosure(
+                        options: .init(style: .header),
+                    )
+                ] : []
+                cell.indentationLevel = 0
+            }
 
             dataSource = UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem>(collectionView: collectionView) {
                 collectionView, indexPath, menuItem in

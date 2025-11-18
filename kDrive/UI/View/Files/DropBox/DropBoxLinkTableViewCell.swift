@@ -34,8 +34,7 @@ class DropBoxLinkTableViewCell: InsetTableViewCell {
         copyButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonShare
     }
 
-    @IBAction func
-        copyButtonPressed(_ sender: UIButton) {
+    @IBAction func copyButtonPressed(_ sender: UIButton) {
         delegate?.didClickOnShareLink(link: copyTextField.text ?? "", sender: sender)
     }
 }
