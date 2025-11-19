@@ -44,7 +44,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         return label
     }()
 
-    lazy var addToKDriveButton: IKLargeButton = {
+    lazy var validatePasswordButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
         button.setTitle(KDriveCoreStrings.Localizable.buttonValid, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -137,25 +137,25 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
     }
 
     private func setupFooter() {
-        view.addSubview(addToKDriveButton)
-        view.bringSubviewToFront(addToKDriveButton)
+        view.addSubview(validatePasswordButton)
+        view.bringSubviewToFront(validatePasswordButton)
 
-        let leadingConstraint = addToKDriveButton.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
-                                                                           constant: 16)
+        let leadingConstraint = validatePasswordButton.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
+                                                                                constant: 16)
         leadingConstraint.priority = .defaultHigh
-        let trailingConstraint = addToKDriveButton.trailingAnchor.constraint(
+        let trailingConstraint = validatePasswordButton.trailingAnchor.constraint(
             greaterThanOrEqualTo: view.trailingAnchor,
             constant: -16
         )
         trailingConstraint.priority = .defaultHigh
-        let widthConstraint = addToKDriveButton.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
+        let widthConstraint = validatePasswordButton.widthAnchor.constraint(lessThanOrEqualToConstant: 360)
 
         NSLayoutConstraint.activate([
-            addToKDriveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            validatePasswordButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             leadingConstraint,
             trailingConstraint,
-            addToKDriveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            addToKDriveButton.heightAnchor.constraint(equalToConstant: 60),
+            validatePasswordButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            validatePasswordButton.heightAnchor.constraint(equalToConstant: 60),
             widthConstraint
         ])
     }
