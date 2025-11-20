@@ -26,7 +26,7 @@ public enum NavigationRoutes: Equatable {
     case sharedWithMe(sharedWithMeLink: SharedWithMeLink)
     case office(officeLink: OfficeLink)
     case privateShare(privateShareLink: PrivateShareLink)
-    case publicShare(publicShareLink: PublicShareLink)
+    case publicShare(publicShareLink: PublicShareLink, token: String? = nil)
     case directory(directoryLink: DirectoryLink)
     case filePreview(filePreviewLink: FilePreviewLink)
     case favoritePreview(favoritePreviewLink: FavoritePreviewLink)
