@@ -44,9 +44,20 @@ public extension Endpoint {
         return .fileInfoV2(file).appending(path: "/link")
     }
 
+    /// Share link authentication
+    static func shareLinkAuthentication(driveId: Int, shareLinkUid: String) -> Endpoint {
+        shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/auth")
+    }
+
     /// Share link info
     static func shareLinkInfo(driveId: Int, shareLinkUid: String) -> Endpoint {
         shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/init")
+    }
+
+    /// Share link info with password
+    static func shareLinkPasswordInfo(driveId: Int, shareLinkUid: String, token: String) -> Endpoint {
+        let shareLinkInfo = shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid)
+        return shareLinkInfo.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
     }
 
     /// Share link file
