@@ -180,7 +180,7 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
-    @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
+    @MainActor public func presentPublicShareLocked(_ link: PublicShareLink) {
         logNoop()
     }
 
