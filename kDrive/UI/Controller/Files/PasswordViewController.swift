@@ -188,9 +188,10 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         }
 
         Task {
-                let token = try await publicShareApiFetcher.getToken(driveId: publicShareLink.driveId,
-                                                                     shareLinkUid: publicShareLink.shareLinkUid,
-                                                                     password: password)
+            let token = try await publicShareApiFetcher.getToken(driveId: publicShareLink.driveId,
+                                                                 shareLinkUid: publicShareLink.shareLinkUid,
+                                                                 password: password)
+            await router.navigate(to: .publicShare(publicShareLink: publicShareLink, token: token))
         }
     }
 

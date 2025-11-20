@@ -29,10 +29,10 @@ import UIKit
 
 public extension AppRouter {
     @discardableResult
-    func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
+    func processPublicShareLink(_ link: PublicShareLink, token: String?) async -> Bool {
         let apiFetcher = PublicShareApiFetcher()
         do {
-            let metadata = try await apiFetcher.getMetadata(driveId: link.driveId, shareLinkUid: link.shareLinkUid)
+            let metadata = try await apiFetcher.getMetadata(driveId: link.driveId, shareLinkUid: link.shareLinkUid, token: token)
 
             return await processPublicShareMetadata(
                 metadata,

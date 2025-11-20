@@ -118,11 +118,11 @@ public struct AppRouter: AppNavigable {
             matomo.track(eventWithCategory: .deeplink, name: "internal")
             await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.fileId, isOfficeLink: false)
 
-        case .publicShare(let publicShareLink):
+        case .publicShare(let publicShareLink, let token):
             if accountManager.currentDriveFileManager == nil {
                 deeplinkService.setLastDeeplink(publicShareLink)
             }
-            await processPublicShareLink(publicShareLink)
+            await processPublicShareLink(publicShareLink, token: token)
 
         case .directory(let directoryLink):
             matomo.track(eventWithCategory: .deeplink, name: "internal")

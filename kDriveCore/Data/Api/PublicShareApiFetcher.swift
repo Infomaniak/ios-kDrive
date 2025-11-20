@@ -60,10 +60,13 @@ public extension PublicShareApiFetcher {
         }
     }
 
-    func getMetadata(driveId: Int, shareLinkUid: String) async throws -> PublicShareMetadata {
-        let shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid).url
-        // TODO: Use authenticated token if availlable
-
+    func getMetadata(driveId: Int, shareLinkUid: String, token: String?) async throws -> PublicShareMetadata {
+        let shareLinkInfoUrl: URL
+        if let token {
+            shareLinkInfoUrl = Endpoint.shareLinkPasswordInfo(driveId: driveId, shareLinkUid: shareLinkUid, token: token).url
+        } else {
+            shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid).url
+        }
         let request = Session.default.request(shareLinkInfoUrl)
 
         do {
