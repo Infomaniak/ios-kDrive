@@ -116,7 +116,7 @@ class AlertDocViewController: AlertFieldViewController {
                 @InjectService var router: AppNavigable
                 if let file,
                    let mainTabViewController = router.getCurrentController() {
-                    OnlyOfficeViewController.open(
+                    router.presentOnlyOfficeViewController(
                         driveFileManager: self.driveFileManager,
                         file: file,
                         viewController: mainTabViewController

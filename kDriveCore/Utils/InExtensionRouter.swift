@@ -126,6 +126,12 @@ public struct InExtensionRouter: AppNavigable {
         apiFetcher: PublicShareApiFetcher
     ) {}
 
+    public func presentOnlyOfficeViewController(
+        driveFileManager: DriveFileManager,
+        file: File,
+        viewController: UIViewController
+    ) {}
+
     public func setRootViewController(_ viewController: UIViewController, animated: Bool) {}
 
     public func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {}

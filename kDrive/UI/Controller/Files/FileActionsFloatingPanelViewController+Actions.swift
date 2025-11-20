@@ -141,7 +141,7 @@ extension FileActionsFloatingPanelViewController {
         case .openWith:
             openWithAction(action, at: indexPath)
         case .edit:
-            OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: frozenFile, viewController: self)
+            router.presentOnlyOfficeViewController(driveFileManager: driveFileManager, file: frozenFile, viewController: self)
         case .manageCategories:
             manageCategoriesAction()
         case .favorite:

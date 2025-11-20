@@ -158,6 +158,14 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func presentOnlyOfficeViewController(
+        driveFileManager: DriveFileManager,
+        file: File,
+        viewController: UIViewController
+    ) {
+        logNoop()
+    }
+
     public func setRootViewController(_ viewController: UIViewController, animated: Bool) {
         logNoop()
     }
