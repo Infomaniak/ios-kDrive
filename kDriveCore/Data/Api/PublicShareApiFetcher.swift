@@ -45,15 +45,31 @@ public class PublicShareApiFetcher: ApiFetcher {
 }
 
 public extension PublicShareApiFetcher {
+    func getToken(driveId: Int, shareLinkUid: String, password: String?) async throws -> String {
+        let shareLinkAuthUrl = Endpoint.shareLinkAuthentication(driveId: driveId, shareLinkUid: shareLinkUid).url
+        let request = Session.default.request(shareLinkAuthUrl,
+                                              method: .post,
+                                              parameters: ["password": password ?? ""],
+                                              encoder: JSONParameterEncoder.default)
+
+        do {
+            let tokenResponse: ValidServerResponse<ApiResult> = try await perform(request: request)
+            return tokenResponse.validApiResponse.data.rawValue
+        } catch let InfomaniakError.apiError(apiError) {
+            throw apiError
+        }
+    }
+
     func getMetadata(driveId: Int, shareLinkUid: String) async throws -> PublicShareMetadata {
         let shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid).url
         // TODO: Use authenticated token if availlable
+
         let request = Session.default.request(shareLinkInfoUrl)
 
         do {
             let metadata: PublicShareMetadata = try await perform(request: request)
             return metadata
-        } catch InfomaniakError.apiError(let apiError) {
+        } catch let InfomaniakError.apiError(apiError) {
             throw apiError
         }
     }

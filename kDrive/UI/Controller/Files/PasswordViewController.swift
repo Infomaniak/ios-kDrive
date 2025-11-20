@@ -17,12 +17,16 @@
  */
 
 import InfomaniakCoreUIKit
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import MaterialOutlinedTextField
 import UIKit
 
 public class PasswordViewController: UIViewController, UITextFieldDelegate {
+    @InjectService var publicShareApiFetcher: PublicShareApiFetcher
+    @InjectService var router: AppNavigable
+
     let imageView = UIImageView()
 
     let titleLabel: UILabel = {
@@ -48,11 +52,24 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         let button = IKLargeButton(frame: .zero)
         button.setTitle(KDriveCoreStrings.Localizable.buttonValid, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(sendPassword), for: .touchUpInside)
         return button
     }()
 
     var passwordTextField = MaterialOutlinedTextField()
     private var showPassword = false
+
+    let publicShareLink: PublicShareLink
+
+    init(publicShareLink: PublicShareLink) {
+        self.publicShareLink = publicShareLink
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -163,6 +180,18 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
     @objc private func displayPassword() {
         showPassword.toggle()
         passwordTextField.isSecureTextEntry = !showPassword
+    }
+
+    @objc private func sendPassword() {
+        guard let password = passwordTextField.text, !password.isEmpty else {
+            return
+        }
+
+        Task {
+                let token = try await publicShareApiFetcher.getToken(driveId: publicShareLink.driveId,
+                                                                     shareLinkUid: publicShareLink.shareLinkUid,
+                                                                     password: password)
+        }
     }
 
     @objc private func close() {
