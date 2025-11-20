@@ -51,21 +51,18 @@ public extension AppRouter {
                 return false
             }
 
-            return await processPublicShareMetadataLimitation(limitation, publicShareURL: link.publicShareURL)
+            return await processPublicShareMetadataLimitation(limitation, link: link)
         }
     }
 
     private func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
-                                                      publicShareURL: URL?) async -> Bool {
+                                                      link: PublicShareLink) async -> Bool {
         @InjectService var appNavigable: AppNavigable
         @InjectService var matomo: MatomoUtils
         switch limitation {
         case .passwordProtected:
-            guard let publicShareURL else {
-                return false
-            }
             matomo.track(eventWithCategory: .deeplink, name: "publicShareWithPassword")
-            await appNavigable.presentPublicShareLocked(publicShareURL)
+            await appNavigable.presentPublicShareLocked(link)
         case .expired:
             matomo.track(eventWithCategory: .deeplink, name: "publicShareExpired")
             await appNavigable.presentPublicShareExpired()

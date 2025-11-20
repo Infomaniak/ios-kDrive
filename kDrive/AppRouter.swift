@@ -854,15 +854,14 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterFileNavigable
 
-    @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
+    @MainActor public func presentPublicShareLocked(_ link: PublicShareLink) {
         guard let window,
               let rootViewController = window.rootViewController else {
             return
         }
 
         rootViewController.dismiss(animated: false) {
-            let viewController = LockedFolderViewController()
-            viewController.destinationURL = destinationURL
+            let viewController = PasswordViewController(publicShareLink: link)
             let publicShareNavigationController = UINavigationController(rootViewController: viewController)
             publicShareNavigationController.modalPresentationStyle = .fullScreen
             publicShareNavigationController.modalTransitionStyle = .coverVertical
