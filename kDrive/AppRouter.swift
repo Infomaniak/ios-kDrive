@@ -1107,7 +1107,6 @@ public struct AppRouter: AppNavigable {
             UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allNoNetwork)
             return
         }
-
         OnlyOfficeViewController.open(driveFileManager: driveFileManager,
                                       file: file,
                                       viewController: viewController)

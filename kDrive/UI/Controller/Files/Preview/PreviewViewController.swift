@@ -407,10 +407,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     @objc private func editFile() {
+        @InjectService var appRouter: AppNavigable
+
         guard !driveFileManager.isPublicShare else { return }
         matomo.track(eventWithCategory: .mediaPlayer, name: "edit")
         floatingPanelViewController.dismiss(animated: true)
-        OnlyOfficeViewController.open(driveFileManager: driveFileManager, file: currentFile, viewController: self)
+        appRouter.presentOnlyOfficeViewController(driveFileManager: driveFileManager, file: currentFile, viewController: self)
     }
 
     @objc private func openFile() {
