@@ -107,7 +107,7 @@ public struct InExtensionRouter: AppNavigable {
         animated: Bool
     ) {}
 
-    public func presentPublicShareLocked(_ destinationURL: URL) {}
+    public func presentPublicShareLocked(_ link: PublicShareLink) {}
 
     public func presentPublicShareExpired() {}
 
