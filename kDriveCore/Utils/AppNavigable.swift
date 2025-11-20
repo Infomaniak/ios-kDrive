@@ -173,6 +173,17 @@ public protocol RouterFileNavigable {
         navigationController: UINavigationController,
         animated: Bool
     )
+
+    /// Present the Open office editor
+    /// - Parameters:
+    ///   - driveFileManager: driveFileManager
+    ///   - file: The file to edit
+    ///   - viewController: Root view controller
+    @MainActor func presentOnlyOfficeViewController(
+        driveFileManager: DriveFileManager,
+        file: File,
+        viewController: UIViewController
+    )
 }
 
 /// Something that can set an arbitrary RootView controller

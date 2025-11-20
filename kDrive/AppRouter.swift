@@ -1001,9 +1001,9 @@ public struct AppRouter: AppNavigable {
             }
 
             if office {
-                OnlyOfficeViewController.open(driveFileManager: driveFileManager,
-                                              file: file,
-                                              viewController: rootMenuViewController)
+                presentOnlyOfficeViewController(driveFileManager: driveFileManager,
+                                                file: file,
+                                                viewController: rootMenuViewController)
             } else {
                 let filePresenter = FilePresenter(viewController: rootMenuViewController)
                 filePresenter.present(for: file,
@@ -1096,5 +1096,20 @@ public struct AppRouter: AppNavigable {
     ) {
         let uploadViewController = UploadQueueFoldersViewController.instantiate(driveFileManager: driveFileManager)
         navigationController.pushViewController(uploadViewController, animated: animated)
+    }
+
+    @MainActor public func presentOnlyOfficeViewController(
+        driveFileManager: DriveFileManager,
+        file: File,
+        viewController: UIViewController
+    ) {
+        guard ReachabilityListener.instance.currentStatus != .offline else {
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.allNoNetwork)
+            return
+        }
+
+        OnlyOfficeViewController.open(driveFileManager: driveFileManager,
+                                      file: file,
+                                      viewController: viewController)
     }
 }
