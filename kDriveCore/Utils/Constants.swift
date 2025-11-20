@@ -44,7 +44,7 @@ public struct URLConstants {
     public static let support = URLConstants(urlString: "https://support.infomaniak.com")
     public static let matomo = URLConstants(urlString: "https://analytics.infomaniak.com/matomo.php")
     public static let faqIAP = URLConstants(urlString: "https://faq.infomaniak.com/2632")
-    public static let faqContentBlocker = URLConstants(urlString: "https://www.infomaniak.com/fr/support/faq/2892")
+    public static let faqContentBlocker = URLConstants(urlString: "https://faq.infomaniak.com/2892")
 
     public static func renewDrive(accountId: Int) -> URLConstants {
         return URLConstants(urlString: "https://manager.infomaniak.com/v3/\(accountId)/accounts/accounting/renewal")
