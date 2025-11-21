@@ -1,2 +1,2 @@
 - Améliorations de la stabilité et corrections de bugs
-- Ajout bouton d'édition sur la preview d'un fichier .TXT
+- Vérification de la connectivité avant edition d'un fichier Office

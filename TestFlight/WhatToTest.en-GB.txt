@@ -1,2 +1,2 @@
 - Stability improvements and bug fixes
-- Add edit button on top of .TXT previews
+- Connectivity check before Office file edition
