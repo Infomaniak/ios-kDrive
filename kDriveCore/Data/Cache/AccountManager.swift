@@ -245,7 +245,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     private func updateAccountsAndGetMatchingDrive(deeplink: LinkDriveProvider, accounts: [Account]) async
         -> (driveFileManager: DriveFileManager?, matchingAccount: Account?)? {
-        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, accounts: accounts) {
+        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, accounts: accounts),
+           match.driveFileManager != nil && match.matchingAccount != nil {
             return match
         }
         do {
