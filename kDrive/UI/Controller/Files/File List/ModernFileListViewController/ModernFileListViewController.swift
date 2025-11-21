@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2021 Infomaniak Network SA
+ Copyright (C) 2025 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -28,41 +28,10 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-extension SwipeCellAction {
-    static let share = SwipeCellAction(
-        identifier: "share",
-        title: KDriveResourcesStrings.Localizable.buttonFileRights,
-        backgroundColor: KDriveResourcesAsset.infomaniakColor.color,
-        icon: KDriveResourcesAsset.share.image
-    )
-    static let delete = SwipeCellAction(
-        identifier: "delete",
-        title: KDriveResourcesStrings.Localizable.buttonDelete,
-        backgroundColor: KDriveResourcesAsset.binColor.color,
-        icon: KDriveResourcesAsset.delete.image
-    )
-}
-
-extension SortType: Selectable {
-    var title: String {
-        return value.translation
-    }
-}
-
-class FileListViewController: UICollectionViewController, SwipeActionCollectionViewDelegate,
-    SwipeActionCollectionViewDataSource, FilesHeaderViewDelegate, SceneStateRestorable {
-    @LazyInjectService private var matomo: MatomoUtils
+class ModernFileListViewController: UICollectionViewController {
+    @LazyInjectService var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-
-    // MARK: - Constants
-
-    private let gridMinColumns = 2
-    private let gridCellMaxWidth = 200.0
-    private let gridCellRatio = 3.0 / 4.0
-    private let leftRightInset = UIConstants.Padding.mediumSmall
-    private let gridInnerSpacing = 16.0
-    private let headerViewIdentifier = "FilesHeaderView"
 
     // MARK: - Properties
 
@@ -73,18 +42,9 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         return UIConstants.List.paddingBottom
     }
 
-    var collectionViewFlowLayout: UICollectionViewFlowLayout? {
-        collectionViewLayout as? UICollectionViewFlowLayout
-    }
-
     let refreshControl = UIRefreshControl()
     var headerView: FilesHeaderView?
     var selectView: SelectView?
-    private var gridColumns: Int {
-        let screenWidth = collectionView.bounds.width
-        let maxColumns = Int(screenWidth / gridCellMaxWidth)
-        return max(gridMinColumns, maxColumns)
-    }
 
     #if !ISEXTENSION
     lazy var filePresenter = FilePresenter(viewController: self)
@@ -118,15 +78,13 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         """
     }
 
-    // MARK: - View controller lifecycle
-
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
 
     init(viewModel: FileListViewModel) {
         self.viewModel = viewModel
-        super.init(collectionViewLayout: UICollectionViewFlowLayout())
+        super.init(collectionViewLayout: UICollectionViewLayout())
     }
 
     @available(*, unavailable)
@@ -137,28 +95,19 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.hideBackButtonText()
-        navigationItem.largeTitleDisplayMode = .always
 
-        // Set up collection view
-        collectionView = SwipableCollectionView(frame: collectionView.frame, collectionViewLayout: collectionViewLayout)
+        collectionView.collectionViewLayout = createLayout()
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
-        collectionView.register(
-            UINib(nibName: headerViewIdentifier, bundle: nil),
-            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: headerViewIdentifier
-        )
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
-        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
-        (collectionView as? SwipableCollectionView)?.swipeDataSource = self
-        (collectionView as? SwipableCollectionView)?.swipeDelegate = self
-        collectionViewFlowLayout?.sectionHeadersPinToVisibleBounds = true
         collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
-        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
         collectionView.dropDelegate = self
         collectionView.dragDelegate = self
 
-        // Set up observers
+        setupHeaderView()
+
+        refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
+
         observeNetwork()
         NotificationCenter.default.addObserver(
             self,
@@ -171,6 +120,21 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         setupFooterIfNeeded()
     }
 
+    private func setupHeaderView() {
+        let headerView = FilesHeaderView.instantiate()
+        headerView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(headerView)
+
+        NSLayoutConstraint.activate([
+            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+
+        self.headerView = headerView
+        selectView = headerView.selectView
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
@@ -179,7 +143,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         (tabBarController as? PlusButtonObserver)?.updateCenterButton()
 
         tryLoadingFilesOrDisplayError()
-        collectionView?.collectionViewLayout.invalidateLayout()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -218,7 +181,31 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         viewWillAppear(true)
     }
 
-    // MARK: - Private methods
+    private func createLayout() -> UICollectionViewLayout {
+        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+            var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+            configuration.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+            configuration.showsSeparators = false
+
+            configuration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath in
+                return self?.viewModel.getSwipeActionConfiguration(at: indexPath)
+            }
+
+            let section = NSCollectionLayoutSection.list(using: configuration,
+                                                         layoutEnvironment: layoutEnvironment)
+
+            section.contentInsets = .init(
+                top: 0,
+                leading: UIConstants.Padding.mediumSmall,
+                bottom: 0,
+                trailing: UIConstants.Padding.mediumSmall
+            )
+
+            return section
+        }
+
+        return layout
+    }
 
     private func setupViewModel() {
         bindViewModels()
@@ -283,6 +270,47 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
 
         viewModel.$isShowingEmptyView.receiveOnMain(store: &bindStore) { [weak self] isShowingEmptyView in
             self?.showEmptyView(isShowingEmptyView)
+        }
+    }
+
+    private func bindUploadCardViewModel() {
+        viewModel.uploadViewModel?.$uploadCount
+            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: true)
+            .sink { [weak self] uploadCount in
+                self?.updateUploadCard(uploadCount: uploadCount)
+            }
+            .store(in: &bindStore)
+    }
+
+    private func bindMultipleSelectionViewModel() {
+        viewModel.multipleSelectionViewModel?.$isMultipleSelectionEnabled
+            .receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
+                self?.toggleMultipleSelection(isMultipleSelectionEnabled)
+            }
+
+        viewModel.multipleSelectionViewModel?.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
+            guard self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true else { return }
+            self?.selectView?.updateTitle(selectedCount)
+        }
+
+        viewModel.multipleSelectionViewModel?.onItemSelected = { [weak self] selectedIndexPath in
+            self?.collectionView.selectItem(at: selectedIndexPath, animated: true, scrollPosition: .init(rawValue: 0))
+        }
+
+        viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
+            for i in 0 ..< (self?.viewModel.files.count ?? 0) {
+                self?.collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: true, scrollPosition: [])
+            }
+        }
+
+        viewModel.multipleSelectionViewModel?.onDeselectAll = { [weak self] in
+            for indexPath in self?.collectionView.indexPathsForSelectedItems ?? [] {
+                self?.collectionView.deselectItem(at: indexPath, animated: true)
+            }
+        }
+
+        viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
+            self?.selectView?.setActions(actions)
         }
     }
 
@@ -352,57 +380,9 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         return displayedFiles[safe: indexPath.item]
     }
 
-    private func bindUploadCardViewModel() {
-        viewModel.uploadViewModel?.$uploadCount
-            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: true)
-            .sink { [weak self] uploadCount in
-                self?.updateUploadCard(uploadCount: uploadCount)
-            }
-            .store(in: &bindStore)
-    }
-
-    private func bindMultipleSelectionViewModel() {
-        viewModel.multipleSelectionViewModel?.$isMultipleSelectionEnabled
-            .receiveOnMain(store: &bindStore) { [weak self] isMultipleSelectionEnabled in
-                self?.toggleMultipleSelection(isMultipleSelectionEnabled)
-            }
-
-        viewModel.multipleSelectionViewModel?.$selectedCount.receiveOnMain(store: &bindStore) { [weak self] selectedCount in
-            guard self?.viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true else { return }
-            self?.selectView?.updateTitle(selectedCount)
-        }
-
-        viewModel.multipleSelectionViewModel?.onItemSelected = { [weak self] selectedIndexPath in
-            self?.collectionView.selectItem(at: selectedIndexPath, animated: true, scrollPosition: .init(rawValue: 0))
-        }
-
-        viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
-            for i in 0 ..< (self?.viewModel.files.count ?? 0) {
-                self?.collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: true, scrollPosition: [])
-            }
-        }
-
-        viewModel.multipleSelectionViewModel?.onDeselectAll = { [weak self] in
-            for indexPath in self?.collectionView.indexPathsForSelectedItems ?? [] {
-                self?.collectionView.deselectItem(at: indexPath, animated: true)
-            }
-        }
-
-        viewModel.multipleSelectionViewModel?.$multipleSelectionActions.receiveOnMain(store: &bindStore) { [weak self] actions in
-            self?.selectView?.setActions(actions)
-        }
-    }
-
     private func toggleRefreshing(_ refreshing: Bool) {
         if refreshing {
             refreshControl.beginRefreshing()
-
-            // 200 is an arbitrary value that works fine.
-            // The goal is to prevent moving offset if the user already pulled down the control.
-            if collectionView.contentOffset.y >= -200 {
-                let offsetPoint = CGPoint(x: 0, y: collectionView.contentOffset.y - refreshControl.frame.size.height)
-                collectionView.setContentOffset(offsetPoint, animated: true)
-            }
         } else {
             refreshControl.endRefreshing()
         }
@@ -613,39 +593,6 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         #endif
     }
 
-    func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
-        headerView.delegate = self
-
-        if viewModel.currentDirectory.visibility == .isTeamSpace {
-            let driveOrganisationName = viewModel.driveFileManager.drive.account.name
-            let commonDocumentsDescription = KDriveResourcesStrings.Localizable.commonDocumentsDescription(driveOrganisationName)
-
-            headerView.commonDocumentsDescriptionLabel.text = commonDocumentsDescription
-            headerView.commonDocumentsDescriptionLabel.isHidden = false
-        } else {
-            headerView.commonDocumentsDescriptionLabel.isHidden = true
-        }
-
-        let isTrash = viewModel.currentDirectory.id == DriveFileManager.trashRootFile.id
-        headerView.updateInformationView(drivePackId: packId, isTrash: isTrash)
-        headerView.sortView.isHidden = !isEmptyViewHidden
-
-        headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
-        UIView.performWithoutAnimation {
-            headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
-            headerView.sortButton.layoutIfNeeded()
-            headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
-            headerView.listOrGridButton.layoutIfNeeded()
-        }
-
-        if let uploadViewModel = viewModel.uploadViewModel {
-            headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
-            headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
-            headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
-            headerView.uploadCardView.progressView.enableIndeterminate()
-        }
-    }
-
     private func observeNetwork() {
         guard networkObserver == nil else { return }
         networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
@@ -723,33 +670,14 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
             }
         }
     }
+}
 
-    // MARK: - Collection view data source
+// MARK: - UICollectionViewDataSource
 
+extension ModernFileListViewController {
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return displayedFiles.count
     }
-
-    /*override func collectionView(
-        _ collectionView: UICollectionView,
-        viewForSupplementaryElementOfKind kind: String,
-        at indexPath: IndexPath
-    ) -> UICollectionReusableView {
-        guard kind == UICollectionView.elementKindSectionHeader else {
-            return super.collectionView(collectionView, viewForSupplementaryElementOfKind: kind, at: indexPath)
-        }
-
-        let dequeuedHeaderView = collectionView.dequeueReusableSupplementaryView(
-            ofKind: UICollectionView.elementKindSectionHeader,
-            withReuseIdentifier: headerViewIdentifier,
-            for: indexPath
-        ) as! FilesHeaderView
-        setUpHeaderView(dequeuedHeaderView, isEmptyViewHidden: !viewModel.files.isEmpty)
-
-        headerView = dequeuedHeaderView
-        selectView = dequeuedHeaderView.selectView
-        return dequeuedHeaderView
-    }*/
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cellType: UICollectionViewCell.Type
@@ -796,9 +724,11 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         (cell as? FileCollectionViewCell)?
             .setSelectionMode(viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
     }
+}
 
-    // MARK: - Collection view delegate
+// MARK: - UICollectionViewDelegate
 
+extension ModernFileListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
             guard let file = getDisplayedFile(at: indexPath) else { return }
@@ -815,156 +745,11 @@ class FileListViewController: UICollectionViewController, SwipeActionCollectionV
         }
         viewModel.multipleSelectionViewModel?.didDeselectFile(file, at: indexPath)
     }
-
-    // MARK: - Swipe action collection view delegate
-
-    func collectionView(_ collectionView: SwipableCollectionView, didSelect action: SwipeCellAction, at indexPath: IndexPath) {
-        viewModel.didSelectSwipeAction(action, at: indexPath)
-    }
-
-    // MARK: - Swipe action collection view data source
-
-    func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell,
-                        at indexPath: IndexPath) -> [SwipeCellAction]? {
-        return viewModel.getSwipeActions(at: indexPath)
-    }
-
-    // MARK: - State restoration
-
-    var currentSceneMetadata: [AnyHashable: Any] {
-        [
-            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileListViewController.rawValue,
-            SceneRestorationValues.driveId.rawValue: driveFileManager.driveId,
-            SceneRestorationValues.fileId.rawValue: viewModel.currentDirectory.id
-        ]
-    }
-
-    // MARK: - Files header view delegate
-
-    func sortButtonPressed() {
-        viewModel.sortButtonPressed()
-    }
-
-    func gridButtonPressed() {
-        viewModel.listStyleButtonPressed()
-    }
-
-    #if !ISEXTENSION
-    func uploadCardSelected() {
-        let uploadViewController = UploadQueueViewController.instantiate()
-        uploadViewController.currentDirectory = viewModel.currentDirectory
-        navigationController?.pushViewController(uploadViewController, animated: true)
-    }
-    #endif
-
-    func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton) {
-        viewModel.multipleSelectionViewModel?.actionButtonPressed(action: button.action)
-    }
-
-    func removeFilterButtonPressed(_ filter: Filterable) {
-        // Overriden in subclasses
-    }
-
-    func upsaleButtonPressed() {
-        if packId == .myKSuite {
-            router.presentUpSaleSheet()
-            matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "trashStorageLimit")
-        } else if packId == .kSuiteEssential {
-            router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
-            matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "trashStorageLimit")
-        } else {
-            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
-        }
-    }
 }
 
-// MARK: - Collection view delegate flow layout
+// MARK: - FileCellDelegate
 
-extension FileListViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    ) -> CGSize {
-        let effectiveContentWidth = collectionView.bounds.width - collectionView.safeAreaInsets.left - collectionView
-            .safeAreaInsets.right - leftRightInset * 2
-        switch viewModel.listStyle {
-        case .list:
-            // Important: subtract safe area insets
-            return CGSize(width: effectiveContentWidth, height: UIConstants.FileList.cellHeight)
-        case .grid:
-            // Adjust cell size based on screen size
-            let cellWidth = floor((effectiveContentWidth - gridInnerSpacing * CGFloat(gridColumns - 1)) / CGFloat(gridColumns))
-            return CGSize(width: cellWidth, height: floor(cellWidth * gridCellRatio))
-        }
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        minimumLineSpacingForSectionAt section: Int
-    ) -> CGFloat {
-        switch viewModel.listStyle {
-        case .list:
-            return 0
-        case .grid:
-            return gridInnerSpacing
-        }
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        minimumInteritemSpacingForSectionAt section: Int
-    ) -> CGFloat {
-        switch viewModel.listStyle {
-        case .list:
-            return 0
-        case .grid:
-            return gridInnerSpacing
-        }
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        insetForSectionAt section: Int
-    ) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: leftRightInset, bottom: 0, right: leftRightInset)
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        referenceSizeForHeaderInSection section: Int
-    ) -> CGSize {
-        guard let headerView = collectionView.supplementaryView(
-            forElementKind: UICollectionView.elementKindSectionHeader,
-            at: IndexPath(row: 0, section: section)
-        ) as? FilesHeaderView else {
-            return CGSize(width: collectionView.frame.width, height: 32)
-        }
-
-        return headerView.systemLayoutSizeFitting(
-            CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-    }
-
-    override func collectionView(
-        _ collectionView: UICollectionView,
-        targetIndexPathForMoveOfItemFromOriginalIndexPath originalIndexPath: IndexPath,
-        atCurrentIndexPath currentIndexPath: IndexPath,
-        toProposedIndexPath proposedIndexPath: IndexPath
-    ) -> IndexPath {
-        return originalIndexPath
-    }
-}
-
-// MARK: - File cell delegate
-
-extension FileListViewController: FileCellDelegate {
+extension ModernFileListViewController: FileCellDelegate {
     func didTapMoreButton(_ cell: FileCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
@@ -973,69 +758,12 @@ extension FileListViewController: FileCellDelegate {
     }
 }
 
-// MARK: - Top scrollable
+// MARK: - TopScrollable
 
-extension FileListViewController: TopScrollable {
+extension ModernFileListViewController: TopScrollable {
     func scrollToTop() {
         if isViewLoaded {
             collectionView.scrollToTop(animated: true, navigationController: navigationController)
-        }
-    }
-}
-
-// MARK: - UICollectionViewDragDelegate
-
-extension FileListViewController: UICollectionViewDragDelegate {
-    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
-                        at indexPath: IndexPath) -> [UIDragItem] {
-        if let draggableViewModel = viewModel.draggableFileListViewModel,
-           let draggedFile = getDisplayedFile(at: indexPath) {
-            return draggableViewModel.dragItems(for: draggedFile, in: collectionView, at: indexPath, with: session)
-        } else {
-            return []
-        }
-    }
-}
-
-// MARK: - UICollectionViewDropDelegate
-
-extension FileListViewController: UICollectionViewDropDelegate {
-    func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
-        // Prevent dropping a session with only folders
-        return !session.items.allSatisfy { $0.itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) }
-    }
-
-    func collectionView(
-        _ collectionView: UICollectionView,
-        dropSessionDidUpdate session: UIDropSession,
-        withDestinationIndexPath destinationIndexPath: IndexPath?
-    ) -> UICollectionViewDropProposal {
-        if let droppableViewModel = viewModel.droppableFileListViewModel,
-           let destinationIndexPath {
-            let file = getDisplayedFile(at: destinationIndexPath)
-            return droppableViewModel.updateDropSession(
-                session,
-                in: collectionView,
-                with: destinationIndexPath,
-                destinationFile: file
-            )
-        } else {
-            return UICollectionViewDropProposal(operation: .cancel, intent: .unspecified)
-        }
-    }
-
-    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
-        if let droppableViewModel = viewModel.droppableFileListViewModel {
-            var destinationDirectory = viewModel.currentDirectory
-
-            if let indexPath = coordinator.destinationIndexPath,
-               indexPath.item < viewModel.files.count,
-               let file = getDisplayedFile(at: indexPath),
-               file.isDirectory && file.capabilities.canUpload {
-                destinationDirectory = file
-            }
-
-            droppableViewModel.performDrop(with: coordinator, in: collectionView, destinationDirectory: destinationDirectory)
         }
     }
 }
