@@ -208,15 +208,14 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    private func getMatchingDriveAndAccount(deeplink: Any,
-                                            driveId: Int, accounts: [Account]) async
+    private func getMatchingDriveAndAccount(deeplink: LinkDriveProvider, accounts: [Account]) async
         -> (driveFileManager: DriveFileManager?, matchingAccount: Account?)? {
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
 
         if let privateShareLink = deeplink as? PrivateShareLink {
             for account in accounts {
-                guard let matchingDriveFileManager = getDriveFileManager(for: driveId, userId: account.userId) else { continue }
+                guard let matchingDriveFileManager = getDriveFileManager(for: deeplink.driveId, userId: account.userId) else { continue }
                 do {
                     _ = try await matchingDriveFileManager.file(ProxyFile(
                         driveId: matchingDriveFileManager.driveId,
@@ -233,7 +232,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             for account in accounts {
                 if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
                     for: account.userId,
-                    driveId: driveId
+                    driveId: deeplink.driveId
                 ) {
                     driveFileManager = matchingDriveFileManager
                     matchingAccount = account
@@ -244,10 +243,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return (driveFileManager, matchingAccount)
     }
 
-    private func updateAccountsAndGetMatchingDrive(deeplink: Any,
-                                                   driveId: Int, accounts: [Account]) async
+    private func updateAccountsAndGetMatchingDrive(deeplink: LinkDriveProvider, accounts: [Account]) async
         -> (driveFileManager: DriveFileManager?, matchingAccount: Account?)? {
-        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId, accounts: accounts) {
+        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, accounts: accounts) {
             return match
         }
         do {
@@ -255,12 +253,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         } catch {}
 
-        return await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId, accounts: accounts)
+        return await getMatchingDriveAndAccount(deeplink: deeplink, accounts: accounts)
     }
 
     @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider) async
         -> DriveFileManager? {
-        let driveId = deeplink.driveId
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
 
@@ -275,7 +272,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             }
         }
 
-        if let match = await updateAccountsAndGetMatchingDrive(deeplink: deeplink, driveId: driveId, accounts: orderedAccounts) {
+        if let match = await updateAccountsAndGetMatchingDrive(deeplink: deeplink, accounts: orderedAccounts) {
             driveFileManager = match.driveFileManager
             matchingAccount = match.matchingAccount
         }
@@ -299,8 +296,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return nil
         }
 
-        if driveId != currentDriveId && !(deeplink is PrivateShareLink) {
-            DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
+        if deeplink.driveId != currentDriveId && !(deeplink is PrivateShareLink) {
+            DDLogInfo("switching to drive \(deeplink.driveId) to accommodate sharedWithMeLink navigation")
 
             try? await driveFileManager.switchDriveAndReloadUI()
             deeplinkService.setLastDeeplink(deeplink)
