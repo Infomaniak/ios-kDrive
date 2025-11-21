@@ -306,6 +306,21 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        showErrorMessage(context: ["Error": error.localizedDescription])
+        let nsError = error as NSError
+        switch (nsError.domain, nsError.code) {
+        case ("WebKitErrorDomain", 105):
+            showContentBlockerError(message: error.localizedDescription)
+        default:
+            showErrorMessage(context: ["Error": error.localizedDescription])
+        }
+    }
+
+    func showContentBlockerError(message: String) {
+        dismiss(animated: true) {
+            let ikAction = IKSnackBar.Action(title: KDriveStrings.Localizable.readFAQ) {
+                UIApplication.shared.open(URLConstants.faqContentBlocker.url)
+            }
+            UIConstants.showSnackBar(message: message, action: ikAction)
+        }
     }
 }

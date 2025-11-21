@@ -42,8 +42,9 @@ public struct URLConstants {
     public static let sourceCode = URLConstants(urlString: "https://github.com/Infomaniak/ios-kDrive")
     public static let gpl = URLConstants(urlString: "https://www.gnu.org/licenses/gpl-3.0.html")
     public static let support = URLConstants(urlString: "https://support.infomaniak.com")
-    public static let faqIAP = URLConstants(urlString: "https://faq.infomaniak.com/2632")
     public static let matomo = URLConstants(urlString: "https://analytics.infomaniak.com/matomo.php")
+    public static let faqIAP = URLConstants(urlString: "https://faq.infomaniak.com/2632")
+    public static let faqContentBlocker = URLConstants(urlString: "https://faq.infomaniak.com/2892")
 
     public static func renewDrive(accountId: Int) -> URLConstants {
         return URLConstants(urlString: "https://manager.infomaniak.com/v3/\(accountId)/accounts/accounting/renewal")
