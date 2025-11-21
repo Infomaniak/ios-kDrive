@@ -58,6 +58,8 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
         fatalError("Not implemented")
     }
 
+    func updateAccountsInfos() async throws {}
+
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher { fatalError("Not implemented") }
 
     func getDrive(for accountId: Int, driveId: Int) -> Drive? { nil }
