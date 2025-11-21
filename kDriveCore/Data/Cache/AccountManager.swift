@@ -244,6 +244,20 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return (driveFileManager, matchingAccount)
     }
 
+    private func updateAccountsAndGetMatchingDrive(deeplink: Any,
+                                                   driveId: Int, accounts: [Account]) async
+        -> (driveFileManager: DriveFileManager?, matchingAccount: Account?)? {
+        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId, accounts: accounts) {
+            return match
+        }
+        do {
+            try await updateAccountsInfos()
+
+        } catch {}
+
+        return await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId, accounts: accounts)
+    }
+
     @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider) async
         -> DriveFileManager? {
         let driveId = deeplink.driveId
@@ -261,7 +275,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             }
         }
 
-        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId, accounts: orderedAccounts) {
+        if let match = await updateAccountsAndGetMatchingDrive(deeplink: deeplink, driveId: driveId, accounts: orderedAccounts) {
             driveFileManager = match.driveFileManager
             matchingAccount = match.matchingAccount
         }
