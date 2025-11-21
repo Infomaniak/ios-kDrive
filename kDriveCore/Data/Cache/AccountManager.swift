@@ -61,6 +61,7 @@ public protocol AccountManageable: AnyObject {
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider) async -> DriveFileManager?
+    func updateAccountsInfos() async throws
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -295,6 +296,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         return driveFileManager
+    }
+
+    public func updateAccountsInfos() async throws {
+        let allAccountsToUpdate = accounts.values
+        try await allAccountsToUpdate.concurrentForEach(customConcurrency: Constants.networkParallelism) { account in
+            _ = try await self.updateUser(for: account, registerToken: false)
+        }
     }
 
     public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int,
