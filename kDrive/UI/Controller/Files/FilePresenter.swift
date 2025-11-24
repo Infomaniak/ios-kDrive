@@ -150,7 +150,20 @@ final class FilePresenter {
         let viewModel: FileListViewModel
         if driveFileManager.drive.sharedWithMe {
             let sharedWithMeDriveFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
-            viewModel = SharedWithMeViewModel(driveFileManager: sharedWithMeDriveFileManager, currentDirectory: file)
+            let configuration = FileListViewModel.Configuration(
+                emptyViewType: .emptyFolder,
+                supportsDrop: true,
+                rightBarButtons: [.search]
+            )
+            viewModel = ConcreteFileListViewModel(
+                configuration: configuration,
+                driveFileManager: sharedWithMeDriveFileManager,
+                currentDirectory: file
+            )
+
+            Task {
+                try await viewModel.loadFiles()
+            }
         } else if case .publicShare(let proxy, let metadata) = driveFileManager.context {
             let configuration = FileListViewModel.Configuration(selectAllSupported: true,
                                                                 rootTitle: nil,
