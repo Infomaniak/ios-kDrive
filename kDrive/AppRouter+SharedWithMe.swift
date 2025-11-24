@@ -25,7 +25,7 @@ import kDriveResources
 import UIKit
 
 public extension AppRouter {
-    @MainActor func showSharedWithMeView(
+    @MainActor private func showSharedWithMeView(
         driveFileManager: DriveFileManager,
         navigationController: UINavigationController
     ) {
@@ -34,7 +34,7 @@ public extension AppRouter {
         navigationController.pushViewController(destinationViewController, animated: true)
     }
 
-    @MainActor func showSharedFileIdView(
+    @MainActor private func showSharedFileIdView(
         driveFileManager: DriveFileManager,
         navigationController: UINavigationController,
         driveId: Int,
@@ -62,7 +62,7 @@ public extension AppRouter {
         )
     }
 
-    @MainActor func showSharedFolderIdView(driveFileManager: DriveFileManager,
+    @MainActor private func showSharedFolderIdView(driveFileManager: DriveFileManager,
                                            navigationController: UINavigationController,
                                            driveId: Int,
                                            folderId: Int) async {
@@ -93,7 +93,7 @@ public extension AppRouter {
         navigationController.pushViewController(destinationViewController, animated: true)
     }
 
-    @MainActor func showSharedWithMe(
+    @MainActor private func showSharedWithMe(
         driveFileManager: DriveFileManager,
         navigationController: UINavigationController,
         sharedWithMeLink: SharedWithMeLink
