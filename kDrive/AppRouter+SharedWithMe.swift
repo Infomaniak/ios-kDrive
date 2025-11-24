@@ -63,9 +63,9 @@ public extension AppRouter {
     }
 
     @MainActor private func showSharedFolderIdView(driveFileManager: DriveFileManager,
-                                           navigationController: UINavigationController,
-                                           driveId: Int,
-                                           folderId: Int) async {
+                                                   navigationController: UINavigationController,
+                                                   driveId: Int,
+                                                   folderId: Int) async {
         guard let frozenFolder = await driveFileManager.getFrozenFileFromAPI(
             driveId: driveId,
             fileId: folderId
