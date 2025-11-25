@@ -42,6 +42,7 @@ class ModernFileListViewController: UICollectionViewController {
         return UIConstants.List.paddingBottom
     }
 
+    let layoutHelper = FileListLayout()
     let refreshControl = UIRefreshControl()
     var headerView: FilesHeaderView?
     var selectView: SelectView?
@@ -96,7 +97,8 @@ class ModernFileListViewController: UICollectionViewController {
         super.viewDidLoad()
         navigationItem.hideBackButtonText()
 
-        collectionView.collectionViewLayout = createLayout()
+        collectionView.collectionViewLayout = layoutHelper.createLayoutFor(viewModel: viewModel)
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
@@ -152,21 +154,10 @@ class ModernFileListViewController: UICollectionViewController {
         saveSceneState()
     }
 
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
         if let emptyView = collectionView?.backgroundView as? EmptyTableView {
             updateEmptyView(emptyView)
-        }
-
-        let visibleCells = (collectionView?.indexPathsForVisibleItems ?? []).sorted()
-        coordinator.animate { _ in
-            self.collectionView?.collectionViewLayout.invalidateLayout()
-            self.setSelectedCells()
-            if !visibleCells.isEmpty {
-                let scrolledCell = visibleCells[Int(visibleCells.count / 2)]
-                self.collectionView?.scrollToItem(at: scrolledCell, at: .centeredVertically, animated: false)
-            }
-            self.collectionView.layoutIfNeeded()
         }
     }
 
@@ -179,32 +170,6 @@ class ModernFileListViewController: UICollectionViewController {
 
     @objc func appWillEnterForeground() {
         viewWillAppear(true)
-    }
-
-    private func createLayout() -> UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
-            var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
-            configuration.backgroundColor = KDriveResourcesAsset.backgroundColor.color
-            configuration.showsSeparators = false
-
-            configuration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath in
-                return self?.viewModel.getSwipeActionConfiguration(at: indexPath)
-            }
-
-            let section = NSCollectionLayoutSection.list(using: configuration,
-                                                         layoutEnvironment: layoutEnvironment)
-
-            section.contentInsets = .init(
-                top: 0,
-                leading: UIConstants.Padding.mediumSmall,
-                bottom: 0,
-                trailing: UIConstants.Padding.mediumSmall
-            )
-
-            return section
-        }
-
-        return layout
     }
 
     private func setupViewModel() {
@@ -367,10 +332,6 @@ class ModernFileListViewController: UICollectionViewController {
                               interrupt: { $0.changeCount > Endpoint.itemsPerPage },
                               setData: { self.displayedFiles = $0 })
 
-        // We need recompute the size of the header cell right after the batch update so it reflects its state properly.
-        // State of the header cell can be updated during a diff update of the collection view.
-        collectionView.reloadItems(at: [IndexPath(row: 0, section: 0)])
-
         if let headerView {
             setUpHeaderView(headerView, isEmptyViewHidden: viewModel.isShowingEmptyView)
         }
@@ -390,7 +351,10 @@ class ModernFileListViewController: UICollectionViewController {
 
     private func updateListStyle(_ listStyle: ListStyle) {
         headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
-        collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
+        let newLayout = layoutHelper.createLayoutFor(viewModel: viewModel)
+
+        collectionView.reloadSections([0])
+        collectionView.setCollectionViewLayout(newLayout, animated: true)
         setSelectedCells()
     }
 
@@ -414,7 +378,6 @@ class ModernFileListViewController: UICollectionViewController {
         // Only perform reload if needed
         if shouldHideUploadCard != headerView?.uploadCardView.isHidden {
             headerView?.uploadCardView.isHidden = shouldHideUploadCard
-            collectionView.performBatchUpdates(nil)
         }
     }
 
