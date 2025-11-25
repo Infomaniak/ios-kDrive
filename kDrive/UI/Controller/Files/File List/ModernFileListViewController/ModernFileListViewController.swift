@@ -490,12 +490,8 @@ class ModernFileListViewController: UICollectionViewController {
     }
 
     private func updateEmptyView(_ emptyBackground: EmptyTableView) {
-        if UIDevice.current.orientation.isPortrait {
-            emptyBackground.emptyImageFrameViewHeightConstant.constant = 200
-        }
-        if UIDevice.current.orientation.isLandscape {
-            emptyBackground.emptyImageFrameViewHeightConstant.constant = 120
-        }
+        let isSpaceLimited = traitCollection.verticalSizeClass == .compact && traitCollection.horizontalSizeClass == .compact
+        emptyBackground.emptyImageFrameViewHeightConstant.constant = isSpaceLimited ? 120 : 200
         emptyBackground.emptyImageFrameView.cornerRadius = emptyBackground.emptyImageFrameViewHeightConstant.constant / 2
     }
 
