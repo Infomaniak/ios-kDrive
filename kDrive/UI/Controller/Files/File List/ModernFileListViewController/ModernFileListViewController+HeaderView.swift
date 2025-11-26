@@ -21,44 +21,9 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-extension ModernFileListViewController {
-    func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
-        headerView.delegate = self
-
-        if viewModel.currentDirectory.visibility == .isTeamSpace {
-            let driveOrganisationName = viewModel.driveFileManager.drive.account.name
-            let commonDocumentsDescription = KDriveResourcesStrings.Localizable.commonDocumentsDescription(driveOrganisationName)
-
-            headerView.commonDocumentsDescriptionLabel.text = commonDocumentsDescription
-            headerView.commonDocumentsDescriptionLabel.isHidden = false
-        } else {
-            headerView.commonDocumentsDescriptionLabel.isHidden = true
-        }
-
-        let isTrash = viewModel.currentDirectory.id == DriveFileManager.trashRootFile.id
-        headerView.updateInformationView(drivePackId: packId, isTrash: isTrash)
-        headerView.sortView.isHidden = !isEmptyViewHidden
-
-        headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
-        UIView.performWithoutAnimation {
-            headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
-            headerView.sortButton.layoutIfNeeded()
-            headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
-            headerView.listOrGridButton.layoutIfNeeded()
-        }
-
-        if let uploadViewModel = viewModel.uploadViewModel {
-            headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
-            headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
-            headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
-            headerView.uploadCardView.progressView.enableIndeterminate()
-        }
-    }
-}
-
 // MARK: - FilesHeaderViewDelegate
 
-extension ModernFileListViewController: FilesHeaderViewDelegate {
+extension FileListViewController: FilesHeaderViewDelegate {
     func headerViewHeightDidChange(_ headerView: FilesHeaderView) {
         collectionView.contentInset.top = headerView.frame.height
     }

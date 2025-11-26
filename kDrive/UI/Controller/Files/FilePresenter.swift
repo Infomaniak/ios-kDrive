@@ -192,7 +192,7 @@ final class FilePresenter {
             )
         }
 
-        let destinationViewController = ModernFileListViewController(viewModel: viewModel)
+        let destinationViewController = FileListViewController(viewModel: viewModel)
         viewModel.onDismissViewController = { [weak destinationViewController] in
             destinationViewController?.dismiss(animated: true)
         }
@@ -210,7 +210,7 @@ final class FilePresenter {
 
     private func presentNoAccessOrForceAccessPanel(for file: File,
                                                    driveFileManager: DriveFileManager,
-                                                   accessingFileViewController: ModernFileListViewController) {
+                                                   accessingFileViewController: FileListViewController) {
         guard !file.isRoot && (file.visibility == .isInTeamSpaceFolder || file.visibility == .isTeamSpaceFolder) else {
             return
         }
@@ -228,7 +228,7 @@ final class FilePresenter {
 
     private func presentForceAccessPanel(for file: File,
                                          driveFileManager: DriveFileManager,
-                                         accessingFileViewController: ModernFileListViewController) {
+                                         accessingFileViewController: FileListViewController) {
         let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
         let floatingPanelViewController = accessFileDriveFloatingPanelController
             .contentViewController as? AccessFileFloatingPanelViewController

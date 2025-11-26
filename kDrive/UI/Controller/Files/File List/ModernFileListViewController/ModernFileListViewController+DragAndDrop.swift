@@ -21,7 +21,7 @@ import InfomaniakCore
 
 // MARK: - UICollectionViewDragDelegate
 
-extension ModernFileListViewController: UICollectionViewDragDelegate {
+extension FileListViewController: UICollectionViewDragDelegate {
     func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession,
                         at indexPath: IndexPath) -> [UIDragItem] {
         if let draggableViewModel = viewModel.draggableFileListViewModel,
@@ -35,7 +35,7 @@ extension ModernFileListViewController: UICollectionViewDragDelegate {
 
 // MARK: - UICollectionViewDropDelegate
 
-extension ModernFileListViewController: UICollectionViewDropDelegate {
+extension FileListViewController: UICollectionViewDropDelegate {
     func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
         // Prevent dropping a session with only folders
         return !session.items.allSatisfy { $0.itemProvider.hasItemConformingToTypeIdentifier(UTI.directory.identifier) }
