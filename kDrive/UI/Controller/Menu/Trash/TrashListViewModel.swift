@@ -27,7 +27,7 @@ import Kingfisher
 import RealmSwift
 import UIKit
 
-class TrashListViewModel: InMemoryFileListViewModel {
+final class TrashListViewModel: InMemoryFileListViewModel {
     @LazyInjectService private var matomo: MatomoUtils
 
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {

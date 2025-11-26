@@ -21,7 +21,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class RecentActivityFilesViewModel: InMemoryFileListViewModel {
+final class RecentActivityFilesViewModel: InMemoryFileListViewModel {
     var activity: FileActivity?
 
     convenience init(driveFileManager: DriveFileManager, activities: [FileActivity]) {

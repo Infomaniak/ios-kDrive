@@ -18,11 +18,20 @@
 
 import CocoaLumberjackSwift
 import Foundation
+import InfomaniakCoreDB
 import kDriveCore
 import RealmSwift
 
 class InMemoryFileListViewModel: FileListViewModel {
-    private let realm: Realm
+    private struct RealmWrapper: RealmAccessible {
+        let realm: Realm
+
+        func getRealm() -> Realm {
+            realm
+        }
+    }
+
+    private let transactionExecutor: Transactionable
 
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         // TODO: Refactor to explicit realm state
@@ -32,24 +41,32 @@ class InMemoryFileListViewModel: FileListViewModel {
             currentDirectory = liveDirectory
         }
 
+        let realmAccessible: RealmAccessible
         if let realm = currentDirectory.realm, !currentDirectory.isFrozen {
-            self.realm = realm
+            realmAccessible = RealmWrapper(realm: realm)
+            Log.fileList("reusing in-memory realm", level: .error)
         } else {
+            Log.fileList("creating new in-memory realm", level: .error)
             let unCachedRealmConfiguration = Realm.Configuration(
                 inMemoryIdentifier: "uncachedrealm-\(UUID().uuidString)",
                 objectTypes: DriveFileManager.constants.driveObjectTypes
             )
+
             do {
-                realm = try Realm(configuration: unCachedRealmConfiguration)
+                let realm = try Realm(configuration: unCachedRealmConfiguration)
+                realmAccessible = RealmWrapper(realm: realm)
+                currentDirectory = currentDirectory.detached()
             } catch {
                 Logging.reportRealmOpeningError(error, realmConfiguration: unCachedRealmConfiguration)
             }
         }
 
+        transactionExecutor = TransactionExecutor(realmAccessible: realmAccessible)
+
         super.init(configuration: configuration, driveFileManager: driveFileManager, currentDirectory: currentDirectory)
 
-        try? realm.write {
-            realm.add(currentDirectory, update: .modified)
+        try? transactionExecutor.writeTransaction { writableRealm in
+            writableRealm.add(currentDirectory, update: .modified)
         }
 
         observedFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory.children).filesSorted(by: sortType))
@@ -65,15 +82,18 @@ class InMemoryFileListViewModel: FileListViewModel {
     ///   - fetchedFiles: The list of files to add.
     ///   - page: The page of the files.
     final func addPage(files fetchedFiles: [File], fullyDownloaded: Bool, copyInRealm: Bool = false, cursor: String?) {
-        guard let liveCurrentDirectory = realm.object(ofType: File.self, forPrimaryKey: currentDirectory.uid) else { return }
-        try? realm.write {
+        try? transactionExecutor.writeTransaction { writableRealm in
+            guard let liveCurrentDirectory = writableRealm.object(ofType: File.self, forPrimaryKey: currentDirectory.uid) else {
+                return
+            }
+
             var children = [File]()
             if copyInRealm {
                 for file in fetchedFiles {
-                    children.append(realm.create(File.self, value: file, update: .modified))
+                    children.append(writableRealm.create(File.self, value: file, update: .modified))
                 }
             } else {
-                realm.add(fetchedFiles, update: .modified)
+                writableRealm.add(fetchedFiles, update: .modified)
                 children = fetchedFiles
             }
 
@@ -87,10 +107,10 @@ class InMemoryFileListViewModel: FileListViewModel {
     }
 
     func removeFiles(_ files: [ProxyFile]) {
-        try? realm.write {
+        try? transactionExecutor.writeTransaction { writableRealm in
             for file in files {
-                if let file = realm.object(ofType: File.self, forPrimaryKey: file.uid), !file.isInvalidated {
-                    realm.delete(file)
+                if let file = writableRealm.object(ofType: File.self, forPrimaryKey: file.uid), !file.isInvalidated {
+                    writableRealm.delete(file)
                 }
             }
         }
