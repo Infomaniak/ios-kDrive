@@ -61,6 +61,7 @@ public protocol AccountManageable: AnyObject {
     func reloadTokensAndAccounts()
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
     @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider) async -> DriveFileManager?
+    func updateAccountsInfos() async throws
     func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager
     func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager?
 
@@ -207,15 +208,17 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
     }
 
-    private func getMatchingDriveAndAccount(deeplink: Any,
-                                            driveId: Int, accounts: [Account]) async
+    private func getMatchingDriveAndAccount(deeplink: LinkDriveProvider, accounts: [Account]) async
         -> (driveFileManager: DriveFileManager?, matchingAccount: Account?)? {
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
 
         if let privateShareLink = deeplink as? PrivateShareLink {
             for account in accounts {
-                guard let matchingDriveFileManager = getDriveFileManager(for: driveId, userId: account.userId) else { continue }
+                guard let matchingDriveFileManager = getDriveFileManager(for: deeplink.driveId,
+                                                                         userId: account.userId) else {
+                    continue
+                }
                 do {
                     _ = try await matchingDriveFileManager.file(ProxyFile(
                         driveId: matchingDriveFileManager.driveId,
@@ -232,7 +235,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             for account in accounts {
                 if let matchingDriveFileManager = try? getFirstMatchingDriveFileManager(
                     for: account.userId,
-                    driveId: driveId
+                    driveId: deeplink.driveId
                 ) {
                     driveFileManager = matchingDriveFileManager
                     matchingAccount = account
@@ -243,9 +246,21 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return (driveFileManager, matchingAccount)
     }
 
+    private func updateAccountsAndGetMatchingDrive(deeplink: LinkDriveProvider, accounts: [Account]) async
+        -> (driveFileManager: DriveFileManager?, matchingAccount: Account?)? {
+        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, accounts: accounts),
+           match.driveFileManager != nil && match.matchingAccount != nil {
+            return match
+        }
+        do {
+            try await updateAccountsInfos()
+        } catch {}
+
+        return await getMatchingDriveAndAccount(deeplink: deeplink, accounts: accounts)
+    }
+
     @MainActor public func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider) async
         -> DriveFileManager? {
-        let driveId = deeplink.driveId
         var driveFileManager: DriveFileManager?
         var matchingAccount: Account?
 
@@ -260,7 +275,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             }
         }
 
-        if let match = await getMatchingDriveAndAccount(deeplink: deeplink, driveId: driveId, accounts: orderedAccounts) {
+        if let match = await updateAccountsAndGetMatchingDrive(deeplink: deeplink, accounts: orderedAccounts) {
             driveFileManager = match.driveFileManager
             matchingAccount = match.matchingAccount
         }
@@ -284,8 +299,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             return nil
         }
 
-        if driveId != currentDriveId && !(deeplink is PrivateShareLink) {
-            DDLogInfo("switching to drive \(driveId) to accommodate sharedWithMeLink navigation")
+        if deeplink.driveId != currentDriveId && !(deeplink is PrivateShareLink) {
+            DDLogInfo("switching to drive \(deeplink.driveId) to accommodate sharedWithMeLink navigation")
 
             try? await driveFileManager.switchDriveAndReloadUI()
             deeplinkService.setLastDeeplink(deeplink)
@@ -295,6 +310,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         return driveFileManager
+    }
+
+    public func updateAccountsInfos() async throws {
+        let allAccountsToUpdate = accounts.values
+        try await allAccountsToUpdate.concurrentForEach(customConcurrency: Constants.networkParallelism) { account in
+            _ = try await self.updateUser(for: account, registerToken: false)
+        }
     }
 
     public func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int,

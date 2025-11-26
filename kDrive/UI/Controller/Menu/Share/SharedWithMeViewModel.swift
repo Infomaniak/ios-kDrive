@@ -23,6 +23,7 @@ import UIKit
 
 class SharedWithMeViewModel: FileListViewModel {
     required init(driveFileManager: DriveFileManager, currentDirectory: File? = nil) {
+        assert(currentDirectory == nil, "This does not support a specific file as current directory")
         let sharedWithMeRootFile = driveFileManager.getManagedFile(from: DriveFileManager.sharedWithMeRootFile)
         let configuration = Configuration(selectAllSupported: false,
                                           rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
@@ -33,9 +34,9 @@ class SharedWithMeViewModel: FileListViewModel {
         super.init(
             configuration: configuration,
             driveFileManager: driveFileManager,
-            currentDirectory: currentDirectory ?? sharedWithMeRootFile
+            currentDirectory: sharedWithMeRootFile
         )
-        observedFiles = AnyRealmCollection(AnyRealmCollection(currentDirectory?.children ?? sharedWithMeRootFile.children)
+        observedFiles = AnyRealmCollection(AnyRealmCollection(sharedWithMeRootFile.children)
             .filesSorted(by: sortType))
     }
 
