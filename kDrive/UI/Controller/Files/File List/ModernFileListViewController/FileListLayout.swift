@@ -26,7 +26,6 @@ protocol FileListLayout {
     func createLayoutFor(viewModel: FileListViewModel) -> UICollectionViewLayout
 }
 
-@MainActor
 struct DefaultFileListLayout: FileListLayout {
     private let gridMinColumns = 2
     private let gridCellMaxWidth = 200.0
