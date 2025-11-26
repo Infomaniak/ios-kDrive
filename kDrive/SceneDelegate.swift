@@ -127,10 +127,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             Task {
                 await TokenMigrator().migrateTokensIfNeeded()
 
-                finishSceneSetup(scene)
+                finishSceneSetup(scene, skipRestoration: false)
             }
         } else {
-            finishSceneSetup(scene)
+            finishSceneSetup(scene, skipRestoration: true)
         }
     }
 
@@ -276,14 +276,16 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
 // TODO: Refactor with router like pattern and split code away from this class
 extension SceneDelegate {
-    @MainActor func finishSceneSetup(_ scene: UIScene) {
+    @MainActor func finishSceneSetup(_ scene: UIScene, skipRestoration: Bool) {
         uploadNotifications.setPausedNotificationSent(false)
 
         let currentState = RootViewControllerState.getCurrentState()
         let session = scene.session
         let isRestoration: Bool = session.stateRestorationActivity != nil
         Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(String(describing: session.stateRestorationActivity))")
-        appNavigable.prepareRootViewController(currentState: currentState, restoration: isRestoration)
+        if !skipRestoration {
+            appNavigable.prepareRootViewController(currentState: currentState, restoration: isRestoration)
+        }
 
         switch currentState {
         case .mainViewController, .appLock:
