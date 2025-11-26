@@ -48,10 +48,6 @@ extension FileListViewController: FilesHeaderViewDelegate {
         viewModel.multipleSelectionViewModel?.actionButtonPressed(action: button.action)
     }
 
-    func removeFilterButtonPressed(_ filter: Filterable) {
-        // Overriden in subclasses
-    }
-
     func upsaleButtonPressed() {
         if packId == .myKSuite {
             router.presentUpSaleSheet()

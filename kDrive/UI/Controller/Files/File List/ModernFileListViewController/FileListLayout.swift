@@ -22,7 +22,12 @@ import kDriveResources
 import UIKit
 
 @MainActor
-struct FileListLayout {
+protocol FileListLayout {
+    func createLayoutFor(viewModel: FileListViewModel) -> UICollectionViewLayout
+}
+
+@MainActor
+struct DefaultFileListLayout: FileListLayout {
     private let gridMinColumns = 2
     private let gridCellMaxWidth = 200.0
     private let gridCellRatio = 3.0 / 4.0
@@ -45,7 +50,7 @@ struct FileListLayout {
         return max(gridMinColumns, maxColumns)
     }
 
-    private func createGridLayout(environment: any NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
+    func createGridLayout(environment: any NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
         let effectiveContentWidth = environment.container.effectiveContentSize.width - UIConstants.Padding.mediumSmall * 2
         let gridColumns = getColumnCountFor(width: effectiveContentWidth)
 
@@ -76,8 +81,8 @@ struct FileListLayout {
         return section
     }
 
-    private func createListLayout(environment: any NSCollectionLayoutEnvironment,
-                                  viewModel: FileListViewModel) -> NSCollectionLayoutSection {
+    func createListLayout(environment: any NSCollectionLayoutEnvironment,
+                          viewModel: FileListViewModel) -> NSCollectionLayoutSection {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         configuration.showsSeparators = false

@@ -36,32 +36,19 @@ class SearchFilesViewModel: FileListViewModel {
 
     var currentSearchText: String? {
         didSet {
+            displaySearchResultsIfNeeded()
             search()
         }
     }
 
     var filters: Filters {
         didSet {
+            displaySearchResultsIfNeeded()
             search()
         }
     }
 
-    var isDisplayingSearchResults: Bool {
-        let displayingSearchResults = (currentSearchText ?? "").count >= minSearchCount || filters.hasFilters
-        _isDisplayingSearchResults = displayingSearchResults
-        return displayingSearchResults
-    }
-
-    /// Detect flip/flop of displayed content type
-    var _isDisplayingSearchResults = true {
-        willSet {
-            guard newValue != _isDisplayingSearchResults else {
-                return
-            }
-
-            onContentTypeChanged?()
-        }
-    }
+    private(set) var isDisplayingSearchResults = false
 
     private var currentTask: Task<Void, Never>?
 
@@ -154,6 +141,17 @@ class SearchFilesViewModel: FileListViewModel {
                                                                           belongToAllCategories: filters.belongToAllCategories,
                                                                           sortType: sortType))
         startObservation()
+    }
+
+    private func displaySearchResultsIfNeeded() {
+        let newDisplayingSearchResults = (currentSearchText ?? "").count >= minSearchCount || filters.hasFilters
+
+        guard newDisplayingSearchResults != isDisplayingSearchResults else {
+            return
+        }
+
+        isDisplayingSearchResults = newDisplayingSearchResults
+        onContentTypeChanged?()
     }
 
     override func barButtonPressed(sender: Any?, type: FileListBarButtonType) {
