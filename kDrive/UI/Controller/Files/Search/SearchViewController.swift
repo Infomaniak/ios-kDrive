@@ -24,8 +24,6 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-// MARK: - SearchViewController
-
 class SearchViewController: FileListViewController {
     // MARK: - Constants
 
@@ -76,6 +74,7 @@ class SearchViewController: FileListViewController {
         definesPresentationContext = true
 
         bindSearchViewModel()
+        headerView?.isHidden = true
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -101,7 +100,7 @@ class SearchViewController: FileListViewController {
     }
 
     static func instantiateInNavigationController(viewModel: SearchFilesViewModel) -> UINavigationController {
-        let searchViewController = SearchViewController(viewModel: viewModel)
+        let searchViewController = SearchViewController(viewModel: viewModel, listLayout: SearchFileListLayout())
         let navigationController = UINavigationController(rootViewController: searchViewController)
         navigationController.modalPresentationStyle = .fullScreen
         return navigationController
@@ -139,14 +138,16 @@ class SearchViewController: FileListViewController {
         searchViewModel.onContentTypeChanged = { [weak self] in
             guard let self else { return }
             collectionView.reloadData()
+
+            headerView?.isHidden = !searchViewModel.isDisplayingSearchResults
+            collectionView.setCollectionViewLayout(layoutHelper.createLayoutFor(viewModel: viewModel), animated: true)
         }
 
         searchViewModel.onFiltersChanged = { [weak self] in
             guard let self else { return }
             guard isViewLoaded else { return }
-            // Update UI
+
             collectionView.refreshControl = searchViewModel.isDisplayingSearchResults ? refreshControl : nil
-            collectionViewFlowLayout?.sectionHeadersPinToVisibleBounds = searchViewModel.isDisplayingSearchResults
             collectionView.backgroundView = nil
             if let headerView {
                 updateFilters(headerView: headerView)
@@ -193,24 +194,6 @@ class SearchViewController: FileListViewController {
         }
     }
 
-    override func collectionView(
-        _ collectionView: UICollectionView,
-        viewForSupplementaryElementOfKind kind: String,
-        at indexPath: IndexPath
-    ) -> UICollectionReusableView {
-        if searchViewModel.isDisplayingSearchResults {
-            return super.collectionView(collectionView, viewForSupplementaryElementOfKind: kind, at: indexPath)
-        } else {
-            let titleHeaderView = collectionView.dequeueReusableSupplementaryView(
-                ofKind: UICollectionView.elementKindSectionHeader,
-                withReuseIdentifier: searchHeaderIdentifier,
-                for: indexPath
-            ) as! BasicTitleCollectionReusableView
-            titleHeaderView.titleLabel.text = sectionTitles[indexPath.section]
-            return titleHeaderView
-        }
-    }
-
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if searchViewModel.isDisplayingSearchResults {
             return super.collectionView(collectionView, cellForItemAt: indexPath)
@@ -242,35 +225,6 @@ class SearchViewController: FileListViewController {
         }
     }
 
-    // MARK: - Collection view delegate flow layout
-
-    override func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        referenceSizeForHeaderInSection section: Int
-    ) -> CGSize {
-        guard searchViewModel.isDisplayingSearchResults else {
-            return super.collectionView(collectionView, layout: collectionViewLayout, referenceSizeForHeaderInSection: section)
-        }
-
-        guard recentSearchesViewModel.recentSearches.isEmpty else {
-            return .zero
-        }
-
-        guard let headerView = self.collectionView.supplementaryView(
-            forElementKind: UICollectionView.elementKindSectionHeader,
-            at: IndexPath(row: 0, section: section)
-        ) else {
-            return CGSize(width: collectionView.frame.width, height: 32)
-        }
-
-        return headerView.systemLayoutSizeFitting(
-            CGSize(width: collectionView.frame.width, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
-    }
-
     // MARK: - Files header view delegate
 
     override func removeFilterButtonPressed(_ filter: Filterable) {
@@ -281,7 +235,6 @@ class SearchViewController: FileListViewController {
         } else if let category = filter as? kDriveCore.Category {
             searchViewModel.filters.categories.remove(category)
         }
-        collectionView.collectionViewLayout.invalidateLayout()
     }
 
     // MARK: - UICollectionViewDragDelegate

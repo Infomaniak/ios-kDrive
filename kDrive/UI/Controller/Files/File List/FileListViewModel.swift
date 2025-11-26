@@ -433,7 +433,7 @@ class FileListViewModel: SelectDelegate {
     }
 
     func getSwipeActionConfiguration(at indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        if configuration.presentationOrigin == .activities || listStyle == .grid {
+        if configuration.presentationOrigin == .activities {
             return nil
         }
 

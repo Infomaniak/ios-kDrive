@@ -42,7 +42,7 @@ class FileListViewController: UICollectionViewController {
         return UIConstants.List.paddingBottom
     }
 
-    let layoutHelper = FileListLayout()
+    let layoutHelper: FileListLayout
     let refreshControl = UIRefreshControl()
     var headerView: FilesHeaderView?
     var selectView: SelectView?
@@ -83,9 +83,10 @@ class FileListViewController: UICollectionViewController {
         NotificationCenter.default.removeObserver(self)
     }
 
-    init(viewModel: FileListViewModel) {
+    init(viewModel: FileListViewModel, listLayout: FileListLayout? = nil) {
         self.viewModel = viewModel
-        super.init(collectionViewLayout: UICollectionViewLayout())
+        layoutHelper = listLayout ?? DefaultFileListLayout()
+        super.init(collectionViewLayout: layoutHelper.createLayoutFor(viewModel: viewModel))
     }
 
     @available(*, unavailable)
@@ -97,7 +98,6 @@ class FileListViewController: UICollectionViewController {
         super.viewDidLoad()
         navigationItem.hideBackButtonText()
 
-        collectionView.collectionViewLayout = layoutHelper.createLayoutFor(viewModel: viewModel)
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
@@ -661,6 +661,12 @@ class FileListViewController: UICollectionViewController {
                 }
             }
         }
+    }
+
+    // MARK: - FilesHeaderViewDelegate - Subclasses override
+
+    func removeFilterButtonPressed(_ filter: Filterable) {
+        // Overriden in subclasses
     }
 }
 
