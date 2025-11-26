@@ -229,7 +229,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             detailNavigationController.setViewControllers([homeViewController], animated: false)
         case .photoList:
             let photoListViewModel = PhotoListViewModel(driveFileManager: driveFileManager)
-            let photoListViewController = PhotoListViewController(viewModel: photoListViewModel)
+            let photoListViewController = PhotoListViewController(viewModel: photoListViewModel, listLayout: PhotoListLayout())
             mainTabBarViewController.selectedIndex = MainTabBarIndex.gallery.rawValue
             detailNavigationController.setViewControllers([photoListViewController], animated: false)
         case .menu:
@@ -397,7 +397,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     private static func initPhotoListViewController(with viewModel: FileListViewModel) -> UIViewController {
-        let photoListViewController = PhotoListViewController(viewModel: viewModel)
+        let photoListViewController = PhotoListViewController(viewModel: viewModel, listLayout: PhotoListLayout())
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: photoListViewController)
         navigationViewController.restorationIdentifier = String(describing: PhotoListViewController.self)
         navigationViewController.navigationBar.prefersLargeTitles = true

@@ -386,7 +386,9 @@ class FileListViewController: UICollectionViewController {
         headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
         let newLayout = layoutHelper.createLayoutFor(viewModel: viewModel)
 
-        collectionView.reloadSections([0])
+        if !displayedFiles.isEmpty {
+            collectionView.reloadSections([0])
+        }
         collectionView.setCollectionViewLayout(newLayout, animated: true)
         setSelectedCells()
     }
@@ -667,6 +669,16 @@ class FileListViewController: UICollectionViewController {
 
     func removeFilterButtonPressed(_ filter: Filterable) {
         // Overriden in subclasses
+    }
+
+    // MARK: - State restoration
+
+    var currentSceneMetadata: [AnyHashable: Any] {
+        [
+            SceneRestorationKeys.lastViewController.rawValue: SceneRestorationScreens.FileListViewController.rawValue,
+            SceneRestorationValues.driveId.rawValue: driveFileManager.driveId,
+            SceneRestorationValues.fileId.rawValue: viewModel.currentDirectory.id
+        ]
     }
 }
 
