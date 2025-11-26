@@ -28,7 +28,7 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class ModernFileListViewController: UICollectionViewController {
+class FileListViewController: UICollectionViewController {
     @LazyInjectService var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
@@ -135,6 +135,39 @@ class ModernFileListViewController: UICollectionViewController {
 
         self.headerView = headerView
         selectView = headerView.selectView
+    }
+
+    open func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
+        headerView.delegate = self
+
+        if viewModel.currentDirectory.visibility == .isTeamSpace {
+            let driveOrganisationName = viewModel.driveFileManager.drive.account.name
+            let commonDocumentsDescription = KDriveResourcesStrings.Localizable.commonDocumentsDescription(driveOrganisationName)
+
+            headerView.commonDocumentsDescriptionLabel.text = commonDocumentsDescription
+            headerView.commonDocumentsDescriptionLabel.isHidden = false
+        } else {
+            headerView.commonDocumentsDescriptionLabel.isHidden = true
+        }
+
+        let isTrash = viewModel.currentDirectory.id == DriveFileManager.trashRootFile.id
+        headerView.updateInformationView(drivePackId: packId, isTrash: isTrash)
+        headerView.sortView.isHidden = !isEmptyViewHidden
+
+        headerView.sortButton.isHidden = viewModel.configuration.sortingOptions.isEmpty
+        UIView.performWithoutAnimation {
+            headerView.sortButton.setTitle(viewModel.sortType.value.translation, for: .normal)
+            headerView.sortButton.layoutIfNeeded()
+            headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
+            headerView.listOrGridButton.layoutIfNeeded()
+        }
+
+        if let uploadViewModel = viewModel.uploadViewModel {
+            headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
+            headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
+            headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
+            headerView.uploadCardView.progressView.enableIndeterminate()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -633,7 +666,7 @@ class ModernFileListViewController: UICollectionViewController {
 
 // MARK: - UICollectionViewDataSource
 
-extension ModernFileListViewController {
+extension FileListViewController {
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return displayedFiles.count
     }
@@ -687,7 +720,7 @@ extension ModernFileListViewController {
 
 // MARK: - UICollectionViewDelegate
 
-extension ModernFileListViewController {
+extension FileListViewController {
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
             guard let file = getDisplayedFile(at: indexPath) else { return }
@@ -708,7 +741,7 @@ extension ModernFileListViewController {
 
 // MARK: - FileCellDelegate
 
-extension ModernFileListViewController: FileCellDelegate {
+extension FileListViewController: FileCellDelegate {
     func didTapMoreButton(_ cell: FileCollectionViewCell) {
         guard let indexPath = collectionView.indexPath(for: cell) else {
             return
@@ -719,7 +752,7 @@ extension ModernFileListViewController: FileCellDelegate {
 
 // MARK: - TopScrollable
 
-extension ModernFileListViewController: TopScrollable {
+extension FileListViewController: TopScrollable {
     func scrollToTop() {
         if isViewLoaded {
             collectionView.scrollToTop(animated: true, navigationController: navigationController)
