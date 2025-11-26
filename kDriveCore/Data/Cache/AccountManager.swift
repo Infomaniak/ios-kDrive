@@ -254,7 +254,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
         do {
             try await updateAccountsInfos()
-
         } catch {}
 
         return await getMatchingDriveAndAccount(deeplink: deeplink, accounts: accounts)
