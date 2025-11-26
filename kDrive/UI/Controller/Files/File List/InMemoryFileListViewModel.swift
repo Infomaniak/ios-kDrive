@@ -44,9 +44,9 @@ class InMemoryFileListViewModel: FileListViewModel {
         let realmAccessible: RealmAccessible
         if let realm = currentDirectory.realm, !currentDirectory.isFrozen {
             realmAccessible = RealmWrapper(realm: realm)
-            Log.fileList("reusing in-memory realm")
+            Log.fileList("reusing in-memory realm", level: .error)
         } else {
-            Log.fileList("creating new in-memory realm")
+            Log.fileList("creating new in-memory realm", level: .error)
             let unCachedRealmConfiguration = Realm.Configuration(
                 inMemoryIdentifier: "uncachedrealm-\(UUID().uuidString)",
                 objectTypes: DriveFileManager.constants.driveObjectTypes
