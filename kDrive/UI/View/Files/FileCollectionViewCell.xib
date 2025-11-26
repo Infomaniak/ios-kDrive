@@ -25,12 +25,6 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="HyS-E9-hha">
                                 <rect key="frame" x="0.0" y="0.0" width="364" height="60"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="XIo-Vc-zQ4">
-                                        <rect key="frame" x="364" y="0.0" width="0.0" height="60"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" priority="250" id="Mll-jY-nYg"/>
-                                        </constraints>
-                                    </stackView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hE6-GN-a4l">
                                         <rect key="frame" x="0.0" y="0.0" width="364" height="60"/>
                                         <subviews>
@@ -166,13 +160,10 @@
                                     </view>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="XIo-Vc-zQ4" secondAttribute="trailing" id="9S9-e4-6mG"/>
                                     <constraint firstAttribute="trailing" secondItem="hE6-GN-a4l" secondAttribute="trailing" id="AJo-d5-YPv"/>
                                     <constraint firstItem="hE6-GN-a4l" firstAttribute="top" secondItem="HyS-E9-hha" secondAttribute="top" id="H5b-H8-n1x"/>
-                                    <constraint firstItem="XIo-Vc-zQ4" firstAttribute="top" secondItem="HyS-E9-hha" secondAttribute="top" id="L1G-H1-Qou"/>
                                     <constraint firstItem="hE6-GN-a4l" firstAttribute="leading" secondItem="HyS-E9-hha" secondAttribute="leading" id="NWx-Fw-CMT"/>
                                     <constraint firstAttribute="bottom" secondItem="hE6-GN-a4l" secondAttribute="bottom" id="ODo-Od-H7c"/>
-                                    <constraint firstAttribute="bottom" secondItem="XIo-Vc-zQ4" secondAttribute="bottom" id="lNY-Fg-nEh"/>
                                 </constraints>
                             </view>
                         </subviews>
@@ -214,7 +205,6 @@
                 <outlet property="logoLeadingConstraint" destination="45G-W6-Uzf" id="ntd-5D-vOQ"/>
                 <outlet property="logoWidthConstraint" destination="y6P-eV-qo6" id="mgd-Hp-Ae6"/>
                 <outlet property="moreButton" destination="WCm-bJ-flM" id="ObD-8O-87S"/>
-                <outlet property="swipeActionsView" destination="XIo-Vc-zQ4" id="bMg-QM-YWP"/>
                 <outlet property="titleLabel" destination="TES-Tv-kfS" id="VCA-rE-D4J"/>
                 <outlet property="topConstraint" destination="3Js-Vi-ibW" id="PDQ-1y-tWy"/>
                 <outlet property="trailingConstraint" destination="GeY-03-PvP" id="ILQ-ZZ-aaM"/>
@@ -223,7 +213,7 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="check" width="24" height="24"/>
+        <image name="check" width="16" height="16"/>
         <image name="favorite" width="24" height="24"/>
         <image name="folder-filled" width="24" height="24"/>
         <image name="menu" width="24" height="24"/>

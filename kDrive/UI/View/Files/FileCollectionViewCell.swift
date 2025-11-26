@@ -197,7 +197,7 @@ protocol FileCellDelegate: AnyObject {
     }
 }
 
-class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
+class FileCollectionViewCell: UICollectionViewCell {
     static let identifier = String(describing: FileCollectionViewCell.self)
 
     var swipeStartPoint: CGPoint = .zero
@@ -302,7 +302,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         collectionView?.isHidden = true
         collectionView?.reloadData()
         centerTitleConstraint?.isActive = false
-        resetSwipeActions()
         detailLabel?.text = ""
         logoImage.image = nil
         logoImage.backgroundColor = nil

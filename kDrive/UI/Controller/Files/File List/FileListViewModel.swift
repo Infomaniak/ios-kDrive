@@ -464,10 +464,7 @@ class FileListViewModel: SelectDelegate {
             actions.append(action)
         }
 
-        let configuration = UISwipeActionsConfiguration(actions: actions)
-        //configuration.performsFirstActionWithFullSwipe = false
-
-        return configuration
+        return UISwipeActionsConfiguration(actions: actions)
     }
 
     func forceRefresh() {
