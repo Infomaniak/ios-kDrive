@@ -51,9 +51,11 @@ class InMemoryFileListViewModel: FileListViewModel {
                 inMemoryIdentifier: "uncachedrealm-\(UUID().uuidString)",
                 objectTypes: DriveFileManager.constants.driveObjectTypes
             )
+
             do {
                 let realm = try Realm(configuration: unCachedRealmConfiguration)
                 realmAccessible = RealmWrapper(realm: realm)
+                currentDirectory = currentDirectory.detached()
             } catch {
                 Logging.reportRealmOpeningError(error, realmConfiguration: unCachedRealmConfiguration)
             }
