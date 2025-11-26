@@ -31,7 +31,7 @@ class InMemoryFileListViewModel: FileListViewModel {
         }
     }
 
-    private let transactionExecutor: TransactionExecutor
+    private let transactionExecutor: Transactionable
 
     override init(configuration: Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         // TODO: Refactor to explicit realm state
@@ -44,7 +44,9 @@ class InMemoryFileListViewModel: FileListViewModel {
         let realmAccessible: RealmAccessible
         if let realm = currentDirectory.realm, !currentDirectory.isFrozen {
             realmAccessible = RealmWrapper(realm: realm)
+            Log.fileList("reusing in-memory realm")
         } else {
+            Log.fileList("creating new in-memory realm")
             let unCachedRealmConfiguration = Realm.Configuration(
                 inMemoryIdentifier: "uncachedrealm-\(UUID().uuidString)",
                 objectTypes: DriveFileManager.constants.driveObjectTypes
