@@ -1,2 +1,5 @@
 - Améliorations de la stabilité et corrections de bugs
+- Correction d'un problème rare empêchant l'ouverture d'un lien de partage privé
 - Vérification de la connectivité avant edition d'un fichier Office
+- Gestion des erreurs en rapport au contrôle parental à l'édition de fichiers Office
+- Rafraîchissement excessif de l'application lors du passage au premier plan
