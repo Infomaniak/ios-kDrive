@@ -859,6 +859,9 @@
 /* loco:6049df4d5c2c3a04bc3979a7 */
 "errorTitle" = "Error";
 
+/* loco:69270405644ff4b0930dc2b5 */
+"errorUnableToLoadContent" = "No se nos permite acceder a este recurso.";
+
 /* loco:6049df4d5c2c3a04bc3979a8 */
 "errorUpload" = "Error al importar";
 
@@ -1542,6 +1545,9 @@
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Enlace de uso compartido público";
+
+/* loco:691f1b320ffa47846800e682 */
+"readFAQ" = "Lea las preguntas frecuentes";
 
 /* loco:6049df4d5c2c3a04bc397a29 */
 "recentActivityMeTitle" = "Por mí";
