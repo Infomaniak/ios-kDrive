@@ -107,14 +107,4 @@ class RecentActivityFilesViewController: FileListViewController {
         }
         #endif
     }
-
-    // MARK: - Swipe action collection view data source
-
-    override func collectionView(_ collectionView: SwipableCollectionView, actionsFor cell: SwipableCell,
-                                 at indexPath: IndexPath) -> [SwipeCellAction]? {
-        guard !viewModel.getFile(at: indexPath)!.isTrashed else {
-            return nil
-        }
-        return super.collectionView(collectionView, actionsFor: cell, at: indexPath)
-    }
 }
