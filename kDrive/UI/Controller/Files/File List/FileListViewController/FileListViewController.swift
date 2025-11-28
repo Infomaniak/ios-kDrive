@@ -28,7 +28,7 @@ import kDriveResources
 import RealmSwift
 import UIKit
 
-class FileListViewController: UICollectionViewController {
+class FileListViewController: UICollectionViewController, SceneStateRestorable {
     @LazyInjectService var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
