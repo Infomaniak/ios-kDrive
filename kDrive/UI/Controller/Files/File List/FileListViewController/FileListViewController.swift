@@ -97,6 +97,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.hideBackButtonText()
+        navigationItem.largeTitleDisplayMode = .always
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(cellView: FileCollectionViewCell.self)
