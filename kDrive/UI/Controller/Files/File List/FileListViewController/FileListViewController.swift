@@ -125,6 +125,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     private func createHeaderView() {
         let headerView = FilesHeaderView.instantiate()
+        headerView.delegate = self
         headerView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(headerView)
 
@@ -139,8 +140,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     open func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
-        headerView.delegate = self
-
         if viewModel.currentDirectory.visibility == .isTeamSpace {
             let driveOrganisationName = viewModel.driveFileManager.drive.account.name
             let commonDocumentsDescription = KDriveResourcesStrings.Localizable.commonDocumentsDescription(driveOrganisationName)
