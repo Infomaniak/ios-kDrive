@@ -1,5 +1,5 @@
-- Stability improvements and bug fixes
 - Fix a rare issue preventing a private share link from opening
 - Connectivity check before Office file edition
 - Error handling of parental control on Office file edition
 - App over refreshing when switching to foreground
+- Stability improvements and bug fixes
