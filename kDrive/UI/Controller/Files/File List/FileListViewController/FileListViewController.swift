@@ -107,7 +107,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         collectionView.dropDelegate = self
         collectionView.dragDelegate = self
 
-        setupHeaderView()
+        createHeaderView()
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
@@ -123,7 +123,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         setupFooterIfNeeded()
     }
 
-    private func setupHeaderView() {
+    private func createHeaderView() {
         let headerView = FilesHeaderView.instantiate()
         headerView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(headerView)
