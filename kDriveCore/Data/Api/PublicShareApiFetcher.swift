@@ -44,6 +44,14 @@ public class PublicShareApiFetcher: ApiFetcher {
     }
 }
 
+private struct ShareLinkPasswordPayload: Decodable {
+    let token: String
+
+    enum CodingKeys: String, CodingKey {
+        case token
+    }
+}
+
 public extension PublicShareApiFetcher {
     func getToken(driveId: Int, shareLinkUid: String, password: String?) async throws -> String {
         let shareLinkAuthUrl = Endpoint.shareLinkAuthentication(driveId: driveId, shareLinkUid: shareLinkUid).url
@@ -53,8 +61,8 @@ public extension PublicShareApiFetcher {
                                               encoder: JSONParameterEncoder.default)
 
         do {
-            let tokenResponse: ValidServerResponse<ApiResult> = try await perform(request: request)
-            return tokenResponse.validApiResponse.data.rawValue
+            let tokenResponse: ValidServerResponse<ShareLinkPasswordPayload> = try await perform(request: request)
+            return tokenResponse.validApiResponse.data.token
         } catch let InfomaniakError.apiError(apiError) {
             throw apiError
         }
