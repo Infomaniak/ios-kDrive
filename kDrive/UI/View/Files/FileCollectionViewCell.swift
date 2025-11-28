@@ -200,9 +200,6 @@ protocol FileCellDelegate: AnyObject {
 class FileCollectionViewCell: UICollectionViewCell {
     static let identifier = String(describing: FileCollectionViewCell.self)
 
-    var swipeStartPoint: CGPoint = .zero
-    var initialTrailingConstraintValue: CGFloat = 0
-
     @IBOutlet var disabledView: UIView!
     @IBOutlet var contentInsetView: UIView!
     @IBOutlet var titleLabel: UILabel!
@@ -216,8 +213,6 @@ class FileCollectionViewCell: UICollectionViewCell {
     @IBOutlet var centerTitleConstraint: NSLayoutConstraint!
     @IBOutlet var innerViewTrailingConstraint: NSLayoutConstraint!
     @IBOutlet var innerViewLeadingConstraint: NSLayoutConstraint!
-    @IBOutlet var swipeActionsView: UIStackView?
-    @IBOutlet var stackViewTrailingConstraint: NSLayoutConstraint?
     @IBOutlet var detailsStackView: UIStackView?
     @IBOutlet var importProgressView: RPCircularProgress?
     @IBOutlet var downloadProgressView: RPCircularProgress?
@@ -493,9 +488,5 @@ extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewData
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
         return CGSize(width: 16, height: 16)
-    }
-
-    func setIsLastCell(_ isLast: Bool) {
-        separatorView.isHidden = isLast
     }
 }

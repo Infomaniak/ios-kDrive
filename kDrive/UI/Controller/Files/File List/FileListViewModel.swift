@@ -441,7 +441,7 @@ class FileListViewModel: SelectDelegate {
         var actions = [UIContextualAction]()
 
         if file.capabilities.canDelete {
-            let actionHandler: UIContextualAction.Handler = { [weak self] action, view, completion in
+            let actionHandler: UIContextualAction.Handler = { [weak self] _, _, completion in
                 self?.didSelectSwipeAction(.delete, at: indexPath)
                 completion(true)
             }
@@ -453,7 +453,7 @@ class FileListViewModel: SelectDelegate {
         }
 
         if file.capabilities.canShare {
-            let actionHandler: UIContextualAction.Handler = { [weak self] action, view, completion in
+            let actionHandler: UIContextualAction.Handler = { [weak self] _, _, completion in
                 self?.didSelectSwipeAction(.share, at: indexPath)
                 completion(true)
             }
