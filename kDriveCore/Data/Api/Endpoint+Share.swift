@@ -50,14 +50,12 @@ public extension Endpoint {
     }
 
     /// Share link info
-    static func shareLinkInfo(driveId: Int, shareLinkUid: String) -> Endpoint {
-        shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/init")
-    }
-
-    /// Share link info with password
-    static func shareLinkPasswordInfo(driveId: Int, shareLinkUid: String, token: String) -> Endpoint {
-        let shareLinkInfo = shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid)
-        return shareLinkInfo.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+    static func shareLinkInfo(driveId: Int, shareLinkUid: String, token: String? = nil) -> Endpoint {
+        let shareLink = shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/init")
+        if let token {
+            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+        }
+        return shareLink
     }
 
     /// Share link file
@@ -88,13 +86,21 @@ public extension Endpoint {
     }
 
     /// Share link file thumbnail
-    static func shareLinkFileThumbnail(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
+    static func shareLinkFileThumbnail(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
+        let shareLink = shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
+        if let token {
+            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+        }
+        return shareLink
     }
 
     /// Share link file preview
-    static func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
+    static func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
+        let shareLink = shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
+        if let token {
+            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+        }
+        return shareLink
     }
 
     /// Download share link file
