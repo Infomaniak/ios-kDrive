@@ -163,7 +163,8 @@ protocol FileCellDelegate: AnyObject {
             // Fetch public share thumbnail
             thumbnailDownloadTask = file.getPublicShareThumbnail(publicShareId: publicShareProxy.shareLinkUid,
                                                                  publicDriveId: publicShareProxy.driveId,
-                                                                 publicFileId: file.id) { [
+                                                                 publicFileId: file.id,
+                                                                 token: publicShareProxy.token) { [
                 requestFileId = file.id,
                 weak self
             ] image, _ in

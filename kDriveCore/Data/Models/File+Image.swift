@@ -26,6 +26,7 @@ public extension File {
     func getPublicShareThumbnail(publicShareId: String,
                                  publicDriveId: Int,
                                  publicFileId: Int,
+                                 token: String? = nil,
                                  completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
         guard supportedBy.contains(.thumbnail) else {
             completion(icon, false)
@@ -34,7 +35,8 @@ public extension File {
 
         let thumbnailURL = Endpoint.shareLinkFileThumbnail(driveId: publicDriveId,
                                                            linkUuid: publicShareId,
-                                                           fileId: publicFileId).url
+                                                           fileId: publicFileId,
+                                                           token: token).url
 
         return KingfisherManager.shared.retrieveImage(with: thumbnailURL) { result in
             if let image = try? result.get().image {
@@ -74,10 +76,12 @@ public extension File {
     func getPublicSharePreview(publicShareId: String,
                                publicDriveId: Int,
                                publicFileId: Int,
+                               token: String? = nil,
                                completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
         let previewURL = Endpoint.shareLinkFilePreview(driveId: publicDriveId,
                                                        linkUuid: publicShareId,
-                                                       fileId: publicFileId).url
+                                                       fileId: publicFileId,
+                                                       token: token).url
 
         return KingfisherManager.shared.retrieveImage(with: previewURL) { result in
             if let image = try? result.get().image {
