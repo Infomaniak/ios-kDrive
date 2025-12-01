@@ -104,13 +104,15 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
         self.file = file
         file.getPublicShareThumbnail(publicShareId: publicShareProxy.shareLinkUid,
                                      publicDriveId: publicShareProxy.driveId,
-                                     publicFileId: file.id) { thumbnail, _ in
+                                     publicFileId: file.id,
+                                     token: publicShareProxy.token) { thumbnail, _ in
             self.previewImageView.image = thumbnail
         }
 
         previewDownloadTask = file.getPublicSharePreview(publicShareId: publicShareProxy.shareLinkUid,
                                                          publicDriveId: publicShareProxy.driveId,
-                                                         publicFileId: file.id) { [weak previewImageView] preview in
+                                                         publicFileId: file.id,
+                                                         token: publicShareProxy.token) { [weak previewImageView] preview in
             guard let previewImageView else {
                 return
             }
