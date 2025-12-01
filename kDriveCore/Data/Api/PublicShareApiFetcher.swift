@@ -63,7 +63,7 @@ public extension PublicShareApiFetcher {
         do {
             let tokenResponse: ValidServerResponse<ShareLinkPasswordPayload> = try await perform(request: request)
             return tokenResponse.validApiResponse.data.token
-        } catch let InfomaniakError.apiError(apiError) {
+        } catch InfomaniakError.apiError(let apiError) {
             throw apiError
         }
     }
@@ -75,7 +75,7 @@ public extension PublicShareApiFetcher {
         do {
             let metadata: PublicShareMetadata = try await perform(request: request)
             return metadata
-        } catch let InfomaniakError.apiError(apiError) {
+        } catch InfomaniakError.apiError(let apiError) {
             throw apiError
         }
     }
