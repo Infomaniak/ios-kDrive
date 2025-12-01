@@ -146,7 +146,8 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
             descriptionLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             descriptionLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
 
-            passwordTextField.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: UIConstants.Padding.standard),
+            passwordTextField.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor,
+                                                   constant: UIConstants.Padding.standard),
             passwordTextField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             passwordTextField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             passwordTextField.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
