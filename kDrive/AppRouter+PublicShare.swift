@@ -38,6 +38,7 @@ public extension AppRouter {
                 metadata,
                 driveId: link.driveId,
                 shareLinkUid: link.shareLinkUid,
+                token: token,
                 apiFetcher: apiFetcher
             )
         } catch {
@@ -72,6 +73,7 @@ public extension AppRouter {
     private func processPublicShareMetadata(_ metadata: PublicShareMetadata,
                                             driveId: Int,
                                             shareLinkUid: String,
+                                            token: String?,
                                             apiFetcher: PublicShareApiFetcher) async -> Bool {
         @InjectService var accountManager: AccountManageable
         @InjectService var matomo: MatomoUtils
@@ -81,6 +83,7 @@ public extension AppRouter {
         guard let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
             for: shareLinkUid,
             driveId: driveId,
+            token: token,
             metadata: metadata
         ) else {
             return false
