@@ -208,11 +208,13 @@ public struct PublicShareProxy: Equatable {
     public let driveId: Int
     public let fileId: Int
     public let shareLinkUid: String
+    public var token: String?
 
-    public init(driveId: Int, fileId: Int, shareLinkUid: String) {
+    public init(driveId: Int, fileId: Int, shareLinkUid: String, token: String? = nil) {
         self.driveId = driveId
         self.fileId = fileId
         self.shareLinkUid = shareLinkUid
+        self.token = token
     }
 
     public var proxyDrive: ProxyDrive {
