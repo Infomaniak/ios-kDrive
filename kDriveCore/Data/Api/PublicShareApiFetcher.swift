@@ -33,6 +33,12 @@ public class PublicShareApiFetcher: ApiFetcher {
     /// All status including 401 are handled by our code. A locked public share will 401, therefore we need to support it.
     private static var handledHttpStatus = Set(200 ... 500)
 
+    private static let noCookiesSession: Session = {
+        let configuration = URLSessionConfiguration.af.default
+        configuration.httpCookieStorage = nil
+        return Session(configuration: configuration)
+    }()
+
     override public func perform<T: Decodable>(request: DataRequest,
                                                overrideDecoder: JSONDecoder? = nil) async throws -> ValidServerResponse<T> {
         let decoder = overrideDecoder ?? self.decoder
@@ -55,10 +61,10 @@ private struct ShareLinkPasswordPayload: Decodable {
 public extension PublicShareApiFetcher {
     func getToken(driveId: Int, shareLinkUid: String, password: String?) async throws -> String {
         let shareLinkAuthUrl = Endpoint.shareLinkAuthentication(driveId: driveId, shareLinkUid: shareLinkUid).url
-        let request = Session.default.request(shareLinkAuthUrl,
-                                              method: .post,
-                                              parameters: ["password": password ?? ""],
-                                              encoder: JSONParameterEncoder.default)
+        let request = PublicShareApiFetcher.noCookiesSession.request(shareLinkAuthUrl,
+                                                                     method: .post,
+                                                                     parameters: ["password": password ?? ""],
+                                                                     encoder: JSONParameterEncoder.default)
 
         do {
             let tokenResponse: ValidServerResponse<ShareLinkPasswordPayload> = try await perform(request: request)
