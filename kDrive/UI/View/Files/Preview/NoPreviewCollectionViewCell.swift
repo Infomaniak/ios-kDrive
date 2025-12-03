@@ -52,6 +52,16 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
         previewDelegate?.setFullscreen(nil)
     }
 
+    func configureWith(file: File, errorReason: String) {
+        titleLabel.text = file.name
+        iconImageView.image = file.icon
+        iconImageView.tintColor = file.tintColor
+        subtitleLabel.text = errorReason
+        offlineView.isHidden = true
+        openButton.isHidden = true
+        progressView.isHidden = true
+    }
+
     func configureWith(file: File, isOffline: Bool = false) {
         titleLabel.text = file.name
 
