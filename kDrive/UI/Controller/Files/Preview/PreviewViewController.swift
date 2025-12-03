@@ -819,7 +819,8 @@ extension PreviewViewController: UICollectionViewDataSource {
                 return cell
             }
         } else if let previewError = previewErrors[file.id], let avError = previewError.underlyingError as? AVError {
-            let errorMessage = avError.userInfo[NSLocalizedFailureReasonErrorKey] as? String ?? KDriveResourcesStrings.Localizable.errorGeneric
+            let errorMessage = avError.userInfo[NSLocalizedFailureReasonErrorKey] as? String
+                ?? KDriveResourcesStrings.Localizable.errorGeneric
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file, errorReason: errorMessage)
             cell.previewDelegate = self
