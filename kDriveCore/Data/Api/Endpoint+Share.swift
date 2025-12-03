@@ -59,8 +59,12 @@ public extension Endpoint {
     }
 
     /// Share link file
-    static func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
+    static func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
+        let shareLink = shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
+        if let token {
+            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+        }
+        return shareLink
     }
 
     static func shareLinkFileWithThumbnail(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
@@ -75,13 +79,18 @@ public extension Endpoint {
     }
 
     /// Share link file children
-    static func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType) -> Endpoint {
+    static func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType, token: String? = nil) -> Endpoint {
         let orderByQuery = URLQueryItem(name: "order_by", value: sortType.value.apiValue)
         let orderQuery = URLQueryItem(name: "order", value: sortType.value.order)
         let withQuery = URLQueryItem(name: "with", value: "capabilities,conversion_capabilities,supported_by")
 
         let shareLinkQueryItems = [orderByQuery, orderQuery, withQuery]
         let fileChildrenEndpoint = Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)/files")
+        if let token {
+            let tokenQuery = URLQueryItem(name: "sharelink_password", value: token)
+            let allQueryItems = shareLinkQueryItems + [tokenQuery]
+            return fileChildrenEndpoint.appending(path: "", queryItems: allQueryItems)
+        }
         return fileChildrenEndpoint.appending(path: "", queryItems: shareLinkQueryItems)
     }
 
