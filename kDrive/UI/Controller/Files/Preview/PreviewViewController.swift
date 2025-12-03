@@ -814,6 +814,12 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.previewDelegate = self
                 return cell
             }
+        } else if let previewError = previewErrors[file.id], let avError = previewError.downloadError as? AVError {
+            let errorMessage = avError.userInfo[NSLocalizedFailureReasonErrorKey] as? String ?? KDriveResourcesStrings.Localizable.errorGeneric
+            let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
+            cell.configureWith(file: file, errorReason: errorMessage)
+            cell.previewDelegate = self
+            return cell
         } else if file.supportedBy.contains(.thumbnail) && !ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) {
             let cell = collectionView.dequeueReusableCell(type: DownloadingPreviewCollectionViewCell.self, for: indexPath)
             if let downloadOperation = currentDownloadOperation,
