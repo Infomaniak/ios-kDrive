@@ -86,8 +86,8 @@ public extension PublicShareApiFetcher {
         }
     }
 
-    func getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) async throws -> File {
-        let shareLinkFileUrl = Endpoint.shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).url
+    func getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int, token: String?) async throws -> File {
+        let shareLinkFileUrl = Endpoint.shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId, token: token).url
         let requestParameters: [String: String] = [
             APIUploadParameter.with.rawValue: FileWith.capabilities.rawValue
         ]
@@ -112,7 +112,8 @@ public extension PublicShareApiFetcher {
             driveId: publicShareProxy.driveId,
             linkUuid: publicShareProxy.shareLinkUid,
             fileId: rootFolderId,
-            sortType: sortType
+            sortType: sortType,
+            token: publicShareProxy.token
         )
         .cursored(cursor)
         .sorted(by: [sortType])

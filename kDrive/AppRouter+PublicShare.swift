@@ -97,6 +97,7 @@ public extension AppRouter {
                         linkUuid: shareLinkUid,
                         folderId: folderId,
                         fileId: fileId ?? metadata.fileId,
+                        token: token,
                         driveFileManager: publicShareDriveFileManager,
                         apiFetcher: apiFetcher)
 
@@ -107,6 +108,7 @@ public extension AppRouter {
                                  linkUuid: String,
                                  folderId: Int?,
                                  fileId: Int,
+                                 token: String?,
                                  driveFileManager: DriveFileManager,
                                  apiFetcher: PublicShareApiFetcher) {
         Task {
@@ -115,15 +117,17 @@ public extension AppRouter {
                 if let folderId {
                     publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
                                                                         linkUuid: linkUuid,
-                                                                        fileId: folderId)
+                                                                        fileId: folderId,
+																		token: token)
                 } else {
                     publicShare = try await apiFetcher.getShareLinkFileWithThumbnail(driveId: driveId,
                                                                                      linkUuid: linkUuid,
-                                                                                     fileId: fileId)
+                                                                                     fileId: fileId,
+																					 token: token)
                 }
 
                 @InjectService var appNavigable: AppNavigable
-                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
+                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid, token: token)
 
                 if publicShare.isDirectory {
                     // Root folder must be in database for the FileListViewModel to work
