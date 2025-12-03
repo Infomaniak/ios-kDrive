@@ -530,11 +530,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         if avError.code == .fileFormatNotRecognized {
-            previewErrors[file.id] = PreviewError(fileId: file.id, downloadError: nil)
+            previewErrors[file.id] = PreviewError(fileId: file.id, underlyingError: nil)
             guard file.isLocalVersionOlderThanRemote else { return }
             downloadFile(at: IndexPath(item: previewIndex, section: 0))
         } else {
-            let previewError = PreviewError(fileId: file.id, downloadError: avError)
+            let previewError = PreviewError(fileId: file.id, underlyingError: avError)
             previewErrors[file.id] = previewError
         }
     }
@@ -547,7 +547,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        previewErrors[file.id] = PreviewError(fileId: file.id, downloadError: nil)
+        previewErrors[file.id] = PreviewError(fileId: file.id, underlyingError: nil)
     }
 
     func handleOfficePreviewError(_ error: Error, previewIndex: Int) {
@@ -564,7 +564,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             if let url {
                 previewError.pdfUrl = url
             } else {
-                previewError.downloadError = error
+                previewError.underlyingError = error
             }
             Task { @MainActor [weak self] in
                 self?.collectionView.reloadItems(at: [IndexPath(item: previewIndex, section: 0)])
@@ -673,7 +673,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
             if let error {
                 if error != .taskCancelled {
-                    previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, downloadError: error)
+                    previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, underlyingError: error)
                     collectionView.reloadItems(at: [indexPath])
                 }
             } else {
@@ -812,13 +812,13 @@ extension PreviewViewController: UICollectionViewDataSource {
                 cell.configureWith(file: file)
                 if let progress = officePreviewError.pdfGenerationProgress {
                     cell.setDownloadProgress(progress)
-                } else if officePreviewError.downloadError != nil {
+                } else if officePreviewError.underlyingError != nil {
                     cell.errorDownloading()
                 }
                 cell.previewDelegate = self
                 return cell
             }
-        } else if let previewError = previewErrors[file.id], let avError = previewError.downloadError as? AVError {
+        } else if let previewError = previewErrors[file.id], let avError = previewError.underlyingError as? AVError {
             let errorMessage = avError.userInfo[NSLocalizedFailureReasonErrorKey] as? String ?? KDriveResourcesStrings.Localizable.errorGeneric
             let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)
             cell.configureWith(file: file, errorReason: errorMessage)
