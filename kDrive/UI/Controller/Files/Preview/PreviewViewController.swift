@@ -525,14 +525,25 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     func handleAudioPreviewError(_ error: Error, previewIndex: Int) {
         let file = previewFiles[previewIndex]
 
-        guard let avError = error as? AVError,
-              avError.code == .fileFormatNotRecognized else {
+        guard let avError = error as? AVError else {
             return
         }
 
-        previewErrors[file.id] = PreviewError(fileId: file.id, downloadError: nil)
-        guard file.isLocalVersionOlderThanRemote else { return }
-        downloadFile(at: IndexPath(item: previewIndex, section: 0))
+        if avError.code == .failedToLoadMediaData {
+            let errorMessage = avError.userInfo[NSLocalizedFailureReasonErrorKey] ?? KDriveResourcesStrings.Localizable.errorGeneric
+            let previewError = PreviewError(fileId: file.id, downloadError: avError)
+            previewErrors[file.id] = previewError
+            let presentableError = NSError(
+                domain: NSCocoaErrorDomain,
+                code: avError.code.rawValue,
+                userInfo: [NSLocalizedDescriptionKey: errorMessage]
+            )
+            UIConstants.showSnackBarIfNeeded(error: presentableError)
+        } else if avError.code == .fileFormatNotRecognized {
+            previewErrors[file.id] = PreviewError(fileId: file.id, downloadError: nil)
+            guard file.isLocalVersionOlderThanRemote else { return }
+            downloadFile(at: IndexPath(item: previewIndex, section: 0))
+        }
     }
 
     func handleVideoPreviewError(_ error: Error, previewIndex: Int) {
