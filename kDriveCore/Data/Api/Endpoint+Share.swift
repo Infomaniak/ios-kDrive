@@ -79,7 +79,8 @@ public extension Endpoint {
     }
 
     /// Share link file children
-    static func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType, token: String? = nil) -> Endpoint {
+    static func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int,
+                                      sortType: SortType, token: String? = nil) -> Endpoint {
         let orderByQuery = URLQueryItem(name: "order_by", value: sortType.value.apiValue)
         let orderQuery = URLQueryItem(name: "order", value: sortType.value.order)
         let withQuery = URLQueryItem(name: "with", value: "capabilities,conversion_capabilities,supported_by")
