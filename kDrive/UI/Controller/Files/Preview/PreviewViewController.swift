@@ -529,13 +529,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        if avError.code == .failedToLoadMediaData {
-            let previewError = PreviewError(fileId: file.id, downloadError: avError)
-            previewErrors[file.id] = previewError
-        } else if avError.code == .fileFormatNotRecognized {
+        if avError.code == .fileFormatNotRecognized {
             previewErrors[file.id] = PreviewError(fileId: file.id, downloadError: nil)
             guard file.isLocalVersionOlderThanRemote else { return }
             downloadFile(at: IndexPath(item: previewIndex, section: 0))
+        } else {
+            let previewError = PreviewError(fileId: file.id, downloadError: avError)
+            previewErrors[file.id] = previewError
         }
     }
 
