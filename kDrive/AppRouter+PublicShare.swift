@@ -92,6 +92,7 @@ public extension AppRouter {
         openPublicShare(driveId: driveId,
                         linkUuid: shareLinkUid,
                         fileId: metadata.fileId,
+                        token: token,
                         driveFileManager: publicShareDriveFileManager,
                         apiFetcher: apiFetcher)
 
@@ -101,16 +102,18 @@ public extension AppRouter {
     private func openPublicShare(driveId: Int,
                                  linkUuid: String,
                                  fileId: Int,
+                                 token: String?,
                                  driveFileManager: DriveFileManager,
                                  apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
                 let publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
                                                                         linkUuid: linkUuid,
-                                                                        fileId: fileId)
+                                                                        fileId: fileId,
+                                                                        token: token)
 
                 @InjectService var appNavigable: AppNavigable
-                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
+                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid, token: token)
 
                 if publicShare.isDirectory {
                     // Root folder must be in database for the FileListViewModel to work
