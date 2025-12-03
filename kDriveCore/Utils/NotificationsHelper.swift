@@ -47,6 +47,8 @@ public protocol NotificationsHelpable {
     func sendFailedUpload(failedUpload: Int, totalUpload: Int)
 
     func sendDeleteUploadedPhotosNotification(photosToDelete: Int)
+
+    func sendWrongPasswordNotification()
 }
 
 public struct NotificationsHelper: NotificationsHelpable {
@@ -239,6 +241,15 @@ public struct NotificationsHelper: NotificationsHelpable {
         content.categoryIdentifier = CategoryIdentifier.general
         content.sound = .default
         sendImmediately(notification: content, id: NotificationIdentifier.deleteUploadedPhotos)
+    }
+
+    public func sendWrongPasswordNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = KDriveResourcesStrings.Localizable.errorGeneric
+        content.body = KDriveResourcesStrings.Localizable.errorWrongPassword
+        content.categoryIdentifier = CategoryIdentifier.general
+        content.sound = .default
+        sendImmediately(notification: content, id: UUID().uuidString)
     }
 
     // MARK: - Private
