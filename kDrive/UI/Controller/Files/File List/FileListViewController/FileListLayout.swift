@@ -72,9 +72,9 @@ struct DefaultFileListLayout: FileListLayout {
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsets = .init(
             top: 0,
-            leading: UIConstants.Padding.mediumSmall,
+            leading: environment.container.contentInsets.leading + UIConstants.Padding.mediumSmall,
             bottom: 0,
-            trailing: UIConstants.Padding.mediumSmall
+            trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
 
         return section
@@ -94,9 +94,9 @@ struct DefaultFileListLayout: FileListLayout {
 
         section.contentInsets = .init(
             top: 0,
-            leading: UIConstants.Padding.mediumSmall,
+            leading: environment.container.contentInsets.leading + UIConstants.Padding.mediumSmall,
             bottom: 0,
-            trailing: UIConstants.Padding.mediumSmall
+            trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
 
         return section
