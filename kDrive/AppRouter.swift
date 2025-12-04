@@ -873,12 +873,14 @@ public struct AppRouter: AppNavigable {
 
     @MainActor public func presentPublicShare(
         frozenRootFolder: File,
+        previewFileId: Int?,
         publicShareProxy: PublicShareProxy,
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher
     ) {
         presentAnyPublicShare(frozenRootFolder: frozenRootFolder,
                               singleFrozenFile: nil,
+                              previewFileId: previewFileId,
                               publicShareProxy: publicShareProxy,
                               driveFileManager: driveFileManager,
                               apiFetcher: apiFetcher)
@@ -893,6 +895,7 @@ public struct AppRouter: AppNavigable {
     ) {
         presentAnyPublicShare(frozenRootFolder: virtualFrozenRootFolder,
                               singleFrozenFile: singleFrozenFile,
+                              previewFileId: singleFrozenFile.id,
                               publicShareProxy: publicShareProxy,
                               driveFileManager: driveFileManager,
                               apiFetcher: apiFetcher)
@@ -901,6 +904,7 @@ public struct AppRouter: AppNavigable {
     @MainActor private func presentAnyPublicShare(
         frozenRootFolder: File,
         singleFrozenFile: File?,
+        previewFileId: Int?,
         publicShareProxy: PublicShareProxy,
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher
@@ -920,7 +924,7 @@ public struct AppRouter: AppNavigable {
                                                             publicShareProxy: publicShareProxy,
                                                             driveFileManager: driveFileManager,
                                                             apiFetcher: apiFetcher)
-            presentPublicShare(viewModel: publicShareViewModel, rootViewController: rootViewController)
+            presentPublicShare(viewModel: publicShareViewModel, rootViewController: rootViewController, previewFileId: previewFileId)
         }
     }
 
@@ -961,7 +965,8 @@ public struct AppRouter: AppNavigable {
         return viewModel
     }
 
-    @MainActor private func presentPublicShare(viewModel: PublicShareViewModel, rootViewController: UIViewController) {
+    @MainActor private func presentPublicShare(viewModel: PublicShareViewModel, rootViewController: UIViewController,
+                                               previewFileId: Int?) {
         let viewController = FileListViewController(viewModel: viewModel)
         viewModel.onDismissViewController = { [weak viewController] in
             viewController?.dismiss(animated: false)
@@ -970,7 +975,18 @@ public struct AppRouter: AppNavigable {
         publicShareNavigationController.modalPresentationStyle = .fullScreen
         publicShareNavigationController.modalTransitionStyle = .coverVertical
 
-        rootViewController.present(publicShareNavigationController, animated: true, completion: nil)
+        rootViewController.present(publicShareNavigationController, animated: true) {
+            guard let previewFileId,
+                  let fileToPresent = viewModel.files.first(where: { $0.id == previewFileId }) else {
+                return
+            }
+
+            let presenter = FilePresenter(viewController: viewController)
+            presenter.present(for: fileToPresent,
+                              files: [fileToPresent],
+                              driveFileManager: viewController.driveFileManager,
+                              normalFolderHierarchy: false)
+        }
     }
 
     @MainActor public func present(file: File, driveFileManager: DriveFileManager) {
