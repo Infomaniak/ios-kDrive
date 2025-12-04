@@ -20,7 +20,7 @@ import Foundation
 import SwiftRegex
 
 public struct PublicShareLink: Sendable, Equatable, LinkDriveProvider {
-    public static let parsingRegex = Regex(pattern: #"^.*/app/share/([0-9]+)/([a-z0-9-]+)(?:/files/([0-9]+))?(?:/preview\/[a-z]+/([0-9]+))?$"#)
+    public static let parsingRegex = Regex(pattern: #"^.*/app/share/([0-9]+)/([a-z0-9-]+)(?:/files/(?:([0-9]+)(?=/preview)|[0-9]+)(?:/preview/[a-z]+/([0-9]+))?)?$"#)
 
     public let publicShareURL: URL
     public let shareLinkUid: String
