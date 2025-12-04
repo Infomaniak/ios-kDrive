@@ -20,11 +20,11 @@ import Foundation
 
 class PreviewError {
     let fileId: Int
-    var downloadError: Error?
+    var underlyingError: Error?
 
-    init(fileId: Int, downloadError: Error?) {
+    init(fileId: Int, underlyingError: Error?) {
         self.fileId = fileId
-        self.downloadError = downloadError
+        self.underlyingError = underlyingError
     }
 }
 
@@ -40,7 +40,7 @@ class OfficePreviewError: PreviewError {
         pdfUrl: URL? = nil,
         downloadError: Error? = nil
     ) {
-        super.init(fileId: fileId, downloadError: downloadError)
+        super.init(fileId: fileId, underlyingError: downloadError)
         self.pdfGenerationProgress = pdfGenerationProgress
         self.downloadTask = downloadTask
         self.pdfUrl = pdfUrl
