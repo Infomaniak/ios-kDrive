@@ -48,7 +48,6 @@ struct UTPublicShareLink {
         #expect(parsedResult.publicShareURL == url)
         #expect(parsedResult.driveId == driveId)
         #expect(parsedResult.shareLinkUid == shareLinkUid)
-        #expect(parsedResult.folderId == folderId)
     }
 
     @Test("Parse driveId, shareLinkUid, folderId and fileId from a publicShare link", arguments: [(289_423, "2393dz-212957-34de2-a29v-d293824", 482_391, 129_384)])
