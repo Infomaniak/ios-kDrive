@@ -20,35 +20,16 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class SwipeCellAction: Equatable {
-    var identifier: String
-    var title: String
-    var backgroundColor: UIColor
-    var tintColor: UIColor
-    var icon: UIImage
-    var style: SwipeActionStyle
+enum SwipeCellActionIdentifier: String {
+    case share
+    case delete
+}
 
-    enum SwipeActionStyle {
-        case normal
-        case stayOpen
-        case destructive
-    }
-
-    init(
-        identifier: String,
-        title: String,
-        backgroundColor: UIColor,
-        tintColor: UIColor = .white,
-        icon: UIImage,
-        style: SwipeActionStyle = .normal
-    ) {
-        self.identifier = identifier
-        self.title = title
-        self.backgroundColor = backgroundColor
-        self.tintColor = tintColor
-        self.icon = icon
-        self.style = style
-    }
+struct SwipeCellAction: Equatable {
+    let identifier: SwipeCellActionIdentifier
+    let title: String
+    let backgroundColor: UIColor
+    let icon: UIImage
 
     static func == (lhs: SwipeCellAction, rhs: SwipeCellAction) -> Bool {
         return lhs.identifier == rhs.identifier
@@ -57,13 +38,13 @@ class SwipeCellAction: Equatable {
 
 extension SwipeCellAction {
     static let share = SwipeCellAction(
-        identifier: "share",
+        identifier: .share,
         title: KDriveResourcesStrings.Localizable.buttonFileRights,
         backgroundColor: KDriveResourcesAsset.infomaniakColor.color,
         icon: KDriveResourcesAsset.share.image
     )
     static let delete = SwipeCellAction(
-        identifier: "delete",
+        identifier: .delete,
         title: KDriveResourcesStrings.Localizable.buttonDelete,
         backgroundColor: KDriveResourcesAsset.binColor.color,
         icon: KDriveResourcesAsset.delete.image
