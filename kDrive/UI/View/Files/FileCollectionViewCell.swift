@@ -314,20 +314,6 @@ class FileCollectionViewCell: UICollectionViewCell {
     func initStyle(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
         separatorView.isHidden = !inFolderSelectMode
 
-        if isLast && isFirst {
-            contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10
-            )
-        } else if isFirst {
-            contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: 10)
-        } else if isLast {
-            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMinXMaxYCorner], radius: 10)
-        } else {
-            contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-                radius: 0
-            )
-        }
         addConstraint(isFirst: isFirst, isLast: isLast, inFolderSelectMode: inFolderSelectMode)
         contentInsetView.clipsToBounds = true
     }

@@ -701,7 +701,7 @@ extension FileListViewController {
         let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
         let file = displayedFiles[indexPath.row]
 
-        cell.initStyle(isFirst: file.isFirstInList, isLast: file.isLastInList, inFolderSelectMode: false)
+        cell.initStyle(isFirst: false, isLast: false, inFolderSelectMode: false)
         cell.configureWith(
             driveFileManager: viewModel.driveFileManager,
             file: file,
