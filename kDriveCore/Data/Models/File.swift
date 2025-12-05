@@ -504,10 +504,6 @@ public final class File: Object, Codable {
     @Persisted public var fullyDownloaded: Bool
     @Persisted public var isAvailableOffline: Bool
 
-    // Used for corner diffing
-    public var isFirstInList = false
-    public var isLastInList = false
-
     private enum CodingKeys: String, CodingKey {
         case id
         case parentId
@@ -930,8 +926,6 @@ extension File: Differentiable {
                 && capabilities.isContentEqual(to: source.capabilities)
                 && Array(categories).isContentEqual(to: Array(source.categories))
                 && color == source.color
-                && isFirstInList == source.isFirstInList
-                && isLastInList == source.isLastInList
         }
     }
 }

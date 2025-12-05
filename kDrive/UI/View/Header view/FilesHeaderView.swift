@@ -31,13 +31,15 @@ protocol FilesHeaderViewDelegate: AnyObject {
     func removeFilterButtonPressed(_ filter: Filterable)
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton)
     func upsaleButtonPressed()
+    func headerViewHeightDidChange(_ headerView: FilesHeaderView)
 }
 
 extension FilesHeaderViewDelegate {
     func uploadCardSelected() {}
+    func headerViewHeightDidChange(_ headerView: FilesHeaderView) {}
 }
 
-class FilesHeaderView: UICollectionReusableView {
+class FilesHeaderView: UIView {
     @IBOutlet var containerStackView: UIStackView!
     @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
     @IBOutlet var sortView: UIView!
@@ -88,6 +90,11 @@ class FilesHeaderView: UICollectionReusableView {
         selectView = SelectView.instantiate()
         selectView.isHidden = true
         containerStackView.addArrangedSubview(selectView)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        delegate?.headerViewHeightDidChange(self)
     }
 
     func updateInformationView(drivePackId: DrivePackId?, isTrash: Bool) {
@@ -149,5 +156,9 @@ class FilesHeaderView: UICollectionReusableView {
 
     @IBAction func gridButtonPressed(_ sender: UIButton) {
         delegate?.gridButtonPressed()
+    }
+
+    class func instantiate() -> FilesHeaderView {
+        return Bundle.main.loadNibNamed("FilesHeaderView", owner: nil, options: nil)![0] as! FilesHeaderView
     }
 }

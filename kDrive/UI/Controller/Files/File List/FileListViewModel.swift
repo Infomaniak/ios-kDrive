@@ -235,10 +235,7 @@ class FileListViewModel: SelectDelegate {
 
                 guard let newResults else { return }
                 currentDirectory = getRefreshedCurrentDirectory()
-                let resultFiles = Array(newResults.freezeIfNeeded())
-                resultFiles.first?.isFirstInList = true
-                resultFiles.last?.isLastInList = true
-                files = resultFiles
+                files = Array(newResults.freezeIfNeeded())
                 isShowingEmptyView = shouldShowEmptyView()
             }
 
@@ -433,6 +430,41 @@ class FileListViewModel: SelectDelegate {
         }
 
         return actions
+    }
+
+    func getSwipeActionConfiguration(at indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        if configuration.presentationOrigin == .activities {
+            return nil
+        }
+
+        guard let file = getFile(at: indexPath) else { return nil }
+        var actions = [UIContextualAction]()
+
+        if file.capabilities.canDelete {
+            let actionHandler: UIContextualAction.Handler = { [weak self] _, _, completion in
+                self?.didSelectSwipeAction(.delete, at: indexPath)
+                completion(true)
+            }
+
+            let action = UIContextualAction(style: .normal, title: SwipeCellAction.share.title, handler: actionHandler)
+            action.image = SwipeCellAction.delete.icon
+            action.backgroundColor = SwipeCellAction.delete.backgroundColor
+            actions.append(action)
+        }
+
+        if file.capabilities.canShare {
+            let actionHandler: UIContextualAction.Handler = { [weak self] _, _, completion in
+                self?.didSelectSwipeAction(.share, at: indexPath)
+                completion(true)
+            }
+
+            let action = UIContextualAction(style: .normal, title: SwipeCellAction.share.title, handler: actionHandler)
+            action.image = SwipeCellAction.share.icon
+            action.backgroundColor = SwipeCellAction.share.backgroundColor
+            actions.append(action)
+        }
+
+        return UISwipeActionsConfiguration(actions: actions)
     }
 
     func forceRefresh() {

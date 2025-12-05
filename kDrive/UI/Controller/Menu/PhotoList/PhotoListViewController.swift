@@ -63,14 +63,6 @@ final class PhotoListViewController: FileListViewController {
         return selectView
     }()
 
-    private var numberOfColumns: Int {
-        let screenWidth = collectionView.bounds.width
-        let maxColumns = Int(screenWidth / cellMaxWidth)
-        return max(minColumns, maxColumns)
-    }
-
-    private let minColumns = 3
-    private let cellMaxWidth = 150.0
     private let footerIdentifier = "LoadingFooterView"
     private let headerIdentifier = "ReusableHeaderView"
     private var displayedSections = PhotoListViewModel.emptySections
@@ -100,10 +92,10 @@ final class PhotoListViewController: FileListViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        headerView?.isHidden = true
         navigationItem.largeTitleDisplayMode = .never
         view.addSubview(headerImageView)
         view.addSubview(photoHeaderView)
-        selectView = photoHeaderView
 
         NSLayoutConstraint.activate([
             photoHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -116,8 +108,6 @@ final class PhotoListViewController: FileListViewController {
             headerImageView.bottomAnchor.constraint(equalTo: photoHeaderView.bottomAnchor, constant: 16)
         ])
 
-        (collectionViewLayout as? UICollectionViewFlowLayout)?.minimumInteritemSpacing = 4
-        (collectionViewLayout as? UICollectionViewFlowLayout)?.minimumLineSpacing = 4
         collectionView.scrollIndicatorInsets = UIEdgeInsets(top: photoHeaderView.frame.height, left: 0, bottom: 0, right: 0)
         collectionView.contentInset.top = photoHeaderView.frame.height
         collectionView.register(cellView: HomeLastPicCollectionViewCell.self)
@@ -412,7 +402,6 @@ final class PhotoListViewController: FileListViewController {
         guard let viewModel = photoListViewModel else { return }
         photoHeaderView.isHidden = false
         headerImageView.isHidden = false
-        (collectionView.collectionViewLayout as? UICollectionViewFlowLayout)?.sectionHeadersPinToVisibleBounds = false
         navigationController?.navigationBar.tintColor = .white
         navigationController?.setNeedsStatusBarAppearanceUpdate()
 
@@ -486,18 +475,6 @@ final class PhotoListViewController: FileListViewController {
 
     override func collectionView(
         _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        referenceSizeForHeaderInSection section: Int
-    ) -> CGSize {
-        if section == 0 {
-            return .zero
-        } else {
-            return CGSize(width: collectionView.frame.width, height: 50)
-        }
-    }
-
-    override func collectionView(
-        _ collectionView: UICollectionView,
         viewForSupplementaryElementOfKind kind: String,
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
@@ -534,45 +511,6 @@ final class PhotoListViewController: FileListViewController {
             }
             return reusableHeaderView
         }
-    }
-
-    // MARK: - UICollectionViewDelegateFlowLayout
-
-    override func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        sizeForItemAt indexPath: IndexPath
-    ) -> CGSize {
-        guard let collectionViewLayout = collectionViewLayout as? UICollectionViewFlowLayout else {
-            return .zero
-        }
-        let width = collectionView.frame.width - collectionViewLayout.minimumInteritemSpacing * CGFloat(numberOfColumns - 1)
-        let cellWidth = floor(width / CGFloat(numberOfColumns))
-        return CGSize(width: cellWidth, height: cellWidth)
-    }
-
-    override func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        minimumLineSpacingForSectionAt section: Int
-    ) -> CGFloat {
-        return 4
-    }
-
-    override func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        minimumInteritemSpacingForSectionAt section: Int
-    ) -> CGFloat {
-        return 4
-    }
-
-    override func collectionView(
-        _ collectionView: UICollectionView,
-        layout collectionViewLayout: UICollectionViewLayout,
-        insetForSectionAt section: Int
-    ) -> UIEdgeInsets {
-        return .zero
     }
 
     // MARK: - State restoration

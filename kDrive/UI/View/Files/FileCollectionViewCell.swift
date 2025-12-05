@@ -197,11 +197,8 @@ protocol FileCellDelegate: AnyObject {
     }
 }
 
-class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
+class FileCollectionViewCell: UICollectionViewCell {
     static let identifier = String(describing: FileCollectionViewCell.self)
-
-    var swipeStartPoint: CGPoint = .zero
-    var initialTrailingConstraintValue: CGFloat = 0
 
     @IBOutlet var disabledView: UIView!
     @IBOutlet var contentInsetView: UIView!
@@ -216,8 +213,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     @IBOutlet var centerTitleConstraint: NSLayoutConstraint!
     @IBOutlet var innerViewTrailingConstraint: NSLayoutConstraint!
     @IBOutlet var innerViewLeadingConstraint: NSLayoutConstraint!
-    @IBOutlet var swipeActionsView: UIStackView?
-    @IBOutlet var stackViewTrailingConstraint: NSLayoutConstraint?
     @IBOutlet var detailsStackView: UIStackView?
     @IBOutlet var importProgressView: RPCircularProgress?
     @IBOutlet var downloadProgressView: RPCircularProgress?
@@ -302,7 +297,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
         collectionView?.isHidden = true
         collectionView?.reloadData()
         centerTitleConstraint?.isActive = false
-        resetSwipeActions()
         detailLabel?.text = ""
         logoImage.image = nil
         logoImage.backgroundColor = nil
@@ -320,20 +314,6 @@ class FileCollectionViewCell: UICollectionViewCell, SwipableCell {
     func initStyle(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
         separatorView.isHidden = !inFolderSelectMode
 
-        if isLast && isFirst {
-            contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner], radius: 10
-            )
-        } else if isFirst {
-            contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: 10)
-        } else if isLast {
-            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMinXMaxYCorner], radius: 10)
-        } else {
-            contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-                radius: 0
-            )
-        }
         addConstraint(isFirst: isFirst, isLast: isLast, inFolderSelectMode: inFolderSelectMode)
         contentInsetView.clipsToBounds = true
     }
@@ -494,9 +474,5 @@ extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewData
         sizeForItemAt indexPath: IndexPath
     ) -> CGSize {
         return CGSize(width: 16, height: 16)
-    }
-
-    func setIsLastCell(_ isLast: Bool) {
-        separatorView.isHidden = isLast
     }
 }
