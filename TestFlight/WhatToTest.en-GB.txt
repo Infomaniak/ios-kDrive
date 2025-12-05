@@ -1,5 +1,2 @@
-- Fix a rare issue preventing a private share link from opening
-- Connectivity check before Office file edition
-- Error handling of parental control on Office file edition
-- App over refreshing when switching to foreground
+- Fix a UI issue regarding the header of lists of files
 - Stability improvements and bug fixes
