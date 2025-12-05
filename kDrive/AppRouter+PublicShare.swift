@@ -111,9 +111,16 @@ public extension AppRouter {
                                  apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
-                let publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
+                let publicShare: File
+                if let folderId {
+                    publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
                                                                         linkUuid: linkUuid,
-                                                                        fileId: folderId ?? fileId)
+                                                                        fileId: folderId)
+                } else {
+                    publicShare = try await apiFetcher.getShareLinkFileWithThumbnail(driveId: driveId,
+                                                                                     linkUuid: linkUuid,
+                                                                                     fileId: fileId)
+                }
 
                 @InjectService var appNavigable: AppNavigable
                 let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
