@@ -38,6 +38,8 @@ public extension AppRouter {
                 metadata,
                 driveId: link.driveId,
                 shareLinkUid: link.shareLinkUid,
+                folderId: link.folderId,
+                fileId: link.fileId,
                 apiFetcher: apiFetcher
             )
         } catch {
@@ -75,6 +77,8 @@ public extension AppRouter {
     private func processPublicShareMetadata(_ metadata: PublicShareMetadata,
                                             driveId: Int,
                                             shareLinkUid: String,
+                                            folderId: Int?,
+                                            fileId: Int?,
                                             apiFetcher: PublicShareApiFetcher) async -> Bool {
         @InjectService var accountManager: AccountManageable
         @InjectService var matomo: MatomoUtils
@@ -91,7 +95,8 @@ public extension AppRouter {
 
         openPublicShare(driveId: driveId,
                         linkUuid: shareLinkUid,
-                        fileId: metadata.fileId,
+                        folderId: folderId,
+                        fileId: fileId ?? metadata.fileId,
                         driveFileManager: publicShareDriveFileManager,
                         apiFetcher: apiFetcher)
 
@@ -100,14 +105,22 @@ public extension AppRouter {
 
     private func openPublicShare(driveId: Int,
                                  linkUuid: String,
+                                 folderId: Int?,
                                  fileId: Int,
                                  driveFileManager: DriveFileManager,
                                  apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
-                let publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
+                let publicShare: File
+                if let folderId {
+                    publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
                                                                         linkUuid: linkUuid,
-                                                                        fileId: fileId)
+                                                                        fileId: folderId)
+                } else {
+                    publicShare = try await apiFetcher.getShareLinkFileWithThumbnail(driveId: driveId,
+                                                                                     linkUuid: linkUuid,
+                                                                                     fileId: fileId)
+                }
 
                 @InjectService var appNavigable: AppNavigable
                 let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
@@ -121,6 +134,7 @@ public extension AppRouter {
                     let frozenRootFolder = publicShare.freeze()
                     await appNavigable.presentPublicShare(
                         frozenRootFolder: frozenRootFolder,
+                        previewFileId: (folderId != nil) ? fileId : nil,
                         publicShareProxy: publicShareProxy,
                         driveFileManager: driveFileManager,
                         apiFetcher: apiFetcher

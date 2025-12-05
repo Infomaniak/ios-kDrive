@@ -198,6 +198,7 @@ public final class MCKRouter: AppNavigable {
 
     @MainActor public func presentPublicShare(
         frozenRootFolder: File,
+        previewFileId: Int?,
         publicShareProxy: PublicShareProxy,
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher
