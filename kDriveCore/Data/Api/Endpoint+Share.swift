@@ -44,14 +44,27 @@ public extension Endpoint {
         return .fileInfoV2(file).appending(path: "/link")
     }
 
+    /// Share link authentication
+    static func shareLinkAuthentication(driveId: Int, shareLinkUid: String) -> Endpoint {
+        shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/auth")
+    }
+
     /// Share link info
-    static func shareLinkInfo(driveId: Int, shareLinkUid: String) -> Endpoint {
-        shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/init")
+    static func shareLinkInfo(driveId: Int, shareLinkUid: String, token: String? = nil) -> Endpoint {
+        let shareLink = shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/init")
+        if let token {
+            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+        }
+        return shareLink
     }
 
     /// Share link file
-    static func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
+    static func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
+        let shareLink = shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
+        if let token {
+            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+        }
+        return shareLink
     }
 
     static func shareLinkFileV2(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
@@ -59,24 +72,38 @@ public extension Endpoint {
     }
 
     /// Share link file children
-    static func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType) -> Endpoint {
+    static func shareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int,
+                                      sortType: SortType, token: String? = nil) -> Endpoint {
         let orderByQuery = URLQueryItem(name: "order_by", value: sortType.value.apiValue)
         let orderQuery = URLQueryItem(name: "order", value: sortType.value.order)
         let withQuery = URLQueryItem(name: "with", value: "capabilities,conversion_capabilities,supported_by")
 
         let shareLinkQueryItems = [orderByQuery, orderQuery, withQuery]
         let fileChildrenEndpoint = Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)/files")
+        if let token {
+            let tokenQuery = URLQueryItem(name: "sharelink_password", value: token)
+            let allQueryItems = shareLinkQueryItems + [tokenQuery]
+            return fileChildrenEndpoint.appending(path: "", queryItems: allQueryItems)
+        }
         return fileChildrenEndpoint.appending(path: "", queryItems: shareLinkQueryItems)
     }
 
     /// Share link file thumbnail
-    static func shareLinkFileThumbnail(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
+    static func shareLinkFileThumbnail(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
+        let shareLink = shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
+        if let token {
+            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+        }
+        return shareLink
     }
 
     /// Share link file preview
-    static func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
-        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
+    static func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
+        let shareLink = shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
+        if let token {
+            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
+        }
+        return shareLink
     }
 
     /// Download share link file
