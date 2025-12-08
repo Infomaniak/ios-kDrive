@@ -924,7 +924,8 @@ public struct AppRouter: AppNavigable {
                                                             publicShareProxy: publicShareProxy,
                                                             driveFileManager: driveFileManager,
                                                             apiFetcher: apiFetcher)
-            presentPublicShare(viewModel: publicShareViewModel, rootViewController: rootViewController, previewFileId: previewFileId)
+            presentPublicShare(viewModel: publicShareViewModel, rootViewController: rootViewController,
+                               previewFileId: previewFileId)
         }
     }
 

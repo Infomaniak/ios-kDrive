@@ -22,7 +22,8 @@ import Testing
 
 @Suite("UTPublicShareLink")
 struct UTPublicShareLink {
-    @Test("Parse driveId and shareLinkUid from a publicShare link", arguments: [129_842], ["133b2ea4-e41b-4e4f-a41e-d466e41b133b"])
+    @Test("Parse driveId and shareLinkUid from a publicShare link",
+          arguments: [129_842], ["133b2ea4-e41b-4e4f-a41e-d466e41b133b"])
     func parsePublicShareLink(driveId: Int, shareLinkUid: String) async throws {
         let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)"
 
@@ -36,8 +37,10 @@ struct UTPublicShareLink {
         #expect(parsedResult.shareLinkUid == shareLinkUid)
     }
 
-    @Test("Parse driveId, shareLinkUid and fileId from a publicShare link", arguments: [(289_423, "2393dz-212957-34de2-a29v-d293824", 482_391)])
-    func parsePublicShareLinkWithFileId(driveId: Int, shareLinkUid: String, folderId: Int) async throws {
+    @Test("Parse driveId, shareLinkUid and fileId from a publicShare link",
+          arguments: [(289_423, "2393dz-212957-34de2-a29v-d293824", 482_391)])
+    func parsePublicShareLinkWithFileId(driveId: Int, shareLinkUid: String,
+                                        folderId: Int) async throws {
         let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)/files/\(folderId)"
 
         guard let url = URL(string: givenLink), let parsedResult = PublicShareLink(publicShareURL: url) else {
@@ -50,8 +53,10 @@ struct UTPublicShareLink {
         #expect(parsedResult.shareLinkUid == shareLinkUid)
     }
 
-    @Test("Parse driveId, shareLinkUid, folderId and fileId from a publicShare link", arguments: [(289_423, "2393dz-212957-34de2-a29v-d293824", 482_391, 129_384)])
-    func parsePublicShareLinkPreview(driveId: Int, shareLinkUid: String, folderId: Int, fileId: Int) async throws {
+    @Test("Parse driveId, shareLinkUid, folderId and fileId from a publicShare link",
+          arguments: [(289_423, "2393dz-212957-34de2-a29v-d293824", 482_391, 129_384)])
+    func parsePublicShareLinkPreview(driveId: Int, shareLinkUid: String, folderId: Int,
+                                     fileId: Int) async throws {
         let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)/files/\(folderId)/preview/image/\(fileId)"
 
         guard let url = URL(string: givenLink), let parsedResult = PublicShareLink(publicShareURL: url) else {
