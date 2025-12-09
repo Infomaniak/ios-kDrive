@@ -148,7 +148,7 @@ public extension DriveFileManager {
                 }
 
             default:
-                break
+                SentryDebug.capture(message: "fileAction not handled")
             }
         }
     }
