@@ -141,6 +141,11 @@ extension RegisterViewController: WKNavigationDelegate {
         } else if host == loginHost {
             decisionHandler(.cancel)
             dismiss(animated: true)
+        } else if navigationAction.navigationType == .linkActivated,
+                  navigationAction.targetFrame == nil,
+                  let url = navigationAction.request.url {
+            UIApplication.shared.open(url)
+            decisionHandler(.cancel)
         } else {
             decisionHandler(.allow)
         }
