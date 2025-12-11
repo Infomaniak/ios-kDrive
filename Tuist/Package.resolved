@@ -1,5 +1,5 @@
 {
-  "originHash" : "1b46a3fd3a67c87df6c463cc79ab5a44466085829442092accbd9ee1747aca04",
+  "originHash" : "aed3ac2f1742bfc3af13eca78cec4622919e358de3af45320bc2ffb0f1e72d65",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-dependency-injection",
       "state" : {
-        "revision" : "f6aa8ebc6fe1311deb5eb5ec09ccc695ba84a265",
-        "version" : "2.0.5"
+        "branch" : "fix/threadsafe-recursive-lock",
+        "revision" : "8b3e5b38e5e13f8e55cb5fcc3a8271da6dd64949"
       }
     },
     {
