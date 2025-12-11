@@ -113,6 +113,7 @@ public struct InExtensionRouter: AppNavigable {
 
     public func presentPublicShare(
         frozenRootFolder: File,
+        previewFileId: Int?,
         publicShareProxy: PublicShareProxy,
         driveFileManager: DriveFileManager,
         apiFetcher: PublicShareApiFetcher

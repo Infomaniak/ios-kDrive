@@ -20,11 +20,18 @@ import Foundation
 import SwiftRegex
 
 public struct PublicShareLink: Sendable, Equatable, LinkDriveProvider {
-    public static let parsingRegex = Regex(pattern: #"^.*/app/share/([0-9]+)/([a-z0-9-]+)$"#)
+    public static let parsingRegex = Regex(
+        pattern:
+        #"^.*/app/share/([0-9]+)/([a-z0-9-]+)"#
+            + #"(?:/files/(?:([0-9]+)(?=/preview)|[0-9]+)"#
+            + #"(?:/preview/[a-z]+/([0-9]+))?)?$"#
+    )
 
     public let publicShareURL: URL
     public let shareLinkUid: String
     public let driveId: Int
+    public let folderId: Int?
+    public let fileId: Int?
 
     public init?(publicShareURL: URL) {
         guard let components = URLComponents(url: publicShareURL, resolvingAgainstBaseURL: true) else {
@@ -46,5 +53,17 @@ public struct PublicShareLink: Sendable, Equatable, LinkDriveProvider {
         self.driveId = driveIdInt
         self.shareLinkUid = shareLinkUid
         self.publicShareURL = publicShareURL
+
+        if let folderIdString = firstMatch[safe: 3] {
+            folderId = Int(folderIdString)
+        } else {
+            folderId = nil
+        }
+
+        if let fileIdString = firstMatch[safe: 4] {
+            fileId = Int(fileIdString)
+        } else {
+            fileId = nil
+        }
     }
 }

@@ -54,6 +54,13 @@ public extension Endpoint {
         shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
     }
 
+    static func shareLinkFileWithThumbnail(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+        let withQuery = URLQueryItem(name: "with", value: "supported_by,conversion_capabilities")
+        let shareLinkQueryItems = [withQuery]
+        let fileChildrenEndpoint = Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
+        return fileChildrenEndpoint.appending(path: "", queryItems: shareLinkQueryItems)
+    }
+
     static func shareLinkFileV2(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
         shareUrlV2.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
     }

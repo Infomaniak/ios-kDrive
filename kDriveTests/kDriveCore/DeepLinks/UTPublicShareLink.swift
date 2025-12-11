@@ -22,9 +22,10 @@ import Testing
 
 @Suite("UTPublicShareLink")
 struct UTPublicShareLink {
-    @Test("Parse driveId and fileUid from a publicShare link", arguments: [129_842], ["133b2ea4-e41b-4e4f-a41e-d466e41b133b"])
-    func parsePublicShareLink(driveId: Int, fileUid: String) async throws {
-        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(fileUid)"
+    @Test("Parse driveId and shareLinkUid from a publicShare link",
+          arguments: [129_842], ["133b2ea4-e41b-4e4f-a41e-d466e41b133b"])
+    func parsePublicShareLink(driveId: Int, shareLinkUid: String) async throws {
+        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)"
 
         guard let url = URL(string: givenLink), let parsedResult = PublicShareLink(publicShareURL: url) else {
             Issue.record("Failed to parse the URL")
@@ -33,7 +34,41 @@ struct UTPublicShareLink {
 
         #expect(parsedResult.publicShareURL == url)
         #expect(parsedResult.driveId == driveId)
-        #expect(parsedResult.shareLinkUid == fileUid)
+        #expect(parsedResult.shareLinkUid == shareLinkUid)
+    }
+
+    @Test("Parse driveId, shareLinkUid and fileId from a publicShare link",
+          arguments: [(289_423, "2393dz-212957-34de2-a29v-d293824", 482_391)])
+    func parsePublicShareLinkWithFileId(driveId: Int, shareLinkUid: String,
+                                        folderId: Int) async throws {
+        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)/files/\(folderId)"
+
+        guard let url = URL(string: givenLink), let parsedResult = PublicShareLink(publicShareURL: url) else {
+            Issue.record("Failed to parse the URL")
+            return
+        }
+
+        #expect(parsedResult.publicShareURL == url)
+        #expect(parsedResult.driveId == driveId)
+        #expect(parsedResult.shareLinkUid == shareLinkUid)
+    }
+
+    @Test("Parse driveId, shareLinkUid, folderId and fileId from a publicShare link",
+          arguments: [(289_423, "2393dz-212957-34de2-a29v-d293824", 482_391, 129_384)])
+    func parsePublicShareLinkPreview(driveId: Int, shareLinkUid: String, folderId: Int,
+                                     fileId: Int) async throws {
+        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)/files/\(folderId)/preview/image/\(fileId)"
+
+        guard let url = URL(string: givenLink), let parsedResult = PublicShareLink(publicShareURL: url) else {
+            Issue.record("Failed to parse the URL")
+            return
+        }
+
+        #expect(parsedResult.publicShareURL == url)
+        #expect(parsedResult.driveId == driveId)
+        #expect(parsedResult.shareLinkUid == shareLinkUid)
+        #expect(parsedResult.folderId == folderId)
+        #expect(parsedResult.fileId == fileId)
     }
 
     @Test("Fail to parse a publicShareLink if the URL is invalid", arguments: zip(
@@ -41,8 +76,52 @@ struct UTPublicShareLink {
         ["1293ad-eo342-4321-a321-e321e321e321", "", "24239824", "2324ac3-a48v-43d3-a243-d234e23"]
 
     ))
-    func publicShareLinkInvalidURL(driveId: String, fileUid: String) async throws {
-        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(fileUid)"
+    func publicShareLinkInvalidURL(driveId: String, shareLinkUid: String) async throws {
+        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)"
+
+        guard let url = URL(string: givenLink) else {
+            Issue.record("Failed to create URL")
+            return
+        }
+
+        let parsedResult = PublicShareLink(publicShareURL: url)
+        #expect(parsedResult == nil)
+    }
+
+    @Test(
+        "Fail to parse a publicShareLink if the URL is invalid with fileId specified",
+        arguments: [
+            ("", "2393dz-212957-34de2-a29v-d293824", "482391"),
+            ("2894230", "", "482391"),
+            ("foo", "2393dz-212957-34de2-a29v-d293824", "482391"),
+            ("2894230", "2324ac3-a48v-43d3-a243-d234e23", "-1"),
+            ("2894230", "2324ac3-a48v-43d3-a243-d234e23", "bar"),
+            ("2894230", "2324ac3-a48v-43d3-a243-d234e23", "")
+        ]
+    )
+    func publicShareLinkInvalidUrlWithFileId(driveId: String, shareLinkUid: String, folderId: String) async throws {
+        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)/files/\(folderId)"
+
+        guard let url = URL(string: givenLink) else {
+            Issue.record("Failed to create URL")
+            return
+        }
+
+        let parsedResult = PublicShareLink(publicShareURL: url)
+        #expect(parsedResult == nil)
+    }
+
+    @Test("Fail to parse a publicShareLink if the URL is invalid with file preview specified", arguments: [
+        ("", "2393dz-212957-34de2-a29v-d293824", "482391", "129384"),
+        ("2894230", "", "482391", "129384"),
+        ("foo", "2393dz-212957-34de2-a29v-d293824", "482391", "129384"),
+        ("2894230", "2324ac3-a48v-43d3-a243-d234e23", "-1", "129384"),
+        ("2894230", "2324ac3-a48v-43d3-a243-d234e23", "482391", "-5"),
+        ("2894230", "2324ac3-a48v-43d3-a243-d234e23", "bar", "129384"),
+        ("2894230", "2324ac3-a48v-43d3-a243-d234e23", "482391", "foo")
+    ])
+    func publicShareLinkInvalidPreviewUrl(driveId: String, shareLinkUid: String, folderId: String, fileId: String) async throws {
+        let givenLink = "https://kdrive.infomaniak.com/app/share/\(driveId)/\(shareLinkUid)/files/\(folderId)/preview/video/\(fileId)"
 
         guard let url = URL(string: givenLink) else {
             Issue.record("Failed to create URL")
