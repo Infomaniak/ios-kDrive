@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import os.log
@@ -54,5 +55,10 @@ public struct EarlyDIHook {
 
         // setup DI ASAP
         FactoryService.setupDependencyInjection(other: extraDependencies)
+
+        // FIXME: Load ASAP matomo from the mainthread to prevent a deadlock
+        try? SimpleResolver.sharedResolver.resolve(type: MatomoUtils.self,
+                                                   forCustomTypeIdentifier: nil,
+                                                   resolver: SimpleResolver.sharedResolver)
     }
 }
