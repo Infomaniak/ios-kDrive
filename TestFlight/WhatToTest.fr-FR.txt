@@ -1,2 +1,5 @@
-- Correction d'un problème d'interface utilisateur concernant l'en-tête des listes de fichiers
+- Correction des liens sur l'écran d'inscription
+- Meilleure prise en charge des liens de partage publics avec aperçu
+- Correction d'un problème d'interface concernant l'en-tête des listes de fichiers
+- Correction d'un blocage rare lors du lancement de l'application depuis un lien profond
 - Améliorations de la stabilité et corrections de bugs
