@@ -1,2 +1,5 @@
+- Fix linking within the register screen
+- Better support of public share link containing a preview
 - Fix a UI issue regarding the header of lists of files
+- Fix a rare deadlock when the apps launches from a deeplink
 - Stability improvements and bug fixes
