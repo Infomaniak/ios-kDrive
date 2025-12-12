@@ -88,7 +88,12 @@ public enum FileActivityType: String, Codable, CaseIterable {
     ]
 
     public init(apiRawValue: String) {
-        self = .init(rawValue: apiRawValue) ?? .unknown
+        guard let type = FileActivityType(rawValue: apiRawValue) else {
+            self = .unknown
+            SentryDebug.capture(message: "Unknown FileActivityType", context: ["rawValue": apiRawValue])
+            return
+        }
+        self = type
     }
 }
 
