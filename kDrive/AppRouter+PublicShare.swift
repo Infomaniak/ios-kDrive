@@ -123,14 +123,19 @@ public extension AppRouter {
             do {
                 let publicShare: File
                 if let folderId {
-                    publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
-                                                                        linkUuid: linkUuid,
-                                                                        fileId: folderId,
-																		token: token)
+                    publicShare = try await apiFetcher.getShareLinkFile(
+                        driveId: driveId,
+                        linkUuid: linkUuid,
+                        fileId: folderId,
+                        token: token
+                    )
                 } else {
-                    publicShare = try await apiFetcher.getShareLinkFileWithThumbnail(driveId: driveId,
-                                                                                     linkUuid: linkUuid,
-                                                                                     fileId: fileId)
+                    publicShare = try await apiFetcher.getShareLinkFileWithThumbnail(
+                        driveId: driveId,
+                        linkUuid: linkUuid,
+                        fileId: fileId,
+                        token: token
+                    )
                 }
 
                 @InjectService var appNavigable: AppNavigable

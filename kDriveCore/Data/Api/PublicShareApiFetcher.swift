@@ -96,8 +96,11 @@ public extension PublicShareApiFetcher {
         return shareLinkFile
     }
 
-    func getShareLinkFileWithThumbnail(driveId: Int, linkUuid: String, fileId: Int) async throws -> File {
-        let shareLinkFileUrl = Endpoint.shareLinkFileWithThumbnail(driveId: driveId, linkUuid: linkUuid, fileId: fileId).url
+    func getShareLinkFileWithThumbnail(driveId: Int, linkUuid: String, fileId: Int, token: String?) async throws -> File {
+        let shareLinkFileUrl = Endpoint.shareLinkFileWithThumbnail(driveId: driveId,
+                                                                   linkUuid: linkUuid,
+                                                                   fileId: fileId,
+                                                                   token: token).url
         let request = Session.default.request(shareLinkFileUrl)
         let shareLinkFile: File = try await perform(request: request)
         return shareLinkFile
