@@ -22,6 +22,14 @@ import RealmSwift
 
 // MARK: - Share Links
 
+private extension Endpoint {
+    func withShareLinkToken(_ token: String?) -> Endpoint {
+        guard let token else { return self }
+        let mergedItems = (queryItems ?? []) + [URLQueryItem(name: "sharelink_password", value: token)]
+        return Endpoint(host: host, path: path, queryItems: mergedItems)
+    }
+}
+
 public extension Endpoint {
     /// It is necessary to keep V1 here for backward compatibility of old links
     static var shareUrlV1: Endpoint {
@@ -51,27 +59,22 @@ public extension Endpoint {
 
     /// Share link info
     static func shareLinkInfo(driveId: Int, shareLinkUid: String, token: String? = nil) -> Endpoint {
-        let shareLink = shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/init")
-        if let token {
-            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
-        }
-        return shareLink
+        return shareUrlV2.appending(path: "/\(driveId)/share/\(shareLinkUid)/init")
+            .withShareLinkToken(token)
     }
 
     /// Share link file
     static func shareLinkFile(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
-        let shareLink = shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
-        if let token {
-            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
-        }
-        return shareLink
+        return shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
+            .withShareLinkToken(token)
     }
 
-    static func shareLinkFileWithThumbnail(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+    static func shareLinkFileWithThumbnail(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
         let withQuery = URLQueryItem(name: "with", value: "supported_by,conversion_capabilities")
         let shareLinkQueryItems = [withQuery]
         let fileChildrenEndpoint = Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)")
         return fileChildrenEndpoint.appending(path: "", queryItems: shareLinkQueryItems)
+            .withShareLinkToken(token)
     }
 
     static func shareLinkFileV2(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
@@ -87,30 +90,20 @@ public extension Endpoint {
 
         let shareLinkQueryItems = [orderByQuery, orderQuery, withQuery]
         let fileChildrenEndpoint = Self.shareUrlV3.appending(path: "/\(driveId)/share/\(linkUuid)/files/\(fileId)/files")
-        if let token {
-            let tokenQuery = URLQueryItem(name: "sharelink_password", value: token)
-            let allQueryItems = shareLinkQueryItems + [tokenQuery]
-            return fileChildrenEndpoint.appending(path: "", queryItems: allQueryItems)
-        }
         return fileChildrenEndpoint.appending(path: "", queryItems: shareLinkQueryItems)
+            .withShareLinkToken(token)
     }
 
     /// Share link file thumbnail
     static func shareLinkFileThumbnail(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
-        let shareLink = shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
-        if let token {
-            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
-        }
-        return shareLink
+        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/thumbnail")
+            .withShareLinkToken(token)
     }
 
     /// Share link file preview
     static func shareLinkFilePreview(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
-        let shareLink = shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
-        if let token {
-            return shareLink.appending(path: "", queryItems: [URLQueryItem(name: "sharelink_password", value: token)])
-        }
-        return shareLink
+        return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/preview")
+            .withShareLinkToken(token)
     }
 
     /// Download share link file
