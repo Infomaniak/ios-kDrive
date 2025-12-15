@@ -27,6 +27,10 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
     @InjectService var publicShareApiFetcher: PublicShareApiFetcher
     @InjectService var router: AppNavigable
 
+    let scrollView = UIScrollView()
+
+    let containerView = UIView()
+
     let imageView = UIImageView()
 
     let titleLabel: UILabel = {
@@ -76,9 +80,9 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         navigationItem.leftBarButtonItem = FileListBarButton(type: .cancel, target: self, action: #selector(close))
 
+        setupFooter()
         setupBody()
         configurePasswordTextField()
-        setupFooter()
     }
 
     private func configurePasswordTextField() {
@@ -109,9 +113,19 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
     }
 
     private func setupBody() {
-        let containerView = UIView()
+        view.addSubview(scrollView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: validatePasswordButton.topAnchor,
+                                               constant: -UIConstants.Padding.medium)
+        ])
+
+        scrollView.addSubview(containerView)
         containerView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(containerView)
 
         imageView.contentMode = .scaleAspectFit
         imageView.image = KDriveResourcesAsset.lockExternal.image
@@ -127,16 +141,24 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         containerView.addSubview(passwordTextField)
 
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.Padding.standard),
-            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.Padding.standard),
-            containerView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            containerView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor,
+                                                   constant: UIConstants.Padding.standard),
+            containerView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor,
+                                                    constant: -UIConstants.Padding.standard),
+            containerView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            containerView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+
+            containerView.widthAnchor.constraint(
+                equalTo: scrollView.frameLayoutGuide.widthAnchor,
+                constant: -2 * UIConstants.Padding.standard
+            )
         ])
 
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            imageView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             imageView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             imageView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
-            imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor, multiplier: 0.5),
+            imageView.heightAnchor.constraint(equalToConstant: 124.0),
 
             titleLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: UIConstants.Padding.standard),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
@@ -159,7 +181,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         view.bringSubviewToFront(validatePasswordButton)
 
         let leadingConstraint = validatePasswordButton.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
-                                                                                constant: 16)
+                                                                                constant: UIConstants.Padding.medium)
         leadingConstraint.priority = .defaultHigh
         let trailingConstraint = validatePasswordButton.trailingAnchor.constraint(
             greaterThanOrEqualTo: view.trailingAnchor,
@@ -172,7 +194,8 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
             validatePasswordButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             leadingConstraint,
             trailingConstraint,
-            validatePasswordButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            validatePasswordButton.bottomAnchor.constraint(equalTo: view.keyboardLayoutGuide.topAnchor,
+                                                           constant: -UIConstants.Padding.medium),
             validatePasswordButton.heightAnchor.constraint(equalToConstant: 60),
             widthConstraint
         ])
@@ -187,6 +210,8 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         guard let password = passwordTextField.text, !password.isEmpty else {
             return
         }
+
+        view.endEditing(true)
 
         Task {
             do {
