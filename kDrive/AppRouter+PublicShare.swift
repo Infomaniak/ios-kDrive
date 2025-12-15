@@ -130,8 +130,7 @@ public extension AppRouter {
                 } else {
                     publicShare = try await apiFetcher.getShareLinkFileWithThumbnail(driveId: driveId,
                                                                                      linkUuid: linkUuid,
-                                                                                     fileId: fileId,
-																					 token: token)
+                                                                                     fileId: fileId)
                 }
 
                 @InjectService var appNavigable: AppNavigable
