@@ -797,6 +797,7 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor private func refreshAccountAndShowMainView() async throws {
+        let initialAccountId = accountManager.currentAccount?.id
         let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
 
         guard let currentAccount = accountManager.currentAccount else {
@@ -805,6 +806,12 @@ public struct AppRouter: AppNavigable {
         }
 
         let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
+
+        guard initialAccountId == accountManager.currentAccount?.id else {
+            Log.sceneDelegate("Account is switching, skipping refresh", level: .info)
+            return
+        }
+
         let viewController = window?.rootViewController as? UpdateAccountDelegate
         viewController?.didUpdateCurrentAccountInformations(account)
 

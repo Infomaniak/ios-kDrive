@@ -284,6 +284,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             DDLogInfo("switching to account \(matchingAccount.userId) to accommodate sharedWithMeLink navigation")
             deeplinkService.setLastDeeplink(deeplink)
             switchAccount(newAccount: matchingAccount)
+            Task {
+                await appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
+            }
             appNavigable.prepareRootViewController(
                 currentState: RootViewControllerState.getCurrentState(),
                 restoration: false
