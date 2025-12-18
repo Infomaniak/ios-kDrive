@@ -74,7 +74,7 @@ class MenuTopTableViewCell: UITableViewCell {
                 case .almostFull:
                     progressView.progressTintColor = KDriveResourcesAsset.warningColor.color
                 case .normal:
-                    progressView.progressTintColor = KDriveResourcesAsset.greenColor.color
+                    progressView.progressTintColor = KDriveResourcesAsset.infomaniakColor.color
                 }
             }
             progressLabel
