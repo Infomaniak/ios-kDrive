@@ -191,7 +191,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             return topRows
         }
 
-        if driveFileManager.storageState == .full && showInsufficientStorage {
+        if driveFileManager.drive.storageState == .full && showInsufficientStorage {
             topRows.append(.insufficientStorage)
         }
         return topRows

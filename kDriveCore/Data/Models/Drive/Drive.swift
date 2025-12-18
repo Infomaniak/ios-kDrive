@@ -89,6 +89,23 @@ public enum MaintenanceTypeValue: String, PersistableEnum, Codable {
     }
 }
 
+public enum StorageState {
+    case full
+    case almostFull
+    case normal
+
+    public init(drive: Drive) {
+        let storagePercentage = Double(drive.usedSize) / max(1.0, Double(drive.size)) * 100
+        if storagePercentage >= UIConstants.insufficientStorageMinimumPercentage {
+            self = .full
+        } else if storagePercentage >= UIConstants.storageAlmostFullMinimumPercentage {
+            self = .almostFull
+        } else {
+            self = .normal
+        }
+    }
+}
+
 public final class DrivePreferences: EmbeddedObject, Codable {
     @Persisted public var color = "#0098FF"
     @Persisted public var hide = false
@@ -180,6 +197,10 @@ public final class Drive: Object, Codable {
 
     public var isInTechnicalMaintenance: Bool {
         return inMaintenance && maintenanceReason == .technical
+    }
+
+    public var storageState: StorageState {
+        StorageState(drive: self)
     }
 
     public required init(from decoder: Decoder) throws {

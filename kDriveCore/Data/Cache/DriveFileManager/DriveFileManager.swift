@@ -41,12 +41,6 @@ extension TransactionExecutor: CustomStringConvertible {
     }
 }
 
-public enum StorageState {
-    case full
-    case almostFull
-    case normal
-}
-
 // MARK: - Transactionable
 
 public final class DriveFileManager {
@@ -273,17 +267,6 @@ public final class DriveFileManager {
             return nil
         }
         return metadata
-    }
-
-    public var storageState: StorageState {
-        let storagePercentage = Double(drive.usedSize) / Double(drive.size) * 100
-        if storagePercentage > UIConstants.insufficientStorageMinimumPercentage {
-            return .almostFull
-        } else if storagePercentage > UIConstants.storageAlmostFullMinimumPercentage {
-            return .almostFull
-        } else {
-            return .normal
-        }
     }
 
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
