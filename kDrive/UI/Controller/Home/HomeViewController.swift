@@ -191,8 +191,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             return topRows
         }
 
-        let storagePercentage = Double(driveFileManager.drive.usedSize) / Double(driveFileManager.drive.size) * 100
-        if (storagePercentage > UIConstants.insufficientStorageMinimumPercentage) && showInsufficientStorage {
+        if driveFileManager.drive.storageState == .full && showInsufficientStorage {
             topRows.append(.insufficientStorage)
         }
         return topRows

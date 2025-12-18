@@ -67,6 +67,16 @@ class MenuTopTableViewCell: UITableViewCell {
             progressView.isHidden = false
             progressLabel.isHidden = false
             progressView.progress = Float(drive.usedSize) / Float(drive.size)
+            if let currentDriveFileManager = accountManager.currentDriveFileManager {
+                switch currentDriveFileManager.drive.storageState {
+                case .full:
+                    progressView.progressTintColor = KDriveResourcesAsset.binColor.color
+                case .almostFull:
+                    progressView.progressTintColor = KDriveResourcesAsset.warningColor.color
+                case .normal:
+                    progressView.progressTintColor = KDriveResourcesAsset.infomaniakColor.color
+                }
+            }
             progressLabel
                 .text = "\(Constants.formatFileSize(drive.usedSize, decimals: 1)) / \(Constants.formatFileSize(drive.size))"
         }
