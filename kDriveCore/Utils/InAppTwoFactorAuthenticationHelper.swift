@@ -32,6 +32,7 @@ public struct InAppTwoFactorAuthenticationHelper: Sendable {
         let sessions: [InAppTwoFactorAuthenticationSession] = await accounts.asyncCompactMap { account in
             guard let user = account.user,
                   let token = account.token else {
+                SentryDebug.accountWithNoUserOrToken(account)
                 return nil
             }
 

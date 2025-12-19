@@ -236,9 +236,13 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return false
         }
 
-        guard let account = accounts.first(where: { $0.userId == userId }),
-              let token = account.token,
+        guard let account = accounts.first(where: { $0.userId == userId }) else {
+            return false
+        }
+
+        guard let token = account.token,
               let user = account.user else {
+            SentryDebug.accountWithNoUserOrToken(account)
             return false
         }
 
