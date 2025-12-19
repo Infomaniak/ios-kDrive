@@ -95,6 +95,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         passwordTextField.keyboardType = .default
         passwordTextField.autocorrectionType = .no
         passwordTextField.autocapitalizationType = .none
+        passwordTextField.becomeFirstResponder()
 
         let overlayButton = UIButton(type: .custom)
         let viewImage = KDriveResourcesAsset.view.image
