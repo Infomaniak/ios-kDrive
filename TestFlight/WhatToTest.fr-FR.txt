@@ -1,3 +1,6 @@
+- Correction d'un problème de concurrence lié au changement de compte
+- Correction du téléchargement d'un dossier depuis un partage public
+- Couleurs détaillées pour l'utilisation à distance du kDrive
 - Correction des liens sur l'écran d'inscription
 - Meilleure prise en charge des liens de partage publics avec aperçu
 - Correction d'un problème d'interface concernant l'en-tête des listes de fichiers
