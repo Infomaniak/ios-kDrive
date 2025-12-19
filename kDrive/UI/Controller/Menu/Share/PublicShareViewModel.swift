@@ -151,7 +151,7 @@ class PublicShareViewModel: InMemoryFileListViewModel {
 
             // present share sheet
             let activityViewController = UIActivityViewController(
-                activityItems: [self.currentDirectory.localUrl],
+                activityItems: [self.currentDirectory.temporaryUrl],
                 applicationActivities: nil
             )
 
