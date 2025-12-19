@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakLogin
 import Sentry
 import UIKit
@@ -111,6 +112,14 @@ public enum SentryDebug {
 
     public static func captureNoWindow(function: String = #function) {
         capture(message: "Trying to call show with no window in :\(function)")
+    }
+
+    public static func accountWithNoUserOrToken(_ account: Account) {
+        capture(message: "Account with no token or user", context: [
+            "Nil user ?": account.user == nil,
+            "Nil token ?": account.token == nil
+        ],
+        contextKey: "Values")
     }
 }
 
