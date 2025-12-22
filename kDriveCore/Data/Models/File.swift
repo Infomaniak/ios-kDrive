@@ -381,13 +381,13 @@ public final class FileConversion: EmbeddedObject, Codable {
     /// File can be converted for live only-office editing
     @Persisted public var whenOnlyoffice: Bool
     /// If convertible, the alternate extension that only-office understands.
-    @Persisted public var onylofficeExtension: String?
+    @Persisted public var onlyofficeExtension: String?
 
     private enum CodingKeys: String, CodingKey {
         case whenDownload = "whenDownloading"
         case downloadExtensions
         case whenOnlyoffice = "whenOnlyofficeOpening"
-        case onylofficeExtension
+        case onlyofficeExtension
     }
 }
 
