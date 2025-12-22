@@ -199,7 +199,7 @@ public extension Endpoint {
     }
 
     static func convert(file: AbstractFile) -> Endpoint {
-        return .fileInfoV2(file).appending(path: "/convert", queryItems: [FileWith.fileMinimal.toQueryItem()])
+        return .fileInfo(file).appending(path: "/convert", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
     static func move(file: AbstractFile, destination: AbstractFile) -> Endpoint {
