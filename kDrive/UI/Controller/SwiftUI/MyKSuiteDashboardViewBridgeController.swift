@@ -20,6 +20,7 @@ import FloatingPanel
 import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
+import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import MyKSuite
@@ -27,7 +28,7 @@ import SwiftUI
 import UIKit
 
 enum MyKSuiteDashboardViewBridgeController {
-    static func instantiate(apiFetcher: DriveApiFetcher, currentAccount: Account) -> UIViewController {
+    static func instantiate(apiFetcher: DriveApiFetcher, currentAccount: ApiToken) -> UIViewController {
         let swiftUIView = MyKSuiteDashboardView(apiFetcher: apiFetcher, userId: currentAccount.userId) {
             AsyncImageView(currentAccount: currentAccount)
         }

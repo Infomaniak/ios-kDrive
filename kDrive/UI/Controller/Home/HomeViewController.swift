@@ -328,7 +328,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     // MARK: - Switch account delegate
 
-    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: UserProfile) {
         if isViewLoaded {
             reloadTopRows()
         }

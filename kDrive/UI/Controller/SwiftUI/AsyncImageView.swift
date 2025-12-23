@@ -18,11 +18,14 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakDI
+import InfomaniakLogin
+import kDriveCore
 import SwiftUI
 
 struct AsyncImageView: View {
     @State private var loadedImage: UIImage?
-    let currentAccount: Account
+    let currentAccount: ApiToken
 
     var body: some View {
         VStack {
@@ -38,7 +41,8 @@ struct AsyncImageView: View {
             }
         }
         .task {
-            loadedImage = await currentAccount.user.getAvatar()
+            @InjectService var accountManager: AccountManageable
+            loadedImage = await accountManager.userProfileStore.getUserProfile(id: currentAccount.userId)?.getAvatar()
         }
     }
 }

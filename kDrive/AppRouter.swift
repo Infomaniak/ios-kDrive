@@ -505,7 +505,7 @@ public struct AppRouter: AppNavigable {
         }
     }
 
-    @MainActor public func showPreloading(currentAccount: Account) {
+    @MainActor public func showPreloading(currentAccount: ApiToken) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -805,7 +805,7 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor private func refreshAccountAndShowMainView() async throws {
-        let initialAccountId = accountManager.currentAccount?.id
+        let initialAccountId = accountManager.currentAccount?.userId
         let oldDriveId = accountManager.currentDriveFileManager?.drive.objectId
 
         guard let currentAccount = accountManager.currentAccount else {
@@ -814,14 +814,17 @@ public struct AppRouter: AppNavigable {
         }
 
         let account = try await accountManager.updateUser(for: currentAccount, registerToken: true)
+        guard let userProfile = await accountManager.userProfileStore.getUserProfile(id: currentAccount.userId) else {
+            return
+        }
 
-        guard initialAccountId == accountManager.currentAccount?.id else {
+        guard initialAccountId == accountManager.currentAccount?.userId else {
             Log.sceneDelegate("Account is switching, skipping refresh", level: .info)
             return
         }
 
         let viewController = window?.rootViewController as? UpdateAccountDelegate
-        viewController?.didUpdateCurrentAccountInformations(account)
+        viewController?.didUpdateCurrentAccountInformations(userProfile)
 
         if let oldDriveId,
            let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),

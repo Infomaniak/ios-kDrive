@@ -113,7 +113,7 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
         }
     }
 
-    @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: Account?) {
+    @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: ApiToken?) {
         DDLogError("Error on didCompleteLoginWith \(error)")
 
         guard let topMostViewController = router.topMostViewController else { return }

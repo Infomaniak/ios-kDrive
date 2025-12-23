@@ -319,13 +319,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         (tabBar as? MainTabBar)?.tabDelegate = self
         photoPickerDelegate.viewController = self
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(userDidTakeScreenshot),
-            name: UIApplication.userDidTakeScreenshotNotification,
-            object: nil
-        )
     }
 
     override func viewWillLayoutSubviews() {
@@ -432,13 +425,14 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     func updateTabBarProfilePicture() {
-        accountManager.currentAccount?.user?.getAvatar { [weak self] image in
-            guard let self,
-                  let menuViewController = viewControllers?
-                  .compactMap({
-                      ($0 as? TitleSizeAdjustingNavigationController)?.viewControllers.first as? MenuViewController
-                  }),
-                  let menuNavigationViewController = menuViewController.first?.navigationController else { return }
+        Task {
+            guard let image = await accountManager.getCurrentUser()?.getAvatar() else { return }
+
+            guard let menuViewController = viewControllers?
+                .compactMap({
+                    ($0 as? TitleSizeAdjustingNavigationController)?.viewControllers.first as? MenuViewController
+                }),
+                let menuNavigationViewController = menuViewController.first?.navigationController else { return }
 
             let (placeholder, placeholderSelected) = Self.generateProfileTabImages(image: image)
             menuNavigationViewController.tabBarItem.image = placeholder
@@ -484,12 +478,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         }
         let canCreateFile = currentDirectory.isRoot || currentDirectory.capabilities.canCreateFile
         (tabBar as? MainTabBar)?.centerButton?.isEnabled = canCreateFile
-    }
-
-    @objc private func userDidTakeScreenshot() {
-        if (accountManager.currentAccount?.user.isStaff) == true {
-            present(BugTrackerViewController(), animated: true)
-        }
     }
 }
 
@@ -620,7 +608,7 @@ extension MainTabViewController: UITabBarControllerDelegate {
 // MARK: - SwitchAccountDelegate, SwitchDriveDelegate
 
 extension MainTabViewController: UpdateAccountDelegate {
-    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: UserProfile) {
         updateTabBarProfilePicture()
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
             ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?

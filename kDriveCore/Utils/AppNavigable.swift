@@ -30,7 +30,7 @@ public protocol RouterAppNavigable {
     @discardableResult
     @MainActor func showMainViewController(driveFileManager: DriveFileManager, selectedIndex: Int?) -> UISplitViewController?
 
-    @MainActor func showPreloading(currentAccount: Account)
+    @MainActor func showPreloading(currentAccount: ApiToken)
 
     @MainActor func showOnboarding()
 
