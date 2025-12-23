@@ -351,7 +351,6 @@ public class DriveApiFetcher: ApiFetcher {
                 return
             }
 
-            self.accountManager.reloadTokensAndAccounts()
             guard let reloadedToken = self.accountManager.getTokenForUserId(token.userId) else {
                 request(nil, DriveError.unknownToken)
                 return

@@ -70,7 +70,7 @@ public struct TokenMigrator {
 
             guard let derivatedToken = try? await networkLoginService.derivateApiToken(token.apiToken) else {
                 logToSentry(message: "New token derivation failed - Removing account", token: token, device: device)
-                accountManager.removeTokenAndAccount(account: Account(apiToken: token.apiToken))
+                accountManager.removeTokenAndAccountFor(userId: token.userId)
                 return false
             }
 

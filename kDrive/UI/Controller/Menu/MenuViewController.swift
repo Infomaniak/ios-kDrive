@@ -70,14 +70,12 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
     }
 
     private var sections: [Section] = []
-    private var currentAccount: Account?
+    private var currentUser: UserProfile?
     private var needsContentUpdate = false
     private let isModallyPresented: Bool
     private let onDismiss: (() -> Void)?
 
     init(driveFileManager: DriveFileManager, isModallyPresented: Bool = false, onDismiss: (() -> Void)? = nil) {
-        @InjectService var manager: AccountManageable
-        currentAccount = manager.currentAccount
         self.driveFileManager = driveFileManager
         self.isModallyPresented = isModallyPresented
         self.onDismiss = onDismiss
@@ -124,6 +122,13 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
                 let indexPath = IndexPath(row: 0, section: 1)
                 self?.tableView.reloadRows(at: [indexPath], with: .automatic)
             }
+        }
+
+        Task {
+            @InjectService var accountManager: AccountManageable
+            currentUser = await accountManager.getCurrentUser()
+            needsContentUpdate = true
+            updateContentIfNeeded()
         }
     }
 
@@ -226,8 +231,8 @@ extension MenuViewController {
             } else {
                 let cell = tableView.dequeueReusableCell(type: MenuTopTableViewCell.self, for: indexPath)
                 cell.selectionStyle = .none
-                if let currentAccount {
-                    cell.configureCell(with: driveFileManager.drive, and: currentAccount)
+                if let currentUser {
+                    cell.configureCell(with: driveFileManager.drive, and: currentUser)
                 }
                 let tap = UITapGestureRecognizer(target: self, action: #selector(switchDriveButtonPressed(_:)))
                 cell.switchDriveStackView.addGestureRecognizer(tap)
@@ -276,7 +281,7 @@ extension MenuViewController {
         case .disconnect:
             let alert = AlertTextViewController(title: KDriveResourcesStrings.Localizable.alertRemoveUserTitle,
                                                 message: KDriveResourcesStrings.Localizable
-                                                    .alertRemoveUserDescription(currentAccount?.user.displayName ?? ""),
+                                                    .alertRemoveUserDescription(currentUser?.displayName ?? ""),
                                                 action: KDriveResourcesStrings.Localizable.buttonConfirm,
                                                 destructive: true) {
                 self.accountManager.logoutCurrentAccountAndSwitchToNextIfPossible()
@@ -324,8 +329,8 @@ extension MenuViewController {
 }
 
 extension MenuViewController: UpdateAccountDelegate {
-    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: Account) {
-        self.currentAccount = currentAccount
+    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: UserProfile) {
+        currentUser = currentAccount
         needsContentUpdate = true
     }
 }
