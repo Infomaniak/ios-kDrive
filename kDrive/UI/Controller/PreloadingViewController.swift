@@ -26,14 +26,14 @@ class PreloadingViewController: UIViewController {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var appNavigable: AppNavigable
 
-    private let currentAccount: Account?
+    private let currentAccount: ApiToken?
 
     init() {
         currentAccount = nil
         super.init(nibName: nil, bundle: nil)
     }
 
-    init(currentAccount: Account) {
+    init(currentAccount: ApiToken) {
         self.currentAccount = currentAccount
         super.init(nibName: nil, bundle: nil)
     }
@@ -96,7 +96,7 @@ class PreloadingViewController: UIViewController {
         ])
     }
 
-    func preloadAccountAndDrives(account: Account) {
+    func preloadAccountAndDrives(account: ApiToken) {
         Task {
             do {
                 _ = try await accountManager.updateUser(for: account, registerToken: true)
@@ -120,7 +120,7 @@ class PreloadingViewController: UIViewController {
                 present(driveErrorNavigationViewController, animated: true)
             } catch {
                 SentryDebug.logPreloadingAccountError(error: error, origin: "PreloadingViewController")
-                accountManager.removeTokenAndAccount(account: account)
+                accountManager.removeTokenAndAccountFor(userId: account.userId)
                 self.appNavigable.prepareRootViewController(currentState: .onboarding, restoration: false)
             }
         }
@@ -129,7 +129,7 @@ class PreloadingViewController: UIViewController {
 
 @available(iOS 17, *)
 #Preview {
-    PreloadingViewController(currentAccount: Account(apiToken: ApiToken(
+    PreloadingViewController(currentAccount: ApiToken(
         accessToken: "",
         expiresIn: 0,
         refreshToken: "",
@@ -137,5 +137,5 @@ class PreloadingViewController: UIViewController {
         tokenType: "",
         userId: 0,
         expirationDate: Date()
-    )))
+    ))
 }

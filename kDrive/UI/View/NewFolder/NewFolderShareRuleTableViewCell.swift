@@ -67,8 +67,9 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
         accessoryImageView.image = KDriveResourcesAsset.placeholderAvatar.image
         accessoryImageView.layer.cornerRadius = accessoryImageView.bounds.width / 2
 
-        accountManager.currentAccount?.user?.getAvatar { image in
-            self.accessoryImageView.image = image
+        Task {
+            let avatar = await accountManager.getCurrentUser()?.getAvatar()
+            accessoryImageView.image = avatar
         }
     }
 

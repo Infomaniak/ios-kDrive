@@ -42,16 +42,19 @@ class SwitchUserViewController: UIViewController {
         }
     }
 
-    private var accounts = [Account]()
+    private var users = [UserProfile]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: UserAccountTableViewCell.self)
 
-        accounts = accountManager.accounts.values
-
         // Try to update other accounts infos
         Task {
+            users = await accountManager.accounts.asyncCompactMap {
+                await self.accountManager.userProfileStore.getUserProfile(id: $0.userId)
+            }
+            reloadDataSource()
+
             try await accountManager.updateAccountsInfos()
 
             reloadDataSource()
@@ -83,20 +86,25 @@ class SwitchUserViewController: UIViewController {
     }
 
     private func reloadDataSource() {
-        accounts = accountManager.accounts.values
-        tableView.reloadData()
+        Task {
+            users = await accountManager.accounts.asyncCompactMap {
+                await self.accountManager.userProfileStore.getUserProfile(id: $0.userId)
+            }
+
+            tableView.reloadData()
+        }
     }
 
-    private func switchToConnectedAccount(_ account: Account) {
+    private func switchToConnectedUserId(_ userId: Int) {
         do {
-            guard let existingAccount = accountManager.account(for: account.userId) else {
+            guard let existingAccount = accountManager.account(for: userId) else {
                 reloadDataSource()
                 return
             }
 
             let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: existingAccount.userId)
             matomo.track(eventWithCategory: .account, name: "switch")
-            matomo.connectUser(userId: account.userId.description)
+            matomo.connectUser(userId: userId.description)
 
             accountManager.switchAccount(newAccount: existingAccount)
             appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
@@ -115,7 +123,7 @@ class SwitchUserViewController: UIViewController {
         } catch {
             SentryDebug.logPreloadingAccountError(error: error, origin: "SwitchUserViewController")
             // Unknown error, remove the user
-            accountManager.removeTokenAndAccount(account: account)
+            accountManager.removeTokenAndAccountFor(userId: userId)
         }
     }
 
@@ -135,8 +143,8 @@ class SwitchUserViewController: UIViewController {
 
 extension SwitchUserViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let account = accounts[indexPath.row]
-        switchToConnectedAccount(account)
+        let user = users[indexPath.row]
+        switchToConnectedUserId(user.id)
     }
 }
 
@@ -144,26 +152,26 @@ extension SwitchUserViewController: UITableViewDelegate {
 
 extension SwitchUserViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return accounts.count
+        return users.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let account = accounts[indexPath.row]
+        let user = users[indexPath.row]
         let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-        cell.titleLabel.text = account.user.displayName
-        cell.userEmailLabel.text = account.user.email
+        cell.titleLabel.text = user.displayName
+        cell.userEmailLabel.text = user.email
         cell.logoImage.image = KDriveResourcesAsset.placeholderAvatar.image
 
-        if account == accountManager.currentAccount {
+        if user.id == accountManager.currentAccount?.userId {
             cell.accessoryImageView.image = KDriveResourcesAsset.check.image
             cell.isUserInteractionEnabled = false
         } else {
             cell.accessoryImageView.image = KDriveResourcesAsset.chevronRight.image
-            cell.isUserInteractionEnabled = !driveInfosManager.getDrives(for: account.userId).isEmpty
+            cell.isUserInteractionEnabled = !driveInfosManager.getDrives(for: user.id).isEmpty
         }
 
-        account.user.getAvatar { image in
+        user.getAvatar { image in
             cell.logoImage.image = image
         }
         return cell
@@ -178,7 +186,7 @@ extension SwitchUserViewController: InfomaniakLoginDelegate {
             do {
                 let connectedAccount = try await accountManager.createAndSetCurrentAccount(code: code, codeVerifier: verifier)
 
-                switchToConnectedAccount(connectedAccount)
+                switchToConnectedUserId(connectedAccount.userId)
             } catch {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorConnection)
             }

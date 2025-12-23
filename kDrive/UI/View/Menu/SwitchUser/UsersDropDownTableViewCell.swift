@@ -75,10 +75,10 @@ class UsersDropDownTableViewCell: DropDownCell {
         }
     }
 
-    func configureWith(account: Account) {
-        usernameLabel.text = account.user.displayName
-        detailLabel.text = account.user.email
-        account.user.getAvatar { image in
+    func configureWith(user: UserProfile) {
+        usernameLabel.text = user.displayName
+        detailLabel.text = user.email
+        user.getAvatar { image in
             self.avatarImage.image = image
         }
     }

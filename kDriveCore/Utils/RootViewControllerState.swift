@@ -20,6 +20,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
+import InfomaniakLogin
 
 public enum RootViewControllerState {
     case splashScreen
@@ -27,7 +28,7 @@ public enum RootViewControllerState {
     case appLock
     case mainViewController(driveFileManager: DriveFileManager)
     case updateRequired
-    case preloading(Account)
+    case preloading(ApiToken)
 
     public static func getCurrentState() -> RootViewControllerState {
         @InjectService var accountManager: AccountManageable

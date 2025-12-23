@@ -112,9 +112,9 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         }
     }
 
-    private lazy var visibleRows: [GeneralParameterRow] = GeneralParameterRow.allCases
+    private var visibleRows: [GeneralParameterRow] = GeneralParameterRow.allCases
         .filter { $0 != .joinBeta || !Bundle.main.isRunningInTestFlight }
-        .filter { $0 != .feedback || accountManager.currentAccount?.user.isStaff == true }
+        .filter { $0 != .feedback }
 
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
@@ -132,6 +132,13 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
         navigationItem.hideBackButtonText()
         checkMykSuiteEnabledAndRefresh()
+
+        Task {
+            let currentUserIsStaff = await accountManager.getCurrentUser()?.isStaff == true
+            guard currentUserIsStaff else { return }
+            visibleRows.insert(.feedback, at: visibleRows.count - 1)
+            tableView.reloadData()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -368,7 +375,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 extension ParameterTableViewController: DeleteAccountDelegate {
     func didCompleteDeleteAccount() {
         if let currentAccount = accountManager.currentAccount {
-            accountManager.removeTokenAndAccount(account: currentAccount)
+            accountManager.removeTokenAndAccountFor(userId: currentAccount.userId)
         }
 
         if let nextAccount = accountManager.accounts.first {
@@ -379,7 +386,6 @@ extension ParameterTableViewController: DeleteAccountDelegate {
         } else {
             SentrySDK.setUser(nil)
         }
-        accountManager.saveAccounts()
         appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: false)
         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.snackBarAccountDeleted)
     }
