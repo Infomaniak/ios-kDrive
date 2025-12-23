@@ -61,6 +61,8 @@ public class DeeplinkService: DeeplinkServiceable {
                 await router.navigate(to: .search(searchLink: lastDeeplink))
             case let lastDeeplink as BasicLink:
                 await router.navigate(to: .basic(basicLink: lastDeeplink))
+            case let lastDeeplink as FavoritePreviewLink:
+                await router.navigate(to: .favoritePreview(favoritePreviewLink: lastDeeplink))
             default:
                 break
             }

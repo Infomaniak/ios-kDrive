@@ -108,11 +108,8 @@ public extension AppRouter {
             deeplinkService.setLastDeeplink(deeplink)
             return
         }
-        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
-            return
-        }
 
-        showMainViewController(driveFileManager: currentDriveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
 
         let fileActionsHelper = FileActionsHelper()
         fileActionsHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
