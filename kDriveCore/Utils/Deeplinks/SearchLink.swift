@@ -61,7 +61,11 @@ public struct SearchLink: Sendable, Equatable, LinkDriveProvider {
         self.driveId = driveIdInt
         self.queryJson = queryJson
         searchQuery = jsonDict["query"] as? String ?? ""
-        type = ConvertedType(apiRawValue: jsonDict["type"] as? String ?? "")
+        if let convertedTypeRawValue = jsonDict["type"] as? String {
+            type = ConvertedType(apiRawValue: convertedTypeRawValue)
+        } else {
+            type = nil
+        }
         modifiedBefore = jsonDict["modified_before"] as? Int
         modifiedAfter = jsonDict["modified_after"] as? Int
         categoryIds = jsonDict["category_ids"] as? [Int] ?? []
