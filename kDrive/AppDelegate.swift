@@ -240,8 +240,8 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return false
         }
 
-        guard let token = account.token,
-              let user = account.user else {
+        guard let user = account.user,
+              let token = tokenStore.tokenFor(userId: user.id)?.apiToken else {
             SentryDebug.accountWithNoUserOrToken(account)
             return false
         }

@@ -19,6 +19,7 @@
 import Foundation
 import InAppTwoFactorAuthentication
 import InfomaniakConcurrency
+import InfomaniakCore
 import InfomaniakDI
 
 public struct InAppTwoFactorAuthenticationHelper: Sendable {
@@ -26,12 +27,13 @@ public struct InAppTwoFactorAuthenticationHelper: Sendable {
 
     public func checkTwoFAChallenges() async {
         @InjectService var accountManager: AccountManageable
+        @InjectService var tokenStore: TokenStore
 
         let accounts = accountManager.accounts.values
 
         let sessions: [InAppTwoFactorAuthenticationSession] = await accounts.asyncCompactMap { account in
             guard let user = account.user,
-                  let token = account.token else {
+                  let token = tokenStore.tokenFor(userId: user.id)?.apiToken else {
                 SentryDebug.accountWithNoUserOrToken(account)
                 return nil
             }
