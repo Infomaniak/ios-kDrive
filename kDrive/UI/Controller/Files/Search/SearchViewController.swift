@@ -74,7 +74,7 @@ class SearchViewController: FileListViewController {
         definesPresentationContext = true
 
         bindSearchViewModel()
-        headerView?.isHidden = true
+        headerView?.isHidden = !searchViewModel.isDisplayingSearchResults
     }
 
     override func viewDidAppear(_ animated: Bool) {
