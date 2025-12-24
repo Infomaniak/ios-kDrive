@@ -1,2 +1,8 @@
-- Fix non compatible files
-- Fix 2FA
+- Fix a race issue on account switching
+- Fix download of a folder of a public share
+- Detailed colors related to kDrive remote usage
+- Fix linking within the register screen
+- Better support of public share link containing a preview
+- Fix a UI issue regarding the header of lists of files
+- Fix a rare deadlock when the apps launches from a deeplink
+- Stability improvements and bug fixes
