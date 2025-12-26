@@ -77,7 +77,7 @@ public protocol RouterFileNavigable {
     @MainActor func present(file: File, driveFileManager: DriveFileManager, office: Bool)
 
     /// Present the public share locked screen
-    @MainActor func presentPublicShareLocked(_ destinationURL: URL)
+    @MainActor func presentPublicShareLocked(_ link: PublicShareLink)
 
     /// Present the public share expired screen
     @MainActor func presentPublicShareExpired()

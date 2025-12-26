@@ -108,7 +108,7 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func logoutCurrentAccountAndSwitchToNextIfPossible() { fatalError("Not implemented") }
 
-    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int,
+    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, token: String?,
                                      metadata: PublicShareMetadata) -> DriveFileManager? {
         fatalError("Not implemented")
     }

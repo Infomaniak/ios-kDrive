@@ -118,6 +118,9 @@ public enum FactoryService {
             },
             Factory(type: DeeplinkParsable.self) { _, _ in
                 DeeplinkParser()
+            },
+            Factory(type: PublicShareApiFetcher.self) { _, _ in
+                PublicShareApiFetcher()
             }
         ]
         return services
