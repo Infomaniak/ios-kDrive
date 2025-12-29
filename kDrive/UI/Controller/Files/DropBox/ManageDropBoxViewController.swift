@@ -293,8 +293,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
                     UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
-        }
-        else {
+        } else {
             self.tableView.isUserInteractionEnabled = true
         }
     }

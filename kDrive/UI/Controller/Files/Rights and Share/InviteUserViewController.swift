@@ -338,7 +338,7 @@ extension InviteUserViewController: FooterButtonDelegate {
         matomo.track(eventWithCategory: .shareAndRights, name: "inviteUser")
         tableView.isUserInteractionEnabled = false
         sender.setLoading(true)
-        
+
         let settings = FileAccessSettings(
             message: message,
             right: newPermission,
