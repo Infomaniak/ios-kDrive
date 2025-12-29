@@ -272,21 +272,30 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
     // MARK: - Table view delegate
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.tableView.isUserInteractionEnabled = false
         tableView.deselectRow(at: indexPath, animated: true)
         if indexPath.section == 2 {
             Task { [proxyDirectory = directory.proxify()] in
+                defer {
+                    self.tableView.isUserInteractionEnabled = true
+                }
                 do {
                     let response = try await driveFileManager.apiFetcher.deleteDropBox(directory: proxyDirectory)
                     if response {
                         self.dismissAndRefreshDataSource()
                         self.driveFileManager.setFileDropBox(file: proxyDirectory, dropBox: nil)
                     } else {
+                        self.navigationController?.popViewController(animated: true)
                         UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorModification)
                     }
                 } catch {
+                    self.navigationController?.popViewController(animated: true)
                     UIConstants.showSnackBarIfNeeded(error: error)
                 }
             }
+        }
+        else {
+            self.tableView.isUserInteractionEnabled = true
         }
     }
 }
