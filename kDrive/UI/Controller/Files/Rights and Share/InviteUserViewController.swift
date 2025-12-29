@@ -336,6 +336,9 @@ extension InviteUserViewController: RightsSelectionDelegate {
 extension InviteUserViewController: FooterButtonDelegate {
     func didClickOnButton(_ sender: IKLargeButton) {
         matomo.track(eventWithCategory: .shareAndRights, name: "inviteUser")
+        tableView.isUserInteractionEnabled = false
+        sender.setLoading(true)
+        
         let settings = FileAccessSettings(
             message: message,
             right: newPermission,
@@ -344,6 +347,11 @@ extension InviteUserViewController: FooterButtonDelegate {
             userIds: userIds
         )
         Task { [proxyFile = file.proxify()] in
+            defer {
+                tableView.isUserInteractionEnabled = true
+                sender.setLoading(false)
+            }
+
             let results = try await driveFileManager.apiFetcher.checkAccessChange(to: proxyFile, settings: settings)
             let conflictList = results.filter { !$0.needChange }
             if conflictList.isEmpty {
