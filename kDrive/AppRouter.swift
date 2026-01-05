@@ -824,7 +824,7 @@ public struct AppRouter: AppNavigable {
         }
 
         let viewController = window?.rootViewController as? UpdateAccountDelegate
-        viewController?.didUpdateCurrentAccountInformations(userProfile)
+        viewController?.didUpdateCurrentUserProfile(userProfile)
 
         if let oldDriveId,
            let newDrive = driveInfosManager.getDrive(primaryKey: oldDriveId),

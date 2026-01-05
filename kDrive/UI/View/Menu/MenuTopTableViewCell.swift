@@ -36,7 +36,7 @@ class MenuTopTableViewCell: UITableViewCell {
 
     @LazyInjectService var accountManager: AccountManageable
 
-    func configureCell(with drive: Drive, and account: UserProfile) {
+    func configureCell(with drive: Drive, and user: UserProfile) {
         userAvatarContainerView.clipsToBounds = false
         userAvatarContainerView.layer.shadowOpacity = 0.3
         userAvatarContainerView.layer.shadowOffset = .zero
@@ -53,10 +53,10 @@ class MenuTopTableViewCell: UITableViewCell {
 
         driveNameLabel.text = drive.name
         driveImageView.tintColor = UIColor(hex: drive.preferences.color)
-        userDisplayNameLabel.text = account.displayName
-        userEmailLabel.text = account.email
+        userDisplayNameLabel.text = user.displayName
+        userEmailLabel.text = user.email
         userAvatarImageView.image = KDriveResourcesAsset.placeholderAvatar.image
-        account.getAvatar(size: CGSize(width: 512, height: 512)) { image in
+        user.getAvatar(size: CGSize(width: 512, height: 512)) { image in
             self.userAvatarImageView.image = image
         }
 

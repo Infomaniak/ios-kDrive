@@ -30,7 +30,7 @@ import RealmSwift
 import Sentry
 
 public protocol UpdateAccountDelegate: AnyObject {
-    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: InfomaniakCore.UserProfile)
+    @MainActor func didUpdateCurrentUserProfile(_ currentUser: InfomaniakCore.UserProfile)
 }
 
 public protocol AccountManagerDelegate: AnyObject {

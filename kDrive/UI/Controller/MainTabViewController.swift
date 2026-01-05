@@ -608,11 +608,11 @@ extension MainTabViewController: UITabBarControllerDelegate {
 // MARK: - SwitchAccountDelegate, SwitchDriveDelegate
 
 extension MainTabViewController: UpdateAccountDelegate {
-    @MainActor func didUpdateCurrentAccountInformations(_ currentAccount: UserProfile) {
+    @MainActor func didUpdateCurrentUserProfile(_ currentUser: UserProfile) {
         updateTabBarProfilePicture()
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
             ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?
-                .didUpdateCurrentAccountInformations(currentAccount)
+                .didUpdateCurrentUserProfile(currentUser)
         }
     }
 }

@@ -36,8 +36,8 @@ class SelectDriveViewController: UIViewController {
     @LazyInjectService var driveInfosManager: DriveInfosManager
 
     private var driveList: [Drive] = []
-    private var currentAccount: UserProfile?
-    private var accounts: [UserProfile] = []
+    private var currentUser: UserProfile?
+    private var users: [UserProfile] = []
     var selectedDrive: Drive?
     weak var delegate: SelectDriveDelegate?
 
@@ -61,19 +61,19 @@ class SelectDriveViewController: UIViewController {
 
         DropDown.startListeningToKeyboard()
 
-        var selectedAccount: UserProfile?
+        var selectedUser: UserProfile?
         Task {
             if let selectedUserId = selectedDrive?.userId {
-                selectedAccount = await accountManager.userProfileStore.getUserProfile(id: selectedUserId)
+                selectedUser = await accountManager.userProfileStore.getUserProfile(id: selectedUserId)
             }
 
             let currentUser = await accountManager.getCurrentUser()
-            if let account = selectedAccount ?? currentUser {
-                await initForCurrentAccount(account)
-                if !accounts.isEmpty {
-                    sections = [.selectAccount, .selectDrive]
-                } else {
+            if let user = selectedUser ?? currentUser {
+                await initForCurrentUser(user)
+                if users.isEmpty {
                     sections = [.selectDrive]
+                } else {
+                    sections = [.selectAccount, .selectDrive]
                 }
             } else {
                 sections = [.noAccount]
@@ -88,13 +88,13 @@ class SelectDriveViewController: UIViewController {
         matomo.track(view: [MatomoUtils.View.save.displayName, "SelectDrive"])
     }
 
-    private func initForCurrentAccount(_ account: UserProfile) async {
-        currentAccount = account
-        accounts = await accountManager.accounts.asyncCompactMap {
+    private func initForCurrentUser(_ user: UserProfile) async {
+        currentUser = user
+        users = await accountManager.accounts.asyncCompactMap {
             await self.accountManager.userProfileStore.getUserProfile(id: $0.userId)
         }
-        driveList = Array(driveInfosManager.getDrives(for: account.id))
-        dropDown.dataSource = accounts.map(\.displayName)
+        driveList = Array(driveInfosManager.getDrives(for: user.id))
+        dropDown.dataSource = users.map(\.displayName)
     }
 
     func configureDropDownWith(selectUserCell: UserAccountTableViewCell) {
@@ -106,14 +106,14 @@ class SelectDriveViewController: UIViewController {
         dropDown.customCellConfiguration = { [weak self] (index: Index, _: String, cell: DropDownCell) in
             guard let self else { return }
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
-            let account = accounts[index]
+            let account = users[index]
             cell.configureWith(user: account)
         }
         dropDown.selectionAction = { [weak self] (index: Int, _: String) in
             Task { [weak self] in
                 guard let self else { return }
-                let account = accounts[index]
-                await initForCurrentAccount(account)
+                let account = users[index]
+                await initForCurrentUser(account)
                 tableView.reloadSections([0, 1], with: .fade)
             }
         }
@@ -149,10 +149,10 @@ extension SelectDriveViewController: UITableViewDataSource {
         case .selectAccount:
             let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            if let currentAccount {
-                cell.titleLabel.text = currentAccount.displayName
-                cell.userEmailLabel.text = currentAccount.email
-                currentAccount.getAvatar { image in
+            if let currentUser {
+                cell.titleLabel.text = currentUser.displayName
+                cell.userEmailLabel.text = currentUser.email
+                currentUser.getAvatar { image in
                     cell.logoImage.image = image
                 }
             }
