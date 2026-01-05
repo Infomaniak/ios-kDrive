@@ -44,16 +44,17 @@ public enum Logging {
         }
     }
 
-    public static func reportRealmOpeningError(_ error: Error, realmConfiguration: Realm.Configuration) -> Never {
+    public static func reportRealmOpeningError(_ error: Error, realmConfiguration: Realm.Configuration, afterRetry: Bool) -> Never {
         let context = [
-            "File URL": realmConfiguration.fileURL?.absoluteString ?? ""
+            "File URL": realmConfiguration.fileURL?.absoluteString ?? "",
+            "after a retry": afterRetry
         ]
         SentryDebug.capture(error: error, context: context, contextKey: "Realm")
 
         #if DEBUG
         copyDebugInformations()
         DDLogError(
-            "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch"
+            "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error"
         )
         #endif
     }

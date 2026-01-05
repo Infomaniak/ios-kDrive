@@ -57,7 +57,7 @@ final class RealmAccessor: RealmAccessible {
             realm.refresh()
             return realm
         } catch let error as RLMError where error.code == .fail || error.code == .schemaMismatch {
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
+            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration, afterRetry: !canRetry)
 
             #if DEBUG
             Logger.general.error("Realm files will be deleted, you can resume the app with the debugger")
@@ -69,7 +69,7 @@ final class RealmAccessor: RealmAccessible {
 
             return getRealm(canRetry: false)
         } catch {
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
+            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration, afterRetry: !canRetry)
 
             guard canRetry else {
                 fatalError("Failed creating realm after a retry \(error.localizedDescription)")
