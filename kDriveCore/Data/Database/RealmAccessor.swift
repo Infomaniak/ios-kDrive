@@ -19,8 +19,8 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCoreDB
-import RealmSwift
 import Realm
+import RealmSwift
 
 /// Something to identify specific instances of Transactionable
 public enum kDriveDBID {
