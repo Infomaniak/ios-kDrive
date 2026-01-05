@@ -29,7 +29,7 @@ import XCTest
 final class ITAppLaunchTest: XCTestCase {
     let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
 
-    let fakeAccount = Account(apiToken: ApiToken(
+    let fakeAccount = ApiToken(
         accessToken: "",
         expiresIn: 0,
         refreshToken: "",
@@ -37,7 +37,7 @@ final class ITAppLaunchTest: XCTestCase {
         tokenType: "",
         userId: 0,
         expirationDate: Date()
-    ))
+    )
 
     override func setUp() {
         super.setUp()
@@ -52,7 +52,7 @@ final class ITAppLaunchTest: XCTestCase {
             accountManager.currentUserId = self.fakeAccount.userId
             accountManager.currentDriveFileManager = DriveFileManager(
                 drive: Drive(),
-                apiFetcher: DriveApiFetcher(token: self.fakeAccount.token, delegate: accountManager)
+                apiFetcher: DriveApiFetcher(token: self.fakeAccount, delegate: accountManager)
             )
             return accountManager
         }

@@ -45,8 +45,7 @@ final class DriveFileManagerTests: XCTestCase {
                              tokenType: "",
                              userId: Env.userId,
                              expirationDate: Date(timeIntervalSinceNow: TimeInterval(Int.max)))
-        let account = Account(apiToken: token)
-        try await accountManager.updateUser(for: account, registerToken: false)
+        _ = try await accountManager.updateUser(for: token, registerToken: false)
         DriveFileManagerTests.driveFileManager = accountManager.getDriveFileManager(for: Env.driveId, userId: Env.userId)
         DriveFileManagerTests.driveFileManager.apiFetcher.setToken(token, delegate: MCKTokenDelegate())
 

@@ -27,10 +27,9 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     var delegate: AccountManagerDelegate?
 
-    var currentAccount: Account?
+    var currentAccount: ApiToken?
 
-    var accounts = SendableArray<Account>()
-
+    var accounts: [ApiToken] = []
     var currentUserId = 0
 
     var currentDriveId = 0
@@ -39,83 +38,70 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     var currentDriveFileManager: DriveFileManager?
 
+    var userProfileStore = UserProfileStore()
+
     var mqService: MQService { fatalError("Not implemented") }
 
     var refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
 
-    func forceReload() {}
+    func getCurrentUser() async -> InfomaniakCore.UserProfile? {
+        return nil
+    }
 
-    func reloadTokensAndAccounts() {}
+    func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? {
+        return currentDriveFileManager
+    }
 
-    func getDriveFileManager(for drive: Drive) -> DriveFileManager? { currentDriveFileManager }
-
-    func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager? { currentDriveFileManager }
-
-    func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager { fatalError("Not implemented") }
-
-    @MainActor func getMatchingDriveFileManagerOrSwitchAccount(deeplink: LinkDriveProvider)
-        -> DriveFileManager? {
-        fatalError("Not implemented")
+    func getMatchingDriveFileManagerOrSwitchAccount(deeplink: any LinkDriveProvider) async -> DriveFileManager? {
+        return currentDriveFileManager
     }
 
     func updateAccountsInfos() async throws {}
 
+    func getFirstAvailableDriveFileManager(for userId: Int) throws -> DriveFileManager {
+        fatalError("Not implemented")
+    }
+
+    func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager? {
+        return currentDriveFileManager
+    }
+
+    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int,
+                                     metadata: PublicShareMetadata) -> DriveFileManager? {
+        return currentDriveFileManager
+    }
+
     func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher { fatalError("Not implemented") }
 
-    func getDrive(for accountId: Int, driveId: Int) -> Drive? { nil }
-
-    func getDrive(for accountId: Int, driveId: Int, using realm: Realm) -> Drive? { nil }
-
-    func getTokenForUserId(_ id: Int) -> ApiToken? { nil }
+    func getTokenForUserId(_ id: Int) -> ApiToken? { return nil }
 
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {}
 
     func didFailRefreshToken(_ token: ApiToken) {}
 
-    func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> Account { fatalError("Not implemented") }
+    func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> ApiToken { fatalError("Not implemented") }
 
-    func createAndSetCurrentAccount(token: ApiToken) async throws -> Account { fatalError("Not implemented") }
+    func createAndSetCurrentAccount(token: ApiToken) async throws -> ApiToken { fatalError("Not implemented") }
 
-    func updateUser(for account: Account, registerToken: Bool) async throws -> Account {
-        guard let currentAccount else {
-            fatalError("Set a currentAccount in the mock for this to work")
-        }
+    func updateUser(for account: ApiToken, registerToken: Bool) async throws -> ApiToken { fatalError("Not implemented") }
 
-        return currentAccount
-    }
-
-    func loadAccounts() -> [Account] { fatalError("Not implemented") }
-
-    func saveAccounts() {}
-
-    func switchAccount(newAccount: Account) {}
+    func switchAccount(newAccount: ApiToken) {}
 
     func switchToNextAvailableAccount() {}
 
     func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int) {}
 
-    func addAccount(account: Account, token apiToken: ApiToken) {}
+    func addAccount(token: ApiToken) async throws {}
 
-    func removeAccount(toDeleteAccount: Account) {}
+    func removeAccountFor(userId: Int) {}
 
-    func removeTokenAndAccount(account: Account) {}
-
-    func account(for token: ApiToken) -> Account? { fatalError("Not implemented") }
-
-    func account(for userId: Int) -> Account? { fatalError("Not implemented") }
-
-    func updateToken(newToken: ApiToken, oldToken: ApiToken) {}
-
-    func logoutCurrentAccountAndSwitchToNextIfPossible() { fatalError("Not implemented") }
-
-    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int,
-                                     metadata: PublicShareMetadata) -> DriveFileManager? {
-        fatalError("Not implemented")
-    }
-
-    func getFirstMatchingDriveFileManager(for userId: Int, driveId: Int) throws -> DriveFileManager? {
-        fatalError("Not implemented")
-    }
+    func removeTokenAndAccountFor(userId: Int) {}
 
     func removeCachedProperties() {}
+
+    func account(for token: ApiToken) -> ApiToken? { return nil }
+
+    func account(for userId: Int) -> ApiToken? { return nil }
+
+    func logoutCurrentAccountAndSwitchToNextIfPossible() {}
 }
