@@ -61,6 +61,7 @@ class InMemoryFileListViewModel: FileListViewModel {
 
                 #if DEBUG
                 Logger.general.error("Failed to create a realm. Aborting.")
+                // This will force the execution to breakpoint, to give a chance to the dev for debugging
                 raise(SIGINT)
                 #endif
 
