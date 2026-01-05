@@ -67,6 +67,10 @@ final class RealmAccessor: RealmAccessible {
 
             _ = try? Realm.deleteFiles(for: realmConfiguration)
 
+            guard canRetry else {
+                fatalError("Failed creating realm after a retry \(error.localizedDescription)")
+            }
+
             return getRealm(canRetry: false)
         } catch {
             Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration, afterRetry: !canRetry)
