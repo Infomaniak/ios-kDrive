@@ -56,9 +56,26 @@ final class RealmAccessor: RealmAccessible {
             let realm = try Realm(configuration: realmConfiguration)
             realm.refresh()
             return realm
-        } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
+        } catch let error as RLMError where error.code == .fail || error.code == .schemaMismatch {
             Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
+
+            #if DEBUG
+            Logger.general.error("Realm files will be deleted, you can resume the app with the debugger")
+            // This will force the execution to breakpoint, to give a chance to the dev for debugging
+            raise(SIGINT)
+            #endif
+
+            _ = try? Realm.deleteFiles(for: realmConfiguration)
+
+            return getRealm(canRetry: false)
+        } catch {
+            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
+
+            guard canRetry else {
+                fatalError("Failed creating realm after a retry \(error.localizedDescription)")
+            }
+
+            return getRealm(canRetry: false)
         }
     }
 
