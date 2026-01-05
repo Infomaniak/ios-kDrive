@@ -55,9 +55,7 @@ public enum Logging {
         DDLogError(
             "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error for next launch"
         )
-        _ = try? Realm.deleteFiles(for: realmConfiguration)
         #endif
-        fatalError("Failed creating realm \(error.localizedDescription)")
     }
 
     public static func functionOverrideError(_ function: String) -> Never {
