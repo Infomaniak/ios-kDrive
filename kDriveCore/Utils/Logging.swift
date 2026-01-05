@@ -44,8 +44,8 @@ public enum Logging {
         }
     }
 
-    public static func reportRealmOpeningError(_ error: Error, realmConfiguration: Realm.Configuration, afterRetry: Bool) -> Never {
-        let context = [
+    public static func reportRealmOpeningError(_ error: Error, realmConfiguration: Realm.Configuration, afterRetry: Bool) {
+        let context: [String: Any] = [
             "File URL": realmConfiguration.fileURL?.absoluteString ?? "",
             "after a retry": afterRetry
         ]
