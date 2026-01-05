@@ -63,7 +63,7 @@ class InMemoryFileListViewModel: FileListViewModel {
                 Logger.general.error("Failed to create a realm. Aborting.")
                 raise(SIGINT)
                 #endif
-                
+
                 fatalError("Failed creating realm \(error.localizedDescription)")
             }
         }
