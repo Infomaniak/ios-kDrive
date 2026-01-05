@@ -90,7 +90,7 @@ class SelectDriveViewController: UIViewController {
 
     private func initForCurrentAccount(_ account: UserProfile) async {
         currentAccount = account
-        accounts = await accountManager.accounts.concurrentCompactMap {
+        accounts = await accountManager.accounts.asyncCompactMap {
             await self.accountManager.userProfileStore.getUserProfile(id: $0.userId)
         }
         driveList = Array(driveInfosManager.getDrives(for: account.id))

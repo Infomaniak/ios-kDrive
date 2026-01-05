@@ -27,7 +27,6 @@ public struct InAppTwoFactorAuthenticationHelper: Sendable {
 
     public func checkTwoFAChallenges() async {
         @InjectService var accountManager: AccountManageable
-        @InjectService var tokenStore: TokenStore
 
         let sessions: [InAppTwoFactorAuthenticationSession] = await accountManager.accounts.asyncCompactMap { account in
             guard let user = await accountManager.userProfileStore.getUserProfile(id: account.userId) else {
