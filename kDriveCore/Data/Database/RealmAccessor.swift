@@ -20,6 +20,7 @@ import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCoreDB
 import RealmSwift
+import Realm
 
 /// Something to identify specific instances of Transactionable
 public enum kDriveDBID {
@@ -61,7 +62,6 @@ final class RealmAccessor: RealmAccessible {
 
             #if DEBUG
             Logger.general.error("Realm files will be deleted, you can resume the app with the debugger")
-            // This will force the execution to breakpoint, to give a chance to the dev for debugging
             raise(SIGINT)
             #endif
 
