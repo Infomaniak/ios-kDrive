@@ -56,7 +56,8 @@ extension SaveFileViewController: FooterButtonDelegate {
                                              fileIds: publicShareFileIds,
                                              exceptIds: publicShareExceptIds,
                                              sharelinkUuid: publicShareProxy.shareLinkUid,
-                                             driveFileManager: selectedDriveFileManager)
+                                             driveFileManager: selectedDriveFileManager,
+                                             token: publicShareProxy.token)
         }
     }
 
@@ -66,13 +67,15 @@ extension SaveFileViewController: FooterButtonDelegate {
                                         fileIds: [Int],
                                         exceptIds: [Int],
                                         sharelinkUuid: String,
-                                        driveFileManager: DriveFileManager) async throws {
+                                        driveFileManager: DriveFileManager,
+                                        token: String? = nil) async throws {
         try await _ = driveFileManager.apiFetcher.importShareLinkFiles(sourceDriveId: sourceDriveId,
                                                                        destinationDriveId: destinationDriveId,
                                                                        destinationFolderId: destinationFolderId,
                                                                        fileIds: fileIds,
                                                                        exceptIds: exceptIds,
-                                                                       sharelinkUuid: sharelinkUuid)
+                                                                       sharelinkUuid: sharelinkUuid,
+                                                                       token: token)
     }
 
     private func dismissViewController() {

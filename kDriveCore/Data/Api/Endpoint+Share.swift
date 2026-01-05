@@ -25,7 +25,7 @@ import RealmSwift
 private extension Endpoint {
     func withShareLinkToken(_ token: String?) -> Endpoint {
         guard let token else { return self }
-        let mergedItems = (queryItems ?? []) + [URLQueryItem(name: "sharelink_password", value: token)]
+        let mergedItems = (queryItems ?? []) + [URLQueryItem(name: "sharelink_token", value: token)]
         return Endpoint(host: host, path: path, queryItems: mergedItems)
     }
 }
@@ -130,7 +130,8 @@ public extension Endpoint {
         return Self.shareUrlV1.appending(path: "/share/\(driveId)/\(linkUuid)/preview/text/\(fileId)")
     }
 
-    static func importShareLinkFiles(destinationDrive: AbstractDrive) -> Endpoint {
+    static func importShareLinkFiles(destinationDrive: AbstractDrive, token: String? = nil) -> Endpoint {
         return Endpoint.driveInfoV2(drive: destinationDrive).appending(path: "/imports/sharelink")
+            .withShareLinkToken(token)
     }
 }

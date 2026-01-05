@@ -513,9 +513,10 @@ public class DriveApiFetcher: ApiFetcher {
                                      fileIds: [Int]?,
                                      exceptIds: [Int]?,
                                      sharelinkUuid: String,
-                                     password: String? = nil) async throws -> ValidServerResponse<FileExternalImport> {
+                                     password: String? = nil,
+                                     token: String? = nil) async throws -> ValidServerResponse<FileExternalImport> {
         let destinationDrive = ProxyDrive(id: destinationDriveId)
-        let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive)
+        let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive, token: token)
         var requestParameters: EncodableParameters = [
             PublicShareAPIParameters.sourceDriveId: sourceDriveId,
             PublicShareAPIParameters.destinationFolderId: destinationFolderId,
