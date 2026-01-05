@@ -142,7 +142,7 @@
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="switchUserTitle"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="switchAccountTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
