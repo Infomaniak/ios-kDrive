@@ -42,7 +42,11 @@ final class RealmAccessor: RealmAccessible {
         self.excludeFromBackup = excludeFromBackup
     }
 
-    func getRealm() -> RealmSwift.Realm {
+    func getRealm() -> Realm {
+        getRealm(canRetry: true)
+    }
+
+    private func getRealm(canRetry: Bool) -> Realm {
         defer {
             // Change file metadata after creation of the realm file.
             excludeFromBackupIfNeeded()
