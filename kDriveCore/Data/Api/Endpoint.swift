@@ -25,11 +25,29 @@ import RealmSwift
 
 public extension ApiEnvironment {
     var driveHost: String {
-        return "kdrive.\(host)"
+        switch self {
+        case .prod, .preprod:
+            return "kdrive.\(host)"
+        case let .customHost(host):
+            if host.contains("orphan") {
+                return host
+            }
+
+            return "kdrive.\(host)"
+        }
     }
 
     var apiDriveHost: String {
-        return "api.\(driveHost)"
+        switch self {
+        case .prod, .preprod:
+            return "api.\(driveHost)"
+        case let .customHost(host):
+            if host.contains("orphan") {
+                return host
+            }
+
+            return "api.\(driveHost)"
+        }
     }
 
     var onlyOfficeDocumentServerHost: String {
