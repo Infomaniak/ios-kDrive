@@ -28,7 +28,7 @@ public extension ApiEnvironment {
         switch self {
         case .prod, .preprod:
             return "kdrive.\(host)"
-        case let .customHost(host):
+        case .customHost(let host):
             if host.contains("orphan") {
                 return host
             }
@@ -41,7 +41,7 @@ public extension ApiEnvironment {
         switch self {
         case .prod, .preprod:
             return "api.\(driveHost)"
-        case let .customHost(host):
+        case .customHost(let host):
             if host.contains("orphan") {
                 return host
             }
@@ -54,7 +54,7 @@ public extension ApiEnvironment {
         switch self {
         case .prod, .preprod:
             return "documentserver.\(driveHost)"
-        case let .customHost(host):
+        case .customHost(let host):
             guard host.contains("orphan") else {
                 Logger.general.error("documentserver for arbitrary customHost will likely fail")
                 return "documentserver.\(host)"
@@ -70,7 +70,7 @@ public extension ApiEnvironment {
             return "info-mq.infomaniak.com"
         case .preprod:
             return "preprod-info-mq.infomaniak.com"
-        case let .customHost(host):
+        case .customHost(let host):
             if !host.contains("orphan") {
                 Logger.general.error("Cannot guess mqttHost for arbitrary customHost will fallback to preprod")
             }
@@ -84,7 +84,7 @@ public extension ApiEnvironment {
             return "8QC5EwBqpZ2Z"
         case .preprod:
             return "4fBt5AdC2P"
-        case let .customHost(host):
+        case .customHost(let host):
             if !host.contains("orphan") {
                 Logger.general.error("Cannot guess mqttPass for arbitrary customHost will fallback to preprod")
             }
