@@ -57,7 +57,15 @@ class InMemoryFileListViewModel: FileListViewModel {
                 realmAccessible = RealmWrapper(realm: realm)
                 currentDirectory = currentDirectory.detached()
             } catch {
-                Logging.reportRealmOpeningError(error, realmConfiguration: unCachedRealmConfiguration)
+                Logging.reportRealmOpeningError(error, realmConfiguration: unCachedRealmConfiguration, afterRetry: false)
+
+                #if DEBUG
+                Logger.general.error("Failed to create a realm. Aborting.")
+                // This will force the execution to breakpoint, to give a chance to the dev for debugging
+                raise(SIGINT)
+                #endif
+
+                fatalError("Failed creating realm \(error.localizedDescription)")
             }
         }
 

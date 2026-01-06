@@ -19,6 +19,7 @@
 import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCoreDB
+import Realm
 import RealmSwift
 
 /// Something to identify specific instances of Transactionable
@@ -42,7 +43,11 @@ final class RealmAccessor: RealmAccessible {
         self.excludeFromBackup = excludeFromBackup
     }
 
-    func getRealm() -> RealmSwift.Realm {
+    func getRealm() -> Realm {
+        getRealm(canRetry: true)
+    }
+
+    private func getRealm(canRetry: Bool) -> Realm {
         defer {
             // Change file metadata after creation of the realm file.
             excludeFromBackupIfNeeded()
@@ -52,9 +57,30 @@ final class RealmAccessor: RealmAccessible {
             let realm = try Realm(configuration: realmConfiguration)
             realm.refresh()
             return realm
+        } catch let error as RLMError where error.code == .fail || error.code == .schemaMismatch {
+            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration, afterRetry: !canRetry)
+
+            #if DEBUG
+            Logger.general.error("Realm files will be deleted, you can resume the app with the debugger")
+            // This will force the execution to breakpoint, to give a chance to the dev for debugging
+            raise(SIGINT)
+            #endif
+
+            _ = try? Realm.deleteFiles(for: realmConfiguration)
+
+            guard canRetry else {
+                fatalError("Failed creating realm after a retry \(error.localizedDescription)")
+            }
+
+            return getRealm(canRetry: false)
         } catch {
-            // We can't recover from this error but at least we report it correctly on Sentry
-            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration)
+            Logging.reportRealmOpeningError(error, realmConfiguration: realmConfiguration, afterRetry: !canRetry)
+
+            guard canRetry else {
+                fatalError("Failed creating realm after a retry \(error.localizedDescription)")
+            }
+
+            return getRealm(canRetry: false)
         }
     }
 
