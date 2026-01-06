@@ -61,6 +61,16 @@ class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
             documentPreview.loadFileURL(file.localUrl, allowingReadAccessTo: file.localUrl)
         }
     }
+
+    func setTopInset(_ inset: CGFloat) {
+        let scrollView = documentPreview.scrollView
+        let oldInset = scrollView.contentInset.top
+        let oldOffset = scrollView.contentOffset.y
+        scrollView.contentInset.top = inset
+        if oldInset == 0 && oldOffset <= -50 {
+            scrollView.contentOffset.y = oldOffset - inset
+        }
+    }
 }
 
 extension OfficePreviewCollectionViewCell: UIGestureRecognizerDelegate {

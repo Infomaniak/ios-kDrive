@@ -460,7 +460,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.pdfPageLabel.transform = hideButton
             self.editButton.transform = hideButton
             self.openButton.transform = hideButton
+
+            let topInset = self.fullScreenPreview ? 0 : UIConstants.Padding.standard
+            if let officeCell = self.collectionView.cellForItem(at: self.currentIndex) as? OfficePreviewCollectionViewCell {
+                officeCell.setTopInset(topInset)
+            }
         }
+
         hideFloatingPanel(fullScreenPreview)
     }
 
@@ -786,6 +792,8 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: OfficePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
+                let topInset = fullScreenPreview ? 0 : UIConstants.Padding.standard
+                cell.setTopInset(topInset)
                 return cell
             case .code:
                 let cell = collectionView.dequeueReusableCell(type: CodePreviewCollectionViewCell.self, for: indexPath)
