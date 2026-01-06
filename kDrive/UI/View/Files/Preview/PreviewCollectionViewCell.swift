@@ -41,7 +41,7 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         // META: keep SonarCloud happy
     }
 
-    func setTopInset(_ inset: CGFloat) {
+    func setTopInset(_: CGFloat) {
         // Implemented by subclasses
     }
 }
