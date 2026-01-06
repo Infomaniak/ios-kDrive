@@ -62,7 +62,7 @@ class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
         }
     }
 
-    func setTopInset(_ inset: CGFloat) {
+    override func setTopInset(_ inset: CGFloat) {
         let scrollView = documentPreview.scrollView
         let oldInset = scrollView.contentInset.top
         let oldOffset = scrollView.contentOffset.y

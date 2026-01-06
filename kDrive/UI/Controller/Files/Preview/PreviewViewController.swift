@@ -462,7 +462,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.openButton.transform = hideButton
 
             let topInset = self.fullScreenPreview ? 0 : UIConstants.Padding.standard
-            if let officeCell = self.collectionView.cellForItem(at: self.currentIndex) as? OfficePreviewCollectionViewCell {
+            if let officeCell = self.collectionView.cellForItem(at: self.currentIndex) as? PreviewCollectionViewCell {
                 officeCell.setTopInset(topInset)
             }
         }
@@ -799,6 +799,8 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: CodePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configure(with: file)
+                let topInset = fullScreenPreview ? 0 : UIConstants.Padding.standard
+                cell.setTopInset(topInset)
                 return cell
             default:
                 return getNoLocalPreviewCellFor(file: file, indexPath: indexPath)

@@ -40,4 +40,8 @@ class PreviewCollectionViewCell: UICollectionViewCell {
     func didEndDisplaying() {
         // META: keep SonarCloud happy
     }
+
+    func setTopInset(_ inset: CGFloat) {
+        // Implemented by subclasses
+    }
 }
