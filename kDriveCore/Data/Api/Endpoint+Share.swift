@@ -107,8 +107,9 @@ public extension Endpoint {
     }
 
     /// Download share link file
-    static func downloadShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+    static func downloadShareLinkFile(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
         return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/download")
+            .withShareLinkToken(token)
     }
 
     /// Archive files from a share link

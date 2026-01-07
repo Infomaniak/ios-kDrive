@@ -192,7 +192,8 @@ public extension Endpoint {
         if let publicShareProxy {
             return .downloadShareLinkFile(driveId: publicShareProxy.driveId,
                                           linkUuid: publicShareProxy.shareLinkUid,
-                                          fileId: file.id)
+                                          fileId: file.id,
+                                          token: publicShareProxy.token)
         } else {
             return .fileInfoV2(file).appending(path: "/download", queryItems: queryItems)
         }
