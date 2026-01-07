@@ -66,7 +66,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
     private var titleHeightConstraint: NSLayoutConstraint?
-    private var popRecognizer: InteractivePopRecognizer?
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
     private var heightToHide = 0.0
@@ -180,12 +179,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
-    private func setInteractiveRecognizer() {
-        guard let controller = navigationController else { return }
-        popRecognizer = InteractivePopRecognizer(controller: controller)
-        controller.interactivePopGestureRecognizer?.delegate = popRecognizer
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if initialLoading {
@@ -201,7 +194,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
         }
-        setInteractiveRecognizer()
     }
 
     private func updateFileForCurrentIndex() {
@@ -227,7 +219,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         currentCell?.didEndDisplaying()
         currentDownloadOperation?.cancel()
         previewErrors.values.compactMap { $0 as? OfficePreviewError }.forEach { $0.downloadTask?.cancel() }
-        navigationController?.interactivePopGestureRecognizer?.delegate = nil
 
         UIApplication.shared.endReceivingRemoteControlEvents()
         resignFirstResponder()
