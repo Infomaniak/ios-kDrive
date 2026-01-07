@@ -24,8 +24,8 @@ public struct SearchLink: Sendable, Equatable, LinkDriveProvider {
 
     public let searchURL: URL
     public let driveId: Int
-    public let queryJson: String
-    public let searchQuery: String
+    public let queryJson: String?
+    public let searchQuery: String?
     public let type: ConvertedType?
     public let modifiedBefore: Int?
     public let modifiedAfter: Int?
@@ -49,26 +49,29 @@ public struct SearchLink: Sendable, Equatable, LinkDriveProvider {
             return nil
         }
 
-        guard let queryItem = components.queryItems?.first(where: { $0.name == "q" }),
-              let queryJson = queryItem.value,
-              let data = queryJson.data(using: .utf8),
-              let jsonDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else {
-            return nil
-        }
-
-        self.searchURL = searchURL
-        self.driveId = driveIdInt
-        self.queryJson = queryJson
-        searchQuery = jsonDict["query"] as? String ?? ""
-        if let convertedTypeRawValue = jsonDict["type"] as? String {
-            type = ConvertedType(apiRawValue: convertedTypeRawValue)
+        if let queryItem = components.queryItems?.first(where: { $0.name == "q" }),
+           let queryJson = queryItem.value,
+           let data = queryJson.data(using: .utf8),
+           let jsonDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            self.searchURL = searchURL
+            self.driveId = driveIdInt
+            self.queryJson = queryJson
+            searchQuery = jsonDict["query"] as? String ?? ""
+            type = ConvertedType(apiRawValue: jsonDict["type"] as? String ?? "")
+            modifiedBefore = jsonDict["modified_before"] as? Int
+            modifiedAfter = jsonDict["modified_after"] as? Int
+            categoryIds = jsonDict["category_ids"] as? [Int] ?? []
+            categoryOperator = jsonDict["category_operator"] as? String
         } else {
+            self.searchURL = searchURL
+            self.driveId = driveIdInt
+            queryJson = nil
+            searchQuery = nil
             type = nil
+            modifiedBefore = nil
+            modifiedAfter = nil
+            categoryIds = []
+            categoryOperator = nil
         }
-        modifiedBefore = jsonDict["modified_before"] as? Int
-        modifiedAfter = jsonDict["modified_after"] as? Int
-        categoryIds = jsonDict["category_ids"] as? [Int] ?? []
-        categoryOperator = jsonDict["category_operator"] as? String
     }
 }
