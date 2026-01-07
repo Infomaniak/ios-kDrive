@@ -77,7 +77,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         textView.text = ""
-        textView.textContainerInset = UIEdgeInsets(top: 8, left: 3, bottom: 8, right: 3)
+        textView.textContainerInset = UIEdgeInsets(top: 36, left: 3, bottom: 36, right: 3)
         markdownParser.code.font = UIFont.monospacedSystemFont(
             ofSize: UIFontMetrics.default.scaledValue(for: MarkdownParser.defaultFont.pointSize),
             weight: .regular
@@ -150,6 +150,15 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         let theme: HighlightColors = UITraitCollection.current.userInterfaceStyle == .light ? .light(.xcode) : .dark(.xcode)
         let attributedText = try await Highlight().attributedText(content, colors: theme)
         textView.attributedText = NSAttributedString(attributedText)
+    }
+
+    override func setTopInset(_ inset: CGFloat) {
+        let oldInset = textView.contentInset.top
+        let oldOffset = textView.contentOffset.y
+        textView.contentInset.top = inset
+        if oldInset == 0 && oldOffset <= -50 {
+            textView.contentOffset.y = oldOffset - inset
+        }
     }
 }
 
