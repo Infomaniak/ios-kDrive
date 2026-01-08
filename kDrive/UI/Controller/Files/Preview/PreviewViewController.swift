@@ -82,6 +82,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private var navBarHeight: CGFloat {
+        navigationController?.navigationBar.frame.height ?? 0
+    }
+
+    private var statusBarHeight: CGFloat {
+        statusBarView.frame.height
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -122,7 +130,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.numberOfLines = 1
         pdfPageLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(pdfPageLabel)
-
 
         // Constraints
         titleWidthConstraint = pdfPageLabel.widthAnchor.constraint(equalToConstant: pdfPageLabel.frame.width)
@@ -198,6 +205,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         navigationController?.navigationBar.standardAppearance = navbarAppearance
         navigationController?.navigationBar.compactAppearance = navbarAppearance
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
+        navigationItem.title = nil
+
+        let hideStatusBar = CGAffineTransform(
+            translationX: 0,
+            y: -navBarHeight
+        )
+        statusBarView.transform = hideStatusBar
+        navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
 
         if initialLoading {
             matomo.trackPreview(file: currentFile)
@@ -421,12 +436,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.setNeedsStatusBarAppearanceUpdate()
             let hideStatusBar = CGAffineTransform(
                 translationX: 0,
-                y: self.fullScreenPreview ? -self.statusBarView.frame.height : 0
+                y: self.fullScreenPreview ? -self.statusBarHeight - self.navBarHeight : -self.navBarHeight
             )
             self.statusBarView.transform = hideStatusBar
+
+            let hideNavButtons = CGAffineTransform(
+                translationX: 0,
+                y: self.fullScreenPreview ? -self.statusBarHeight - self.navBarHeight : UIConstants.Padding.medium
+            )
+            self.navigationController?.navigationBar.transform = hideNavButtons
         }
         UIView.animate(withDuration: 0.4) {
-
             let topInset = self.fullScreenPreview ? 0 : UIConstants.Padding.standard
             if let officeCell = self.collectionView.cellForItem(at: self.currentIndex) as? PreviewCollectionViewCell {
                 officeCell.setTopInset(topInset)
