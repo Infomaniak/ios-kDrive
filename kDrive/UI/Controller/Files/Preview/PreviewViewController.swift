@@ -376,6 +376,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func setNavbarForEditing() {
         pdfPageLabel.isHidden = true
+
+        let editImage = makeImageWithCircle(
+            icon: KDriveResourcesAsset.editDocument.image,
+            circleDiameter: 36,
+            iconSize: CGSize(width: 20, height: 20),
+            circleColor: KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+        )
+
+        let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
+        editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
+
+        navigationItem.rightBarButtonItem = editItem
     }
 
     private func setNavbarForOpening() {
