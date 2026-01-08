@@ -181,6 +181,24 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+
+        let backImage = makeImageWithCircle(
+            icon: KDriveResourcesAsset.chevronLeft.image,
+            circleDiameter: 44,
+            iconSize: CGSize(width: 28, height: 28),
+            circleColor: KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+        )
+
+        let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
+        let navbarAppearance = UINavigationBarAppearance()
+        navbarAppearance.setBackIndicatorImage(backImage, transitionMaskImage: backImage)
+        navbarAppearance.backButtonAppearance = backButtonAppearance
+        navbarAppearance.configureWithTransparentBackground()
+        navbarAppearance.shadowImage = UIImage()
+        navigationController?.navigationBar.standardAppearance = navbarAppearance
+        navigationController?.navigationBar.compactAppearance = navbarAppearance
+        navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
+
         if initialLoading {
             matomo.trackPreview(file: currentFile)
 
@@ -194,6 +212,39 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
         }
+    }
+
+    private func makeImageWithCircle(
+        icon: UIImage,
+        circleDiameter: CGFloat,
+        iconSize: CGSize,
+        circleColor: UIColor
+    ) -> UIImage {
+        let canvasSize = CGSize(width: circleDiameter, height: circleDiameter)
+
+        let renderer = UIGraphicsImageRenderer(size: canvasSize)
+        let image = renderer.image { _ in
+            let rect = CGRect(origin: .zero, size: canvasSize)
+
+            let circlePath = UIBezierPath(ovalIn: rect)
+            circleColor.setFill()
+            circlePath.fill()
+
+            let iconImage = icon
+                .withRenderingMode(.alwaysTemplate)
+            let iconRect = CGRect(
+                x: (canvasSize.width - iconSize.width) / 2.0,
+                y: (canvasSize.height - iconSize.height) / 2.0,
+                width: iconSize.width,
+                height: iconSize.height
+            )
+
+            UIColor.white.setFill()
+            UIColor.white.setStroke()
+            iconImage.draw(in: iconRect, blendMode: .normal, alpha: 1.0)
+        }
+
+        return image.withRenderingMode(.alwaysOriginal)
     }
 
     private func updateFileForCurrentIndex() {
