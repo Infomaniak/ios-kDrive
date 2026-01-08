@@ -128,18 +128,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.textAlignment = .center
         pdfPageLabel.contentMode = .center
         pdfPageLabel.numberOfLines = 1
-        pdfPageLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(pdfPageLabel)
-
-        // Constraints
-        titleWidthConstraint = pdfPageLabel.widthAnchor.constraint(equalToConstant: pdfPageLabel.frame.width)
-        titleWidthConstraint?.isActive = true
-        titleHeightConstraint = pdfPageLabel.heightAnchor.constraint(equalToConstant: pdfPageLabel.frame.height)
-        titleHeightConstraint?.isActive = true
-        let constraints = [
-            pdfPageLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor)
-        ]
-        NSLayoutConstraint.activate(constraints)
 
         observeFileUpdated()
     }
@@ -397,7 +385,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
         pdfPageLabel.text = KDriveResourcesStrings.Localizable.previewPdfPages(currentPage, totalPages)
         pdfPageLabel.sizeToFit()
-        titleWidthConstraint?.constant = pdfPageLabel.frame.width + 32
+        let width = pdfPageLabel.frame.width + 32
         let height = pdfPageLabel.frame.height + 16
         titleHeightConstraint?.constant = height
         pdfPageLabel.setNeedsUpdateConstraints()
@@ -405,6 +393,16 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.clipsToBounds = true
         pdfPageLabel.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
         pdfPageLabel.isHidden = false
+
+        pdfPageLabel.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: width,
+            height: height
+        )
+
+        pdfPageLabel.layer.cornerRadius = pdfPageLabel.frame.height / 2
+        navigationItem.titleView = pdfPageLabel
     }
 
     @objc private func editFile() {
