@@ -137,18 +137,26 @@ public struct AppRouter: AppNavigable {
             await handleSimpleLink(deeplink: favoritePreviewLink, fileId: favoritePreviewLink.fileId, isOfficeLink: false)
 
         case .search(let searchLink):
-            handleSearchLink(searchLink: searchLink)
+            await handleSearchLink(searchLink: searchLink)
 
         case .basic(let basicLink):
             await handleBasicLink(basicLink: basicLink)
         }
     }
 
-    @MainActor private func handleSearchLink(searchLink: SearchLink) {
-        guard let driveFileManager = accountManager.currentDriveFileManager else {
-            Log.sceneDelegate("NavigationManager: Unable to navigate to .search without a DriveFileManager", level: .error)
+    @MainActor private func handleSearchLink(searchLink: SearchLink) async {
+        guard let driveFileManager = await accountManager
+            .getMatchingDriveFileManagerOrSwitchAccount(deeplink: searchLink) else {
+            Log.sceneDelegate(
+                "NavigationManager: Unable to navigate to .search without a DriveFileManager",
+                level: .error
+            )
+            deeplinkService.setLastDeeplink(searchLink)
             return
         }
+
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
+
         let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
 
         if let startTimestamp = searchLink.modifiedAfter, let endTimeStamp = searchLink.modifiedBefore {

@@ -74,6 +74,10 @@ public struct DeeplinkParser: DeeplinkParsable {
         if let basicLink = BasicLink(basicURL: url) {
             await router.navigate(to: .basic(basicLink: basicLink))
             return true
+        }
+        if let searchLink = SearchLink(searchURL: url) {
+            await router.navigate(to: .search(searchLink: searchLink))
+            return true
         } else {
             Log.sceneDelegate("Failed to open URL: Invalid URL", level: .error)
             return false
