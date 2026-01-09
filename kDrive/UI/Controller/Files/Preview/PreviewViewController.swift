@@ -181,7 +181,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         )
 
         let adjustedBackImage = backImage.withAlignmentRectInsets(
-            UIEdgeInsets(top: 1, left: -4, bottom: -1, right: 4)
+            UIEdgeInsets(top: -10, left: -4, bottom: 10, right: 4)
         )
 
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
@@ -219,8 +219,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func makeImageWithCircle(
         icon: UIImage,
-        circleDiameter: CGFloat = 34,
-        iconSize: CGSize = CGSize(width: 19, height: 19),
+        circleDiameter: CGFloat = 44,
+        iconSize: CGSize = CGSize(width: 23, height: 23),
         circleColor: UIColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
     ) -> UIImage {
         let canvasSize = CGSize(width: circleDiameter, height: circleDiameter)
@@ -369,7 +369,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
         editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
 
-        editItem.imageInsets = UIEdgeInsets(top: -4, left: -2, bottom: 4, right: 2)
+        editItem.imageInsets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: 2)
         navigationItem.rightBarButtonItem = editItem
     }
 
