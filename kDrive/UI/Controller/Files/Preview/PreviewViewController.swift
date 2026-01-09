@@ -219,7 +219,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func makeImageWithCircle(
         icon: UIImage,
-        circleDiameter: CGFloat = 44,
+        circleDiameter: CGFloat = 43,
         iconSize: CGSize = CGSize(width: 23, height: 23),
         circleColor: UIColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
     ) -> UIImage {
