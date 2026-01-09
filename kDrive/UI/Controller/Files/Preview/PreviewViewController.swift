@@ -49,7 +49,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var presentationOrigin = PresentationOrigin.fileList
     private var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
-            setTitle()
             saveSceneState()
         }
     }
@@ -326,10 +325,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override var prefersStatusBarHidden: Bool {
         return fullScreenPreview
-    }
-
-    private func setTitle() {
-        navigationItem.title = currentFile.name
     }
 
     func updateNavigationBar() {
