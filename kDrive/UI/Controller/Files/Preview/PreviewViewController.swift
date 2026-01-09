@@ -179,14 +179,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         let backImage = makeImageWithCircle(
             icon: KDriveResourcesAsset.chevronLeft.image,
-            circleDiameter: 44,
-            iconSize: CGSize(width: 28, height: 28),
+            circleDiameter: 34,
+            iconSize: CGSize(width: 19, height: 19),
             circleColor: KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+        )
+
+        let adjustedBackImage = backImage.withAlignmentRectInsets(
+            UIEdgeInsets(top: 1, left: -4, bottom: -1, right: 4)
         )
 
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
         let navbarAppearance = UINavigationBarAppearance()
-        navbarAppearance.setBackIndicatorImage(backImage, transitionMaskImage: backImage)
+        navbarAppearance.setBackIndicatorImage(adjustedBackImage, transitionMaskImage: adjustedBackImage)
         navbarAppearance.backButtonAppearance = backButtonAppearance
         navbarAppearance.configureWithTransparentBackground()
         navbarAppearance.shadowImage = UIImage()
@@ -368,13 +372,15 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         let editImage = makeImageWithCircle(
             icon: KDriveResourcesAsset.editDocument.image,
-            circleDiameter: 36,
-            iconSize: CGSize(width: 20, height: 20),
+            circleDiameter: 34,
+            iconSize: CGSize(width: 19, height: 19),
             circleColor: KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
         )
 
         let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
         editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
+
+        editItem.imageInsets = UIEdgeInsets(top: -4, left: -2, bottom: 4, right: 2)
 
         navigationItem.rightBarButtonItem = editItem
     }
