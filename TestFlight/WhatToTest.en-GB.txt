@@ -1,3 +1,6 @@
+- Deeplink improvements
+- The app will no longer crash on Realm downgrade
+- Fix missing translation
 - Fix an UI issue related to Dropboxes
 - Fix non compatible files
 - Fix 2FA

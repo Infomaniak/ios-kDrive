@@ -38,6 +38,15 @@
       }
     },
     {
+      "identity" : "dotlottie-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LottieFiles/dotlottie-ios",
+      "state" : {
+        "revision" : "bcc118976f04e8a36bfa4e41f55fb0c3f56d6ab9",
+        "version" : "0.12.0"
+      }
+    },
+    {
       "identity" : "dropdown",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/DropDown",
@@ -96,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "df170683c6c7f60b9ac54b50bb4e23b0e4ca1e84",
-        "version" : "18.4.1"
+        "revision" : "37fe4e9b9e7376ffb596a11cc75efbd8dcc87a16",
+        "version" : "18.4.2"
       }
     },
     {
@@ -105,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "21ef2edeebd53e8c9c00a1bdd303a8682917b3b3",
-        "version" : "24.2.2"
+        "revision" : "8f997eb249ecec6b75cf447edc0cbceef1d3df3e",
+        "version" : "24.3.0"
       }
     },
     {
@@ -159,8 +168,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-onboarding",
       "state" : {
-        "revision" : "ca793dc5613ae4fd67b209e3f5f0222e00a6da4d",
-        "version" : "1.4.4"
+        "revision" : "df57bb493c01f7ab2753e3c6a14f947897f16e46",
+        "version" : "1.5.0"
       }
     },
     {
@@ -357,8 +366,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "a1605a3303a28e14d822dec8aaa53da8a9490461",
-        "version" : "2.92.0"
+        "revision" : "e3d5c560e0a6bfa391a00e857aa28ad52a41fe8d",
+        "version" : "2.92.1"
       }
     },
     {
