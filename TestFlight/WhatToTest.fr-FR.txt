@@ -1,3 +1,6 @@
-- Correction d'interface utilisateur en lien avec les boites de dépots
+- Améliorations relative aux liens profonds
+- L'application ne plantera plus lors de la rétrogradation de Realm
+- Correction de traductions manquantes
+- Correction d'interface utilisateur en lien avec les boites de dépôts
 - Correction des fichiers non compatibles
 - Correction 2FA
