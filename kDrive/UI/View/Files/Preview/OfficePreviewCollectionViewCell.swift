@@ -67,7 +67,7 @@ class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
         let oldInset = scrollView.contentInset.top
         let oldOffset = scrollView.contentOffset.y
         scrollView.contentInset.top = inset
-        if oldInset == 0 && oldOffset <= -50 {
+        if oldInset <= 0 && oldOffset <= -50 {
             scrollView.contentOffset.y = oldOffset - inset
         }
     }

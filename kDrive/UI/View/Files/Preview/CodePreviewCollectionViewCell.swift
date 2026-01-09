@@ -77,7 +77,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         textView.text = ""
-        textView.textContainerInset = UIEdgeInsets(top: 36, left: 3, bottom: 36, right: 3)
+        textView.textContainerInset = UIEdgeInsets(top: 8, left: 3, bottom: 8, right: 3)
         markdownParser.code.font = UIFont.monospacedSystemFont(
             ofSize: UIFontMetrics.default.scaledValue(for: MarkdownParser.defaultFont.pointSize),
             weight: .regular
@@ -156,7 +156,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         let oldInset = textView.contentInset.top
         let oldOffset = textView.contentOffset.y
         textView.contentInset.top = inset
-        if oldInset == 0 && oldOffset <= -50 {
+        if oldInset <= 0 && oldOffset <= -50 {
             textView.contentOffset.y = oldOffset - inset
         }
     }

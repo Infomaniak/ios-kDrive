@@ -462,7 +462,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.navigationController?.navigationBar.transform = hideNavButtons
         }
         UIView.animate(withDuration: 0.4) {
-            let topInset = self.fullScreenPreview ? 0 : UIConstants.Padding.standard
+            let topInset = self.fullScreenPreview ? -UIConstants.Padding.standard : UIConstants.Padding.standard
             if let officeCell = self.collectionView.cellForItem(at: self.currentIndex) as? PreviewCollectionViewCell {
                 officeCell.setTopInset(topInset)
             }
@@ -793,14 +793,14 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: OfficePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
-                let topInset = fullScreenPreview ? 0 : UIConstants.Padding.standard
+                let topInset = fullScreenPreview ? -UIConstants.Padding.standard : UIConstants.Padding.standard
                 cell.setTopInset(topInset)
                 return cell
             case .code:
                 let cell = collectionView.dequeueReusableCell(type: CodePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configure(with: file)
-                let topInset = fullScreenPreview ? 0 : UIConstants.Padding.standard
+                let topInset = fullScreenPreview ? -UIConstants.Padding.standard : UIConstants.Padding.standard
                 cell.setTopInset(topInset)
                 return cell
             default:
