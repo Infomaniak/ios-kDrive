@@ -57,7 +57,7 @@ public extension ApiEnvironment {
         case .customHost(let host):
             guard host.contains("orphan") else {
                 Logger.general.error("documentserver for arbitrary customHost will likely fail")
-                return "documentserver.\(host)"
+                return "documentserver.\(driveHost)"
             }
 
             return "documentserver.\(ApiEnvironment.preprod.driveHost)"
