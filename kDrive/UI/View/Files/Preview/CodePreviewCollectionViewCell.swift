@@ -157,7 +157,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         let oldOffset = textView.contentOffset.y
         textView.contentInset.top = inset
         if oldInset <= 0 && oldOffset <= -50 {
-            textView.contentOffset.y = oldOffset - inset
+            textView.contentOffset.y = oldOffset - inset - UIConstants.Padding.small
         }
     }
 }
