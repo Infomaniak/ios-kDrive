@@ -236,18 +236,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
             return false
         }
 
-        guard let account = accounts.first(where: { $0.userId == userId }) else {
+        guard let account = accountManager.account(for: userId),
+              let user = await accountManager.userProfileStore.getUserProfile(id: userId) else {
             return false
         }
 
-        guard let user = account.user,
-              let token = tokenStore.tokenFor(userId: user.id)?.apiToken else {
-            SentryDebug.accountWithNoUserOrToken(account)
-            return false
-        }
-
-        let apiFetcher = accountManager.getApiFetcher(for: userId, token: token)
-
+        let apiFetcher = accountManager.getApiFetcher(for: userId, token: account)
         let session = InAppTwoFactorAuthenticationSession(user: user, apiFetcher: apiFetcher)
 
         inAppTwoFactorAuthenticationManager.checkConnectionAttempts(using: session)

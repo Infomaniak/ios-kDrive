@@ -41,11 +41,10 @@ final class MenuViewControllerTests: XCTestCase {
                                  scope: "scope",
                                  tokenType: "tokenType",
                                  userId: 1337, expirationDate: mockFutureDate)
-        let mockAccount = Account(apiToken: mockToken)
         let session = Alamofire.Session()
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let manager = AccountManager()
-            manager.currentAccount = mockAccount
+            manager.currentAccount = mockToken
             return manager
         }
         SimpleResolver.register([accountManagerFactory])

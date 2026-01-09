@@ -20,6 +20,7 @@ import DropDown
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
+import InfomaniakLogin
 import kDriveCore
 import UIKit
 
@@ -34,9 +35,9 @@ class SelectDriveViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
 
-    private var driveList: [Drive]!
-    private var currentAccount: Account!
-    private var accounts: [Account]!
+    private var driveList: [Drive] = []
+    private var currentUser: UserProfile?
+    private var users: [UserProfile] = []
     var selectedDrive: Drive?
     weak var delegate: SelectDriveDelegate?
 
@@ -46,7 +47,7 @@ class SelectDriveViewController: UIViewController {
         case selectDrive
     }
 
-    private var sections: [Section] = [.selectAccount, .selectDrive]
+    private var sections: [Section] = []
     private let dropDown = DropDown()
 
     override func viewDidLoad() {
@@ -60,20 +61,25 @@ class SelectDriveViewController: UIViewController {
 
         DropDown.startListeningToKeyboard()
 
-        var selectedAccount: Account?
-        if let selectedUserId = selectedDrive?.userId {
-            selectedAccount = accountManager.account(for: selectedUserId)
-        }
-
-        if let account = selectedAccount ?? accountManager.currentAccount {
-            initForCurrentAccount(account)
-            if !accounts.isEmpty {
-                sections = [.selectAccount, .selectDrive]
-            } else {
-                sections = [.selectDrive]
+        var selectedUser: UserProfile?
+        Task {
+            if let selectedUserId = selectedDrive?.userId {
+                selectedUser = await accountManager.userProfileStore.getUserProfile(id: selectedUserId)
             }
-        } else {
-            sections = [.noAccount]
+
+            let currentUser = await accountManager.getCurrentUser()
+            if let user = selectedUser ?? currentUser {
+                await initForCurrentUser(user)
+                if users.isEmpty {
+                    sections = [.selectDrive]
+                } else {
+                    sections = [.selectAccount, .selectDrive]
+                }
+            } else {
+                sections = [.noAccount]
+            }
+
+            tableView.reloadData()
         }
     }
 
@@ -82,11 +88,13 @@ class SelectDriveViewController: UIViewController {
         matomo.track(view: [MatomoUtils.View.save.displayName, "SelectDrive"])
     }
 
-    private func initForCurrentAccount(_ account: Account) {
-        currentAccount = account
-        accounts = accountManager.accounts.filter { $0.userId != account.userId }
-        driveList = Array(driveInfosManager.getDrives(for: account.userId))
-        dropDown.dataSource = accounts.map(\.user.displayName)
+    private func initForCurrentUser(_ user: UserProfile) async {
+        currentUser = user
+        users = await accountManager.accounts.asyncCompactMap {
+            await self.accountManager.userProfileStore.getUserProfile(id: $0.userId)
+        }
+        driveList = Array(driveInfosManager.getDrives(for: user.id))
+        dropDown.dataSource = users.map(\.displayName)
     }
 
     func configureDropDownWith(selectUserCell: UserAccountTableViewCell) {
@@ -98,14 +106,16 @@ class SelectDriveViewController: UIViewController {
         dropDown.customCellConfiguration = { [weak self] (index: Index, _: String, cell: DropDownCell) in
             guard let self else { return }
             guard let cell = cell as? UsersDropDownTableViewCell else { return }
-            let account = accounts[index]
-            cell.configureWith(account: account)
+            let account = users[index]
+            cell.configureWith(user: account)
         }
         dropDown.selectionAction = { [weak self] (index: Int, _: String) in
-            guard let self else { return }
-            let account = accounts[index]
-            initForCurrentAccount(account)
-            tableView.reloadSections([0, 1], with: .fade)
+            Task { [weak self] in
+                guard let self else { return }
+                let account = users[index]
+                await initForCurrentUser(account)
+                tableView.reloadSections([0, 1], with: .fade)
+            }
         }
     }
 
@@ -139,10 +149,10 @@ extension SelectDriveViewController: UITableViewDataSource {
         case .selectAccount:
             let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.titleLabel.text = currentAccount.user.displayName
-            cell.userEmailLabel.text = currentAccount.user.email
-            if let user = currentAccount.user {
-                user.getAvatar { image in
+            if let currentUser {
+                cell.titleLabel.text = currentUser.displayName
+                cell.userEmailLabel.text = currentUser.email
+                currentUser.getAvatar { image in
                     cell.logoImage.image = image
                 }
             }

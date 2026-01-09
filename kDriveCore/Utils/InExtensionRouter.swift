@@ -45,7 +45,7 @@ public struct InExtensionRouter: AppNavigable {
         return nil
     }
 
-    public func showPreloading(currentAccount: InfomaniakCore.Account) {}
+    public func showPreloading(currentAccount: ApiToken) {}
 
     public func showOnboarding() {}
 

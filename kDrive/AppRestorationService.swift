@@ -69,7 +69,6 @@ public final class AppRestorationService: AppRestorationServiceable {
 
     public func reloadAppUI(for driveId: Int, userId: Int) async {
         accountManager.setCurrentDriveForCurrentAccount(for: driveId, userId: userId)
-        accountManager.saveAccounts()
 
         guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
             return

@@ -344,7 +344,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         guard !selectMode else { return }
         if !isCompactView {
-            accountManager.currentAccount?.user?.getAvatar(size: CGSize(width: 512, height: 512)) { image in
+            Task {
+                guard let image = await accountManager.getCurrentUser()?.getAvatar(size: CGSize(width: 512, height: 512)) else {
+                    return
+                }
+
                 let avatar = SidebarViewController.generateProfileTabImages(image: image)
                 let buttonMenu = UIBarButtonItem(image: avatar, primaryAction: UIAction { [weak self] _ in
                     self?.buttonMenuClicked()

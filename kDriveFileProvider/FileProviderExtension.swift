@@ -291,7 +291,6 @@ final class FileProviderExtension: NSFileProviderExtension {
     private func updateDriveFileManager() throws {
         Log.fileProvider("updateDriveFileManager")
         if driveFileManager == nil {
-            accountManager.forceReload()
             driveFileManager = setDriveFileManager()
         }
         guard driveFileManager != nil else {

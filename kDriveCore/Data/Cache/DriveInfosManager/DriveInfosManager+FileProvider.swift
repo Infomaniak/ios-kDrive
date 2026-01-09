@@ -178,11 +178,12 @@ public extension DriveInfosManager {
     /// Set all available drives in `Files.app`
     private func setAllDomains() async {
         @InjectService var accountManager: AccountManageable
-        let accounts = accountManager.accounts.values
+        let accounts = accountManager.accounts
 
         for account in accounts {
+            guard let userProfile = await accountManager.userProfileStore.getUserProfile(id: account.userId) else { continue }
             let frozenDrives = Array(getDrives(for: account.userId).freezeIfNeeded())
-            updateFileManagerDomains(frozenDrives: frozenDrives, user: account.user)
+            updateFileManagerDomains(frozenDrives: frozenDrives, user: userProfile)
         }
     }
 

@@ -77,7 +77,7 @@ public final class MCKRouter: AppNavigable {
         return nil
     }
 
-    public func showPreloading(currentAccount: InfomaniakCore.Account) {
+    public func showPreloading(currentAccount: ApiToken) {
         logNoop()
     }
 

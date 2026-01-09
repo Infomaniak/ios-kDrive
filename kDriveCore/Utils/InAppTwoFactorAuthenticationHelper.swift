@@ -27,18 +27,13 @@ public struct InAppTwoFactorAuthenticationHelper: Sendable {
 
     public func checkTwoFAChallenges() async {
         @InjectService var accountManager: AccountManageable
-        @InjectService var tokenStore: TokenStore
 
-        let accounts = accountManager.accounts.values
-
-        let sessions: [InAppTwoFactorAuthenticationSession] = await accounts.asyncCompactMap { account in
-            guard let user = account.user,
-                  let token = tokenStore.tokenFor(userId: user.id)?.apiToken else {
-                SentryDebug.accountWithNoUserOrToken(account)
+        let sessions: [InAppTwoFactorAuthenticationSession] = await accountManager.accounts.asyncCompactMap { account in
+            guard let user = await accountManager.userProfileStore.getUserProfile(id: account.userId) else {
                 return nil
             }
 
-            let apiFetcher = accountManager.getApiFetcher(for: account.userId, token: token)
+            let apiFetcher = accountManager.getApiFetcher(for: account.userId, token: account)
 
             let session = InAppTwoFactorAuthenticationSession(user: user, apiFetcher: apiFetcher)
             return session

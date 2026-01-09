@@ -29,7 +29,7 @@ import XCTest
 final class UTRootViewControllerState: XCTestCase {
     let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68", accessType: nil)
 
-    static let fakeAccount = Account(apiToken: ApiToken(
+    static let fakeAccount = ApiToken(
         accessToken: "",
         expiresIn: 0,
         refreshToken: "",
@@ -37,7 +37,7 @@ final class UTRootViewControllerState: XCTestCase {
         tokenType: "",
         userId: 1234,
         expirationDate: Date()
-    ))
+    )
 
     override func setUp() {
         super.setUp()
@@ -191,7 +191,7 @@ final class UTRootViewControllerPreloading: XCTestCase {
             accountManager.currentUserId = UTRootViewControllerState.fakeAccount.userId
             accountManager.currentDriveFileManager = DriveFileManager(
                 drive: Drive(),
-                apiFetcher: DriveApiFetcher(token: UTRootViewControllerState.fakeAccount.token, delegate: accountManager)
+                apiFetcher: DriveApiFetcher(token: UTRootViewControllerState.fakeAccount, delegate: accountManager)
             )
             return accountManager
         }
@@ -209,7 +209,7 @@ final class UTRootViewControllerPreloading: XCTestCase {
         // THEN
         switch currentState {
         case .preloading(let account):
-            XCTAssertEqual(account.id, UTRootViewControllerState.fakeAccount.userId)
+            XCTAssertEqual(account.userId, UTRootViewControllerState.fakeAccount.userId)
         default:
             XCTFail("Should be preloading \(UTRootViewControllerState.fakeAccount), got \(currentState)")
         }
