@@ -357,10 +357,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func setNavbarStandard() {
         pdfPageLabel.isHidden = true
+        navigationItem.titleView = nil
+        navigationItem.rightBarButtonItem = nil
     }
 
     private func setNavbarForEditing() {
         pdfPageLabel.isHidden = true
+        navigationItem.titleView = nil
 
         let editImage = makeImageWithCircle(
             icon: KDriveResourcesAsset.editDocument.image
@@ -370,11 +373,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
 
         editItem.imageInsets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: 2)
-        navigationItem.rightBarButtonItem = editItem
+        navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
     }
 
     private func setNavbarForOpening() {
         pdfPageLabel.isHidden = true
+        navigationItem.titleView = nil
 
         let openImage = makeImageWithCircle(
             icon: KDriveResourcesAsset.openWith.image
@@ -388,6 +392,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
+        navigationItem.rightBarButtonItem = nil
         pdfPageLabel.text = KDriveResourcesStrings.Localizable.previewPdfPages(currentPage, totalPages)
         pdfPageLabel.sizeToFit()
         let width = pdfPageLabel.frame.width + 32
