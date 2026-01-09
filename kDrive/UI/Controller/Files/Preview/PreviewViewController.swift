@@ -178,10 +178,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         super.viewWillAppear(animated)
 
         let backImage = makeImageWithCircle(
-            icon: KDriveResourcesAsset.chevronLeft.image,
-            circleDiameter: 34,
-            iconSize: CGSize(width: 19, height: 19),
-            circleColor: KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+            icon: KDriveResourcesAsset.chevronLeft.image
         )
 
         let adjustedBackImage = backImage.withAlignmentRectInsets(
@@ -223,9 +220,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func makeImageWithCircle(
         icon: UIImage,
-        circleDiameter: CGFloat,
-        iconSize: CGSize,
-        circleColor: UIColor
+        circleDiameter: CGFloat = 34,
+        iconSize: CGSize = CGSize(width: 19, height: 19),
+        circleColor: UIColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
     ) -> UIImage {
         let canvasSize = CGSize(width: circleDiameter, height: circleDiameter)
 
@@ -371,22 +368,28 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.isHidden = true
 
         let editImage = makeImageWithCircle(
-            icon: KDriveResourcesAsset.editDocument.image,
-            circleDiameter: 34,
-            iconSize: CGSize(width: 19, height: 19),
-            circleColor: KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+            icon: KDriveResourcesAsset.editDocument.image
         )
 
         let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
         editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
 
         editItem.imageInsets = UIEdgeInsets(top: -4, left: -2, bottom: 4, right: 2)
-
         navigationItem.rightBarButtonItem = editItem
     }
 
     private func setNavbarForOpening() {
         pdfPageLabel.isHidden = true
+
+        let openImage = makeImageWithCircle(
+            icon: KDriveResourcesAsset.openWith.image
+        )
+
+        let openItem = UIBarButtonItem(image: openImage, style: .plain, target: self, action: #selector(openFile))
+        openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
+
+        openItem.imageInsets = UIEdgeInsets(top: -4, left: -2, bottom: 4, right: 2)
+        navigationItem.rightBarButtonItem = openItem
     }
 
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
