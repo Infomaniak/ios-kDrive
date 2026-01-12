@@ -62,7 +62,7 @@ struct UTApiEnvironment {
 
         #expect(customHost.driveHost == "kdrive.custom.example.com")
         #expect(customHost.apiDriveHost == "api.kdrive.custom.example.com")
-        #expect(customHost.onlyOfficeDocumentServerHost == "documentserver.custom.example.com")
+        #expect(customHost.onlyOfficeDocumentServerHost == "documentserver.kdrive.custom.example.com")
         #expect(customHost.mqttHost == "preprod-info-mq.infomaniak.com")
         #expect(customHost.mqttPass == "4fBt5AdC2P")
     }
