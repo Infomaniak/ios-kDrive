@@ -15,7 +15,6 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-// swiftlint:disable:this identical_operands
 
 @testable import InfomaniakCore
 @testable import kDriveCore
@@ -69,8 +68,11 @@ struct UTApiEnvironment {
 
     @Test("Equatable conformance")
     func equatableConformance() {
+        // swiftlint:disable:next identical_operands
         #expect(ApiEnvironment.prod == ApiEnvironment.prod)
+        // swiftlint:disable:next identical_operands
         #expect(ApiEnvironment.preprod == ApiEnvironment.preprod)
+        // swiftlint:disable:next identical_operands
         #expect(ApiEnvironment.customHost("test.com") == ApiEnvironment.customHost("test.com"))
         #expect(ApiEnvironment.prod != ApiEnvironment.preprod)
     }
