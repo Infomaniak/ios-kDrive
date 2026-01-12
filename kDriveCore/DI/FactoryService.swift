@@ -43,7 +43,7 @@ public enum FactoryService {
     public static let bundleId = "com.infomaniak.drive"
     public static let loginConfig = InfomaniakLogin.Config(clientId: "9473D73C-C20F-4971-9E10-D957C563FA68",
                                                            loginURL: URL(
-                                                               string: "https://login.\(ApiEnvironment.current.host)/"
+                                                               string: "https://\(ApiEnvironment.current.loginHost)/"
                                                            )!,
                                                            accessType: nil)
 
