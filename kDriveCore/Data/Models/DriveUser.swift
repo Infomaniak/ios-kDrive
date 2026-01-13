@@ -51,7 +51,7 @@ public enum UserPermission: String, Codable, CaseIterable {
         case .manage:
             return KDriveResourcesStrings.Localizable.userPermissionManage
         case .delete:
-            return KDriveResourcesStrings.Localizable.buttonDelete
+            return KDriveResourcesStrings.Localizable.buttonRemoveUserFromShare
         }
     }
 

@@ -2,9 +2,9 @@
  * Loco ios export: Xcode Strings (legacy)
  * Project: kDrive
  * Locale: it, Italian
- * Tagged: ios, !ios-action-info-plist
- * Exported by: Philippe Weidmann
- * Exported at: Wed, 05 Nov 2025 15:37:47 +0100
+ * Tagged: ios
+ * Exported by: Baptiste Griva
+ * Exported at: Tue, 13 Jan 2026 08:47:25 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -414,6 +414,9 @@
 
 /* loco:6049df4d5c2c3a04bc39795f */
 "buttonRemoveFavorites" = "Elimina i preferiti";
+
+/* loco:69651623d1509dbfc30bdde2 */
+"buttonRemoveUserFromShare" = "Elimina la condivisione";
 
 /* loco:6049df4d5c2c3a04bc397960 */
 "buttonRename" = "Rinomina";
@@ -1220,7 +1223,7 @@
 "localizedFilenamePrivateTeamSpace" = "La mia cartella";
 
 /* loco:65a140c3cdbe107c5a025352 */
-"localizedFilenameTeamSpace" = "Cartelle comuni";
+"localizedFilenameTeamSpace" = "Cartelle dell’organizzazione";
 
 /* loco:60dc3d5b27c2f44e2f7a3c12 */
 "locateButton" = "Localizzare";
