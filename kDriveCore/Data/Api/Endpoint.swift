@@ -50,6 +50,19 @@ public extension ApiEnvironment {
         }
     }
 
+    var preprodOnOrphanDriveHost: String {
+        switch self {
+        case .prod, .preprod:
+            return "api.\(driveHost)"
+        case .customHost(let host):
+            if host.contains("orphan") {
+                return "api.\(Self.preprod.driveHost)"
+            }
+
+            return "api.\(driveHost)"
+        }
+    }
+
     var onlyOfficeDocumentServerHost: String {
         switch self {
         case .prod, .preprod:
@@ -221,8 +234,12 @@ public extension Endpoint {
 
     // MARK: V2
 
+    private static var driveV2Path: String {
+        return "/2/drive"
+    }
+
     private static var driveV2: Endpoint {
-        return Endpoint(hostKeypath: \.apiDriveHost, path: "/2/drive")
+        return Endpoint(hostKeypath: \.apiDriveHost, path: driveV2Path)
     }
 
     static var initData: Endpoint {
@@ -230,7 +247,8 @@ public extension Endpoint {
             noAvatarDefault(),
             DriveInitWith.allCases.toQueryItem()
         ]
-        return .driveV2.appending(path: "/init", queryItems: queryItems)
+        return Endpoint(hostKeypath: \.preprodOnOrphanDriveHost, path: driveV2Path)
+            .appending(path: "/init", queryItems: queryItems)
     }
 
     // MARK: Action
