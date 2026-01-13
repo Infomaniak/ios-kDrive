@@ -85,20 +85,29 @@ public extension AppRouter {
 
         matomo.track(eventWithCategory: .deeplink, name: "publicShare")
 
-        guard let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
-            for: shareLinkUid,
-            driveId: driveId,
-            metadata: metadata
-        ) else {
-            return false
-        }
+        if let driveFileManager = try? accountManager
+            .getFirstMatchingDriveFileManager(for: accountManager.currentUserId, driveId: driveId) {
+            try? await driveFileManager.switchDriveAndReloadUI()
+            await showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
 
-        openPublicShare(driveId: driveId,
-                        linkUuid: shareLinkUid,
-                        folderId: folderId,
-                        fileId: fileId ?? metadata.fileId,
-                        driveFileManager: publicShareDriveFileManager,
-                        apiFetcher: apiFetcher)
+            let fileActionsHelper = await FileActionsHelper()
+            await fileActionsHelper.openFile(id: fileId ?? metadata.fileId, driveFileManager: driveFileManager, office: false)
+        } else {
+            guard let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
+                for: shareLinkUid,
+                driveId: driveId,
+                metadata: metadata
+            ) else {
+                return false
+            }
+
+            openPublicShare(driveId: driveId,
+                            linkUuid: shareLinkUid,
+                            folderId: folderId,
+                            fileId: fileId ?? metadata.fileId,
+                            driveFileManager: publicShareDriveFileManager,
+                            apiFetcher: apiFetcher)
+        }
 
         return true
     }
