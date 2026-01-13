@@ -151,15 +151,6 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         let attributedText = try await Highlight().attributedText(content, colors: theme)
         textView.attributedText = NSAttributedString(attributedText)
     }
-
-    override func setTopInset(_ inset: CGFloat) {
-        let oldInset = textView.contentInset.top
-        let oldOffset = textView.contentOffset.y
-        textView.contentInset.top = inset
-        if oldInset <= 0 && oldOffset <= -50 {
-            textView.contentOffset.y = oldOffset - inset - UIConstants.Padding.small
-        }
-    }
 }
 
 extension MarkdownParser {

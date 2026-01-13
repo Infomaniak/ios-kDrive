@@ -459,24 +459,16 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 y: self.fullScreenPreview ? -self.statusBarHeight - self.navBarHeight : -self.navBarHeight
             )
             self.statusBarView.transform = hideStatusBar
-
-            let hideNavButtons = CGAffineTransform(
-                translationX: 0,
-                y: self.fullScreenPreview ? -self.statusBarHeight - self.navBarHeight : UIConstants.Padding.medium
-            )
-            self.navigationController?.navigationBar.transform = hideNavButtons
-        }
-        UIView.animate(withDuration: 0.4) {
-            let topInset = self.fullScreenPreview ? -UIConstants.Padding.standard : UIConstants.Padding.standard
-            if let officeCell = self.collectionView.cellForItem(at: self.currentIndex) as? PreviewCollectionViewCell {
-                officeCell.setTopInset(topInset)
-            }
         }
 
         hideFloatingPanel(fullScreenPreview)
     }
 
     func hideFloatingPanel(_ hide: Bool) {
+        navigationController?.setNavigationBarHidden(hide, animated: true)
+        let targetTopInset = hide ? navBarHeight : 0.0
+        additionalSafeAreaInsets.top = targetTopInset
+        view.layoutIfNeeded()
         if hide {
             if floatingPanelViewController.presentingViewController != nil {
                 floatingPanelViewController.dismiss(animated: true)
@@ -798,15 +790,11 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: OfficePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
-                let topInset = fullScreenPreview ? -UIConstants.Padding.standard : UIConstants.Padding.standard
-                cell.setTopInset(topInset)
                 return cell
             case .code:
                 let cell = collectionView.dequeueReusableCell(type: CodePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configure(with: file)
-                let topInset = fullScreenPreview ? -UIConstants.Padding.standard : UIConstants.Padding.standard
-                cell.setTopInset(topInset)
                 return cell
             default:
                 return getNoLocalPreviewCellFor(file: file, indexPath: indexPath)
