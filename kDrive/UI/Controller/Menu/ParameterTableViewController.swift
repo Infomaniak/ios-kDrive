@@ -114,7 +114,6 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     private var visibleRows: [GeneralParameterRow] = GeneralParameterRow.allCases
         .filter { $0 != .joinBeta || !Bundle.main.isRunningInTestFlight }
-        .filter { $0 != .feedback }
 
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
@@ -132,13 +131,6 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
         navigationItem.hideBackButtonText()
         checkMykSuiteEnabledAndRefresh()
-
-        Task {
-            let currentUserIsStaff = await accountManager.getCurrentUser()?.isStaff == true
-            guard currentUserIsStaff else { return }
-            visibleRows.insert(.feedback, at: visibleRows.count - 1)
-            tableView.reloadData()
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -349,8 +341,18 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             UIApplication.shared.open(URLConstants.testFlight.url)
             matomo.track(eventWithCategory: .settings, name: "joinBetaProgram")
         case .feedback:
-            present(BugTrackerViewController(), animated: true)
-            matomo.track(eventWithCategory: .settings, name: "feedback")
+            Task {
+                let currentUserIsStaff = await accountManager.getCurrentUser()?.isStaff == true
+                if currentUserIsStaff {
+                    present(BugTrackerViewController(), animated: true)
+                    matomo.track(eventWithCategory: .settings, name: "feedback")
+                } else {
+                    guard let url = URL(string: KDriveResourcesStrings.Localizable.urlUserReportiOS) else {
+                        return
+                    }
+                    await UIApplication.shared.open(url)
+                }
+            }
         case .deleteAccount:
             let deleteAccountViewController = DeleteAccountViewController.instantiateInViewController(
                 delegate: self,
