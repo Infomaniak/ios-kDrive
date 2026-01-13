@@ -85,8 +85,8 @@ public extension AppRouter {
 
         matomo.track(eventWithCategory: .deeplink, name: "publicShare")
 
-        if accountManager.currentDriveId == driveId {
-            guard let driveFileManager = accountManager.currentDriveFileManager else { return false }
+        if let driveFileManager = try? accountManager.getFirstMatchingDriveFileManager(for: accountManager.currentUserId, driveId: driveId) {
+            try? await driveFileManager.switchDriveAndReloadUI()
             await showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
 
             let fileActionsHelper = await FileActionsHelper()
