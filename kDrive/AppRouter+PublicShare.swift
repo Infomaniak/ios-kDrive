@@ -105,6 +105,7 @@ public extension AppRouter {
                             linkUuid: shareLinkUid,
                             folderId: folderId,
                             fileId: fileId ?? metadata.fileId,
+                            token: token,
                             driveFileManager: publicShareDriveFileManager,
                             apiFetcher: apiFetcher)
         }
