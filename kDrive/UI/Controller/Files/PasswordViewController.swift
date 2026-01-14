@@ -56,7 +56,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         let button = IKLargeButton(frame: .zero)
         button.setTitle(KDriveCoreStrings.Localizable.buttonValid, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(sendPassword), for: .touchUpInside)
+        button.addTarget(self, action: #selector(sendPassword(_:)), for: .touchUpInside)
         return button
     }()
 
@@ -207,12 +207,14 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         passwordTextField.isSecureTextEntry = !showPassword
     }
 
-    @objc private func sendPassword() {
+    @objc private func sendPassword(_ sender: IKLargeButton) {
         guard let password = passwordTextField.text, !password.isEmpty else {
             return
         }
 
+        sender.setLoading(true)
         view.endEditing(true)
+        passwordTextField.isUserInteractionEnabled = false
 
         Task {
             do {
@@ -223,6 +225,9 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
             } catch {
                 @InjectService var notificationHelper: NotificationsHelpable
                 notificationHelper.sendWrongPasswordNotification()
+                passwordTextField.text = ""
+                sender.setLoading(false)
+                passwordTextField.isUserInteractionEnabled = true
             }
         }
     }
