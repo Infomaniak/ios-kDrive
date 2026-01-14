@@ -50,7 +50,7 @@ struct PDFScanImportHelper {
 
         for pageIndex in 0 ..< scan.pageCount {
             let pageImage = scan.imageOfPage(at: pageIndex)
-            guard let pageData = pageImage.jpegData(compressionQuality: FileImportHelper.imageCompression),
+            guard let pageData = pageImage.jpegData(compressionQuality: FileImportHelper.pdfCompression),
                   let compressedPageImage = UIImage(data: pageData) else {
                 return nil
             }
