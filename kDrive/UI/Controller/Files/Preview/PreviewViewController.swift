@@ -49,7 +49,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var presentationOrigin = PresentationOrigin.fileList
     private var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
-            setTitle()
             saveSceneState()
         }
     }
@@ -66,10 +65,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private let pdfPageLabel = UILabel(frame: .zero)
     private var titleWidthConstraint: NSLayoutConstraint?
     private var titleHeightConstraint: NSLayoutConstraint?
-    private let editButton = UIButton(type: .custom)
-    private let openButton = UIButton(type: .custom)
-    private let backButton = UIButton(type: .custom)
-    private var popRecognizer: InteractivePopRecognizer?
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
     private var heightToHide = 0.0
@@ -86,10 +81,16 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private var navBarHeight: CGFloat {
+        navigationController?.navigationBar.frame.height ?? 0
+    }
+
+    private var statusBarHeight: CGFloat {
+        statusBarView.frame.height
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        navigationItem.hideBackButtonText()
 
         collectionView.collectionViewLayout = createFullscreenLayout()
         collectionView.register(cellView: NoPreviewCollectionViewCell.self)
@@ -126,68 +127,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.textAlignment = .center
         pdfPageLabel.contentMode = .center
         pdfPageLabel.numberOfLines = 1
-        pdfPageLabel.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(pdfPageLabel)
-
-        editButton.tintColor = .white
-        editButton.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
-        editButton.contentMode = .center
-        editButton.setImage(KDriveResourcesAsset.editDocument.image, for: .normal)
-        editButton.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        editButton.imageEdgeInsets = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-        editButton.cornerRadius = editButton.frame.width / 2
-        editButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
-        editButton.addTarget(self, action: #selector(editFile), for: .touchUpInside)
-        editButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(editButton)
-
-        openButton.tintColor = .white
-        openButton.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
-        openButton.contentMode = .center
-        openButton.setImage(KDriveResourcesAsset.openWith.image, for: .normal)
-        openButton.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        openButton.imageEdgeInsets = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-        openButton.cornerRadius = openButton.frame.width / 2
-        openButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
-        openButton.addTarget(self, action: #selector(openFile), for: .touchUpInside)
-        openButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(openButton)
-
-        backButton.tintColor = .white
-        backButton.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
-        backButton.contentMode = .center
-        backButton.setImage(KDriveResourcesAsset.chevronLeft.image, for: .normal)
-        backButton.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        backButton.imageEdgeInsets = UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16)
-        backButton.cornerRadius = backButton.frame.width / 2
-        backButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonBack
-        backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
-        backButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(backButton)
-
-        // Constraints
-        titleWidthConstraint = pdfPageLabel.widthAnchor.constraint(equalToConstant: pdfPageLabel.frame.width)
-        titleWidthConstraint?.isActive = true
-        titleHeightConstraint = pdfPageLabel.heightAnchor.constraint(equalToConstant: pdfPageLabel.frame.height)
-        titleHeightConstraint?.isActive = true
-        let constraints = [
-            backButton.widthAnchor.constraint(equalToConstant: 50),
-            backButton.heightAnchor.constraint(equalToConstant: 50),
-            backButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 8),
-            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            editButton.widthAnchor.constraint(equalToConstant: 50),
-            editButton.heightAnchor.constraint(equalToConstant: 50),
-            editButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
-            editButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            openButton.widthAnchor.constraint(equalToConstant: 50),
-            openButton.heightAnchor.constraint(equalToConstant: 50),
-            openButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8),
-            openButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            pdfPageLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            pdfPageLabel.centerYAnchor.constraint(equalTo: backButton.centerYAnchor),
-            pdfPageLabel.centerYAnchor.constraint(equalTo: editButton.centerYAnchor)
-        ]
-        NSLayoutConstraint.activate(constraints)
 
         observeFileUpdated()
     }
@@ -234,15 +173,35 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
-    private func setInteractiveRecognizer() {
-        guard let controller = navigationController else { return }
-        popRecognizer = InteractivePopRecognizer(controller: controller)
-        controller.interactivePopGestureRecognizer?.delegate = popRecognizer
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: true)
+
+        let backImage = makeImageWithCircle(
+            icon: KDriveResourcesAsset.chevronLeft.image
+        )
+
+        let adjustedBackImage = backImage.withAlignmentRectInsets(
+            UIEdgeInsets(top: -10, left: -4, bottom: 10, right: 4)
+        )
+
+        let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
+        let navbarAppearance = UINavigationBarAppearance()
+        navbarAppearance.setBackIndicatorImage(adjustedBackImage, transitionMaskImage: adjustedBackImage)
+        navbarAppearance.backButtonAppearance = backButtonAppearance
+        navbarAppearance.configureWithTransparentBackground()
+        navbarAppearance.shadowImage = UIImage()
+        navigationController?.navigationBar.standardAppearance = navbarAppearance
+        navigationController?.navigationBar.compactAppearance = navbarAppearance
+        navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
+        navigationItem.title = nil
+
+        let hideStatusBar = CGAffineTransform(
+            translationX: 0,
+            y: -navBarHeight
+        )
+        statusBarView.transform = hideStatusBar
+        navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
+
         if initialLoading {
             matomo.trackPreview(file: currentFile)
 
@@ -256,7 +215,39 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
         }
-        setInteractiveRecognizer()
+    }
+
+    private func makeImageWithCircle(
+        icon: UIImage,
+        circleDiameter: CGFloat = 43,
+        iconSize: CGSize = CGSize(width: 23, height: 23),
+        circleColor: UIColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
+    ) -> UIImage {
+        let canvasSize = CGSize(width: circleDiameter, height: circleDiameter)
+
+        let renderer = UIGraphicsImageRenderer(size: canvasSize)
+        let image = renderer.image { _ in
+            let rect = CGRect(origin: .zero, size: canvasSize)
+
+            let circlePath = UIBezierPath(ovalIn: rect)
+            circleColor.setFill()
+            circlePath.fill()
+
+            let iconImage = icon
+                .withRenderingMode(.alwaysTemplate)
+            let iconRect = CGRect(
+                x: (canvasSize.width - iconSize.width) / 2.0,
+                y: (canvasSize.height - iconSize.height) / 2.0,
+                width: iconSize.width,
+                height: iconSize.height
+            )
+
+            UIColor.white.setFill()
+            UIColor.white.setStroke()
+            iconImage.draw(in: iconRect, blendMode: .normal, alpha: 1.0)
+        }
+
+        return image.withRenderingMode(.alwaysOriginal)
     }
 
     private func updateFileForCurrentIndex() {
@@ -269,7 +260,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
-        heightToHide = backButton.frame.minY
         matomo.track(view: [MatomoUtils.View.preview.displayName, "File"])
 
         saveSceneState()
@@ -278,12 +268,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         hideFloatingPanel(true)
+        navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: 0)
         navigationController?.setNavigationBarHidden(false, animated: true)
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
         currentDownloadOperation?.cancel()
         previewErrors.values.compactMap { $0 as? OfficePreviewError }.forEach { $0.downloadTask?.cancel() }
-        navigationController?.interactivePopGestureRecognizer?.delegate = nil
 
         UIApplication.shared.endReceivingRemoteControlEvents()
         resignFirstResponder()
@@ -337,10 +327,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         return fullScreenPreview
     }
 
-    private func setTitle() {
-        navigationItem.title = currentFile.name
-    }
-
     func updateNavigationBar() {
         guard !currentFile.isLocalVersionOlderThanRemote else {
             setNavbarStandard()
@@ -370,33 +356,46 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func setNavbarStandard() {
-        backButton.isHidden = false
         pdfPageLabel.isHidden = true
-        editButton.isHidden = true
-        openButton.isHidden = true
+        navigationItem.titleView = nil
+        navigationItem.rightBarButtonItem = nil
     }
 
     private func setNavbarForEditing() {
-        backButton.isHidden = false
         pdfPageLabel.isHidden = true
-        editButton.isHidden = editButtonHidden
-        openButton.isHidden = true
+        navigationItem.titleView = nil
+
+        let editImage = makeImageWithCircle(
+            icon: KDriveResourcesAsset.editDocument.image
+        )
+
+        let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
+        editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
+
+        editItem.imageInsets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: 2)
+        navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
     }
 
     private func setNavbarForOpening() {
-        backButton.isHidden = false
         pdfPageLabel.isHidden = true
-        editButton.isHidden = true
-        openButton.isHidden = false
+        navigationItem.titleView = nil
+
+        let openImage = makeImageWithCircle(
+            icon: KDriveResourcesAsset.openWith.image
+        )
+
+        let openItem = UIBarButtonItem(image: openImage, style: .plain, target: self, action: #selector(openFile))
+        openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
+
+        openItem.imageInsets = UIEdgeInsets(top: -4, left: -2, bottom: 4, right: 2)
+        navigationItem.rightBarButtonItem = openItem
     }
 
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
-        backButton.isHidden = false
-        editButton.isHidden = true
-        openButton.isHidden = true
+        navigationItem.rightBarButtonItem = nil
         pdfPageLabel.text = KDriveResourcesStrings.Localizable.previewPdfPages(currentPage, totalPages)
         pdfPageLabel.sizeToFit()
-        titleWidthConstraint?.constant = pdfPageLabel.frame.width + 32
+        let width = pdfPageLabel.frame.width + 32
         let height = pdfPageLabel.frame.height + 16
         titleHeightConstraint?.constant = height
         pdfPageLabel.setNeedsUpdateConstraints()
@@ -404,6 +403,16 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.clipsToBounds = true
         pdfPageLabel.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
         pdfPageLabel.isHidden = false
+
+        pdfPageLabel.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: width,
+            height: height
+        )
+
+        pdfPageLabel.layer.cornerRadius = pdfPageLabel.frame.height / 2
+        navigationItem.titleView = pdfPageLabel
     }
 
     @objc private func editFile() {
@@ -447,30 +456,19 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.setNeedsStatusBarAppearanceUpdate()
             let hideStatusBar = CGAffineTransform(
                 translationX: 0,
-                y: self.fullScreenPreview ? -self.statusBarView.frame.height : 0
+                y: self.fullScreenPreview ? -self.statusBarHeight - self.navBarHeight : -self.navBarHeight
             )
             self.statusBarView.transform = hideStatusBar
-        }
-        UIView.animate(withDuration: 0.4) {
-            let hideButton = CGAffineTransform(
-                translationX: 0,
-                y: self.fullScreenPreview ? -(self.backButton.frame.height + self.heightToHide) : 0
-            )
-            self.backButton.transform = hideButton
-            self.pdfPageLabel.transform = hideButton
-            self.editButton.transform = hideButton
-            self.openButton.transform = hideButton
-
-            let topInset = self.fullScreenPreview ? 0 : UIConstants.Padding.standard
-            if let officeCell = self.collectionView.cellForItem(at: self.currentIndex) as? PreviewCollectionViewCell {
-                officeCell.setTopInset(topInset)
-            }
         }
 
         hideFloatingPanel(fullScreenPreview)
     }
 
     func hideFloatingPanel(_ hide: Bool) {
+        navigationController?.setNavigationBarHidden(hide, animated: true)
+        let targetTopInset = hide ? navBarHeight : 0.0
+        additionalSafeAreaInsets.top = targetTopInset
+        view.layoutIfNeeded()
         if hide {
             if floatingPanelViewController.presentingViewController != nil {
                 floatingPanelViewController.dismiss(animated: true)
@@ -792,15 +790,11 @@ extension PreviewViewController: UICollectionViewDataSource {
                 let cell = collectionView.dequeueReusableCell(type: OfficePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configureWith(file: file)
-                let topInset = fullScreenPreview ? 0 : UIConstants.Padding.standard
-                cell.setTopInset(topInset)
                 return cell
             case .code:
                 let cell = collectionView.dequeueReusableCell(type: CodePreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
                 cell.configure(with: file)
-                let topInset = fullScreenPreview ? 0 : UIConstants.Padding.standard
-                cell.setTopInset(topInset)
                 return cell
             default:
                 return getNoLocalPreviewCellFor(file: file, indexPath: indexPath)
