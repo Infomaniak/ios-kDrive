@@ -95,7 +95,7 @@ public extension AppRouter {
             guard let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
                 for: shareLinkUid,
                 driveId: driveId,
-				token: token,
+                token: token,
                 metadata: metadata
             ) else {
                 return false
