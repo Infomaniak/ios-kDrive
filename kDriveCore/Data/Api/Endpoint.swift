@@ -25,15 +25,56 @@ import RealmSwift
 
 public extension ApiEnvironment {
     var driveHost: String {
-        return "kdrive.\(host)"
+        switch self {
+        case .prod, .preprod:
+            return "kdrive.\(host)"
+        case .customHost(let host):
+            if host.contains("orphan") {
+                return host
+            }
+
+            return "kdrive.\(host)"
+        }
     }
 
     var apiDriveHost: String {
-        return "api.\(driveHost)"
+        switch self {
+        case .prod, .preprod:
+            return "api.\(driveHost)"
+        case .customHost(let host):
+            if host.contains("orphan") {
+                return host
+            }
+
+            return "api.\(driveHost)"
+        }
+    }
+
+    var preprodOnOrphanDriveHost: String {
+        switch self {
+        case .prod, .preprod:
+            return "api.\(driveHost)"
+        case .customHost(let host):
+            if host.contains("orphan") {
+                return "api.\(Self.preprod.driveHost)"
+            }
+
+            return "api.\(driveHost)"
+        }
     }
 
     var onlyOfficeDocumentServerHost: String {
-        return "documentserver.\(driveHost)"
+        switch self {
+        case .prod, .preprod:
+            return "documentserver.\(driveHost)"
+        case .customHost(let host):
+            guard host.contains("orphan") else {
+                Logger.general.error("documentserver for arbitrary customHost will likely fail")
+                return "documentserver.\(driveHost)"
+            }
+
+            return "documentserver.\(ApiEnvironment.preprod.driveHost)"
+        }
     }
 
     var mqttHost: String {
@@ -42,8 +83,10 @@ public extension ApiEnvironment {
             return "info-mq.infomaniak.com"
         case .preprod:
             return "preprod-info-mq.infomaniak.com"
-        case .customHost:
-            Logger.general.error("Cannot guess mqttHost for customHost will fallback to preprod")
+        case .customHost(let host):
+            if !host.contains("orphan") {
+                Logger.general.error("Cannot guess mqttHost for arbitrary customHost will fallback to preprod")
+            }
             return "preprod-info-mq.infomaniak.com"
         }
     }
@@ -54,8 +97,10 @@ public extension ApiEnvironment {
             return "8QC5EwBqpZ2Z"
         case .preprod:
             return "4fBt5AdC2P"
-        case .customHost:
-            Logger.general.error("Cannot guess mqttPass for customHost will fallback to preprod")
+        case .customHost(let host):
+            if !host.contains("orphan") {
+                Logger.general.error("Cannot guess mqttPass for arbitrary customHost will fallback to preprod")
+            }
             return "4fBt5AdC2P"
         }
     }
@@ -189,8 +234,12 @@ public extension Endpoint {
 
     // MARK: V2
 
+    private static var driveV2Path: String {
+        return "/2/drive"
+    }
+
     private static var driveV2: Endpoint {
-        return Endpoint(hostKeypath: \.apiDriveHost, path: "/2/drive")
+        return Endpoint(hostKeypath: \.apiDriveHost, path: driveV2Path)
     }
 
     static var initData: Endpoint {
@@ -198,7 +247,8 @@ public extension Endpoint {
             noAvatarDefault(),
             DriveInitWith.allCases.toQueryItem()
         ]
-        return .driveV2.appending(path: "/init", queryItems: queryItems)
+        return Endpoint(hostKeypath: \.preprodOnOrphanDriveHost, path: driveV2Path)
+            .appending(path: "/init", queryItems: queryItems)
     }
 
     // MARK: Action
