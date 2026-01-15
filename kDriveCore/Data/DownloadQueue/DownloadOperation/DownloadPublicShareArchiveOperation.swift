@@ -53,7 +53,8 @@ public final class DownloadPublicShareArchiveOperation: DownloadArchiveOperation
         let url = Endpoint.downloadPublicShareArchive(
             drive: shareDrive,
             linkUuid: publicShareProxy.shareLinkUid,
-            archiveUuid: archiveId
+            archiveUuid: archiveId,
+            token: publicShareProxy.token
         ).url
 
         let request = URLRequest(url: url)

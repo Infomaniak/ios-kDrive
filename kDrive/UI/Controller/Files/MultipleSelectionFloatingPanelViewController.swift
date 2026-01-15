@@ -198,7 +198,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 let response = try await PublicShareApiFetcher().buildPublicShareArchive(
                     driveId: publicShareProxy.driveId,
                     linkUuid: publicShareProxy.shareLinkUid,
-                    body: archiveBody
+                    body: archiveBody,
+                    token: publicShareProxy.token
                 )
                 currentArchiveId = response.uuid
                 guard let rootViewController = view.window?.rootViewController else { return }

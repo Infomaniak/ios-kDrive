@@ -113,13 +113,16 @@ public extension Endpoint {
     }
 
     /// Archive files from a share link
-    static func publicShareArchive(driveId: Int, linkUuid: String) -> Endpoint {
+    static func publicShareArchive(driveId: Int, linkUuid: String, token: String? = nil) -> Endpoint {
         return shareUrlV2.appending(path: "/\(driveId)/share/\(linkUuid)/archive")
+            .withShareLinkToken(token)
     }
 
     /// Downloads a public share archive
-    static func downloadPublicShareArchive(drive: AbstractDrive, linkUuid: String, archiveUuid: String) -> Endpoint {
+    static func downloadPublicShareArchive(drive: AbstractDrive, linkUuid: String, archiveUuid: String,
+                                           token: String? = nil) -> Endpoint {
         return publicShareArchive(driveId: drive.id, linkUuid: linkUuid).appending(path: "/\(archiveUuid)/download")
+            .withShareLinkToken(token)
     }
 
     /// Count files of a public share folder

@@ -129,8 +129,10 @@ public extension PublicShareApiFetcher {
 
     func buildPublicShareArchive(driveId: Int,
                                  linkUuid: String,
-                                 body: ArchiveBody) async throws -> DownloadArchiveResponse {
-        let shareLinkArchiveUrl = Endpoint.publicShareArchive(driveId: driveId, linkUuid: linkUuid).url
+                                 body: ArchiveBody,
+                                 token: String? = nil) async throws -> DownloadArchiveResponse {
+        let shareLinkArchiveUrl = Endpoint.publicShareArchive(driveId: driveId, linkUuid: linkUuid,
+                                                              token: token).url
         let request = Session.default.request(shareLinkArchiveUrl,
                                               method: .post,
                                               parameters: body,
