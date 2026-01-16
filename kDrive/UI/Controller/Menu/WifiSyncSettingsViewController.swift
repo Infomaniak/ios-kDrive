@@ -46,7 +46,11 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
+        if offlineSync {
+            title = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
+        } else {
+            title = KDriveResourcesStrings.Localizable.syncWifiPicturesTitle
+        }
 
         tableView.register(cellView: ParameterSyncTableViewCell.self)
         tableView.allowsMultipleSelection = false
@@ -75,7 +79,11 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
         let currentMode = tableContent[indexPath.row]
         cell.syncTitleLabel.text = currentMode.title
-        cell.syncDetailLabel.text = currentMode.selectionTitle
+        if currentMode == .onlyWifi && !offlineSync {
+            cell.syncDetailLabel.text = KDriveResourcesStrings.Localizable.syncPhotosOnlyWifiDescription
+        } else {
+            cell.syncDetailLabel.text = currentMode.selectionTitle
+        }
         if currentMode == selectedMode {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
