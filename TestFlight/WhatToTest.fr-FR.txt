@@ -1,6 +1,5 @@
-- Améliorations relative aux liens profonds
-- L'application ne plantera plus lors de la rétrogradation de Realm
-- Correction de traductions manquantes
-- Correction d'interface utilisateur en lien avec les boites de dépôts
-- Correction des fichiers non compatibles
-- Correction 2FA
+- Prise en charge des partages publics protégés par mot de passe
+- Un lien profond vers un partage public vous redirigera vers vos fichiers si vous en êtes le propriétaire
+- Bouton de commentaires accessible à tous dans les paramètres
+- Notifications urgentes pour l'authentification à deux facteurs
+- Améliorations de la stabilité et corrections de bugs
