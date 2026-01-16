@@ -118,11 +118,11 @@ public struct AppRouter: AppNavigable {
             matomo.track(eventWithCategory: .deeplink, name: "internal")
             await handleSimpleLink(deeplink: privateShareLink, fileId: privateShareLink.fileId, isOfficeLink: false)
 
-        case .publicShare(let publicShareLink):
+        case .publicShare(let publicShareLink, let token):
             if accountManager.currentDriveFileManager == nil {
                 deeplinkService.setLastDeeplink(publicShareLink)
             }
-            await processPublicShareLink(publicShareLink)
+            await processPublicShareLink(publicShareLink, token: token)
 
         case .directory(let directoryLink):
             matomo.track(eventWithCategory: .deeplink, name: "internal")
@@ -854,15 +854,14 @@ public struct AppRouter: AppNavigable {
 
     // MARK: RouterFileNavigable
 
-    @MainActor public func presentPublicShareLocked(_ destinationURL: URL) {
+    @MainActor public func presentPublicShareLocked(_ link: PublicShareLink) {
         guard let window,
               let rootViewController = window.rootViewController else {
             return
         }
 
         rootViewController.dismiss(animated: false) {
-            let viewController = LockedFolderViewController()
-            viewController.destinationURL = destinationURL
+            let viewController = PasswordViewController(publicShareLink: link)
             let publicShareNavigationController = UINavigationController(rootViewController: viewController)
             publicShareNavigationController.modalPresentationStyle = .fullScreen
             publicShareNavigationController.modalTransitionStyle = .coverVertical

@@ -121,8 +121,8 @@ public final class DriveFileManager {
         let realmURL = context.realmURL(driveId: driveId, driveUserId: driveUserId)
 
         let inMemoryIdentifier: String?
-        if case .publicShare(let identifier, _) = context {
-            inMemoryIdentifier = "inMemory:\(identifier)"
+        if case .publicShare(let shareProxy, _) = context {
+            inMemoryIdentifier = "inMemory:\(shareProxy.shareLinkUid)"
         } else {
             inMemoryIdentifier = nil
         }

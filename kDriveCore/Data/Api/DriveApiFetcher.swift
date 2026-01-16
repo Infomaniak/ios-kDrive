@@ -507,19 +507,19 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.file(file)))
     }
 
-    public func importShareLinkFiles(sourceDriveId: Int,
+    public func importShareLinkFiles(publicShareProxy: PublicShareProxy,
                                      destinationDriveId: Int,
                                      destinationFolderId: Int,
                                      fileIds: [Int]?,
                                      exceptIds: [Int]?,
-                                     sharelinkUuid: String,
                                      password: String? = nil) async throws -> ValidServerResponse<FileExternalImport> {
         let destinationDrive = ProxyDrive(id: destinationDriveId)
-        let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive)
+        let importShareLinkFiles = Endpoint.importShareLinkFiles(destinationDrive: destinationDrive,
+                                                                 token: publicShareProxy.token)
         var requestParameters: EncodableParameters = [
-            PublicShareAPIParameters.sourceDriveId: sourceDriveId,
+            PublicShareAPIParameters.sourceDriveId: publicShareProxy.driveId,
             PublicShareAPIParameters.destinationFolderId: destinationFolderId,
-            PublicShareAPIParameters.sharelinkUuid: sharelinkUuid
+            PublicShareAPIParameters.sharelinkUuid: publicShareProxy.shareLinkUid
         ]
 
         if let fileIds, !fileIds.isEmpty {

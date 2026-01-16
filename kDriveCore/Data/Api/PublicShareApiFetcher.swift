@@ -33,6 +33,12 @@ public class PublicShareApiFetcher: ApiFetcher {
     /// All status including 401 are handled by our code. A locked public share will 401, therefore we need to support it.
     private static var handledHttpStatus = Set(200 ... 500)
 
+    private static let noCookiesSession: Session = {
+        let configuration = URLSessionConfiguration.af.default
+        configuration.httpCookieStorage = nil
+        return Session(configuration: configuration)
+    }()
+
     override public func perform<T: Decodable>(request: DataRequest,
                                                overrideDecoder: JSONDecoder? = nil) async throws -> ValidServerResponse<T> {
         let decoder = overrideDecoder ?? self.decoder
@@ -44,10 +50,32 @@ public class PublicShareApiFetcher: ApiFetcher {
     }
 }
 
+private struct ShareLinkPasswordPayload: Decodable {
+    let token: String
+
+    enum CodingKeys: String, CodingKey {
+        case token
+    }
+}
+
 public extension PublicShareApiFetcher {
-    func getMetadata(driveId: Int, shareLinkUid: String) async throws -> PublicShareMetadata {
-        let shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid).url
-        // TODO: Use authenticated token if availlable
+    func getToken(driveId: Int, shareLinkUid: String, password: String?) async throws -> String {
+        let shareLinkAuthUrl = Endpoint.shareLinkAuthentication(driveId: driveId, shareLinkUid: shareLinkUid).url
+        let request = PublicShareApiFetcher.noCookiesSession.request(shareLinkAuthUrl,
+                                                                     method: .post,
+                                                                     parameters: ["password": password ?? ""],
+                                                                     encoder: JSONParameterEncoder.default)
+
+        do {
+            let tokenResponse: ValidServerResponse<ShareLinkPasswordPayload> = try await perform(request: request)
+            return tokenResponse.validApiResponse.data.token
+        } catch InfomaniakError.apiError(let apiError) {
+            throw apiError
+        }
+    }
+
+    func getMetadata(driveId: Int, shareLinkUid: String, token: String?) async throws -> PublicShareMetadata {
+        let shareLinkInfoUrl = Endpoint.shareLinkInfo(driveId: driveId, shareLinkUid: shareLinkUid, token: token).url
         let request = Session.default.request(shareLinkInfoUrl)
 
         do {
@@ -58,8 +86,8 @@ public extension PublicShareApiFetcher {
         }
     }
 
-    func getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) async throws -> File {
-        let shareLinkFileUrl = Endpoint.shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId).url
+    func getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int, token: String?) async throws -> File {
+        let shareLinkFileUrl = Endpoint.shareLinkFile(driveId: driveId, linkUuid: linkUuid, fileId: fileId, token: token).url
         let requestParameters: [String: String] = [
             APIUploadParameter.with.rawValue: FileWith.capabilities.rawValue
         ]
@@ -68,8 +96,11 @@ public extension PublicShareApiFetcher {
         return shareLinkFile
     }
 
-    func getShareLinkFileWithThumbnail(driveId: Int, linkUuid: String, fileId: Int) async throws -> File {
-        let shareLinkFileUrl = Endpoint.shareLinkFileWithThumbnail(driveId: driveId, linkUuid: linkUuid, fileId: fileId).url
+    func getShareLinkFileWithThumbnail(driveId: Int, linkUuid: String, fileId: Int, token: String?) async throws -> File {
+        let shareLinkFileUrl = Endpoint.shareLinkFileWithThumbnail(driveId: driveId,
+                                                                   linkUuid: linkUuid,
+                                                                   fileId: fileId,
+                                                                   token: token).url
         let request = Session.default.request(shareLinkFileUrl)
         let shareLinkFile: File = try await perform(request: request)
         return shareLinkFile
@@ -84,7 +115,8 @@ public extension PublicShareApiFetcher {
             driveId: publicShareProxy.driveId,
             linkUuid: publicShareProxy.shareLinkUid,
             fileId: rootFolderId,
-            sortType: sortType
+            sortType: sortType,
+            token: publicShareProxy.token
         )
         .cursored(cursor)
         .sorted(by: [sortType])
@@ -97,8 +129,10 @@ public extension PublicShareApiFetcher {
 
     func buildPublicShareArchive(driveId: Int,
                                  linkUuid: String,
-                                 body: ArchiveBody) async throws -> DownloadArchiveResponse {
-        let shareLinkArchiveUrl = Endpoint.publicShareArchive(driveId: driveId, linkUuid: linkUuid).url
+                                 body: ArchiveBody,
+                                 token: String? = nil) async throws -> DownloadArchiveResponse {
+        let shareLinkArchiveUrl = Endpoint.publicShareArchive(driveId: driveId, linkUuid: linkUuid,
+                                                              token: token).url
         let request = Session.default.request(shareLinkArchiveUrl,
                                               method: .post,
                                               parameters: body,
@@ -107,8 +141,8 @@ public extension PublicShareApiFetcher {
         return archiveResponse.validApiResponse.data
     }
 
-    func countPublicShare(drive: AbstractDrive, linkUuid: String, fileId: Int) async throws -> FileCount {
-        let countUrl = Endpoint.countPublicShare(driveId: drive.id, linkUuid: linkUuid, fileId: fileId).url
+    func countPublicShare(drive: AbstractDrive, linkUuid: String, fileId: Int, token: String? = nil) async throws -> FileCount {
+        let countUrl = Endpoint.countPublicShare(driveId: drive.id, linkUuid: linkUuid, fileId: fileId, token: token).url
         let request = Session.default.request(countUrl)
         let countResponse: ValidServerResponse<FileCount> = try await perform(request: request)
         return countResponse.validApiResponse.data

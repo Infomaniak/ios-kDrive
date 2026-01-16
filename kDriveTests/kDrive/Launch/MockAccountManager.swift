@@ -66,7 +66,7 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
         return currentDriveFileManager
     }
 
-    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int,
+    func getInMemoryDriveFileManager(for publicShareId: String, driveId: Int, token: String?,
                                      metadata: PublicShareMetadata) -> DriveFileManager? {
         return currentDriveFileManager
     }

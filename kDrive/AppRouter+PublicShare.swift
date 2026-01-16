@@ -29,10 +29,10 @@ import UIKit
 
 public extension AppRouter {
     @discardableResult
-    func processPublicShareLink(_ link: PublicShareLink) async -> Bool {
+    func processPublicShareLink(_ link: PublicShareLink, token: String?) async -> Bool {
         let apiFetcher = PublicShareApiFetcher()
         do {
-            let metadata = try await apiFetcher.getMetadata(driveId: link.driveId, shareLinkUid: link.shareLinkUid)
+            let metadata = try await apiFetcher.getMetadata(driveId: link.driveId, shareLinkUid: link.shareLinkUid, token: token)
 
             return await processPublicShareMetadata(
                 metadata,
@@ -40,6 +40,7 @@ public extension AppRouter {
                 shareLinkUid: link.shareLinkUid,
                 folderId: link.folderId,
                 fileId: link.fileId,
+                token: token,
                 apiFetcher: apiFetcher
             )
         } catch {
@@ -51,21 +52,18 @@ public extension AppRouter {
                 return false
             }
 
-            return await processPublicShareMetadataLimitation(limitation, publicShareURL: link.publicShareURL)
+            return await processPublicShareMetadataLimitation(limitation, link: link)
         }
     }
 
     private func processPublicShareMetadataLimitation(_ limitation: PublicShareLimitation,
-                                                      publicShareURL: URL?) async -> Bool {
+                                                      link: PublicShareLink) async -> Bool {
         @InjectService var appNavigable: AppNavigable
         @InjectService var matomo: MatomoUtils
         switch limitation {
         case .passwordProtected:
-            guard let publicShareURL else {
-                return false
-            }
             matomo.track(eventWithCategory: .deeplink, name: "publicShareWithPassword")
-            await appNavigable.presentPublicShareLocked(publicShareURL)
+            await appNavigable.presentPublicShareLocked(link)
         case .expired:
             matomo.track(eventWithCategory: .deeplink, name: "publicShareExpired")
             await appNavigable.presentPublicShareExpired()
@@ -79,6 +77,7 @@ public extension AppRouter {
                                             shareLinkUid: String,
                                             folderId: Int?,
                                             fileId: Int?,
+                                            token: String?,
                                             apiFetcher: PublicShareApiFetcher) async -> Bool {
         @InjectService var accountManager: AccountManageable
         @InjectService var matomo: MatomoUtils
@@ -96,6 +95,7 @@ public extension AppRouter {
             guard let publicShareDriveFileManager = accountManager.getInMemoryDriveFileManager(
                 for: shareLinkUid,
                 driveId: driveId,
+                token: token,
                 metadata: metadata
             ) else {
                 return false
@@ -105,6 +105,7 @@ public extension AppRouter {
                             linkUuid: shareLinkUid,
                             folderId: folderId,
                             fileId: fileId ?? metadata.fileId,
+                            token: token,
                             driveFileManager: publicShareDriveFileManager,
                             apiFetcher: apiFetcher)
         }
@@ -116,23 +117,30 @@ public extension AppRouter {
                                  linkUuid: String,
                                  folderId: Int?,
                                  fileId: Int,
+                                 token: String?,
                                  driveFileManager: DriveFileManager,
                                  apiFetcher: PublicShareApiFetcher) {
         Task {
             do {
                 let publicShare: File
                 if let folderId {
-                    publicShare = try await apiFetcher.getShareLinkFile(driveId: driveId,
-                                                                        linkUuid: linkUuid,
-                                                                        fileId: folderId)
+                    publicShare = try await apiFetcher.getShareLinkFile(
+                        driveId: driveId,
+                        linkUuid: linkUuid,
+                        fileId: folderId,
+                        token: token
+                    )
                 } else {
-                    publicShare = try await apiFetcher.getShareLinkFileWithThumbnail(driveId: driveId,
-                                                                                     linkUuid: linkUuid,
-                                                                                     fileId: fileId)
+                    publicShare = try await apiFetcher.getShareLinkFileWithThumbnail(
+                        driveId: driveId,
+                        linkUuid: linkUuid,
+                        fileId: fileId,
+                        token: token
+                    )
                 }
 
                 @InjectService var appNavigable: AppNavigable
-                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid)
+                let publicShareProxy = PublicShareProxy(driveId: driveId, fileId: fileId, shareLinkUid: linkUuid, token: token)
 
                 if publicShare.isDirectory {
                     // Root folder must be in database for the FileListViewModel to work

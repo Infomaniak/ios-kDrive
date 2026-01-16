@@ -50,29 +50,26 @@ extension SaveFileViewController: FooterButtonDelegate {
                 dismissViewController()
             }
 
-            try await savePublicShareToDrive(sourceDriveId: publicShareProxy.driveId,
+            try await savePublicShareToDrive(publicShareProxy: publicShareProxy,
                                              destinationDriveId: drive.id,
                                              destinationFolderId: directory.id,
                                              fileIds: publicShareFileIds,
                                              exceptIds: publicShareExceptIds,
-                                             sharelinkUuid: publicShareProxy.shareLinkUid,
                                              driveFileManager: selectedDriveFileManager)
         }
     }
 
-    private func savePublicShareToDrive(sourceDriveId: Int,
+    private func savePublicShareToDrive(publicShareProxy: PublicShareProxy,
                                         destinationDriveId: Int,
                                         destinationFolderId: Int,
                                         fileIds: [Int],
                                         exceptIds: [Int],
-                                        sharelinkUuid: String,
                                         driveFileManager: DriveFileManager) async throws {
-        try await _ = driveFileManager.apiFetcher.importShareLinkFiles(sourceDriveId: sourceDriveId,
+        try await _ = driveFileManager.apiFetcher.importShareLinkFiles(publicShareProxy: publicShareProxy,
                                                                        destinationDriveId: destinationDriveId,
                                                                        destinationFolderId: destinationFolderId,
                                                                        fileIds: fileIds,
-                                                                       exceptIds: exceptIds,
-                                                                       sharelinkUuid: sharelinkUuid)
+                                                                       exceptIds: exceptIds)
     }
 
     private func dismissViewController() {
