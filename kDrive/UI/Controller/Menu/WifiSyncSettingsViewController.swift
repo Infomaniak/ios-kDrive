@@ -46,7 +46,11 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
+        if offlineSync {
+            title = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
+        } else {
+            title = KDriveResourcesStrings.Localizable.syncWifiPicturesTitle
+        }
 
         tableView.register(cellView: ParameterSyncTableViewCell.self)
         tableView.allowsMultipleSelection = false
@@ -75,7 +79,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
         let currentMode = tableContent[indexPath.row]
         cell.syncTitleLabel.text = currentMode.title
-        cell.syncDetailLabel.text = currentMode.selectionTitle
+        cell.syncDetailLabel.text = currentMode.selectionTitle(offlineSync: offlineSync)
         if currentMode == selectedMode {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
@@ -84,11 +88,24 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mode = tableContent[indexPath.row]
-        matomo.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
         if !offlineSync {
             delegate?.didSelectSyncMode(mode)
+            switch mode {
+            case .onlyWifi:
+                matomo.track(eventWithCategory: .photoSync, name: "syncOnlyWifi")
+
+            case .wifiAndMobileData:
+                matomo.track(eventWithCategory: .photoSync, name: "syncWifiAndData")
+            }
+
         } else {
             UserDefaults.shared.syncOfflineMode = mode
+            switch mode {
+            case .onlyWifi:
+                matomo.track(eventWithCategory: .settings, name: "syncOnlyWifi")
+            case .wifiAndMobileData:
+                matomo.track(eventWithCategory: .settings, name: "syncWifiAndData")
+            }
         }
 
         downloadQueue.updateQueueSuspension()

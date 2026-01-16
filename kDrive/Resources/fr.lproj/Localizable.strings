@@ -4,7 +4,7 @@
  * Locale: fr, French
  * Tagged: ios
  * Exported by: Baptiste Griva
- * Exported at: Tue, 13 Jan 2026 08:47:25 +0100
+ * Exported at: Fri, 16 Jan 2026 11:41:15 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -1919,10 +1919,13 @@
 "syncConfigureTitle" = "Sauvegardez vos souvenirs en lieu sûr";
 
 /* loco:66f50ff53251a55b2f0f1532 */
-"syncOnlyWifiDescription" = "Les fichiers hors ligne ne seront synchronisés uniquement via le Wi-Fi";
+"syncOnlyWifiDescription" = "Les fichiers hors ligne seront synchronisés uniquement via le Wi-Fi";
 
 /* loco:66f50e357d4c318d780a5bd2 */
 "syncOnlyWifiTitle" = "Via Wi-Fi uniquement";
+
+/* loco:696a13cc88a6c3e5c60bf632 */
+"syncPhotosOnlyWifiDescription" = "Les photos et les vidéos seront synchronisées uniquement via le Wi-Fi";
 
 /* loco:6049df4d5c2c3a04bc397a66 */
 "syncSettingsButtonActiveSync" = "Activer la sauvegarde automatique";
