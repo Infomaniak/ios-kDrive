@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -208,6 +209,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
     }
 
     @objc private func sendPassword(_ sender: IKLargeButton) {
+        @InjectService var matomo: MatomoUtils
         guard let password = passwordTextField.text, !password.isEmpty else {
             return
         }
@@ -215,6 +217,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         sender.setLoading(true)
         view.endEditing(true)
         passwordTextField.isUserInteractionEnabled = false
+        matomo.track(eventWithCategory: .publicShareAction, name: "validatePassword")
 
         Task {
             do {
