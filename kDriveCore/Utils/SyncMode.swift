@@ -33,10 +33,13 @@ public enum SyncMode: String, CaseIterable, PersistableEnum {
         }
     }
 
-    public var selectionTitle: String {
+    public func selectionTitle(offlineSync: Bool) -> String {
         switch self {
         case .onlyWifi:
-            return KDriveResourcesStrings.Localizable.syncOnlyWifiDescription
+            if offlineSync {
+                return KDriveResourcesStrings.Localizable.syncOnlyWifiDescription
+            }
+            return KDriveResourcesStrings.Localizable.syncPhotosOnlyWifiDescription
         case .wifiAndMobileData:
             return KDriveResourcesStrings.Localizable.syncWifiAndMobileDataDescription
         }

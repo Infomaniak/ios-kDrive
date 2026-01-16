@@ -79,11 +79,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         cell.initWithPositionAndShadow(isFirst: true, isLast: true)
         let currentMode = tableContent[indexPath.row]
         cell.syncTitleLabel.text = currentMode.title
-        if currentMode == .onlyWifi && !offlineSync {
-            cell.syncDetailLabel.text = KDriveResourcesStrings.Localizable.syncPhotosOnlyWifiDescription
-        } else {
-            cell.syncDetailLabel.text = currentMode.selectionTitle
-        }
+        cell.syncDetailLabel.text = currentMode.selectionTitle(offlineSync: offlineSync)
         if currentMode == selectedMode {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
@@ -94,17 +90,21 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
         let mode = tableContent[indexPath.row]
         if !offlineSync {
             delegate?.didSelectSyncMode(mode)
-            if mode == .onlyWifi {
+            switch mode {
+            case .onlyWifi:
                 matomo.track(eventWithCategory: .photoSync, name: "syncOnlyWifi")
-            } else {
-                matomo.track(eventWithCategory: .photoSync, name: "syncWifiAndMobileData")
+
+            case .wifiAndMobileData:
+                matomo.track(eventWithCategory: .photoSync, name: "syncWifiAndData")
             }
+
         } else {
             UserDefaults.shared.syncOfflineMode = mode
-            if mode == .onlyWifi {
+            switch mode {
+            case .onlyWifi:
                 matomo.track(eventWithCategory: .settings, name: "syncOnlyWifi")
-            } else {
-                matomo.track(eventWithCategory: .settings, name: "syncWifiAndMobileData")
+            case .wifiAndMobileData:
+                matomo.track(eventWithCategory: .settings, name: "syncWifiAndData")
             }
         }
 
