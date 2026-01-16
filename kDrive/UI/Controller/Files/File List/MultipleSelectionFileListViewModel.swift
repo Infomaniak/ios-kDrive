@@ -231,7 +231,8 @@ class MultipleSelectionFileListViewModel {
                     directoryCount = try await PublicShareApiFetcher()
                         .countPublicShare(drive: publicShareProxy.proxyDrive,
                                           linkUuid: publicShareProxy.shareLinkUid,
-                                          fileId: publicShareProxy.fileId)
+                                          fileId: publicShareProxy.fileId,
+                                          token: publicShareProxy.token)
                 } else {
                     directoryCount = try await driveFileManager.apiFetcher.count(of: proxyCurrentDirectory)
                 }

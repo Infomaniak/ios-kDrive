@@ -126,8 +126,9 @@ public extension Endpoint {
     }
 
     /// Count files of a public share folder
-    static func countPublicShare(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
+    static func countPublicShare(driveId: Int, linkUuid: String, fileId: Int, token: String? = nil) -> Endpoint {
         return shareLinkFileV2(driveId: driveId, linkUuid: linkUuid, fileId: fileId).appending(path: "/count")
+            .withShareLinkToken(token)
     }
 
     func showOfficeShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) -> Endpoint {
