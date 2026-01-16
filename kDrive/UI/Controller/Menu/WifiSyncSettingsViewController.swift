@@ -106,7 +106,6 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
             } else {
                 matomo.track(eventWithCategory: .settings, name: "syncWifiAndMobileData")
             }
-
         }
 
         downloadQueue.updateQueueSuspension()
