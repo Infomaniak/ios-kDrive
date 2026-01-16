@@ -92,11 +92,21 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let mode = tableContent[indexPath.row]
-        matomo.track(eventWithCategory: .settings, name: "mod\(mode.rawValue.capitalized)")
         if !offlineSync {
             delegate?.didSelectSyncMode(mode)
+            if mode == .onlyWifi {
+                matomo.track(eventWithCategory: .photoSync, name: "syncOnlyWifi")
+            } else {
+                matomo.track(eventWithCategory: .photoSync, name: "syncWifiAndMobileData")
+            }
         } else {
             UserDefaults.shared.syncOfflineMode = mode
+            if mode == .onlyWifi {
+                matomo.track(eventWithCategory: .settings, name: "syncOnlyWifi")
+            } else {
+                matomo.track(eventWithCategory: .settings, name: "syncWifiAndMobileData")
+            }
+
         }
 
         downloadQueue.updateQueueSuspension()
