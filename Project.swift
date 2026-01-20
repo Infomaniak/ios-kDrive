@@ -24,7 +24,8 @@ let project = Project(name: "kDrive",
                       options: .options(
                           automaticSchemesOptions: .enabled(
                               targetSchemesGrouping: .notGrouped
-                          )
+                          ),
+                          developmentRegion: "en"
                       ),
                       targets: [
                           .target(name: "kDrive",
