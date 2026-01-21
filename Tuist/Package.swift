@@ -12,6 +12,7 @@ let packageSettings = PackageSettings(
         "Atomics": .framework,
         "CNIODarwin": .framework,
         "CNIOLinux": .framework,
+        "CNIOOpenBSD": .framework,
         "CNIOWindows": .framework,
         "CocoaLumberjackSwift": .framework,
         "CocoaLumberjack": .framework,
