@@ -36,6 +36,14 @@ class MenuTopTableViewCell: UITableViewCell {
 
     @LazyInjectService var accountManager: AccountManageable
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        userEmailLabel.text = nil
+        userDisplayNameLabel.text = nil
+        driveNameLabel.text = nil
+        progressLabel.text = nil
+    }
+
     func configureCell(with drive: Drive, and user: UserProfile) {
         userAvatarContainerView.clipsToBounds = false
         userAvatarContainerView.layer.shadowOpacity = 0.3
