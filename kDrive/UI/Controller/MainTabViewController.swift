@@ -533,6 +533,9 @@ extension MainTabViewController: MainTabBarDelegate {
 
         _ = router.showMainViewController(driveFileManager: accountManager,
                                           selectedIndex: MainTabBarIndex.profile.rawValue)
+        Task {
+            await router.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: true)
+        }
 
         matomo.track(eventWithCategory: .account, name: "switchDoubleTap")
     }
