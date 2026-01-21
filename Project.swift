@@ -217,6 +217,7 @@ let project = Project(name: "kDrive",
                                       .external(name: "CocoaLumberjackSwift"),
                                       .external(name: "CocoaLumberjack"),
                                       .external(name: "InfomaniakCore"),
+                                      .external(name: "InfomaniakCoreCommonUI"),
                                       .external(name: "InfomaniakDI"),
                                       .external(name: "InfomaniakLogin"),
                                       .external(name: "RealmSwift")
