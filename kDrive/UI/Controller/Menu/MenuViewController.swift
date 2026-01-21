@@ -332,6 +332,7 @@ extension MenuViewController: UpdateAccountDelegate {
     @MainActor func didUpdateCurrentUserProfile(_ currentUser: UserProfile) {
         self.currentUser = currentUser
         needsContentUpdate = true
+        updateContentIfNeeded()
     }
 }
 
