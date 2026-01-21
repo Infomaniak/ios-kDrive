@@ -194,7 +194,9 @@ public final class DriveFileManager {
                         newObject?["_capabilities"] = oldObject?["rights"] as? Rights
                         newObject?["rawType"] = oldObject?["type"]
                         newObject?["rawStatus"] = oldObject?["status"]
-                        newObject?["hasOnlyoffice"] = oldObject?["onlyOffice"]
+                        if newObject?.objectSchema["hasOnlyOffice"] != nil {
+                            newObject?["hasOnlyoffice"] = oldObject?["onlyOffice"]
+                        }
                         newObject?["addedAt"] = Date(timeIntervalSince1970: TimeInterval(oldObject?["createdAt"] as? Int ?? 0))
                         newObject?["lastModifiedAt"] =
                             Date(timeIntervalSince1970: TimeInterval(oldObject?["lastModifiedAt"] as? Int ?? 0))
