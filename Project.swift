@@ -118,6 +118,7 @@ let project = Project(name: "kDrive",
                                   dependencies: [
                                       .target(name: "kDrive"),
                                       .target(name: "kDriveCore"),
+                                      .external(name: "DeviceAssociation"),
                                       .external(name: "InfomaniakCore"),
                                       .external(name: "InfomaniakDI"),
                                       .external(name: "InfomaniakLogin"),
