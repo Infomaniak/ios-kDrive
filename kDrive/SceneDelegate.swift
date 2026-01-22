@@ -126,6 +126,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
             Task {
                 await TokenMigrator().migrateTokensIfNeeded()
+                await UserProfileMigrator().migrateUserProfilesIfNeeded()
 
                 finishSceneSetup(scene, skipRestoration: false)
             }
