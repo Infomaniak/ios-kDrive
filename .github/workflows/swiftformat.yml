@@ -1,7 +1,6 @@
 name: SwiftFormat
 
-on:
-  pull_request:
+on: pull_request
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -10,16 +9,13 @@ concurrency:
 jobs:
   build:
     name: SwiftFormat
-    runs-on: [ self-hosted, iOS ]
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: jdx/mise-action@v2
-        with:
-          cache: false
-          experimental: true
       - name: Checkout
         uses: actions/checkout@v4
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
         with:
-          fetch-depth: 0
+          cache: false
       - name: SwiftFormat
         run: swiftformat --lint . --reporter github-actions-log

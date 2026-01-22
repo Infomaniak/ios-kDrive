@@ -1,7 +1,6 @@
 name: CI workflow
 
-on:
-  pull_request:
+on: pull_request
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -13,12 +12,11 @@ jobs:
     runs-on: [ self-hosted, iOS ]
 
     steps:
-      - uses: jdx/mise-action@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
         with:
           cache: false
-          experimental: true
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Create test env
         env:
           ENV_PATH: "kDriveTestShared/Env.swift"
@@ -41,11 +39,11 @@ jobs:
     runs-on: [ self-hosted, iOS ]
 
     steps:
-      - uses: jdx/mise-action@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
         with:
           cache: false
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Create test env
         env:
           ENV_PATH: "kDriveTestShared/Env.swift"
@@ -68,11 +66,11 @@ jobs:
     runs-on: [ self-hosted, iOS ]
 
     steps:
-      - uses: jdx/mise-action@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
         with:
           cache: false
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Create test env
         env:
           ENV_PATH: "kDriveTestShared/Env.swift"
