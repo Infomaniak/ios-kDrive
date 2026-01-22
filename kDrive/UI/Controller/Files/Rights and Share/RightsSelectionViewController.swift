@@ -33,10 +33,15 @@ enum RightsSelectionType {
 protocol RightsSelectionDelegate: AnyObject {
     func didUpdateRightValue(newValue value: String)
     func didDeleteUserRight()
+    func didRemoveUserDriveAccess()
 }
 
 extension RightsSelectionDelegate {
     func didDeleteUserRight() {
+        // META: keep SonarCloud happy
+    }
+
+    func didRemoveUserDriveAccess() {
         // META: keep SonarCloud happy
     }
 }
@@ -272,7 +277,8 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         }
 
         let right = rights[indexPath.row]
-        if right.key == UserPermission.delete.rawValue {
+        switch right.key {
+        case UserPermission.delete.rawValue:
             let deleteUser = fileAccessElement?.name ?? ""
             let attrString = NSMutableAttributedString(
                 string: KDriveResourcesStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser),
@@ -289,7 +295,26 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
             }
             present(alert, animated: true)
             selectRight()
-        } else {
+
+        case UserPermission.removeDriveAccess.rawValue:
+            let deleteUser = fileAccessElement?.name ?? ""
+            let attrString = NSMutableAttributedString(
+                string: KDriveResourcesStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser),
+                boldText: deleteUser
+            )
+            let alert = AlertTextViewController(
+                title: KDriveResourcesStrings.Localizable.buttonDelete,
+                message: attrString,
+                action: KDriveResourcesStrings.Localizable.buttonDelete,
+                destructive: true
+            ) {
+                self.delegate?.didRemoveUserDriveAccess()
+                self.presentingViewController?.dismiss(animated: true)
+            }
+            present(alert, animated: true)
+            selectRight()
+
+        default:
             selectedRight = right.key
         }
     }

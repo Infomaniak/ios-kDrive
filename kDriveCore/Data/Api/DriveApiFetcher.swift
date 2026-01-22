@@ -223,6 +223,11 @@ public class DriveApiFetcher: ApiFetcher {
         try await perform(request: authenticatedRequest(.userAccess(file: file, id: user.id), method: .delete))
     }
 
+    @discardableResult
+    public func removeDriveAccess(to drive: ProxyDrive, user: UserFileAccess) async throws -> Bool {
+        try await perform(request: authenticatedRequest(.userDriveAccess(drive: drive, userId: user.id), method: .delete))
+    }
+
     public func updateTeamAccess(to file: ProxyFile, team: TeamFileAccess, right: UserPermission) async throws -> Bool {
         try await perform(request: authenticatedRequest(.teamAccess(file: file, id: team.id), method: .put,
                                                         parameters: ["right": right]))

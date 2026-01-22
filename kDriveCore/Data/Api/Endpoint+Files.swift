@@ -86,6 +86,10 @@ public extension Endpoint {
         return .usersAccess(file: file).appending(path: "/\(id)")
     }
 
+    static func userDriveAccess(drive: ProxyDrive, userId: Int) -> Endpoint {
+        return .driveInfoV2(drive: drive).appending(path: "/users/\(userId)")
+    }
+
     static func forceAccess(file: AbstractFile) -> Endpoint {
         return .access(file: file).appending(path: "/force")
     }

@@ -328,6 +328,22 @@ extension ShareAndRightsViewController: RightsSelectionDelegate {
             }
         }
     }
+
+    func didRemoveUserDriveAccess() {
+        Task {
+            do {
+                if let user = selectedElement as? UserFileAccess {
+                    try await driveFileManager.apiFetcher.removeDriveAccess(
+                        to: ProxyDrive(id: driveFileManager.driveId),
+                        user: user
+                    )
+                    self.tableView.reloadSections([0, 2], with: .automatic)
+                }
+            } catch {
+                UIConstants.showSnackBarIfNeeded(error: error)
+            }
+        }
+    }
 }
 
 // MARK: - Share link table view cell delegate
