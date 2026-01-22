@@ -1,5 +1,5 @@
 {
-  "originHash" : "1b46a3fd3a67c87df6c463cc79ab5a44466085829442092accbd9ee1747aca04",
+  "originHash" : "dd24d3d6a8304fc71147971e3623534462688b0d2cfa8de83cde88c79d4ebfe0",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -220,10 +220,10 @@
     {
       "identity" : "markdownkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/bmoliveira/MarkdownKit",
+      "location" : "https://github.com/Infomaniak/MarkdownKit",
       "state" : {
-        "revision" : "39ea7a3fc7e65bcafe55152592b834859be574a5",
-        "version" : "1.7.3"
+        "branch" : "master",
+        "revision" : "feba8dcda762d3d72abb3d83bacede97c039d562"
       }
     },
     {
