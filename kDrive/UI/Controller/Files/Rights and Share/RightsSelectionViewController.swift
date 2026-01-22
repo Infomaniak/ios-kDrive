@@ -45,9 +45,9 @@ struct Right {
     var key: String
     var title: String
     var icon: UIImage
-    var fileDescription: String
-    var folderDescription: String
-    var documentDescription: String
+    var fileDescription: String?
+    var folderDescription: String?
+    var documentDescription: String?
     var upgradeDescription: String?
     var detailDescription: String?
 
@@ -154,7 +154,7 @@ class RightsSelectionViewController: UIViewController {
         case .shareLinkSettings:
             rights = Right.shareLinkRights(driveFileManager: driveFileManager)
         case .addUserRights:
-            let getUserRightDescription = { (permission: UserPermission) -> (String) in
+            let getUserRightDescription = { (permission: UserPermission) -> (String?) in
                 switch permission {
                 case .read:
                     return KDriveResourcesStrings.Localizable.userPermissionReadDescription
@@ -164,6 +164,8 @@ class RightsSelectionViewController: UIViewController {
                     return KDriveResourcesStrings.Localizable.userPermissionManageDescription
                 case .delete:
                     return KDriveResourcesStrings.Localizable.userPermissionRemove
+                case .removeDriveAccess:
+                    return nil
                 }
             }
             let userPermissions = UserPermission.allCases

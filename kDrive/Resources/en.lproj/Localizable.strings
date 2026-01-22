@@ -4,7 +4,7 @@
  * Locale: en, English
  * Tagged: ios
  * Exported by: Baptiste Griva
- * Exported at: Fri, 16 Jan 2026 11:41:15 +0100
+ * Exported at: Thu, 22 Jan 2026 10:14:13 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -411,6 +411,9 @@
 
 /* loco:6049df4d5c2c3a04bc39795e */
 "buttonRefresh" = "Update";
+
+/* loco:695f6972ddde32c26d0b1f22 */
+"buttonRemoveDriveAccess" = "Remove access to the drive";
 
 /* loco:6049df4d5c2c3a04bc39795f */
 "buttonRemoveFavorites" = "Delete from favorites";
