@@ -2153,7 +2153,7 @@
 "userPermissionRead" = "Peut consulter";
 
 /* loco:6049df4d5c2c3a04bc397a92 */
-"userPermissionReadDescription" = "Consultation uniquement\nTéléchargement\nAjout de commentaire";
+"userPermissionReadDescription" = "Consultation uniquement\nTéléchargement";
 
 /* loco:6049df4d5c2c3a04bc397a93 */
 "userPermissionRemove" = "L’utilisateur n’aura plus accès à ce fichier.";
@@ -2162,4 +2162,7 @@
 "userPermissionWrite" = "Peut modifier";
 
 /* loco:6049df4d5c2c3a04bc397a95 */
-"userPermissionWriteDescription" = "Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier";
+"userPermissionWriteDescription" = "Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression de fichier / dossier";
+
+/* loco:695e3e46c18ae37694044f72 */
+"userPermissionWriteExternalDescription" = "Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichiers / dossiers\nSuppression de ses propres fichiers / dossiers";

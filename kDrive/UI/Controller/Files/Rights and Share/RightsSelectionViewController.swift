@@ -165,6 +165,9 @@ class RightsSelectionViewController: UIViewController {
                 case .read:
                     return KDriveResourcesStrings.Localizable.userPermissionReadDescription
                 case .write:
+                    if let userId = self.fileAccessElement?.user?.id, !self.driveFileManager.drive.users.internalUsers.contains(userId) {
+                        return KDriveResourcesStrings.Localizable.userPermissionWriteExternalDescription
+                    }
                     return KDriveResourcesStrings.Localizable.userPermissionWriteDescription
                 case .manage:
                     return KDriveResourcesStrings.Localizable.userPermissionManageDescription
