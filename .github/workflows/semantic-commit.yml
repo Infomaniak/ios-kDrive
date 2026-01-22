@@ -1,6 +1,6 @@
 name: 'PR and Commit Message Check'
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - edited
