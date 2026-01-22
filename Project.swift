@@ -207,6 +207,7 @@ let project = Project(name: "kDrive",
                                       .external(name: "MQTTNIO"),
                                       .external(name: "MyKSuite"),
                                       .external(name: "RealmSwift"),
+                                      .external(name: "Realm"),
                                       .external(name: "Sentry-Dynamic"),
                                       .external(name: "SwiftRegex"),
                                       .external(name: "VersionChecker")
