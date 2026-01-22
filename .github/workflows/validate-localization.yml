@@ -20,7 +20,6 @@ jobs:
         uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
         with:
           cache: false
-          experimental: true
       - name: Create configuration file
         env:
           LOCO_KEY: ${{ secrets.LOCO_KEY }}
