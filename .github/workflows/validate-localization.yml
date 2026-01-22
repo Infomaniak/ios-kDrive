@@ -1,8 +1,6 @@
 name: Validate localization files
 
-on:
-  pull_request:
-    branches: [ master ]
+on: pull_request
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
