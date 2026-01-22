@@ -118,14 +118,28 @@ public extension Target {
                        entitlements: Entitlements(stringLiteral: entitlements),
                        dependencies: [
                            .target(name: "kDriveCore"),
-                           .external(name: "FloatingPanel"),
-                           .external(name: "Lottie"),
+                           .target(name: "kDriveResources"),
+                           .external(name: "Alamofire"),
+                           .external(name: "CocoaLumberjack"),
+                           .external(name: "CocoaLumberjackSwift"),
+                           .external(name: "DesignSystem"),
+                           .external(name: "DifferenceKit"),
                            .external(name: "DropDown"),
+                           .external(name: "FloatingPanel"),
                            .external(name: "HorizonCalendar"),
+                           .external(name: "InfomaniakCore"),
+                           .external(name: "InfomaniakCoreCommonUI"),
+                           .external(name: "InfomaniakCoreDB"),
+                           .external(name: "InfomaniakCoreUIKit"),
+                           .external(name: "InfomaniakDI"),
+                           .external(name: "InfomaniakLogin"),
+                           .external(name: "KSuite"),
+                           .external(name: "Kingfisher"),
+                           .external(name: "Lottie"),
+                           .external(name: "MaterialOutlinedTextField"),
                            .external(name: "Realm"),
                            .external(name: "RealmSwift"),
-                           .external(name: "CocoaLumberjack"),
-                           .external(name: "CocoaLumberjackSwift")
+                           .external(name: "VersionChecker")
                        ],
                        settings: settings)
     }

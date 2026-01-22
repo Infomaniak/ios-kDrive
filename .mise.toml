@@ -1,5 +1,5 @@
 [tools]
-tuist = '4.104.6'
+tuist = '4.128.3'
 swiftformat = '0.58.6'
 swiftlint = '0.62.2'
 sentry-cli = "latest"
