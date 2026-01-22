@@ -158,6 +158,7 @@ class RightsSelectionViewController: UIViewController {
         switch rightSelectionType {
         case .shareLinkSettings:
             rights = Right.shareLinkRights(driveFileManager: driveFileManager)
+
         case .addUserRights:
             let getUserRightDescription = { (permission: UserPermission) -> (String?) in
                 switch permission {
@@ -185,6 +186,11 @@ class RightsSelectionViewController: UIViewController {
                     documentDescription: getUserRightDescription($0)
                 )
             }
+
+            if fileAccessElement is ExternInvitationFileAccess {
+                rights.removeAll { $0.key == UserPermission.removeDriveAccess.rawValue }
+            }
+
         case .officeOnly:
             rights = Right.onlyOfficeRights
         }
