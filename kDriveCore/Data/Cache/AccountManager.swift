@@ -26,6 +26,7 @@ import InfomaniakLogin
 import InfomaniakNotifications
 import kDriveResources
 import MyKSuite
+
 import RealmSwift
 import Sentry
 
@@ -126,8 +127,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public var drives: [Drive] {
         return Array(driveInfosManager.getDrives(for: currentUserId))
     }
-
+    
+    public func troloolololololololololololololololololololololololololololololololololololololololololololololololololololololololololololololololol() {
+        
+    }
+    
     public var currentDriveFileManager: DriveFileManager? {
+        // TODO: Step 1 … step N Induction profit
         if let currentDriveFileManager = getDriveFileManager(for: currentDriveId, userId: currentUserId) {
             return currentDriveFileManager
         } else if let newCurrentDrive = drives.first {
