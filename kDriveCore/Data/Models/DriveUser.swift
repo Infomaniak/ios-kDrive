@@ -41,6 +41,7 @@ public enum UserPermission: String, Codable, CaseIterable {
     case write
     case manage
     case delete
+    case removeDriveAccess
 
     public var title: String {
         switch self {
@@ -52,6 +53,8 @@ public enum UserPermission: String, Codable, CaseIterable {
             return KDriveResourcesStrings.Localizable.userPermissionManage
         case .delete:
             return KDriveResourcesStrings.Localizable.buttonRemoveUserFromShare
+        case .removeDriveAccess:
+            return KDriveResourcesStrings.Localizable.buttonRemoveDriveAccess
         }
     }
 
@@ -63,7 +66,7 @@ public enum UserPermission: String, Codable, CaseIterable {
             return KDriveResourcesAsset.edit.image
         case .manage:
             return KDriveResourcesAsset.crown.image
-        case .delete:
+        case .delete, .removeDriveAccess:
             return KDriveResourcesAsset.delete.image
         }
     }

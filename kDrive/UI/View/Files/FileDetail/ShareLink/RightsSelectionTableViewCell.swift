@@ -101,7 +101,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
             enableCell()
         }
 
-        if right.key == UserPermission.delete.rawValue {
+        if right.key == UserPermission.delete.rawValue || right.key == UserPermission.removeDriveAccess.rawValue {
             rightsIconImageView.tintColor = KDriveResourcesAsset.binColor.color
         }
     }
