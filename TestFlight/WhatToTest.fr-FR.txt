@@ -1,3 +1,4 @@
+- Migration des profiles utilisateurs si nécessaire
 - Prise en charge des partages publics protégés par mot de passe
 - Un lien profond vers un partage public vous redirigera vers vos fichiers si vous en êtes le propriétaire
 - Bouton de commentaires accessible à tous dans les paramètres

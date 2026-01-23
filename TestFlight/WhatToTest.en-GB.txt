@@ -1,3 +1,4 @@
+- Migrate User Profiles if needed
 - Support for public shares with password
 - A public share deep-link will navigate to your files if you own it
 - Feedback button for everyone in the settings
