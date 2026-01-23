@@ -172,8 +172,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         if let driveFileManager = driveFileManagers[objectId] {
             return driveFileManager
-        } else if account(for: userId) != nil,
-                  let token = tokenStore.tokenFor(userId: userId),
+        } else if let token = tokenStore.tokenFor(userId: userId),
                   let drive = driveInfosManager.getDrive(id: driveId, userId: userId) {
             let apiFetcher = getApiFetcher(for: userId, token: token)
             driveFileManagers[objectId] = DriveFileManager(
