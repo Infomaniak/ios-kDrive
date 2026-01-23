@@ -8,4 +8,4 @@ concurrency:
 
 jobs:
   format:
-    uses: infomaniak/.github/.github/workflows/swiftformat.yml@feat/add-workflows
+    uses: infomaniak/.github/.github/workflows/swiftformat.yml@v1
