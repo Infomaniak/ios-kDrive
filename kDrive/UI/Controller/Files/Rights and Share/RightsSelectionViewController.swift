@@ -165,7 +165,15 @@ class RightsSelectionViewController: UIViewController {
                 case .read:
                     return KDriveResourcesStrings.Localizable.userPermissionReadDescription
                 case .write:
-                    if let userId = self.fileAccessElement?.user?.id, !self.driveFileManager.drive.users.internalUsers.contains(userId) {
+                    let isInvitation = self.fileAccessElement is ExternInvitationFileAccess
+                    let isNonInternalUser = {
+                        if let userId = self.fileAccessElement?.user?.id {
+                            return !self.driveFileManager.drive.users.internalUsers.contains(userId)
+                        }
+                        return false
+                    }()
+
+                    if isInvitation || isNonInternalUser {
                         return KDriveResourcesStrings.Localizable.userPermissionWriteExternalDescription
                     }
                     return KDriveResourcesStrings.Localizable.userPermissionWriteDescription
@@ -252,6 +260,10 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         if right.key == UserPermission.manage.rawValue {
             if let userId = fileAccessElement?.user?.id {
                 disable = !driveFileManager.drive.users.internalUsers.contains(userId)
+            }
+
+            if fileAccessElement is ExternInvitationFileAccess {
+                disable = true
             }
         }
         cell.configureCell(
