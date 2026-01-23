@@ -13,16 +13,13 @@ on:
       - edited
       - closed
       - reopened
-      # Makes sure we always add status check for PRs. Useful only if
-      # this action is required to pass before merging. Otherwise, it
-      # can be removed.
       - synchronize
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: z0al/dependent-issues@950226e7ca8fc43dc209a7febf67c655af3bdb43
-        env:
-          # (Required) The token to use to make API calls to GitHub.
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  check_dependencies:
+    uses: infomaniak/.github/.github/workflows/dependent-issues.yml@feat/add-workflows
+    secrets: inherit

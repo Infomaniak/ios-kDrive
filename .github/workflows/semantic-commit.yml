@@ -1,4 +1,5 @@
-name: 'PR and Commit Message Check'
+name: Check Commit Message
+
 on:
   pull_request:
     types:
@@ -7,17 +8,11 @@ on:
       - reopened
       - synchronize
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check-commit-message:
-    name: Check Commit Message
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check Commit Message
-        uses: gsactions/commit-message-checker@16fa2d5de096ae0d35626443bcd24f1e756cafee
-        with:
-          pattern: '^(Merge .+|((feat|fix|chore|docs|style|refactor|perf|ci|test)(\(.+\))?: [A-Z0-9].+[^.\s])$)'
-          error: 'Commit messages and PR title should match conventional commit convention and start with an uppercase.'
-          excludeDescription: 'true'
-          excludeTitle: 'false'
-          checkAllCommitMessages: 'true'
-          accessToken: ${{ secrets.GITHUB_TOKEN }}
+    uses: infomaniak/.github/.github/workflows/semantic-commit.yml@feat/add-workflows
+    secrets: inherit
