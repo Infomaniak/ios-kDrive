@@ -20,6 +20,7 @@ let packageSettings = PackageSettings(
         "DesignSystem": .framework,
         "DeviceAssociation": .framework,
         "DifferenceKit": .framework,
+        "DropDown": .framework,
         "InAppTwoFactorAuthentication": .framework,
         "InfomaniakBugTracker": .framework,
         "InfomaniakConcurrency": .framework,
