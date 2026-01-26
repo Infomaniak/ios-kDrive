@@ -7,22 +7,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Validate localization files
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup mise
-        uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
-        with:
-          cache: false
-      - name: Create configuration file
-        env:
-          LOCO_KEY: ${{ secrets.LOCO_KEY }}
-        run: |
-          touch ${GITHUB_WORKSPACE}/.import_loco
-          echo -e "[mail]\nlocalizable_path = ${GITHUB_WORKSPACE}/kDrive/Resources\nmain_target_localizable_path = ${GITHUB_WORKSPACE}/kDrive/Resources\nloco_key = $LOCO_KEY" > ${GITHUB_WORKSPACE}/.import_loco
-      - name: Validate
-        run: import_loco mail -c --config-file ${GITHUB_WORKSPACE}/.import_loco
+  validate:
+    uses: infomaniak/.github/.github/workflows/validate-localization.yml@v1
+    with:
+      localizable_path: "kDrive/Resources"
+      main_target_localizable_path: "kDrive/Resources"
+    secrets: inherit

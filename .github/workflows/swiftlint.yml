@@ -5,17 +5,7 @@ on: pull_request
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-  
-jobs:
-  build:
-    name: SwiftLint
-    runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
-        with:
-          cache: false
-      - name: SwiftLint
-        run: swiftlint --config .swiftlint.yml --config .swiftlint-ci.yml --reporter github-actions-logging .
+jobs:
+  lint:
+    uses: infomaniak/.github/.github/workflows/swiftlint.yml@v1
