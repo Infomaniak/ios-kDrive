@@ -1,3 +1,4 @@
+- Fix related to iOS's Files.app
 - Migrate User Profiles if needed
 - Support for public shares with password
 - A public share deep-link will navigate to your files if you own it
