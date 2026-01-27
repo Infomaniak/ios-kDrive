@@ -176,6 +176,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        navigationController?.navigationBar.isHidden = true
+
         let backImage = makeImageWithCircle(
             icon: KDriveResourcesAsset.chevronLeft.image
         )
@@ -252,6 +254,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         hideFloatingPanel(false)
+        navigationController?.navigationBar.isHidden = false
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
