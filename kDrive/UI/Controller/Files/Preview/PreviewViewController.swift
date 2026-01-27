@@ -267,9 +267,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        hideFloatingPanel(true)
         navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: 0)
-        navigationController?.setNavigationBarHidden(false, animated: true)
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
         currentDownloadOperation?.cancel()
@@ -440,10 +438,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 self.present(self.floatingPanelViewController, animated: false)
             }
         }
-    }
-
-    @objc private func goBack() {
-        navigationController?.popViewController(animated: true)
     }
 
     func setFullscreen(_ fullscreen: Bool? = nil) {
