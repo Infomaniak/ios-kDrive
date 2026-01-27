@@ -175,9 +175,13 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
-        (tabBarController as? PlusButtonObserver)?.updateCenterButton()
-
         tryLoadingFilesOrDisplayError()
+    }
+
+    override func beginAppearanceTransition(_ isAppearing: Bool, animated: Bool) {
+        super.beginAppearanceTransition(isAppearing, animated: animated)
+
+        (tabBarController as? PlusButtonObserver)?.updateCenterButton()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -614,7 +618,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     private func bestEmptyViewType() -> EmptyTableView.EmptyTableViewType {
         var type = viewModel.configuration.emptyViewType
         if tabBarController?.tabBar.isHidden == false,
-           type == .emptyFolder && viewModel.currentDirectory.capabilities.canCreateFile {
+           type == .emptyFolder &&
+           viewModel.currentDirectory.capabilities.canCreateFile &&
+           !viewModel.currentDirectory.isTrashed {
             type = .emptyFolderWithCreationRights
         }
         return type
