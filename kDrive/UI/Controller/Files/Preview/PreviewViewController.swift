@@ -197,6 +197,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
         navigationItem.title = nil
 
+        let hideStatusBar = CGAffineTransform(
+            translationX: 0,
+            y: -navBarHeight
+        )
+        statusBarView.transform = hideStatusBar
+
         navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
 
         if initialLoading {
@@ -254,6 +260,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         hideFloatingPanel(false)
+        setFullscreen(false)
         navigationController?.navigationBar.isHidden = false
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
@@ -309,7 +316,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view.safeAreaInsets.bottom, 5))
-        setFullscreen(false)
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
