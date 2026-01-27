@@ -471,7 +471,9 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     func updateCenterButton() {
         let (_, currentDirectory) = getCurrentDirectory()
-        guard let currentDirectory, currentDirectory.id >= DriveFileManager.constants.rootID else {
+        guard let currentDirectory,
+              currentDirectory.id >= DriveFileManager.constants.rootID,
+              !currentDirectory.isTrashed else {
             (tabBar as? MainTabBar)?.centerButton?.isEnabled = false
             return
         }
