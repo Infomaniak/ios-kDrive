@@ -182,6 +182,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         )
 
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
+        backButtonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.clear]
+        backButtonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.clear]
         let navbarAppearance = UINavigationBarAppearance()
         navbarAppearance.setBackIndicatorImage(adjustedBackImage, transitionMaskImage: adjustedBackImage)
         navbarAppearance.backButtonAppearance = backButtonAppearance
