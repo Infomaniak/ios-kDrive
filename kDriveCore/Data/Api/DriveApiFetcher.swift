@@ -552,9 +552,9 @@ enum PublicShareAPIParameters {
 
 class SyncedAuthenticator: OAuthAuthenticator {
     @LazyInjectService var accountManager: AccountManageable
-    @LazyInjectService var tokenable: InfomaniakNetworkLoginable
-    @LazyInjectService var appContextService: AppContextServiceable
+    @LazyInjectService var networkLoginService: InfomaniakNetworkLoginable
     @LazyInjectService var keychainHelper: KeychainHelper
+    @LazyInjectService var tokenStore: TokenStore
 
     func handleFailedRefreshingToken(oldToken: ApiToken,
                                      newToken: ApiToken?,
@@ -608,7 +608,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
     ) {
         // Only resolve locally to break init loop
         accountManager.refreshTokenLockedQueue.async {
-            let storedToken = self.accountManager.getTokenForUserId(credential.userId)
+            let storedToken = self.tokenStore.tokenFor(userId: credential.userId, fetchLocation: .keychain)?.apiToken
 
             Log.tokenAuthentication(
                 "Refreshing token - Starting",
@@ -661,7 +661,7 @@ class SyncedAuthenticator: OAuthAuthenticator {
             // It is necessary that the app stays awake while we refresh the token
             let expiringActivity = ExpiringActivity()
             expiringActivity.start()
-            self.tokenable.refreshToken(token: credential) { result in
+            self.networkLoginService.refreshToken(token: credential) { result in
                 // New token has been fetched correctly
                 switch result {
                 case .success(let token):
