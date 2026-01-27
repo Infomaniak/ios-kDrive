@@ -461,8 +461,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     func getCurrentDirectory() -> (DriveFileManager, File?) {
         if let filesViewController = (selectedViewController as? UINavigationController)?
-            .topViewController as? FileListViewController,
-            filesViewController.viewModel.currentDirectory.id >= DriveFileManager.constants.rootID {
+            .topViewController as? FileListViewController {
             return (filesViewController.driveFileManager, filesViewController.viewModel.currentDirectory)
         } else {
             let file = driveFileManager.getCachedMyFilesRoot()
@@ -472,7 +471,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     func updateCenterButton() {
         let (_, currentDirectory) = getCurrentDirectory()
-        guard let currentDirectory else {
+        guard let currentDirectory, currentDirectory.id >= DriveFileManager.constants.rootID else {
             (tabBar as? MainTabBar)?.centerButton?.isEnabled = false
             return
         }

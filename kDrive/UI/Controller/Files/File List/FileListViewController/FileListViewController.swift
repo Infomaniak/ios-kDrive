@@ -175,9 +175,13 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
 
-        (tabBarController as? PlusButtonObserver)?.updateCenterButton()
-
         tryLoadingFilesOrDisplayError()
+    }
+
+    override func beginAppearanceTransition(_ isAppearing: Bool, animated: Bool) {
+        super.beginAppearanceTransition(isAppearing, animated: animated)
+
+        (tabBarController as? PlusButtonObserver)?.updateCenterButton()
     }
 
     override func viewDidAppear(_ animated: Bool) {
