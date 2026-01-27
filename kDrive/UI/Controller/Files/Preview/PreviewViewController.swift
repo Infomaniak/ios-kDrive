@@ -67,7 +67,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var titleHeightConstraint: NSLayoutConstraint?
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
-    private var heightToHide = 0.0
 
     private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
@@ -147,10 +146,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         configuration.contentInsetsReference = .none
         let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
         return layout
-    }
-
-    @objc func tapPreview() {
-        setFullscreen()
     }
 
     func observeFileUpdated() {
