@@ -178,7 +178,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         )
 
         let adjustedBackImage = backImage.withAlignmentRectInsets(
-            UIEdgeInsets(top: -10, left: -4, bottom: 10, right: 4)
+            UIEdgeInsets(top: 8, left: -4, bottom: 8, right: 4)
         )
 
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
@@ -219,8 +219,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func makeImageWithCircle(
         icon: UIImage,
-        circleDiameter: CGFloat = 43,
-        iconSize: CGSize = CGSize(width: 23, height: 23),
+        circleDiameter: CGFloat = 40,
+        iconSize: CGSize = CGSize(width: 21, height: 21),
         circleColor: UIColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
     ) -> UIImage {
         let canvasSize = CGSize(width: circleDiameter, height: circleDiameter)
@@ -269,7 +269,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: 0)
+        navigationController?.navigationBar.transform = .identity
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
         currentDownloadOperation?.cancel()
@@ -377,7 +377,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
         editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
 
-        editItem.imageInsets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: 2)
+        editItem.imageInsets = UIEdgeInsets(top: -1, left: -2, bottom: 1, right: 2)
         navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
     }
 
@@ -392,7 +392,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let openItem = UIBarButtonItem(image: openImage, style: .plain, target: self, action: #selector(openFile))
         openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
 
-        openItem.imageInsets = UIEdgeInsets(top: -4, left: -2, bottom: 4, right: 2)
+        openItem.imageInsets = UIEdgeInsets(top: -2, left: -2, bottom: 2, right: 2)
         navigationItem.rightBarButtonItem = openItem
     }
 
