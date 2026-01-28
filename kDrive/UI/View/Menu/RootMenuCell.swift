@@ -67,7 +67,7 @@ class RootMenuCell: UICollectionViewCell {
     override var isSelected: Bool {
         didSet {
             contentInsetView.backgroundColor = isSelected ?
-                KDriveResourcesAsset.itemSelectedBackgroundColor.color : InfomaniakCoreAsset
+                KDriveResourcesAsset.backgroundCardViewSelectedColor.color : InfomaniakCoreAsset
                 .backgroundCardView.color
         }
     }
@@ -75,7 +75,7 @@ class RootMenuCell: UICollectionViewCell {
     override var isHighlighted: Bool {
         didSet {
             contentInsetView.backgroundColor = isHighlighted ?
-                KDriveResourcesAsset.itemSelectedBackgroundColor.color : InfomaniakCoreAsset
+                KDriveResourcesAsset.backgroundCardViewSelectedColor.color : InfomaniakCoreAsset
                 .backgroundCardView.color
         }
     }
