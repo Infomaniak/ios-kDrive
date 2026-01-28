@@ -50,9 +50,9 @@ struct Right {
     var key: String
     var title: String
     var icon: UIImage
-    var fileDescription: String?
-    var folderDescription: String?
-    var documentDescription: String?
+    var fileDescription: String
+    var folderDescription: String
+    var documentDescription: String
     var upgradeDescription: String?
     var detailDescription: String?
 
@@ -160,7 +160,7 @@ class RightsSelectionViewController: UIViewController {
             rights = Right.shareLinkRights(driveFileManager: driveFileManager)
 
         case .addUserRights:
-            let getUserRightDescription = { (permission: UserPermission) -> (String?) in
+            let getUserRightDescription = { (permission: UserPermission) -> (String) in
                 switch permission {
                 case .read:
                     return KDriveResourcesStrings.Localizable.userPermissionReadDescription
@@ -182,7 +182,7 @@ class RightsSelectionViewController: UIViewController {
                 case .delete:
                     return KDriveResourcesStrings.Localizable.userPermissionRemove
                 case .removeDriveAccess:
-                    return nil
+                    return KDriveCoreStrings.Localizable.userDriveRemoveDescription
                 }
             }
             let userPermissions = UserPermission.allCases
@@ -320,7 +320,10 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         case UserPermission.removeDriveAccess.rawValue:
             let deleteUser = fileAccessElement?.name ?? ""
             let attrString = NSMutableAttributedString(
-                string: KDriveResourcesStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser),
+                string: KDriveResourcesStrings.Localizable.modalRemoveUserDriveAccessDescription(
+                    deleteUser,
+                    driveFileManager.drive.name
+                ),
                 boldText: deleteUser
             )
             let alert = AlertTextViewController(
