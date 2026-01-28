@@ -279,6 +279,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         resignFirstResponder()
     }
 
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        hideFloatingPanel(true)
+    }
+
     override func willMove(toParent parent: UIViewController?) {
         super.willMove(toParent: parent)
         guard parent == nil else {
