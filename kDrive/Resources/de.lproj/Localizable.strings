@@ -4,7 +4,7 @@
  * Locale: de, German
  * Tagged: ios
  * Exported by: Baptiste Griva
- * Exported at: Thu, 22 Jan 2026 10:14:13 +0100
+ * Exported at: Wed, 28 Jan 2026 15:59:05 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -419,7 +419,7 @@
 "buttonRemoveFavorites" = "Von den Favoriten entfernen";
 
 /* loco:69651623d1509dbfc30bdde2 */
-"buttonRemoveUserFromShare" = "Freigabe entfernen";
+"buttonRemoveUserFromShare" = "Freigabe löschen";
 
 /* loco:6049df4d5c2c3a04bc397960 */
 "buttonRename" = "Umbenennen";
@@ -1330,6 +1330,9 @@
 /* loco:6049df4d5c2c3a04bc397a04 */
 "modalMoveTrashTitle" = "In den Papierkorb verschieben";
 
+/* loco:697a226ca7f90b21b20ef8b2 */
+"modalRemoveUserDriveAccessDescription" = "Möchten Sie wirklich den Zugriff von Benutzer %1$@ auf das kDrive %2$@ entfernen?";
+
 /* loco:6049df8ecfa0dd393a577ea4 */
 "modalTrashFileDescription" = "Wollen Sie %@ wirklich in den Papierkorb verschieben?";
 
@@ -1337,7 +1340,7 @@
 "modalTrashFilesDescription" = "Wollen Sie die ausgewählten Dateien wirklich in den Papierkorb verschieben?";
 
 /* loco:6049df4d5c2c3a04bc397a05 */
-"modalUserPermissionRemoveDescription" = "Wollen Sie den Zugang des Benutzers %@ wirklich löschen?";
+"modalUserPermissionRemoveDescription" = "Möchten Sie dem Benutzer %@ wirklich den Zugriff auf diese Datei entziehen?";
 
 /* loco:61696058c328022b120007c6 */
 "modificationDateFilterTitle" = "Zuletzt geändert am";
@@ -2136,6 +2139,9 @@
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/b9a9acec-ada6-471f-a473-c91f22be2acc/";
+
+/* loco:697a1f0ee11b818505061003 */
+"userDriveRemoveDescription" = "Der Benutzer hat keinen Zugriff auf diese kDrive mehr.";
 
 /* loco:6049df4d5c2c3a04bc397a8d */
 "userInviteByEmail" = "Per E-Mail einladen";
