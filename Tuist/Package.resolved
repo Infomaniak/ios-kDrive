@@ -1,5 +1,5 @@
 {
-  "originHash" : "a46428344d538e56cf66e97ae9736328b9e32e308ca27388a7c9b6093d067a48",
+  "originHash" : "0876fc80436382f1cd41883a358031f09dff31084f1166a66a345f9be15287af",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "a9fb8f7f5fe161ad56dc5169615f1870fcc4cd1b",
-        "version" : "1.31.0"
+        "revision" : "35dfce743f9669c4a5d2834885a90cd39c43fa30",
+        "version" : "1.32.0"
       }
     },
     {
@@ -35,15 +35,6 @@
       "state" : {
         "revision" : "073b9671ce2b9b5b96398611427a1f929927e428",
         "version" : "1.3.0"
-      }
-    },
-    {
-      "identity" : "dotlottie-ios",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/LottieFiles/dotlottie-ios",
-      "state" : {
-        "revision" : "1f46c4786abe02a0a2f70c79d97e08105f363964",
-        "version" : "0.12.1"
       }
     },
     {
@@ -69,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SCENEE/FloatingPanel",
       "state" : {
-        "revision" : "7844fac6a477a7fbca12c1d6214deb3984517f85",
-        "version" : "3.2.0"
+        "revision" : "ee2c6fee991c8b2d15c6e2db2b883065becf18e2",
+        "version" : "3.2.1"
       }
     },
     {
@@ -105,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "d6c6c47c83c1e6b14352bad3fff514efda2e4b18",
-        "version" : "18.4.3"
+        "revision" : "4360f62b9396075195989a3e31ab5a7daf988977",
+        "version" : "18.5.0"
       }
     },
     {
@@ -114,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "8f997eb249ecec6b75cf447edc0cbceef1d3df3e",
-        "version" : "24.3.0"
+        "revision" : "d04e30b94a5a8371d6e587128d492733dbdeb788",
+        "version" : "24.4.0"
       }
     },
     {
@@ -168,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-onboarding",
       "state" : {
-        "revision" : "df57bb493c01f7ab2753e3c6a14f947897f16e46",
-        "version" : "1.5.0"
+        "revision" : "ca793dc5613ae4fd67b209e3f5f0222e00a6da4d",
+        "version" : "1.4.4"
       }
     },
     {
@@ -211,7 +202,7 @@
     {
       "identity" : "lottie-spm",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/lottie-spm",
+      "location" : "https://github.com/airbnb/lottie-spm.git",
       "state" : {
         "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
         "version" : "4.5.2"

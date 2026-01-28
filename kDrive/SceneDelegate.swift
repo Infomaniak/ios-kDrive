@@ -291,7 +291,9 @@ extension SceneDelegate {
         switch currentState {
         case .mainViewController, .appLock:
             UserDefaults.shared.numberOfConnections += 1
-            UserDefaults.shared.openingUntilReview -= 1
+            if UserDefaults.shared.object(forKey: "actionUntilReview") != nil {
+                UserDefaults.shared.actionUntilReview -= 1
+            }
             Task {
                 await appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             }

@@ -764,7 +764,7 @@ public struct AppRouter: AppNavigable {
 
     @MainActor private func requestAppStoreReview() {
         matomo.track(eventWithCategory: .appReview, name: "like")
-        UserDefaults.shared.appReview = .readyForReview
+        UserDefaults.shared.alreadyAskedReview = true
         reviewManager.requestReview()
     }
 
@@ -774,7 +774,7 @@ public struct AppRouter: AppNavigable {
               let presentingViewController = window?.rootViewController else {
             return
         }
-        UserDefaults.shared.appReview = .feedback
+        UserDefaults.shared.alreadyAskedReview = true
         presentingViewController.present(SFSafariViewController(url: url), animated: true)
     }
 
