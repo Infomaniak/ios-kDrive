@@ -137,10 +137,13 @@ public final class FileActionsHelper {
         let convertedType = file.convertedType
         switch convertedType {
         case .image, .video:
+            let successMessage = convertedType == .video ? KDriveResourcesStrings.Localizable
+                .snackbarVideoSavedConfirmation : KDriveResourcesStrings.Localizable
+                .snackbarImageSavedConfirmation
             saveMedia(
                 url: file.localUrl,
                 type: convertedType.assetMediaType,
-                successMessage: showSuccessSnackBar ? KDriveResourcesStrings.Localizable.snackbarImageSavedConfirmation : nil
+                successMessage: showSuccessSnackBar ? successMessage : nil
             )
         case .folder:
             let documentExportViewController = UIDocumentPickerViewController(forExporting: [file.temporaryUrl], asCopy: true)
