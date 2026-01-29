@@ -45,7 +45,7 @@ extension UploadOperation {
         try transactionWithFile { file in
             SentryDebug.uploadOperationRetryCountDecreaseBreadcrumb(uploadId, file.maxRetryCount)
 
-            /// If cannot retry, throw
+            // If cannot retry, throw
             guard file.maxRetryCount > 0 else {
                 error = ErrorDomain.retryCountIsZero
                 return
@@ -311,7 +311,7 @@ extension UploadOperation {
         await cleanRemoteSession(AbstractTokenWrapper(token: token), driveId: driveId, userId: userId)
     }
 
-    // Delete a remote session for a specific token
+    /// Delete a remote session for a specific token
     private func cleanRemoteSession(_ abstractToken: AbstractToken, driveId: Int, userId: Int) async {
         guard let driveFileManager = try? getDriveFileManager(for: driveId, userId: userId) else {
             return
