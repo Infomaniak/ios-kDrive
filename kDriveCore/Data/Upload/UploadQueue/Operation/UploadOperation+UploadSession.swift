@@ -371,7 +371,7 @@ extension UploadOperation {
         Log.uploadOperation("got fileSize:\(mebibytes)MiB ufid:\(uploadFileId)")
 
         // Compute ranges for a file
-        let rangeProvider = RangeProvider(fileURL: fileUrl, config: RangeProvider.kDriveConfig)
+        let rangeProvider = RangeProvider(fileURL: fileUrl, config: Constants.rangeProviderConfig)
         let ranges: [DataRange]
         do {
             ranges = try rangeProvider.allRanges
