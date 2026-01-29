@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 
 extension UploadOperation {
     /// Generate some chunks into a temporary folder from a file

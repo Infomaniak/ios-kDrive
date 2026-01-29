@@ -1,6 +1,6 @@
 /*
  Infomaniak kDrive - iOS App
- Copyright (C) 2023 Infomaniak Network SA
+ Copyright (C) 2025 Infomaniak Network SA
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,29 +17,20 @@
  */
 
 import Foundation
+import InfomaniakCore
 
-/// Something that matches most of the FileHandle specification, used for testing
-protocol FileHandlable {
-    var availableData: Data { get }
+public extension RangeProvider {
+    /// Encapsulating API parameters used to compute ranges
+    enum APIConstants {
+        static let smallFileMaxSize: UInt64 = 5 * 1024 * 1024
+    }
 
-    var description: String { get }
-
-    func seek(toOffset offset: UInt64) throws
-
-    func truncate(atOffset offset: UInt64) throws
-
-    func synchronize() throws
-
-    func close() throws
-
-    func readToEnd() throws -> Data?
-
-    func read(upToCount count: Int) throws -> Data?
-
-    func offset() throws -> UInt64
-
-    func seekToEnd() throws -> UInt64
+    static var kDriveConfig: RangeProvider.Config {
+        RangeProvider.Config(chunkMinSize: 1 * 1024 * 1024,
+                             chunkMaxSizeClient: 50 * 1024 * 1024,
+                             chunkMaxSizeServer: 1 * 1024 * 1024 * 1024,
+                             optimalChunkCount: 200,
+                             maxTotalChunks: 10000,
+                             minTotalChunks: 1)
+    }
 }
-
-/// Protocol conformance
-extension FileHandle: FileHandlable {}

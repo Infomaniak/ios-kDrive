@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakCore
 import Sentry
 
 // MARK: - Session management -
@@ -370,7 +371,7 @@ extension UploadOperation {
         Log.uploadOperation("got fileSize:\(mebibytes)MiB ufid:\(uploadFileId)")
 
         // Compute ranges for a file
-        let rangeProvider = RangeProvider(fileURL: fileUrl)
+        let rangeProvider = RangeProvider(fileURL: fileUrl, config: RangeProvider.kDriveConfig)
         let ranges: [DataRange]
         do {
             ranges = try rangeProvider.allRanges

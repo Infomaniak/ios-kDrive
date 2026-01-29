@@ -84,8 +84,8 @@ public extension DriveApiFetcher {
             throw DriveError.UploadSessionError.fileNameIsEmpty
         }
 
-        guard totalChunks < RangeProvider.APIConstants.maxTotalChunks,
-              totalChunks >= RangeProvider.APIConstants.minTotalChunks else {
+        guard totalChunks < RangeProvider.kDriveConfig.maxTotalChunks,
+              totalChunks >= RangeProvider.kDriveConfig.minTotalChunks else {
             throw DriveError.UploadSessionError.chunksNumberOutOfBounds
         }
 
