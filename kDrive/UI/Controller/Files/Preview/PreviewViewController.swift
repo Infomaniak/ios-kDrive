@@ -67,7 +67,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var titleHeightConstraint: NSLayoutConstraint?
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
-    private var heightToHide = 0.0
 
     private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
@@ -149,10 +148,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         return layout
     }
 
-    @objc func tapPreview() {
-        setFullscreen()
-    }
-
     func observeFileUpdated() {
         driveFileManager?.observeFileUpdated(self, fileId: nil) { [weak self] file in
             guard !file.isInvalidated else { return }
@@ -176,15 +171,19 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        navigationController?.navigationBar.isHidden = true
+
         let backImage = makeImageWithCircle(
             icon: KDriveResourcesAsset.chevronLeft.image
         )
 
         let adjustedBackImage = backImage.withAlignmentRectInsets(
-            UIEdgeInsets(top: -10, left: -4, bottom: 10, right: 4)
+            UIEdgeInsets(top: 8, left: -4, bottom: 8, right: 4)
         )
 
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
+        backButtonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.clear]
+        backButtonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.clear]
         let navbarAppearance = UINavigationBarAppearance()
         navbarAppearance.setBackIndicatorImage(adjustedBackImage, transitionMaskImage: adjustedBackImage)
         navbarAppearance.backButtonAppearance = backButtonAppearance
@@ -200,6 +199,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             y: -navBarHeight
         )
         statusBarView.transform = hideStatusBar
+
         navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
 
         if initialLoading {
@@ -219,8 +219,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func makeImageWithCircle(
         icon: UIImage,
-        circleDiameter: CGFloat = 43,
-        iconSize: CGSize = CGSize(width: 23, height: 23),
+        circleDiameter: CGFloat = 40,
+        iconSize: CGSize = CGSize(width: 21, height: 21),
         circleColor: UIColor = KDriveResourcesAsset.previewBackgroundColor.color.withAlphaComponent(0.4)
     ) -> UIImage {
         let canvasSize = CGSize(width: circleDiameter, height: circleDiameter)
@@ -256,7 +256,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        hideFloatingPanel(false)
+        setFullscreen(false)
+        navigationController?.navigationBar.isHidden = false
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
@@ -267,9 +268,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        hideFloatingPanel(true)
-        navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: 0)
-        navigationController?.setNavigationBarHidden(false, animated: true)
+        navigationController?.navigationBar.transform = .identity
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
         currentDownloadOperation?.cancel()
@@ -277,6 +276,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         UIApplication.shared.endReceivingRemoteControlEvents()
         resignFirstResponder()
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        hideFloatingPanel(true)
     }
 
     override func willMove(toParent parent: UIViewController?) {
@@ -372,7 +376,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
         editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
 
-        editItem.imageInsets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: 2)
+        editItem.imageInsets = UIEdgeInsets(top: -1, left: -2, bottom: 1, right: 2)
         navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
     }
 
@@ -387,7 +391,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let openItem = UIBarButtonItem(image: openImage, style: .plain, target: self, action: #selector(openFile))
         openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
 
-        openItem.imageInsets = UIEdgeInsets(top: -4, left: -2, bottom: 4, right: 2)
+        openItem.imageInsets = UIEdgeInsets(top: -2, left: -2, bottom: 2, right: 2)
         navigationItem.rightBarButtonItem = openItem
     }
 
@@ -440,10 +444,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 self.present(self.floatingPanelViewController, animated: false)
             }
         }
-    }
-
-    @objc private func goBack() {
-        navigationController?.popViewController(animated: true)
     }
 
     func setFullscreen(_ fullscreen: Bool? = nil) {
