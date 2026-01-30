@@ -77,6 +77,15 @@ struct DefaultFileListLayout: FileListLayout {
             trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
 
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
+        let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
+
+        section.boundarySupplementaryItems = [headerItem]
+
         return section
     }
 
@@ -98,6 +107,15 @@ struct DefaultFileListLayout: FileListLayout {
             bottom: 0,
             trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
+
+        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
+        let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: headerSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
+
+        section.boundarySupplementaryItems = [headerItem]
 
         return section
     }

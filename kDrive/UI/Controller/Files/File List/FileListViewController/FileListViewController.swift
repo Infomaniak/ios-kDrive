@@ -102,12 +102,15 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
+        collectionView.register(
+            FilesHeaderReusableView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: String(describing: FilesHeaderReusableView.self)
+        )
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
         collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
         collectionView.dropDelegate = self
         collectionView.dragDelegate = self
-
-        createHeaderView()
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
@@ -121,22 +124,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
         setupViewModel()
         setupFooterIfNeeded()
-    }
-
-    private func createHeaderView() {
-        let headerView = FilesHeaderView.instantiate()
-        headerView.delegate = self
-        headerView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(headerView)
-
-        NSLayoutConstraint.activate([
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
-
-        self.headerView = headerView
-        selectView = headerView.selectView
     }
 
     open func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
@@ -743,6 +730,26 @@ extension FileListViewController {
         }
         (cell as? FileCollectionViewCell)?
             .setSelectionMode(viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
+    }
+
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionHeader {
+            let reusableView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                view: FilesHeaderReusableView.self,
+                for: indexPath
+            )
+
+            reusableView.headerView.delegate = self
+
+            return reusableView
+        }
+
+        return UICollectionReusableView()
     }
 }
 
