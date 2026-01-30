@@ -256,7 +256,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        hideFloatingPanel(false)
         setFullscreen(false)
         navigationController?.navigationBar.isHidden = false
         UIApplication.shared.beginReceivingRemoteControlEvents()
