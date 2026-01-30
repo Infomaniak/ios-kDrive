@@ -155,6 +155,13 @@ class RightsSelectionViewController: UIViewController {
     }
 
     private func setupView() {
+        let isInternalUser = {
+            if let userId = self.fileAccessElement?.user?.id {
+                return self.driveFileManager.drive.users.internalUsers.contains(userId)
+            }
+            return false
+        }()
+        let isInvitation = fileAccessElement is ExternInvitationFileAccess
         switch rightSelectionType {
         case .shareLinkSettings:
             rights = Right.shareLinkRights(driveFileManager: driveFileManager)
@@ -165,15 +172,7 @@ class RightsSelectionViewController: UIViewController {
                 case .read:
                     return KDriveResourcesStrings.Localizable.userPermissionReadDescription
                 case .write:
-                    let isInvitation = self.fileAccessElement is ExternInvitationFileAccess
-                    let isNonInternalUser = {
-                        if let userId = self.fileAccessElement?.user?.id {
-                            return !self.driveFileManager.drive.users.internalUsers.contains(userId)
-                        }
-                        return false
-                    }()
-
-                    if isInvitation || isNonInternalUser {
+                    if isInvitation || !isInternalUser {
                         return KDriveResourcesStrings.Localizable.userPermissionWriteExternalDescription
                     }
                     return KDriveResourcesStrings.Localizable.userPermissionWriteDescription
@@ -198,7 +197,7 @@ class RightsSelectionViewController: UIViewController {
                 )
             }
 
-            if fileAccessElement is ExternInvitationFileAccess {
+            if isInvitation || isInternalUser {
                 rights.removeAll { $0.key == UserPermission.removeDriveAccess.rawValue }
             }
 
