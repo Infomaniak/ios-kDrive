@@ -178,7 +178,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     }
 
     func isSmallOrEmptyFile(fileSize: UInt64) -> Bool {
-        return fileSize < RangeProvider.APIConstants.smallFileMaxSize
+        return fileSize < Constants.smallFileMaxSize
     }
 
     func handleSmallOrEmptyFileIfNeeded() async throws -> Bool {

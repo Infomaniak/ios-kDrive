@@ -88,6 +88,17 @@ public enum Constants {
 
     public static let networkParallelism = 4
 
+    public static let smallFileMaxSize: UInt64 = 5 * 1024 * 1024
+
+    public static let rangeProviderConfig = RangeProvider.Config(
+        chunkMinSize: 1 * 1024 * 1024,
+        chunkMaxSizeClient: 50 * 1024 * 1024,
+        chunkMaxSizeServer: 1 * 1024 * 1024 * 1024,
+        optimalChunkCount: 200,
+        maxTotalChunks: 10000,
+        minTotalChunks: 1
+    )
+
     public static let kDriveTeams = "Solo, Team & Pro"
 
     private static var dateFormatter = DateFormatter()

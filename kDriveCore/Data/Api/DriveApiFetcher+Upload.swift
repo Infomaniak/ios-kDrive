@@ -84,8 +84,8 @@ public extension DriveApiFetcher {
             throw DriveError.UploadSessionError.fileNameIsEmpty
         }
 
-        guard totalChunks < RangeProvider.APIConstants.maxTotalChunks,
-              totalChunks >= RangeProvider.APIConstants.minTotalChunks else {
+        guard totalChunks < Constants.rangeProviderConfig.maxTotalChunks,
+              totalChunks >= Constants.rangeProviderConfig.minTotalChunks else {
             throw DriveError.UploadSessionError.chunksNumberOutOfBounds
         }
 
@@ -118,8 +118,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .POSTParameters(apiParameters.toParameters()))
 
-        let result: UploadSession = try await dispatch(request, networkStack: .Alamofire)
-        return result
+        return try await dispatch(request, networkStack: .Alamofire)
     }
 
     func getSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> UploadLiveSession {
@@ -129,8 +128,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: UploadLiveSession = try await dispatch(request, networkStack: .Alamofire)
-        return result
+        return try await dispatch(request, networkStack: .Alamofire)
     }
 
     func cancelSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> Bool {
@@ -140,8 +138,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: Bool = try await dispatch(request, networkStack: .Alamofire)
-        return result
+        return try await dispatch(request, networkStack: .Alamofire)
     }
 
     func closeSession(drive: AbstractDrive, sessionToken: AbstractToken) async throws -> UploadedFile {
@@ -151,8 +148,7 @@ public extension DriveApiFetcher {
                               GETParameters: nil,
                               body: .none)
 
-        let result: UploadedFile = try await dispatch(request, networkStack: .Alamofire)
-        return result
+        return try await dispatch(request, networkStack: .Alamofire)
     }
 
     func appendChunk(drive: AbstractDrive,
@@ -171,8 +167,7 @@ public extension DriveApiFetcher {
                               GETParameters: parameters.toParameters(),
                               body: .requestBody(chunk))
 
-        let result: UploadedChunk = try await dispatch(request, networkStack: .Alamofire)
-        return result
+        return try await dispatch(request, networkStack: .Alamofire)
     }
 
     func upload(drive: AbstractDrive,
@@ -188,8 +183,7 @@ public extension DriveApiFetcher {
                               GETParameters: parameters.toParameters(),
                               body: .none)
 
-        let result: UploadedChunk = try await dispatch(request, networkStack: .Alamofire)
-        return result
+        return try await dispatch(request, networkStack: .Alamofire)
     }
 
     func directUpload(drive: AbstractDrive,
@@ -237,8 +231,7 @@ public extension DriveApiFetcher {
                               GETParameters: apiParameters.toParameters(),
                               body: .requestBody(fileData))
 
-        let result: File = try await dispatch(request, networkStack: .Alamofire)
-        return result
+        return try await dispatch(request, networkStack: .Alamofire)
     }
 }
 
