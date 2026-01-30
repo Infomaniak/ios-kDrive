@@ -206,7 +206,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     @objc func appWillEnterForeground() {
-        viewWillAppear(true)
+        tryLoadingFilesOrDisplayError()
     }
 
     private func setupViewModel() {
