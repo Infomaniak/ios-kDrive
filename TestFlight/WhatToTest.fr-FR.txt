@@ -1,3 +1,6 @@
+- Fonctionnalité d'exclusion d'un utilisateur externe d'un drive sur un partage
+- Améliorations de l'interface utilisateur pour iPhone et iPad
+- Correction relative aux previews de fichiers TXT
 - Correction relative a l'application iOS Fichiers
 - Migration des profiles utilisateurs si nécessaire
 - Prise en charge des partages publics protégés par mot de passe
