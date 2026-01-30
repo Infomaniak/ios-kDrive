@@ -84,6 +84,8 @@ struct DefaultFileListLayout: FileListLayout {
             alignment: .top
         )
 
+        headerItem.pinToVisibleBounds = true
+        headerItem.zIndex = 1000
         section.boundarySupplementaryItems = [headerItem]
 
         return section
@@ -115,6 +117,8 @@ struct DefaultFileListLayout: FileListLayout {
             alignment: .top
         )
 
+        headerItem.pinToVisibleBounds = true
+        headerItem.zIndex = 1000
         section.boundarySupplementaryItems = [headerItem]
 
         return section

@@ -744,7 +744,10 @@ extension FileListViewController {
                 for: indexPath
             )
 
+            setUpHeaderView(reusableView.headerView, isEmptyViewHidden: !viewModel.isShowingEmptyView)
             reusableView.headerView.delegate = self
+            selectView = reusableView.headerView.selectView
+            headerView = reusableView.headerView
 
             return reusableView
         }
