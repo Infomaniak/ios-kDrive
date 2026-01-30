@@ -1,3 +1,6 @@
+- Functionality to exclude an external user from a share on a drive
+- UI refinements for both iPhone and iPad
+- Fix related to .TXT files
 - Fix related to iOS's Files.app
 - Migrate User Profiles if needed
 - Support for public shares with password
