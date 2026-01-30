@@ -197,7 +197,7 @@ class RightsSelectionViewController: UIViewController {
                 )
             }
 
-            if isInvitation || isInternalUser {
+            if isInvitation || isInternalUser || !driveFileManager.drive.accountAdmin {
                 rights.removeAll { $0.key == UserPermission.removeDriveAccess.rawValue }
             }
 
