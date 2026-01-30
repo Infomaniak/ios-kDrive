@@ -95,7 +95,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
             let lightModeText = textView.text ?? ""
             textView.text = ""
             activityView.startAnimating()
-            try? await displayCode(for: lightModeText)
+            await displayCode(for: lightModeText)
             activityView.stopAnimating()
         }
     }
@@ -146,9 +146,12 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         textView.attributedText = NSAttributedString(attributedText)
     }
 
-    private func displayCode(for content: String) async throws {
+    private func displayCode(for content: String) async {
         let theme: HighlightColors = UITraitCollection.current.userInterfaceStyle == .light ? .light(.xcode) : .dark(.xcode)
-        let attributedText = try await Highlight().attributedText(content, colors: theme)
+        guard let attributedText = try? await Highlight().attributedText(content, colors: theme) else {
+            textView.attributedText = NSAttributedString(string: content)
+            return
+        }
         textView.attributedText = NSAttributedString(attributedText)
     }
 }
