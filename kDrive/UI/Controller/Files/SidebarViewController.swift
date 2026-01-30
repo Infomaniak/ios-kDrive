@@ -733,7 +733,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             guard let detailNavigationController = splitViewController?.viewControllers.last as? UINavigationController
             else { return }
             let isDetailAtRoot = detailNavigationController.viewControllers.count == 1
-
+            detailNavigationController.navigationBar.transform = .identity
             if selectedIndexPath != indexPath || !isDetailAtRoot {
                 switch destination {
                 case .home:
