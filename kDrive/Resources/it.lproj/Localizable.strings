@@ -4,7 +4,7 @@
  * Locale: it, Italian
  * Tagged: ios
  * Exported by: Baptiste Griva
- * Exported at: Fri, 16 Jan 2026 11:41:15 +0100
+ * Exported at: Wed, 28 Jan 2026 15:59:05 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -411,6 +411,9 @@
 
 /* loco:6049df4d5c2c3a04bc39795e */
 "buttonRefresh" = "Aggiorna";
+
+/* loco:695f6972ddde32c26d0b1f22 */
+"buttonRemoveDriveAccess" = "Ritira l’accesso al drive";
 
 /* loco:6049df4d5c2c3a04bc39795f */
 "buttonRemoveFavorites" = "Elimina i preferiti";
@@ -1327,6 +1330,9 @@
 /* loco:6049df4d5c2c3a04bc397a04 */
 "modalMoveTrashTitle" = "Sposta nel cestino";
 
+/* loco:697a226ca7f90b21b20ef8b2 */
+"modalRemoveUserDriveAccessDescription" = "Vuoi davvero rimuovere l’accesso dell’utente %1$@ al kDrive %2$@?";
+
 /* loco:6049df8ecfa0dd393a577ea4 */
 "modalTrashFileDescription" = "Spostare veramente %@ nel cestino?";
 
@@ -1334,7 +1340,7 @@
 "modalTrashFilesDescription" = "Spostare nel cestino i file selezionati?";
 
 /* loco:6049df4d5c2c3a04bc397a05 */
-"modalUserPermissionRemoveDescription" = "Eliminare l’accesso dell’utente %@?";
+"modalUserPermissionRemoveDescription" = "Vuoi davvero rimuovere l’accesso dell’utente %@ a questo file?";
 
 /* loco:61696058c328022b120007c6 */
 "modificationDateFilterTitle" = "Data di modifica";
@@ -2134,6 +2140,9 @@
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/b1992919-c53a-4935-bb15-22f8c57c1446/";
 
+/* loco:697a1f0ee11b818505061003 */
+"userDriveRemoveDescription" = "L’utente non avrà più accesso a questo kDrive.";
+
 /* loco:6049df4d5c2c3a04bc397a8d */
 "userInviteByEmail" = "Invita tramite e-mail";
 
@@ -2150,7 +2159,7 @@
 "userPermissionRead" = "Può consultare";
 
 /* loco:6049df4d5c2c3a04bc397a92 */
-"userPermissionReadDescription" = "Solo consultazione\nDownload\nAggiunta di commenti";
+"userPermissionReadDescription" = "Solo consultazione\nDownload";
 
 /* loco:6049df4d5c2c3a04bc397a93 */
 "userPermissionRemove" = "L’utente non avrà più accesso a questo file.";
@@ -2159,4 +2168,7 @@
 "userPermissionWrite" = "Può modificare";
 
 /* loco:6049df4d5c2c3a04bc397a95 */
-"userPermissionWriteDescription" = "Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file";
+"userPermissionWriteDescription" = "Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file / cartelle";
+
+/* loco:695e3e46c18ae37694044f72 */
+"userPermissionWriteExternalDescription" = "Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione dei propri file / cartelle";

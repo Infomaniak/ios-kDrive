@@ -33,10 +33,15 @@ enum RightsSelectionType {
 protocol RightsSelectionDelegate: AnyObject {
     func didUpdateRightValue(newValue value: String)
     func didDeleteUserRight()
+    func didRemoveUserDriveAccess()
 }
 
 extension RightsSelectionDelegate {
     func didDeleteUserRight() {
+        // META: keep SonarCloud happy
+    }
+
+    func didRemoveUserDriveAccess() {
         // META: keep SonarCloud happy
     }
 }
@@ -150,20 +155,33 @@ class RightsSelectionViewController: UIViewController {
     }
 
     private func setupView() {
+        let isInternalUser = {
+            if let userId = self.fileAccessElement?.user?.id {
+                return self.driveFileManager.drive.users.internalUsers.contains(userId)
+            }
+            return false
+        }()
+        let isInvitation = fileAccessElement is ExternInvitationFileAccess
         switch rightSelectionType {
         case .shareLinkSettings:
             rights = Right.shareLinkRights(driveFileManager: driveFileManager)
+
         case .addUserRights:
             let getUserRightDescription = { (permission: UserPermission) -> (String) in
                 switch permission {
                 case .read:
                     return KDriveResourcesStrings.Localizable.userPermissionReadDescription
                 case .write:
+                    if isInvitation || !isInternalUser {
+                        return KDriveResourcesStrings.Localizable.userPermissionWriteExternalDescription
+                    }
                     return KDriveResourcesStrings.Localizable.userPermissionWriteDescription
                 case .manage:
                     return KDriveResourcesStrings.Localizable.userPermissionManageDescription
                 case .delete:
                     return KDriveResourcesStrings.Localizable.userPermissionRemove
+                case .removeDriveAccess:
+                    return KDriveCoreStrings.Localizable.userDriveRemoveDescription
                 }
             }
             let userPermissions = UserPermission.allCases
@@ -178,6 +196,11 @@ class RightsSelectionViewController: UIViewController {
                     documentDescription: getUserRightDescription($0)
                 )
             }
+
+            if isInvitation || isInternalUser || !driveFileManager.drive.accountAdmin {
+                rights.removeAll { $0.key == UserPermission.removeDriveAccess.rawValue }
+            }
+
         case .officeOnly:
             rights = Right.onlyOfficeRights
         }
@@ -237,6 +260,10 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
             if let userId = fileAccessElement?.user?.id {
                 disable = !driveFileManager.drive.users.internalUsers.contains(userId)
             }
+
+            if fileAccessElement is ExternInvitationFileAccess {
+                disable = true
+            }
         }
         cell.configureCell(
             right: right,
@@ -270,7 +297,8 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
         }
 
         let right = rights[indexPath.row]
-        if right.key == UserPermission.delete.rawValue {
+        switch right.key {
+        case UserPermission.delete.rawValue:
             let deleteUser = fileAccessElement?.name ?? ""
             let attrString = NSMutableAttributedString(
                 string: KDriveResourcesStrings.Localizable.modalUserPermissionRemoveDescription(deleteUser),
@@ -287,7 +315,29 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
             }
             present(alert, animated: true)
             selectRight()
-        } else {
+
+        case UserPermission.removeDriveAccess.rawValue:
+            let deleteUser = fileAccessElement?.name ?? ""
+            let attrString = NSMutableAttributedString(
+                string: KDriveResourcesStrings.Localizable.modalRemoveUserDriveAccessDescription(
+                    deleteUser,
+                    driveFileManager.drive.name
+                ),
+                boldText: deleteUser
+            )
+            let alert = AlertTextViewController(
+                title: KDriveResourcesStrings.Localizable.buttonDelete,
+                message: attrString,
+                action: KDriveResourcesStrings.Localizable.buttonDelete,
+                destructive: true
+            ) {
+                self.delegate?.didRemoveUserDriveAccess()
+                self.presentingViewController?.dismiss(animated: true)
+            }
+            present(alert, animated: true)
+            selectRight()
+
+        default:
             selectedRight = right.key
         }
     }
