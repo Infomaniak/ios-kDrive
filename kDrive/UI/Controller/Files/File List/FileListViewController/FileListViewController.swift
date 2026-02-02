@@ -192,6 +192,12 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        collectionView.contentInset.top = 0
+        collectionView.verticalScrollIndicatorInsets.top = 0
+    }
+
     @objc func appWillEnterForeground() {
         tryLoadingFilesOrDisplayError()
     }
