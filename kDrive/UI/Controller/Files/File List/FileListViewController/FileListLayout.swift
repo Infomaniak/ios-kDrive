@@ -33,11 +33,20 @@ struct DefaultFileListLayout: FileListLayout {
     private let gridInnerSpacing = 8.0
 
     func createLayoutFor(viewModel: FileListViewModel) -> UICollectionViewLayout {
+        let headerEstimatedHeight = {
+            if viewModel.currentDirectory.visibility == .isTeamSpace {
+                return 100.0
+            }
+            return 50.0
+        }()
         let layout = UICollectionViewCompositionalLayout { _, layoutEnvironment in
             if viewModel.listStyle == .list {
-                return createListLayout(environment: layoutEnvironment, viewModel: viewModel)
+                return createListLayout(environment: layoutEnvironment,
+                                        viewModel: viewModel,
+                                        headerEstimatedHeight: headerEstimatedHeight)
             } else {
-                return createGridLayout(environment: layoutEnvironment)
+                return createGridLayout(environment: layoutEnvironment,
+                                        headerEstimatedHeight: headerEstimatedHeight)
             }
         }
 
@@ -49,7 +58,8 @@ struct DefaultFileListLayout: FileListLayout {
         return max(gridMinColumns, maxColumns)
     }
 
-    func createGridLayout(environment: any NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
+    func createGridLayout(environment: any NSCollectionLayoutEnvironment,
+                          headerEstimatedHeight: CGFloat = 1) -> NSCollectionLayoutSection {
         let effectiveContentWidth = environment.container.effectiveContentSize.width - UIConstants.Padding.mediumSmall * 2
         let gridColumns = getColumnCountFor(width: effectiveContentWidth)
 
@@ -77,7 +87,10 @@ struct DefaultFileListLayout: FileListLayout {
             trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
+        let headerSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(headerEstimatedHeight)
+        )
         let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
             elementKind: UICollectionView.elementKindSectionHeader,
@@ -92,7 +105,7 @@ struct DefaultFileListLayout: FileListLayout {
     }
 
     func createListLayout(environment: any NSCollectionLayoutEnvironment,
-                          viewModel: FileListViewModel) -> NSCollectionLayoutSection {
+                          viewModel: FileListViewModel, headerEstimatedHeight: CGFloat = 1) -> NSCollectionLayoutSection {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         configuration.showsSeparators = false
@@ -110,7 +123,10 @@ struct DefaultFileListLayout: FileListLayout {
             trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
+        let headerSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(headerEstimatedHeight)
+        )
         let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
             elementKind: UICollectionView.elementKindSectionHeader,
