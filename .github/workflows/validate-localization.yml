@@ -8,8 +8,5 @@ concurrency:
 
 jobs:
   validate:
-    uses: infomaniak/.github/.github/workflows/validate-localization.yml@v1
-    with:
-      localizable_path: "kDrive/Resources"
-      main_target_localizable_path: "kDrive/Resources"
+    uses: infomaniak/.github/.github/workflows/validate-localization.yml@v2
     secrets: inherit

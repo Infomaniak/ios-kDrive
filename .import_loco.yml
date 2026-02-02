@@ -1,0 +1,4 @@
+platform: ios
+
+localizable_path: kDrive/Resources
+main_target_localizable_path: kDrive/Resources
