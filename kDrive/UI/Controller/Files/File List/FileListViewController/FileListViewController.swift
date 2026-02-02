@@ -386,6 +386,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         if !displayedFiles.isEmpty {
             collectionView.reloadSections([0])
         }
+        collectionView.layoutIfNeeded()
         collectionView.setCollectionViewLayout(newLayout, animated: true)
         setSelectedCells()
     }
