@@ -1,5 +1,5 @@
 {
-  "originHash" : "0876fc80436382f1cd41883a358031f09dff31084f1166a66a345f9be15287af",
+  "originHash" : "6f8e44d12a4b2673decd0c007ac308de859a9db6c77ba509a0dfed945ec7fab4",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-bug-tracker",
       "state" : {
-        "revision" : "18597dcd3a3585c352a25d847108ec6ce55518a1",
-        "version" : "17.0.0"
+        "revision" : "f6c92f7ed021d3a875083da9f2079f8fd0d00113",
+        "version" : "17.0.1"
       }
     },
     {
@@ -202,7 +202,7 @@
     {
       "identity" : "lottie-spm",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/lottie-spm",
+      "location" : "https://github.com/airbnb/lottie-spm.git",
       "state" : {
         "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
         "version" : "4.5.2"
