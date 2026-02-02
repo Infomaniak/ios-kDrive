@@ -87,19 +87,7 @@ struct DefaultFileListLayout: FileListLayout {
             trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
 
-        let headerSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(headerEstimatedHeight)
-        )
-        let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top
-        )
-
-        headerItem.pinToVisibleBounds = true
-        headerItem.zIndex = 1000
-        section.boundarySupplementaryItems = [headerItem]
+        addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
 
         return section
     }
@@ -123,9 +111,16 @@ struct DefaultFileListLayout: FileListLayout {
             trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
 
+        addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
+
+        return section
+    }
+
+    private func addSectionHeader(_ section: NSCollectionLayoutSection,
+                                  estimatedHeight: CGFloat) {
         let headerSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(headerEstimatedHeight)
+            heightDimension: .estimated(estimatedHeight)
         )
         let headerItem = NSCollectionLayoutBoundarySupplementaryItem(
             layoutSize: headerSize,
@@ -136,7 +131,5 @@ struct DefaultFileListLayout: FileListLayout {
         headerItem.pinToVisibleBounds = true
         headerItem.zIndex = 1000
         section.boundarySupplementaryItems = [headerItem]
-
-        return section
     }
 }
