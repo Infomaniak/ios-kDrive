@@ -79,7 +79,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/DropDown", branch: "master"),
         .package(url: "https://github.com/Infomaniak/ios-bug-tracker", .upToNextMajor(from: "17.0.1")),
         .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "18.1.0")),
-        .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "24.4.1")),
+        .package(url: "https://github.com/Infomaniak/ios-core-ui", branch: "fix/color"),
         .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.5")),
         .package(url: "https://github.com/Infomaniak/ios-device-check", .upToNextMajor(from: "1.1.1")),
         .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "8.1.1")),
