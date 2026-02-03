@@ -33,12 +33,8 @@ struct DefaultFileListLayout: FileListLayout {
     private let gridInnerSpacing = 8.0
 
     func createLayoutFor(viewModel: FileListViewModel) -> UICollectionViewLayout {
-        let headerEstimatedHeight = {
-            if viewModel.currentDirectory.visibility == .isTeamSpace {
-                return 100.0
-            }
-            return 50.0
-        }()
+        let headerEstimatedHeight = viewModel.currentDirectory.visibility == .isTeamSpace ? 100.0 : 50.0
+
         let layout = UICollectionViewCompositionalLayout { _, layoutEnvironment in
             if viewModel.listStyle == .list {
                 return createListLayout(environment: layoutEnvironment,

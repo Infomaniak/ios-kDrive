@@ -19,9 +19,10 @@
 import UIKit
 
 final class FilesHeaderReusableView: UICollectionReusableView {
-    private(set) var headerView: FilesHeaderView!
+    let headerView: FilesHeaderView
 
     override init(frame: CGRect) {
+        headerView = FilesHeaderView.instantiate()
         super.init(frame: frame)
         setupUI()
     }
@@ -32,7 +33,6 @@ final class FilesHeaderReusableView: UICollectionReusableView {
     }
 
     private func setupUI() {
-        let headerView = FilesHeaderView.instantiate()
         headerView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(headerView)
 
@@ -42,7 +42,5 @@ final class FilesHeaderReusableView: UICollectionReusableView {
             headerView.trailingAnchor.constraint(equalTo: trailingAnchor),
             headerView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
-
-        self.headerView = headerView
     }
 }
