@@ -380,14 +380,28 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     private func updateListStyle(_ listStyle: ListStyle) {
+        collectionView.collectionViewLayout.invalidateLayout()
         headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
         let newLayout = layoutHelper.createLayoutFor(viewModel: viewModel)
 
         if !displayedFiles.isEmpty {
             collectionView.reloadSections([0])
         }
-        collectionView.layoutIfNeeded()
+
+        if let headerView {
+            if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
+                headerView.selectView.isHidden = false
+                headerView.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
+                headerView.selectView.updateTitle(viewModel.multipleSelectionViewModel?.selectedCount ?? 0)
+            } else {
+                headerView.selectView.isHidden = true
+            }
+        }
+
         collectionView.setCollectionViewLayout(newLayout, animated: true)
+        collectionView.setNeedsLayout()
+        collectionView.layoutIfNeeded()
+        collectionView.contentInset.top = 0
         setSelectedCells()
     }
 
@@ -634,6 +648,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     // MARK: - Multiple selection
 
     func toggleMultipleSelection(_ on: Bool) {
+        collectionView.collectionViewLayout.invalidateLayout()
         if on {
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
@@ -649,6 +664,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             navigationController?.navigationBar.prefersLargeTitles = true
             navigationItem.title = viewModel.title
         }
+        collectionView.setNeedsLayout()
+        collectionView.layoutIfNeeded()
+        collectionView.contentInset.top = 0
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
 
