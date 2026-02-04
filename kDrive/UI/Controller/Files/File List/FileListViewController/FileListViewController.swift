@@ -192,12 +192,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
     }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        collectionView.contentInset.top = 0
-        collectionView.verticalScrollIndicatorInsets.top = 0
-    }
-
     @objc func appWillEnterForeground() {
         tryLoadingFilesOrDisplayError()
     }
@@ -398,9 +392,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             }
         }
 
-        collectionView.setCollectionViewLayout(newLayout, animated: true)
         collectionView.setNeedsLayout()
         collectionView.layoutIfNeeded()
+        collectionView.setCollectionViewLayout(newLayout, animated: true)
         collectionView.contentInset.top = 0
         setSelectedCells()
     }
