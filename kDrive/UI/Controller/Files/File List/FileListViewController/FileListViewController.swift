@@ -418,6 +418,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         if shouldHideUploadCard != headerView?.uploadCardView.isHidden {
             headerView?.uploadCardView.isHidden = shouldHideUploadCard
         }
+
+        if shouldHideUploadCard {
+            tryLoadingFilesOrDisplayError()
+        }
     }
 
     private func fileFloatingPanelLayout(files: [File]) -> FloatingPanelLayout {

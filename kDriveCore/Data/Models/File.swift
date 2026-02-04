@@ -928,6 +928,7 @@ extension File: Differentiable {
                 && capabilities.isContentEqual(to: source.capabilities)
                 && Array(categories).isContentEqual(to: Array(source.categories))
                 && color == source.color
+                && supportedBy.contains(.thumbnail) == source.supportedBy.contains(.thumbnail)
         }
     }
 }
