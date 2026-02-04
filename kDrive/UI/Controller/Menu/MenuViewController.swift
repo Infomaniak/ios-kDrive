@@ -159,6 +159,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
         onDismiss?()
     }
 
