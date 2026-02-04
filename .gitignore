@@ -72,3 +72,6 @@ kDriveTests/Env.swift
 kDriveAPITests/Env.swift
 kDriveUITests/Env.swift
 kDriveTestShared/Env.swift
+
+### Import Loco ###
+.import_loco_api

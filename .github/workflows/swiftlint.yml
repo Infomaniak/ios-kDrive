@@ -8,4 +8,4 @@ concurrency:
 
 jobs:
   lint:
-    uses: infomaniak/.github/.github/workflows/swiftlint.yml@v1
+    uses: infomaniak/.github/.github/workflows/swiftlint.yml@v2

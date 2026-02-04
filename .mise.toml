@@ -4,4 +4,4 @@ swiftformat = { version = "0.58.6", os = ["macos", "linux"] }
 swiftlint = { version = "0.62.2", os = ["macos", "linux"] }
 sentry-cli = { version = "latest", os = ["macos"] }
 pipx = { version = "latest", os = ["macos", "linux"] }
-"pipx:infomaniak/importloco" = { version = "1.2.0", os = ["macos", "linux"] }
+"pipx:infomaniak/importloco" = { version = "2.0.0", os = ["macos", "linux"] }
