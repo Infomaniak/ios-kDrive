@@ -46,6 +46,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     let refreshControl = UIRefreshControl()
     var headerView: FilesHeaderView?
     var selectView: SelectView?
+    private weak var emptyView: EmptyTableView?
 
     #if !ISEXTENSION
     lazy var filePresenter = FilePresenter(viewController: self)
@@ -611,19 +612,26 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     func showEmptyView(_ isShowing: Bool) {
-        guard (collectionView.backgroundView == nil) == isShowing || headerView?.sortView.isHidden == !isShowing else { return }
-        let emptyView = EmptyTableView.instantiate(type: bestEmptyViewType(), button: false)
-        emptyView.actionHandler = { [weak self] _ in
-            self?.forceRefresh()
+        guard (emptyView == nil) == isShowing || headerView?.sortView.isHidden == !isShowing else { return }
+
+        if isShowing {
+            let newEmptyView = EmptyTableView.instantiate(type: bestEmptyViewType(), button: false)
+            newEmptyView.actionHandler = { [weak self] _ in
+                self?.forceRefresh()
+            }
+            collectionView.addSubview(newEmptyView)
+            NSLayoutConstraint.activate([
+                newEmptyView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
+                newEmptyView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
+                newEmptyView.topAnchor.constraint(equalTo: collectionView.topAnchor),
+                newEmptyView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
+            ])
+            emptyView = newEmptyView
+        } else {
+            emptyView?.removeFromSuperview()
+            emptyView = nil
         }
-        collectionView.addSubview(emptyView)
-        NSLayoutConstraint.activate([
-            emptyView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
-            emptyView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
-            emptyView.topAnchor.constraint(equalTo: collectionView.topAnchor),
-            emptyView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
-        ])
-        emptyView.isHidden = !isShowing
+
         if let headerView {
             setUpHeaderView(headerView, isEmptyViewHidden: !isShowing)
         }
