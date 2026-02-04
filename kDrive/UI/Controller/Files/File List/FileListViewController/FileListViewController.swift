@@ -383,6 +383,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
 
         if let headerView {
+            setUpHeaderView(headerView, isEmptyViewHidden: !viewModel.isShowingEmptyView)
             if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
                 headerView.selectView.isHidden = false
                 headerView.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
