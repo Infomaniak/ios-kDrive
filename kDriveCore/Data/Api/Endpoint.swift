@@ -108,6 +108,7 @@ public extension ApiEnvironment {
 
 public extension Endpoint {
     static let itemsPerPage = 200
+    static let filesPerPage = 50
 
     func paginated(page: Int = 1) -> Endpoint {
         let paginationQueryItems = [
@@ -128,10 +129,15 @@ public extension Endpoint {
         return Endpoint(host: host, path: path, queryItems: (queryItems ?? []) + sortQueryItems)
     }
 
-    func cursored(_ cursor: String?) -> Endpoint {
-        let perPage = URLQueryItem(name: "limit", value: "\(Endpoint.itemsPerPage)")
+    func cursored(_ cursor: String?, limit: Int = Endpoint.itemsPerPage) -> Endpoint {
+        let perPage = URLQueryItem(name: "limit", value: "\(limit)")
         let cursorQueryItem = cursor != nil ? [URLQueryItem(name: "cursor", value: cursor), perPage] : [perPage]
         return Endpoint(host: host, path: path, queryItems: (queryItems ?? []) + cursorQueryItem)
+    }
+
+    func limited(_ limit: Int = Endpoint.itemsPerPage) -> Endpoint {
+        let perPage = URLQueryItem(name: "limit", value: "\(limit)")
+        return Endpoint(host: host, path: path, queryItems: (queryItems ?? []) + [perPage])
     }
 }
 
