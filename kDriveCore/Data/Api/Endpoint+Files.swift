@@ -302,12 +302,15 @@ public extension Endpoint {
     // MARK: Listing
 
     static func fileListing(file: AbstractFile) -> Endpoint {
-        return .fileInfo(file).appending(path: "/listing", queryItems: [FileWith.fileListingMinimal.toQueryItem()])
+        return .fileInfo(file)
+            .appending(path: "/listing", queryItems: [FileWith.fileListingMinimal.toQueryItem()])
+            .limited(Endpoint.filesPerPage)
     }
 
     static func fileListingContinue(file: AbstractFile, cursor: String) -> Endpoint {
-        return .fileInfo(file).appending(path: "/listing/continue", queryItems: [URLQueryItem(name: "cursor", value: cursor),
-                                                                                 FileWith.fileListingMinimal.toQueryItem()])
+        return .fileInfo(file)
+            .appending(path: "/listing/continue", queryItems: [FileWith.fileListingMinimal.toQueryItem()])
+            .cursored(cursor, limit: Endpoint.filesPerPage)
     }
 
     static func filePartialListing(drive: AbstractDrive) -> Endpoint {
