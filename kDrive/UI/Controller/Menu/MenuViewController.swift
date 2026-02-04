@@ -140,8 +140,14 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        navigationController?.setNavigationBarHidden(false, animated: false)
         navigationController?.setInfomaniakAppearanceNavigationBar()
+    }
+
+    override func beginAppearanceTransition(_ isAppearing: Bool, animated: Bool) {
+        super.beginAppearanceTransition(isAppearing, animated: animated)
+        if !isAppearing {
+            navigationController?.setNavigationBarHidden(false, animated: false)
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
