@@ -156,6 +156,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
             headerView.uploadCardView.progressView.enableIndeterminate()
         }
+
+        headerView.offlineView.isHidden = ReachabilityListener.instance.currentStatus != .offline
     }
 
     override func viewWillAppear(_ animated: Bool) {
