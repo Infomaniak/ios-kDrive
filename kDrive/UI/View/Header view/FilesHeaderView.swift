@@ -83,6 +83,12 @@ class FilesHeaderView: UIView {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
 
+        uploadCardView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            uploadCardView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
+            uploadCardView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0)
+        ])
+
         setupTrashView()
 
         selectView = SelectView.instantiate()
