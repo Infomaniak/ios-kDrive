@@ -414,6 +414,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     private func updateUploadCard(uploadCount: Int) {
         let shouldHideUploadCard: Bool
+        collectionView.collectionViewLayout.invalidateLayout()
         if uploadCount > 0 {
             headerView?.uploadCardView.setUploadCount(uploadCount)
             shouldHideUploadCard = false
