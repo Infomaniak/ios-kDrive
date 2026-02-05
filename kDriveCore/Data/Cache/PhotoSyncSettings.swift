@@ -41,7 +41,7 @@ public final class PhotoSyncSettings: Object {
     @Persisted(primaryKey: true) public var userId = UUID().uuidString.hashValue
     @Persisted public var driveId: Int
     @Persisted public var parentDirectoryId: Int
-    @Persisted public var lastSync = Date(timeIntervalSince1970: 0)
+    @Persisted public var lastSync = Constants.yearOneDate
     @Persisted public var syncMode: PhotoSyncMode = .new
     @Persisted public var fromDate = Date()
     @Persisted public var syncPicturesEnabled = true

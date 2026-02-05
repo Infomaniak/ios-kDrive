@@ -84,6 +84,8 @@ public enum Constants {
         public static let diskSizeLimit: UInt = 512 * 1024 * 1024 // 512 Mi
     }
 
+    public static let yearOneDate = Date(timeIntervalSince1970: -62_135_597_361)
+
     public static let matomoId = "8"
 
     public static let networkParallelism = 4

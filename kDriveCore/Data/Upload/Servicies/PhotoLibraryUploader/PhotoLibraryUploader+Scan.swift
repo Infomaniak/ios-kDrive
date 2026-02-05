@@ -55,7 +55,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
             do {
                 try await addImageAssetsToUploadQueue(
                     assetsFetchResult: assetsFetchResult,
-                    initial: frozenSettings.lastSync.timeIntervalSince1970 == 0
+                    initial: frozenSettings.lastSync == Constants.yearOneDate
                 )
 
                 if Task.isCancelled {
