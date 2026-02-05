@@ -267,7 +267,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     private func bindUploadCardViewModel() {
         viewModel.uploadViewModel?.$uploadCount
-            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: true)
+            .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
             .sink { [weak self] uploadCount in
                 self?.updateUploadCard(uploadCount: uploadCount)
             }
