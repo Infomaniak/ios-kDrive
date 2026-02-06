@@ -172,12 +172,6 @@ final class PhotoListViewController: FileListViewController {
         applyGradient(view: headerImageView)
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        currentNavigationController?.setInfomaniakAppearanceNavigationBar()
-        currentNavigationController?.navigationBar.tintColor = nil
-    }
-
     private func applyGradient(view: UIImageView) {
         let gradient = CAGradientLayer()
         let bounds = view.frame
