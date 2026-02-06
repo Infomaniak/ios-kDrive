@@ -24,10 +24,6 @@ import UIKit
 // MARK: - FilesHeaderViewDelegate
 
 extension FileListViewController: FilesHeaderViewDelegate {
-    func headerViewHeightDidChange(_ headerView: FilesHeaderView) {
-        collectionView.contentInset.top = headerView.frame.height
-    }
-
     func sortButtonPressed() {
         viewModel.sortButtonPressed()
     }

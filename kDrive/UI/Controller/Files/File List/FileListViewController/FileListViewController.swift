@@ -46,6 +46,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     let refreshControl = UIRefreshControl()
     var headerView: FilesHeaderView?
     var selectView: SelectView?
+    private weak var emptyView: EmptyTableView?
 
     #if !ISEXTENSION
     lazy var filePresenter = FilePresenter(viewController: self)
@@ -102,12 +103,15 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
+        collectionView.register(
+            FilesHeaderReusableView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: String(describing: FilesHeaderReusableView.self)
+        )
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
         collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
         collectionView.dropDelegate = self
         collectionView.dragDelegate = self
-
-        createHeaderView()
 
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
@@ -121,22 +125,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
         setupViewModel()
         setupFooterIfNeeded()
-    }
-
-    private func createHeaderView() {
-        let headerView = FilesHeaderView.instantiate()
-        headerView.delegate = self
-        headerView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(headerView)
-
-        NSLayoutConstraint.activate([
-            headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
-
-        self.headerView = headerView
-        selectView = headerView.selectView
     }
 
     open func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
@@ -168,6 +156,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
             headerView.uploadCardView.progressView.enableIndeterminate()
         }
+
+        headerView.offlineView.isHidden = ReachabilityListener.instance.currentStatus != .offline
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -277,7 +267,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     private func bindUploadCardViewModel() {
         viewModel.uploadViewModel?.$uploadCount
-            .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: true)
+            .debounce(for: .milliseconds(100), scheduler: RunLoop.main)
             .sink { [weak self] uploadCount in
                 self?.updateUploadCard(uploadCount: uploadCount)
             }
@@ -387,13 +377,29 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     private func updateListStyle(_ listStyle: ListStyle) {
+        collectionView.collectionViewLayout.invalidateLayout()
         headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
         let newLayout = layoutHelper.createLayoutFor(viewModel: viewModel)
 
         if !displayedFiles.isEmpty {
             collectionView.reloadSections([0])
         }
+
+        if let headerView {
+            setUpHeaderView(headerView, isEmptyViewHidden: !viewModel.isShowingEmptyView)
+            if viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
+                headerView.selectView.isHidden = false
+                headerView.selectView.setActions(viewModel.multipleSelectionViewModel?.multipleSelectionActions ?? [])
+                headerView.selectView.updateTitle(viewModel.multipleSelectionViewModel?.selectedCount ?? 0)
+            } else {
+                headerView.selectView.isHidden = true
+            }
+        }
+
+        collectionView.setNeedsLayout()
+        collectionView.layoutIfNeeded()
         collectionView.setCollectionViewLayout(newLayout, animated: true)
+        collectionView.contentInset.top = 0
         setSelectedCells()
     }
 
@@ -408,6 +414,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     private func updateUploadCard(uploadCount: Int) {
         let shouldHideUploadCard: Bool
+        collectionView.collectionViewLayout.invalidateLayout()
         if uploadCount > 0 {
             headerView?.uploadCardView.setUploadCount(uploadCount)
             shouldHideUploadCard = false
@@ -608,12 +615,26 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     func showEmptyView(_ isShowing: Bool) {
-        guard (collectionView.backgroundView == nil) == isShowing || headerView?.sortView.isHidden == !isShowing else { return }
-        let emptyView = EmptyTableView.instantiate(type: bestEmptyViewType(), button: false)
-        emptyView.actionHandler = { [weak self] _ in
-            self?.forceRefresh()
+        guard (emptyView == nil) == isShowing || headerView?.sortView.isHidden == !isShowing else { return }
+
+        if isShowing {
+            let newEmptyView = EmptyTableView.instantiate(type: bestEmptyViewType(), button: false)
+            newEmptyView.actionHandler = { [weak self] _ in
+                self?.forceRefresh()
+            }
+            collectionView.addSubview(newEmptyView)
+            NSLayoutConstraint.activate([
+                newEmptyView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
+                newEmptyView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
+                newEmptyView.topAnchor.constraint(equalTo: collectionView.topAnchor),
+                newEmptyView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
+            ])
+            emptyView = newEmptyView
+        } else {
+            emptyView?.removeFromSuperview()
+            emptyView = nil
         }
-        collectionView.backgroundView = isShowing ? emptyView : nil
+
         if let headerView {
             setUpHeaderView(headerView, isEmptyViewHidden: !isShowing)
         }
@@ -633,6 +654,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     // MARK: - Multiple selection
 
     func toggleMultipleSelection(_ on: Bool) {
+        collectionView.collectionViewLayout.invalidateLayout()
         if on {
             navigationItem.title = nil
             headerView?.selectView.isHidden = false
@@ -648,6 +670,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             navigationController?.navigationBar.prefersLargeTitles = true
             navigationItem.title = viewModel.title
         }
+        collectionView.setNeedsLayout()
+        collectionView.layoutIfNeeded()
+        collectionView.contentInset.top = 0
         collectionView.reloadItems(at: collectionView.indexPathsForVisibleItems)
     }
 
@@ -743,6 +768,29 @@ extension FileListViewController {
         }
         (cell as? FileCollectionViewCell)?
             .setSelectionMode(viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true)
+    }
+
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        viewForSupplementaryElementOfKind kind: String,
+        at indexPath: IndexPath
+    ) -> UICollectionReusableView {
+        if kind == UICollectionView.elementKindSectionHeader {
+            let reusableView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                view: FilesHeaderReusableView.self,
+                for: indexPath
+            )
+
+            setUpHeaderView(reusableView.headerView, isEmptyViewHidden: !viewModel.isShowingEmptyView)
+            reusableView.headerView.delegate = self
+            selectView = reusableView.headerView.selectView
+            headerView = reusableView.headerView
+
+            return reusableView
+        }
+
+        return UICollectionReusableView()
     }
 }
 

@@ -31,12 +31,10 @@ protocol FilesHeaderViewDelegate: AnyObject {
     func removeFilterButtonPressed(_ filter: Filterable)
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton)
     func upsaleButtonPressed()
-    func headerViewHeightDidChange(_ headerView: FilesHeaderView)
 }
 
 extension FilesHeaderViewDelegate {
     func uploadCardSelected() {}
-    func headerViewHeightDidChange(_ headerView: FilesHeaderView) {}
 }
 
 class FilesHeaderView: UIView {
@@ -85,16 +83,17 @@ class FilesHeaderView: UIView {
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
         uploadCardView.addGestureRecognizer(tapGestureRecognizer)
 
+        uploadCardView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            uploadCardView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
+            uploadCardView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0)
+        ])
+
         setupTrashView()
 
         selectView = SelectView.instantiate()
         selectView.isHidden = true
         containerStackView.addArrangedSubview(selectView)
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        delegate?.headerViewHeightDidChange(self)
     }
 
     func updateInformationView(drivePackId: DrivePackId?, isTrash: Bool) {
