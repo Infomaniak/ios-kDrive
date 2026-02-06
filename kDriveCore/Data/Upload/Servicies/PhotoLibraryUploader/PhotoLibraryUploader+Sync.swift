@@ -46,7 +46,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
                    !shouldReset {
                     liveNewSyncSettings.lastSync = currentSyncSettings.lastSync
                 } else {
-                    liveNewSyncSettings.lastSync = Date(timeIntervalSince1970: 0)
+                    liveNewSyncSettings.lastSync = Constants.yearOneDate
                 }
             case .fromDate:
                 if let currentSyncSettings = currentSyncSettings,
