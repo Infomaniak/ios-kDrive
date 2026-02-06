@@ -1,3 +1,5 @@
+- Chargement plus rapide des dossiers volumineux
+- Correction de l'aperçu des images après leur téléversement
 - Fonctionnalité d'exclusion d'un utilisateur externe d'un drive sur un partage
 - Améliorations de l'interface utilisateur pour iPhone et iPad
 - Correction relative aux previews de fichiers TXT

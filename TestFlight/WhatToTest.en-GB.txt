@@ -1,3 +1,5 @@
+- Faster loading for large folders
+- Fix preview of an image post upload
 - Functionality to exclude an external user from a share on a drive
 - UI refinements for both iPhone and iPad
 - Fix related to .TXT files
