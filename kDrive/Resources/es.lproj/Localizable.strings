@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Tue, 03 Feb 2026 08:13:56 +0100
+ * Exported by: Baptiste Griva
+ * Exported at: Fri, 06 Feb 2026 08:59:14 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -590,7 +590,7 @@
 "commonFolderDescription" = "Comparte esta carpeta con los usuarios del kDrive %@";
 
 /* loco:6049df4d5c2c3a04bc397975 */
-"commonFolderTitle" = "Carpeta común";
+"commonFolderTitle" = "Carpeta de organización";
 
 /* loco:60545b0e9f34163fee5888e2 */
 "contentDescriptionIsSelected" = "Está seleccionado";
@@ -604,14 +604,11 @@
 /* loco:6049df4d5c2c3a04bc397973 */
 "createCommonFolderAllUsersDescription" = "Todos los usuarios del kDrive %@ tendrán acceso automáticamente a esta carpeta.";
 
-/* loco:6049df4d5c2c3a04bc39797c */
-"createCommonFolderDescription" = "¿Con quién deseas compartir esta carpeta común?";
-
 /* loco:6049df4d5c2c3a04bc39797d */
-"createCommonFolderSucces" = "Carpeta común creada correctamente";
+"createCommonFolderSucces" = "Carpeta de organización creada con éxito";
 
 /* loco:6049df4d5c2c3a04bc39797e */
-"createCommonFolderTitle" = "Crear una carpeta común";
+"createCommonFolderTitle" = "Crear una carpeta de organización";
 
 /* loco:60b9e61ed2bc0c19f9307d42 */
 "createDatedSubFoldersDescription" = "Crear automáticamente subcarpetas con el mes y el año de la foto";
@@ -1551,9 +1548,6 @@
 
 /* loco:66d05b5928ec407b32087892 */
 "publicSharePasswordNeededTitle" = "Contenido seguro";
-
-/* loco:66dfe73543cef47d3e073e62 */
-"publicSharePasswordNotSupportedDescription" = "Los enlaces protegidos por contraseña aún no están disponibles en la aplicación móvil.";
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Enlace de uso compartido público";

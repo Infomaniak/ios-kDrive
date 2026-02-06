@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: en, English
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Tue, 03 Feb 2026 08:13:56 +0100
+ * Exported by: Baptiste Griva
+ * Exported at: Fri, 06 Feb 2026 08:59:14 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -590,7 +590,7 @@
 "commonFolderDescription" = "Share this folder with users of kDrive %@";
 
 /* loco:6049df4d5c2c3a04bc397975 */
-"commonFolderTitle" = "Common folder";
+"commonFolderTitle" = "Organization folder";
 
 /* loco:60545b0e9f34163fee5888e2 */
 "contentDescriptionIsSelected" = "Is selected";
@@ -604,14 +604,11 @@
 /* loco:6049df4d5c2c3a04bc397973 */
 "createCommonFolderAllUsersDescription" = "All kDrive %@ users will automatically have access to this folder.";
 
-/* loco:6049df4d5c2c3a04bc39797c */
-"createCommonFolderDescription" = "Who would you like to share this common folder with?";
-
 /* loco:6049df4d5c2c3a04bc39797d */
-"createCommonFolderSucces" = "Common folder created successfully";
+"createCommonFolderSucces" = "Organization folder created successfully";
 
 /* loco:6049df4d5c2c3a04bc39797e */
-"createCommonFolderTitle" = "Create a common folder";
+"createCommonFolderTitle" = "Create an organization folder";
 
 /* loco:60b9e61ed2bc0c19f9307d42 */
 "createDatedSubFoldersDescription" = "Automatically create subfolders with the month and year of the photo";
@@ -1551,9 +1548,6 @@
 
 /* loco:66d05b5928ec407b32087892 */
 "publicSharePasswordNeededTitle" = "Protected content";
-
-/* loco:66dfe73543cef47d3e073e62 */
-"publicSharePasswordNotSupportedDescription" = "Password-protected links are not yet available on the mobile application.";
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Public sharing link";
