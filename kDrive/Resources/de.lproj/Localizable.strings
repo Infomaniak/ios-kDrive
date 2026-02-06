@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: de, German
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Tue, 03 Feb 2026 08:13:56 +0100
+ * Exported by: Baptiste Griva
+ * Exported at: Fri, 06 Feb 2026 08:59:14 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -590,7 +590,7 @@
 "commonFolderDescription" = "Teilen Sie diesen Ordner mit den Benutzern des kDrive %@";
 
 /* loco:6049df4d5c2c3a04bc397975 */
-"commonFolderTitle" = "Gemeinsamer Ordner";
+"commonFolderTitle" = "Organisationsordner";
 
 /* loco:60545b0e9f34163fee5888e2 */
 "contentDescriptionIsSelected" = "Wurde ausgewählt";
@@ -604,14 +604,11 @@
 /* loco:6049df4d5c2c3a04bc397973 */
 "createCommonFolderAllUsersDescription" = "Alle Benutzer des kDrive %@ erhalten automatisch Zugang zu diesem Ordner.";
 
-/* loco:6049df4d5c2c3a04bc39797c */
-"createCommonFolderDescription" = "Mit wem möchten Sie diesen gemeinsamen Ordner teilen?";
-
 /* loco:6049df4d5c2c3a04bc39797d */
-"createCommonFolderSucces" = "Gemeinsamer Ordner erfolgreich angelegt";
+"createCommonFolderSucces" = "Organisationsordner erfolgreich erstellt";
 
 /* loco:6049df4d5c2c3a04bc39797e */
-"createCommonFolderTitle" = "Gemeinsamen Ordner erstellen";
+"createCommonFolderTitle" = "Organisationsordner erstellen";
 
 /* loco:60b9e61ed2bc0c19f9307d42 */
 "createDatedSubFoldersDescription" = "Automatisches Erstellen von Unterordnern mit dem Monat und Jahr des Fotos";
@@ -1551,9 +1548,6 @@
 
 /* loco:66d05b5928ec407b32087892 */
 "publicSharePasswordNeededTitle" = "Sicherer Inhalt";
-
-/* loco:66dfe73543cef47d3e073e62 */
-"publicSharePasswordNotSupportedDescription" = "Passwortgeschützte Links sind in der mobilen Anwendung noch nicht verfügbar.";
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Öffentlicher Freigabelink";

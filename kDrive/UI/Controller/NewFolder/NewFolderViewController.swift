@@ -288,11 +288,9 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if section == 1 {
             let sectionHeaderView = NewFolderSectionHeaderView.instantiate()
-            if folderType == .commonFolder {
-                sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.createCommonFolderDescription
-            } else {
-                sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.createFolderAccessPermissionTitle
-            }
+
+            sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.createFolderAccessPermissionTitle
+
             return sectionHeaderView
         } else if section == 2 && folderType == .commonFolder {
             let sectionHeaderView = NewFolderSectionHeaderView.instantiate()

@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: fr, French
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Tue, 03 Feb 2026 08:13:56 +0100
+ * Exported by: Baptiste Griva
+ * Exported at: Fri, 06 Feb 2026 08:59:14 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -590,7 +590,7 @@
 "commonFolderDescription" = "Partagez ce dossier avec des utilisateurs du kDrive %@";
 
 /* loco:6049df4d5c2c3a04bc397975 */
-"commonFolderTitle" = "Dossier commun";
+"commonFolderTitle" = "Dossier d’organisation";
 
 /* loco:60545b0e9f34163fee5888e2 */
 "contentDescriptionIsSelected" = "Est sélectionné";
@@ -604,14 +604,11 @@
 /* loco:6049df4d5c2c3a04bc397973 */
 "createCommonFolderAllUsersDescription" = "Tous les utilisateurs du kDrive %@ auront automatiquement accès à ce dossier.";
 
-/* loco:6049df4d5c2c3a04bc39797c */
-"createCommonFolderDescription" = "Avec qui souhaitez-vous partager ce dossier commun ?";
-
 /* loco:6049df4d5c2c3a04bc39797d */
-"createCommonFolderSucces" = "Dossier commun créé avec succès";
+"createCommonFolderSucces" = "Dossier d’organisation créé avec succès";
 
 /* loco:6049df4d5c2c3a04bc39797e */
-"createCommonFolderTitle" = "Créer un dossier commun";
+"createCommonFolderTitle" = "Créer un dossier d’organisation";
 
 /* loco:60b9e61ed2bc0c19f9307d42 */
 "createDatedSubFoldersDescription" = "Créer automatiquement des sous dossiers avec le mois et l’année de la photo";
@@ -1551,9 +1548,6 @@
 
 /* loco:66d05b5928ec407b32087892 */
 "publicSharePasswordNeededTitle" = "Contenu sécurisé";
-
-/* loco:66dfe73543cef47d3e073e62 */
-"publicSharePasswordNotSupportedDescription" = "Les liens protégés par mot de passe ne sont pas encore disponibles sur l’application mobile.";
 
 /* loco:617a50f1744434292a2f07a2 */
 "publicSharedLinkTitle" = "Lien de partage public";
