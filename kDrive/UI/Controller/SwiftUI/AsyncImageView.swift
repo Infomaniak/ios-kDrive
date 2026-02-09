@@ -33,11 +33,9 @@ struct AsyncImageView: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 40, height: 40)
             } else {
                 Circle()
                     .fill(KDriveAsset.loaderDefaultColor.swiftUIColor)
-                    .frame(width: 40, height: 40)
             }
         }
         .task {
