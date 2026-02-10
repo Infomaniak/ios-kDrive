@@ -41,8 +41,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     /// periphery:ignore - Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .app)
 
-    private var reachabilityListener: ReachabilityListener!
-
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
