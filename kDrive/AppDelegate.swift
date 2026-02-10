@@ -68,7 +68,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         ]
         ImageDownloader.default.sessionConfiguration = sessionConfiguration
 
-        reachabilityListener = ReachabilityListener.instance
+        _ = ReachabilityListener.instance
 
         // Start audio session
         do {
