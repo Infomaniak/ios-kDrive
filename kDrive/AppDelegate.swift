@@ -45,7 +45,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
-    @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
