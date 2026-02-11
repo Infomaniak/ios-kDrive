@@ -283,7 +283,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         } else if !isCompactView && !selectMode {
             applySnapshotForLargeView(userRootFolders: userRootFolders)
         } else {
-            dataSource.apply(itemsSnapshot, animatingDifferences: true)
+            dataSource.apply(itemsSnapshot, animatingDifferences: false)
         }
     }
 
