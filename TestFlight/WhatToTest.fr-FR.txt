@@ -1,3 +1,5 @@
+- Correction d'un plantage survenant lors d'un partage de fichiers sur iPad
+- Correction de l'action « Ouvrir dans kDrive » depuis Mail lors d'un démarrage à froid de kDrive
 - Chargement plus rapide des dossiers volumineux
 - Correction de l'aperçu des images après leur téléversement
 - Fonctionnalité d'exclusion d'un utilisateur externe d'un drive sur un partage
