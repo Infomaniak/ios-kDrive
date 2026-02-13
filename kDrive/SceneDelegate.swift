@@ -40,6 +40,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     private var mediaHelper: OpenMediaHelper?
     var shortcutItemToProcess: UIApplicationShortcutItem?
+    var pendingURLContext: UIOpenURLContext?
 
     var window: UIWindow?
 
@@ -51,6 +52,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
         if let shortcutItem = connectionOptions.shortcutItem {
             shortcutItemToProcess = shortcutItem
+        }
+
+        if let urlContext = connectionOptions.urlContexts.first {
+            pendingURLContext = urlContext
         }
 
         prepareWindowScene(windowScene)
@@ -138,6 +143,15 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     func sceneDidBecomeActive(_ scene: UIScene) {
         Log.sceneDelegate("sceneDidBecomeActive \(scene)")
         mediaHelper = nil
+
+        if let pendingURLContext {
+            Task {
+                let url = pendingURLContext.url
+                let success = await deeplinkParser.parse(url: url)
+                Log.sceneDelegate("scene didBecomeActive pending URL parsed: \(url) success: \(success)")
+            }
+            self.pendingURLContext = nil
+        }
 
         guard let shortcutItem = shortcutItemToProcess else {
             return
