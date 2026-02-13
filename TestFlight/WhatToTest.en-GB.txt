@@ -1,3 +1,5 @@
+- Fix a crash while sharing when selecting a drive on iPad
+- Fix mail "open in kDrive" action on a cold kDrive start
 - Faster loading for large folders
 - Fix preview of an image post upload
 - Functionality to exclude an external user from a share on a drive
