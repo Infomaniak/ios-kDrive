@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "35dfce743f9669c4a5d2834885a90cd39c43fa30",
-        "version" : "1.32.0"
+        "revision" : "2ccbbaa031f11090c8d39b70daaf6a0d4484819d",
+        "version" : "1.34.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "a2ab3fd1cfa3733118fcb8a96f08857c444c70f7",
-        "version" : "18.5.1"
+        "revision" : "c9e513f953f04408f535ab53458ff56096e02f3e",
+        "version" : "18.6.0"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "9860c081e5495bf97f6c6dcf1775ca050541123b",
-        "version" : "24.4.1"
+        "revision" : "c4e8599e448b84b55f476fd7752185f9c72786c4",
+        "version" : "24.4.3"
       }
     },
     {
@@ -357,8 +357,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "5e72fc102906ebe75a3487595a653e6f43725552",
-        "version" : "2.94.0"
+        "revision" : "9b92dcd5c22ae17016ad867852e0850f1f9f93ed",
+        "version" : "2.94.1"
       }
     },
     {
