@@ -53,8 +53,10 @@ The project follows a modular architecture with clear separation of concerns:
 2. Bootstrap the development environment:
    ```bash
    mise install
-   # For bash/zsh users:
+   # For bash users:
    eval "$(mise activate bash --shims)"
+   # For zsh users:
+   eval "$(mise activate zsh --shims)"
    # For other shells, see: https://mise.jdx.dev/getting-started.html
    ```
 
