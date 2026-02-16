@@ -2,7 +2,7 @@
 
 Welcome to the official repository for **Infomaniak kDrive**, a modern and secure cloud storage client for iOS and iPadOS. 👋
 
-<a href="https://apps.apple.com/app/infomaniak-kdrive/id1482778676"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1630886400"></a>
+<a href="https://apps.apple.com/app/infomaniak-kdrive/id1482778676"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"></a>
 
 [![Tuist badge](https://img.shields.io/badge/Powered%20by-Tuist-blue)](https://tuist.io)
 [![CI workflow](https://github.com/Infomaniak/ios-kDrive/actions/workflows/ci.yml/badge.svg)](https://github.com/Infomaniak/ios-kDrive/actions/workflows/ci.yml)
@@ -48,7 +48,7 @@ The project follows a modular architecture with clear separation of concerns:
    curl https://mise.run | sh
    ```
    
-   Note: For alternative installation methods, visit the <a href="https://mise.jdx.dev/getting-started.html">official Mise documentation</a>.
+   **Note**: For alternative installation methods or to review the installation script before running, visit the <a href="https://mise.jdx.dev/getting-started.html">official Mise documentation</a>.
 
 2. Bootstrap the development environment:
    ```bash
