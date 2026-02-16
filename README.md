@@ -31,13 +31,13 @@ The project follows a modular architecture with clear separation of concerns:
 ## 🛠️ Technology Stack
 
 - **Language**: Swift 5.10
-- **UI Framework**: UIKit (ViewControllers) with SwiftUI integration (iOS 16.4+)
+- **UI Framework**: UIKit (primary) with SwiftUI integration for newer features
 - **Database**: <a href="https://realm.io/">RealmSwift</a> for local data persistence
 - **Build System**: <a href="https://tuist.io/">Tuist</a> for project generation and SPM dependency management
 - **Tool Management**: <a href="https://mise.jdx.dev/">Mise</a> for managing tool versions
 - **Networking**: Alamofire
 - **Linting**: SwiftLint, SwiftFormat
-- **Minimum iOS**: 13.0+
+- **Minimum iOS**: 13.0+ (SwiftUI features require iOS 16.4+)
 
 ## 🚀 Getting Started
 
@@ -47,11 +47,15 @@ The project follows a modular architecture with clear separation of concerns:
    ```bash
    curl https://mise.run | sh
    ```
+   
+   Note: For alternative installation methods, visit the <a href="https://mise.jdx.dev/getting-started.html">official Mise documentation</a>.
 
 2. Bootstrap the development environment:
    ```bash
    mise install
+   # For bash/zsh users:
    eval "$(mise activate bash --shims)"
+   # For other shells, see: https://mise.jdx.dev/getting-started.html
    ```
 
 3. Install dependencies and generate the Xcode project:
