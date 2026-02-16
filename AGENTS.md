@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-Infomaniak kDrive — a production iOS cloud storage client supporting iPhone, iPad, and Mac Catalyst (iOS 13.0+).
+Infomaniak kDrive — a production iOS cloud storage client supporting iPhone, iPad.
 
 - **Language:** Swift 5.10
 - **UI:** UIKit (ViewControllers) with SwiftUI integration (iOS 16.4+)
