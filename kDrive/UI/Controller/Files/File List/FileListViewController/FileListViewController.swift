@@ -99,6 +99,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         super.viewDidLoad()
         navigationItem.hideBackButtonText()
         navigationItem.largeTitleDisplayMode = .always
+        navigationController?.navigationBar.tintColor = nil
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(cellView: FileCollectionViewCell.self)
