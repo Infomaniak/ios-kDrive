@@ -4,9 +4,6 @@ Welcome to the official repository for **Infomaniak kDrive**, a modern and secur
 
 <a href="https://apps.apple.com/app/infomaniak-kdrive/id1482778676"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83"></a>
 
-[![Tuist badge](https://img.shields.io/badge/Powered%20by-Tuist-blue)](https://tuist.io)
-[![CI workflow](https://github.com/Infomaniak/ios-kDrive/actions/workflows/ci.yml/badge.svg)](https://github.com/Infomaniak/ios-kDrive/actions/workflows/ci.yml)
-
 ## 📖 About Infomaniak kDrive
 
 Infomaniak kDrive is part of the <a href="https://www.infomaniak.com/">Infomaniak</a> ecosystem, providing a privacy-focused 🔒, Swiss-based 🇨🇭 cloud storage solution with a beautiful native iOS experience. Built with Swift and UIKit/SwiftUI, this app offers a fast, secure, and user-friendly way to store, synchronize, share, and collaborate on your files.
@@ -82,21 +79,12 @@ scripts/lint.sh
 
 ## 🧪 Testing
 
-Before running the Unit and UI tests, you must create an `Env` struct/enum. Duplicate the sample file (`kDriveTests/Env.sample.swift`), rename it to `Env`, and complete it. You can then run the tests using Xcode or Tuist:
-```bash
-tuist test
-```
+You can run the tests using Xcode or Tuist. The project includes unit tests to ensure code quality and reliability.
 
-## 📄 License & Contributions
+## 🤝 Contributing
 
-This project is under GPLv3 license.
+If you see a bug or an enhancement point, feel free to create an issue, so that we can discuss it. Once approved, we or you (depending on the priority of the bug/improvement) will take care of the issue and apply a merge request. Please, don't do a merge request before creating an issue.
 
-If you see a bug or an enhanceable point, feel free to create an issue, so that we can discuss about it, and once approved, we or you (depending on the criticality of the bug/improvement) will take care of the issue and apply a merge request.
+## 📄 License
 
-**Please, don't do a merge request before creating an issue.**
-
-## ⚖️ Legal Requirements
-
-Apple, the Apple logo, and Xcode are trademarks of Apple Inc., registered in the U.S. and other countries and regions. App Store is a service mark of Apple Inc.
-
-IOS is a trademark or registered trademark of Cisco in the U.S. and other countries.
+This project is under GPLv3 license. See the LICENSE file for more details.
