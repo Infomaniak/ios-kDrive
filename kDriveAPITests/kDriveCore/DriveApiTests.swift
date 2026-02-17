@@ -189,11 +189,8 @@ final class DriveApiTests: XCTestCase {
     // MARK: - Test methods
 
     func testGetRootFile() async throws {
-        let file = try await currentApiFetcher.fileInfo(ProxyFile(
-            driveId: Env.driveId,
-            id: DriveFileManager.constants.rootID
-        )).validApiResponse.data
-        _ = try await currentApiFetcher.files(in: file.proxify())
+        let files = try await currentApiFetcher.rootFiles(drive: proxyDrive, cursor: nil).validApiResponse.data
+        _ = try await currentApiFetcher.files(in: files[0].proxify())
     }
 
     func testGetCommonDocuments() async throws {
