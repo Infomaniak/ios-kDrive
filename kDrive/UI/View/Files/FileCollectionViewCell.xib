@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24412" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_3" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24405"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -34,7 +34,7 @@
                                             </view>
                                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="id8-ZX-iUQ">
                                                 <rect key="frame" x="0.0" y="0.0" width="364" height="60"/>
-                                                <color key="backgroundColor" name="itemSelectedBackgroundColor"/>
+                                                <color key="backgroundColor" name="backgroundCardViewSelectedColor"/>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LXW-VV-Quo" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
                                                 <rect key="frame" x="21" y="16" width="28" height="28"/>
@@ -213,7 +213,7 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="check" width="16" height="16"/>
+        <image name="check" width="24" height="24"/>
         <image name="favorite" width="24" height="24"/>
         <image name="folder-filled" width="24" height="24"/>
         <image name="menu" width="24" height="24"/>
@@ -223,14 +223,14 @@
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
+        <namedColor name="backgroundCardViewSelectedColor">
+            <color red="0.89411764705882357" green="0.89411764705882357" blue="0.90980392156862744" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
         <namedColor name="favoriteColor">
             <color red="1" green="0.75686274509803919" blue="0.039215686274509803" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="greenColor">
             <color red="0.24300000071525574" green="0.74900001287460327" blue="0.30199998617172241" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="itemSelectedBackgroundColor">
-            <color red="0.78823529411764703" green="0.78823529411764703" blue="0.81568627450980391" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
             <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
