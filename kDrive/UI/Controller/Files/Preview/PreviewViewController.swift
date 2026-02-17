@@ -477,12 +477,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             }
             floatingPanelViewController.dismiss(animated: true)
         } else {
-            if traitCollection.horizontalSizeClass == .regular {
-                guard floatingPanelViewController.parent == nil else { return }
-                floatingPanelViewController.addPanel(toParent: self, animated: true)
-            } else {
+            if traitCollection.horizontalSizeClass.iskDriveCompactSize {
                 guard floatingPanelViewController.presentingViewController == nil else { return }
                 present(floatingPanelViewController, animated: true)
+            } else {
+                guard floatingPanelViewController.parent == nil else { return }
+                floatingPanelViewController.addPanel(toParent: self, animated: true)
             }
         }
     }
