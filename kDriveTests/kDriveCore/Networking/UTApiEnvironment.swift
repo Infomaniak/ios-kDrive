@@ -28,7 +28,6 @@ struct UTApiEnvironment {
 
         #expect(prodEnv.driveHost == "kdrive.infomaniak.com")
         #expect(prodEnv.apiDriveHost == "api.kdrive.infomaniak.com")
-        #expect(prodEnv.onlyOfficeDocumentServerHost == "documentserver.kdrive.infomaniak.com")
         #expect(prodEnv.mqttHost == "info-mq.infomaniak.com")
         #expect(prodEnv.mqttPass == "8QC5EwBqpZ2Z")
     }
@@ -39,7 +38,6 @@ struct UTApiEnvironment {
 
         #expect(preprodEnv.driveHost == "kdrive.preprod.dev.infomaniak.ch")
         #expect(preprodEnv.apiDriveHost == "api.kdrive.preprod.dev.infomaniak.ch")
-        #expect(preprodEnv.onlyOfficeDocumentServerHost == "documentserver.kdrive.preprod.dev.infomaniak.ch")
         #expect(preprodEnv.mqttHost == "preprod-info-mq.infomaniak.com")
         #expect(preprodEnv.mqttPass == "4fBt5AdC2P")
     }
@@ -50,7 +48,6 @@ struct UTApiEnvironment {
 
         #expect(customHost.driveHost == "orphan.example.com")
         #expect(customHost.apiDriveHost == "orphan.example.com")
-        #expect(customHost.onlyOfficeDocumentServerHost == "documentserver.kdrive.preprod.dev.infomaniak.ch")
         #expect(customHost.mqttHost == "preprod-info-mq.infomaniak.com")
         #expect(customHost.mqttPass == "4fBt5AdC2P")
     }
@@ -61,7 +58,6 @@ struct UTApiEnvironment {
 
         #expect(customHost.driveHost == "kdrive.custom.example.com")
         #expect(customHost.apiDriveHost == "api.kdrive.custom.example.com")
-        #expect(customHost.onlyOfficeDocumentServerHost == "documentserver.kdrive.custom.example.com")
         #expect(customHost.mqttHost == "preprod-info-mq.infomaniak.com")
         #expect(customHost.mqttPass == "4fBt5AdC2P")
     }

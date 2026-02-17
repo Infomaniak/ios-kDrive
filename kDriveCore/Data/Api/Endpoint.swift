@@ -63,20 +63,6 @@ public extension ApiEnvironment {
         }
     }
 
-    var onlyOfficeDocumentServerHost: String {
-        switch self {
-        case .prod, .preprod:
-            return "documentserver.\(driveHost)"
-        case .customHost(let host):
-            guard host.contains("orphan") else {
-                Logger.general.error("documentserver for arbitrary customHost will likely fail")
-                return "documentserver.\(driveHost)"
-            }
-
-            return "documentserver.\(ApiEnvironment.preprod.driveHost)"
-        }
-    }
-
     var mqttHost: String {
         switch self {
         case .prod:
