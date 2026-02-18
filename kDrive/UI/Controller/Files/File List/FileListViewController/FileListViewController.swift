@@ -110,7 +110,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             withReuseIdentifier: String(describing: FilesHeaderReusableView.self)
         )
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
+        #if !ISEXTENSION
         collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
+        #endif
         collectionView.dropDelegate = self
         collectionView.dragDelegate = self
 

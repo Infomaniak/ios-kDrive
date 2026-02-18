@@ -83,7 +83,13 @@ protocol FileCellDelegate: AnyObject {
         return file.isFavorite
     }
 
-    var moreButtonHidden: Bool { selectionMode }
+    var moreButtonHidden: Bool {
+        #if !ISEXTENSION
+        selectionMode
+        #else
+        return true
+        #endif
+    }
 
     var categories = [kDriveCore.Category]()
 
