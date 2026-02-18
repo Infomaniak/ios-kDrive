@@ -259,8 +259,7 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
         }
 
         // If destination is a file download or print. This is a hack because `shouldPerformDownload` doesn't work
-        if url.host == ApiEnvironment.current.onlyOfficeDocumentServerHost,
-           url.path.contains("/output.") {
+        if url.host == "onlyoffice.infomaniak.com", url.path.contains("/output.") {
             if UIPrintInteractionController.canPrint(url) {
                 let printController = UIPrintInteractionController()
                 printController.printingItem = url
