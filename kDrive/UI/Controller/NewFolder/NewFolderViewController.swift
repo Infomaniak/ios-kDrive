@@ -436,7 +436,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
                         self.dismissAndRefreshDataSource()
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createPrivateFolderSucces)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createPrivateFolderSuccess)
                     }
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: error)
@@ -464,7 +464,7 @@ extension NewFolderViewController: FooterButtonDelegate {
                         self.navigationController?.pushViewController(shareVC, animated: true)
                     } else {
                         self.dismissAndRefreshDataSource()
-                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createCommonFolderSucces)
+                        UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.createCommonFolderSuccess)
                     }
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: error)
