@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Baptiste Griva
- * Exported at: Fri, 06 Feb 2026 08:59:14 +0100
+ * Exported by: Valentin Perignon
+ * Exported at: Thu, 19 Feb 2026 09:12:49 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -605,7 +605,7 @@
 "createCommonFolderAllUsersDescription" = "Tutti gli utenti del kDrive %@ avranno automaticamente accesso a questa cartella.";
 
 /* loco:6049df4d5c2c3a04bc39797d */
-"createCommonFolderSucces" = "Cartella organizzativa creata con successo";
+"createCommonFolderSuccess" = "Cartella organizzativa creata con successo";
 
 /* loco:6049df4d5c2c3a04bc39797e */
 "createCommonFolderTitle" = "Crea una cartella dell’organizzazione";
@@ -674,7 +674,7 @@
 "createFolderValidUntilDescription" = "Dopo tale data, gli utenti non potranno più trasferire i file.";
 
 /* loco:6049df4d5c2c3a04bc39798d */
-"createPrivateFolderSucces" = "Cartella creata con successo";
+"createPrivateFolderSuccess" = "Cartella creata con successo";
 
 /* loco:629618adfe596f553920c562 */
 "deleteMyAccount" = "Cancellare il mio account";
@@ -1277,7 +1277,7 @@
 "modalCommentDeleteDescription" = "Rimuovere veramente questo commento?";
 
 /* loco:6049df4d5c2c3a04bc397a01 */
-"modalCreateFileSucces" = "%@ creato con successo";
+"modalCreateFileSuccess" = "%@ creato con successo";
 
 /* loco:6049df4d5c2c3a04bc397a02 */
 "modalCreateFileTitle" = "Crea un file";
