@@ -1,14 +1,3 @@
-- Correction d'un plantage survenant lors d'un partage de fichiers sur iPad
-- Correction de l'action « Ouvrir dans kDrive » depuis Mail lors d'un démarrage à froid de kDrive
-- Chargement plus rapide des dossiers volumineux
-- Correction de l'aperçu des images après leur téléversement
-- Fonctionnalité d'exclusion d'un utilisateur externe d'un drive sur un partage
-- Améliorations de l'interface utilisateur pour iPhone et iPad
-- Correction relative aux previews de fichiers TXT
-- Correction relative a l'application iOS Fichiers
-- Migration des profiles utilisateurs si nécessaire
-- Prise en charge des partages publics protégés par mot de passe
-- Un lien profond vers un partage public vous redirigera vers vos fichiers si vous en êtes le propriétaire
-- Bouton de commentaires accessible à tous dans les paramètres
-- Notifications urgentes pour l'authentification à deux facteurs
+- Correction des problèmes d'interface utilisateur dans l'extension de partage
+- Correction de l'action de téléchargement depuis OnlyOffice
 - Améliorations de la stabilité et corrections de bugs
