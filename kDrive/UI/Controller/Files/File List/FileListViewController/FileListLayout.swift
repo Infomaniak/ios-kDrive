@@ -94,9 +94,11 @@ struct DefaultFileListLayout: FileListLayout {
         configuration.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         configuration.showsSeparators = false
 
+        #if !ISEXTENSION
         configuration.trailingSwipeActionsConfigurationProvider = { indexPath in
             return viewModel.getSwipeActionConfiguration(at: indexPath)
         }
+        #endif
 
         let section = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: environment)
 

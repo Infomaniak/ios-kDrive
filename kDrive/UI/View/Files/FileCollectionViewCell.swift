@@ -83,7 +83,13 @@ protocol FileCellDelegate: AnyObject {
         return file.isFavorite
     }
 
-    var moreButtonHidden: Bool { selectionMode }
+    var moreButtonHidden: Bool {
+        #if !ISEXTENSION
+        selectionMode
+        #else
+        return true
+        #endif
+    }
 
     var categories = [kDriveCore.Category]()
 
@@ -330,6 +336,29 @@ class FileCollectionViewCell: UICollectionViewCell {
         if isFirst {
             topConstraint.constant = 8
         }
+
+        applyGroupedCorners(isFirst: isFirst, isLast: isLast)
+    }
+
+    private func applyGroupedCorners(isFirst: Bool, isLast: Bool) {
+        let radius = CGFloat(UIConstants.cornerRadius)
+
+        if isFirst && isLast {
+            contentInsetView.roundCorners(
+                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
+                radius: radius
+            )
+        } else if isFirst {
+            contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: radius)
+        } else if isLast {
+            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMinXMaxYCorner], radius: radius)
+        } else {
+            contentInsetView.roundCorners(
+                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
+                radius: 0
+            )
+        }
+        contentInsetView.addShadow()
     }
 
     func setEnabled(_ enabled: Bool) {
