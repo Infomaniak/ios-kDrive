@@ -38,16 +38,13 @@ import VersionChecker
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
-    /// Making sure the DI is registered at a very early stage of the app launch.
+    /// periphery:ignore - Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .app)
-
-    private var reachabilityListener: ReachabilityListener!
 
     @LazyInjectService var infomaniakLogin: InfomaniakLogin
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
-    @LazyInjectService var appRestorationService: AppRestorationServiceable
     @LazyInjectService var appNavigable: AppNavigable
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
@@ -66,7 +63,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Must define a limit, unlimited otherwise
         ImageCache.default.diskStorage.config.sizeLimit = Constants.ImageCache.diskSizeLimit
 
-        reachabilityListener = ReachabilityListener.instance
+        _ = ReachabilityListener.instance
 
         // Start audio session
         do {
