@@ -1,14 +1,3 @@
-- Fix a crash while sharing when selecting a drive on iPad
-- Fix mail "open in kDrive" action on a cold kDrive start
-- Faster loading for large folders
-- Fix preview of an image post upload
-- Functionality to exclude an external user from a share on a drive
-- UI refinements for both iPhone and iPad
-- Fix related to .TXT files
-- Fix related to iOS's Files.app
-- Migrate User Profiles if needed
-- Support for public shares with password
-- A public share deep-link will navigate to your files if you own it
-- Feedback button for everyone in the settings
-- Sensitive notifications for 2FA
+- Fix UI issues in share extension
+- Fix download action from OnlyOffice
 - Stability improvements and bug fixes
