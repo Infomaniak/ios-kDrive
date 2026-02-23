@@ -57,6 +57,7 @@ extension FileProviderExtension {
 
             var request = URLRequest(url: file.thumbnailURL)
             request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
+            request.setValue(Constants.userAgent, forHTTPHeaderField: "User-Agent")
 
             // Download the thumbnail to disk
             // For simplicity, this sample downloads each thumbnail separately;

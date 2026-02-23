@@ -36,6 +36,7 @@ public class PublicShareApiFetcher: ApiFetcher {
     private static let noCookiesSession: Session = {
         let configuration = URLSessionConfiguration.af.default
         configuration.httpCookieStorage = nil
+        configuration.httpAdditionalHeaders = ["User-Agent": Constants.userAgent]
         return Session(configuration: configuration)
     }()
 

@@ -65,6 +65,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         ImageCache.default.memoryStorage.config.totalCostLimit = Constants.ImageCache.memorySizeLimit
         // Must define a limit, unlimited otherwise
         ImageCache.default.diskStorage.config.sizeLimit = Constants.ImageCache.diskSizeLimit
+        let sessionConfiguration = ImageDownloader.default.sessionConfiguration
+        sessionConfiguration.httpAdditionalHeaders = [
+            "User-Agent": Constants.userAgent
+        ]
+        ImageDownloader.default.sessionConfiguration = sessionConfiguration
 
         reachabilityListener = ReachabilityListener.instance
 

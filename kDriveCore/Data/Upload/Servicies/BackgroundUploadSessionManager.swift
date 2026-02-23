@@ -108,6 +108,7 @@ public final class BackgroundUploadSessionManager: NSObject,
         backgroundUrlSessionConfiguration
             .timeoutIntervalForResource = 60 * 60 * 11 // 11h before giving up (chunk upload session not valid after)
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
+        backgroundUrlSessionConfiguration.httpAdditionalHeaders = ["User-Agent": Constants.userAgent]
         let session = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
         syncQueue.async(flags: .barrier) { [weak self] in
             guard let self else { return }

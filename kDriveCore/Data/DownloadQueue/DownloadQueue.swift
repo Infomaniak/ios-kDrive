@@ -91,6 +91,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
         urlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = false
         urlSessionConfiguration.allowsCellularAccess = true
         urlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
+        urlSessionConfiguration.httpAdditionalHeaders = ["User-Agent": Constants.userAgent]
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
     }()
 
