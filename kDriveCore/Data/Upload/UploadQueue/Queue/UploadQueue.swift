@@ -61,6 +61,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
             .httpMaximumConnectionsPerHost = 4 // This limit is not really respected because we are using http/2
         urlSessionConfiguration.timeoutIntervalForRequest = 60 * 2 // 2 minutes before timeout
         urlSessionConfiguration.networkServiceType = .default
+        urlSessionConfiguration.httpAdditionalHeaders = ["User-Agent": Constants.userAgent]
         return URLSession(configuration: urlSessionConfiguration, delegate: nil, delegateQueue: nil)
     }()
 

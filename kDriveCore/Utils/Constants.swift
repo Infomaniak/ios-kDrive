@@ -192,8 +192,10 @@ public enum Constants {
     }
 
     public static func appVersionLabel() -> String {
-        return CorePlatform.appVersionLabel(fallbackAppName: "Mail")
+        return CorePlatform.appVersionLabel(fallbackAppName: "kDrive")
     }
+
+    public static let userAgent = UserAgentBuilder().userAgent
 }
 
 /// App lifecycle Constants

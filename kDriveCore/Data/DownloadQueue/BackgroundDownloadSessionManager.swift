@@ -79,6 +79,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
         backgroundUrlSessionConfiguration.shouldUseExtendedBackgroundIdleMode = true
         backgroundUrlSessionConfiguration.sharedContainerIdentifier = AccountManager.appGroup
         backgroundUrlSessionConfiguration.networkServiceType = .responsiveData
+        backgroundUrlSessionConfiguration.httpAdditionalHeaders = ["User-Agent": Constants.userAgent]
         backgroundSession = URLSession(configuration: backgroundUrlSessionConfiguration, delegate: self, delegateQueue: nil)
     }
 
