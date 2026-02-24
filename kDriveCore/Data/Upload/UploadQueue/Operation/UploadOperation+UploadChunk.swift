@@ -105,6 +105,7 @@ extension UploadOperation {
         return chunkPath
     }
 
+    // periphery:ignore
     /// Prepare chunk upload requests, and start them.
     private func scheduleNextChunk(filePath: String, chunksToGenerateCount: Int) async throws {
         do {
