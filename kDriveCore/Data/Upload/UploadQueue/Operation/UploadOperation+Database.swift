@@ -19,6 +19,7 @@
 import Foundation
 import RealmSwift
 
+// periphery:ignore
 extension UploadOperation {
     /// The standard way to interact with a UploadFile within an UploadOperation
     ///
