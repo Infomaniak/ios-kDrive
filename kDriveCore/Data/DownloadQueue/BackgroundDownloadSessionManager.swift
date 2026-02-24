@@ -21,6 +21,7 @@ import Foundation
 import InfomaniakCoreDB
 import InfomaniakDI
 
+// periphery:ignore
 protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases
 
