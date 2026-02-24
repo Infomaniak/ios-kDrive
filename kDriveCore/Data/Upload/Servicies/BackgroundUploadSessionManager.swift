@@ -38,6 +38,7 @@ protocol BackgroundUploadSessionManageable: URLSessionTaskDelegate, URLSessionDe
     func rescheduleForBackground(task: URLSessionDataTask, fileUrl: URL) -> String?
 }
 
+// periphery:ignore
 /// Something that can provide a completion handler for a request
 protocol BackgroundUploadSessionCompletionable {
     /// Fetch completion handler for a specified request
