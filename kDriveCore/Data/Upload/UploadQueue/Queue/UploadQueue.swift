@@ -75,8 +75,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        let shouldBeSuspended = status == .offline
-        return shouldBeSuspended
+        return status == .offline
     }
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
