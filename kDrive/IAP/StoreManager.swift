@@ -41,6 +41,7 @@ class StoreManager: NSObject {
         fetchProducts(matchingIdentifiers: identifiers)
     }
 
+    // periphery:ignore
     /// Existing product's title matching the specified product identifier.
     func title(matchingIdentifier identifier: String) -> String? {
         guard !availableProducts.isEmpty else { return nil }
@@ -51,6 +52,7 @@ class StoreManager: NSObject {
         return result?.localizedTitle
     }
 
+    // periphery:ignore
     /// Existing product's title associated with the specified payment transaction.
     func title(matchingPaymentTransaction transaction: SKPaymentTransaction) -> String {
         let title = title(matchingIdentifier: transaction.payment.productIdentifier)
@@ -63,6 +65,7 @@ class StoreManager: NSObject {
         // META: keep SonarCloud happy
     }
 
+    // periphery:ignore
     /// Fetches information about your products from the App Store.
     private func fetchProducts(matchingIdentifiers identifiers: [String]) {
         // Create a set for the product identifiers
