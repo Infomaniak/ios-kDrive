@@ -163,8 +163,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     /// Return the available chunking slots.
     func availableWorkerSlots() -> Int {
         let uploadTasksCount = uploadTasks.count
-        let free = max(Self.parallelism - uploadTasksCount, 0)
-        return free
+        return max(Self.parallelism - uploadTasksCount, 0)
     }
 
     func fileSize(fileUrl: URL) throws -> UInt64 {
@@ -362,7 +361,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     // MARK: Network callback
 
-    // Chunk upload network callback
+    /// Chunk upload network callback
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         enqueueCatching {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
@@ -454,8 +453,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         switch nsError.code {
         case NSURLErrorCancelled, NSURLErrorNetworkConnectionLost:
-            /// Here a Chunk request canceled on .taskRescheduled _or_ the network connection was lost
-            /// Either way we catch silently the issue, the operation will seamlessly retry the chunk
+            // Here a Chunk request canceled on .taskRescheduled _or_ the network connection was lost
+            // Either way we catch silently the issue, the operation will seamlessly retry the chunk
             var iterator = uploadTasks.makeIterator()
             try cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
 
