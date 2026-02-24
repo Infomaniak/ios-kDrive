@@ -75,6 +75,11 @@ extension FileActionsFloatingPanelViewController {
             }
         case .sharedWithMe:
             actions = [.download]
+            let canDelete = frozenFile.capabilities.canDelete && !frozenFile
+                .isImporting && (!sharedWithMe || frozenFile.createdBy == accountManager.currentUserId)
+            if canDelete {
+                actions.append(.delete)
+            }
         default:
             actions = (frozenFile.isDirectory ? FloatingPanelAction.folderListActions : FloatingPanelAction.listActions)
                 .filter { action in
