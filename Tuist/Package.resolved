@@ -1,5 +1,5 @@
 {
-  "originHash" : "efafe0147a98b1e1b12fdc4afcc3a5b2f4d750ba92e5bec95a29b2b4f08ff836",
+  "originHash" : "b98c8d83206eb77687da6773a8a6e57ac1af76e4cbf7822dac7b58ae6b82d2d4",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "revision" : "aa7a0c221a3b111011f95bc9e136b26fc047d721",
-        "version" : "8.4.3"
+        "revision" : "3d6765b06879a2a29e41ed17f31d7859a3c968e4",
+        "version" : "8.5.0"
       }
     },
     {
@@ -202,7 +202,7 @@
     {
       "identity" : "lottie-spm",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/lottie-spm",
+      "location" : "https://github.com/airbnb/lottie-spm.git",
       "state" : {
         "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
         "version" : "4.5.2"

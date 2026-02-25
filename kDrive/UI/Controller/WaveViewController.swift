@@ -124,7 +124,8 @@ extension IKButtonTheme {
         disabledSecondary: KDriveResourcesAsset.buttonDisabledBackgroundColor.swiftUIColor,
         error: KDriveResourcesAsset.binColor.swiftUIColor,
         smallFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)),
-        mediumFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium))
+        mediumFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium)),
+        cornerRadius: UIConstants.Button.cornerRadius
     )
 }
 
