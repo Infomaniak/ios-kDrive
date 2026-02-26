@@ -30,6 +30,7 @@ class SaveFileViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var fileImportHelper: FileImportHelper
     @LazyInjectService var appContextService: AppContextServiceable
+    @InjectService var appLockHelper: AppLockHelper
 
     private var originalDriveId: Int = {
         @InjectService var accountManager: AccountManageable
@@ -176,6 +177,21 @@ class SaveFileViewController: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
         tableView.reloadData()
+        guard UserDefaults.shared.isAppLockEnabled && appLockHelper.isAppLocked else {
+            return
+        }
+
+        Task { @MainActor in
+            let unlocked = await (try? appLockHelper.evaluatePolicy(
+                reason: KDriveResourcesStrings.Localizable.lockAppTitle
+            )) == true
+
+            if unlocked {
+                appLockHelper.setTime()
+            } else {
+                close(self)
+            }
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
