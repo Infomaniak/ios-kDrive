@@ -19,6 +19,7 @@
 import Foundation
 import RealmSwift
 
+// periphery:ignore
 extension UploadOperation {
     /// The standard way to interact with a UploadFile within an UploadOperation
     ///
@@ -29,7 +30,7 @@ extension UploadOperation {
     ///   - function: The name of the function performing the transaction
     ///   - task: A closure to mutate the current `UploadFile`
     func transactionWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
-        /// A cancelled operation can access database for cleanup, _not_ a finished one.
+        // A cancelled operation can access database for cleanup, _not_ a finished one.
         guard !isFinished else {
             throw ErrorDomain.operationFinished
         }

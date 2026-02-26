@@ -23,6 +23,7 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
+// periphery:ignore
 public protocol UploadQueueDelegate: AnyObject {
     func operationQueueBecameEmpty(_ queue: UploadQueue)
     func operationQueueNoLongerEmpty(_ queue: UploadQueue)
@@ -32,6 +33,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     @LazyInjectService var appContextService: AppContextServiceable
     @LazyInjectService var uploadPublisher: UploadPublishable
 
+    // periphery:ignore
     private var queueObserver: UploadQueueObserver?
 
     static let silentErrors: [DriveError] =
@@ -73,8 +75,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         let status = ReachabilityListener.instance.currentStatus
-        let shouldBeSuspended = status == .offline
-        return shouldBeSuspended
+        return status == .offline
     }
 
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call

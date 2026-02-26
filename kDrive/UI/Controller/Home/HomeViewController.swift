@@ -105,6 +105,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         case insufficientStorage
     }
 
+    // periphery:ignore
     enum RecentFileRow: Differentiable {
         case file
         case loading
@@ -112,8 +113,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     var driveFileManager: DriveFileManager
 
-    private var floatingPanelViewController: DriveFloatingPanelController?
-    private var fileInformationsViewController: FileActionsFloatingPanelViewController!
     private lazy var filePresenter = FilePresenter(viewController: self)
 
     private var recentActivitiesController: HomeRecentActivitiesController?
@@ -125,7 +124,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         isLoading: false
     )
     private var showInsufficientStorage = true
-    private var filesObserver: ObservationToken?
 
     private let refreshControl = UIRefreshControl()
 
@@ -204,6 +202,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         reload(newViewModel: newViewModel)
     }
 
+    // periphery:ignore
     func reloadWith(fetchedFiles: [FileActivity], isEmpty: Bool) {
         refreshControl.endRefreshing()
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
@@ -342,6 +341,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     // MARK: - State restoration
 
+    // periphery:ignore
     var currentSceneMetadata: [AnyHashable: Any] {
         [:]
     }

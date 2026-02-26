@@ -27,6 +27,7 @@ public typealias RequestCompletionHandler = (Data?, URLResponse?, Error?) -> Voi
 /// A completion handler to call to terminate the handling of a background task finishing
 public typealias BackgroundCompletionHandler = () -> Void
 
+// periphery:ignore
 protocol BackgroundUploadSessionManageable: URLSessionTaskDelegate, URLSessionDelegate, URLSessionDataDelegate {
     var backgroundSession: URLSession! { get }
 
@@ -37,6 +38,7 @@ protocol BackgroundUploadSessionManageable: URLSessionTaskDelegate, URLSessionDe
     func rescheduleForBackground(task: URLSessionDataTask, fileUrl: URL) -> String?
 }
 
+// periphery:ignore
 /// Something that can provide a completion handler for a request
 protocol BackgroundUploadSessionCompletionable {
     /// Fetch completion handler for a specified request
