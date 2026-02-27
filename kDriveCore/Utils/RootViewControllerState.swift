@@ -50,3 +50,21 @@ public enum RootViewControllerState {
         }
     }
 }
+
+extension RootViewControllerState: Equatable {
+    public static func == (lhs: RootViewControllerState, rhs: RootViewControllerState) -> Bool {
+        switch (lhs, rhs) {
+        case (.splashScreen, .splashScreen),
+             (.onboarding, .onboarding),
+             (.appLock, .appLock),
+             (.updateRequired, .updateRequired):
+            return true
+        case (.mainViewController(let lhsDriveFileManager), .mainViewController(let rhsDriveFileManager)):
+            return lhsDriveFileManager === rhsDriveFileManager
+        case (.preloading(let lhsApiToken), .preloading(let rhsApiToken)):
+            return lhsApiToken.userId == rhsApiToken.userId
+        default:
+            return false
+        }
+    }
+}
