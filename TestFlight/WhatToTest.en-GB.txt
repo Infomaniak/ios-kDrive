@@ -1,3 +1,4 @@
+- File deletion where available in shares
 - Fix UI issues in share extension
 - Fix download action from OnlyOffice
 - Stability improvements and bug fixes
