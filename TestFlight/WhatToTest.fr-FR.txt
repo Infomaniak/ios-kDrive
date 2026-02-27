@@ -1,3 +1,4 @@
+- Suppression des fichiers lorsque c'est possible dans les partages
 - Correction des problèmes d'interface utilisateur dans l'extension de partage
 - Correction de l'action de téléchargement depuis OnlyOffice
 - Améliorations de la stabilité et corrections de bugs
