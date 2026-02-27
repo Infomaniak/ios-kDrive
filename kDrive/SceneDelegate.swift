@@ -39,6 +39,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var uploadObservation: UploadObservable
 
     private var mediaHelper: OpenMediaHelper?
+    var currentRootViewControllerState: RootViewControllerState = .splashScreen
     var shortcutItemToProcess: UIApplicationShortcutItem?
     var pendingURLContext: UIOpenURLContext?
 
@@ -125,6 +126,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
+        let newState = RootViewControllerState.getCurrentState()
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
         if window?.rootViewController == nil {
             appNavigable.prepareRootViewController(currentState: .splashScreen, restoration: false)
@@ -135,6 +137,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
                 finishSceneSetup(scene, skipRestoration: false)
             }
+        } else if currentRootViewControllerState != newState {
+            currentRootViewControllerState = newState
+            appNavigable.prepareRootViewController(currentState: newState, restoration: false)
         } else {
             finishSceneSetup(scene, skipRestoration: true)
         }
@@ -299,6 +304,7 @@ extension SceneDelegate {
         let isRestoration: Bool = session.stateRestorationActivity != nil
         Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(String(describing: session.stateRestorationActivity))")
         if !skipRestoration {
+            currentRootViewControllerState = currentState
             appNavigable.prepareRootViewController(currentState: currentState, restoration: isRestoration)
         }
 
@@ -323,6 +329,7 @@ extension SceneDelegate {
 
         Task {
             if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
+                currentRootViewControllerState = .updateRequired
                 appNavigable.prepareRootViewController(currentState: .updateRequired, restoration: false)
             }
         }

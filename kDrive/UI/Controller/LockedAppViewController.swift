@@ -47,6 +47,9 @@ class LockedAppViewController: UIViewController {
 
     func unlockApp() {
         appLockHelper.setTime()
+        if let delegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            delegate.currentRootViewControllerState = RootViewControllerState.getCurrentState()
+        }
         appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: true)
     }
 
