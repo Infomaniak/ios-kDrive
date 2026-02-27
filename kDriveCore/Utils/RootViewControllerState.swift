@@ -67,8 +67,4 @@ extension RootViewControllerState: Equatable {
             return false
         }
     }
-
-    public static func != (lhs: RootViewControllerState, rhs: RootViewControllerState) -> Bool {
-        return !(lhs == rhs)
-    }
 }
