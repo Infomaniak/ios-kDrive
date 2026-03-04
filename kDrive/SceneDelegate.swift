@@ -248,6 +248,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             return false
         }
 
+        lockHelper.setTime()
+        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: false)
+
         return await deeplinkParser.parse(url: incomingURL)
     }
 
