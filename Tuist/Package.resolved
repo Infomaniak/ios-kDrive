@@ -1,5 +1,5 @@
 {
-  "originHash" : "c03a805116666e270004be899f2981eaf77ebed266b64d8f75b2c1196a9ca2dd",
+  "originHash" : "e3ad6afcec9efd9915b8b89b0336f3061971e4f98381861fcf88d038498af2f9",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "3c030e441e727480ad712559cea4b7c92d0916a6",
-        "version" : "18.7.0"
+        "revision" : "bb4bedd8727720d449379d33fdce1b66133b9b77",
+        "version" : "18.7.1"
       }
     },
     {
@@ -202,7 +202,7 @@
     {
       "identity" : "lottie-spm",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/lottie-spm",
+      "location" : "https://github.com/airbnb/lottie-spm.git",
       "state" : {
         "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
         "version" : "4.5.2"
