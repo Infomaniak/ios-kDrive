@@ -109,7 +109,16 @@ public extension AppRouter {
             return
         }
 
-        showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
+        if deeplink is PrivateShareLink {
+            if let currentDriveFileManager = accountManager.currentDriveFileManager {
+                showMainViewController(
+                    driveFileManager: currentDriveFileManager,
+                    selectedIndex: MainTabBarIndex.files.rawValue
+                )
+            }
+        } else {
+            showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
+        }
 
         let fileActionsHelper = FileActionsHelper()
         fileActionsHelper.openFile(id: fileId, driveFileManager: driveFileManager, office: isOfficeLink)
