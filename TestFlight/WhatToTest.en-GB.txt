@@ -1,3 +1,5 @@
+- Locking is working in the share extension
+- Support for Apple Raw format
 - File deletion where available in shares
 - Fix UI issues in share extension
 - Fix download action from OnlyOffice
