@@ -1,0 +1,35 @@
+name: Euria Review
+
+on: pull_request
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: Nikita-Filonov/ai-review@v0.59.0
+        with:
+          review-command: ${{ inputs.review-command }}
+        env:
+          # --- LLM configuration ---
+          LLM__PROVIDER: "OPENAI"
+          LLM__META__MODEL: "moonshotai/Kimi-K2.5"
+          LLM__META__MAX_TOKENS: "250000"
+          LLM__META__TEMPERATURE: "0.3"
+          LLM__HTTP_CLIENT__API_URL: "https://api.infomaniak.com/2/ai/27/openai/v1/chat/completions"
+          LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.EURIA_API_KEY }}
+
+          # --- GitHub integration ---
+          VCS__PROVIDER: "GITHUB"
+          VCS__PIPELINE__OWNER: ${{ github.repository_owner }}
+          VCS__PIPELINE__REPO: ${{ github.event.repository.name }}
+          VCS__PIPELINE__PULL_NUMBER: ${{ inputs.pull-request-number }}
+          VCS__HTTP_CLIENT__API_URL: "https://api.github.com"
+          VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
