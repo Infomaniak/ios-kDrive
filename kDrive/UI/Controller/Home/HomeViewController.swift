@@ -503,7 +503,7 @@ extension HomeViewController: RecentActivityDelegate {
         } else {
             filePresenter.present(
                 for: driveFileManager.getManagedFile(from: file),
-                files: activities.compactMap(\.file),
+                files: activities.compactMap(\.file).filter { !$0.isInvalidated },
                 driveFileManager: driveFileManager,
                 normalFolderHierarchy: false
             )
