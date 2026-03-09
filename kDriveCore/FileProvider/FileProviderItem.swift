@@ -137,7 +137,7 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
         // Every file should have a parent, root file parent should not be called
         // If provided a different parent eg. WorkingSet
-        parentItemIdentifier = parent ?? NSFileProviderItemIdentifier(file.parent?.id ?? 1)
+        parentItemIdentifier = parent ?? NSFileProviderItemIdentifier(file.parentId)
 
         isDirectory = file.isDirectory
         if file.isDirectory && file.fullyDownloaded {
