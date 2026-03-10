@@ -1,5 +1,6 @@
-- Le verrouillage est fonctionnel dans l'extension de partage.
-- Prise en charge du format Apple Raw.
+- Correction du problème de disparition de fichiers dans l'application Fichiers
+- Le verrouillage est fonctionnel dans l'extension de partage
+- Correction sur l'upload de fichiers Apple Raw
 - Suppression des fichiers lorsque c'est possible dans les partages
 - Correction des problèmes d'interface utilisateur dans l'extension de partage
 - Correction de l'action de téléchargement depuis OnlyOffice
