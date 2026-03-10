@@ -9,32 +9,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ai-review:
-    runs-on: ubuntu-latest
-    env:
-      LLM__PROVIDER: "OPENROUTER"
-      LLM__META__MODEL: "moonshotai/Kimi-K2.5"
-      LLM__META__MAX_TOKENS: "250000"
-      LLM__META__TEMPERATURE: "0.3"
-      LLM__HTTP_CLIENT__API_URL: "https://api.infomaniak.com/2/ai/27/openai/v1"
-      LLM__HTTP_CLIENT__API_TOKEN: ${{ secrets.EURIA_API_KEY }}
-      VCS__PROVIDER: "GITHUB"
-      VCS__PIPELINE__OWNER: ${{ github.repository_owner }}
-      VCS__PIPELINE__REPO: ${{ github.event.repository.name }}
-      VCS__PIPELINE__PULL_NUMBER: ${{ github.event.number }}
-      VCS__HTTP_CLIENT__API_URL: "https://api.github.com"
-      VCS__HTTP_CLIENT__API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Run summary review
-        uses: Nikita-Filonov/ai-review@150f80168a20b435017e2422bfb30fa24351c1d0 #v0.59.0
-        with:
-          review-command: run-summary
-
-      - name: Run inline review
-        uses: Nikita-Filonov/ai-review@150f80168a20b435017e2422bfb30fa24351c1d0 #v0.59.0
-        with:
-          review-command: run-context
+  check_dependencies:
+    uses: infomaniak/.github/.github/workflows/ai-review.yml
+    secrets: inherit
