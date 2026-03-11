@@ -1,5 +1,6 @@
+- Fix disappearing files in Files.app
 - Locking is working in the share extension
-- Support for Apple Raw format
+- Fix uploading of Apple Raw files
 - File deletion where available in shares
 - Fix UI issues in share extension
 - Fix download action from OnlyOffice
