@@ -96,7 +96,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Attach an observer to the payment queue.
         SKPaymentQueue.default().add(StoreObserver.shared)
 
+        foobar()
+
         return true
+    }
+
+    func foobar() {
+        Log.appDelegate("remove me")
     }
 
     func application(_ application: UIApplication,
