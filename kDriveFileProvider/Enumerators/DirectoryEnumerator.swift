@@ -200,7 +200,9 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                             writableRealm: writableRealm
                         )
                         writableRealm.add(updatedChild, update: .all)
-                        parentDirectory.children.insert(updatedChild)
+                        if updatedChild.id != parentDirectory.id {
+                            parentDirectory.children.insert(updatedChild)
+                        }
                         updatedItems.append(updatedChild)
                     }
 
