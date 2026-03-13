@@ -163,7 +163,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 self.currentFile = frozenFile
 
                 self.collectionView.endEditing(true)
-                self.collectionView.reloadItems(at: [self.currentIndex])
+                Task { @MainActor in
+                    self.collectionView.reloadItems(at: [self.currentIndex])
+                }
             }
         }
     }
@@ -678,14 +680,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             if let error {
                 if error != .taskCancelled {
                     previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, underlyingError: error)
-                    collectionView.reloadItems(at: [indexPath])
+                    Task { @MainActor in
+                        self.collectionView.reloadItems(at: [indexPath])
+                    }
                 }
             } else {
                 (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
                     .previewDownloadTask?.cancel()
                 previewErrors[currentFile.id] = nil
                 collectionView.endEditing(true)
-                collectionView.reloadItems(at: [indexPath])
+                Task { @MainActor in
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
                 updateNavigationBar()
             }
         }
