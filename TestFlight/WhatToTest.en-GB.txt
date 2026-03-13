@@ -1,4 +1,4 @@
-- Fix disappearing files in Files.app
+- Fix issues regarding disappearing files
 - Locking is working in the share extension
 - Fix uploading of Apple Raw files
 - File deletion where available in shares
