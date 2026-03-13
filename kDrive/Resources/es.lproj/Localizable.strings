@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Valentin Perignon
- * Exported at: Thu, 19 Feb 2026 09:12:49 +0100
+ * Exported by: Adrien Coye
+ * Exported at: Fri, 13 Mar 2026 10:43:44 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -1106,7 +1106,7 @@
 "fileListMoveDoneSnackbar" = "Desplazamientos finalizados correctamente";
 
 /* loco:6049df4d5c2c3a04bc397aa4 */
-"fileListMoveFileConfirmationSnackbar" = "Se ha movido correctamente un archivo a %2$@";
+"fileListMoveFileConfirmationSnackbar" = "Se ha movido correctamente un archivo a %@";
 
 /* loco:6049df4d5c2c3a04bc397aa5 */
 "fileListMoveFileConfirmationSnackbar-plural" = "%1$d archivos movidos correctamente a %2$@";
