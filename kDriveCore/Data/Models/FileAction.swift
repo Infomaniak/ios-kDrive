@@ -21,4 +21,5 @@ import Foundation
 @frozen public struct FileAction: Codable {
     public let action: FileActivityType
     public let fileId: Int
+    public let parentId: Int
 }

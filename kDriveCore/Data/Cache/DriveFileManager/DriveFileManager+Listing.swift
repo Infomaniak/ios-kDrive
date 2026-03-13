@@ -104,7 +104,10 @@ public extension DriveFileManager {
 
             case .fileMoveOut:
                 guard let movedOutFile: File = writableRealm.getObject(id: fileUid),
-                      let oldParent = movedOutFile.parent else { continue }
+                      let oldParent = writableRealm.object(
+                          ofType: File.self,
+                          forPrimaryKey: File.uid(driveId: directory.driveId, fileId: fileAction.parentId)
+                      ) else { continue }
 
                 oldParent.children.remove(movedOutFile)
 
@@ -115,11 +118,6 @@ public extension DriveFileManager {
                     writableRealm: writableRealm
                 )
                 writableRealm.add(actionFile, update: .modified)
-
-                if let existingFile: File = writableRealm.getObject(id: fileUid),
-                   let oldParent = existingFile.parent {
-                    oldParent.children.remove(existingFile)
-                }
 
                 if fileUid != directory.uid {
                     directory.children.insert(actionFile)
