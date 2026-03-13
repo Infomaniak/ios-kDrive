@@ -67,6 +67,7 @@ class StoreObserver: NSObject {
         SKPaymentQueue.default().add(payment)
     }
 
+    // periphery:ignore
     /// Restores all previously completed purchases.
     func restore() {
         if !restored.isEmpty {

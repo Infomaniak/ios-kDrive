@@ -20,10 +20,6 @@ import Foundation
 import kDriveCore
 
 extension NSFileProviderPage {
-    init(_ integer: Int) {
-        self.init(withUnsafeBytes(of: integer.littleEndian) { Data($0) })
-    }
-
     init?(_ cursor: FileCursor) {
         guard let cursorData = cursor.data(using: .utf8) else { return nil }
         self.init(cursorData)

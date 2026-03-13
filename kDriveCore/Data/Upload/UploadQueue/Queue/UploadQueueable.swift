@@ -20,6 +20,7 @@ import FileProvider
 import Foundation
 import RealmSwift
 
+// periphery:ignore
 public protocol UploadQueueable {
     func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable?
 

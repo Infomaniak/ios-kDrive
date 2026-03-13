@@ -1,0 +1,32 @@
+name: CI workflow
+
+on: pull_request
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  periphery:
+    name: Scan unused code
+    runs-on: [ self-hosted, iOS ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
+      - name: Create test env
+        env:
+          ENV_PATH: "kDriveTestShared/Env.swift"
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          USER_ID: ${{ secrets.USER_ID }}
+          INVITE_USER_ID: ${{ secrets.INVITE_USER_ID }}
+          INVITE_EMAIL: ${{ secrets.INVITE_EMAIL }}
+        run: |
+          touch $ENV_PATH
+          echo -e "enum Env {\n    static let token = \"$ACCESS_TOKEN\"\n\n    static let driveId = 420132\n\n    static let userId = $USER_ID\n\n    static let inviteUserId = $INVITE_USER_ID\n\n    static let inviteMail = \"$INVITE_EMAIL\"\n\n    static let inviteTeam = 0\n\n    static let commonDocumentsId = 3\n}" > $ENV_PATH
+      - name: Generate
+        run: tuist install && tuist generate
+      - name: Periphery
+        run: periphery scan --retain-codable-properties --format github-actions --relative-results --strict
+        

@@ -1,0 +1,9 @@
+project: kDrive.xcworkspace
+retain_public: true
+schemes:
+  - kDrive
+index_exclude:
+  - "kDriveAPITests/**"
+  - "kDriveTestShared/**"
+  - "kDriveTests/**"
+  - "kDriveUITests/**"

@@ -47,6 +47,7 @@ class AlertDocViewController: AlertFieldViewController {
         textFieldConfiguration = .fileNameConfiguration
     }
 
+    // periphery:ignore
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

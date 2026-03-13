@@ -75,8 +75,6 @@ final class PhotoListViewController: FileListViewController {
         return viewModel as? PhotoListViewModel
     }
 
-    private weak var currentNavigationController: UINavigationController?
-
     enum SelectionMode {
         case selecting
         case deselecting
@@ -86,7 +84,6 @@ final class PhotoListViewController: FileListViewController {
     var selectionMode: SelectionMode = .none
     var lastTouchPoint: CGPoint = .zero
     var startIndexPath: IndexPath?
-    var initialTouchPoint: CGPoint?
     var displayLink: CADisplayLink?
     var scrollSpeed: CGFloat = 0
 
@@ -207,8 +204,6 @@ final class PhotoListViewController: FileListViewController {
         navigationController?.navigationBar.standardAppearance = navbarAppearance
         navigationController?.navigationBar.compactAppearance = navbarAppearance
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
-
-        currentNavigationController = navigationController
     }
 
     override func showEmptyView(_ isShowing: Bool) {
@@ -268,10 +263,6 @@ final class PhotoListViewController: FileListViewController {
         collectionView.reloadSections(IndexSet(integersIn: 0 ..< numberOfSections(in: collectionView)))
     }
 
-    func updateTitle(_ count: Int) {
-        headerTitleLabel.text = KDriveResourcesStrings.Localizable.fileListMultiSelectedTitle(count)
-    }
-
     @objc func handleSelectionPan(_ gesture: UIPanGestureRecognizer) {
         let location = gesture.location(in: collectionView)
 
@@ -290,15 +281,13 @@ final class PhotoListViewController: FileListViewController {
             }
 
             startIndexPath = indexPath
-            initialTouchPoint = location
             startDisplayLink()
 
         case .changed:
             updateScrollSpeed(for: lastTouchPoint)
-            updateSelection(to: location, current: indexPath)
+            updateSelection(current: indexPath)
 
         case .ended, .cancelled, .failed:
-            initialTouchPoint = nil
             stopDisplayLink()
             selectionMode = .none
 
@@ -307,7 +296,7 @@ final class PhotoListViewController: FileListViewController {
         }
     }
 
-    func updateSelection(to location: CGPoint, current: IndexPath) {
+    func updateSelection(current: IndexPath) {
         guard let start = startIndexPath,
               let multipleSelectionViewModel = photoListViewModel.multipleSelectionViewModel else { return }
 
@@ -455,6 +444,7 @@ final class PhotoListViewController: FileListViewController {
         return cell
     }
 
+    // periphery:ignore
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,

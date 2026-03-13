@@ -38,6 +38,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var uploadObservation: UploadObservable
 
+    // periphery:ignore
     private var mediaHelper: OpenMediaHelper?
     var currentRootViewControllerState: RootViewControllerState = .splashScreen
     var shortcutItemToProcess: UIApplicationShortcutItem?
@@ -112,6 +113,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         appNavigable.updateTheme()
     }
 
+    // periphery:ignore
     func configure(window: UIWindow?, session: UISceneSession, with activity: NSUserActivity) -> Bool {
         Log.sceneDelegate("configure session with")
         return true
@@ -240,6 +242,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         }
     }
 
+    // periphery:ignore
     @discardableResult
     private func continueWebActivityIfPossible(_ scene: UIScene, userActivity: NSUserActivity) async -> Bool {
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
@@ -282,6 +285,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     // MARK: - Reload drive notification
 
+    // periphery:ignore
     @objc func reloadDrive(_ notification: Notification) {
         Task {
             await self.appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)

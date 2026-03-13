@@ -3,5 +3,6 @@ tuist = { version = "4.133.1", os = ["macos"] }
 swiftformat = { version = "0.58.6", os = ["macos", "linux"] }
 swiftlint = { version = "0.62.2", os = ["macos", "linux"] }
 sentry-cli = { version = "latest", os = ["macos"] }
+periphery = { version = "3.4.0", os = ["macos"] }
 pipx = { version = "latest", os = ["macos", "linux"] }
 "pipx:infomaniak/importloco" = { version = "2.0.0", os = ["macos", "linux"] }
