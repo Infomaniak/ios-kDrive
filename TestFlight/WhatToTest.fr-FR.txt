@@ -1,4 +1,4 @@
-- Correction du problème de disparition de fichiers dans l'application Fichiers
+- Correction de problèmes de disparition de fichiers
 - Le verrouillage est fonctionnel dans l'extension de partage
 - Correction sur l'upload de fichiers Apple Raw
 - Suppression des fichiers lorsque c'est possible dans les partages
