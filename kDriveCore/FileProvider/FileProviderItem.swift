@@ -137,7 +137,9 @@ public final class FileProviderItem: NSObject, NSFileProviderItem {
 
         // Every file should have a parent, root file parent should not be called
         // If provided a different parent eg. WorkingSet
-        parentItemIdentifier = parent ?? NSFileProviderItemIdentifier(file.parentId)
+        let parentId = file.parentId > 0 ? file.parentId : DriveFileManager.constants.rootID
+
+        parentItemIdentifier = parent ?? NSFileProviderItemIdentifier(parentId)
 
         isDirectory = file.isDirectory
         if file.isDirectory && file.fullyDownloaded {
