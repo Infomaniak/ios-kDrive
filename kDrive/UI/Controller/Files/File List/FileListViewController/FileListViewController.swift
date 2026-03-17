@@ -625,17 +625,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             newEmptyView.actionHandler = { [weak self] _ in
                 self?.forceRefresh()
             }
-            collectionView.addSubview(newEmptyView)
-            NSLayoutConstraint.activate([
-                newEmptyView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
-                newEmptyView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
-                newEmptyView.topAnchor.constraint(equalTo: collectionView.topAnchor),
-                newEmptyView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
-            ])
-            emptyView = newEmptyView
+            collectionView.backgroundView = newEmptyView
         } else {
-            emptyView?.removeFromSuperview()
-            emptyView = nil
+            collectionView.backgroundView = nil
         }
 
         if let headerView {

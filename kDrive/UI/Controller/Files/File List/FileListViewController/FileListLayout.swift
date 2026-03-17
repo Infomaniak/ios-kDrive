@@ -91,7 +91,7 @@ struct DefaultFileListLayout: FileListLayout {
     func createListLayout(environment: any NSCollectionLayoutEnvironment,
                           viewModel: FileListViewModel, headerEstimatedHeight: CGFloat = 1) -> NSCollectionLayoutSection {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
-        configuration.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        configuration.backgroundColor = .clear
         configuration.showsSeparators = false
 
         #if !ISEXTENSION
