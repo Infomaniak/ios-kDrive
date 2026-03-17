@@ -637,10 +637,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     private func bestEmptyViewType() -> EmptyTableView.EmptyTableViewType {
         var type = viewModel.configuration.emptyViewType
-        if tabBarController?.tabBar.isHidden == false,
-           type == .emptyFolder &&
-           viewModel.currentDirectory.capabilities.canCreateFile &&
-           !viewModel.currentDirectory.isTrashed {
+        if tabBarController?.tabBar.isHidden == false ||
+            !traitCollection.horizontalSizeClass.iskDriveCompactSize,
+            type == .emptyFolder &&
+            viewModel.currentDirectory.capabilities.canCreateFile &&
+            !viewModel.currentDirectory.isTrashed {
             type = .emptyFolderWithCreationRights
         }
         return type
