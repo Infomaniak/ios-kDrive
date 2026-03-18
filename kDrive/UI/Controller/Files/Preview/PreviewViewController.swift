@@ -163,7 +163,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 self.currentFile = frozenFile
 
                 self.collectionView.endEditing(true)
-                self.collectionView.reloadItems(at: [self.currentIndex])
+                self.reloadItemsAfterOneLoop(at: self.currentIndex)
             }
         }
     }
@@ -521,9 +521,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
         // cellForItemAt and iOS 18 seems unhappy about this.
-        Task { @MainActor [weak self] in
-            self?.collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
-        }
+        reloadItemsAfterOneLoop(at: IndexPath(item: index, section: 0))
     }
 
     func handleAudioPreviewError(_ error: Error, previewIndex: Int) {
@@ -560,9 +558,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         PdfPreviewCache.shared.retrievePdf(forSafeFile: safeFile, driveFileManager: driveFileManager) { downloadTask in
             previewError.addDownloadTask(downloadTask)
-            Task { @MainActor [weak self] in
-                self?.collectionView.reloadItems(at: [IndexPath(item: previewIndex, section: 0)])
-            }
+            self.reloadItemsAfterOneLoop(at: IndexPath(item: previewIndex, section: 0))
         } completion: { url, error in
             previewError.removeDownloadTask()
             if let url {
@@ -570,9 +566,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             } else {
                 previewError.underlyingError = error
             }
-            Task { @MainActor [weak self] in
-                self?.collectionView.reloadItems(at: [IndexPath(item: previewIndex, section: 0)])
-            }
+            self.reloadItemsAfterOneLoop(at: IndexPath(item: previewIndex, section: 0))
         }
 
         previewErrors[safeFile.id] = previewError
@@ -678,14 +672,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             if let error {
                 if error != .taskCancelled {
                     previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, underlyingError: error)
-                    collectionView.reloadItems(at: [indexPath])
+                    self.reloadItemsAfterOneLoop(at: indexPath)
                 }
             } else {
                 (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
                     .previewDownloadTask?.cancel()
                 previewErrors[currentFile.id] = nil
                 collectionView.endEditing(true)
-                collectionView.reloadItems(at: [indexPath])
+                self.reloadItemsAfterOneLoop(at: indexPath)
                 updateNavigationBar()
             }
         }
@@ -853,6 +847,15 @@ extension PreviewViewController: UICollectionViewDataSource {
             }
             cell.previewDelegate = self
             return cell
+        }
+    }
+
+    private func reloadItemsAfterOneLoop(at indexPath: IndexPath) {
+        Task { @MainActor in
+            guard currentIndex.item < collectionView.numberOfItems(inSection: 0) else {
+                return
+            }
+            collectionView.reloadItems(at: [indexPath])
         }
     }
 }
