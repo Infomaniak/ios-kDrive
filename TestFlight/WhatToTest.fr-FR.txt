@@ -1,3 +1,4 @@
+- Correction de problèmes d'affichage dans un dossier vide
 - Correction de problèmes de disparition de fichiers
 - Le verrouillage est fonctionnel dans l'extension de partage
 - Correction sur l'upload de fichiers Apple Raw

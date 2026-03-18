@@ -1,3 +1,4 @@
+- Fix display issues in an empty folder
 - Fix issues regarding disappearing files
 - Locking is working in the share extension
 - Fix uploading of Apple Raw files
