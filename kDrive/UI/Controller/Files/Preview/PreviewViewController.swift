@@ -164,6 +164,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
                 self.collectionView.endEditing(true)
                 Task { @MainActor in
+                    guard self.currentIndex.item < self.collectionView.numberOfItems(inSection: 0) else {
+                        return
+                    }
                     self.collectionView.reloadItems(at: [self.currentIndex])
                 }
             }
