@@ -137,6 +137,7 @@ class SearchViewController: FileListViewController {
         // Clear collection view on content type changed without animation
         searchViewModel.onContentTypeChanged = { [weak self] in
             guard let self else { return }
+            displayedFiles.removeAll()
             collectionView.reloadData()
 
             headerView?.isHidden = !searchViewModel.isDisplayingSearchResults

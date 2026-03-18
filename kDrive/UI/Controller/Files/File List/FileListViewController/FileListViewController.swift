@@ -625,17 +625,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             newEmptyView.actionHandler = { [weak self] _ in
                 self?.forceRefresh()
             }
-            collectionView.addSubview(newEmptyView)
-            NSLayoutConstraint.activate([
-                newEmptyView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
-                newEmptyView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
-                newEmptyView.topAnchor.constraint(equalTo: collectionView.topAnchor),
-                newEmptyView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
-            ])
-            emptyView = newEmptyView
+            collectionView.backgroundView = newEmptyView
         } else {
-            emptyView?.removeFromSuperview()
-            emptyView = nil
+            collectionView.backgroundView = nil
         }
 
         if let headerView {
@@ -645,10 +637,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     private func bestEmptyViewType() -> EmptyTableView.EmptyTableViewType {
         var type = viewModel.configuration.emptyViewType
-        if tabBarController?.tabBar.isHidden == false,
-           type == .emptyFolder &&
-           viewModel.currentDirectory.capabilities.canCreateFile &&
-           !viewModel.currentDirectory.isTrashed {
+        if tabBarController?.tabBar.isHidden == false ||
+            !traitCollection.horizontalSizeClass.iskDriveCompactSize,
+            type == .emptyFolder &&
+            viewModel.currentDirectory.capabilities.canCreateFile &&
+            !viewModel.currentDirectory.isTrashed {
             type = .emptyFolderWithCreationRights
         }
         return type
