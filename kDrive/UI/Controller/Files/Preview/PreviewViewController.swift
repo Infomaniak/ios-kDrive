@@ -521,7 +521,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
         // cellForItemAt and iOS 18 seems unhappy about this.
-        self.reloadItemsAfterOneLoop(at: IndexPath(item: index, section: 0))
+        reloadItemsAfterOneLoop(at: IndexPath(item: index, section: 0))
     }
 
     func handleAudioPreviewError(_ error: Error, previewIndex: Int) {
