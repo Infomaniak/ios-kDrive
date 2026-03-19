@@ -146,9 +146,17 @@ public final class FileActionsHelper {
                 successMessage: showSuccessSnackBar ? successMessage : nil
             )
         case .folder:
+            guard FileManager.default.fileExists(atPath: file.temporaryUrl.path) else {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
+                return
+            }
             let documentExportViewController = UIDocumentPickerViewController(forExporting: [file.temporaryUrl], asCopy: true)
             presenterViewController?.present(documentExportViewController, animated: true)
         default:
+            guard FileManager.default.fileExists(atPath: file.localUrl.path) else {
+                UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
+                return
+            }
             let documentExportViewController = UIDocumentPickerViewController(forExporting: [file.localUrl], asCopy: true)
             presenterViewController?.present(documentExportViewController, animated: true)
         }
