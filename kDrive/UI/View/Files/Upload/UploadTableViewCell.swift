@@ -79,8 +79,7 @@ final class UploadTableViewCell: InsetTableViewCell {
                 cardContentView.detailsLabel.text = error.localizedDescription
                 cardContentView.retryButton?.isHidden = true
             } else {
-                cardContentView.detailsLabel.text = KDriveResourcesStrings.Localizable
-                    .errorUpload + " (\(error.localizedDescription))"
+                cardContentView.detailsLabel.text = error.localizedDescription
                 cardContentView.retryButton?.isHidden = false
             }
 
