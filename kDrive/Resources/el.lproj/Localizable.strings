@@ -1,0 +1,2234 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: el, Greek
+ * Tagged: ios
+ * Exported by: Philippe Weidmann
+ * Exported at: Mon, 23 Mar 2026 08:23:04 +0100
+ */
+
+/* loco:6049df4d5c2c3a04bc397901 */
+"aboutAppVersionTitle" = "Εφαρμογή kDrive";
+
+/* loco:6049df4d5c2c3a04bc397902 */
+"aboutLicenseDescription" = "Γενική Δημόσια Άδεια GNU, έκδοση 3";
+
+/* loco:6049df4d5c2c3a04bc397903 */
+"aboutLicenseTitle" = "Άδεια χρήσης";
+
+/* loco:6049df4d5c2c3a04bc397904 */
+"aboutPrivacyTitle" = "Απόρρητο";
+
+/* loco:6049df4d5c2c3a04bc397905 */
+"aboutSourceCodeTitle" = "Λήψη πηγαίου κώδικα";
+
+/* loco:6049df4d5c2c3a04bc397906 */
+"aboutTitle" = "Σχετικά";
+
+/* loco:6049df4d5c2c3a04bc397907 */
+"accessDeniedDescriptionIsAdmin" = "Θέλετε να τροποποιήσετε τα δικαιώματα αυτού του φακέλου για να αποκτήσετε πρόσβαση; Θα προστεθείτε στους χρήστες με πρόσβαση σε αυτόν τον φάκελο. Οι υπόλοιποι χρήστες αυτού του φακέλου θα ειδοποιηθούν μέσω email.";
+
+/* loco:6049df4d5c2c3a04bc397908 */
+"accessDeniedDescriptionIsNotAdmin" = "Παρακαλούμε επικοινωνήστε με έναν διαχειριστή του kDrive για να τροποποιήσετε τα δικαιώματα πρόσβασής σας.";
+
+/* loco:6049df4d5c2c3a04bc397909 */
+"accessDeniedTitle" = "Δεν έχετε εξουσιοδότηση για πρόσβαση σε αυτόν τον φάκελο.";
+
+/* loco:61695fa9dedbed08b1748152 */
+"addCategoriesTitle" = "Προσθήκη κατηγοριών";
+
+/* loco:617a7155e4ec9a5deb713a03 */
+"addPassword" = "Προστασία με κωδικό πρόσβασης";
+
+/* loco:6049df4d5c2c3a04bc39790b */
+"alertRemoveUserDescription" = "Είστε βέβαιοι ότι θέλετε να αφαιρέσετε τον χρήστη \"%@\" από αυτήν την εφαρμογή;";
+
+/* loco:6049df4d5c2c3a04bc39790c */
+"alertRemoveUserTitle" = "Αφαίρεση χρήστη";
+
+/* loco:67c18ad0a89ca83d24067454 */
+"all3DModel" = "Μοντέλα 3D";
+
+/* loco:6049df4d5c2c3a04bc39790d */
+"allActivated" = "Ενεργοποιημένο";
+
+/* loco:6049df4d5c2c3a04bc39790f */
+"allAddExpirationDateTitle" = "Προσθήκη ημερομηνίας λήξης";
+
+/* loco:6049df4d5c2c3a04bc397910 */
+"allAllDriveUsers" = "Όλοι οι χρήστες kDrive";
+
+/* loco:6049df4d5c2c3a04bc397911 */
+"allArchive" = "Αρχεία";
+
+/* loco:6049df4d5c2c3a04bc397912 */
+"allAudio" = "Ήχοι";
+
+/* loco:6149ec3adfc38f4103443312 */
+"allCancellationInProgress" = "Ακύρωση σε εξέλιξη…";
+
+/* loco:6049df4d5c2c3a04bc397913 */
+"allCode" = "Κωδικός";
+
+/* loco:6193d4705829556932561ba4 */
+"allDateCustom" = "Προσαρμοσμένο";
+
+/* loco:607962540ad1dd02fd5fc785 */
+"allDeletedFilePattern" = "'Διαγράφηκε στις 'dd MMM yyyy '-' HH:mm";
+
+/* loco:60e58ac6621d7e5809353952 */
+"allDeletedFileRelativeTime" = "Διαγράφηκε %@";
+
+/* loco:6049df4d5c2c3a04bc397914 */
+"allDisabled" = "Απενεργοποιημένο";
+
+/* loco:67c18a029e7cc069de0144a2 */
+"allEmail" = "E-mail";
+
+/* loco:6049df4d5c2c3a04bc397916 */
+"allEmptyInputError" = "Αυτό το πεδίο δεν μπορεί να είναι κενό";
+
+/* loco:6049df4d5c2c3a04bc397917 */
+"allFileAddFavoris" = "Το %@ προστέθηκε στα αγαπημένα";
+
+/* loco:6058a107c62a577406174e92 */
+"allFileAddRightError" = "Δεν έχετε άδεια να προσθέσετε αρχεία σε αυτόν τον φάκελο.";
+
+/* loco:6049df4d5c2c3a04bc397918 */
+"allFileDeleteFavoris" = "Το %@ διαγράφηκε από τα αγαπημένα";
+
+/* loco:6049df4d5c2c3a04bc397919 */
+"allFileDuplicate" = "Το %@ αντιγράφηκε με επιτυχία";
+
+/* loco:614b1620549fbd3ce4691795 */
+"allFileDuplicateCancelled" = "Η αντιγραφή ακυρώθηκε";
+
+/* loco:6049df4d5c2c3a04bc39791a */
+"allFileMove" = "Το %1$@ μετακινήθηκε στον %2$@ με επιτυχία";
+
+/* loco:6061e86acbdd7f4c4708f615 */
+"allFileMoveCancelled" = "Η μετακίνηση ακυρώθηκε";
+
+/* loco:6049df4d5c2c3a04bc39791b */
+"allFileRename" = "Το %@ μετονομάστηκε με επιτυχία";
+
+/* loco:6818aeac478090df7b0df2e2 */
+"allFilesTitle" = "Όλα τα αρχεία μου";
+
+/* loco:6049df4d5c2c3a04bc39791c */
+"allFolder" = "Φάκελος";
+
+/* loco:6238a658e82caf1b71589e82 */
+"allFont" = "Γραμματοσειρά";
+
+/* loco:6049df4d5c2c3a04bc39791d */
+"allJustNow" = "Μόλις τώρα";
+
+/* loco:61696038c328022b120007c3 */
+"allLast7Days" = "Τελευταίες 7 ημέρες";
+
+/* loco:6049df4d5c2c3a04bc39791e */
+"allLastModifiedFilePattern" = "'Τροποποιήθηκε 'dd MMM yyyy '-' HH:mm";
+
+/* loco:60e589524e0dcd1d45523c62 */
+"allLastModifiedFileRelativeTime" = "Τροποποιήθηκε %@";
+
+/* loco:6049df4d5c2c3a04bc39791f */
+"allMinutesShort" = "%d λεπ";
+
+/* loco:6049df4d5c2c3a04bc397920 */
+"allNoNetwork" = "Δεν υπάρχει σύνδεση στο δίκτυο";
+
+/* loco:6049df4d5c2c3a04bc397921 */
+"allOfficeDocs" = "Έγγραφο";
+
+/* loco:620b6e7c1a94ac24b002fcd2 */
+"allOfficeForm" = "Φόρμα";
+
+/* loco:6049df4d5c2c3a04bc397922 */
+"allOfficeGrids" = "Πίνακας";
+
+/* loco:6049df4d5c2c3a04bc397923 */
+"allOfficeNote" = "Κείμενο";
+
+/* loco:6049df4d5c2c3a04bc397924 */
+"allOfficePoints" = "Παρουσίαση";
+
+/* loco:6049df4d5c2c3a04bc397925 */
+"allPackAvailability" = "Διαθέσιμο μόνο για τα προγράμματα Solo, Team & Pro 🚀";
+
+/* loco:6049df4d5c2c3a04bc397926 */
+"allPasswordHint" = "Κωδικός πρόσβασης";
+
+/* loco:6049df4d5c2c3a04bc397927 */
+"allPathTitle" = "Τοποθεσία";
+
+/* loco:6049df4d5c2c3a04bc397928 */
+"allPdf" = "PDF";
+
+/* loco:6049df4d5c2c3a04bc397929 */
+"allPictures" = "Εικόνες";
+
+/* loco:6049df4d5c2c3a04bc39792b */
+"allRootName" = "Ρίζα kDrive %@";
+
+/* loco:6049df4d5c2c3a04bc39792c */
+"allToday" = "Σήμερα";
+
+/* loco:6061e987889b0a48782ebfc2 */
+"allTrashActionCancelled" = "Η διαγραφή ακυρώθηκε";
+
+/* loco:6049df4d5c2c3a04bc39792d */
+"allUntitledFileName" = "Χωρίς τίτλο";
+
+/* loco:6049df4d5c2c3a04bc39792e */
+"allUploadErrorDescription" = "Το αρχείο %1$@ δεν ήταν δυνατό να μεταφορτωθεί: %2$@";
+
+/* loco:6049df4d5c2c3a04bc397abc */
+"allUploadFinishedDescription" = "Το %@ μεταφορτώθηκε";
+
+/* loco:6049dfb2105eca5bbd0801b9 */
+"allUploadFinishedDescription-plural" = "%d αρχεία μεταφορτώθηκαν";
+
+/* loco:69bcfe53aed2af87a302d422 */
+"allUploadFinishedDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d423 */
+"allUploadFinishedDescription-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc39792f */
+"allUploadFinishedTitle" = "Η μεταφόρτωση ολοκληρώθηκε";
+
+/* loco:60928b79a37f9c2da8777204 */
+"allUploadInProgress" = "%@ γίνεται μεταφόρτωση";
+
+/* loco:60928c47bff9cd1579331ff3 */
+"allUploadInProgress-plural" = "%d γίνονται μεταφόρτωση";
+
+/* loco:69bcfe53aed2af87a302d424 */
+"allUploadInProgress-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d425 */
+"allUploadInProgress-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc397930 */
+"allUserAnonymous" = "Ανώνυμος";
+
+/* loco:6049df4d5c2c3a04bc397931 */
+"allVideo" = "Βίντεο";
+
+/* loco:6049df4d5c2c3a04bc397932 */
+"allYesterday" = "Χθες";
+
+/* loco:6049df4d5c2c3a04bc397933 */
+"appSecurityDescription" = "Προστατέψτε την πρόσβαση στην εφαρμογή σας ενεργοποιώντας το κλείδωμα του τηλεφώνου σας.";
+
+/* loco:6049df4d5c2c3a04bc397934 */
+"appSecurityTitle" = "Κλείδωμα εφαρμογής";
+
+/* loco:616960a4b9fa15412d6a2fb2 */
+"belongToAllCategoriesFilterDescription" = "Τα αποτελέσματα πρέπει να ανήκουν σε όλες τις επιλεγμένες κατηγορίες";
+
+/* loco:616960bb351cc27ee05bbaf2 */
+"belongToOneCategoryFilterDescription" = "Τα αποτελέσματα πρέπει να ανήκουν σε μία από τις επιλεγμένες κατηγορίες";
+
+/* loco:60f7f3ae370e015fb90d7bd2 */
+"betaTestDescription" = "Η εφαρμογή μας για κινητά εξελίσσεται συνεχώς και προσπαθούμε πάντα να τη βελτιώσουμε.\nΘέλετε να μας βοηθήσετε; Συμμετάσχετε στη Beta, αποκτήστε αποκλειστική πρόσβαση σε όλες τις νέες λειτουργίες και μοιραστείτε μαζί μας τα σχόλιά σας και τις ιδέες σας!";
+
+/* loco:60f7edd07ee3f419944935d2 */
+"betaTestTitle" = "Δοκιμάστε τις νέες δυνατότητες";
+
+/* loco:6049df4d5c2c3a04bc397935 */
+"buttonAdd" = "Προσθήκη";
+
+/* loco:6049df4d5c2c3a04bc397936 */
+"buttonAddComment" = "Προσθήκη σχολίου";
+
+/* loco:6049df4d5c2c3a04bc397937 */
+"buttonAddFavorites" = "Προσθήκη στα αγαπημένα";
+
+/* loco:668e92d227a71514a808d485 */
+"buttonAddToKDrive" = "Προσθήκη στο kDrive μου";
+
+/* loco:6049df4d5c2c3a04bc397938 */
+"buttonAddUser" = "Προσθήκη χρήστη";
+
+/* loco:61696c1fe9dd49214b720a76 */
+"buttonApplyFilters" = "Εφαρμογή φίλτρων";
+
+/* loco:6049dfb2105eca5bbd0801b3 */
+"buttonAuthorize" = "Εξουσιοδότηση";
+
+/* loco:6049df4d5c2c3a04bc397939 */
+"buttonAvailableOffline" = "Διαθέσιμο εκτός σύνδεσης";
+
+/* loco:6049df4d5c2c3a04bc39793a */
+"buttonBack" = "Πίσω";
+
+/* loco:60f7f3c594ec884cad691fb2 */
+"buttonBetaTest" = "Συμμετοχή στη Beta";
+
+/* loco:6049df4d5c2c3a04bc39793b */
+"buttonCancel" = "Ακύρωση";
+
+/* loco:624e99d3adb6372fb56e5ab8 */
+"buttonCancelImport" = "Ακύρωση εισαγωγής";
+
+/* loco:619624bcb9b09f02f0102733 */
+"buttonChangeFolderColor" = "Αλλαγή χρώματος φακέλου";
+
+/* loco:6049df4d5c2c3a04bc39793c */
+"buttonClear" = "Εκκαθάριση";
+
+/* loco:61696c0ce9dd49214b720a74 */
+"buttonClearFilters" = "Εκκαθάριση φίλτρων";
+
+/* loco:6049df4d5c2c3a04bc39793d */
+"buttonClose" = "Κλείσιμο";
+
+/* loco:6049df4d5c2c3a04bc39793e */
+"buttonConfigure" = "Ρύθμιση";
+
+/* loco:6049df4d5c2c3a04bc39793f */
+"buttonConfirm" = "Επιβεβαίωση";
+
+/* loco:6049df4d5c2c3a04bc397940 */
+"buttonConfirmNotify" = "Επιβεβαίωση και ειδοποίηση";
+
+/* loco:6049df4d5c2c3a04bc397941 */
+"buttonConvertToDropBox" = "Μετατροπή σε κουτί παρακαταθήκης";
+
+/* loco:6049df4d5c2c3a04bc397942 */
+"buttonCopy" = "Αντιγραφή";
+
+/* loco:6049df4d5c2c3a04bc397944 */
+"buttonCreate" = "Δημιουργία";
+
+/* loco:6049df4d5c2c3a04bc397945 */
+"buttonCreateFolder" = "Δημιουργία φακέλου";
+
+/* loco:60794894a643783766602fb2 */
+"buttonCreateOnlyOfficeCopy" = "Δημιουργία αντιγράφου .%@";
+
+/* loco:6049df4d5c2c3a04bc397946 */
+"buttonCreatePublicLink" = "Δημιουργία δημόσιου συνδέσμου";
+
+/* loco:6049df4d5c2c3a04bc397947 */
+"buttonDelete" = "Διαγραφή";
+
+/* loco:611b6ca6fe8d0c03d92403e2 */
+"buttonDeselectAll" = "Αποεπιλογή όλων";
+
+/* loco:6049df4d5c2c3a04bc397948 */
+"buttonDisableDropBox" = "Απενεργοποίηση κουτιού παρακαταθήκης";
+
+/* loco:6049df4d5c2c3a04bc397949 */
+"buttonDocumentScanning" = "Σάρωση εγγράφου";
+
+/* loco:6049df4d5c2c3a04bc39794a */
+"buttonDownload" = "Λήψη";
+
+/* loco:6049df4d5c2c3a04bc39794b */
+"buttonDuplicate" = "Δημιουργία αντιγράφου";
+
+/* loco:6049df4d5c2c3a04bc39794c */
+"buttonEdit" = "Επεξεργασία";
+
+/* loco:606d687970761158a147b514 */
+"buttonEmpty" = "Άδειασμα";
+
+/* loco:606d682e70761158a147b512 */
+"buttonEmptyTrash" = "Άδειασμα κάδου ανακύκλωσης";
+
+/* loco:6825a634667190d66c0c1852 */
+"buttonFeedback" = "Ανατροφοδότηση";
+
+/* loco:6049df4d5c2c3a04bc39794d */
+"buttonFileRights" = "Κοινή χρήση και δικαιώματα";
+
+/* loco:6049df4d5c2c3a04bc39794e */
+"buttonGoToSettings" = "Μετάβαση στις Ρυθμίσεις";
+
+/* loco:6049df4d5c2c3a04bc39794f */
+"buttonLater" = "Αργότερα";
+
+/* loco:605b09e6a6279864ac4ba6f2 */
+"buttonLeaveShare" = "Αποχώρηση από κοινή χρήση";
+
+/* loco:6059f35332f59035fd6e2b62 */
+"buttonLike" = "Μου αρέσει";
+
+/* loco:6049df4d5c2c3a04bc397950 */
+"buttonLogin" = "Σύνδεση";
+
+/* loco:6049df4d5c2c3a04bc397951 */
+"buttonLogout" = "Αποσύνδεση";
+
+/* loco:6049df4d5c2c3a04bc397952 */
+"buttonManageDropBox" = "Διαχείριση της \"λίστας\" αποθήκευσης";
+
+/* loco:6049df4d5c2c3a04bc397953 */
+"buttonMenu" = "Μενού";
+
+/* loco:6049df4d5c2c3a04bc397954 */
+"buttonMove" = "Μετακίνηση";
+
+/* loco:6049df4d5c2c3a04bc397955 */
+"buttonMoveTo" = "Μετακίνηση σε";
+
+/* loco:604f985c7e79116ee83e2b15 */
+"buttonNewPassword" = "Ορισμός νέου κωδικού πρόσβασης";
+
+/* loco:61261341bbb2fe14eb477766 */
+"buttonNext" = "Επόμενο";
+
+/* loco:65d76caca735073506023715 */
+"buttonNo" = "Όχι";
+
+/* loco:6049df4d5c2c3a04bc397956 */
+"buttonNoDriveAnotherUser" = "Χρήση άλλου προφίλ Infomaniak";
+
+/* loco:6049df4d5c2c3a04bc397957 */
+"buttonNoDriveFreeTest" = "Δωρεάν δοκιμή";
+
+/* loco:6075c0bb65160c29997c5e32 */
+"buttonOpenDocument" = "Άνοιγμα του εγγράφου";
+
+/* loco:66dfe78b7da115a16c0733e2 */
+"buttonOpenInBrowser" = "Άνοιγμα στον φυλλομετρητή";
+
+/* loco:607948379bda7f7df0121872 */
+"buttonOpenReadOnly" = "Άνοιγμα σε λειτουργία μόνο για ανάγνωση";
+
+/* loco:6049df4d5c2c3a04bc397958 */
+"buttonOpenWith" = "Άνοιγμα με";
+
+/* loco:6049df4d5c2c3a04bc397959 */
+"buttonPlayerFfwd" = "Προώθηση λίγων δευτερολέπτων";
+
+/* loco:6049df4d5c2c3a04bc39795a */
+"buttonPlayerNext" = "Επόμενο";
+
+/* loco:6049df4d5c2c3a04bc39795b */
+"buttonPlayerPlayPause" = "Αναπαραγωγή/Παύση";
+
+/* loco:6049df4d5c2c3a04bc39795c */
+"buttonPlayerPrev" = "Προηγούμενο";
+
+/* loco:6049df4d5c2c3a04bc39795d */
+"buttonPlayerRew" = "Επιστροφή λίγων δευτερολέπτων";
+
+/* loco:61434c587ac8854bf40efa02 */
+"buttonRedeemPromoCode" = "Χρήση κωδικού προσφοράς";
+
+/* loco:6049df4d5c2c3a04bc39795e */
+"buttonRefresh" = "Ανανέωση";
+
+/* loco:695f6972ddde32c26d0b1f22 */
+"buttonRemoveDriveAccess" = "Αφαίρεση πρόσβασης στον kDrive";
+
+/* loco:6049df4d5c2c3a04bc39795f */
+"buttonRemoveFavorites" = "Αφαίρεση από τα αγαπημένα";
+
+/* loco:69651623d1509dbfc30bdde2 */
+"buttonRemoveUserFromShare" = "Ακύρωση της κοινοποίησης";
+
+/* loco:6049df4d5c2c3a04bc397960 */
+"buttonRename" = "Μετονομασία";
+
+/* loco:608fce3469583d3ba3411d43 */
+"buttonRenew" = "Ανανέωση";
+
+/* loco:604a29d9f20c5e115e640152 */
+"buttonRetry" = "Επανάληψη";
+
+/* loco:6049df4d5c2c3a04bc397961 */
+"buttonSave" = "Αποθήκευση";
+
+/* loco:606f1b035b651445ab137732 */
+"buttonSeeFolder" = "Προβολή του φακέλου";
+
+/* loco:6126165eb8a5c86c7f00f602 */
+"buttonSelect" = "Επιλογή";
+
+/* loco:6049df4d5c2c3a04bc397962 */
+"buttonSelectAll" = "Επιλογή όλων";
+
+/* loco:685545854a29fa85140fcf62 */
+"buttonSelectTheFolder" = "Επιλογή φακέλου";
+
+/* loco:6049df4d5c2c3a04bc397963 */
+"buttonSend" = "Αποστολή";
+
+/* loco:6049df4d5c2c3a04bc397964 */
+"buttonSendCopy" = "Αποστολή αντιγράφου";
+
+/* loco:6049df4d5c2c3a04bc397965 */
+"buttonSettingsLockApp" = "Ενεργοποίηση κλειδώματος";
+
+/* loco:6049df4d5c2c3a04bc397966 */
+"buttonShare" = "Κοινοποίηση";
+
+/* loco:606d7c4a2f511b00e97a0152 */
+"buttonShareDropboxLink" = "Κοινοποίηση συνδέσμου";
+
+/* loco:67dd44d13648dcecc500c052 */
+"buttonSharePrivateLink" = "Κοινοποίηση ιδιωτικού συνδέσμου";
+
+/* loco:6049df4d5c2c3a04bc397943 */
+"buttonSharePublicLink" = "Κοινοποίηση δημόσιου συνδέσμου";
+
+/* loco:6049df4d5c2c3a04bc397967 */
+"buttonSignIn" = "Δημιουργία λογαριασμού";
+
+/* loco:62aaf42957e7311609525592 */
+"buttonSnackBarGoToSettings" = "Ρυθμίσεις";
+
+/* loco:6049df4d5c2c3a04bc397968 */
+"buttonStopUpload" = "Διακοπή μεταφόρτωσης αυτού του αρχείου";
+
+/* loco:61261399888bc37f7a1333e2 */
+"buttonStoreSuccessHome" = "Επιστροφή στην αρχική σελίδα";
+
+/* loco:6059cbb23fcfb17294332642 */
+"buttonSwitchDrive" = "Αλλαγή drive";
+
+/* loco:6049df4d5c2c3a04bc397969 */
+"buttonTakePhotoOrVideo" = "Λήψη φωτογραφίας ή βίντεο";
+
+/* loco:6049df4d5c2c3a04bc39796a */
+"buttonToggleDisplay" = "Εναλλαγή προβολής (πλέγμα/λίστα)";
+
+/* loco:6059ff858381d627a10cf422 */
+"buttonTogglePassword" = "Εμφάνιση/απόκρυψη κωδικού πρόσβασης";
+
+/* loco:6049df4d5c2c3a04bc39796b */
+"buttonUnlock" = "Ξεκλείδωμα";
+
+/* loco:6049df4d5c2c3a04bc39796c */
+"buttonUpdate" = "Ενημέρωση";
+
+/* loco:67a9efa524991c1b1e0ae0d2 */
+"buttonUpgrade" = "Αναβάθμιση";
+
+/* loco:6049df4d5c2c3a04bc39796d */
+"buttonUpgradeOffer" = "Αναβάθμιση προγράμματος";
+
+/* loco:6049df4d5c2c3a04bc39796e */
+"buttonUpload" = "Μεταφόρτωση από το τηλέφωνο";
+
+/* loco:6049df4d5c2c3a04bc39796f */
+"buttonUploadFile" = "Μεταφόρτωση αρχείου";
+
+/* loco:6049df4d5c2c3a04bc397970 */
+"buttonUploadPhotoOrVideo" = "Μεταφόρτωση φωτογραφίας ή βίντεο";
+
+/* loco:6049df4d5c2c3a04bc397971 */
+"buttonValid" = "Επικύρωση";
+
+/* loco:6101109cb5c21e394d127402 */
+"buttonYes" = "Ναι";
+
+/* loco:614c8806c00b6044a92a7775 */
+"cacheDirectory" = "Προσωρινή μνήμη";
+
+/* loco:614c88a2f93d4c57b6630c25 */
+"cachedFileTitle" = "Αρχεία προσωρινής μνήμης";
+
+/* loco:6054b7d53726d8506b6c9a42 */
+"cameraAccessDeniedDescription" = "Η πρόσβαση στην κάμερα είναι απενεργοποιημένη: μπορείτε να την αλλάξετε στις Ρυθμίσεις.";
+
+/* loco:6054b7b06fb6b07b6c25ec12 */
+"cameraAccessDeniedTitle" = "Πρόσβαση απενεργοποιημένη";
+
+/* loco:6101124480b37c0ebb78cf02 */
+"cancelDownloadDescription" = "Θέλετε σίγουρα να ακυρώσετε αυτή τη λήψη;";
+
+/* loco:6101111ac888310e7a433135 */
+"cancelDownloadTitle" = "Ακύρωση λήψης";
+
+/* loco:6169608e8934a0564732b7d4 */
+"categoriesFilterTitle" = "Κατηγορίες";
+
+/* loco:6169612bb7bdcf38d1662b72 */
+"categoryBanking" = "Τράπεζα";
+
+/* loco:6169613b9b59e70d3b0b4863 */
+"categoryBill" = "Τιμολόγιο";
+
+/* loco:61696bf8a758c603395e59a2 */
+"categoryColorTitle" = "Χρώμα κατηγορίας";
+
+/* loco:6169616f3eec095ad267a822 */
+"categoryContract" = "Συμβόλαιο";
+
+/* loco:6169617d3eec095ad267a824 */
+"categoryForm" = "Έντυπο";
+
+/* loco:6169618975c332599703e382 */
+"categoryHobbies" = "Χόμπι";
+
+/* loco:61696197fdbfec6e4754f3d2 */
+"categoryID" = "Έγγραφα ταυτότητας";
+
+/* loco:616961a7dd624e5cbb6cf8f2 */
+"categoryInsurance" = "Ασφάλεια";
+
+/* loco:61695f859bcf5534bf205b42 */
+"categoryNameField" = "Όνομα κατηγορίας";
+
+/* loco:616961b8961fc207bc6ebf24 */
+"categoryQuotation" = "Προσφορά";
+
+/* loco:63985af2b769ef1fe1344c23 */
+"categoryResume" = "Βιογραφικό";
+
+/* loco:616961c2dd624e5cbb6cf8f4 */
+"categoryTaxation" = "Φορολογία";
+
+/* loco:616961d0ccfa9a632b72af02 */
+"categoryTransportation" = "Μεταφορές";
+
+/* loco:616961eb5e92cf60f962e6d2 */
+"categoryWarranty" = "Εγγύηση";
+
+/* loco:616961fe123aaf53247698b2 */
+"categoryWork" = "Εργασία";
+
+/* loco:6548a6eb63ec2f8b5001ac32 */
+"commonDocumentsDescription" = "Αυτός ο χώρος ανήκει στο %@ και συγκεντρώνει τα κοινά αρχεία του οργανισμού σας.";
+
+/* loco:6049df4d5c2c3a04bc397974 */
+"commonFolderDescription" = "Κοινή χρήση αυτού του φακέλου με χρήστες του kDrive %@";
+
+/* loco:6049df4d5c2c3a04bc397975 */
+"commonFolderTitle" = "Φάκελος οργανισμού";
+
+/* loco:60545b0e9f34163fee5888e2 */
+"contentDescriptionIsSelected" = "Είναι επιλεγμένο";
+
+/* loco:604b81caf1d3fc3c426e2443 */
+"convertToDropboxTitle" = "Μετατροπή σε κουτί παραλαβής %@";
+
+/* loco:61695ef04a145b45632ed042 */
+"createCategoryTitle" = "Δημιουργία κατηγορίας";
+
+/* loco:6049df4d5c2c3a04bc397973 */
+"createCommonFolderAllUsersDescription" = "Όλοι οι χρήστες του kDrive %@ θα έχουν αυτόματα πρόσβαση σε αυτόν τον φάκελο.";
+
+/* loco:6049df4d5c2c3a04bc39797d */
+"createCommonFolderSuccess" = "Ο φάκελος οργανισμού δημιουργήθηκε με επιτυχία";
+
+/* loco:6049df4d5c2c3a04bc39797e */
+"createCommonFolderTitle" = "Δημιουργία φακέλου οργανισμού";
+
+/* loco:60b9e61ed2bc0c19f9307d42 */
+"createDatedSubFoldersDescription" = "Αυτόματη δημιουργία υποφακέλων με τον μήνα και το έτος της φωτογραφίας";
+
+/* loco:60b9e60d89b1910c85340a94 */
+"createDatedSubFoldersTitle" = "Δημιουργία ενός φακέλου ανά μήνα";
+
+/* loco:6049df4d5c2c3a04bc39797f */
+"createDropBoxHint" = "Όνομα κουτιού παραλαβής";
+
+/* loco:6049df4d5c2c3a04bc397980 */
+"createDropBoxLimitFileSizeError" = "Πρέπει να είναι μεγαλύτερο από 0";
+
+/* loco:6049df4d5c2c3a04bc397981 */
+"createDropBoxTitle" = "Δημιουργία κουτιού παραλαβής";
+
+/* loco:6049df4d5c2c3a04bc397982 */
+"createFolderAccessPermissionTitle" = "Ποιος μπορεί να έχει πρόσβαση σε αυτόν τον φάκελο;";
+
+/* loco:6049df4d5c2c3a04bc397983 */
+"createFolderEmailWhenFinishedTitle" = "Λήψη email όταν έχει μεταφορτωθεί ένα αρχείο";
+
+/* loco:6049df4d5c2c3a04bc397977 */
+"createFolderKeepParentsRightDescription" = "Οι χρήστες με πρόσβαση στον φάκελο %@ θα έχουν επίσης πρόσβαση σε αυτόν τον φάκελο";
+
+/* loco:6049df4d5c2c3a04bc397976 */
+"createFolderKeepParentsRightTitle" = "Διατήρηση των κοινοποιήσεων και των δικαιωμάτων του γονικού φακέλου";
+
+/* loco:6049df4d5c2c3a04bc397984 */
+"createFolderLimitFileSizeDescription" = "Οι χρήστες δεν θα μπορούν να υπερβούν τον χώρο αποθήκευσης που έχει εκχωρηθεί σε αυτόν τον φάκελο.";
+
+/* loco:6049df4d5c2c3a04bc397985 */
+"createFolderLimitFileSizeInput" = "Ορίστε ένα όριο";
+
+/* loco:6049df4d5c2c3a04bc397986 */
+"createFolderLimitFileSizeTitle" = "Περιορισμός χώρου αποθήκευσης";
+
+/* loco:6049df4d5c2c3a04bc397987 */
+"createFolderLimitFileSizeUnitTitle" = "GB";
+
+/* loco:6049df4d5c2c3a04bc397978 */
+"createFolderMeOnly" = "Μόνο εγώ";
+
+/* loco:6049df4d5c2c3a04bc397988 */
+"createFolderPasswordDescription" = "Όποιος έχει τον σύνδεσμο θα πρέπει να εισαγάγει κωδικό πρόσβασης για να μεταφορτώσει τα αρχεία του.";
+
+/* loco:6049df4d5c2c3a04bc397989 */
+"createFolderPasswordTitle" = "Προστασία με κωδικό πρόσβασης";
+
+/* loco:6049df4d5c2c3a04bc39798a */
+"createFolderSettingsTitle" = "Προχωρημένες επιλογές";
+
+/* loco:6049df4d5c2c3a04bc39797a */
+"createFolderSomeUsersDescription" = "Καθορίστε χειροκίνητα τους χρήστες που θα έχουν πρόσβαση σε αυτόν τον φάκελο.";
+
+/* loco:6049df4d5c2c3a04bc39797b */
+"createFolderSomeUsersTitle" = "Ορισμένοι χρήστες";
+
+/* loco:6049df4d5c2c3a04bc39798b */
+"createFolderTitle" = "Δημιουργία φακέλου";
+
+/* loco:6049df4d5c2c3a04bc39798c */
+"createFolderValidUntilDescription" = "Μόλις περάσει η ημερομηνία, οι χρήστες δεν θα μπορούν πλέον να μεταφέρουν αρχεία.";
+
+/* loco:6049df4d5c2c3a04bc39798d */
+"createPrivateFolderSuccess" = "Ο φάκελος δημιουργήθηκε με επιτυχία";
+
+/* loco:629618adfe596f553920c562 */
+"deleteMyAccount" = "Διαγραφή του λογαριασμού μου";
+
+/* loco:60dc3f19352b5e75d37b8c23 */
+"deletePicturesDescription" = "Η εφαρμογή θα σας ζητά τακτικά να διαγράψετε φωτογραφίες από τη συσκευή σας που έχουν ήδη συγχρονιστεί στο kDrive σας. Πρέπει πάντα να εγκρίνετε χειροκίνητα τη διαγραφή";
+
+/* loco:60dc3e2e5ea2965b1152dc03 */
+"deletePicturesTitle" = "Διαγραφή φωτογραφιών";
+
+/* loco:68c961c864c56326660094b2 */
+"deleteUploadedPhotosDescription" = "Κάντε κλικ για να ελευθερώσετε χώρο στον δίσκο";
+
+/* loco:68c9617bf6bead14aa05ca53 */
+"deleteUploadedPhotosTitle" = "Έχετε %d φωτογραφίες για καθαρισμό";
+
+/* loco:614c887ba0ad81657c1e75a2 */
+"directoriesTitle" = "Δεδομένα";
+
+/* loco:614c86f5dd7fc56d0c5fcaa4 */
+"documentsDirectory" = "Άλλα έγγραφα";
+
+/* loco:608fce0b43535250c00ba5c2 */
+"driveBlockedDescription" = "Το προϊόν έληξε στις %@. Παρακαλούμε ανανεώστε το για να το διαχειριστείτε και να αποκτήσετε πρόσβαση στα δεδομένα του.";
+
+/* loco:6095336aa6379b42c65151a2 */
+"driveBlockedDescription-plural" = "Όλα τα προϊόντα σας έχουν λήξει. Παρακαλούμε ανανεώστε τα για να τα διαχειριστείτε και να αποκτήσετε πρόσβαση στα δεδομένα τους.";
+
+/* loco:69bcfe53aed2af87a302d428 */
+"driveBlockedDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d429 */
+"driveBlockedDescription-plural-3" = "";
+
+/* loco:608fcd7f99c877023a07f262 */
+"driveBlockedTitle" = "Το kDrive %@ είναι αυτή τη στιγμή αποκλεισμένο";
+
+/* loco:609505a7cd8a3b0f0c2c6532 */
+"driveBlockedTitle-plural" = "Όλα τα kDrive σας είναι αυτή τη στιγμή αποκλεισμένα";
+
+/* loco:69bcfe53aed2af87a302d42a */
+"driveBlockedTitle-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d42b */
+"driveBlockedTitle-plural-3" = "";
+
+/* loco:608fcddcb3c9f173fe193095 */
+"driveMaintenanceDescription" = "Μια ενημέρωση βρίσκεται σε εξέλιξη για τη βελτίωση του kDrive. Αυτή η διαδικασία μπορεί να διαρκέσει μερικά λεπτά. Σας ευχαριστούμε για την υπομονή σας.";
+
+/* loco:608fcdbab3c9f173fe193093 */
+"driveMaintenanceTitle" = "Το kDrive %@ βρίσκεται αυτή τη στιγμή υπό συντήρηση";
+
+/* loco:609505d502647721ed3312c2 */
+"driveMaintenanceTitle-plural" = "Όλα τα kDrive σας βρίσκονται αυτή τη στιγμή υπό συντήρηση";
+
+/* loco:69bcfe53aed2af87a302d42c */
+"driveMaintenanceTitle-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d42d */
+"driveMaintenanceTitle-plural-3" = "";
+
+/* loco:614c868951be11365c416434 */
+"drivesDirectory" = "Drives και αρχεία εκτός σύνδεσης";
+
+/* loco:6049df4d5c2c3a04bc39798e */
+"dropBoxDescription" = "Προσκαλέστε τους συνεργάτες, τους χρήστες ή τους πελάτες σας να μεταφέρουν αρχεία στο kDrive σας, ακόμα και αν δεν έχουν λογαριασμό Infomaniak.";
+
+/* loco:6049df4d5c2c3a04bc39798f */
+"dropBoxLinkTitle" = "Σύνδεσμος κουτιού παραλαβής";
+
+/* loco:6049df4d5c2c3a04bc397990 */
+"dropBoxResultDescription" = "Μοιραστείτε τον παρακάτω σύνδεσμο με άτομα που πρέπει να σας στείλουν αρχεία.";
+
+/* loco:6049df4d5c2c3a04bc397991 */
+"dropBoxResultTitle" = "Κοινοποίηση του κουτιού παραλαβής %@";
+
+/* loco:6049df4d5c2c3a04bc397992 */
+"dropBoxTitle" = "Κουτί παραλαβής";
+
+/* loco:618b870b92fff1241d67e713 */
+"dropboxSharedLinkDescription" = "Δεν μπορείτε να δημιουργήσετε σύνδεσμο κοινοποίησης σε ένα κουτί παραλαβής.";
+
+/* loco:618b829ad715f5111e3632c2 */
+"dropboxSharedLinkTitle" = "Σύνδεσμος κοινής χρήσης Dropbox";
+
+/* loco:61695f6e3f0ee123d2250692 */
+"editCategoryInfoDescription" = "Η τροποποίηση θα είναι ορατή σε όλους τους χρήστες kDrive που έχουν πρόσβαση στις κατηγορίες.";
+
+/* loco:61695f2fe7df99511f698192 */
+"editCategoryTitle" = "Επεξεργασία κατηγορίας";
+
+/* loco:6049df4d5c2c3a04bc397993 */
+"errorAddComment" = "Σφάλμα κατά την προσθήκη σχολίου";
+
+/* loco:6049df4d5c2c3a04bc397994 */
+"errorAddFavorite" = "Σφάλμα κατά την προσθήκη στα αγαπημένα";
+
+/* loco:6049df4d5c2c3a04bc397995 */
+"errorCache" = "Σφάλμα προσωρινής αποθήκευσης";
+
+/* loco:616d69eef413a20ef401e104 */
+"errorCategoryAlreadyExists" = "Υπάρχει ήδη κατηγορία με το ίδιο όνομα";
+
+/* loco:60795f7ecca7d72b0900bd52 */
+"errorConflict" = "Υπάρχει ήδη ένα στοιχείο με το ίδιο όνομα σε αυτήν την τοποθεσία";
+
+/* loco:6049df4d5c2c3a04bc397996 */
+"errorConnection" = "Σφάλμα σύνδεσης";
+
+/* loco:6049df4d5c2c3a04bc397997 */
+"errorDelete" = "Σφάλμα διαγραφής";
+
+/* loco:60a693f631a0a90e163445f2 */
+"errorDeviceStorage" = "Ανεπαρκής αποθήκευση συσκευής";
+
+/* loco:6099440fdb741c2c6d66d332 */
+"errorDisconnected" = "Παρουσιάστηκε σφάλμα. Παρακαλώ συνδεθείτε ξανά για να συνεχίσετε.";
+
+/* loco:6049df4d5c2c3a04bc397998 */
+"errorDownload" = "Σφάλμα λήψης";
+
+/* loco:616d68dab3af9f17301c15d4 */
+"errorDownloadPermission" = "Πρέπει να προσθέσετε τουλάχιστον ένα αρχείο για το οποίο έχετε άδεια λήψης";
+
+/* loco:68bed25fc40a03885b0cd043 */
+"errorDropboxLimitExceeded" = "Έχετε φτάσει το όριο του κουτιού παρακατάθεσης.";
+
+/* loco:6049df4d5c2c3a04bc397999 */
+"errorDuplicate" = "Σφάλμα αντιγραφής";
+
+/* loco:6708ec44807fa34749094072 */
+"errorExternalImportInProgress" = "Δεν είναι δυνατή η εκτέλεση της ενέργειας στον φάκελο επειδή εκτελείται εισαγωγή από εξωτερική πηγή";
+
+/* loco:605cacde72147f269369e484 */
+"errorFileAlreadyExists" = "Το αρχείο ή ο φάκελος υπάρχει ήδη";
+
+/* loco:60e2d1ed77622d4af14f5a72 */
+"errorFileLocked" = "Αυτό το αρχείο είναι αυτή τη στιγμή ανοιχτό από άλλον χρήστη και δεν μπορεί να τροποποιηθεί";
+
+/* loco:664c499b09f1290486001cb2 */
+"errorFilesLimitExceeded" = "Έχει επιτευχθεί το όριο αρχείων στον φάκελο";
+
+/* loco:605b1b5f49d7ff61223fcfe2 */
+"errorGeneric" = "Παρουσιάστηκε σφάλμα";
+
+/* loco:619d09d108940d5e97470553 */
+"errorGetBookmarkURL" = "Σύνδεσμος μη ανακτήσιμος";
+
+/* loco:605b1457dbf343111f56d112 */
+"errorLeaveShare" = "Σφάλμα κατά τη διακοπή της κοινής χρήσης";
+
+/* loco:67f4dd4c65f3979e8004d539 */
+"errorLimitExceeded" = "Υπέρβαση ορίου";
+
+/* loco:6049df4d5c2c3a04bc39799b */
+"errorLoadingOfficeEditor" = "Αδυναμία φόρτωσης του επεξεργαστή εγγράφων";
+
+/* loco:6049df4d5c2c3a04bc39799c */
+"errorModification" = "Σφάλμα κατά την τροποποίηση";
+
+/* loco:6049df4d5c2c3a04bc39799d */
+"errorMove" = "Σφάλμα μετακίνησης";
+
+/* loco:6049df4d5c2c3a04bc39799e */
+"errorNetwork" = "Σφάλμα δικτύου";
+
+/* loco:6049df4d5c2c3a04bc39799f */
+"errorNetworkDescription" = "Τα αποτελέσματα ενδέχεται να είναι ελλιπή";
+
+/* loco:62aad9bc0b461303fb5559d2 */
+"errorPhotoLibraryAccessLimited" = "Το kDrive δεν έχει πρόσβαση στη βιβλιοθήκη φωτογραφιών σας";
+
+/* loco:6049df4d5c2c3a04bc3979a0 */
+"errorPreviewDeleted" = "Αυτό το αρχείο διαγράφηκε οριστικά";
+
+/* loco:6049df4d5c2c3a04bc3979a1 */
+"errorPreviewTrash" = "Η προεπισκόπηση αρχείου στον κάδο δεν είναι δυνατή";
+
+/* loco:6708e538df700f157c09c833 */
+"errorQuotaExceeded" = "Δεν υπάρχει αρκετός χώρος στο kDrive σας";
+
+/* loco:6049df4d5c2c3a04bc3979a2 */
+"errorRename" = "Σφάλμα μετονομασίας";
+
+/* loco:6049df4d5c2c3a04bc3979a3 */
+"errorRestore" = "Σφάλμα επαναφοράς";
+
+/* loco:6049df4d5c2c3a04bc3979a4 */
+"errorRightModification" = "Σφάλμα κατά την επεξεργασία δικαιωμάτων";
+
+/* loco:6049df4d5c2c3a04bc3979a5 */
+"errorSave" = "Σφάλμα αποθήκευσης";
+
+/* loco:6049df4d5c2c3a04bc3979a6 */
+"errorShareLink" = "Σφάλμα κατά τη δημιουργία συνδέσμου";
+
+/* loco:6863dfc2e279ce3b0a0323e2 */
+"errorSharedWithMeLink" = "Παρουσιάστηκε σφάλμα κατά το άνοιγμα του κοινόχρηστου συνδέσμου";
+
+/* loco:624e97877d7de2125354cfc2 */
+"errorStillUploading" = "Το στοιχείο εισάγεται ακόμα";
+
+/* loco:6049df4d5c2c3a04bc3979a7 */
+"errorTitle" = "Σφάλμα";
+
+/* loco:69270405644ff4b0930dc2b5 */
+"errorUnableToLoadContent" = "Δεν επιτρέπεται η πρόσβαση σε αυτόν τον πόρο";
+
+/* loco:6049df4d5c2c3a04bc3979a8 */
+"errorUpload" = "Σφάλμα μεταφόρτωσης";
+
+/* loco:6569aef523dcf4dc2a0f5c92 */
+"errorWrongPassword" = "Λάθος κωδικός πρόσβασης";
+
+/* loco:6049df4d5c2c3a04bc3979a9 */
+"favoritesNoFile" = "Κανένα αγαπημένο αυτή τη στιγμή";
+
+/* loco:6049df4d5c2c3a04bc3979aa */
+"favoritesTitle" = "Αγαπημένα";
+
+/* loco:62385833bd31511b4a48ba42 */
+"fileActivityCollaborativeFolderAccess" = "είδε το κουτί κατάθεσης";
+
+/* loco:612396ddca51601f9b314b32 */
+"fileActivityCollaborativeFolderCreate" = "δημιούργησε ένα κουτί κατάθεσης";
+
+/* loco:612396eefb52c422c4223982 */
+"fileActivityCollaborativeFolderDelete" = "διέγραψε ένα κουτί κατάθεσης";
+
+/* loco:61239726e69c060aef5b3a52 */
+"fileActivityCollaborativeFolderUpdate" = "ενημέρωσε ένα κουτί κατάθεσης";
+
+/* loco:623868ac84778841a246b082 */
+"fileActivityCollaborativeUserAccess" = "απέστειλε αρχεία στο κουτί κατάθεσης";
+
+/* loco:623859dedcb3115dbc682f22 */
+"fileActivityCollaborativeUserCreate" = "δημιούργησε έναν φάκελο μέσα στο κουτί κατάθεσης για να αποστείλει αρχεία";
+
+/* loco:62385b138941da20b53b8853 */
+"fileActivityCollaborativeUserDelete" = "διέγραψε έναν φάκελο από το κουτί κατάθεσης στον οποίο ένας χρήστης απέστειλε αρχεία";
+
+/* loco:60632ee2a6d3b46038170024 */
+"fileActivityOtherFiles" = "%d άλλα αρχεία";
+
+/* loco:6049df4d5c2c3a04bc3979ab */
+"fileDetailsActivitiesTitle" = "Δραστηριότητα";
+
+/* loco:6049df4d5c2c3a04bc3979ac */
+"fileDetailsActivityFileAccess" = "πρόσβαση στο αρχείο";
+
+/* loco:618b844d3d601243cd6c52d2 */
+"fileDetailsActivityFileCategorize" = "προσθήκη κατηγορίας στο στοιχείο";
+
+/* loco:61dda9c2a380eb74010679e2 */
+"fileDetailsActivityFileColorDelete" = "διαγραφή χρώματος φακέλου";
+
+/* loco:61dda9850be38655ce4d86d2 */
+"fileDetailsActivityFileColorUpdate" = "αλλαγή χρώματος φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979ad */
+"fileDetailsActivityFileCommentCreate" = "σχολιασμός αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979ae */
+"fileDetailsActivityFileCommentDelete" = "διαγραφή σχολίου";
+
+/* loco:6049df4d5c2c3a04bc3979af */
+"fileDetailsActivityFileCommentLike" = "αρέσκεια σε σχόλιο";
+
+/* loco:6049df4d5c2c3a04bc3979b1 */
+"fileDetailsActivityFileCommentUnlike" = "διαγραφή αρέσκειας από σχόλιο";
+
+/* loco:6049df4d5c2c3a04bc3979b2 */
+"fileDetailsActivityFileCommentUpdate" = "τροποποίηση σχολίου";
+
+/* loco:6049df4d5c2c3a04bc3979b3 */
+"fileDetailsActivityFileCreate" = "δημιουργία αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979b4 */
+"fileDetailsActivityFileDelete" = "διαγραφή αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979b5 */
+"fileDetailsActivityFileFavoriteCreate" = "προσθήκη αρχείου στα αγαπημένα";
+
+/* loco:6049df4d5c2c3a04bc3979b6 */
+"fileDetailsActivityFileFavoriteRemove" = "αφαίρεση αρχείου από τα αγαπημένα";
+
+/* loco:6049df4d5c2c3a04bc3979b7 */
+"fileDetailsActivityFileMove" = "μετακίνηση αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979b8 */
+"fileDetailsActivityFileRename" = "μετονομασία αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979b9 */
+"fileDetailsActivityFileRestore" = "ανάκτηση αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979ba */
+"fileDetailsActivityFileShareCreate" = "κοινοποίηση αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979bb */
+"fileDetailsActivityFileShareDelete" = "διακοπή κοινοποίησης αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979bc */
+"fileDetailsActivityFileShareLinkCreate" = "δημιουργία συνδέσμου κοινοποίησης αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979bd */
+"fileDetailsActivityFileShareLinkDelete" = "αφαίρεση συνδέσμου κοινοποίησης αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979be */
+"fileDetailsActivityFileShareLinkShow" = "εμφάνιση συνδέσμου κοινοποίησης αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979bf */
+"fileDetailsActivityFileShareLinkUpdate" = "τροποποίηση συνδέσμου κοινοποίησης αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979c0 */
+"fileDetailsActivityFileShareUpdate" = "τροποποίηση κοινοποίησης αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979c1 */
+"fileDetailsActivityFileTrash" = "μετακίνηση αρχείου στον κάδο";
+
+/* loco:618b86f57f250551b44a14b2 */
+"fileDetailsActivityFileUncategorize" = "αφαίρεση κατηγορίας από το στοιχείο";
+
+/* loco:6049df4d5c2c3a04bc3979c2 */
+"fileDetailsActivityFileUpdate" = "τροποποίηση αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979c3 */
+"fileDetailsActivityFolderAccess" = "πρόσβαση στον φάκελο";
+
+/* loco:6049df4d5c2c3a04bc3979c4 */
+"fileDetailsActivityFolderCommentCreate" = "σχολιασμός φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979c5 */
+"fileDetailsActivityFolderCreate" = "δημιουργία φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979c6 */
+"fileDetailsActivityFolderDelete" = "διαγραφή φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979c7 */
+"fileDetailsActivityFolderFavoriteCreate" = "προσθήκη φακέλου στα αγαπημένα";
+
+/* loco:6049df4d5c2c3a04bc3979c8 */
+"fileDetailsActivityFolderFavoriteRemove" = "αφαίρεση φακέλου από τα αγαπημένα";
+
+/* loco:6049df4d5c2c3a04bc3979c9 */
+"fileDetailsActivityFolderMove" = "μετακίνηση φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979ca */
+"fileDetailsActivityFolderRename" = "μετονόμασε τον φάκελο";
+
+/* loco:6049df4d5c2c3a04bc3979cb */
+"fileDetailsActivityFolderRestore" = "ανάκτησε τον φάκελο";
+
+/* loco:6049df4d5c2c3a04bc3979cc */
+"fileDetailsActivityFolderShareCreate" = "μοιράστηκε τον φάκελο";
+
+/* loco:6049df4d5c2c3a04bc3979cd */
+"fileDetailsActivityFolderShareDelete" = "διέκοψε το διαμοιρασμό του φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979ce */
+"fileDetailsActivityFolderShareLinkCreate" = "δημιούργησε το σύνδεσμο διαμοιρασμού του φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979cf */
+"fileDetailsActivityFolderShareLinkDelete" = "αφαίρεσε το σύνδεσμο διαμοιρασμού του φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979d0 */
+"fileDetailsActivityFolderShareLinkShow" = "εμφάνισε το σύνδεσμο διαμοιρασμού του φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979d1 */
+"fileDetailsActivityFolderShareLinkUpdate" = "άλλαξε το σύνδεσμο διαμοιρασμού του φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979d2 */
+"fileDetailsActivityFolderShareUpdate" = "άλλαξε τον διαμοιρασμό του φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979d3 */
+"fileDetailsActivityFolderTrash" = "μετακίνησε τον φάκελο στον κάδο απορριμμάτων";
+
+/* loco:6049df4d5c2c3a04bc3979d4 */
+"fileDetailsActivityFolderUpdate" = "τροποποίησε τον φάκελο";
+
+/* loco:6049df4d5c2c3a04bc3979d7 */
+"fileDetailsCommentsConfirmationSnackbar" = "Το σχόλιο προστέθηκε";
+
+/* loco:6049df4d5c2c3a04bc3979d5 */
+"fileDetailsCommentsFieldName" = "Το σχόλιό σας";
+
+/* loco:6049df4d5c2c3a04bc3979d6 */
+"fileDetailsCommentsTitle" = "Σχόλια";
+
+/* loco:6075c107fa8e01546e12d402 */
+"fileDetailsCommentsUnavailable" = "Ανοίξτε το έγγραφο για να προσθέσετε σχόλια. Στη συνέχεια επιλέξτε το στοιχείο για σχολιασμό.";
+
+/* loco:6239bfddc542c868b2588ed2 */
+"fileDetailsInfoContent" = "Περιεχόμενο";
+
+/* loco:6239bfa182666831bc78f4f2 */
+"fileDetailsInfoEmptyFolder" = "Άδειος φάκελος";
+
+/* loco:6065c93ed104784cae1aac12 */
+"fileDetailsInfosAddedDateTitle" = "Προσθήκη στο drive";
+
+/* loco:6049df4d5c2c3a04bc3979d8 */
+"fileDetailsInfosCreationDateTitle" = "Δημιουργία";
+
+/* loco:6049df4d5c2c3a04bc3979d9 */
+"fileDetailsInfosOriginalSize" = "Αρχικό μέγεθος";
+
+/* loco:6049df4d5c2c3a04bc3979da */
+"fileDetailsInfosOwnerTitle" = "Ιδιοκτήτης";
+
+/* loco:6049df4d5c2c3a04bc3979db */
+"fileDetailsInfosSharedUsersTitle" = "Χρήστες";
+
+/* loco:6049df4d5c2c3a04bc3979dc */
+"fileDetailsInfosTitle" = "Πληροφορίες";
+
+/* loco:6049df4d5c2c3a04bc3979dd */
+"fileDetailsInfosTotalSizeTitle" = "Μέγεθος (με εκδόσεις)";
+
+/* loco:6049df4d5c2c3a04bc3979de */
+"fileDetailsNoComments" = "Κανένα σχόλιο προς το παρόν";
+
+/* loco:66a369b1a84f9b44440e2423 */
+"fileExtesionFilterPlaceholder" = ".jpg, .mov, κλπ.";
+
+/* loco:6049df4d5c2c3a04bc3979df */
+"fileInfoInputDuplicateFile" = "Όνομα αντιγραφής";
+
+/* loco:614b15f40740a72bd13f4ff5 */
+"fileListCopyDoneSnackbar" = "Οι αντιγραφές ολοκληρώθηκαν με επιτυχία";
+
+/* loco:614b15d8e3a34a3e280327f2 */
+"fileListCopyInProgressSnackbar" = "Αντιγραφές σε εξέλιξη: %1$d/%2$d";
+
+/* loco:614b15ae559e0f20c97d8cc3 */
+"fileListCopyStartedSnackbar" = "Έναρξη αντιγραφών";
+
+/* loco:611b6d16db25751a36410132 */
+"fileListDeletionDoneSnackbar" = "Οι διαγραφές ολοκληρώθηκαν με επιτυχία";
+
+/* loco:611b6d042487e54162428902 */
+"fileListDeletionInProgressSnackbar" = "Διαγραφές σε εξέλιξη: %1$d/%2$d";
+
+/* loco:611b6cc2f8370857fd1d1182 */
+"fileListDeletionStartedSnackbar" = "Έναρξη διαγραφών";
+
+/* loco:611b6e5b3d3bce39f32434e2 */
+"fileListMoveDoneSnackbar" = "Οι μετακινήσεις ολοκληρώθηκαν με επιτυχία";
+
+/* loco:6049df4d5c2c3a04bc397aa4 */
+"fileListMoveFileConfirmationSnackbariOS" = "Το αρχείο μετακινήθηκε επιτυχώς στο %@";
+
+/* loco:6049df4d5c2c3a04bc397aa5 */
+"fileListMoveFileConfirmationSnackbariOS-plural" = "%1$d αρχεία μετακινήθηκαν επιτυχώς στο %2$@";
+
+/* loco:69bcfe53aed2af87a302d44c */
+"fileListMoveFileConfirmationSnackbariOS-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d44d */
+"fileListMoveFileConfirmationSnackbariOS-plural-3" = "";
+
+/* loco:611b6e42cb8967787a31ee82 */
+"fileListMoveInProgressSnackbar" = "Μετακινήσεις σε εξέλιξη: %1$d/%2$d";
+
+/* loco:611b6e2b9ad5ad3c690608e3 */
+"fileListMoveStartedSnackbar" = "Έναρξη μετακινήσεων";
+
+/* loco:6049df4d5c2c3a04bc3979e1 */
+"fileListTitle" = "Αρχεία";
+
+/* loco:6049df4d5c2c3a04bc3979e2 */
+"filePermissionTitle" = "Επιλέξτε το δικαίωμα";
+
+/* loco:610bd30a99648743be1f0a13 */
+"fileProviderExtensionDescription" = "Εάν αυτή η επιλογή απενεργοποιηθεί, το kDrive δεν θα είναι πλέον διαθέσιμο στην εφαρμογή Αρχεία και σε εφαρμογές τρίτων.";
+
+/* loco:610a903379317f32214437b4 */
+"fileProviderExtensionTitle" = "Εμφάνιση στα Αρχεία";
+
+/* loco:6049df4d5c2c3a04bc3979e3 */
+"fileShareAddMessage" = "Προσθήκη μηνύματος για επισκέπτες (προαιρετικό)";
+
+/* loco:6049df4d5c2c3a04bc3979e5 */
+"fileShareDetailsFileTitle" = "Κοινή χρήση και δικαιώματα του αρχείου %@";
+
+/* loco:6049df4d5c2c3a04bc3979e6 */
+"fileShareDetailsFolderTitle" = "Κοινή χρήση και δικαιώματα του φακέλου %@";
+
+/* loco:6049df4d5c2c3a04bc3979e8 */
+"fileShareDetailsUsersAccesTitle" = "Χρήστες με πρόσβαση";
+
+/* loco:6049df4d5c2c3a04bc3979e9 */
+"fileShareFileTitle" = "Κοινή χρήση αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979ea */
+"fileShareFolderTitle" = "Κοινή χρήση φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979eb */
+"fileShareLinkSettingsAccessRightTitle" = "Δικαιώματα επεξεργασίας";
+
+/* loco:6049df4d5c2c3a04bc3979ec */
+"fileShareLinkSettingsTitle" = "Σύνθετες ρυθμίσεις συνδέσμου κοινής χρήσης";
+
+/* loco:6169607a87650c03cf1ded24 */
+"fileTypeFilterTitle" = "Τύπος αρχείου";
+
+/* loco:61696046c3498f0db20ca172 */
+"filtersTitle" = "Φίλτρα";
+
+/* loco:61a5f2b9477a9a261e636f43 */
+"folderColorDescription" = "Αλλάξτε το χρώμα των φακέλων σας για να εξατομικεύσετε και να οργανώσετε καλύτερα το kDrive σας σύμφωνα με τις προτιμήσεις σας.";
+
+/* loco:61a5f0ec40299f71720dbedf */
+"folderColorTitle" = "Χρώμα φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979ed */
+"folderDescription" = "Ιδιωτικός ή κοινόχρηστος φάκελος";
+
+/* loco:62e01023bdd522033953b8c5 */
+"galleryTitle" = "Συλλογή";
+
+/* loco:6281fb1abfdfb513f5356323 */
+"heicRecommandation" = "Συνιστούμε την αποθήκευση ως JPEG επειδή πολλές υπηρεσίες δεν μπορούν να εμφανίσουν φωτογραφίες HEIC.";
+
+/* loco:6049df4d5c2c3a04bc3979ee */
+"hintInputDirName" = "Όνομα φακέλου";
+
+/* loco:6049df4d5c2c3a04bc3979ef */
+"hintInputFileName" = "Όνομα αρχείου";
+
+/* loco:6049df4d5c2c3a04bc3979f0 */
+"homeLastActivities" = "Πρόσφατη δραστηριότητα";
+
+/* loco:6049df4d5c2c3a04bc3979f1 */
+"homeLastFilesTitle" = "Οι πιο πρόσφατες αλλαγές μου";
+
+/* loco:6049df4d5c2c3a04bc3979f3 */
+"homeNetworkUnavailableDescription" = "Ορισμένα στοιχεία ενδέχεται να μην είναι ορατά αν η συσκευή είναι εκτός σύνδεσης.";
+
+/* loco:6049df4d5c2c3a04bc3979f4 */
+"homeNoActivities" = "Καμία δραστηριότητα αυτή τη στιγμή";
+
+/* loco:6049df4d5c2c3a04bc3979f5 */
+"homeNoActivitiesDescription" = "Όταν προστίθενται αρχεία, θα δείτε εδώ τις πιο πρόσφατες δραστηριότητές σας και των άλλων χρηστών του kDrive σας.";
+
+/* loco:6049df4d5c2c3a04bc3979f6 */
+"homeNoActivitiesDescriptionSolo" = "Εδώ θα βρείτε τα πιο πρόσφατα τροποποιημένα αρχεία στο kDrive σας.";
+
+/* loco:6049df4d5c2c3a04bc3979f7 */
+"homeNoPictures" = "Καμία εικόνα αυτή τη στιγμή";
+
+/* loco:6049df4d5c2c3a04bc3979f8 */
+"homeSeeAllImages" = "Προβολή όλων των εικόνων μου";
+
+/* loco:6049df4d5c2c3a04bc3979f9 */
+"homeTitle" = "Καλώς ήρθες";
+
+/* loco:6889c36b7cef77ada70ae2d3 */
+"imageCache" = "Προσωρινή μνήμη εικόνων";
+
+/* loco:6889c331e5ba3eb6640d7e22 */
+"importDirectory" = "Εισαγωγές";
+
+/* loco:6049df4d5c2c3a04bc3979fb */
+"inputExpirationDate" = "Ημερομηνία λήξης";
+
+/* loco:617b99510ec1ee7d7e2accd2 */
+"inputExpirationTime" = "Ώρα λήξης";
+
+/* loco:6049df4d5c2c3a04bc3979fc */
+"lastEditsTitle" = "Πιο πρόσφατες αλλαγές";
+
+/* loco:668cfa288f78f439cc044b92 */
+"localizedFilenamePrivateTeamSpace" = "Ο φάκελός μου";
+
+/* loco:65a140c3cdbe107c5a025352 */
+"localizedFilenameTeamSpace" = "Φάκελοι οργανισμού";
+
+/* loco:60dc3d5b27c2f44e2f7a3c12 */
+"locateButton" = "Εντοπισμός";
+
+/* loco:6049df4d5c2c3a04bc3979fd */
+"lockAppTitle" = "Η εφαρμογή είναι κλειδωμένη";
+
+/* loco:67f50a35f35eb567990c2e32 */
+"maintenanceAsleepDescription" = "Για να μειώσουμε τον περιβαλλοντικό αντίκτυπο, το kDrive σας μπήκε σε λειτουργία αναμονής μετά από παρατεταμένη αδράνεια. Επανεκκινήστε το για να αποκτήσετε ξανά πρόσβαση στα αρχεία σας!";
+
+/* loco:67f509c180ba041c690a8e02 */
+"maintenanceAsleepTitle" = "Το kDrive %@ σας πήρε έναν μικρό υπνάκο!";
+
+/* loco:67f50e36f46a2825af088213 */
+"maintenanceWakeUpButton" = "Επανεκκίνηση του kDrive μου";
+
+/* loco:616960e0fdf2c313b4239902 */
+"manageCategoriesCreateTitle" = "Δημιουργία %@";
+
+/* loco:616960c81341d1563201c7a2 */
+"manageCategoriesNoCategory" = "Καμία κατηγορία";
+
+/* loco:61695f9a1385a25fd21f9fd3 */
+"manageCategoriesTitle" = "Διαχείριση κατηγοριών";
+
+/* loco:604b1ff2a5300e5b7d75fb82 */
+"manageDropboxTitle" = "Διαχείριση της θυρίδας %@";
+
+/* loco:614c861005fa88548e40ee83 */
+"manageStorageTitle" = "Διαχείριση τοπικής αποθήκευσης";
+
+/* loco:6049df4d5c2c3a04bc3979fe */
+"menuTitle" = "Μενού";
+
+/* loco:614c8925d281f46671687393 */
+"modalClearCacheDirectoryDescription" = "Θέλετε να διαγράψετε το περιεχόμενο του \"%@\";";
+
+/* loco:614c8965f987554eab2cc096 */
+"modalClearCacheFileDescription" = "Θέλετε να αφαιρέσετε το αρχείο \"%@\" από την τοπική προσωρινή μνήμη; Δεν θα αφαιρεθεί από το kDrive σας.";
+
+/* loco:614c88ddf987554eab2cc092 */
+"modalClearCacheTitle" = "Εκκαθάριση προσωρινής μνήμης";
+
+/* loco:6049df4d5c2c3a04bc3979ff */
+"modalCommentAddTitle" = "Επεξεργασία σχολίου";
+
+/* loco:6049df4d5c2c3a04bc397a00 */
+"modalCommentDeleteDescription" = "Θέλετε πραγματικά να διαγράψετε το σχόλιό σας;";
+
+/* loco:6049df4d5c2c3a04bc397a01 */
+"modalCreateFileSuccess" = "%@ δημιουργήθηκε με επιτυχία";
+
+/* loco:6049df4d5c2c3a04bc397a02 */
+"modalCreateFileTitle" = "Δημιουργία αρχείου";
+
+/* loco:61695feae5d07852df60f1c3 */
+"modalDeleteCategoryDescription" = "Θέλετε να διαγράψετε μόνιμα την κατηγορία %@ για όλους τους χρήστες του kDrive;";
+
+/* loco:6049df4d5c2c3a04bc397a9a */
+"modalDeleteDescription" = "Θέλετε πραγματικά να διαγράψετε μόνιμα το %@;";
+
+/* loco:6049dfb2105eca5bbd0801b7 */
+"modalDeleteDescription-plural" = "Θέλετε πραγματικά να διαγράψετε μόνιμα %d αντικείμενα;";
+
+/* loco:69bcfe53aed2af87a302d458 */
+"modalDeleteDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d459 */
+"modalDeleteDescription-plural-3" = "";
+
+/* loco:60e44729e8e4b7695643f9b2 */
+"modalDeletePhotosDescription" = "Θέλετε να διαγράψετε από τη συσκευή σας τις φωτογραφίες που μεταφέρθηκαν στο kDrive;";
+
+/* loco:60e442f92f7b3f3b756eb962 */
+"modalDeletePhotosTitle" = "Αυτόματη διαγραφή φωτογραφιών";
+
+/* loco:6049df4d5c2c3a04bc397a03 */
+"modalDeleteTitle" = "Μόνιμη διαγραφή";
+
+/* loco:606d6853ce3979753c4243e5 */
+"modalEmptyTrashDescription" = "Θέλετε πραγματικά να αδειάσετε τον κάδο απορριμμάτων;";
+
+/* loco:606d683dce3979753c4243e3 */
+"modalEmptyTrashTitle" = "Άδειασμα κάδου απορριμμάτων";
+
+/* loco:6049df8ecfa0dd393a577ea2 */
+"modalFileDeleteDescription" = "Θέλετε πραγματικά να διαγράψετε το %@; Προσοχή: αυτή η ενέργεια δεν μπορεί να αναιρεθεί!";
+
+/* loco:6049df8ecfa0dd393a577ea3 */
+"modalFilesDeleteDescription" = "Θέλετε πραγματικά να διαγράψετε τα επιλεγμένα αρχεία; Προσοχή: αυτή η ενέργεια δεν μπορεί να αναιρεθεί!";
+
+/* loco:605b0f55ddabfd136f653194 */
+"modalLeaveShareDescription" = "Θέλετε πραγματικά να διακόψετε το κοινόχρηστο αρχείο %@;";
+
+/* loco:605b0f882442c452cb76d472 */
+"modalLeaveShareTitle" = "Διακοπή κοινής χρήσης αρχείου";
+
+/* loco:6049df4d5c2c3a04bc397a96 */
+"modalMoveTrashDescription" = "Μετακίνηση %@ στον κάδο απορριμμάτων;";
+
+/* loco:6049dfb2105eca5bbd0801b5 */
+"modalMoveTrashDescription-plural" = "Μετακίνηση %d αντικειμένων στον κάδο απορριμμάτων;";
+
+/* loco:69bcfe53aed2af87a302d45a */
+"modalMoveTrashDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d45b */
+"modalMoveTrashDescription-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc397a04 */
+"modalMoveTrashTitle" = "Μετακίνηση στον κάδο απορριμμάτων";
+
+/* loco:697a226ca7f90b21b20ef8b2 */
+"modalRemoveUserDriveAccessDescription" = "Θέλετε πραγματικά να αφαιρέσετε την πρόσβαση του χρήστη %1$@ στο kDrive %2$@;";
+
+/* loco:6049df8ecfa0dd393a577ea4 */
+"modalTrashFileDescription" = "Θέλετε πραγματικά να μετακινήσετε το %@ στον κάδο απορριμμάτων;";
+
+/* loco:6049df8ecfa0dd393a577ea5 */
+"modalTrashFilesDescription" = "Θέλετε πραγματικά να μετακινήσετε τα επιλεγμένα αρχεία στον κάδο απορριμμάτων;";
+
+/* loco:6049df4d5c2c3a04bc397a05 */
+"modalUserPermissionRemoveDescription" = "Θέλετε πραγματικά να αφαιρέσετε την πρόσβαση του χρήστη %@ σε αυτό το αρχείο;";
+
+/* loco:61696058c328022b120007c6 */
+"modificationDateFilterTitle" = "Ημερομηνία τροποποίησης";
+
+/* loco:6049df4d5c2c3a04bc397a06 */
+"mySharesNoFile" = "Κανένα κοινόχρηστο αρχείο";
+
+/* loco:6049df4d5c2c3a04bc397a07 */
+"mySharesTitle" = "Οι κοινές μου χρήσεις";
+
+/* loco:6049df4d5c2c3a04bc397a08 */
+"newFolderTitle" = "Τι θέλετε να προσθέσετε;";
+
+/* loco:60ad169bd79aa2487c624742 */
+"noAccountDescription" = "Δεν υπάρχει διαθέσιμος λογαριασμός. Εκκινήστε την εφαρμογή για να συνδεθείτε.";
+
+/* loco:6049df4d5c2c3a04bc397a09 */
+"noDriveDescription" = "Δοκιμάστε το kDrive δωρεάν ή συνδεθείτε με διαφορετικό λογαριασμό χρήστη.";
+
+/* loco:6049df4d5c2c3a04bc397a0a */
+"noDriveTitle" = "Δεν έχετε ακόμα kDrive!";
+
+/* loco:628b37bd60033e17fb7d3882 */
+"noFilesDescription" = "Αυτός ο φάκελος είναι άδειος.";
+
+/* loco:6049df4d5c2c3a04bc397a0c */
+"noFilesDescriptionNoNetwork" = "Αδυναμία ανάκτησης πληροφοριών από το φάκελο. Ελέγξτε τη σύνδεση δικτύου σας ή δοκιμάστε ξανά αργότερα.";
+
+/* loco:6049df4d5c2c3a04bc397a0b */
+"noFilesDescriptionWithCreationRights" = "Αυτός ο φάκελος είναι κενός. Κάντε κλικ στο κουμπί + για να προσθέσετε αρχεία εδώ.";
+
+/* loco:60c11597ba8b664750680ca2 */
+"noMediaFolderTitle" = "Δεν υπάρχουν διαθέσιμοι φάκελοι πολυμέσων";
+
+/* loco:68775c45dfd520437c08bed3 */
+"noRightsToOfficeLink" = "Κανένας λογαριασμός δεν έχει πρόσβαση σε αυτό το αρχείο";
+
+/* loco:6049df4d5c2c3a04bc397a0d */
+"notEnoughStorageDescription1" = "Ο αποθηκευτικός χώρος του kDrive σας είναι σχεδόν πλήρης. Αναβαθμίστε το πακέτο σας και ξεκλειδώστε νέες λειτουργίες.";
+
+/* loco:6049df4d5c2c3a04bc397a0e */
+"notEnoughStorageDescription2" = "Ο αποθηκευτικός χώρος του kDrive σας είναι σχεδόν πλήρης. Επικοινωνήστε με τον διαχειριστή σας για να μπορέσει να αναβαθμίσει το πακέτο σας.";
+
+/* loco:6049df4d5c2c3a04bc397a0f */
+"notEnoughStorageUsed" = "σε χρήση";
+
+/* loco:607947d62b29a7483d1c61a2 */
+"notSupportedExtensionDescription" = "Θέλετε να δημιουργήσετε ένα αντίγραφο του αρχείου σας με συμβατή επέκταση για επεξεργασία online; Το αρχικό αρχείο %@ θα παραμείνει αναλλοίωτο.\n";
+
+/* loco:60794789c3a8a86f4e611e42 */
+"notSupportedExtensionTitle" = "Η επέκταση %@ δεν υποστηρίζεται για επεξεργασία online";
+
+/* loco:690b600910daf9780f097b72 */
+"notification2faApproval" = "Επιβεβαίωση σύνδεσης";
+
+/* loco:6049df4d5c2c3a04bc397a10 */
+"notificationAll" = "Όλες";
+
+/* loco:6049df4d5c2c3a04bc397a11 */
+"notificationCommentChannelName" = "Σχόλια";
+
+/* loco:610b77aabb918651d965e962 */
+"notificationCustom" = "Προσαρμοσμένες";
+
+/* loco:610b77f24d5c2a372e29bf32 */
+"notificationDisable" = "Απενεργοποιημένες";
+
+/* loco:6049df4d5c2c3a04bc397a12 */
+"notificationFileUpload" = "Μεταφόρτωση αρχείων";
+
+/* loco:604b9caa43ed563ca07293f2 */
+"notificationGeneralChannelName" = "Γενικές ειδοποιήσεις";
+
+/* loco:6049df4d5c2c3a04bc397a13 */
+"notificationReceiveNotifications" = "Λήψη ειδοποιήσεων";
+
+/* loco:6049df4d5c2c3a04bc397a14 */
+"notificationSharedWithMeChannelName" = "Κοινόχρηστα στοιχεία";
+
+/* loco:6049df4d5c2c3a04bc397a15 */
+"notificationStartDownloadTicker" = "Έναρξη της λήψης από τον διακομιστή";
+
+/* loco:6049df4d5c2c3a04bc397a16 */
+"notificationStartUploadTicker" = "Έναρξη της μεταφόρτωσης στον διακομιστή";
+
+/* loco:6049df4d5c2c3a04bc397a17 */
+"notificationTitle" = "Ειδοποιήσεις";
+
+/* loco:690b6057b3cf1ccfbd0f3a02 */
+"notificationTitle2faApproval" = "kDrive";
+
+/* loco:6049df4d5c2c3a04bc397a18 */
+"notificationUploadDownloadChannelName" = "Μεταφορτώσεις και λήψεις";
+
+/* loco:6049dfb2105eca5bbd0801b4 */
+"notificationUploadServiceChannelName" = "Υπηρεσία μεταφόρτωσης αρχείων";
+
+/* loco:6889c8fad38cd378d8019882 */
+"notificationsDisabledDescription" = "Οι ειδοποιήσεις της εφαρμογής είναι απενεργοποιημένες: μπορείτε να τις ενεργοποιήσετε στις Ρυθμίσεις";
+
+/* loco:66f658cbb0e522d4f50cc2f2 */
+"obtainkDriveAdAlreadyGotAccount" = "Έχω ήδη λογαριασμό";
+
+/* loco:66f64e66297dda6eb402f022 */
+"obtainkDriveAdDescription" = "Αποθηκεύστε τις φωτογραφίες, τα έγγραφα και τα emails σας στην Ελβετία με μια ανεξάρτητη εταιρεία που σέβεται το απόρρητό σας.";
+
+/* loco:66f657511dc417a794017b92 */
+"obtainkDriveAdFreeTrialButton" = "Δωρεάν δοκιμή";
+
+/* loco:66f64fa849bd6bdd0f0ae622 */
+"obtainkDriveAdListing1" = "15 GB δωρεάν, στη συνέχεια 2 TB έως 106 TB";
+
+/* loco:66f65063f4b00a1c660ce462 */
+"obtainkDriveAdListing2" = "Δημιουργία και συνεργασία online για έγγραφα Word, Excel και PowerPoint";
+
+/* loco:66f651361a641d2f5f0207d2 */
+"obtainkDriveAdListing3" = "Αυτόματη εισαγωγή αρχείων από Google Drive, Dropbox, One Drive, NextCloud, Hubic και WebDav";
+
+/* loco:66f64797fdc443552a0a5e92 */
+"obtainkDriveAdTitle" = "Αποκτήστε το kDrive δωρεάν";
+
+/* loco:6049df4d5c2c3a04bc397a19 */
+"offlineFileNoFile" = "Κανένα αρχείο εκτός σύνδεσης";
+
+/* loco:6049df4d5c2c3a04bc397a1a */
+"offlineFileNoFileDescription" = "Επιλέξτε ένα αρχείο και κάντε το διαθέσιμο εκτός σύνδεσης για να το βρείτε εδώ όταν δεν έχετε σύνδεση.";
+
+/* loco:6049df4d5c2c3a04bc397a1b */
+"offlineFileTitle" = "Εκτός σύνδεσης";
+
+/* loco:6049df4d5c2c3a04bc397a1c */
+"onBoardingDescription1" = "Το kDrive είναι συμβατό με όλες τις συσκευές. Είτε βρίσκεστε στο γραφείο, είτε στο σπίτι είτε εν κινήσει, μπορείτε να εργάζεστε, να μοιράζεστε και να έχετε πρόσβαση σε όλα τα δεδομένα σας με ασφάλεια.";
+
+/* loco:6049df4d5c2c3a04bc397a1d */
+"onBoardingDescription2" = "Μοιραστείτε εύκολα αρχεία και συνεργαστείτε σε πραγματικό χρόνο σε έγγραφα κειμένου, υπολογιστικά φύλλα ή ομαδικές παρουσιάσεις.";
+
+/* loco:6049df4d5c2c3a04bc397a1e */
+"onBoardingDescription3" = "Οι φωτογραφίες σας, τα βίντεό σας και τα στιγμιότυπα οθόνης θα αποθηκεύονται αυτόματα στο kDrive σας και θα είναι διαθέσιμα σε όλες τις συσκευές σας.";
+
+/* loco:6049df4d5c2c3a04bc397a1f */
+"onBoardingTitle1" = "Πρόσβαση στα αρχεία σας από όλες τις συσκευές σας";
+
+/* loco:6049df4d5c2c3a04bc397a20 */
+"onBoardingTitle2" = "Εργαστείτε μαζί στον ίδιο χώρο και γίνετε πιο αποδοτικοί";
+
+/* loco:6049df4d5c2c3a04bc397a21 */
+"onBoardingTitle3" = "Αποθηκεύστε τις αναμνήσεις σας με ασφάλεια";
+
+/* loco:6660083917d29585d5010582 */
+"openInPlaceDirectory" = "Άνοιγμα στη θέση του";
+
+/* loco:6049df4d5c2c3a04bc397a23 */
+"photoAccessDeniedDescription" = "Η πρόσβαση στις φωτογραφίες σας είναι απενεργοποιημένη: μπορείτε να το αλλάξετε αυτό στις Ρυθμίσεις";
+
+/* loco:627cf1dad81a13018111e4f2 */
+"photoFormatTitle" = "Επιλογές";
+
+/* loco:638469dc5d9b75142a430ac2 */
+"photoLibraryAccessLimitedDescription" = "Η πρόσβαση στη βιβλιοθήκη φωτογραφιών είναι απαραίτητη για να αποθηκεύσετε τις φωτογραφίες και τα βίντεό σας.";
+
+/* loco:63846ac1f8786f515b61f752 */
+"photoLibraryAccessLimitedTitle" = "Περιορισμένη ή απορριφθείσα πρόσβαση";
+
+/* loco:6765711b1f6cfc8c5408ee33 */
+"photoSyncSuspended" = "Συνδεθείτε σε ασύρματο δίκτυο Wi-Fi ή επιτρέψτε τη χρήση δεδομένων κινητής τηλεφωνίας";
+
+/* loco:67657012f62b39abc50deb62 */
+"photoSyncSuspendedTitle" = "Ο συγχρονισμός φωτογραφιών ανεστάλη";
+
+/* loco:627cf782146a6d748e5e7262 */
+"photosHeaderDateFormat" = "ΜΜΜΜ yyyy";
+
+/* loco:6049df4d5c2c3a04bc397a22 */
+"picturesNoFile" = "Δεν υπάρχουν φωτογραφίες αυτήν την περίοδο";
+
+/* loco:6049df4d5c2c3a04bc397a24 */
+"previewDownloadIndication" = "Φόρτωση σε εξέλιξη, παρακαλώ περιμένετε…";
+
+/* loco:6528f45d04fb1c341b0ccfa2 */
+"previewFileProtectedError" = "Δεν υπάρχει διαθέσιμη προεπισκόπηση, αυτό το αρχείο είναι προστατευμένο με κωδικό";
+
+/* loco:6049df4d5c2c3a04bc397a25 */
+"previewLoadError" = "Αδυναμία φόρτωσης προεπισκόπησης";
+
+/* loco:6049df4d5c2c3a04bc397a26 */
+"previewNoPreview" = "Αυτό το αρχείο φαίνεται να μην έχει προεπισκόπηση.";
+
+/* loco:6049df4d5c2c3a04bc397a27 */
+"previewPdfPages" = "%1$d από %2$d";
+
+/* loco:6049df4d5c2c3a04bc397a28 */
+"previewVideoSourceError" = "Το αρχείο βίντεο δεν υποστηρίζεται από το πρόγραμμα αναπαραγωγής βίντεο";
+
+/* loco:6049df4d5c2c3a04bc397a3b */
+"privateSharedLinkTitle" = "Ιδιωτικός σύνδεσμος κοινής χρήσης";
+
+/* loco:66ffbbcd294f6022e60948f3 */
+"publicShareImportationInProgress" = "Λήψη σε εξέλιξη στον επιλεγμένο φάκελο";
+
+/* loco:66e0295f01da3c1ab90c2d72 */
+"publicShareOutdatedLinkDescription" = "Ο σύνδεσμος έχει απενεργοποιηθεί ή έχει λήξει.\nΓια να αποκτήσετε πρόσβαση στα αρχεία, στείλτε ένα μήνυμα στον χρήστη που σας μοιράστηκε τον σύνδεσμο για να τον ενεργοποιήσει ξανά.";
+
+/* loco:66e028cb3cd41df03c0a7003 */
+"publicShareOutdatedLinkTitle" = "Τα αρχεία δεν είναι πλέον διαθέσιμα";
+
+/* loco:66d05b05fe43da3cb8009652 */
+"publicSharePasswordNeededDescription" = "Παρακαλώ εισάγετε τον κωδικό που σας παρόχθηκε για να αποκτήσετε πρόσβαση στο περιεχόμενο.";
+
+/* loco:66d05b5928ec407b32087892 */
+"publicSharePasswordNeededTitle" = "Προστατευόμενο περιεχόμενο";
+
+/* loco:617a50f1744434292a2f07a2 */
+"publicSharedLinkTitle" = "Δημόσιος σύνδεσμος κοινοποίησης";
+
+/* loco:691f1b320ffa47846800e682 */
+"readFAQ" = "Διαβάστε τις Συχνές Ερωτήσεις";
+
+/* loco:6049df4d5c2c3a04bc397a29 */
+"recentActivityMeTitle" = "Από εμένα";
+
+/* loco:6049df4d5c2c3a04bc397a2a */
+"recentActivityMyTeam" = "Από την ομάδα μου";
+
+/* loco:6049df4d5c2c3a04bc397a2b */
+"recentActivitySeeMore" = "Προβολή περισσότερων πρόσφατων αρχείων";
+
+/* loco:6818ae071c7e870445011a44 */
+"recentTitle" = "Πρόσφατα";
+
+/* loco:6049df4d5c2c3a04bc397a2c */
+"refreshTokenError" = "Έχετε αποσυνδεθεί";
+
+/* loco:65d76b35ab978ba1c5014122 */
+"reviewAlertTitle" = "Σας αρέσει το kDrive;";
+
+/* loco:6049df4d5c2c3a04bc397a2d */
+"saveExternalFileInputFileName" = "Όνομα εγγράφου";
+
+/* loco:6049df4d5c2c3a04bc397a2e */
+"saveExternalFileTitle" = "Αποθήκευση στο Drive";
+
+/* loco:62864b7da70e2c3f9332b992 */
+"savePhotoJpegDetail" = "(συνιστάται)";
+
+/* loco:6049df4d5c2c3a04bc397a2f */
+"searchFilterTitle" = "Τύποι αρχείων";
+
+/* loco:616960f2351cc27ee05bbaf4 */
+"searchFiltersSelectDate" = "Επιλέξτε μια ημερομηνία";
+
+/* loco:61696114b9fa15412d6a2fb6 */
+"searchFiltersSelectType" = "Επιλέξτε έναν τύπο αρχείου";
+
+/* loco:668feca6092b456442086012 */
+"searchForAnExtension" = "Αναζήτηση επέκτασης";
+
+/* loco:6049df4d5c2c3a04bc397a30 */
+"searchLastTitle" = "Πρόσφατες αναζητήσεις";
+
+/* loco:6049df4d5c2c3a04bc397a31 */
+"searchNoFile" = "Χωρίς αποτελέσματα, τροποποιήστε τα κριτήρια αναζήτησης";
+
+/* loco:6049df4d5c2c3a04bc397a32 */
+"searchTitle" = "Αναζήτηση";
+
+/* loco:6049df4d5c2c3a04bc397a33 */
+"searchViewHint" = "Αναζήτηση αρχείου…";
+
+/* loco:610a8f8e03e07e47d539af82 */
+"securityTitle" = "Ασφάλεια";
+
+/* loco:6049df4d5c2c3a04bc397a36 */
+"selectDriveTitle" = "Επιλέξτε ένα kDrive";
+
+/* loco:68554bfb0b1581a8b40b34a2 */
+"selectFolderTitle" = "Επιλέξτε έναν φάκελο";
+
+/* loco:627cf1f7089b7c7d9e3597e3 */
+"selectPhotoFormat" = "Αποθήκευση φωτογραφιών .HEIC ως";
+
+/* loco:6049df4d5c2c3a04bc397a38 */
+"settingsOnlyWifiSyncDescription" = "Οι μεταφορτώσεις και ενημερώσεις εκτός σύνδεσης θα γίνουν μόνο με σύνδεση Wi-Fi.";
+
+/* loco:6049df4d5c2c3a04bc397a39 */
+"settingsOnlyWifiSyncTitle" = "Μεταφορά μόνο μέσω Wi-Fi";
+
+/* loco:67bc4dd60ddd119f9d056e02 */
+"settingsOptionDataManagement" = "Διαχείριση δεδομένων";
+
+/* loco:67a9f25b711672a919072474 */
+"settingsSectionGeneral" = "Γενικά";
+
+/* loco:6049df4d5c2c3a04bc397a3a */
+"settingsTitle" = "Ρυθμίσεις";
+
+/* loco:6049df4d5c2c3a04bc397a3e */
+"shareFileInputUserAndEmail" = "Προσκαλέστε έναν χρήστη ή μια διεύθυνση email…";
+
+/* loco:6049df4d5c2c3a04bc397a44 */
+"shareLinkOfficePermissionReadFileDescription" = "Οι χρήστες μπορούν να βλέπουν μόνο το έγγραφο.";
+
+/* loco:6182b4b76dbb2b6b393f3702 */
+"shareLinkOfficePermissionReadFolderDescription" = "Οι χρήστες μπορούν να δουν μόνο τα αρχεία μέσα στον κοινοποιημένο φάκελο.";
+
+/* loco:6049df4d5c2c3a04bc397a45 */
+"shareLinkOfficePermissionReadTitle" = "Προβολή";
+
+/* loco:6049df4d5c2c3a04bc397a46 */
+"shareLinkOfficePermissionWriteFileDescription" = "Οι χρήστες μπορούν να τροποποιήσουν το έγγραφο.";
+
+/* loco:6182b577c9b65b323b378093 */
+"shareLinkOfficePermissionWriteFolderDescription" = "Οι χρήστες μπορούν να τροποποιήσουν το έγγραφο, το υπολογιστικό φύλλο ή την παρουσίαση.";
+
+/* loco:6049df4d5c2c3a04bc397a47 */
+"shareLinkOfficePermissionWriteTitle" = "Τροποποίηση";
+
+/* loco:61814fb574c48e49a560d35d */
+"shareLinkPasswordRightDescription" = "Όποιος έχει τον σύνδεσμο θα πρέπει να εισαγάγει κωδικό πρόσβασης για να αποκτήσει πρόσβαση στο %@.";
+
+/* loco:6049df4d5c2c3a04bc397a42 */
+"shareLinkPasswordRightTitle" = "Με κωδικό πρόσβασης";
+
+/* loco:6049df4d5c2c3a04bc397a40 */
+"shareLinkPrivateRightTitle" = "Ιδιωτικό";
+
+/* loco:618e3208c0cdbb2371438302 */
+"shareLinkPublicRightDescription" = "Όποιος έχει τον σύνδεσμο μπορεί να %1$@ αυτό το %3$@%2$@%4$@.";
+
+/* loco:618e728db8279f0bdd5aada2 */
+"shareLinkPublicRightDescriptionDate" = " έως %@";
+
+/* loco:618e6dd5d3c1c1110e1b2a73 */
+"shareLinkPublicRightDescriptionPassword" = "προστατευμένο με κωδικό πρόσβασης ";
+
+/* loco:618e653eab470f504731f937 */
+"shareLinkPublicRightDocumentDescriptionShort" = "Όποιος έχει τον σύνδεσμο μπορεί να αποκτήσει πρόσβαση στο έγγραφο.";
+
+/* loco:6181510554a16d742506c4f5 */
+"shareLinkPublicRightFileDescriptionShort" = "Όποιος έχει τον σύνδεσμο μπορεί να αποκτήσει πρόσβαση στο αρχείο.";
+
+/* loco:618e50a5eddeea65b017cc82 */
+"shareLinkPublicRightFolderDescriptionShort" = "Όποιος έχει τον σύνδεσμο μπορεί να αποκτήσει πρόσβαση στο φάκελο.";
+
+/* loco:6049df4d5c2c3a04bc39792a */
+"shareLinkPublicRightTitle" = "Δημόσιο";
+
+/* loco:618151be73ed775a66144903 */
+"shareLinkRestrictedRightDescription" = "Μόνο οι προστεθέντες χρήστες μπορούν να αποκτήσουν πρόσβαση σε αυτό το %@ σύμφωνα με τα δικαιώματά τους.";
+
+/* loco:618e669594f4573acb14d382 */
+"shareLinkRestrictedRightDocumentDescriptionShort" = "Μόνο οι προστεθέντες χρήστες μπορούν να αποκτήσουν πρόσβαση στο έγγραφο.";
+
+/* loco:618e30058e079f36c11ab422 */
+"shareLinkRestrictedRightFileDescriptionShort" = "Μόνο οι προστεθέντες χρήστες μπορούν να αποκτήσουν πρόσβαση στο αρχείο.";
+
+/* loco:618e592000a6e0021b1da285 */
+"shareLinkRestrictedRightFolderDescriptionShort" = "Μόνο οι προστεθέντες χρήστες μπορούν να αποκτήσουν πρόσβαση στο φάκελο.";
+
+/* loco:6049df4d5c2c3a04bc397a49 */
+"shareLinkSettingsAddExpirationDateDescription" = "Ο σύνδεσμος κοινοποίησης θα λειτουργεί μόνο έως την ημερομηνία λήξης.";
+
+/* loco:6049df4d5c2c3a04bc397a4a */
+"shareLinkSettingsAllowDownloadDescription" = "Οι χρήστες θα μπορούν να κατεβάσουν αρχεία χρησιμοποιώντας αυτόν τον σύνδεσμο.";
+
+/* loco:6049df4d5c2c3a04bc397a4b */
+"shareLinkSettingsAllowDownloadTitle" = "Λήψη από τον σύνδεσμο κοινοποίησης";
+
+/* loco:618e5bf5202c3d2ffb09072a */
+"shareLinkTypeDocument" = "έγγραφο";
+
+/* loco:618e5bcff21225023d4773c0 */
+"shareLinkTypeFile" = "αρχείο";
+
+/* loco:618e5b84172b1b1bbc254915 */
+"shareLinkTypeFolder" = "φάκελο";
+
+/* loco:6123b3ef6ed5824956771de2 */
+"shareUserExternal" = "Εξωτερικός χρήστης kDrive";
+
+/* loco:6049df4d5c2c3a04bc397a4f */
+"shareUserNotAccepted" = "Ο χρήστης δεν έχει ακόμη αποδεχτεί την κοινοποίηση και είναι εξωτερικός χρήστης του kDrive.";
+
+/* loco:604a2f6d3949bd0d7330a633 */
+"sharedConflictDescription" = "Ο χρήστης %1$@ μπορεί ήδη να αποκτήσει πρόσβαση σε αυτόν τον φάκελο με δικαίωμα \"%2$@\". Εάν κοινοποιήσετε, θα αποκτήσουν πρόσβαση με δικαίωμα \"%3$@\"";
+
+/* loco:604a2f6d3949bd0d7330a632 */
+"sharedConflictManyUserDescription" = "Κάποιοι χρήστες μπορούν ήδη να αποκτήσουν πρόσβαση σε αυτόν τον φάκελο. Εάν κοινοποιήσετε, θα αποκτήσουν πρόσβαση με δικαίωμα \"%@\"";
+
+/* loco:604a2f2e0ec97567583079a3 */
+"sharedConflictTitle" = "Σύγκρουση δικαιωμάτων";
+
+/* loco:6049df4d5c2c3a04bc397a3c */
+"sharedWithMeNoFile" = "Κανένα αρχείο δεν κοινοποιήθηκε σε εμένα";
+
+/* loco:6049df4d5c2c3a04bc397a3d */
+"sharedWithMeTitle" = "Κοινοποιήθηκαν σε εμένα";
+
+/* loco:68da2ce6292e9175f608b042 */
+"sharesTitle" = "Κοινή χρήση";
+
+/* loco:629f1ad12117e31124690d64 */
+"snackBarAccountDeleted" = "Ο λογαριασμός διαγράφηκε";
+
+/* loco:6169601e8934a0564732b7d2 */
+"snackBarCategoryDeleted" = "Η κατηγορία διαγράφηκε με επιτυχία";
+
+/* loco:629f1b5bfc67572038545e23 */
+"snackBarErrorAccountDeletion" = "Σφάλμα κατά τη διαγραφή του λογαριασμού";
+
+/* loco:62a8409e5803ef33d9677572 */
+"snackBarImageVideoSaved" = "%d αρχεία αποθηκεύτηκαν στη βιβλιοθήκη φωτογραφιών";
+
+/* loco:6049df4d5c2c3a04bc397a9c */
+"snackbarDeleteConfirmation" = "%@ διαγράφηκε οριστικά";
+
+/* loco:606d68683b8add66d9636d33 */
+"snackbarEmptyTrashConfirmation" = "Ο κάδος ανακύκλωσης άδειασε";
+
+/* loco:6050df602fdc4b67852aac72 */
+"snackbarFileCreateConfirmation" = "Το αρχείο δημιουργήθηκε με επιτυχία";
+
+/* loco:6049df4d5c2c3a04bc397a50 */
+"snackbarImageSavedConfirmation" = "Η εικόνα αποθηκεύτηκε";
+
+/* loco:605b1442458ddf7cc4668642 */
+"snackbarLeaveShareConfirmation" = "Η κοινή χρήση σταμάτησε";
+
+/* loco:6049df4d5c2c3a04bc397a98 */
+"snackbarMoveTrashConfirmation" = "%@ μετακινήθηκε στον κάδο ανακύκλωσης";
+
+/* loco:60db1a607e10290db82d6d72 */
+"snackbarProcessingUploads" = "Επεξεργασία μεταφορτώσεων";
+
+/* loco:6049df4d5c2c3a04bc397a51 */
+"snackbarVideoSavedConfirmation" = "Το βίντεο αποθηκεύτηκε";
+
+/* loco:6049df4d5c2c3a04bc397a53 */
+"sortBigger" = "Μεγαλύτερο";
+
+/* loco:60c0955b330ced44e61ac4c4 */
+"sortDay" = "Ανά ημέρα";
+
+/* loco:6049df4d5c2c3a04bc397a55 */
+"sortExtension" = "Επέκταση";
+
+/* loco:65e089a9f1203bf18d07e823 */
+"sortLeastRelevant" = "Λιγότερο σχετικό";
+
+/* loco:60c095a650430a455a1a1963 */
+"sortMonth" = "Ανά μήνα";
+
+/* loco:62961cefada5091f29102c32 */
+"sortMostRecentAdded" = "Πρόσφατα προστεθέν";
+
+/* loco:65e0875a2630c8df780f4932 */
+"sortMostRelevant" = "Πιο σχετικό";
+
+/* loco:6049df4d5c2c3a04bc397a58 */
+"sortNameAZ" = "Όνομα: από A έως Ω";
+
+/* loco:6049df4d5c2c3a04bc397a59 */
+"sortNameZA" = "Όνομα: από Ω έως A";
+
+/* loco:6049df4d5c2c3a04bc397a5a */
+"sortOlder" = "Παλαιότερο";
+
+/* loco:62961ec80bcd580ee806f012 */
+"sortOldestAdded" = "Παλαιότερα προστεθέν";
+
+/* loco:6049df4d5c2c3a04bc397a5c */
+"sortRecent" = "Νεότερο";
+
+/* loco:6049df4d5c2c3a04bc397a5d */
+"sortSmaller" = "Μικρότερο";
+
+/* loco:6049df4d5c2c3a04bc397a5f */
+"sortTitle" = "Ταξινόμηση";
+
+/* loco:60c095d625e1597da2490d03 */
+"sortYear" = "Ανά έτος";
+
+/* loco:6141c2e0746dd37e5a318583 */
+"storeAccessDeniedDescription" = "Δεν έχετε τα δικαιώματα για να αλλάξετε την προσφορά αυτού του kDrive. Παρακαλούμε επικοινωνήστε με τον διαχειριστή σας.";
+
+/* loco:6141c2b723cae070d728bce2 */
+"storeAccessDeniedTitle" = "Πρόσβαση απορριπτέα";
+
+/* loco:6141c24eced39f0b645d50f2 */
+"storeBillingWarningDescription" = "Δεν μπορείτε να διαχειριστείτε τη συνδρομή σας από αυτή την εφαρμογή καθώς διαχειρίζεται αυτή τη στιγμή με διαφορετικό τρόπο.";
+
+/* loco:6141c373cf51575a0e0cae93 */
+"storeExistingIAPDescription" = "Δεν μπορείτε να δημιουργήσετε πολλαπλές συνδρομές με τις αγορές εντός εφαρμογής.";
+
+/* loco:6141c2f923cae070d728bcf0 */
+"storeExistingIAPTitle" = "Υπάρχουσα συνδρομή";
+
+/* loco:612612838211f509eb5b9232 */
+"storeMonthly" = "Μηνιαία";
+
+/* loco:6127420fdde00c3fc7143082 */
+"storeOfferSoloDescription" = "1 χρήστης μέγιστος\n2 TB αποθήκευσης";
+
+/* loco:6127422d1a55ab468f37d942 */
+"storeOfferSoloFeature1" = "Προσαρμογή συνδέσμων κοινοποίησης";
+
+/* loco:6127425c8673d310e74c92d2 */
+"storeOfferSoloFeature2" = "Υποστήριξη πρωτοκόλλου WebDAV";
+
+/* loco:612742d5731234595079c313 */
+"storeOfferSoloFeature3" = "Υποστήριξη 7/7";
+
+/* loco:6127433d5629bf008e39ff53 */
+"storeOfferTeamDescription" = "6 χρήστες συμπεριλαμβάνονται και μέγιστος\n3 TB αποθήκευσης";
+
+/* loco:6127435a684d0a521f2972b2 */
+"storeOfferTeamFeature1" = "Όλα όσα υπάρχουν στην προσφορά Solo";
+
+/* loco:612743756936aa666738a542 */
+"storeOfferTeamFeature2" = "Συνεργασία με πολλούς χρήστες";
+
+/* loco:6127438b5f057144c067e612 */
+"storeOfferTeamFeature3" = "Θυρίδα κατάθεσης";
+
+/* loco:612743aca7921f26e15b4d72 */
+"storeOfferTeamFeature4" = "Απλή διαχείριση χρηστών";
+
+/* loco:612741dada8e9e11e76bfe22 */
+"storePaymentNotAuthorized" = "Οι αγορές εντός εφαρμογής δεν επιτρέπονται";
+
+/* loco:612612d2a6256953bb0a35b3 */
+"storePeriodDay" = "ημέρα";
+
+/* loco:612612f4bbb2fe14eb477764 */
+"storePeriodMonth" = "μήνας";
+
+/* loco:6126130d2fe2170e18255844 */
+"storePeriodUnknown" = "περίοδος";
+
+/* loco:612612e3185e7f2e205b4396 */
+"storePeriodWeek" = "εβδομάδα";
+
+/* loco:61261300fcaaf43fed779b52 */
+"storePeriodYear" = "έτος";
+
+/* loco:6126132cf0f4844e5e174b02 */
+"storePricing" = "%1$@ για %2$@";
+
+/* loco:612612ba2fe2170e18255842 */
+"storeRetrieving" = "Ανάκτηση…";
+
+/* loco:6126137b32c58504e96a36f3 */
+"storeSuccessDescription" = "Ολοκληρώνουμε την παραγγελία, θα ειδοποιηθείτε μέσω email όταν το kDrive σας είναι διαθέσιμο.";
+
+/* loco:6126135a6c5d5a0c28679842 */
+"storeSuccessTitle" = "Σας ευχαριστούμε για την εμπιστοσύνη σας, χαιρόμαστε που συνεργαζόμαστε!";
+
+/* loco:6126126f2f09c246b1286ad6 */
+"storeTitle" = "Αλλαγή προσφοράς";
+
+/* loco:6126129081536410aa0ab9e3 */
+"storeYearly" = "Ετήσια";
+
+/* loco:610aabe5b46db619993bf2b4 */
+"supportTitle" = "Βοήθεια & υποστήριξη";
+
+/* loco:6049df4d5c2c3a04bc397a63 */
+"switchAccountTitle" = "Αλλαγή λογαριασμού";
+
+/* loco:6049df4d5c2c3a04bc397a61 */
+"switchDriveSearchViewHint" = "Αναζήτηση kDrive";
+
+/* loco:6049df4d5c2c3a04bc397a62 */
+"switchUserDescription" = "Δείτε τα kDrive των άλλων προφίλ Infomaniak σας. Μπορείτε να προσθέσετε όσα προφίλ χρηστών επιθυμείτε.";
+
+/* loco:6049df4d5c2c3a04bc397a64 */
+"syncConfigureDescription" = "Οι φωτογραφίες, τα βίντεο και τα στιγμιότυπα οθόνης σας θα αποθηκευτούν αυτόματα στο kDrive %@.";
+
+/* loco:6049df4d5c2c3a04bc397a65 */
+"syncConfigureTitle" = "Αποθηκεύστε τις αναμνήσεις σας σε ασφαλές μέρος";
+
+/* loco:66f50ff53251a55b2f0f1532 */
+"syncOnlyWifiDescription" = "Τα αρχεία εκτός σύνδεσης θα συγχρονίζονται μόνο μέσω Wi-Fi";
+
+/* loco:66f50e357d4c318d780a5bd2 */
+"syncOnlyWifiTitle" = "Μόνο μέσω Wi-Fi";
+
+/* loco:696a13cc88a6c3e5c60bf632 */
+"syncPhotosOnlyWifiDescription" = "Οι φωτογραφίες και τα βίντεο θα συγχρονίζονται μόνο μέσω Wi-Fi";
+
+/* loco:6049df4d5c2c3a04bc397a66 */
+"syncSettingsButtonActiveSync" = "Ενεργοποίηση αυτόματου αντιγράφου ασφαλείας";
+
+/* loco:6049df4d5c2c3a04bc397a67 */
+"syncSettingsButtonSaveDate" = "Αποθήκευση";
+
+/* loco:6049df4d5c2c3a04bc397a68 */
+"syncSettingsButtonSyncPeriodicity" = "Συγχρονισμός";
+
+/* loco:6049df4d5c2c3a04bc397a69 */
+"syncSettingsButtonSyncPicture" = "Μεταφόρτωση φωτογραφιών (DCIM)";
+
+/* loco:6049df4d5c2c3a04bc397a6a */
+"syncSettingsButtonSyncScreenshot" = "Μεταφόρτωση στιγμιότυπων οθόνης";
+
+/* loco:6049df4d5c2c3a04bc397a6b */
+"syncSettingsButtonSyncVideo" = "Μεταφόρτωση βίντεο";
+
+/* loco:6049df4d5c2c3a04bc397a6c */
+"syncSettingsDescription" = "Αποθηκεύστε αυτόματα τις φωτογραφίες και τα βίντεο που λαμβάνετε με τη συσκευή σας στο kDrive.";
+
+/* loco:6447c3523e8d13f7b80f3f62 */
+"syncSettingsNotSavedDescription" = "Θέλετε πραγματικά να εγκαταλείψετε αυτήν τη σελίδα; Οι αλλαγές σας δεν θα αποθηκευτούν.";
+
+/* loco:6447c24567043ee81704f173 */
+"syncSettingsNotSavedTitle" = "Μη αποθηκευμένες αλλαγές";
+
+/* loco:6049df4d5c2c3a04bc397a6d */
+"syncSettingsSaveDateAllPictureValue" = "Όλες οι φωτογραφίες";
+
+/* loco:61b87c150eabdf2793302df2 */
+"syncSettingsSaveDateFromDateValue" = "από την ημερομηνία";
+
+/* loco:61b87cfc3e2af8325337e394 */
+"syncSettingsSaveDateFromDateValue2" = "Από ημερομηνία";
+
+/* loco:6049df4d5c2c3a04bc397a6e */
+"syncSettingsSaveDateNowValue" = "από τώρα και στο εξής";
+
+/* loco:6049df4d5c2c3a04bc397a6f */
+"syncSettingsSaveDateNowValue2" = "Μόνο νέες φωτογραφίες (από τώρα και στο εξής)";
+
+/* loco:6049df4d5c2c3a04bc397a70 */
+"syncSettingsSaveOn" = "Αποθήκευση σε";
+
+/* loco:6049df4d5c2c3a04bc397a71 */
+"syncSettingsSyncPeriodicityFourHoursValue" = "Κάθε 4 ώρες";
+
+/* loco:6049df4d5c2c3a04bc397a72 */
+"syncSettingsSyncPeriodicityInstantValue" = "Άμεσα";
+
+/* loco:6049df4d5c2c3a04bc397a73 */
+"syncSettingsSyncPeriodicityOneHourValue" = "Κάθε ώρα";
+
+/* loco:6049df4d5c2c3a04bc397a74 */
+"syncSettingsSyncPeriodicityOneQuarterValue" = "Κάθε 15 λεπτά";
+
+/* loco:6049df4d5c2c3a04bc397a75 */
+"syncSettingsTitle" = "Αντίγραφο ασφαλείας φωτογραφιών";
+
+/* loco:66f51084cb6715272c0b5762 */
+"syncWifiAndMobileDataDescription" = "Ενδέχεται να ισχύουν χρεώσεις χρήσης δεδομένων κινητής";
+
+/* loco:66f50ef81220705fc30d60a2 */
+"syncWifiAndMobileDataTitle" = "Μέσω Wi-Fi και δεδομένων κινητής";
+
+/* loco:66f51f3fa1ad831cda076d52 */
+"syncWifiPicturesTitle" = "Συγχρονισμός φωτογραφιών και βίντεο";
+
+/* loco:66f5115224f82ae9020b3162 */
+"syncWifiSettingsTitle" = "Συγχρονισμός αρχείων εκτός σύνδεσης";
+
+/* loco:614c87dd3af1ff4501490ec5 */
+"tempDirectory" = "Προσωρινά αρχεία";
+
+/* loco:60a65b76f8bf9002e9594852 */
+"themeSettingsDarkLabel" = "Σκοτεινό";
+
+/* loco:60a65b617652427d20367cc4 */
+"themeSettingsLightLabel" = "Φωτεινό";
+
+/* loco:60a65ba139d35536f858f4f2 */
+"themeSettingsSystemDefaultLabel" = "Προεπιλογή συστήματος";
+
+/* loco:60a65bbd7652427d20367cc6 */
+"themeSettingsSystemLabel" = "Σύστημα";
+
+/* loco:60a65b3df229b924e419f452 */
+"themeSettingsTitle" = "Θέμα";
+
+/* loco:614c8841083c4c6d41454f55 */
+"totalStorageUsedTitle" = "Συνολικός αποθηκευτικός χώρος που χρησιμοποιείται";
+
+/* loco:6049df4d5c2c3a04bc397a76 */
+"trashActionDelete" = "Μόνιμη διαγραφή";
+
+/* loco:6049df4d5c2c3a04bc397a77 */
+"trashActionRestoreFileIn" = "Ανάκτηση σε";
+
+/* loco:6049df4d5c2c3a04bc397a78 */
+"trashActionRestoreFileOriginalPlace" = "Ανάκτηση στην αρχική θέση";
+
+/* loco:67a9ef7e628ce12f3209f422 */
+"trashAutoClearDescription" = "Ο κάδος απορριμμάτων καθαρίζεται αυτόματα κάθε 30 ημέρες.\nΕπιθυμείτε να αυξήσετε αυτή την περίοδο;";
+
+/* loco:6049df4d5c2c3a04bc397a7b */
+"trashNoFile" = "Κανένα διαγραμμένο αρχείο";
+
+/* loco:6049df4d5c2c3a04bc397a7c */
+"trashTitle" = "Κάδος απορριμμάτων";
+
+/* loco:6049df4d5c2c3a04bc397a79 */
+"trashedFileRestoreFileInSuccess" = "%1$@ ανακτήθηκε σε %2$@";
+
+/* loco:62344899e7238255cc5120d2 */
+"trashedFileRestoreFileInSuccess-plural" = "%1$d αντικείμενα ανακτήθηκαν σε %2$@";
+
+/* loco:69bcfe53aed2af87a302d464 */
+"trashedFileRestoreFileInSuccess-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d465 */
+"trashedFileRestoreFileInSuccess-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc397a7a */
+"trashedFileRestoreFileToOriginalPlaceSuccess" = "%@ ανακτήθηκε στην αρχική του θέση";
+
+/* loco:62344c023cb45e6fcb219b43 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural" = "%d αντικείμενα ανακτήθηκαν στην αρχική τους θέση";
+
+/* loco:69bcfe53aed2af87a302d466 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d467 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
+
+/* loco:66fe3560501931dbfb04f0c8 */
+"unknownArtist" = "Άγνωστος καλλιτέχνης";
+
+/* loco:66fe3634a0cfdc15cf0c1a94 */
+"unknownTitle" = "Άγνωστος τίτλος";
+
+/* loco:6049df4d5c2c3a04bc397a7d */
+"updateAvailableDescription" = "Για να αξιοποιήσετε στο έπακρο το kDrive, σας συνιστούμε να ενημερώσετε την εφαρμογή σας.";
+
+/* loco:6049df4d5c2c3a04bc397a7e */
+"updateAvailableTitle" = "Διαθέσιμη ενημέρωση!";
+
+/* loco:61261255d4c1162fbc75aae2 */
+"upgradeOfferTitle" = "Ξεκλειδώστε περισσότερες λειτουργίες και αποκτήστε περισσότερο αποθηκευτικό χώρο!";
+
+/* loco:6049df4d5c2c3a04bc397a7f */
+"uploadCancelDescription" = "Η μεταφόρτωση ακυρώθηκε από τον χρήστη";
+
+/* loco:6049df4d5c2c3a04bc397a80 */
+"uploadCancelTitle" = "Μεταφόρτωση ακυρώθηκε";
+
+/* loco:6049df4d5c2c3a04bc397a81 */
+"uploadErrorTitle" = "Σφάλμα μεταφόρτωσης";
+
+/* loco:61e15913fefa9c6c80093ed2 */
+"uploadFileSizeExceeded" = "Υπέρβαση του επιτρεπόμενου μεγέθους αρχείου.";
+
+/* loco:6049df4d5c2c3a04bc397a82 */
+"uploadFolderNotFoundError" = "Ο φάκελος διαγράφηκε ή δεν υπάρχει";
+
+/* loco:6168271204d05b14c459bbe2 */
+"uploadFolderNotFoundSyncDisabledError" = "Η αυτόματη δημιουργία αντιγράφων ασφαλείας απενεργοποιήθηκε επειδή ο φάκελος προορισμού δεν υπάρχει πλέον";
+
+/* loco:62a873924424292ffd74faf3 */
+"uploadImportedFailedAmount" = "1 μεταφόρτωση απέτυχε από σύνολο %d";
+
+/* loco:62a874566f1e5662420d2b82 */
+"uploadImportedFailedAmount-plural" = "%2$d μεταφορτώσεις απέτυχαν από σύνολο %1$d";
+
+/* loco:69bcfe53aed2af87a302d468 */
+"uploadImportedFailedAmount-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d469 */
+"uploadImportedFailedAmount-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc397a83 */
+"uploadInProgressCancelAllUploadTitle" = "Ακύρωση μεταφορτώσεων";
+
+/* loco:6049df4d5c2c3a04bc397a84 */
+"uploadInProgressCancelFileUploadTitle" = "Ακύρωση %@;";
+
+/* loco:6049df4d5c2c3a04bc3979fa */
+"uploadInProgressNoFile" = "Καμία μεταφόρτωση σε εξέλιξη";
+
+/* loco:6049df4d5c2c3a04bc397a85 */
+"uploadInProgressPending" = "Αναμονή";
+
+/* loco:6049df4d5c2c3a04bc397a86 */
+"uploadInProgressRestartUploadTitle" = "Επανεκκίνηση των μεταφορτώσεων";
+
+/* loco:6049df4d5c2c3a04bc397a87 */
+"uploadInProgressTitle" = "Μεταφόρτωση σε εξέλιξη";
+
+/* loco:6049df4d5c2c3a04bc397a89 */
+"uploadInThisFolderTitle" = "Μεταφόρτωση σε αυτόν τον φάκελο";
+
+/* loco:6049df4d5c2c3a04bc397a88 */
+"uploadInterruptedErrorTitle" = "Η μεταφόρτωση διακόπηκε";
+
+/* loco:6049df4d5c2c3a04bc397a8a */
+"uploadNetworkErrorDescription" = "Αναμονή δικτύου";
+
+/* loco:6049df4d5c2c3a04bc397a8b */
+"uploadNetworkErrorTitle" = "Η μεταφόρτωση ανεστάλη";
+
+/* loco:6049df4d5c2c3a04bc397a8c */
+"uploadNetworkErrorWifiRequired" = "Αναμονή για δίκτυο Wi-Fi";
+
+/* loco:66fbba74682fe9a0990df012 */
+"uploadOverDataRestrictedError" = "Αναμονή για Wi-Fi";
+
+/* loco:60928fcf72952001716b86d2 */
+"uploadPausedDescription" = "Κάποιες μεταφορτώσεις εξακολουθούν να βρίσκονται σε εξέλιξη στο kDrive. Ανοίξτε την εφαρμογή και κρατήστε τη συσκευή συνδεδεμένη για να επιταχύνετε τη μεταφόρτωση.";
+
+/* loco:60928fb3063e352b1e028476 */
+"uploadPausedTitle" = "Η μεταφόρτωση ανεστάλη";
+
+/* loco:65df0b66eb1209e60f0ff4b5 */
+"urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";
+
+/* loco:697a1f0ee11b818505061003 */
+"userDriveRemoveDescription" = "Ο χρήστης δεν θα έχει πλέον πρόσβαση σε αυτό το kDrive.";
+
+/* loco:6049df4d5c2c3a04bc397a8d */
+"userInviteByEmail" = "Πρόσκληση μέσω email";
+
+/* loco:6049df4d5c2c3a04bc397a8e */
+"userPermissionManage" = "Μπορεί να διαχειριστεί";
+
+/* loco:6049df4d5c2c3a04bc397a8f */
+"userPermissionManageDescription" = "Επεξεργασία του αρχείου\nΛήψη\nΠροσθήκη σχολίων\nΠροσθήκη και δημιουργία αρχείων/φακέλων\nΔιαγραφή του αρχείου\nΚοινή χρήση με άλλους χρήστες";
+
+/* loco:6049df4d5c2c3a04bc397a90 */
+"userPermissionNotAvailable" = "Μη διαθέσιμο για εξωτερικούς χρήστες του kDrive";
+
+/* loco:6049df4d5c2c3a04bc397a91 */
+"userPermissionRead" = "Μπορεί να δει";
+
+/* loco:6049df4d5c2c3a04bc397a92 */
+"userPermissionReadDescription" = "Προβολή μόνο\nΛήψη";
+
+/* loco:6049df4d5c2c3a04bc397a93 */
+"userPermissionRemove" = "Ο χρήστης δεν θα έχει πλέον πρόσβαση σε αυτό το αρχείο.";
+
+/* loco:6049df4d5c2c3a04bc397a94 */
+"userPermissionWrite" = "Μπορεί να τροποποιήσει";
+
+/* loco:6049df4d5c2c3a04bc397a95 */
+"userPermissionWriteDescription" = "Επεξεργασία του αρχείου\nΛήψη\nΠροσθήκη σχολίων\nΠροσθήκη και δημιουργία αρχείων/φακέλων\nΔιαγραφή αρχείων/φακέλων";
+
+/* loco:695e3e46c18ae37694044f72 */
+"userPermissionWriteExternalDescription" = "Επεξεργασία του αρχείου\nΛήψη\nΠροσθήκη σχολίων\nΠροσθήκη και δημιουργία αρχείων/φακέλων\nΔιαγραφή των δικών του αρχείων/φακέλων";

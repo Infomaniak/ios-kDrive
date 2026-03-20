@@ -1,0 +1,38 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: da, Danish
+ * Tagged: ios-info-plist
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:27:04 +0100
+ */
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "Adgang til kameraet er påkrævet for at scanne dokumenter og tage billeder.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "Face ID bruges til at låse applikationen op.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Bruges kun i debug-tilstand.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "Adgang til mikrofonen er påkrævet for at tage videoer.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "Adgang til dit fotoalbumme er påkrævet for at gemme dine fotos og videoer.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "Adgang til dit fotoalbumme er påkrævet for at gemme dine fotos.";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Scan dokument";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Søg";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Hjælp &amp; support";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Upload foto eller video";

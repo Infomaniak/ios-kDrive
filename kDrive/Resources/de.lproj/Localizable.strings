@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: de, German
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Fri, 13 Mar 2026 10:43:44 +0100
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:43:59 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -74,7 +74,7 @@
 "allDateCustom" = "Kundenspezifisch";
 
 /* loco:607962540ad1dd02fd5fc785 */
-"allDeletedFilePattern" = "'Gelöscht am 'dd MMM yyyy '-' HH:mm";
+"allDeletedFilePattern" = "'Gelöscht am 'dd. MMM yyyy '-' HH:mm";
 
 /* loco:60e58ac6621d7e5809353952 */
 "allDeletedFileRelativeTime" = "Gelöscht %@";
@@ -128,7 +128,7 @@
 "allLast7Days" = "Letzte 7 Tage";
 
 /* loco:6049df4d5c2c3a04bc39791e */
-"allLastModifiedFilePattern" = "'Geändert am 'dd MMM yyyy '-' HH:mm";
+"allLastModifiedFilePattern" = "'Geändert am 'dd. MMM yyyy '-' HH:mm";
 
 /* loco:60e589524e0dcd1d45523c62 */
 "allLastModifiedFileRelativeTime" = "Geändert %@";
@@ -190,6 +190,12 @@
 /* loco:6049dfb2105eca5bbd0801b9 */
 "allUploadFinishedDescription-plural" = "%d Dateien wurden importiert";
 
+/* loco:69bcfe53aed2af87a302d422 */
+"allUploadFinishedDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d423 */
+"allUploadFinishedDescription-plural-3" = "";
+
 /* loco:6049df4d5c2c3a04bc39792f */
 "allUploadFinishedTitle" = "Import abgeschlossen";
 
@@ -198,6 +204,12 @@
 
 /* loco:60928c47bff9cd1579331ff3 */
 "allUploadInProgress-plural" = "%d Dateien werden importiert";
+
+/* loco:69bcfe53aed2af87a302d424 */
+"allUploadInProgress-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d425 */
+"allUploadInProgress-plural-3" = "";
 
 /* loco:6049df4d5c2c3a04bc397930 */
 "allUserAnonymous" = "Anonym";
@@ -703,11 +715,23 @@
 /* loco:6095336aa6379b42c65151a2 */
 "driveBlockedDescription-plural" = "Alle Ihre Produkte sind abgelaufen. Bitte erneuern Sie diese, um sie zu verwalten und auf ihre Daten zuzugreifen.";
 
+/* loco:69bcfe53aed2af87a302d428 */
+"driveBlockedDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d429 */
+"driveBlockedDescription-plural-3" = "";
+
 /* loco:608fcd7f99c877023a07f262 */
 "driveBlockedTitle" = "Das kDrive %@ ist derzeit gesperrt";
 
 /* loco:609505a7cd8a3b0f0c2c6532 */
 "driveBlockedTitle-plural" = "Alle Ihre kDrives sind derzeit gesperrt";
+
+/* loco:69bcfe53aed2af87a302d42a */
+"driveBlockedTitle-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d42b */
+"driveBlockedTitle-plural-3" = "";
 
 /* loco:608fcddcb3c9f173fe193095 */
 "driveMaintenanceDescription" = "Ein Update zur Verbesserung von kDrive ist in Arbeit. Dieser Vorgang kann ein paar Minuten dauern. Wir danken Ihnen für Ihre Geduld.";
@@ -717,6 +741,12 @@
 
 /* loco:609505d502647721ed3312c2 */
 "driveMaintenanceTitle-plural" = "Alle Ihre kDrives sind derzeit in Wartung";
+
+/* loco:69bcfe53aed2af87a302d42c */
+"driveMaintenanceTitle-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d42d */
+"driveMaintenanceTitle-plural-3" = "";
 
 /* loco:614c868951be11365c416434 */
 "drivesDirectory" = "Laufwerke und Offline-Dateien";
@@ -1106,10 +1136,16 @@
 "fileListMoveDoneSnackbar" = "Verschiebungen erfolgreich abgeschlossen";
 
 /* loco:6049df4d5c2c3a04bc397aa4 */
-"fileListMoveFileConfirmationSnackbar" = "Datei in %@ verschoben";
+"fileListMoveFileConfirmationSnackbariOS" = "Datei in %@ verschoben";
 
 /* loco:6049df4d5c2c3a04bc397aa5 */
-"fileListMoveFileConfirmationSnackbar-plural" = "%1$d Dateien verschoben in %2$@";
+"fileListMoveFileConfirmationSnackbariOS-plural" = "%1$d Dateien verschoben in %2$@";
+
+/* loco:69bcfe53aed2af87a302d44c */
+"fileListMoveFileConfirmationSnackbariOS-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d44d */
+"fileListMoveFileConfirmationSnackbariOS-plural-3" = "";
 
 /* loco:611b6e42cb8967787a31ee82 */
 "fileListMoveInProgressSnackbar" = "Verschiebungen werden ausgeführt: %d/%d";
@@ -1291,6 +1327,12 @@
 /* loco:6049dfb2105eca5bbd0801b7 */
 "modalDeleteDescription-plural" = "Wollen Sie %d Elemente wirklich endgültig löschen?";
 
+/* loco:69bcfe53aed2af87a302d458 */
+"modalDeleteDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d459 */
+"modalDeleteDescription-plural-3" = "";
+
 /* loco:60e44729e8e4b7695643f9b2 */
 "modalDeletePhotosDescription" = "Möchten Sie die auf kDrive hochgeladenen Fotos von Ihrem Gerät löschen?";
 
@@ -1323,6 +1365,12 @@
 
 /* loco:6049dfb2105eca5bbd0801b5 */
 "modalMoveTrashDescription-plural" = "Wollen Sie %d Elemente in den Papierkorb verschieben?";
+
+/* loco:69bcfe53aed2af87a302d45a */
+"modalMoveTrashDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d45b */
+"modalMoveTrashDescription-plural-3" = "";
 
 /* loco:6049df4d5c2c3a04bc397a04 */
 "modalMoveTrashTitle" = "In den Papierkorb verschieben";
@@ -2044,11 +2092,23 @@
 /* loco:62344899e7238255cc5120d2 */
 "trashedFileRestoreFileInSuccess-plural" = "%1$d Elemente wiederhergestellt in %2$@";
 
+/* loco:69bcfe53aed2af87a302d464 */
+"trashedFileRestoreFileInSuccess-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d465 */
+"trashedFileRestoreFileInSuccess-plural-3" = "";
+
 /* loco:6049df4d5c2c3a04bc397a7a */
 "trashedFileRestoreFileToOriginalPlaceSuccess" = "%@ am ursprünglichen Ort wiederhergestellt";
 
 /* loco:62344c023cb45e6fcb219b43 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural" = "%d Elemente am ursprünglichen Ort wiederhergestellt";
+
+/* loco:69bcfe53aed2af87a302d466 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d467 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
 
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Unbekannter Künstler";
@@ -2084,10 +2144,16 @@
 "uploadFolderNotFoundSyncDisabledError" = "Die automatische Sicherung wurde deaktiviert, da der Zielordner nicht mehr existiert";
 
 /* loco:62a873924424292ffd74faf3 */
-"uploadImportedFailedAmount" = "1 Import von insgesamt %1$d fehlgeschlagen";
+"uploadImportedFailedAmount" = "1 Import von insgesamt %d fehlgeschlagen";
 
 /* loco:62a874566f1e5662420d2b82 */
 "uploadImportedFailedAmount-plural" = "%2$d Importe von insgesamt %1$d sind fehlgeschlagen";
+
+/* loco:69bcfe53aed2af87a302d468 */
+"uploadImportedFailedAmount-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d469 */
+"uploadImportedFailedAmount-plural-3" = "";
 
 /* loco:6049df4d5c2c3a04bc397a83 */
 "uploadInProgressCancelAllUploadTitle" = "Importe abbrechen";

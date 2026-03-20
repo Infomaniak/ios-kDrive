@@ -1,0 +1,38 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: fi, Finnish
+ * Tagged: ios-info-plist
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:27:04 +0100
+ */
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "Kameran käyttöoikeus tarvitaan dokumenttien skannaamiseen ja kuvien ottamiseen.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "Face ID:tä käytetään sovelluksen lukituksen avaamiseen.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Käytetään vain debug-tilassa.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "Mikrofonin käyttöoikeus tarvitaan videoiden ottamiseen.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "Kuvakirjastosi käyttöoikeus tarvitaan valokuviesi ja videosi tallentamiseen.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "Kuvakirjastosi käyttöoikeus tarvitaan valokuviesi tallentamiseen.";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Skannaa dokumentti";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Haku";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Ohje ja tuki";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Lähetä valokuva tai video";

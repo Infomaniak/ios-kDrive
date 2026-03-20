@@ -1,0 +1,38 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: nl, Dutch; Flemish
+ * Tagged: ios-info-plist
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:27:04 +0100
+ */
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "Camera toegang is nodig om documenten te scannen en foto’s te maken.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "Face ID wordt gebruikt om de applicatie te ontgrendelen.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Alleen gebruikt in debug modus.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "Microfoon toegang is nodig om video’s op te nemen.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "Toegang tot uw fotobibliotheek is nodig om uw foto’s en video’s op te slaan.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "Toegang tot uw fotobibliotheek is nodig om uw foto’s op te slaan.";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Document Scannen";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Zoeken";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Help & Ondersteuning";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Foto of Video Uploaden";

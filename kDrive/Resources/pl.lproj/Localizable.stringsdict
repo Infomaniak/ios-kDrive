@@ -3,7 +3,7 @@
 <!--
  Loco ios export: Xcode Stringsdict (legacy)
  Project: kDrive
- Locale: fr, French
+ Locale: pl, Polish
  Tagged: ios-stringsdict
  Exported by: Philippe Weidmann
  Exported at: Fri, 20 Mar 2026 13:43:59 +0100
@@ -21,9 +21,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a commenté le fichier suivant</string>
+        <string>skomentował następujący plik</string>
+        <key>few</key>
+        <string>skomentował %d pliki</string>
+        <key>many</key>
+        <string>skomentował %d plików</string>
         <key>other</key>
-        <string>a commenté %d fichiers</string>
+        <string>skomentował %d plików</string>
       </dict>
     </dict>
     <key>fileActivityFileCreate</key>
@@ -37,9 +41,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a importé le fichier suivant</string>
+        <string>przesłał następujący plik</string>
+        <key>few</key>
+        <string>przesłał %d nowe pliki</string>
+        <key>many</key>
+        <string>przesłał %d nowych plików</string>
         <key>other</key>
-        <string>a importé %d nouveaux fichiers</string>
+        <string>przesłał %d nowych plików</string>
       </dict>
     </dict>
     <key>fileActivityFileRestore</key>
@@ -53,9 +61,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a restauré le fichier suivant</string>
+        <string>przywrócił następujący plik</string>
+        <key>few</key>
+        <string>przywrócił %d pliki</string>
+        <key>many</key>
+        <string>przywrócił %d plików</string>
         <key>other</key>
-        <string>a restauré %d fichiers</string>
+        <string>przywrócił %d plików</string>
       </dict>
     </dict>
     <key>fileActivityFileTrash</key>
@@ -69,9 +81,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a déplacé le fichier suivant dans la corbeille</string>
+        <string>przeniósł następujący plik do kosza</string>
+        <key>few</key>
+        <string>przeniósł %d pliki do kosza</string>
+        <key>many</key>
+        <string>przeniósł %d plików do kosza</string>
         <key>other</key>
-        <string>a déplacé %d fichiers dans la corbeille</string>
+        <string>przeniósł %d plików do kosza</string>
       </dict>
     </dict>
     <key>fileActivityFileUpdate</key>
@@ -85,9 +101,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a modifié le fichier suivant</string>
+        <string>zmienił następujący plik</string>
+        <key>few</key>
+        <string>zmienił %d pliki</string>
+        <key>many</key>
+        <string>zmienił %d plików</string>
         <key>other</key>
-        <string>a modifié %d fichiers</string>
+        <string>zmienił %d plików</string>
       </dict>
     </dict>
     <key>fileActivityFolderCreate</key>
@@ -101,9 +121,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a créé le dossier suivant</string>
+        <string>utworzył następujący folder</string>
+        <key>few</key>
+        <string>utworzył %d nowe foldery</string>
+        <key>many</key>
+        <string>utworzył %d nowych folderów</string>
         <key>other</key>
-        <string>a créé %d nouveaux dossiers</string>
+        <string>utworzył %d nowych folderów</string>
       </dict>
     </dict>
     <key>fileActivityFolderRestore</key>
@@ -117,9 +141,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a restauré le dossier suivant</string>
+        <string>przywrócił następujący folder</string>
+        <key>few</key>
+        <string>przywrócił %d foldery</string>
+        <key>many</key>
+        <string>przywrócił %d folderów</string>
         <key>other</key>
-        <string>a restauré %d dossiers</string>
+        <string>przywrócił %d folderów</string>
       </dict>
     </dict>
     <key>fileActivityFolderTrash</key>
@@ -133,9 +161,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a déplacé le dossier suivant dans la corbeille</string>
+        <string>przeniósł następujący folder do kosza</string>
+        <key>few</key>
+        <string>przeniósł %d foldery do kosza</string>
+        <key>many</key>
+        <string>przeniósł %d folderów do kosza</string>
         <key>other</key>
-        <string>a déplacé %d dossiers dans la corbeille</string>
+        <string>przeniósł %d folderów do kosza</string>
       </dict>
     </dict>
     <key>fileActivityUnknown</key>
@@ -149,9 +181,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a effectué une action sur le fichier suivant</string>
+        <string>wykonał akcję na następującym pliku</string>
+        <key>few</key>
+        <string>wykonał akcję na %d plikach</string>
+        <key>many</key>
+        <string>wykonał akcję na %d plikach</string>
         <key>other</key>
-        <string>a effectué une action sur %d fichiers</string>
+        <string>wykonał akcję na %d plikach</string>
       </dict>
     </dict>
     <key>fileDetailsInfoFile</key>
@@ -165,9 +201,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>1 fichier</string>
+        <string>1 plik</string>
+        <key>few</key>
+        <string>%d pliki</string>
+        <key>many</key>
+        <string>%d plików</string>
         <key>other</key>
-        <string>%d fichiers</string>
+        <string>%d plików</string>
       </dict>
     </dict>
     <key>fileDetailsInfoFolder</key>
@@ -181,9 +221,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>1 dossier</string>
+        <string>1 folder</string>
+        <key>few</key>
+        <string>%d foldery</string>
+        <key>many</key>
+        <string>%d folderów</string>
         <key>other</key>
-        <string>%d dossiers</string>
+        <string>%d folderów</string>
       </dict>
     </dict>
     <key>fileListAddFavoritesConfirmationSnackbar</key>
@@ -197,9 +241,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier ajouté aux favoris avec succès</string>
+        <string>Jeden plik dodany do ulubionych</string>
+        <key>few</key>
+        <string>%d pliki dodane do ulubionych</string>
+        <key>many</key>
+        <string>%d plików dodanych do ulubionych</string>
         <key>other</key>
-        <string>%d fichiers ajoutés aux favoris avec succès</string>
+        <string>%d plików dodanych do ulubionych</string>
       </dict>
     </dict>
     <key>fileListAddOfflineConfirmationSnackbar</key>
@@ -213,9 +261,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier disponible hors ligne</string>
+        <string>Jeden plik dostępny offline</string>
+        <key>few</key>
+        <string>%d pliki dostępne offline</string>
+        <key>many</key>
+        <string>%d plików dostępnych offline</string>
         <key>other</key>
-        <string>%d fichiers disponibles hors ligne</string>
+        <string>%d plików dostępnych offline</string>
       </dict>
     </dict>
     <key>fileListColorFolderConfirmationSnackbar</key>
@@ -229,9 +281,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un dossier coloré avec succès</string>
+        <string>Jeden folder pokolorowany</string>
+        <key>few</key>
+        <string>%d foldery pokolorowane</string>
+        <key>many</key>
+        <string>%d folderów pokolorowanych</string>
         <key>other</key>
-        <string>%d dossiers colorés avec succès</string>
+        <string>%d folderów pokolorowanych</string>
       </dict>
     </dict>
     <key>fileListDuplicationConfirmationSnackbar</key>
@@ -245,9 +301,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier dupliqué avec succès</string>
+        <string>Plik został pomyślnie zduplikowany</string>
+        <key>few</key>
+        <string>%d pliki zostały pomyślnie zduplikowane</string>
+        <key>many</key>
+        <string>%d plików zostało pomyślnie zduplikowanych</string>
         <key>other</key>
-        <string>%d fichiers dupliqués avec succès</string>
+        <string>%d plików zostało pomyślnie zduplikowanych</string>
       </dict>
     </dict>
     <key>fileListMoveTrashConfirmationSnackbar</key>
@@ -261,9 +321,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un élément déplacé dans la corbeille</string>
+        <string>Element został przeniesiony do kosza</string>
+        <key>few</key>
+        <string>%d elementy zostały przeniesione do kosza</string>
+        <key>many</key>
+        <string>%d elementów zostało przeniesionych do kosza</string>
         <key>other</key>
-        <string>%d éléments déplacés dans la corbeille</string>
+        <string>%d elementów zostało przeniesionych do kosza</string>
       </dict>
     </dict>
     <key>fileListMultiSelectedTitle</key>
@@ -277,9 +341,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d sélectionné</string>
+        <string>%d wybrany</string>
+        <key>few</key>
+        <string>%d wybrane</string>
+        <key>many</key>
+        <string>%d wybranych</string>
         <key>other</key>
-        <string>%d sélectionnés</string>
+        <string>%d wybranych</string>
       </dict>
     </dict>
     <key>fileListRemoveFavoritesConfirmationSnackbar</key>
@@ -293,9 +361,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier retiré des favoris avec succès</string>
+        <string>Plik został pomyślnie usunięty z ulubionych</string>
+        <key>few</key>
+        <string>%d pliki zostały pomyślnie usunięte z ulubionych</string>
+        <key>many</key>
+        <string>%d plików zostało pomyślnie usuniętych z ulubionych</string>
         <key>other</key>
-        <string>%d fichiers retirés des favoris avec succès</string>
+        <string>%d plików zostało pomyślnie usuniętych z ulubionych</string>
       </dict>
     </dict>
     <key>fileListRemoveOfflineConfirmationSnackbar</key>
@@ -309,9 +381,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier retiré de la disponibilité hors ligne</string>
+        <string>Plik został usunięty z dostępności offline</string>
+        <key>few</key>
+        <string>%d pliki zostały usunięte z dostępności offline</string>
+        <key>many</key>
+        <string>%d plików zostało usuniętych z dostępności offline</string>
         <key>other</key>
-        <string>%d fichiers retirés de la disponibilité hors ligne</string>
+        <string>%d plików zostało usuniętych z dostępności offline</string>
       </dict>
     </dict>
     <key>shareUsersCount</key>
@@ -325,9 +401,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d utilisateur</string>
+        <string>%d użytkownik</string>
+        <key>few</key>
+        <string>%d użytkownicy</string>
+        <key>many</key>
+        <string>%d użytkowników</string>
         <key>other</key>
-        <string>%d utilisateurs</string>
+        <string>%d użytkowników</string>
       </dict>
     </dict>
     <key>snackBarUploadError</key>
@@ -341,9 +421,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier n’a pas pu être importé</string>
+        <string>Nie można było zaimportować pliku</string>
+        <key>few</key>
+        <string>Nie można było zaimportować %d plików</string>
+        <key>many</key>
+        <string>Nie można było zaimportować %d plików</string>
         <key>other</key>
-        <string>%d fichiers n’ont pas pu être importés</string>
+        <string>Nie można było zaimportować %d plików</string>
       </dict>
     </dict>
     <key>trashedFileDeletedPermanentlyConfirmationSnackbar</key>
@@ -357,9 +441,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un élément supprimé définitivement</string>
+        <string>Usunięto na stałe jeden element</string>
+        <key>few</key>
+        <string>Usunięto na stałe %d elementy</string>
+        <key>many</key>
+        <string>Usunięto na stałe %d elementów</string>
         <key>other</key>
-        <string>%d éléments supprimés définitivement</string>
+        <string>Usunięto na stałe %d elementów</string>
       </dict>
     </dict>
     <key>uploadImportedOtherAmount</key>
@@ -373,9 +461,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>+1 autre fichier</string>
+        <string>+1 inny plik</string>
+        <key>few</key>
+        <string>+%d inne pliki</string>
+        <key>many</key>
+        <string>+%d innych plików</string>
         <key>other</key>
-        <string>+%d autres fichiers</string>
+        <string>+%d innych plików</string>
       </dict>
     </dict>
     <key>uploadInProgressNumberFile</key>
@@ -389,9 +481,13 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier restant</string>
+        <string>Pozostał 1 plik</string>
+        <key>few</key>
+        <string>Pozostały %d pliki</string>
+        <key>many</key>
+        <string>Pozostało %d plików</string>
         <key>other</key>
-        <string>%d fichiers restants</string>
+        <string>Pozostało %d plików</string>
       </dict>
     </dict>
   </dict>
