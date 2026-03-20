@@ -110,7 +110,7 @@ public final class FileActionsHelper {
                 )
 
                 UIConstants.showCancelableSnackBar(
-                    message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbar(destinationName),
+                    message: KDriveResourcesStrings.Localizable.fileListMoveFileConfirmationSnackbariOS(destinationName),
                     cancelSuccessMessage: KDriveResourcesStrings.Localizable.allFileMoveCancelled,
                     cancelableResponse: cancelResponse,
                     parentFile: proxyParent,
@@ -279,7 +279,7 @@ public final class FileActionsHelper {
 
                 UIConstants
                     .showSnackBar(message: KDriveResourcesStrings.Localizable
-                        .fileListMoveFileConfirmationSnackbarPlural(files.count, destinationDirectory.formattedLocalizedName))
+                        .fileListMoveFileConfirmationSnackbariOSPlural(files.count, destinationDirectory.formattedLocalizedName))
             } catch {
                 UIConstants.showSnackBar(message: error.localizedDescription)
             }

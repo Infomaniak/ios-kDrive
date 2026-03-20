@@ -1,0 +1,38 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: pt, Portuguese
+ * Tagged: ios-info-plist
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:27:04 +0100
+ */
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "O acesso à câmara é necessário para digitalizar documentos e tirar fotos.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "O Face ID será usado para desbloquear a aplicação.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Usado apenas no modo de depuração.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "O acesso ao microfone é necessário para gravar vídeos.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "O acesso à sua fototeca é necessário para guardar as suas fotos e vídeos.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "O acesso à sua fototeca é necessário para guardar as suas fotos.";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Digitalizar Documento";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Pesquisar";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Ajuda e Apoio";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Carregar Foto ou Vídeo";
