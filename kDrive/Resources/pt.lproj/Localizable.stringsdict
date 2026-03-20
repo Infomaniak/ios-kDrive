@@ -3,7 +3,7 @@
 <!--
  Loco ios export: Xcode Stringsdict (legacy)
  Project: kDrive
- Locale: fr, French
+ Locale: pt, Portuguese
  Tagged: ios-stringsdict
  Exported by: Philippe Weidmann
  Exported at: Fri, 20 Mar 2026 13:43:59 +0100
@@ -21,9 +21,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a commenté le fichier suivant</string>
+        <string>comentou o seguinte ficheiro</string>
         <key>other</key>
-        <string>a commenté %d fichiers</string>
+        <string>comentou %d ficheiros</string>
       </dict>
     </dict>
     <key>fileActivityFileCreate</key>
@@ -37,9 +37,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a importé le fichier suivant</string>
+        <string>carregou o seguinte ficheiro</string>
         <key>other</key>
-        <string>a importé %d nouveaux fichiers</string>
+        <string>carregou %d ficheiros novos</string>
       </dict>
     </dict>
     <key>fileActivityFileRestore</key>
@@ -53,9 +53,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a restauré le fichier suivant</string>
+        <string>recuperou o seguinte ficheiro</string>
         <key>other</key>
-        <string>a restauré %d fichiers</string>
+        <string>recuperou %d ficheiros</string>
       </dict>
     </dict>
     <key>fileActivityFileTrash</key>
@@ -69,9 +69,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a déplacé le fichier suivant dans la corbeille</string>
+        <string>moveu o seguinte ficheiro para o lixo</string>
         <key>other</key>
-        <string>a déplacé %d fichiers dans la corbeille</string>
+        <string>moveu %d ficheiros para o lixo</string>
       </dict>
     </dict>
     <key>fileActivityFileUpdate</key>
@@ -85,9 +85,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a modifié le fichier suivant</string>
+        <string>alterou o seguinte ficheiro</string>
         <key>other</key>
-        <string>a modifié %d fichiers</string>
+        <string>alterou %d ficheiros</string>
       </dict>
     </dict>
     <key>fileActivityFolderCreate</key>
@@ -101,9 +101,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a créé le dossier suivant</string>
+        <string>criou a seguinte pasta</string>
         <key>other</key>
-        <string>a créé %d nouveaux dossiers</string>
+        <string>criou %d pastas novas</string>
       </dict>
     </dict>
     <key>fileActivityFolderRestore</key>
@@ -117,9 +117,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a restauré le dossier suivant</string>
+        <string>recuperou a seguinte pasta</string>
         <key>other</key>
-        <string>a restauré %d dossiers</string>
+        <string>recuperou %d pastas</string>
       </dict>
     </dict>
     <key>fileActivityFolderTrash</key>
@@ -133,9 +133,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a déplacé le dossier suivant dans la corbeille</string>
+        <string>moveu a seguinte pasta para o lixo</string>
         <key>other</key>
-        <string>a déplacé %d dossiers dans la corbeille</string>
+        <string>moveu %d pastas para o lixo</string>
       </dict>
     </dict>
     <key>fileActivityUnknown</key>
@@ -149,9 +149,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>a effectué une action sur le fichier suivant</string>
+        <string>realizou uma ação no seguinte ficheiro</string>
         <key>other</key>
-        <string>a effectué une action sur %d fichiers</string>
+        <string>realizou uma ação em %d ficheiros</string>
       </dict>
     </dict>
     <key>fileDetailsInfoFile</key>
@@ -165,9 +165,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>1 fichier</string>
+        <string>1 ficheiro</string>
         <key>other</key>
-        <string>%d fichiers</string>
+        <string>%d ficheiros</string>
       </dict>
     </dict>
     <key>fileDetailsInfoFolder</key>
@@ -181,9 +181,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>1 dossier</string>
+        <string>1 pasta</string>
         <key>other</key>
-        <string>%d dossiers</string>
+        <string>%d pastas</string>
       </dict>
     </dict>
     <key>fileListAddFavoritesConfirmationSnackbar</key>
@@ -197,9 +197,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier ajouté aux favoris avec succès</string>
+        <string>Um ficheiro adicionado aos favoritos com sucesso</string>
         <key>other</key>
-        <string>%d fichiers ajoutés aux favoris avec succès</string>
+        <string>%d ficheiros adicionados aos favoritos com sucesso</string>
       </dict>
     </dict>
     <key>fileListAddOfflineConfirmationSnackbar</key>
@@ -213,9 +213,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier disponible hors ligne</string>
+        <string>Um ficheiro disponível offline</string>
         <key>other</key>
-        <string>%d fichiers disponibles hors ligne</string>
+        <string>%d ficheiros disponíveis offline</string>
       </dict>
     </dict>
     <key>fileListColorFolderConfirmationSnackbar</key>
@@ -229,9 +229,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un dossier coloré avec succès</string>
+        <string>Uma pasta colorida com sucesso</string>
         <key>other</key>
-        <string>%d dossiers colorés avec succès</string>
+        <string>%d pastas coloridas com sucesso</string>
       </dict>
     </dict>
     <key>fileListDuplicationConfirmationSnackbar</key>
@@ -245,9 +245,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier dupliqué avec succès</string>
+        <string>Um ficheiro duplicado com sucesso</string>
         <key>other</key>
-        <string>%d fichiers dupliqués avec succès</string>
+        <string>%d ficheiros duplicados com sucesso</string>
       </dict>
     </dict>
     <key>fileListMoveTrashConfirmationSnackbar</key>
@@ -261,9 +261,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un élément déplacé dans la corbeille</string>
+        <string>Um item movido para o lixo</string>
         <key>other</key>
-        <string>%d éléments déplacés dans la corbeille</string>
+        <string>%d itens movidos para o lixo</string>
       </dict>
     </dict>
     <key>fileListMultiSelectedTitle</key>
@@ -277,9 +277,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d sélectionné</string>
+        <string>%d selecionado</string>
         <key>other</key>
-        <string>%d sélectionnés</string>
+        <string>%d selecionados</string>
       </dict>
     </dict>
     <key>fileListRemoveFavoritesConfirmationSnackbar</key>
@@ -293,9 +293,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier retiré des favoris avec succès</string>
+        <string>Um ficheiro removido dos favoritos com sucesso</string>
         <key>other</key>
-        <string>%d fichiers retirés des favoris avec succès</string>
+        <string>%d ficheiros removidos dos favoritos com sucesso</string>
       </dict>
     </dict>
     <key>fileListRemoveOfflineConfirmationSnackbar</key>
@@ -309,9 +309,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier retiré de la disponibilité hors ligne</string>
+        <string>Um ficheiro removido da disponibilidade offline</string>
         <key>other</key>
-        <string>%d fichiers retirés de la disponibilité hors ligne</string>
+        <string>%d ficheiros removidos da disponibilidade offline</string>
       </dict>
     </dict>
     <key>shareUsersCount</key>
@@ -325,9 +325,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>%d utilisateur</string>
+        <string>%d utilizador</string>
         <key>other</key>
-        <string>%d utilisateurs</string>
+        <string>%d utilizadores</string>
       </dict>
     </dict>
     <key>snackBarUploadError</key>
@@ -341,9 +341,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier n’a pas pu être importé</string>
+        <string>Não foi possível importar um ficheiro</string>
         <key>other</key>
-        <string>%d fichiers n’ont pas pu être importés</string>
+        <string>Não foi possível importar %d ficheiros</string>
       </dict>
     </dict>
     <key>trashedFileDeletedPermanentlyConfirmationSnackbar</key>
@@ -357,9 +357,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un élément supprimé définitivement</string>
+        <string>Um item eliminado permanentemente</string>
         <key>other</key>
-        <string>%d éléments supprimés définitivement</string>
+        <string>%d itens eliminados permanentemente</string>
       </dict>
     </dict>
     <key>uploadImportedOtherAmount</key>
@@ -373,9 +373,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>+1 autre fichier</string>
+        <string>+1 outro ficheiro</string>
         <key>other</key>
-        <string>+%d autres fichiers</string>
+        <string>+%d outros ficheiros</string>
       </dict>
     </dict>
     <key>uploadInProgressNumberFile</key>
@@ -389,9 +389,9 @@
         <key>NSStringFormatValueTypeKey</key>
         <string>d</string>
         <key>one</key>
-        <string>Un fichier restant</string>
+        <string>Um ficheiro restante</string>
         <key>other</key>
-        <string>%d fichiers restants</string>
+        <string>%d ficheiros restantes</string>
       </dict>
     </dict>
   </dict>

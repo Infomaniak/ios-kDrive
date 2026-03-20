@@ -1,0 +1,38 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: el, Greek
+ * Tagged: ios-info-plist
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:27:04 +0100
+ */
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "Η πρόσβαση στην κάμερα είναι απαραίτητη για σάρωση εγγράφων και λήψη φωτογραφιών.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "Το Face ID θα χρησιμοποιηθεί για ξεκλείδωμα της εφαρμογής.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Χρησιμοποιείται μόνο σε λειτουργία αποσφαλμάτωσης.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "Η πρόσβαση στο μικρόφωνο είναι απαραίτητη για λήψη βίντεο.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "Η πρόσβαση στη βιβλιοθήκη φωτογραφιών είναι απαραίτητη για αποθήκευση των φωτογραφιών και βίντεό σας.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "Η πρόσβαση στη βιβλιοθήκη φωτογραφιών είναι απαραίτητη για αποθήκευση των φωτογραφιών σας.";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Σάρωση Εγγράφου";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Αναζήτηση";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Βοήθεια & Υποστήριξη";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Μεταφόρτωση Φωτογραφίας ή Βίντεο";

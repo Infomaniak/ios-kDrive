@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: fr, French
  * Tagged: ios
- * Exported by: Adrien Coye
- * Exported at: Fri, 13 Mar 2026 10:43:44 +0100
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:43:59 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -190,6 +190,12 @@
 /* loco:6049dfb2105eca5bbd0801b9 */
 "allUploadFinishedDescription-plural" = "%d fichiers ont été importés";
 
+/* loco:69bcfe53aed2af87a302d422 */
+"allUploadFinishedDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d423 */
+"allUploadFinishedDescription-plural-3" = "";
+
 /* loco:6049df4d5c2c3a04bc39792f */
 "allUploadFinishedTitle" = "Importation terminée";
 
@@ -198,6 +204,12 @@
 
 /* loco:60928c47bff9cd1579331ff3 */
 "allUploadInProgress-plural" = "%d fichiers en cours d’importation";
+
+/* loco:69bcfe53aed2af87a302d424 */
+"allUploadInProgress-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d425 */
+"allUploadInProgress-plural-3" = "";
 
 /* loco:6049df4d5c2c3a04bc397930 */
 "allUserAnonymous" = "Anonyme";
@@ -703,11 +715,23 @@
 /* loco:6095336aa6379b42c65151a2 */
 "driveBlockedDescription-plural" = "Tous vos produits ont expiré. Veuillez les renouveler pour les gérer et accéder à leurs données.";
 
+/* loco:69bcfe53aed2af87a302d428 */
+"driveBlockedDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d429 */
+"driveBlockedDescription-plural-3" = "";
+
 /* loco:608fcd7f99c877023a07f262 */
 "driveBlockedTitle" = "Le kDrive %@ est actuellement bloqué";
 
 /* loco:609505a7cd8a3b0f0c2c6532 */
 "driveBlockedTitle-plural" = "Tous vos kDrives sont actuellement bloqués";
+
+/* loco:69bcfe53aed2af87a302d42a */
+"driveBlockedTitle-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d42b */
+"driveBlockedTitle-plural-3" = "";
 
 /* loco:608fcddcb3c9f173fe193095 */
 "driveMaintenanceDescription" = "Une mise à jour est en cours pour améliorer kDrive. Ce processus peut durer quelques minutes. Merci pour votre patience.";
@@ -717,6 +741,12 @@
 
 /* loco:609505d502647721ed3312c2 */
 "driveMaintenanceTitle-plural" = "Tous vos kDrives sont actuellement en maintenance";
+
+/* loco:69bcfe53aed2af87a302d42c */
+"driveMaintenanceTitle-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d42d */
+"driveMaintenanceTitle-plural-3" = "";
 
 /* loco:614c868951be11365c416434 */
 "drivesDirectory" = "Drives et fichiers hors ligne";
@@ -1106,10 +1136,16 @@
 "fileListMoveDoneSnackbar" = "Déplacements terminés avec succès";
 
 /* loco:6049df4d5c2c3a04bc397aa4 */
-"fileListMoveFileConfirmationSnackbar" = "Un fichier a bien été déplacé dans %@";
+"fileListMoveFileConfirmationSnackbariOS" = "Un fichier a bien été déplacé dans %@";
 
 /* loco:6049df4d5c2c3a04bc397aa5 */
-"fileListMoveFileConfirmationSnackbar-plural" = "%1$d fichiers ont bien été déplacés dans %2$@";
+"fileListMoveFileConfirmationSnackbariOS-plural" = "%1$d fichiers ont bien été déplacés dans %2$@";
+
+/* loco:69bcfe53aed2af87a302d44c */
+"fileListMoveFileConfirmationSnackbariOS-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d44d */
+"fileListMoveFileConfirmationSnackbariOS-plural-3" = "";
 
 /* loco:611b6e42cb8967787a31ee82 */
 "fileListMoveInProgressSnackbar" = "Déplacements en cours : %d/%d";
@@ -1291,6 +1327,12 @@
 /* loco:6049dfb2105eca5bbd0801b7 */
 "modalDeleteDescription-plural" = "Souhaitez-vous vraiment supprimer définitivement %d éléments ?";
 
+/* loco:69bcfe53aed2af87a302d458 */
+"modalDeleteDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d459 */
+"modalDeleteDescription-plural-3" = "";
+
 /* loco:60e44729e8e4b7695643f9b2 */
 "modalDeletePhotosDescription" = "Souhaitez-vous supprimer de votre appareil les photos transférées dans kDrive ?";
 
@@ -1323,6 +1365,12 @@
 
 /* loco:6049dfb2105eca5bbd0801b5 */
 "modalMoveTrashDescription-plural" = "Souhaitez-vous déplacer %d éléments dans la corbeille ?";
+
+/* loco:69bcfe53aed2af87a302d45a */
+"modalMoveTrashDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d45b */
+"modalMoveTrashDescription-plural-3" = "";
 
 /* loco:6049df4d5c2c3a04bc397a04 */
 "modalMoveTrashTitle" = "Déplacer dans la corbeille";
@@ -2044,11 +2092,23 @@
 /* loco:62344899e7238255cc5120d2 */
 "trashedFileRestoreFileInSuccess-plural" = "%1$d éléments restaurés dans %2$@";
 
+/* loco:69bcfe53aed2af87a302d464 */
+"trashedFileRestoreFileInSuccess-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d465 */
+"trashedFileRestoreFileInSuccess-plural-3" = "";
+
 /* loco:6049df4d5c2c3a04bc397a7a */
 "trashedFileRestoreFileToOriginalPlaceSuccess" = "%@ restauré à l’emplacement d’origine";
 
 /* loco:62344c023cb45e6fcb219b43 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural" = "%d éléments restaurés à leur emplacement d’origine";
+
+/* loco:69bcfe53aed2af87a302d466 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d467 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
 
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Artiste inconnu";
@@ -2084,10 +2144,16 @@
 "uploadFolderNotFoundSyncDisabledError" = "La sauvegarde automatique a été désactivée car le dossier de destination n’existe plus";
 
 /* loco:62a873924424292ffd74faf3 */
-"uploadImportedFailedAmount" = "1 importation a échoué sur un total de %1$d";
+"uploadImportedFailedAmount" = "1 importation a échoué sur un total de %d";
 
 /* loco:62a874566f1e5662420d2b82 */
 "uploadImportedFailedAmount-plural" = "%2$d importations ont échoué sur un total de %1$d";
+
+/* loco:69bcfe53aed2af87a302d468 */
+"uploadImportedFailedAmount-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d469 */
+"uploadImportedFailedAmount-plural-3" = "";
 
 /* loco:6049df4d5c2c3a04bc397a83 */
 "uploadInProgressCancelAllUploadTitle" = "Annuler les imports";
