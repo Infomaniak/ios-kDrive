@@ -1,4 +1,5 @@
 platform: ios
 
 localizable_path: kDrive/Resources
-main_target_localizable_path: kDrive/Resources
+
+languages: [ da, de, el, en, es, fi, fr, it, nb, nl, pl, pt, sv ]

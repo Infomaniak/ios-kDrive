@@ -1,0 +1,38 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: pl, Polish
+ * Tagged: ios-info-plist
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:27:04 +0100
+ */
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "Dostęp do kamery jest wymagany do skanowania dokumentów i robienia zdjęć.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "Face ID będzie używane do odblokowywania aplikacji.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Używane tylko w trybie debugowania.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "Dostęp do mikrofonu jest wymagany do nagrywania filmów.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "Dostęp do biblioteki zdjęć jest wymagany do zapisywania zdjęć i filmów.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "Dostęp do biblioteki zdjęć jest wymagany do zapisywania zdjęć.";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Skanuj dokument";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Szukaj";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Pomoc i wsparcie";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Prześlij zdjęcie lub wideo";

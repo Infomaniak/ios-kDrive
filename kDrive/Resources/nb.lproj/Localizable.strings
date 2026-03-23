@@ -1,0 +1,2234 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: nb, Norwegian Bokmål
+ * Tagged: ios
+ * Exported by: Philippe Weidmann
+ * Exported at: Mon, 23 Mar 2026 08:23:04 +0100
+ */
+
+/* loco:6049df4d5c2c3a04bc397901 */
+"aboutAppVersionTitle" = "kDrive-applikasjon";
+
+/* loco:6049df4d5c2c3a04bc397902 */
+"aboutLicenseDescription" = "GNU General Public Licence, version 3";
+
+/* loco:6049df4d5c2c3a04bc397903 */
+"aboutLicenseTitle" = "Lisens";
+
+/* loco:6049df4d5c2c3a04bc397904 */
+"aboutPrivacyTitle" = "Personvern";
+
+/* loco:6049df4d5c2c3a04bc397905 */
+"aboutSourceCodeTitle" = "Hent kildekoden";
+
+/* loco:6049df4d5c2c3a04bc397906 */
+"aboutTitle" = "Om";
+
+/* loco:6049df4d5c2c3a04bc397907 */
+"accessDeniedDescriptionIsAdmin" = "Ønsker du å endre rettighetene til denne mappen for å få tilgang til den? Du vil bli lagt til blant brukerne som har tilgang til denne mappen. De andre brukerne av denne mappen vil bli varslet på e-post.";
+
+/* loco:6049df4d5c2c3a04bc397908 */
+"accessDeniedDescriptionIsNotAdmin" = "Vennligst kontakt en kDrive-administrator for å endre tilgangsrettighetene dine.";
+
+/* loco:6049df4d5c2c3a04bc397909 */
+"accessDeniedTitle" = "Du har ikke tilgang til denne mappen.";
+
+/* loco:61695fa9dedbed08b1748152 */
+"addCategoriesTitle" = "Legg til kategorier";
+
+/* loco:617a7155e4ec9a5deb713a03 */
+"addPassword" = "Beskytte med passord";
+
+/* loco:6049df4d5c2c3a04bc39790b */
+"alertRemoveUserDescription" = "Er du sikker på at du vil fjerne brukeren \"%@\" fra denne applikasjonen?";
+
+/* loco:6049df4d5c2c3a04bc39790c */
+"alertRemoveUserTitle" = "Fjern bruker";
+
+/* loco:67c18ad0a89ca83d24067454 */
+"all3DModel" = "3D-modeller";
+
+/* loco:6049df4d5c2c3a04bc39790d */
+"allActivated" = "Aktivert";
+
+/* loco:6049df4d5c2c3a04bc39790f */
+"allAddExpirationDateTitle" = "Legg til utløpsdato";
+
+/* loco:6049df4d5c2c3a04bc397910 */
+"allAllDriveUsers" = "Alle kDrive-brukere";
+
+/* loco:6049df4d5c2c3a04bc397911 */
+"allArchive" = "Arkiver";
+
+/* loco:6049df4d5c2c3a04bc397912 */
+"allAudio" = "Lyd";
+
+/* loco:6149ec3adfc38f4103443312 */
+"allCancellationInProgress" = "Kansellering pågår…";
+
+/* loco:6049df4d5c2c3a04bc397913 */
+"allCode" = "Kode";
+
+/* loco:6193d4705829556932561ba4 */
+"allDateCustom" = "Tilpasset";
+
+/* loco:607962540ad1dd02fd5fc785 */
+"allDeletedFilePattern" = "'Slettet den 'dd. MMM yyyy '-' HH:mm";
+
+/* loco:60e58ac6621d7e5809353952 */
+"allDeletedFileRelativeTime" = "Slettet %@";
+
+/* loco:6049df4d5c2c3a04bc397914 */
+"allDisabled" = "Deaktivert";
+
+/* loco:67c18a029e7cc069de0144a2 */
+"allEmail" = "E-post";
+
+/* loco:6049df4d5c2c3a04bc397916 */
+"allEmptyInputError" = "Dette feltet kan ikke være tomt";
+
+/* loco:6049df4d5c2c3a04bc397917 */
+"allFileAddFavoris" = "%@ lagt til i favoritter";
+
+/* loco:6058a107c62a577406174e92 */
+"allFileAddRightError" = "Du har ikke tillatelse til å legge til filer i denne mappen.";
+
+/* loco:6049df4d5c2c3a04bc397918 */
+"allFileDeleteFavoris" = "%@ fjernet fra favoritter";
+
+/* loco:6049df4d5c2c3a04bc397919 */
+"allFileDuplicate" = "%@ kopiert";
+
+/* loco:614b1620549fbd3ce4691795 */
+"allFileDuplicateCancelled" = "Kopiering avbrutt";
+
+/* loco:6049df4d5c2c3a04bc39791a */
+"allFileMove" = "%1$@ flyttet til %2$@";
+
+/* loco:6061e86acbdd7f4c4708f615 */
+"allFileMoveCancelled" = "Flytting avbrutt";
+
+/* loco:6049df4d5c2c3a04bc39791b */
+"allFileRename" = "%@ omdøpt";
+
+/* loco:6818aeac478090df7b0df2e2 */
+"allFilesTitle" = "Alle filene mine";
+
+/* loco:6049df4d5c2c3a04bc39791c */
+"allFolder" = "Mappe";
+
+/* loco:6238a658e82caf1b71589e82 */
+"allFont" = "Skrift";
+
+/* loco:6049df4d5c2c3a04bc39791d */
+"allJustNow" = "Nå nettopp";
+
+/* loco:61696038c328022b120007c3 */
+"allLast7Days" = "Siste 7 dager";
+
+/* loco:6049df4d5c2c3a04bc39791e */
+"allLastModifiedFilePattern" = "'Endret den 'dd. MMM yyyy '-' HH:mm";
+
+/* loco:60e589524e0dcd1d45523c62 */
+"allLastModifiedFileRelativeTime" = "Endret %@";
+
+/* loco:6049df4d5c2c3a04bc39791f */
+"allMinutesShort" = "%d min";
+
+/* loco:6049df4d5c2c3a04bc397920 */
+"allNoNetwork" = "Ingen nettverkstilkobling";
+
+/* loco:6049df4d5c2c3a04bc397921 */
+"allOfficeDocs" = "Dokument";
+
+/* loco:620b6e7c1a94ac24b002fcd2 */
+"allOfficeForm" = "Skjema";
+
+/* loco:6049df4d5c2c3a04bc397922 */
+"allOfficeGrids" = "Tabell";
+
+/* loco:6049df4d5c2c3a04bc397923 */
+"allOfficeNote" = "Tekst";
+
+/* loco:6049df4d5c2c3a04bc397924 */
+"allOfficePoints" = "Presentasjon";
+
+/* loco:6049df4d5c2c3a04bc397925 */
+"allPackAvailability" = "Tilgjengelig kun for Solo-, Team- og Pro-abonnement 🚀";
+
+/* loco:6049df4d5c2c3a04bc397926 */
+"allPasswordHint" = "Passord";
+
+/* loco:6049df4d5c2c3a04bc397927 */
+"allPathTitle" = "Plassering";
+
+/* loco:6049df4d5c2c3a04bc397928 */
+"allPdf" = "PDF";
+
+/* loco:6049df4d5c2c3a04bc397929 */
+"allPictures" = "Bilder";
+
+/* loco:6049df4d5c2c3a04bc39792b */
+"allRootName" = "Rot for kDrive %@";
+
+/* loco:6049df4d5c2c3a04bc39792c */
+"allToday" = "I dag";
+
+/* loco:6061e987889b0a48782ebfc2 */
+"allTrashActionCancelled" = "Sletting avbrutt";
+
+/* loco:6049df4d5c2c3a04bc39792d */
+"allUntitledFileName" = "Uten tittel";
+
+/* loco:6049df4d5c2c3a04bc39792e */
+"allUploadErrorDescription" = "Filen %1$@ kunne ikke lastes opp: %2$@";
+
+/* loco:6049df4d5c2c3a04bc397abc */
+"allUploadFinishedDescription" = "%@ ble lastet opp";
+
+/* loco:6049dfb2105eca5bbd0801b9 */
+"allUploadFinishedDescription-plural" = "%d filer ble lastet opp";
+
+/* loco:69bcfe53aed2af87a302d422 */
+"allUploadFinishedDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d423 */
+"allUploadFinishedDescription-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc39792f */
+"allUploadFinishedTitle" = "Opplasting fullført";
+
+/* loco:60928b79a37f9c2da8777204 */
+"allUploadInProgress" = "%@ lastes opp";
+
+/* loco:60928c47bff9cd1579331ff3 */
+"allUploadInProgress-plural" = "%d lastes opp";
+
+/* loco:69bcfe53aed2af87a302d424 */
+"allUploadInProgress-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d425 */
+"allUploadInProgress-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc397930 */
+"allUserAnonymous" = "Anonym";
+
+/* loco:6049df4d5c2c3a04bc397931 */
+"allVideo" = "Videoer";
+
+/* loco:6049df4d5c2c3a04bc397932 */
+"allYesterday" = "I går";
+
+/* loco:6049df4d5c2c3a04bc397933 */
+"appSecurityDescription" = "Beskytt tilgangen til appen ved å aktivere telefonlåsen.";
+
+/* loco:6049df4d5c2c3a04bc397934 */
+"appSecurityTitle" = "Applås";
+
+/* loco:616960a4b9fa15412d6a2fb2 */
+"belongToAllCategoriesFilterDescription" = "Resultatene må tilhøre alle valgte kategorier";
+
+/* loco:616960bb351cc27ee05bbaf2 */
+"belongToOneCategoryFilterDescription" = "Resultatene må tilhøre én av de valgte kategoriene";
+
+/* loco:60f7f3ae370e015fb90d7bd2 */
+"betaTestDescription" = "Mobilappen vår utvikles stadig, og vi prøver hele tiden å forbedre den.\nVil du hjelpe oss? Bli med i Beta, få eksklusiv tilgang til alle nye funksjoner, og gi oss dine tilbakemeldinger og ideer!";
+
+/* loco:60f7edd07ee3f419944935d2 */
+"betaTestTitle" = "Test de siste nyhetene";
+
+/* loco:6049df4d5c2c3a04bc397935 */
+"buttonAdd" = "Legge til";
+
+/* loco:6049df4d5c2c3a04bc397936 */
+"buttonAddComment" = "Legge til kommentar";
+
+/* loco:6049df4d5c2c3a04bc397937 */
+"buttonAddFavorites" = "Legge til favoritter";
+
+/* loco:668e92d227a71514a808d485 */
+"buttonAddToKDrive" = "Legge til i min kDrive";
+
+/* loco:6049df4d5c2c3a04bc397938 */
+"buttonAddUser" = "Legge til bruker";
+
+/* loco:61696c1fe9dd49214b720a76 */
+"buttonApplyFilters" = "Bruk filtre";
+
+/* loco:6049dfb2105eca5bbd0801b3 */
+"buttonAuthorize" = "Autoriser";
+
+/* loco:6049df4d5c2c3a04bc397939 */
+"buttonAvailableOffline" = "Tilgjengelig offline";
+
+/* loco:6049df4d5c2c3a04bc39793a */
+"buttonBack" = "Tilbake";
+
+/* loco:60f7f3c594ec884cad691fb2 */
+"buttonBetaTest" = "Delta i beta";
+
+/* loco:6049df4d5c2c3a04bc39793b */
+"buttonCancel" = "Avbryt";
+
+/* loco:624e99d3adb6372fb56e5ab8 */
+"buttonCancelImport" = "Avbryt import";
+
+/* loco:619624bcb9b09f02f0102733 */
+"buttonChangeFolderColor" = "Endre mappefarge";
+
+/* loco:6049df4d5c2c3a04bc39793c */
+"buttonClear" = "Tøm";
+
+/* loco:61696c0ce9dd49214b720a74 */
+"buttonClearFilters" = "Tøm filtre";
+
+/* loco:6049df4d5c2c3a04bc39793d */
+"buttonClose" = "Lukk";
+
+/* loco:6049df4d5c2c3a04bc39793e */
+"buttonConfigure" = "Konfigurer";
+
+/* loco:6049df4d5c2c3a04bc39793f */
+"buttonConfirm" = "Bekreft";
+
+/* loco:6049df4d5c2c3a04bc397940 */
+"buttonConfirmNotify" = "Bekreft og varsle";
+
+/* loco:6049df4d5c2c3a04bc397941 */
+"buttonConvertToDropBox" = "Konverter til drop box";
+
+/* loco:6049df4d5c2c3a04bc397942 */
+"buttonCopy" = "Kopier";
+
+/* loco:6049df4d5c2c3a04bc397944 */
+"buttonCreate" = "Opprett";
+
+/* loco:6049df4d5c2c3a04bc397945 */
+"buttonCreateFolder" = "Opprett mappe";
+
+/* loco:60794894a643783766602fb2 */
+"buttonCreateOnlyOfficeCopy" = "Opprett en .%@-kopi";
+
+/* loco:6049df4d5c2c3a04bc397946 */
+"buttonCreatePublicLink" = "Opprett offentlig lenke";
+
+/* loco:6049df4d5c2c3a04bc397947 */
+"buttonDelete" = "Slett";
+
+/* loco:611b6ca6fe8d0c03d92403e2 */
+"buttonDeselectAll" = "Velg ingen";
+
+/* loco:6049df4d5c2c3a04bc397948 */
+"buttonDisableDropBox" = "Deaktiver drop box";
+
+/* loco:6049df4d5c2c3a04bc397949 */
+"buttonDocumentScanning" = "Skann dokument";
+
+/* loco:6049df4d5c2c3a04bc39794a */
+"buttonDownload" = "Last ned";
+
+/* loco:6049df4d5c2c3a04bc39794b */
+"buttonDuplicate" = "Dupliser";
+
+/* loco:6049df4d5c2c3a04bc39794c */
+"buttonEdit" = "Rediger";
+
+/* loco:606d687970761158a147b514 */
+"buttonEmpty" = "Tøm";
+
+/* loco:606d682e70761158a147b512 */
+"buttonEmptyTrash" = "Tøm papirkurv";
+
+/* loco:6825a634667190d66c0c1852 */
+"buttonFeedback" = "Tilbakemelding";
+
+/* loco:6049df4d5c2c3a04bc39794d */
+"buttonFileRights" = "Deling og rettigheter";
+
+/* loco:6049df4d5c2c3a04bc39794e */
+"buttonGoToSettings" = "Gå til innstillinger";
+
+/* loco:6049df4d5c2c3a04bc39794f */
+"buttonLater" = "Senere";
+
+/* loco:605b09e6a6279864ac4ba6f2 */
+"buttonLeaveShare" = "Forlat deling";
+
+/* loco:6059f35332f59035fd6e2b62 */
+"buttonLike" = "Liker";
+
+/* loco:6049df4d5c2c3a04bc397950 */
+"buttonLogin" = "Logge inn";
+
+/* loco:6049df4d5c2c3a04bc397951 */
+"buttonLogout" = "Logge ut";
+
+/* loco:6049df4d5c2c3a04bc397952 */
+"buttonManageDropBox" = "Administrer innboksen";
+
+/* loco:6049df4d5c2c3a04bc397953 */
+"buttonMenu" = "Meny";
+
+/* loco:6049df4d5c2c3a04bc397954 */
+"buttonMove" = "Flytte";
+
+/* loco:6049df4d5c2c3a04bc397955 */
+"buttonMoveTo" = "Flytte til";
+
+/* loco:604f985c7e79116ee83e2b15 */
+"buttonNewPassword" = "Angi et nytt passord";
+
+/* loco:61261341bbb2fe14eb477766 */
+"buttonNext" = "Neste";
+
+/* loco:65d76caca735073506023715 */
+"buttonNo" = "Nei";
+
+/* loco:6049df4d5c2c3a04bc397956 */
+"buttonNoDriveAnotherUser" = "Bruk en annen Infomaniak-profil";
+
+/* loco:6049df4d5c2c3a04bc397957 */
+"buttonNoDriveFreeTest" = "Gratis prøveperiode";
+
+/* loco:6075c0bb65160c29997c5e32 */
+"buttonOpenDocument" = "Åpne dokumentet";
+
+/* loco:66dfe78b7da115a16c0733e2 */
+"buttonOpenInBrowser" = "Åpne i nettleseren";
+
+/* loco:607948379bda7f7df0121872 */
+"buttonOpenReadOnly" = "Åpne i lesemodus";
+
+/* loco:6049df4d5c2c3a04bc397958 */
+"buttonOpenWith" = "Åpne med";
+
+/* loco:6049df4d5c2c3a04bc397959 */
+"buttonPlayerFfwd" = "Spole frem noen sekunder";
+
+/* loco:6049df4d5c2c3a04bc39795a */
+"buttonPlayerNext" = "Neste";
+
+/* loco:6049df4d5c2c3a04bc39795b */
+"buttonPlayerPlayPause" = "Spill av/Pause";
+
+/* loco:6049df4d5c2c3a04bc39795c */
+"buttonPlayerPrev" = "Forrige";
+
+/* loco:6049df4d5c2c3a04bc39795d */
+"buttonPlayerRew" = "Spole tilbake noen sekunder";
+
+/* loco:61434c587ac8854bf40efa02 */
+"buttonRedeemPromoCode" = "Løs inn en kampanjekode";
+
+/* loco:6049df4d5c2c3a04bc39795e */
+"buttonRefresh" = "Oppdatere";
+
+/* loco:695f6972ddde32c26d0b1f22 */
+"buttonRemoveDriveAccess" = "Fjern tilgang til drive";
+
+/* loco:6049df4d5c2c3a04bc39795f */
+"buttonRemoveFavorites" = "Slett fra favoritter";
+
+/* loco:69651623d1509dbfc30bdde2 */
+"buttonRemoveUserFromShare" = "Avbryt deling";
+
+/* loco:6049df4d5c2c3a04bc397960 */
+"buttonRename" = "Gi nytt navn";
+
+/* loco:608fce3469583d3ba3411d43 */
+"buttonRenew" = "Fornye";
+
+/* loco:604a29d9f20c5e115e640152 */
+"buttonRetry" = "Prøv igjen";
+
+/* loco:6049df4d5c2c3a04bc397961 */
+"buttonSave" = "Lagre";
+
+/* loco:606f1b035b651445ab137732 */
+"buttonSeeFolder" = "Se mappen";
+
+/* loco:6126165eb8a5c86c7f00f602 */
+"buttonSelect" = "Velg";
+
+/* loco:6049df4d5c2c3a04bc397962 */
+"buttonSelectAll" = "Velg alle";
+
+/* loco:685545854a29fa85140fcf62 */
+"buttonSelectTheFolder" = "Velg en mappe";
+
+/* loco:6049df4d5c2c3a04bc397963 */
+"buttonSend" = "Sende";
+
+/* loco:6049df4d5c2c3a04bc397964 */
+"buttonSendCopy" = "Sende en kopi";
+
+/* loco:6049df4d5c2c3a04bc397965 */
+"buttonSettingsLockApp" = "Aktiver låsen";
+
+/* loco:6049df4d5c2c3a04bc397966 */
+"buttonShare" = "Dele";
+
+/* loco:606d7c4a2f511b00e97a0152 */
+"buttonShareDropboxLink" = "Dele link";
+
+/* loco:67dd44d13648dcecc500c052 */
+"buttonSharePrivateLink" = "Dele privat link";
+
+/* loco:6049df4d5c2c3a04bc397943 */
+"buttonSharePublicLink" = "Dele offentlig link";
+
+/* loco:6049df4d5c2c3a04bc397967 */
+"buttonSignIn" = "Opprett en konto";
+
+/* loco:62aaf42957e7311609525592 */
+"buttonSnackBarGoToSettings" = "Innstillinger";
+
+/* loco:6049df4d5c2c3a04bc397968 */
+"buttonStopUpload" = "Stoppe opplastingen av denne filen";
+
+/* loco:61261399888bc37f7a1333e2 */
+"buttonStoreSuccessHome" = "Tilbake til hjemmesiden";
+
+/* loco:6059cbb23fcfb17294332642 */
+"buttonSwitchDrive" = "Bytt disk";
+
+/* loco:6049df4d5c2c3a04bc397969 */
+"buttonTakePhotoOrVideo" = "Ta bilde eller video";
+
+/* loco:6049df4d5c2c3a04bc39796a */
+"buttonToggleDisplay" = "Bytt til rutenett- eller listevisning";
+
+/* loco:6059ff858381d627a10cf422 */
+"buttonTogglePassword" = "Vis/skjul passord";
+
+/* loco:6049df4d5c2c3a04bc39796b */
+"buttonUnlock" = "Låse opp";
+
+/* loco:6049df4d5c2c3a04bc39796c */
+"buttonUpdate" = "Oppdater";
+
+/* loco:67a9efa524991c1b1e0ae0d2 */
+"buttonUpgrade" = "Oppgrader";
+
+/* loco:6049df4d5c2c3a04bc39796d */
+"buttonUpgradeOffer" = "Oppgrader abonnementet mitt";
+
+/* loco:6049df4d5c2c3a04bc39796e */
+"buttonUpload" = "Laste opp fra telefonen";
+
+/* loco:6049df4d5c2c3a04bc39796f */
+"buttonUploadFile" = "Laste opp en fil";
+
+/* loco:6049df4d5c2c3a04bc397970 */
+"buttonUploadPhotoOrVideo" = "Laste opp et bilde eller video";
+
+/* loco:6049df4d5c2c3a04bc397971 */
+"buttonValid" = "Validere";
+
+/* loco:6101109cb5c21e394d127402 */
+"buttonYes" = "Ja";
+
+/* loco:614c8806c00b6044a92a7775 */
+"cacheDirectory" = "Cache";
+
+/* loco:614c88a2f93d4c57b6630c25 */
+"cachedFileTitle" = "Bufrede filer";
+
+/* loco:6054b7d53726d8506b6c9a42 */
+"cameraAccessDeniedDescription" = "Tilgang til kameraet er deaktivert: du kan endre dette i Innstillinger.";
+
+/* loco:6054b7b06fb6b07b6c25ec12 */
+"cameraAccessDeniedTitle" = "Tilgang deaktivert";
+
+/* loco:6101124480b37c0ebb78cf02 */
+"cancelDownloadDescription" = "Vil du virkelig avbryte denne nedlastingen?";
+
+/* loco:6101111ac888310e7a433135 */
+"cancelDownloadTitle" = "Avbryt nedlasting";
+
+/* loco:6169608e8934a0564732b7d4 */
+"categoriesFilterTitle" = "Kategorier";
+
+/* loco:6169612bb7bdcf38d1662b72 */
+"categoryBanking" = "Bank";
+
+/* loco:6169613b9b59e70d3b0b4863 */
+"categoryBill" = "Faktura";
+
+/* loco:61696bf8a758c603395e59a2 */
+"categoryColorTitle" = "Kategorifarge";
+
+/* loco:6169616f3eec095ad267a822 */
+"categoryContract" = "Kontrakt";
+
+/* loco:6169617d3eec095ad267a824 */
+"categoryForm" = "Skjema";
+
+/* loco:6169618975c332599703e382 */
+"categoryHobbies" = "Fritidsaktiviteter";
+
+/* loco:61696197fdbfec6e4754f3d2 */
+"categoryID" = "ID-dokumenter";
+
+/* loco:616961a7dd624e5cbb6cf8f2 */
+"categoryInsurance" = "Forsikring";
+
+/* loco:61695f859bcf5534bf205b42 */
+"categoryNameField" = "Kategorinavn";
+
+/* loco:616961b8961fc207bc6ebf24 */
+"categoryQuotation" = "Tilbud";
+
+/* loco:63985af2b769ef1fe1344c23 */
+"categoryResume" = "CV";
+
+/* loco:616961c2dd624e5cbb6cf8f4 */
+"categoryTaxation" = "Skatt";
+
+/* loco:616961d0ccfa9a632b72af02 */
+"categoryTransportation" = "Transport";
+
+/* loco:616961eb5e92cf60f962e6d2 */
+"categoryWarranty" = "Garanti";
+
+/* loco:616961fe123aaf53247698b2 */
+"categoryWork" = "Arbeid";
+
+/* loco:6548a6eb63ec2f8b5001ac32 */
+"commonDocumentsDescription" = "Dette området tilhører %@ og samler organisasjonens felles filer.";
+
+/* loco:6049df4d5c2c3a04bc397974 */
+"commonFolderDescription" = "Del denne mappen med brukere av kDrive %@";
+
+/* loco:6049df4d5c2c3a04bc397975 */
+"commonFolderTitle" = "Organisasjonsmappe";
+
+/* loco:60545b0e9f34163fee5888e2 */
+"contentDescriptionIsSelected" = "Er valgt";
+
+/* loco:604b81caf1d3fc3c426e2443 */
+"convertToDropboxTitle" = "Gjør om til dropboks %@";
+
+/* loco:61695ef04a145b45632ed042 */
+"createCategoryTitle" = "Opprett en kategori";
+
+/* loco:6049df4d5c2c3a04bc397973 */
+"createCommonFolderAllUsersDescription" = "Alle kDrive %@-brukere vil automatisk ha tilgang til denne mappen.";
+
+/* loco:6049df4d5c2c3a04bc39797d */
+"createCommonFolderSuccess" = "Organisasjonsmappe opprettet";
+
+/* loco:6049df4d5c2c3a04bc39797e */
+"createCommonFolderTitle" = "Opprett en organisasjonsmappe";
+
+/* loco:60b9e61ed2bc0c19f9307d42 */
+"createDatedSubFoldersDescription" = "Opprett automatisk undermapper med måned og år for bildet";
+
+/* loco:60b9e60d89b1910c85340a94 */
+"createDatedSubFoldersTitle" = "Opprett én mappe per måned";
+
+/* loco:6049df4d5c2c3a04bc39797f */
+"createDropBoxHint" = "Navn på dropboks";
+
+/* loco:6049df4d5c2c3a04bc397980 */
+"createDropBoxLimitFileSizeError" = "Må være større enn 0";
+
+/* loco:6049df4d5c2c3a04bc397981 */
+"createDropBoxTitle" = "Opprett en dropboks";
+
+/* loco:6049df4d5c2c3a04bc397982 */
+"createFolderAccessPermissionTitle" = "Hvem kan få tilgang til denne mappen?";
+
+/* loco:6049df4d5c2c3a04bc397983 */
+"createFolderEmailWhenFinishedTitle" = "Motta en e-post når en fil har blitt lastet opp";
+
+/* loco:6049df4d5c2c3a04bc397977 */
+"createFolderKeepParentsRightDescription" = "Brukere som har tilgang til mappen %@ vil også ha tilgang til denne mappen";
+
+/* loco:6049df4d5c2c3a04bc397976 */
+"createFolderKeepParentsRightTitle" = "Behold delinger og rettigheter fra overordnet mappe";
+
+/* loco:6049df4d5c2c3a04bc397984 */
+"createFolderLimitFileSizeDescription" = "Personer vil ikke kunne overskride lagringsplassen som er tildelt denne mappen.";
+
+/* loco:6049df4d5c2c3a04bc397985 */
+"createFolderLimitFileSizeInput" = "Angi en kvote";
+
+/* loco:6049df4d5c2c3a04bc397986 */
+"createFolderLimitFileSizeTitle" = "Begrens lagringsplass";
+
+/* loco:6049df4d5c2c3a04bc397987 */
+"createFolderLimitFileSizeUnitTitle" = "GB";
+
+/* loco:6049df4d5c2c3a04bc397978 */
+"createFolderMeOnly" = "Bare meg";
+
+/* loco:6049df4d5c2c3a04bc397988 */
+"createFolderPasswordDescription" = "Personer som har linken må angi et passord for å laste opp filene sine.";
+
+/* loco:6049df4d5c2c3a04bc397989 */
+"createFolderPasswordTitle" = "Beskytt med et passord";
+
+/* loco:6049df4d5c2c3a04bc39798a */
+"createFolderSettingsTitle" = "Avanserte alternativer";
+
+/* loco:6049df4d5c2c3a04bc39797a */
+"createFolderSomeUsersDescription" = "Definer manuelt brukerne som skal ha tilgang til denne mappen.";
+
+/* loco:6049df4d5c2c3a04bc39797b */
+"createFolderSomeUsersTitle" = "Noen brukere";
+
+/* loco:6049df4d5c2c3a04bc39798b */
+"createFolderTitle" = "Opprett mappe";
+
+/* loco:6049df4d5c2c3a04bc39798c */
+"createFolderValidUntilDescription" = "Når datoen har passert, kan ikke brukere lenger overføre filer.";
+
+/* loco:6049df4d5c2c3a04bc39798d */
+"createPrivateFolderSuccess" = "Mappen ble opprettet";
+
+/* loco:629618adfe596f553920c562 */
+"deleteMyAccount" = "Slett kontoen min";
+
+/* loco:60dc3f19352b5e75d37b8c23 */
+"deletePicturesDescription" = "Appen vil jevnlig be deg om å slette bilder fra enheten som allerede er synkronisert på kDrive-en din. Du må alltid godkjenne slettingen manuelt";
+
+/* loco:60dc3e2e5ea2965b1152dc03 */
+"deletePicturesTitle" = "Slett bilder";
+
+/* loco:68c961c864c56326660094b2 */
+"deleteUploadedPhotosDescription" = "Klikk for å frigjøre lagringsplass";
+
+/* loco:68c9617bf6bead14aa05ca53 */
+"deleteUploadedPhotosTitle" = "Du har %d bilder å rydde";
+
+/* loco:614c887ba0ad81657c1e75a2 */
+"directoriesTitle" = "Data";
+
+/* loco:614c86f5dd7fc56d0c5fcaa4 */
+"documentsDirectory" = "Andre dokumenter";
+
+/* loco:608fce0b43535250c00ba5c2 */
+"driveBlockedDescription" = "Produktet har utløpt siden %@. Forny det for å administrere det og få tilgang til dataene.";
+
+/* loco:6095336aa6379b42c65151a2 */
+"driveBlockedDescription-plural" = "Alle produktene dine har utløpt. Forny dem for å administrere dem og få tilgang til dataene.";
+
+/* loco:69bcfe53aed2af87a302d428 */
+"driveBlockedDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d429 */
+"driveBlockedDescription-plural-3" = "";
+
+/* loco:608fcd7f99c877023a07f262 */
+"driveBlockedTitle" = "kDrive %@ er for øyeblikket blokkert";
+
+/* loco:609505a7cd8a3b0f0c2c6532 */
+"driveBlockedTitle-plural" = "Alle kDrive-ene dine er for øyeblikket blokkert";
+
+/* loco:69bcfe53aed2af87a302d42a */
+"driveBlockedTitle-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d42b */
+"driveBlockedTitle-plural-3" = "";
+
+/* loco:608fcddcb3c9f173fe193095 */
+"driveMaintenanceDescription" = "En oppdatering pågår for å forbedre kDrive. Denne prosessen kan ta noen minutter. Takk for tålmodigheten.";
+
+/* loco:608fcdbab3c9f173fe193093 */
+"driveMaintenanceTitle" = "kDrive %@ er for øyeblikket under vedlikehold";
+
+/* loco:609505d502647721ed3312c2 */
+"driveMaintenanceTitle-plural" = "Alle kDrive-ene dine er for øyeblikket under vedlikehold";
+
+/* loco:69bcfe53aed2af87a302d42c */
+"driveMaintenanceTitle-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d42d */
+"driveMaintenanceTitle-plural-3" = "";
+
+/* loco:614c868951be11365c416434 */
+"drivesDirectory" = "Drives og frakoblede filer";
+
+/* loco:6049df4d5c2c3a04bc39798e */
+"dropBoxDescription" = "Inviter partnerne, brukerne eller kundene dine til å overføre filer til kDrive-en din, selv om de ikke har en Infomaniak-konto.";
+
+/* loco:6049df4d5c2c3a04bc39798f */
+"dropBoxLinkTitle" = "Dropboks-link";
+
+/* loco:6049df4d5c2c3a04bc397990 */
+"dropBoxResultDescription" = "Del linken nedenfor med personer som må sende deg filer.";
+
+/* loco:6049df4d5c2c3a04bc397991 */
+"dropBoxResultTitle" = "Del dropboksen %@";
+
+/* loco:6049df4d5c2c3a04bc397992 */
+"dropBoxTitle" = "Dropboks";
+
+/* loco:618b870b92fff1241d67e713 */
+"dropboxSharedLinkDescription" = "Du kan ikke opprette en delingslink på en dropboks.";
+
+/* loco:618b829ad715f5111e3632c2 */
+"dropboxSharedLinkTitle" = "Dropbox delingslenke";
+
+/* loco:61695f6e3f0ee123d2250692 */
+"editCategoryInfoDescription" = "Endringen vil være synlig for alle kDrive-brukere som har tilgang til kategoriene.";
+
+/* loco:61695f2fe7df99511f698192 */
+"editCategoryTitle" = "Rediger en kategori";
+
+/* loco:6049df4d5c2c3a04bc397993 */
+"errorAddComment" = "Feil ved tillegging av kommentar";
+
+/* loco:6049df4d5c2c3a04bc397994 */
+"errorAddFavorite" = "Feil ved tillegging til favoritter";
+
+/* loco:6049df4d5c2c3a04bc397995 */
+"errorCache" = "Feil ved mellomlagring";
+
+/* loco:616d69eef413a20ef401e104 */
+"errorCategoryAlreadyExists" = "En kategori med samme navn finnes allerede";
+
+/* loco:60795f7ecca7d72b0900bd52 */
+"errorConflict" = "Et element med samme navn finnes allerede på denne plasseringen";
+
+/* loco:6049df4d5c2c3a04bc397996 */
+"errorConnection" = "Tilkoblingsfeil";
+
+/* loco:6049df4d5c2c3a04bc397997 */
+"errorDelete" = "Feil ved sletting";
+
+/* loco:60a693f631a0a90e163445f2 */
+"errorDeviceStorage" = "Manglende lagringsplass på enheten";
+
+/* loco:6099440fdb741c2c6d66d332 */
+"errorDisconnected" = "En feil har oppstått. Vennligst logg inn igjen for å fortsette.";
+
+/* loco:6049df4d5c2c3a04bc397998 */
+"errorDownload" = "Feil ved nedlasting";
+
+/* loco:616d68dab3af9f17301c15d4 */
+"errorDownloadPermission" = "Du må legge til minst én fil som du har tillatelse til å laste ned";
+
+/* loco:68bed25fc40a03885b0cd043 */
+"errorDropboxLimitExceeded" = "Du har nådd grensen for nedlastingsboks";
+
+/* loco:6049df4d5c2c3a04bc397999 */
+"errorDuplicate" = "Feil ved duplisering";
+
+/* loco:6708ec44807fa34749094072 */
+"errorExternalImportInProgress" = "Kan ikke utføre handling på mappen fordi en ekstern import pågår";
+
+/* loco:605cacde72147f269369e484 */
+"errorFileAlreadyExists" = "Fil eller mappe finnes allerede";
+
+/* loco:60e2d1ed77622d4af14f5a72 */
+"errorFileLocked" = "Denne filen er for øyeblikket åpen av en annen bruker og kan ikke endres";
+
+/* loco:664c499b09f1290486001cb2 */
+"errorFilesLimitExceeded" = "Grensen for filer i mappen er nådd";
+
+/* loco:605b1b5f49d7ff61223fcfe2 */
+"errorGeneric" = "En feil har oppstått";
+
+/* loco:619d09d108940d5e97470553 */
+"errorGetBookmarkURL" = "Ikke-gjenopprettbar lenke";
+
+/* loco:605b1457dbf343111f56d112 */
+"errorLeaveShare" = "Feil ved avslutning av deling";
+
+/* loco:67f4dd4c65f3979e8004d539 */
+"errorLimitExceeded" = "Grensen er nådd";
+
+/* loco:6049df4d5c2c3a04bc39799b */
+"errorLoadingOfficeEditor" = "Kan ikke laste dokumentredigering";
+
+/* loco:6049df4d5c2c3a04bc39799c */
+"errorModification" = "Feil ved endring";
+
+/* loco:6049df4d5c2c3a04bc39799d */
+"errorMove" = "Feil ved flytting";
+
+/* loco:6049df4d5c2c3a04bc39799e */
+"errorNetwork" = "Nettverksfeil";
+
+/* loco:6049df4d5c2c3a04bc39799f */
+"errorNetworkDescription" = "Resultatene kan være ufullstendige";
+
+/* loco:62aad9bc0b461303fb5559d2 */
+"errorPhotoLibraryAccessLimited" = "kDrive har ikke tilgang til ditt bild bibliotek";
+
+/* loco:6049df4d5c2c3a04bc3979a0 */
+"errorPreviewDeleted" = "Denne filen har blitt permanent slettet";
+
+/* loco:6049df4d5c2c3a04bc3979a1 */
+"errorPreviewTrash" = "Forhåndsvisning av en fil i papirkurven er ikke mulig";
+
+/* loco:6708e538df700f157c09c833 */
+"errorQuotaExceeded" = "Ikke nok plass på din kDrive";
+
+/* loco:6049df4d5c2c3a04bc3979a2 */
+"errorRename" = "Feil ved endring av navn";
+
+/* loco:6049df4d5c2c3a04bc3979a3 */
+"errorRestore" = "Feil ved gjenoppretting";
+
+/* loco:6049df4d5c2c3a04bc3979a4 */
+"errorRightModification" = "Feil ved redigering av rettigheter";
+
+/* loco:6049df4d5c2c3a04bc3979a5 */
+"errorSave" = "Feil ved lagring";
+
+/* loco:6049df4d5c2c3a04bc3979a6 */
+"errorShareLink" = "Feil ved oppretting av lenke";
+
+/* loco:6863dfc2e279ce3b0a0323e2 */
+"errorSharedWithMeLink" = "En feil oppstod ved åpning av den delte lenken";
+
+/* loco:624e97877d7de2125354cfc2 */
+"errorStillUploading" = "Elementet importeres fortsatt";
+
+/* loco:6049df4d5c2c3a04bc3979a7 */
+"errorTitle" = "Feil";
+
+/* loco:69270405644ff4b0930dc2b5 */
+"errorUnableToLoadContent" = "Vi har ikke tilgang til denne ressursen";
+
+/* loco:6049df4d5c2c3a04bc3979a8 */
+"errorUpload" = "Feil ved opplasting";
+
+/* loco:6569aef523dcf4dc2a0f5c92 */
+"errorWrongPassword" = "Feil passord";
+
+/* loco:6049df4d5c2c3a04bc3979a9 */
+"favoritesNoFile" = "Ingen favoritter for øyeblikket";
+
+/* loco:6049df4d5c2c3a04bc3979aa */
+"favoritesTitle" = "Favoritter";
+
+/* loco:62385833bd31511b4a48ba42 */
+"fileActivityCollaborativeFolderAccess" = "har åpnet innleveringsboksen";
+
+/* loco:612396ddca51601f9b314b32 */
+"fileActivityCollaborativeFolderCreate" = "opprettet en innleveringsboks";
+
+/* loco:612396eefb52c422c4223982 */
+"fileActivityCollaborativeFolderDelete" = "slettet en innleveringsboks";
+
+/* loco:61239726e69c060aef5b3a52 */
+"fileActivityCollaborativeFolderUpdate" = "oppdaterte en innleveringsboks";
+
+/* loco:623868ac84778841a246b082 */
+"fileActivityCollaborativeUserAccess" = "sendte filer til innleveringsboksen";
+
+/* loco:623859dedcb3115dbc682f22 */
+"fileActivityCollaborativeUserCreate" = "opprettet en mappe i innleveringsboksen for å sende filer";
+
+/* loco:62385b138941da20b53b8853 */
+"fileActivityCollaborativeUserDelete" = "slettet en mappe i innleveringsboksen hvor en bruker hadde lagt filer";
+
+/* loco:60632ee2a6d3b46038170024 */
+"fileActivityOtherFiles" = "%d andre filer";
+
+/* loco:6049df4d5c2c3a04bc3979ab */
+"fileDetailsActivitiesTitle" = "Aktivitet";
+
+/* loco:6049df4d5c2c3a04bc3979ac */
+"fileDetailsActivityFileAccess" = "åpnet filen";
+
+/* loco:618b844d3d601243cd6c52d2 */
+"fileDetailsActivityFileCategorize" = "la til en kategori til elementet";
+
+/* loco:61dda9c2a380eb74010679e2 */
+"fileDetailsActivityFileColorDelete" = "slettet fargen på en mappe";
+
+/* loco:61dda9850be38655ce4d86d2 */
+"fileDetailsActivityFileColorUpdate" = "endret fargen på en mappe";
+
+/* loco:6049df4d5c2c3a04bc3979ad */
+"fileDetailsActivityFileCommentCreate" = "kommenterte filen";
+
+/* loco:6049df4d5c2c3a04bc3979ae */
+"fileDetailsActivityFileCommentDelete" = "slettet kommentaren sin";
+
+/* loco:6049df4d5c2c3a04bc3979af */
+"fileDetailsActivityFileCommentLike" = "likte en kommentar";
+
+/* loco:6049df4d5c2c3a04bc3979b1 */
+"fileDetailsActivityFileCommentUnlike" = "fjernet liket sitt fra en kommentar";
+
+/* loco:6049df4d5c2c3a04bc3979b2 */
+"fileDetailsActivityFileCommentUpdate" = "endret kommentaren sin";
+
+/* loco:6049df4d5c2c3a04bc3979b3 */
+"fileDetailsActivityFileCreate" = "opprettet filen";
+
+/* loco:6049df4d5c2c3a04bc3979b4 */
+"fileDetailsActivityFileDelete" = "slettet filen";
+
+/* loco:6049df4d5c2c3a04bc3979b5 */
+"fileDetailsActivityFileFavoriteCreate" = "la til filen i favorittsamlingen sin";
+
+/* loco:6049df4d5c2c3a04bc3979b6 */
+"fileDetailsActivityFileFavoriteRemove" = "fjernet filen fra favorittsamlingen sin";
+
+/* loco:6049df4d5c2c3a04bc3979b7 */
+"fileDetailsActivityFileMove" = "flyttet filen";
+
+/* loco:6049df4d5c2c3a04bc3979b8 */
+"fileDetailsActivityFileRename" = "ga nytt navn til filen";
+
+/* loco:6049df4d5c2c3a04bc3979b9 */
+"fileDetailsActivityFileRestore" = "gjenopprettet filen";
+
+/* loco:6049df4d5c2c3a04bc3979ba */
+"fileDetailsActivityFileShareCreate" = "delte filen";
+
+/* loco:6049df4d5c2c3a04bc3979bb */
+"fileDetailsActivityFileShareDelete" = "stoppet deling av filen";
+
+/* loco:6049df4d5c2c3a04bc3979bc */
+"fileDetailsActivityFileShareLinkCreate" = "opprettet delingslenken til filen";
+
+/* loco:6049df4d5c2c3a04bc3979bd */
+"fileDetailsActivityFileShareLinkDelete" = "fjernet delingslenken til filen";
+
+/* loco:6049df4d5c2c3a04bc3979be */
+"fileDetailsActivityFileShareLinkShow" = "viste delingslenken til filen";
+
+/* loco:6049df4d5c2c3a04bc3979bf */
+"fileDetailsActivityFileShareLinkUpdate" = "endret delingslenken til filen";
+
+/* loco:6049df4d5c2c3a04bc3979c0 */
+"fileDetailsActivityFileShareUpdate" = "endret delingen av filen";
+
+/* loco:6049df4d5c2c3a04bc3979c1 */
+"fileDetailsActivityFileTrash" = "flyttet filen til papirkurven";
+
+/* loco:618b86f57f250551b44a14b2 */
+"fileDetailsActivityFileUncategorize" = "fjernet en kategori fra elementet";
+
+/* loco:6049df4d5c2c3a04bc3979c2 */
+"fileDetailsActivityFileUpdate" = "endret filen";
+
+/* loco:6049df4d5c2c3a04bc3979c3 */
+"fileDetailsActivityFolderAccess" = "åpnet mappen";
+
+/* loco:6049df4d5c2c3a04bc3979c4 */
+"fileDetailsActivityFolderCommentCreate" = "kommenterte mappen";
+
+/* loco:6049df4d5c2c3a04bc3979c5 */
+"fileDetailsActivityFolderCreate" = "opprettet mappen";
+
+/* loco:6049df4d5c2c3a04bc3979c6 */
+"fileDetailsActivityFolderDelete" = "slettet mappen";
+
+/* loco:6049df4d5c2c3a04bc3979c7 */
+"fileDetailsActivityFolderFavoriteCreate" = "la til mappen i favorittsamlingen sin";
+
+/* loco:6049df4d5c2c3a04bc3979c8 */
+"fileDetailsActivityFolderFavoriteRemove" = "slettet favorittmappen";
+
+/* loco:6049df4d5c2c3a04bc3979c9 */
+"fileDetailsActivityFolderMove" = "flyttet mappen";
+
+/* loco:6049df4d5c2c3a04bc3979ca */
+"fileDetailsActivityFolderRename" = "ga mappen nytt navn";
+
+/* loco:6049df4d5c2c3a04bc3979cb */
+"fileDetailsActivityFolderRestore" = "gjenopprettet mappen";
+
+/* loco:6049df4d5c2c3a04bc3979cc */
+"fileDetailsActivityFolderShareCreate" = "delte mappen";
+
+/* loco:6049df4d5c2c3a04bc3979cd */
+"fileDetailsActivityFolderShareDelete" = "stoppet deling av mappen";
+
+/* loco:6049df4d5c2c3a04bc3979ce */
+"fileDetailsActivityFolderShareLinkCreate" = "opprettet delingslenken for mappen";
+
+/* loco:6049df4d5c2c3a04bc3979cf */
+"fileDetailsActivityFolderShareLinkDelete" = "fjernet delingslenken for mappen";
+
+/* loco:6049df4d5c2c3a04bc3979d0 */
+"fileDetailsActivityFolderShareLinkShow" = "viste delingslenken for mappen";
+
+/* loco:6049df4d5c2c3a04bc3979d1 */
+"fileDetailsActivityFolderShareLinkUpdate" = "endret delingslenken for mappen";
+
+/* loco:6049df4d5c2c3a04bc3979d2 */
+"fileDetailsActivityFolderShareUpdate" = "endret delingen av mappen";
+
+/* loco:6049df4d5c2c3a04bc3979d3 */
+"fileDetailsActivityFolderTrash" = "flyttet mappen til papirkurven";
+
+/* loco:6049df4d5c2c3a04bc3979d4 */
+"fileDetailsActivityFolderUpdate" = "endret mappen";
+
+/* loco:6049df4d5c2c3a04bc3979d7 */
+"fileDetailsCommentsConfirmationSnackbar" = "Kommentar lagt til";
+
+/* loco:6049df4d5c2c3a04bc3979d5 */
+"fileDetailsCommentsFieldName" = "Din kommentar";
+
+/* loco:6049df4d5c2c3a04bc3979d6 */
+"fileDetailsCommentsTitle" = "Kommentarer";
+
+/* loco:6075c107fa8e01546e12d402 */
+"fileDetailsCommentsUnavailable" = "Åpne dokumentet for å legge til kommentarer. Deretter velger du elementet du vil kommentere.";
+
+/* loco:6239bfddc542c868b2588ed2 */
+"fileDetailsInfoContent" = "Innhold";
+
+/* loco:6239bfa182666831bc78f4f2 */
+"fileDetailsInfoEmptyFolder" = "Tom mappe";
+
+/* loco:6065c93ed104784cae1aac12 */
+"fileDetailsInfosAddedDateTitle" = "Lagt til i drive";
+
+/* loco:6049df4d5c2c3a04bc3979d8 */
+"fileDetailsInfosCreationDateTitle" = "Opprettelse";
+
+/* loco:6049df4d5c2c3a04bc3979d9 */
+"fileDetailsInfosOriginalSize" = "Opprinnelig størrelse";
+
+/* loco:6049df4d5c2c3a04bc3979da */
+"fileDetailsInfosOwnerTitle" = "Eier";
+
+/* loco:6049df4d5c2c3a04bc3979db */
+"fileDetailsInfosSharedUsersTitle" = "Brukere";
+
+/* loco:6049df4d5c2c3a04bc3979dc */
+"fileDetailsInfosTitle" = "Informasjon";
+
+/* loco:6049df4d5c2c3a04bc3979dd */
+"fileDetailsInfosTotalSizeTitle" = "Størrelse (med versjoner)";
+
+/* loco:6049df4d5c2c3a04bc3979de */
+"fileDetailsNoComments" = "Ingen kommentarer for øyeblikket";
+
+/* loco:66a369b1a84f9b44440e2423 */
+"fileExtesionFilterPlaceholder" = ".jpg, .mov, etc.";
+
+/* loco:6049df4d5c2c3a04bc3979df */
+"fileInfoInputDuplicateFile" = "Navn på kopien";
+
+/* loco:614b15f40740a72bd13f4ff5 */
+"fileListCopyDoneSnackbar" = "Kopier fullført";
+
+/* loco:614b15d8e3a34a3e280327f2 */
+"fileListCopyInProgressSnackbar" = "Kopiering pågår: %1$d/%2$d";
+
+/* loco:614b15ae559e0f20c97d8cc3 */
+"fileListCopyStartedSnackbar" = "Kopiering startet";
+
+/* loco:611b6d16db25751a36410132 */
+"fileListDeletionDoneSnackbar" = "Sletting fullført";
+
+/* loco:611b6d042487e54162428902 */
+"fileListDeletionInProgressSnackbar" = "Sletting pågår: %1$d/%2$d";
+
+/* loco:611b6cc2f8370857fd1d1182 */
+"fileListDeletionStartedSnackbar" = "Sletting startet";
+
+/* loco:611b6e5b3d3bce39f32434e2 */
+"fileListMoveDoneSnackbar" = "Flytting fullført";
+
+/* loco:6049df4d5c2c3a04bc397aa4 */
+"fileListMoveFileConfirmationSnackbariOS" = "En fil flyttet til %@";
+
+/* loco:6049df4d5c2c3a04bc397aa5 */
+"fileListMoveFileConfirmationSnackbariOS-plural" = "%1$d filer flyttet til %2$@";
+
+/* loco:69bcfe53aed2af87a302d44c */
+"fileListMoveFileConfirmationSnackbariOS-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d44d */
+"fileListMoveFileConfirmationSnackbariOS-plural-3" = "";
+
+/* loco:611b6e42cb8967787a31ee82 */
+"fileListMoveInProgressSnackbar" = "Flytting pågår: %1$d/%2$d";
+
+/* loco:611b6e2b9ad5ad3c690608e3 */
+"fileListMoveStartedSnackbar" = "Flytting startet";
+
+/* loco:6049df4d5c2c3a04bc3979e1 */
+"fileListTitle" = "Filer";
+
+/* loco:6049df4d5c2c3a04bc3979e2 */
+"filePermissionTitle" = "Velg rettighet";
+
+/* loco:610bd30a99648743be1f0a13 */
+"fileProviderExtensionDescription" = "Hvis dette alternativet er deaktivert, vil kDrive ikke lenger være tilgjengelig i Filer-appen og i tredjepartsapper.";
+
+/* loco:610a903379317f32214437b4 */
+"fileProviderExtensionTitle" = "Vis i Filer";
+
+/* loco:6049df4d5c2c3a04bc3979e3 */
+"fileShareAddMessage" = "Legg til en melding for gjester (valgfritt)";
+
+/* loco:6049df4d5c2c3a04bc3979e5 */
+"fileShareDetailsFileTitle" = "Fil %@ deling og rettigheter";
+
+/* loco:6049df4d5c2c3a04bc3979e6 */
+"fileShareDetailsFolderTitle" = "Mappe %@ deling og rettigheter";
+
+/* loco:6049df4d5c2c3a04bc3979e8 */
+"fileShareDetailsUsersAccesTitle" = "Brukere med tilgang";
+
+/* loco:6049df4d5c2c3a04bc3979e9 */
+"fileShareFileTitle" = "Del fil";
+
+/* loco:6049df4d5c2c3a04bc3979ea */
+"fileShareFolderTitle" = "Del mappe";
+
+/* loco:6049df4d5c2c3a04bc3979eb */
+"fileShareLinkSettingsAccessRightTitle" = "Redigeringsrettigheter";
+
+/* loco:6049df4d5c2c3a04bc3979ec */
+"fileShareLinkSettingsTitle" = "Avanserte innstillinger for delingslenke";
+
+/* loco:6169607a87650c03cf1ded24 */
+"fileTypeFilterTitle" = "Filtype";
+
+/* loco:61696046c3498f0db20ca172 */
+"filtersTitle" = "Filter";
+
+/* loco:61a5f2b9477a9a261e636f43 */
+"folderColorDescription" = "Endre fargen på mappene dine for å tilpasse og organisere kDrive bedre etter dine ønsker.";
+
+/* loco:61a5f0ec40299f71720dbedf */
+"folderColorTitle" = "Mappefarge";
+
+/* loco:6049df4d5c2c3a04bc3979ed */
+"folderDescription" = "Privat eller delt mappe";
+
+/* loco:62e01023bdd522033953b8c5 */
+"galleryTitle" = "Galleri";
+
+/* loco:6281fb1abfdfb513f5356323 */
+"heicRecommandation" = "Vi anbefaler å lagre som JPEG fordi mange tjenester ikke kan vise HEIC-bilder.";
+
+/* loco:6049df4d5c2c3a04bc3979ee */
+"hintInputDirName" = "Mappenavn";
+
+/* loco:6049df4d5c2c3a04bc3979ef */
+"hintInputFileName" = "Filnavn";
+
+/* loco:6049df4d5c2c3a04bc3979f0 */
+"homeLastActivities" = "Siste aktivitet";
+
+/* loco:6049df4d5c2c3a04bc3979f1 */
+"homeLastFilesTitle" = "Mine siste endringer";
+
+/* loco:6049df4d5c2c3a04bc3979f3 */
+"homeNetworkUnavailableDescription" = "Elementer kan ikke være synlige hvis enheten er frakoblet.";
+
+/* loco:6049df4d5c2c3a04bc3979f4 */
+"homeNoActivities" = "Ingen aktivitet for øyeblikket";
+
+/* loco:6049df4d5c2c3a04bc3979f5 */
+"homeNoActivitiesDescription" = "Når filer blir lagt til, vil du se dine siste aktiviteter her og de til andre brukere av kDrive din.";
+
+/* loco:6049df4d5c2c3a04bc3979f6 */
+"homeNoActivitiesDescriptionSolo" = "Her finner du de sist endrede filene i kDrive.";
+
+/* loco:6049df4d5c2c3a04bc3979f7 */
+"homeNoPictures" = "Ingen bilder for øyeblikket";
+
+/* loco:6049df4d5c2c3a04bc3979f8 */
+"homeSeeAllImages" = "Vis alle bildene mine";
+
+/* loco:6049df4d5c2c3a04bc3979f9 */
+"homeTitle" = "Velkommen";
+
+/* loco:6889c36b7cef77ada70ae2d3 */
+"imageCache" = "Bilde-cache";
+
+/* loco:6889c331e5ba3eb6640d7e22 */
+"importDirectory" = "Importeringer";
+
+/* loco:6049df4d5c2c3a04bc3979fb */
+"inputExpirationDate" = "Utløpsdato";
+
+/* loco:617b99510ec1ee7d7e2accd2 */
+"inputExpirationTime" = "Utløpstid";
+
+/* loco:6049df4d5c2c3a04bc3979fc */
+"lastEditsTitle" = "Siste endringer";
+
+/* loco:668cfa288f78f439cc044b92 */
+"localizedFilenamePrivateTeamSpace" = "Min mappe";
+
+/* loco:65a140c3cdbe107c5a025352 */
+"localizedFilenameTeamSpace" = "Organisasjonens mapper";
+
+/* loco:60dc3d5b27c2f44e2f7a3c12 */
+"locateButton" = "Lokaliser";
+
+/* loco:6049df4d5c2c3a04bc3979fd */
+"lockAppTitle" = "Applikasjonen er låst";
+
+/* loco:67f50a35f35eb567990c2e32 */
+"maintenanceAsleepDescription" = "For å redusere miljøpåvirkningen har kDrive gått i hvilemodus etter en lengre periode med inaktivitet.\nStart den på nytt for å gjenoppta tilgang til filene dine!";
+
+/* loco:67f509c180ba041c690a8e02 */
+"maintenanceAsleepTitle" = "kDrive %@ har tatt seg en liten blund!";
+
+/* loco:67f50e36f46a2825af088213 */
+"maintenanceWakeUpButton" = "Start kDrive på nytt";
+
+/* loco:616960e0fdf2c313b4239902 */
+"manageCategoriesCreateTitle" = "Opprett %@";
+
+/* loco:616960c81341d1563201c7a2 */
+"manageCategoriesNoCategory" = "Ingen kategori";
+
+/* loco:61695f9a1385a25fd21f9fd3 */
+"manageCategoriesTitle" = "Administrér kategorier";
+
+/* loco:604b1ff2a5300e5b7d75fb82 */
+"manageDropboxTitle" = "Administrér postboks %@";
+
+/* loco:614c861005fa88548e40ee83 */
+"manageStorageTitle" = "Administrér lokal lagring";
+
+/* loco:6049df4d5c2c3a04bc3979fe */
+"menuTitle" = "Meny";
+
+/* loco:614c8925d281f46671687393 */
+"modalClearCacheDirectoryDescription" = "Vil du slette innholdet i \"%@\"?";
+
+/* loco:614c8965f987554eab2cc096 */
+"modalClearCacheFileDescription" = "Vil du fjerne filen \"%@\" fra lokal cache? Den vil ikke bli fjernet fra kDrive.";
+
+/* loco:614c88ddf987554eab2cc092 */
+"modalClearCacheTitle" = "Tøm buffer";
+
+/* loco:6049df4d5c2c3a04bc3979ff */
+"modalCommentAddTitle" = "Rediger en kommentar";
+
+/* loco:6049df4d5c2c3a04bc397a00 */
+"modalCommentDeleteDescription" = "Vil du virkelig slette kommentaren din?";
+
+/* loco:6049df4d5c2c3a04bc397a01 */
+"modalCreateFileSuccess" = "%@ opprettet";
+
+/* loco:6049df4d5c2c3a04bc397a02 */
+"modalCreateFileTitle" = "Opprett en fil";
+
+/* loco:61695feae5d07852df60f1c3 */
+"modalDeleteCategoryDescription" = "Vil du slette kategorien %@ permanent for alle kDrive-brukere?";
+
+/* loco:6049df4d5c2c3a04bc397a9a */
+"modalDeleteDescription" = "Vil du virkelig slette %@ permanent?";
+
+/* loco:6049dfb2105eca5bbd0801b7 */
+"modalDeleteDescription-plural" = "Vil du virkelig slette %d elementer permanent?";
+
+/* loco:69bcfe53aed2af87a302d458 */
+"modalDeleteDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d459 */
+"modalDeleteDescription-plural-3" = "";
+
+/* loco:60e44729e8e4b7695643f9b2 */
+"modalDeletePhotosDescription" = "Vil du slette bilder lastet opp til kDrive fra enheten din?";
+
+/* loco:60e442f92f7b3f3b756eb962 */
+"modalDeletePhotosTitle" = "Automatisk sletting av bilder";
+
+/* loco:6049df4d5c2c3a04bc397a03 */
+"modalDeleteTitle" = "Slett permanent";
+
+/* loco:606d6853ce3979753c4243e5 */
+"modalEmptyTrashDescription" = "Vil du virkelig tømme papirkurven?";
+
+/* loco:606d683dce3979753c4243e3 */
+"modalEmptyTrashTitle" = "Tøm papirkurv";
+
+/* loco:6049df8ecfa0dd393a577ea2 */
+"modalFileDeleteDescription" = "Vil du virkelig slette %@? Obs: Denne handlingen kan ikke angres!";
+
+/* loco:6049df8ecfa0dd393a577ea3 */
+"modalFilesDeleteDescription" = "Vil du virkelig slette de valgte filene? Obs: Denne handlingen kan ikke angres!";
+
+/* loco:605b0f55ddabfd136f653194 */
+"modalLeaveShareDescription" = "Vil du virkelig slutte å dele filen %@?";
+
+/* loco:605b0f882442c452cb76d472 */
+"modalLeaveShareTitle" = "Slutt å dele fil";
+
+/* loco:6049df4d5c2c3a04bc397a96 */
+"modalMoveTrashDescription" = "Flytt %@ til papirkurven?";
+
+/* loco:6049dfb2105eca5bbd0801b5 */
+"modalMoveTrashDescription-plural" = "Flytt %d elementer til papirkurven?";
+
+/* loco:69bcfe53aed2af87a302d45a */
+"modalMoveTrashDescription-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d45b */
+"modalMoveTrashDescription-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc397a04 */
+"modalMoveTrashTitle" = "Flytt til papirkurv";
+
+/* loco:697a226ca7f90b21b20ef8b2 */
+"modalRemoveUserDriveAccessDescription" = "Vil du virkelig fjerne brukeren %1$@ sin tilgang til kDrive %2$@?";
+
+/* loco:6049df8ecfa0dd393a577ea4 */
+"modalTrashFileDescription" = "Vil du virkelig flytte %@ til papirkurven?";
+
+/* loco:6049df8ecfa0dd393a577ea5 */
+"modalTrashFilesDescription" = "Vil du virkelig flytte de valgte filene til papirkurven?";
+
+/* loco:6049df4d5c2c3a04bc397a05 */
+"modalUserPermissionRemoveDescription" = "Vil du virkelig fjerne brukeren %@ sin tilgang til denne filen?";
+
+/* loco:61696058c328022b120007c6 */
+"modificationDateFilterTitle" = "Endringsdato";
+
+/* loco:6049df4d5c2c3a04bc397a06 */
+"mySharesNoFile" = "Ingen fil delt";
+
+/* loco:6049df4d5c2c3a04bc397a07 */
+"mySharesTitle" = "Mine delinger";
+
+/* loco:6049df4d5c2c3a04bc397a08 */
+"newFolderTitle" = "Hva vil du legge til?";
+
+/* loco:60ad169bd79aa2487c624742 */
+"noAccountDescription" = "Ingen konto tilgjengelig. Start programmet for å logge inn.";
+
+/* loco:6049df4d5c2c3a04bc397a09 */
+"noDriveDescription" = "Prøv kDrive gratis eller logg inn med en annen brukerkonto.";
+
+/* loco:6049df4d5c2c3a04bc397a0a */
+"noDriveTitle" = "Du har ikke kDrive ennå!";
+
+/* loco:628b37bd60033e17fb7d3882 */
+"noFilesDescription" = "Denne mappen er tom.";
+
+/* loco:6049df4d5c2c3a04bc397a0c */
+"noFilesDescriptionNoNetwork" = "Kan ikke hente informasjon fra mappen. Sjekk nettverkstilkoblingen eller prøv igjen senere.";
+
+/* loco:6049df4d5c2c3a04bc397a0b */
+"noFilesDescriptionWithCreationRights" = "Denne mappen er tom. Trykk på +-knappen for å legge til filer her.";
+
+/* loco:60c11597ba8b664750680ca2 */
+"noMediaFolderTitle" = "Ingen mediemapper tilgjengelig";
+
+/* loco:68775c45dfd520437c08bed3 */
+"noRightsToOfficeLink" = "Ingen konto har tilgang til denne filen";
+
+/* loco:6049df4d5c2c3a04bc397a0d */
+"notEnoughStorageDescription1" = "Lagringsplassen på kDrive er nesten full. Oppgrader abonnementet ditt og lås opp nye funksjoner.";
+
+/* loco:6049df4d5c2c3a04bc397a0e */
+"notEnoughStorageDescription2" = "Lagringsplassen på kDrive er nesten full. Kontakt administratoren din slik at de kan oppgradere abonnementet ditt.";
+
+/* loco:6049df4d5c2c3a04bc397a0f */
+"notEnoughStorageUsed" = "brukt";
+
+/* loco:607947d62b29a7483d1c61a2 */
+"notSupportedExtensionDescription" = "Ønsker du å opprette en kopi av filen din med en kompatibel utvidelse for online redigering? Den originale %@-filen vil forbli uendret.\n";
+
+/* loco:60794789c3a8a86f4e611e42 */
+"notSupportedExtensionTitle" = "Utvidelsen %@ støttes ikke for online redigering";
+
+/* loco:690b600910daf9780f097b72 */
+"notification2faApproval" = "Bekreft pålogging";
+
+/* loco:6049df4d5c2c3a04bc397a10 */
+"notificationAll" = "Alle";
+
+/* loco:6049df4d5c2c3a04bc397a11 */
+"notificationCommentChannelName" = "Kommentarer";
+
+/* loco:610b77aabb918651d965e962 */
+"notificationCustom" = "Tilpasset";
+
+/* loco:610b77f24d5c2a372e29bf32 */
+"notificationDisable" = "Deaktivert";
+
+/* loco:6049df4d5c2c3a04bc397a12 */
+"notificationFileUpload" = "Filopplasting";
+
+/* loco:604b9caa43ed563ca07293f2 */
+"notificationGeneralChannelName" = "Generelle varsler";
+
+/* loco:6049df4d5c2c3a04bc397a13 */
+"notificationReceiveNotifications" = "Motta varsler";
+
+/* loco:6049df4d5c2c3a04bc397a14 */
+"notificationSharedWithMeChannelName" = "Delte elementer";
+
+/* loco:6049df4d5c2c3a04bc397a15 */
+"notificationStartDownloadTicker" = "Starter nedlasting fra serveren";
+
+/* loco:6049df4d5c2c3a04bc397a16 */
+"notificationStartUploadTicker" = "Starter opplasting til serveren";
+
+/* loco:6049df4d5c2c3a04bc397a17 */
+"notificationTitle" = "Varsler";
+
+/* loco:690b6057b3cf1ccfbd0f3a02 */
+"notificationTitle2faApproval" = "kDrive";
+
+/* loco:6049df4d5c2c3a04bc397a18 */
+"notificationUploadDownloadChannelName" = "Opplastinger og nedlastinger";
+
+/* loco:6049dfb2105eca5bbd0801b4 */
+"notificationUploadServiceChannelName" = "Filopplastingstjenester";
+
+/* loco:6889c8fad38cd378d8019882 */
+"notificationsDisabledDescription" = "App-varsler er deaktivert: du kan aktivere dem i Innstillinger";
+
+/* loco:66f658cbb0e522d4f50cc2f2 */
+"obtainkDriveAdAlreadyGotAccount" = "Jeg har allerede en konto";
+
+/* loco:66f64e66297dda6eb402f022 */
+"obtainkDriveAdDescription" = "Lagre bildene, dokumentene og e-postene dine i Sveits hos en uavhengig bedrift som respekterer personvernet ditt.";
+
+/* loco:66f657511dc417a794017b92 */
+"obtainkDriveAdFreeTrialButton" = "Gratis prøveperiode";
+
+/* loco:66f64fa849bd6bdd0f0ae622 */
+"obtainkDriveAdListing1" = "15 GB gratis, deretter 2 TB opptil 106 TB";
+
+/* loco:66f65063f4b00a1c660ce462 */
+"obtainkDriveAdListing2" = "Oppretting og samarbeid på nett for Word-, Excel- og PowerPoint-dokumenter";
+
+/* loco:66f651361a641d2f5f0207d2 */
+"obtainkDriveAdListing3" = "Automatisk filimport fra Google Drive, Dropbox, One Drive, NextCloud, Hubic og WebDav";
+
+/* loco:66f64797fdc443552a0a5e92 */
+"obtainkDriveAdTitle" = "Få kDrive gratis";
+
+/* loco:6049df4d5c2c3a04bc397a19 */
+"offlineFileNoFile" = "Ingen filer offline";
+
+/* loco:6049df4d5c2c3a04bc397a1a */
+"offlineFileNoFileDescription" = "Velg en fil og gjør den tilgjengelig offline, slik at du kan finne den her når du ikke har nettverk.";
+
+/* loco:6049df4d5c2c3a04bc397a1b */
+"offlineFileTitle" = "Offline";
+
+/* loco:6049df4d5c2c3a04bc397a1c */
+"onBoardingDescription1" = "kDrive er kompatibel med alle enheter. Enten du er på kontoret, hjemme eller på farten, kan du jobbe, dele og få tilgang til alle dataene dine med ro i sinnet.";
+
+/* loco:6049df4d5c2c3a04bc397a1d */
+"onBoardingDescription2" = "Del filer enkelt og samarbeid i sanntid om tekstdokumenter, regneark eller team-presentasjoner.";
+
+/* loco:6049df4d5c2c3a04bc397a1e */
+"onBoardingDescription3" = "Dine bilder, videoer og skjermbilder vil bli lagret automatisk i din kDrive og tilgjengelig på alle dine enheter.";
+
+/* loco:6049df4d5c2c3a04bc397a1f */
+"onBoardingTitle1" = "Få tilgang til filene dine på alle dine enheter";
+
+/* loco:6049df4d5c2c3a04bc397a20 */
+"onBoardingTitle2" = "Jobb sammen på ett sted og bli mer effektiv";
+
+/* loco:6049df4d5c2c3a04bc397a21 */
+"onBoardingTitle3" = "Lagre minnene dine trygt";
+
+/* loco:6660083917d29585d5010582 */
+"openInPlaceDirectory" = "Åpne på stedet";
+
+/* loco:6049df4d5c2c3a04bc397a23 */
+"photoAccessDeniedDescription" = "Tilgang til dine bilder er deaktivert: du kan endre dette i Innstillinger";
+
+/* loco:627cf1dad81a13018111e4f2 */
+"photoFormatTitle" = "Alternativer";
+
+/* loco:638469dc5d9b75142a430ac2 */
+"photoLibraryAccessLimitedDescription" = "Tilgang til dine bilder er nødvendig for å lagre dine bilder og videoer.       ";
+
+/* loco:63846ac1f8786f515b61f752 */
+"photoLibraryAccessLimitedTitle" = "Begrenset eller nektet tilgang";
+
+/* loco:6765711b1f6cfc8c5408ee33 */
+"photoSyncSuspended" = "Koble til et Wi-Fi-nettverk eller tillat bruk av mobildata";
+
+/* loco:67657012f62b39abc50deb62 */
+"photoSyncSuspendedTitle" = "Sikkerhetskopiering av bilder er suspendert";
+
+/* loco:627cf782146a6d748e5e7262 */
+"photosHeaderDateFormat" = "MMMM yyyy";
+
+/* loco:6049df4d5c2c3a04bc397a22 */
+"picturesNoFile" = "Ingen bilder for øyeblikket";
+
+/* loco:6049df4d5c2c3a04bc397a24 */
+"previewDownloadIndication" = "Laster inn, vennligst vent…";
+
+/* loco:6528f45d04fb1c341b0ccfa2 */
+"previewFileProtectedError" = "Ingen forhåndsvisning tilgjengelig, denne filen er beskyttet med passord";
+
+/* loco:6049df4d5c2c3a04bc397a25 */
+"previewLoadError" = "Kan ikke laste forhåndsvisning";
+
+/* loco:6049df4d5c2c3a04bc397a26 */
+"previewNoPreview" = "Denne filen ser ikke ut til å ha en forhåndsvisning.";
+
+/* loco:6049df4d5c2c3a04bc397a27 */
+"previewPdfPages" = "%1$d av %2$d";
+
+/* loco:6049df4d5c2c3a04bc397a28 */
+"previewVideoSourceError" = "Videofilen støttes ikke av videospilleren";
+
+/* loco:6049df4d5c2c3a04bc397a3b */
+"privateSharedLinkTitle" = "Privat delingslenke";
+
+/* loco:66ffbbcd294f6022e60948f3 */
+"publicShareImportationInProgress" = "Nedlasting pågår i valgt mappe";
+
+/* loco:66e0295f01da3c1ab90c2d72 */
+"publicShareOutdatedLinkDescription" = "Lenken har blitt deaktivert eller har utløpt.\nFor å få tilgang til filene, send en melding til brukeren som delte lenken med deg slik at de kan reaktivere den.";
+
+/* loco:66e028cb3cd41df03c0a7003 */
+"publicShareOutdatedLinkTitle" = "Filene er ikke lenger tilgjengelige";
+
+/* loco:66d05b05fe43da3cb8009652 */
+"publicSharePasswordNeededDescription" = "Vennligst skriv inn passordet som ble gitt for å få tilgang til innholdet.";
+
+/* loco:66d05b5928ec407b32087892 */
+"publicSharePasswordNeededTitle" = "Beskyttet innhold";
+
+/* loco:617a50f1744434292a2f07a2 */
+"publicSharedLinkTitle" = "Offentlig delingslenke";
+
+/* loco:691f1b320ffa47846800e682 */
+"readFAQ" = "Les FAQ";
+
+/* loco:6049df4d5c2c3a04bc397a29 */
+"recentActivityMeTitle" = "Av meg";
+
+/* loco:6049df4d5c2c3a04bc397a2a */
+"recentActivityMyTeam" = "Av mitt team";
+
+/* loco:6049df4d5c2c3a04bc397a2b */
+"recentActivitySeeMore" = "Se flere nylige filer";
+
+/* loco:6818ae071c7e870445011a44 */
+"recentTitle" = "Nylige";
+
+/* loco:6049df4d5c2c3a04bc397a2c */
+"refreshTokenError" = "Du har blitt koblet fra";
+
+/* loco:65d76b35ab978ba1c5014122 */
+"reviewAlertTitle" = "Liker du kDrive?";
+
+/* loco:6049df4d5c2c3a04bc397a2d */
+"saveExternalFileInputFileName" = "Dokumentnavn";
+
+/* loco:6049df4d5c2c3a04bc397a2e */
+"saveExternalFileTitle" = "Lagre til Drive";
+
+/* loco:62864b7da70e2c3f9332b992 */
+"savePhotoJpegDetail" = "(anbefalt)";
+
+/* loco:6049df4d5c2c3a04bc397a2f */
+"searchFilterTitle" = "Filtyper";
+
+/* loco:616960f2351cc27ee05bbaf4 */
+"searchFiltersSelectDate" = "Velg en dato";
+
+/* loco:61696114b9fa15412d6a2fb6 */
+"searchFiltersSelectType" = "Velg en filtype";
+
+/* loco:668feca6092b456442086012 */
+"searchForAnExtension" = "Søk etter en utvidelse";
+
+/* loco:6049df4d5c2c3a04bc397a30 */
+"searchLastTitle" = "Nylige søk";
+
+/* loco:6049df4d5c2c3a04bc397a31 */
+"searchNoFile" = "Ingen resultater, vennligst endre søkekriteriene dine";
+
+/* loco:6049df4d5c2c3a04bc397a32 */
+"searchTitle" = "Søk";
+
+/* loco:6049df4d5c2c3a04bc397a33 */
+"searchViewHint" = "Søk etter en fil…";
+
+/* loco:610a8f8e03e07e47d539af82 */
+"securityTitle" = "Sikkerhet";
+
+/* loco:6049df4d5c2c3a04bc397a36 */
+"selectDriveTitle" = "Velg en kDrive";
+
+/* loco:68554bfb0b1581a8b40b34a2 */
+"selectFolderTitle" = "Velg en mappe";
+
+/* loco:627cf1f7089b7c7d9e3597e3 */
+"selectPhotoFormat" = "Lagre .HEIC-bilder som";
+
+/* loco:6049df4d5c2c3a04bc397a38 */
+"settingsOnlyWifiSyncDescription" = "Opplastinger og oppdateringer av frakoblede filer vil kun bli utført med en Wi-Fi-tilkobling.";
+
+/* loco:6049df4d5c2c3a04bc397a39 */
+"settingsOnlyWifiSyncTitle" = "Kun Wi-Fi-overføring";
+
+/* loco:67bc4dd60ddd119f9d056e02 */
+"settingsOptionDataManagement" = "Databehandling";
+
+/* loco:67a9f25b711672a919072474 */
+"settingsSectionGeneral" = "Generelt";
+
+/* loco:6049df4d5c2c3a04bc397a3a */
+"settingsTitle" = "Innstillinger";
+
+/* loco:6049df4d5c2c3a04bc397a3e */
+"shareFileInputUserAndEmail" = "Inviter en bruker eller en e-postadresse…";
+
+/* loco:6049df4d5c2c3a04bc397a44 */
+"shareLinkOfficePermissionReadFileDescription" = "Brukere kan kun se dokumentet.";
+
+/* loco:6182b4b76dbb2b6b393f3702 */
+"shareLinkOfficePermissionReadFolderDescription" = "Brukere kan bare vise filer i den delte mappen.";
+
+/* loco:6049df4d5c2c3a04bc397a45 */
+"shareLinkOfficePermissionReadTitle" = "Se";
+
+/* loco:6049df4d5c2c3a04bc397a46 */
+"shareLinkOfficePermissionWriteFileDescription" = "Brukere kan endre dokumentet.";
+
+/* loco:6182b577c9b65b323b378093 */
+"shareLinkOfficePermissionWriteFolderDescription" = "Brukere kan redigere dokument-, regneark- eller presentasjonsfil(er).";
+
+/* loco:6049df4d5c2c3a04bc397a47 */
+"shareLinkOfficePermissionWriteTitle" = "Endre";
+
+/* loco:61814fb574c48e49a560d35d */
+"shareLinkPasswordRightDescription" = "Alle som har linken må angi et passord for å få tilgang til %@.";
+
+/* loco:6049df4d5c2c3a04bc397a42 */
+"shareLinkPasswordRightTitle" = "Med passord";
+
+/* loco:6049df4d5c2c3a04bc397a40 */
+"shareLinkPrivateRightTitle" = "Privat";
+
+/* loco:618e3208c0cdbb2371438302 */
+"shareLinkPublicRightDescription" = "Alle som har linken kan %1$@ denne %2$@%3$@%4$@.";
+
+/* loco:618e728db8279f0bdd5aada2 */
+"shareLinkPublicRightDescriptionDate" = " frem til %@";
+
+/* loco:618e6dd5d3c1c1110e1b2a73 */
+"shareLinkPublicRightDescriptionPassword" = "%@ beskyttet av et passord";
+
+/* loco:618e653eab470f504731f937 */
+"shareLinkPublicRightDocumentDescriptionShort" = "Alle som har linken kan få tilgang til dokumentet.";
+
+/* loco:6181510554a16d742506c4f5 */
+"shareLinkPublicRightFileDescriptionShort" = "Alle som har linken kan få tilgang til filen.";
+
+/* loco:618e50a5eddeea65b017cc82 */
+"shareLinkPublicRightFolderDescriptionShort" = "Alle som har linken kan få tilgang til mappen.";
+
+/* loco:6049df4d5c2c3a04bc39792a */
+"shareLinkPublicRightTitle" = "Offentlig";
+
+/* loco:618151be73ed775a66144903 */
+"shareLinkRestrictedRightDescription" = "Bare brukere som er lagt til kan få tilgang til denne %@ basert på sine rettigheter.";
+
+/* loco:618e669594f4573acb14d382 */
+"shareLinkRestrictedRightDocumentDescriptionShort" = "Bare brukere som er lagt til kan få tilgang til dokumentet.";
+
+/* loco:618e30058e079f36c11ab422 */
+"shareLinkRestrictedRightFileDescriptionShort" = "Bare brukere som er lagt til kan få tilgang til filen.";
+
+/* loco:618e592000a6e0021b1da285 */
+"shareLinkRestrictedRightFolderDescriptionShort" = "Bare brukere som er lagt til kan få tilgang til mappen.";
+
+/* loco:6049df4d5c2c3a04bc397a49 */
+"shareLinkSettingsAddExpirationDateDescription" = "Delingslinken vil bare fungere frem til utløpsdatoen.";
+
+/* loco:6049df4d5c2c3a04bc397a4a */
+"shareLinkSettingsAllowDownloadDescription" = "Brukere kan laste ned filer via denne linken.";
+
+/* loco:6049df4d5c2c3a04bc397a4b */
+"shareLinkSettingsAllowDownloadTitle" = "Nedlasting fra delingslinken";
+
+/* loco:618e5bf5202c3d2ffb09072a */
+"shareLinkTypeDocument" = "dokument";
+
+/* loco:618e5bcff21225023d4773c0 */
+"shareLinkTypeFile" = "fil";
+
+/* loco:618e5b84172b1b1bbc254915 */
+"shareLinkTypeFolder" = "mappe";
+
+/* loco:6123b3ef6ed5824956771de2 */
+"shareUserExternal" = "Ekstern kDrive-bruker";
+
+/* loco:6049df4d5c2c3a04bc397a4f */
+"shareUserNotAccepted" = "Brukeren har ikke godtatt delingen ennå og er en ekstern bruker på kDrive.";
+
+/* loco:604a2f6d3949bd0d7330a633 */
+"sharedConflictDescription" = "Bruker %1$@ kan allerede få tilgang til denne mappen med rettighet til \"%2$@\". Hvis du deler, får de tilgang til mappen med rettighet til \"%3$@\"";
+
+/* loco:604a2f6d3949bd0d7330a632 */
+"sharedConflictManyUserDescription" = "Noen brukere kan allerede få tilgang til denne mappen. Hvis du deler, får de tilgang til mappen med rettighet til \"%@\"";
+
+/* loco:604a2f2e0ec97567583079a3 */
+"sharedConflictTitle" = "Tillatelseskonflikt";
+
+/* loco:6049df4d5c2c3a04bc397a3c */
+"sharedWithMeNoFile" = "Ingen filer delt med meg";
+
+/* loco:6049df4d5c2c3a04bc397a3d */
+"sharedWithMeTitle" = "Delt med meg";
+
+/* loco:68da2ce6292e9175f608b042 */
+"sharesTitle" = "Delte filer";
+
+/* loco:629f1ad12117e31124690d64 */
+"snackBarAccountDeleted" = "Konto slettet";
+
+/* loco:6169601e8934a0564732b7d2 */
+"snackBarCategoryDeleted" = "Kategori slettet";
+
+/* loco:629f1b5bfc67572038545e23 */
+"snackBarErrorAccountDeletion" = "Feil ved sletting av konto";
+
+/* loco:62a8409e5803ef33d9677572 */
+"snackBarImageVideoSaved" = "%d filer lagret i fotobiblioteket";
+
+/* loco:6049df4d5c2c3a04bc397a9c */
+"snackbarDeleteConfirmation" = "%@ slettet permanent";
+
+/* loco:606d68683b8add66d9636d33 */
+"snackbarEmptyTrashConfirmation" = "Papirkurven er tømt";
+
+/* loco:6050df602fdc4b67852aac72 */
+"snackbarFileCreateConfirmation" = "Fil opprettet";
+
+/* loco:6049df4d5c2c3a04bc397a50 */
+"snackbarImageSavedConfirmation" = "Bilde lagret";
+
+/* loco:605b1442458ddf7cc4668642 */
+"snackbarLeaveShareConfirmation" = "Deling er stoppet";
+
+/* loco:6049df4d5c2c3a04bc397a98 */
+"snackbarMoveTrashConfirmation" = "%@ flyttet til papirkurven";
+
+/* loco:60db1a607e10290db82d6d72 */
+"snackbarProcessingUploads" = "Behandler opplastinger";
+
+/* loco:6049df4d5c2c3a04bc397a51 */
+"snackbarVideoSavedConfirmation" = "Video lagret";
+
+/* loco:6049df4d5c2c3a04bc397a53 */
+"sortBigger" = "Større";
+
+/* loco:60c0955b330ced44e61ac4c4 */
+"sortDay" = "Per dag";
+
+/* loco:6049df4d5c2c3a04bc397a55 */
+"sortExtension" = "Filtype";
+
+/* loco:65e089a9f1203bf18d07e823 */
+"sortLeastRelevant" = "Minst relevant";
+
+/* loco:60c095a650430a455a1a1963 */
+"sortMonth" = "Per måned";
+
+/* loco:62961cefada5091f29102c32 */
+"sortMostRecentAdded" = "Nylig lagt til";
+
+/* loco:65e0875a2630c8df780f4932 */
+"sortMostRelevant" = "Mest relevant";
+
+/* loco:6049df4d5c2c3a04bc397a58 */
+"sortNameAZ" = "Navn: A til Å";
+
+/* loco:6049df4d5c2c3a04bc397a59 */
+"sortNameZA" = "Navn: Å til A";
+
+/* loco:6049df4d5c2c3a04bc397a5a */
+"sortOlder" = "Eldre";
+
+/* loco:62961ec80bcd580ee806f012 */
+"sortOldestAdded" = "Eldst lagt til";
+
+/* loco:6049df4d5c2c3a04bc397a5c */
+"sortRecent" = "Nyere";
+
+/* loco:6049df4d5c2c3a04bc397a5d */
+"sortSmaller" = "Mindre";
+
+/* loco:6049df4d5c2c3a04bc397a5f */
+"sortTitle" = "Sorter";
+
+/* loco:60c095d625e1597da2490d03 */
+"sortYear" = "Per år";
+
+/* loco:6141c2e0746dd37e5a318583 */
+"storeAccessDeniedDescription" = "Du har ikke rettigheter til å endre tilbudet for denne kDrive. Vennligst kontakt administrator.";
+
+/* loco:6141c2b723cae070d728bce2 */
+"storeAccessDeniedTitle" = "Tilgang nektet";
+
+/* loco:6141c24eced39f0b645d50f2 */
+"storeBillingWarningDescription" = "Du kan ikke administrere abonnementet ditt fra denne appen, da det for øyeblikket håndteres på en annen måte.";
+
+/* loco:6141c373cf51575a0e0cae93 */
+"storeExistingIAPDescription" = "Du kan ikke opprette flere abonnementer med kjøp i app.";
+
+/* loco:6141c2f923cae070d728bcf0 */
+"storeExistingIAPTitle" = "Eksisterende abonnement";
+
+/* loco:612612838211f509eb5b9232 */
+"storeMonthly" = "Månedlig";
+
+/* loco:6127420fdde00c3fc7143082 */
+"storeOfferSoloDescription" = "Maksimalt 1 bruker\n2 TB lagring";
+
+/* loco:6127422d1a55ab468f37d942 */
+"storeOfferSoloFeature1" = "Tilpass delingslenker";
+
+/* loco:6127425c8673d310e74c92d2 */
+"storeOfferSoloFeature2" = "WebDAV-protokollstøtte";
+
+/* loco:612742d5731234595079c313 */
+"storeOfferSoloFeature3" = "Support 7/7";
+
+/* loco:6127433d5629bf008e39ff53 */
+"storeOfferTeamDescription" = "6 brukere inkludert og maksimalt\n3 TB lagring";
+
+/* loco:6127435a684d0a521f2972b2 */
+"storeOfferTeamFeature1" = "Alt i Solo-tilbudet";
+
+/* loco:612743756936aa666738a542 */
+"storeOfferTeamFeature2" = "Samarbeid med flere brukere";
+
+/* loco:6127438b5f057144c067e612 */
+"storeOfferTeamFeature3" = "Innleveringsboks";
+
+/* loco:612743aca7921f26e15b4d72 */
+"storeOfferTeamFeature4" = "Enkel brukeradministrasjon";
+
+/* loco:612741dada8e9e11e76bfe22 */
+"storePaymentNotAuthorized" = "Kjøp i app er ikke autorisert";
+
+/* loco:612612d2a6256953bb0a35b3 */
+"storePeriodDay" = "dag";
+
+/* loco:612612f4bbb2fe14eb477764 */
+"storePeriodMonth" = "måned";
+
+/* loco:6126130d2fe2170e18255844 */
+"storePeriodUnknown" = "periode";
+
+/* loco:612612e3185e7f2e205b4396 */
+"storePeriodWeek" = "uke";
+
+/* loco:61261300fcaaf43fed779b52 */
+"storePeriodYear" = "år";
+
+/* loco:6126132cf0f4844e5e174b02 */
+"storePricing" = "%1$@ for %2$@";
+
+/* loco:612612ba2fe2170e18255842 */
+"storeRetrieving" = "Henter…";
+
+/* loco:6126137b32c58504e96a36f3 */
+"storeSuccessDescription" = "Vi fullfører bestillingen, du vil bli varslet på e-post når kDrive er tilgjengelig.";
+
+/* loco:6126135a6c5d5a0c28679842 */
+"storeSuccessTitle" = "Takk for din tillit, vi er glade for å kunne arbeide sammen!";
+
+/* loco:6126126f2f09c246b1286ad6 */
+"storeTitle" = "Endre tilbudet ditt";
+
+/* loco:6126129081536410aa0ab9e3 */
+"storeYearly" = "Årlig";
+
+/* loco:610aabe5b46db619993bf2b4 */
+"supportTitle" = "Hjelp og support";
+
+/* loco:6049df4d5c2c3a04bc397a63 */
+"switchAccountTitle" = "Bytt konto";
+
+/* loco:6049df4d5c2c3a04bc397a61 */
+"switchDriveSearchViewHint" = "Søk etter en kDrive";
+
+/* loco:6049df4d5c2c3a04bc397a62 */
+"switchUserDescription" = "Se kDrive-ene til de andre Infomaniak-profilene dine. Du kan legge til så mange brukerprofiler du vil.";
+
+/* loco:6049df4d5c2c3a04bc397a64 */
+"syncConfigureDescription" = "Bildene, videoene og skjermbildene dine vil automatisk lagres i kDrive %@.";
+
+/* loco:6049df4d5c2c3a04bc397a65 */
+"syncConfigureTitle" = "Lagre minnene dine på et trygt sted";
+
+/* loco:66f50ff53251a55b2f0f1532 */
+"syncOnlyWifiDescription" = "Frakoblede filer vil kun synkroniseres via Wi-Fi";
+
+/* loco:66f50e357d4c318d780a5bd2 */
+"syncOnlyWifiTitle" = "Kun via Wi-Fi";
+
+/* loco:696a13cc88a6c3e5c60bf632 */
+"syncPhotosOnlyWifiDescription" = "Bilder og videoer vil kun synkroniseres via Wi-Fi";
+
+/* loco:6049df4d5c2c3a04bc397a66 */
+"syncSettingsButtonActiveSync" = "Aktiver automatisk sikkerhetskopi";
+
+/* loco:6049df4d5c2c3a04bc397a67 */
+"syncSettingsButtonSaveDate" = "Lagre";
+
+/* loco:6049df4d5c2c3a04bc397a68 */
+"syncSettingsButtonSyncPeriodicity" = "Synkronisering";
+
+/* loco:6049df4d5c2c3a04bc397a69 */
+"syncSettingsButtonSyncPicture" = "Laste opp bilder (DCIM)";
+
+/* loco:6049df4d5c2c3a04bc397a6a */
+"syncSettingsButtonSyncScreenshot" = "Laste opp skjermbilder";
+
+/* loco:6049df4d5c2c3a04bc397a6b */
+"syncSettingsButtonSyncVideo" = "Laste opp videoer";
+
+/* loco:6049df4d5c2c3a04bc397a6c */
+"syncSettingsDescription" = "Lagre automatisk bildene og videoene tatt med enheten din i kDrive.";
+
+/* loco:6447c3523e8d13f7b80f3f62 */
+"syncSettingsNotSavedDescription" = "Vil du virkelig forlate denne siden? Endringene dine vil ikke lagres.";
+
+/* loco:6447c24567043ee81704f173 */
+"syncSettingsNotSavedTitle" = "Ikke lagrede endringer";
+
+/* loco:6049df4d5c2c3a04bc397a6d */
+"syncSettingsSaveDateAllPictureValue" = "Alle bilder";
+
+/* loco:61b87c150eabdf2793302df2 */
+"syncSettingsSaveDateFromDateValue" = "fra dato";
+
+/* loco:61b87cfc3e2af8325337e394 */
+"syncSettingsSaveDateFromDateValue2" = "Fra dato";
+
+/* loco:6049df4d5c2c3a04bc397a6e */
+"syncSettingsSaveDateNowValue" = "fra nå av";
+
+/* loco:6049df4d5c2c3a04bc397a6f */
+"syncSettingsSaveDateNowValue2" = "Kun nye bilder (fra nå av)";
+
+/* loco:6049df4d5c2c3a04bc397a70 */
+"syncSettingsSaveOn" = "Lagre på";
+
+/* loco:6049df4d5c2c3a04bc397a71 */
+"syncSettingsSyncPeriodicityFourHoursValue" = "Hver 4. time";
+
+/* loco:6049df4d5c2c3a04bc397a72 */
+"syncSettingsSyncPeriodicityInstantValue" = "Øyeblikkelig";
+
+/* loco:6049df4d5c2c3a04bc397a73 */
+"syncSettingsSyncPeriodicityOneHourValue" = "Hver time";
+
+/* loco:6049df4d5c2c3a04bc397a74 */
+"syncSettingsSyncPeriodicityOneQuarterValue" = "Hvert 15. minutt";
+
+/* loco:6049df4d5c2c3a04bc397a75 */
+"syncSettingsTitle" = "Sikkerhetskopi av bilder";
+
+/* loco:66f51084cb6715272c0b5762 */
+"syncWifiAndMobileDataDescription" = "Gebyrer for bruk av mobildata kan påløpe";
+
+/* loco:66f50ef81220705fc30d60a2 */
+"syncWifiAndMobileDataTitle" = "Via Wi-Fi og mobildata";
+
+/* loco:66f51f3fa1ad831cda076d52 */
+"syncWifiPicturesTitle" = "Synkronisere bilder og videoer";
+
+/* loco:66f5115224f82ae9020b3162 */
+"syncWifiSettingsTitle" = "Synkronisere frakoblede filer";
+
+/* loco:614c87dd3af1ff4501490ec5 */
+"tempDirectory" = "Midlertidige filer";
+
+/* loco:60a65b76f8bf9002e9594852 */
+"themeSettingsDarkLabel" = "Mørk";
+
+/* loco:60a65b617652427d20367cc4 */
+"themeSettingsLightLabel" = "Lys";
+
+/* loco:60a65ba139d35536f858f4f2 */
+"themeSettingsSystemDefaultLabel" = "System standard";
+
+/* loco:60a65bbd7652427d20367cc6 */
+"themeSettingsSystemLabel" = "System";
+
+/* loco:60a65b3df229b924e419f452 */
+"themeSettingsTitle" = "Tema";
+
+/* loco:614c8841083c4c6d41454f55 */
+"totalStorageUsedTitle" = "Total lagring brukt";
+
+/* loco:6049df4d5c2c3a04bc397a76 */
+"trashActionDelete" = "Slett permanent";
+
+/* loco:6049df4d5c2c3a04bc397a77 */
+"trashActionRestoreFileIn" = "Gjenopprett i";
+
+/* loco:6049df4d5c2c3a04bc397a78 */
+"trashActionRestoreFileOriginalPlace" = "Gjenopprett til opprinnelig plassering";
+
+/* loco:67a9ef7e628ce12f3209f422 */
+"trashAutoClearDescription" = "Papirkurven tømmes automatisk hver 30. dag.\nVil du øke denne perioden?";
+
+/* loco:6049df4d5c2c3a04bc397a7b */
+"trashNoFile" = "Ingen slettede filer";
+
+/* loco:6049df4d5c2c3a04bc397a7c */
+"trashTitle" = "Papirkurv";
+
+/* loco:6049df4d5c2c3a04bc397a79 */
+"trashedFileRestoreFileInSuccess" = "%1$@ gjenopprettet i %2$@";
+
+/* loco:62344899e7238255cc5120d2 */
+"trashedFileRestoreFileInSuccess-plural" = "%1$d elementer gjenopprettet i %2$@";
+
+/* loco:69bcfe53aed2af87a302d464 */
+"trashedFileRestoreFileInSuccess-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d465 */
+"trashedFileRestoreFileInSuccess-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc397a7a */
+"trashedFileRestoreFileToOriginalPlaceSuccess" = "%@ gjenopprettet til opprinnelig plassering";
+
+/* loco:62344c023cb45e6fcb219b43 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural" = "%d elementer gjenopprettet til opprinnelig plassering";
+
+/* loco:69bcfe53aed2af87a302d466 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d467 */
+"trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
+
+/* loco:66fe3560501931dbfb04f0c8 */
+"unknownArtist" = "Ukjent artist";
+
+/* loco:66fe3634a0cfdc15cf0c1a94 */
+"unknownTitle" = "Ukjent tittel";
+
+/* loco:6049df4d5c2c3a04bc397a7d */
+"updateAvailableDescription" = "For å få det beste ut av kDrive, anbefaler vi at du oppdaterer applikasjonen din.";
+
+/* loco:6049df4d5c2c3a04bc397a7e */
+"updateAvailableTitle" = "Oppdatering tilgjengelig!";
+
+/* loco:61261255d4c1162fbc75aae2 */
+"upgradeOfferTitle" = "Lås opp flere funksjoner og få mer lagringsplass!";
+
+/* loco:6049df4d5c2c3a04bc397a7f */
+"uploadCancelDescription" = "Opplasting avbrutt av brukeren";
+
+/* loco:6049df4d5c2c3a04bc397a80 */
+"uploadCancelTitle" = "Opplasting avbrutt";
+
+/* loco:6049df4d5c2c3a04bc397a81 */
+"uploadErrorTitle" = "Feil ved opplasting";
+
+/* loco:61e15913fefa9c6c80093ed2 */
+"uploadFileSizeExceeded" = "Den totale tillatte filstørrelsen er overskredet.";
+
+/* loco:6049df4d5c2c3a04bc397a82 */
+"uploadFolderNotFoundError" = "Slettet eller ikke-eksisterende mappe";
+
+/* loco:6168271204d05b14c459bbe2 */
+"uploadFolderNotFoundSyncDisabledError" = "Automatisk sikkerhetskopi er deaktivert fordi målmappen ikke lenger finnes";
+
+/* loco:62a873924424292ffd74faf3 */
+"uploadImportedFailedAmount" = "1 opplasting mislyktes av totalt %d";
+
+/* loco:62a874566f1e5662420d2b82 */
+"uploadImportedFailedAmount-plural" = "%2$d opplastinger mislyktes av totalt %1$d";
+
+/* loco:69bcfe53aed2af87a302d468 */
+"uploadImportedFailedAmount-plural-2" = "";
+
+/* loco:69bcfe53aed2af87a302d469 */
+"uploadImportedFailedAmount-plural-3" = "";
+
+/* loco:6049df4d5c2c3a04bc397a83 */
+"uploadInProgressCancelAllUploadTitle" = "Avbryt opplastinger";
+
+/* loco:6049df4d5c2c3a04bc397a84 */
+"uploadInProgressCancelFileUploadTitle" = "Avbryt %@?";
+
+/* loco:6049df4d5c2c3a04bc3979fa */
+"uploadInProgressNoFile" = "Ingen opplasting pågår";
+
+/* loco:6049df4d5c2c3a04bc397a85 */
+"uploadInProgressPending" = "Venter";
+
+/* loco:6049df4d5c2c3a04bc397a86 */
+"uploadInProgressRestartUploadTitle" = "Start opplastingene på nytt";
+
+/* loco:6049df4d5c2c3a04bc397a87 */
+"uploadInProgressTitle" = "Opplasting pågår";
+
+/* loco:6049df4d5c2c3a04bc397a89 */
+"uploadInThisFolderTitle" = "Last opp til denne mappen";
+
+/* loco:6049df4d5c2c3a04bc397a88 */
+"uploadInterruptedErrorTitle" = "Opplasting avbrutt";
+
+/* loco:6049df4d5c2c3a04bc397a8a */
+"uploadNetworkErrorDescription" = "Venter på nettverk";
+
+/* loco:6049df4d5c2c3a04bc397a8b */
+"uploadNetworkErrorTitle" = "Opplasting suspendert";
+
+/* loco:6049df4d5c2c3a04bc397a8c */
+"uploadNetworkErrorWifiRequired" = "Venter på Wi-Fi-nettverk";
+
+/* loco:66fbba74682fe9a0990df012 */
+"uploadOverDataRestrictedError" = "Venter på Wi-Fi";
+
+/* loco:60928fcf72952001716b86d2 */
+"uploadPausedDescription" = "Noen opplastinger er fortsatt i gang i kDrive. Åpne appen og hold enheten tilkoblet for å øke hastigheten på opplastingen.";
+
+/* loco:60928fb3063e352b1e028476 */
+"uploadPausedTitle" = "Opplasting suspendert";
+
+/* loco:65df0b66eb1209e60f0ff4b5 */
+"urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";
+
+/* loco:697a1f0ee11b818505061003 */
+"userDriveRemoveDescription" = "Brukeren vil ikke lenger ha tilgang til denne kDrive.";
+
+/* loco:6049df4d5c2c3a04bc397a8d */
+"userInviteByEmail" = "Inviter via e-post";
+
+/* loco:6049df4d5c2c3a04bc397a8e */
+"userPermissionManage" = "Kan administrere";
+
+/* loco:6049df4d5c2c3a04bc397a8f */
+"userPermissionManageDescription" = "Rediger filen\nLaste ned\nLegge til kommentarer\nLegge til og opprette filer/mapper\nSlette filen\nDele med andre brukere";
+
+/* loco:6049df4d5c2c3a04bc397a90 */
+"userPermissionNotAvailable" = "Ikke tilgjengelig for eksterne kDrive-brukere";
+
+/* loco:6049df4d5c2c3a04bc397a91 */
+"userPermissionRead" = "Kan vise";
+
+/* loco:6049df4d5c2c3a04bc397a92 */
+"userPermissionReadDescription" = "Kun visning\nLaste ned";
+
+/* loco:6049df4d5c2c3a04bc397a93 */
+"userPermissionRemove" = "Brukeren vil ikke lenger ha tilgang til denne filen.";
+
+/* loco:6049df4d5c2c3a04bc397a94 */
+"userPermissionWrite" = "Kan endre";
+
+/* loco:6049df4d5c2c3a04bc397a95 */
+"userPermissionWriteDescription" = "Rediger filen\nLaste ned\nLegge til kommentarer\nLegge til og opprette filer/mapper\nSlette filer/mapper";
+
+/* loco:695e3e46c18ae37694044f72 */
+"userPermissionWriteExternalDescription" = "Rediger filen\nLaste ned\nLegge til kommentarer\nLegge til og opprette filer/mapper\nSlette egne filer/mapper";

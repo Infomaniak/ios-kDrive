@@ -1,0 +1,38 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: sv, Swedish
+ * Tagged: ios-info-plist
+ * Exported by: Philippe Weidmann
+ * Exported at: Fri, 20 Mar 2026 13:27:04 +0100
+ */
+
+/* loco:6051c6293b16e53c684172c2 */
+"NSCameraUsageDescription" = "Kameraåtkomst krävs för att skanna dokument och ta bilder.";
+
+/* loco:6051c6293b16e53c684172c7 */
+"NSFaceIDUsageDescription" = "Face ID kommer att användas för att låsa upp applikationen.";
+
+/* loco:6051c6293b16e53c684172c4 */
+"NSLocalNetworkUsageDescription" = "Används endast i debug-läge.";
+
+/* loco:6051c6293b16e53c684172c3 */
+"NSMicrophoneUsageDescription" = "Mikrofonåtkomst krävs för att spela in videor.";
+
+/* loco:6051c6293b16e53c684172c6 */
+"NSPhotoLibraryAddUsageDescription" = "Åtkomst till ditt fotobibliotek krävs för att spara dina foton och videor.";
+
+/* loco:6051c6293b16e53c684172c5 */
+"NSPhotoLibraryUsageDescription" = "Åtkomst till ditt fotobibliotek krävs för att spara dina foton.";
+
+/* loco:655f5d8a12b8465261012282 */
+"shortcutScanTitle" = "Skanna dokument";
+
+/* loco:655f62ccebeba55f0b034b52 */
+"shortcutSearchTitle" = "Sök";
+
+/* loco:655f6694d9b5e3e5ac054202 */
+"shortcutSupportTitle" = "Hjälp och support";
+
+/* loco:655f61c4a3c734176c08ce82 */
+"shortcutUploadTitle" = "Ladda upp bild eller video";
