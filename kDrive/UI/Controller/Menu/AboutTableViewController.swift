@@ -93,16 +93,16 @@ class AboutTableViewController: BaseGroupedTableViewController {
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutSourceCodeTitle
             return cell
+        case .thirdPartyLicenses:
+            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutLibrariesTitle
+            return cell
         case .license:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutLicenseTitle
             cell.detailLabel.text = KDriveResourcesStrings.Localizable.aboutLicenseDescription
-            return cell
-        case .thirdPartyLicenses:
-            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
-            cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutThirdPartyLicensesTitle
             return cell
         case .version:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)

@@ -3,12 +3,15 @@
  * Project: kDrive
  * Locale: es, Spanish
  * Tagged: ios
- * Exported by: Philippe Weidmann
- * Exported at: Fri, 20 Mar 2026 13:43:59 +0100
+ * Exported by: Baptiste Griva
+ * Exported at: Wed, 25 Mar 2026 11:05:36 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "Aplicación kDrive";
+
+/* loco:69c16ff7d344885229008d32 */
+"aboutLibrariesTitle" = "Bibliotecas";
 
 /* loco:6049df4d5c2c3a04bc397902 */
 "aboutLicenseDescription" = "Licencia pública general GNU GPL, versión 3";
@@ -21,8 +24,6 @@
 
 /* loco:6049df4d5c2c3a04bc397905 */
 "aboutSourceCodeTitle" = "Obtener el código fuente";
-
-"aboutThirdPartyLicensesTitle" = "Licencias de terceros";
 
 /* loco:6049df4d5c2c3a04bc397906 */
 "aboutTitle" = "Acerca de";
