@@ -40,6 +40,7 @@ public struct URLConstants {
     public static let testFlight = URLConstants(urlString: "https://testflight.apple.com/join/qZHSGy5B")
     public static let rgpd = URLConstants(urlString: "https://infomaniak.com/gtl/rgpd")
     public static let sourceCode = URLConstants(urlString: "https://github.com/Infomaniak/ios-kDrive")
+    public static let licenses = URLConstants(urlString: "https://github.com/Infomaniak/ios-kDrive/blob/main/LICENSES.md")
     public static let gpl = URLConstants(urlString: "https://www.gnu.org/licenses/gpl-3.0.html")
     public static let support = URLConstants(urlString: "https://support.infomaniak.com")
     public static let matomo = URLConstants(urlString: "https://analytics.infomaniak.com/matomo.php")

@@ -26,7 +26,7 @@ import UIKit
 
 class AboutTableViewController: BaseGroupedTableViewController {
     private enum AboutRow: CaseIterable {
-        case privacy, dataPrivacy, sourceCode, license, version
+        case privacy, dataPrivacy, sourceCode, license, thirdPartyLicenses, version
 
         var url: URL? {
             switch self {
@@ -36,6 +36,8 @@ class AboutTableViewController: BaseGroupedTableViewController {
                 return URLConstants.sourceCode.url
             case .license:
                 return URLConstants.gpl.url
+            case .thirdPartyLicenses:
+                return URLConstants.licenses.url
             default:
                 return nil
             }
@@ -97,6 +99,11 @@ class AboutTableViewController: BaseGroupedTableViewController {
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutLicenseTitle
             cell.detailLabel.text = KDriveResourcesStrings.Localizable.aboutLicenseDescription
             return cell
+        case .thirdPartyLicenses:
+            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutThirdPartyLicensesTitle
+            return cell
         case .version:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
@@ -111,7 +118,7 @@ class AboutTableViewController: BaseGroupedTableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         let row = rows[indexPath.row]
         switch row {
-        case .privacy, .sourceCode, .license:
+        case .privacy, .sourceCode, .license, .thirdPartyLicenses:
             if let url = row.url {
                 UIApplication.shared.open(url)
             }
