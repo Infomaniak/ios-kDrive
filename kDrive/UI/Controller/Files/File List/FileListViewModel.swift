@@ -320,8 +320,7 @@ class FileListViewModel: SelectDelegate {
     }
 
     func showLoadingIndicatorIfNeeded() {
-        // Show refresh control if loading is slow
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+        DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             if isLoading && !isRefreshing {
                 isRefreshing = true
