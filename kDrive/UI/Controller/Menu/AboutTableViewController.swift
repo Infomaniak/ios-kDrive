@@ -126,6 +126,10 @@ class AboutTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(privacyVC, animated: true)
         case .libraries:
             let acknowledgmentsViewController = SPLAcknowledgmentsTableViewController()
+            acknowledgmentsViewController.tableView.parentController?.title =
+                KDriveResourcesStrings.Localizable.aboutLibrariesTitle
+            acknowledgmentsViewController.tableView.backgroundColor =
+                KDriveResourcesAsset.backgroundColor.color
             acknowledgmentsViewController.canOpenRepositoryLink = true
             navigationController?.pushViewController(acknowledgmentsViewController, animated: true)
         case .version: break
