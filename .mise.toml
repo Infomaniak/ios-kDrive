@@ -6,3 +6,6 @@ sentry-cli = { version = "latest", os = ["macos"] }
 pipx = { version = "1.8.0", os = ["macos", "linux"] }
 "pipx:infomaniak/importloco" = { version = '2.1.0', os = ["macos", "linux"] }
 "spm:FelixHerrmann/swift-package-list" = { version = "latest", os = ["macos"] }
+
+[settings]
+experimental = true
