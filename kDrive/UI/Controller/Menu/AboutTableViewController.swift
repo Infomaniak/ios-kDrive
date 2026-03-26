@@ -21,9 +21,9 @@ import InfomaniakDI
 import InfomaniakPrivacyManagement
 import kDriveCore
 import kDriveResources
+import SwiftPackageListUI
 import SwiftUI
 import UIKit
-import SwiftPackageListUI
 
 class AboutTableViewController: BaseGroupedTableViewController {
     private enum AboutRow: CaseIterable {
