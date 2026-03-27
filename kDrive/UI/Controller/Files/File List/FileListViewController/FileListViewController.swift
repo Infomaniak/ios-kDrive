@@ -375,7 +375,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         if refreshing {
             refreshControl.beginRefreshing()
         } else {
-            refreshControl.endRefreshing()
+            UIView.performWithoutAnimation {
+                refreshControl.endRefreshing()
+            }
         }
     }
 
