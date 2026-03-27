@@ -3,12 +3,15 @@
  * Project: kDrive
  * Locale: pl, Polish
  * Tagged: ios
- * Exported by: Philippe Weidmann
- * Exported at: Mon, 23 Mar 2026 08:23:04 +0100
+ * Exported by: Baptiste Griva
+ * Exported at: Thu, 26 Mar 2026 08:48:55 +0100
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "Aplikacja kDrive";
+
+/* loco:69c16ff7d344885229008d32 */
+"aboutLibrariesTitle" = "Biblioteki";
 
 /* loco:6049df4d5c2c3a04bc397902 */
 "aboutLicenseDescription" = "Powszechna Licencja Publiczna GNU, wersja 3";

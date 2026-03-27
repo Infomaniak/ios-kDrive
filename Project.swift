@@ -86,6 +86,7 @@ let project = Project(name: "kDrive",
                                       .external(name: "RealmSwift"),
                                       .external(name: "Realm"),
                                       .external(name: "SwiftRegex"),
+                                      .external(name: "SwiftPackageListUI"),
                                       .sdk(name: "StoreKit", type: .framework, status: .required)
                                   ],
                                   settings: .settings(base: Constants.baseSettings),

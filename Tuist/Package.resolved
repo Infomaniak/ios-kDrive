@@ -1,5 +1,5 @@
 {
-  "originHash" : "e3ad6afcec9efd9915b8b89b0336f3061971e4f98381861fcf88d038498af2f9",
+  "originHash" : "a3c249215063b3d8667ba81be763ce815a3e63225fe9d0fdb3490846a48fb027",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -317,6 +317,15 @@
       }
     },
     {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "626b5b7b2f45e1b0b1c6f4a309296d1d21d7311b",
+        "version" : "1.7.1"
+      }
+    },
+    {
       "identity" : "swift-atomics",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-atomics.git",
@@ -386,6 +395,15 @@
       "state" : {
         "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
         "version" : "1.1.1"
+      }
+    },
+    {
+      "identity" : "swift-package-list",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/FelixHerrmann/swift-package-list",
+      "state" : {
+        "revision" : "14f7e7de03182873d8c23cab4c8bbf0d9d46cad4",
+        "version" : "4.10.0"
       }
     },
     {

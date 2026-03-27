@@ -21,12 +21,13 @@ import InfomaniakDI
 import InfomaniakPrivacyManagement
 import kDriveCore
 import kDriveResources
+import SwiftPackageListUI
 import SwiftUI
 import UIKit
 
 class AboutTableViewController: BaseGroupedTableViewController {
     private enum AboutRow: CaseIterable {
-        case privacy, dataPrivacy, sourceCode, license, version
+        case privacy, dataPrivacy, sourceCode, libraries, license, version
 
         var url: URL? {
             switch self {
@@ -91,6 +92,11 @@ class AboutTableViewController: BaseGroupedTableViewController {
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutSourceCodeTitle
             return cell
+        case .libraries:
+            let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
+            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutLibrariesTitle
+            return cell
         case .license:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
@@ -118,6 +124,14 @@ class AboutTableViewController: BaseGroupedTableViewController {
         case .dataPrivacy:
             let privacyVC = AboutPrivacyViewBridgeController.instantiate()
             navigationController?.pushViewController(privacyVC, animated: true)
+        case .libraries:
+            let acknowledgmentsViewController = SPLAcknowledgmentsTableViewController()
+            acknowledgmentsViewController.tableView.backgroundColor =
+                KDriveResourcesAsset.backgroundColor.color
+            acknowledgmentsViewController.canOpenRepositoryLink = true
+            navigationController?.pushViewController(acknowledgmentsViewController, animated: true)
+            acknowledgmentsViewController.navigationItem.title =
+                KDriveResourcesStrings.Localizable.aboutLibrariesTitle
         case .version: break
         }
     }
