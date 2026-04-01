@@ -1,8 +1,3 @@
-- Fix display issues in an empty folder
-- Fix issues regarding disappearing files
-- Locking is working in the share extension
-- Fix uploading of Apple Raw files
-- File deletion where available in shares
-- Fix UI issues in share extension
-- Fix download action from OnlyOffice
+- Added a view to display the licenses in use
+- Fixed the disappearance of the navigation bar in the preview details
 - Stability improvements and bug fixes

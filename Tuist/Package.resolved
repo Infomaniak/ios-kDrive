@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "bb4bedd8727720d449379d33fdce1b66133b9b77",
-        "version" : "18.7.1"
+        "revision" : "0aec5b1106c0237536912b5ee62bc06474442b7f",
+        "version" : "18.8.0"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "ed350dc52d258cc78e8c95bdd622af4bc7da7353",
-        "version" : "24.6.0"
+        "revision" : "9f838764a22cac07960974cc71227bca9d7daee1",
+        "version" : "24.7.0"
       }
     },
     {
@@ -132,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "revision" : "de3c84f2345af00cd1688ea3e2bf85923f6c432f",
-        "version" : "8.7.0"
+        "revision" : "d1acce663081b29a8633378900cf9047b2a9a713",
+        "version" : "8.9.0"
       }
     },
     {
@@ -141,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login",
       "state" : {
-        "revision" : "2bd3a484802879f54c27407671cf80906c34b528",
-        "version" : "7.6.0"
+        "revision" : "3ead81cbaf8c1aa1c7daf45904f77e4b1634aa85",
+        "version" : "7.8.0"
       }
     },
     {
@@ -339,8 +339,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-collections.git",
       "state" : {
-        "revision" : "8d9834a6189db730f6264db7556a7ffb751e99ee",
-        "version" : "1.4.0"
+        "revision" : "6675bc0ff86e61436e615df6fc5174e043e57924",
+        "version" : "1.4.1"
       }
     },
     {
@@ -357,8 +357,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log.git",
       "state" : {
-        "revision" : "bbd81b6725ae874c69e9b8c8804d462356b55523",
-        "version" : "1.10.1"
+        "revision" : "8c0f217f01000dd30f60d6e536569ad4e74291f9",
+        "version" : "1.11.0"
       }
     },
     {
@@ -366,8 +366,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-nio.git",
       "state" : {
-        "revision" : "b31565862a8f39866af50bc6676160d8dda7de35",
-        "version" : "2.96.0"
+        "revision" : "558f24a4647193b5a0e2104031b71c55d31ff83a",
+        "version" : "2.97.1"
       }
     },
     {
