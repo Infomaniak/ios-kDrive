@@ -280,7 +280,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        hideFloatingPanel(true)
+        hideFloatingPanel(true, isViewDisappearing: true)
     }
 
     override func willMove(toParent parent: UIViewController?) {
@@ -464,8 +464,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         hideFloatingPanel(fullScreenPreview)
     }
 
-    func hideFloatingPanel(_ hide: Bool) {
-        navigationController?.setNavigationBarHidden(hide, animated: true)
+    func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false) {
+        if !isViewDisappearing {
+            navigationController?.setNavigationBarHidden(hide, animated: true)
+        }
         let targetTopInset = hide ? navBarHeight : 0.0
         additionalSafeAreaInsets.top = targetTopInset
         view.layoutIfNeeded()
