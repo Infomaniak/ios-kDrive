@@ -1,8 +1,3 @@
-- Correction de problèmes d'affichage dans un dossier vide
-- Correction de problèmes de disparition de fichiers
-- Le verrouillage est fonctionnel dans l'extension de partage
-- Correction sur l'upload de fichiers Apple Raw
-- Suppression des fichiers lorsque c'est possible dans les partages
-- Correction des problèmes d'interface utilisateur dans l'extension de partage
-- Correction de l'action de téléchargement depuis OnlyOffice
+- Ajout d'une vue pour afficher les licences utilisées
+- Correction de la disparition de la barre de navigation dans les détails d'un aperçu
 - Améliorations de la stabilité et corrections de bugs
