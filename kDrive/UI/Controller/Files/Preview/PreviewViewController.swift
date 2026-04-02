@@ -271,7 +271,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         navigationController?.navigationBar.transform = .identity
         let currentCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         currentCell?.didEndDisplaying()
-        currentDownloadOperation?.cancel()
         previewErrors.values.compactMap { $0 as? OfficePreviewError }.forEach { $0.downloadTask?.cancel() }
 
         UIApplication.shared.endReceivingRemoteControlEvents()
