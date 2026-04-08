@@ -817,12 +817,13 @@ extension FileListViewController {
         _ collectionView: UICollectionView,
         shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath
     ) -> Bool {
-        return true
+        return viewModel.multipleSelectionViewModel != nil
     }
 
     override func collectionView(_ collectionView: UICollectionView,
                                  didBeginMultipleSelectionInteractionAt indexPath: IndexPath) {
-        if !(viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled ?? false) {
+        guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else { return }
+        if !multipleSelectionViewModel.isMultipleSelectionEnabled {
             viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = true
         }
     }
