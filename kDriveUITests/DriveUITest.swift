@@ -145,10 +145,7 @@ class AppUITest: XCTestCase {
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
         photospickerApp/*@START_MENU_TOKEN@*/
             .images["Photo, 30 mars 2018, 21:14"]/*[[".otherElements.images[\"Photo, 30 mars 2018, 21:14\"]",".images[\"Photo, 30 mars 2018, 21:14\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-            .coordinate(withNormalizedOffset: CGVector(
-                dx: 0,
-                dy: 0
-            )).tap()
+            .coordinate(withNormalizedOffset: CGVector()).tap()
         photospickerApp/*@START_MENU_TOKEN@*/
             .buttons["Add"]/*[[".navigationBars",".buttons[\"Terminé\"]",".buttons[\"Add\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
             .firstMatch.tap()
