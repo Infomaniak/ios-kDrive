@@ -366,7 +366,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         )
         let navigationViewController = TitleSizeAdjustingNavigationController(rootViewController: homeViewController)
         navigationViewController.navigationBar.prefersLargeTitles = true
-        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.homeTitle
+        navigationViewController.tabBarItem.accessibilityLabel = KDriveResourcesStrings.Localizable.fileListTitle
         navigationViewController.tabBarItem.image = KDriveResourcesAsset.folder.image
         navigationViewController.tabBarItem.selectedImage = KDriveResourcesAsset.folderFilledTab.image
         return navigationViewController
@@ -482,7 +482,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 }
 
-// - MARK: MainTabBarDelegate
+/// - MARK: MainTabBarDelegate
 extension MainTabViewController: MainTabBarDelegate {
     func plusButtonPressed() {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
