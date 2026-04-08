@@ -1,5 +1,5 @@
 {
-  "originHash" : "a3c249215063b3d8667ba81be763ce815a3e63225fe9d0fdb3490846a48fb027",
+  "originHash" : "1a0bee512309739431fe27de5eda5fcfc52ad5f9f761c2eb58b5731c82ca6b4e",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "0aec5b1106c0237536912b5ee62bc06474442b7f",
-        "version" : "18.8.0"
+        "revision" : "0bdf13526040c44ea9a9eb6fba86492d4ad79c06",
+        "version" : "18.9.0"
       }
     },
     {
@@ -202,7 +202,7 @@
     {
       "identity" : "lottie-spm",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/lottie-spm.git",
+      "location" : "https://github.com/airbnb/lottie-spm",
       "state" : {
         "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
         "version" : "4.5.2"
@@ -285,8 +285,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "16cd512711375fa73f25ae5e373f596bdf4251ae",
-        "version" : "8.58.0"
+        "revision" : "d459ff99b1912c9603c9e607e030b4b98e2e199a",
+        "version" : "9.9.0"
       }
     },
     {
