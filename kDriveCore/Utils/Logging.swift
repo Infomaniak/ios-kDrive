@@ -96,6 +96,9 @@ public enum Logging {
     private static func initSentry() {
         SentrySDK.start { options in
             options.dsn = "https://ba647a8cc6fc437baf797d2eb33dfafb@sentry-mobile.infomaniak.com/6"
+            options.experimental.enableSessionReplayInUnreliableEnvironment = false
+            options.sessionReplay.sessionSampleRate = 0
+            options.sessionReplay.onErrorSampleRate = 0
             options.beforeSend = { event in
                 // if the application is in debug mode discard the events
                 @InjectService var photoLibraryUploader: PhotoLibraryUploadable
