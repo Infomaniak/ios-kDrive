@@ -110,6 +110,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             withReuseIdentifier: String(describing: FilesHeaderReusableView.self)
         )
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
+        collectionView.allowsMultipleSelectionDuringEditing = true
         #if !ISEXTENSION
         collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
         #endif
@@ -810,6 +811,21 @@ extension FileListViewController {
             return
         }
         viewModel.multipleSelectionViewModel?.didDeselectFile(file, at: indexPath)
+    }
+
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath
+    ) -> Bool {
+        return viewModel.multipleSelectionViewModel != nil
+    }
+
+    override func collectionView(_ collectionView: UICollectionView,
+                                 didBeginMultipleSelectionInteractionAt indexPath: IndexPath) {
+        guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else { return }
+        if !multipleSelectionViewModel.isMultipleSelectionEnabled {
+            viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = true
+        }
     }
 }
 
