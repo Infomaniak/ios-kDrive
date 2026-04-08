@@ -151,7 +151,8 @@ let project = Project(name: "kDrive",
                                   sources: "kDriveUITests/**",
                                   dependencies: [
                                       .target(name: "kDrive"),
-                                      .target(name: "kDriveCore")
+                                      .target(name: "kDriveCore"),
+                                      .target(name: "kDriveResources")
                                   ],
                                   settings: .settings(base: Constants.testSettings)),
                           .target(name: "kDriveResources",
