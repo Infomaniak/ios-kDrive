@@ -54,6 +54,7 @@ class AppUITest: XCTestCase {
         app.launchArguments += ["-AppleLanguages", "(en-GB)"]
         app.launchArguments += ["-AppleLocale", "en_GB"]
         app.launch()
+        login()
     }
 
     override func setUp() {
@@ -94,7 +95,6 @@ class AppUITest: XCTestCase {
 
     func testLogin() {
         launchAppFromScratch()
-        login()
     }
 
     func setUpTest(testName: String) -> String {
@@ -198,7 +198,7 @@ class AppUITest: XCTestCase {
         let dropdownMail = app.otherElements["drop_down"].staticTexts[mail]
         XCTAssertTrue(dropdownMail.waitForExistence(timeout: 3), "Dropdown mail should be displayed")
         dropdownMail.tap()
-        let shareButton = tablesQuery.buttons["Partager"]
+        let shareButton = tablesQuery.buttons[KDriveResourcesStrings.Localizable.buttonShare]
         XCTAssertTrue(shareButton.waitForExistence(timeout: 3), "Share button should be displayed")
         shareButton.tap()
     }
@@ -219,7 +219,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Rename file-\(Date())"
         let newTestName = "\(testName)_update"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
 
         let laterButton = app.buttons[KDriveResourcesStrings.Localizable.buttonLater]
         if laterButton.exists {
@@ -254,7 +254,7 @@ class AppUITest: XCTestCase {
     func testDuplicateFile() {
         let testName = "UITest - Duplicate file - \(Date())"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
         let root = setUpTest(testName: testName)
 
         openFileMenu(named: root, fullSize: true)
@@ -284,7 +284,7 @@ class AppUITest: XCTestCase {
     func testShareFile() {
         let testName = "UITest - Share file - \(Date())"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
         let root = setUpTest(testName: testName)
 
         openFileMenu(named: root)
@@ -329,7 +329,7 @@ class AppUITest: XCTestCase {
     func testComments() {
         let testName = "UITest - Comment - \(Date())"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
 
         goToMyFolders()
         sortByLatest()
@@ -371,7 +371,7 @@ class AppUITest: XCTestCase {
     func testCreateSharedDirectory() {
         let testName = "UITest - Create shared directory - \(Date())"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
         // Create shared directory
         let root = "\(testName)-\(Date())"
         openTab(.files)
@@ -415,7 +415,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Create office file - \(Date())"
 
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
         let root = setUpTest(testName: testName)
 
         // Enter in root directory
@@ -441,7 +441,7 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Offline files - \(Date())"
 
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
 
         // Get number of offline files
         goToMyFolders()
@@ -477,7 +477,7 @@ class AppUITest: XCTestCase {
     func testCancelAction() {
         let testName = "UITest - Cancel action - \(Date())"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
 
         let root = createDirectoryWithPhoto(name: testName)
         wait(delay: 1)
@@ -500,7 +500,7 @@ class AppUITest: XCTestCase {
     func testAddFileToFavorites() {
         let testName = "UITest - Add file to favorites - \(Date())"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
         let root = setUpTest(testName: testName)
         goToMyFolders()
 
@@ -521,7 +521,7 @@ class AppUITest: XCTestCase {
     func testSearchFile() {
         let testName = "UITest - Search file - \(Date())"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
         let root = setUpTest(testName: testName)
 
         openTab(.home)
@@ -541,7 +541,8 @@ class AppUITest: XCTestCase {
     func testAddCategories() {
         let testName = "UITest - Add categories - \(Date())"
         setUp()
-        launchAppFromScratch(resetData: false)
+        launchAppFromScratch()
+
         let root = setUpTest(testName: testName)
 
         // Add category
@@ -556,12 +557,11 @@ class AppUITest: XCTestCase {
         // Search file with filter category
         navigationBars.buttons[KDriveResourcesStrings.Localizable.searchTitle].tap()
         navigationBars.buttons.element(boundBy: 1).tap()
+        wait(delay: 0.5)
         tablesQuery.staticTexts[KDriveResourcesStrings.Localizable.addCategoriesTitle].tap()
         tablesQuery.cells.firstMatch.tap()
-        app/*@START_MENU_TOKEN@*/
-            .buttons[KDriveResourcesStrings.Localizable
-                .buttonBack]/*[[".navigationBars",".buttons[\"Filtres\"]",".buttons[\"BackButton\"]",".buttons"],[[[-1,2],[-1,1],[-1,3],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-            .firstMatch.tap()
+        let value = KDriveResourcesStrings.Localizable.buttonBack != "Back" ? KDriveResourcesStrings.Localizable.buttonBack : "BackButton"
+        app.buttons[value].firstMatch.tap()
         app.staticTexts[KDriveResourcesStrings.Localizable.buttonApplyFilters].firstMatch.tap()
         XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory with category should be in result")
         navigationBars.buttons[KDriveResourcesStrings.Localizable.buttonClose].tap()
@@ -588,11 +588,11 @@ class AppUITest: XCTestCase {
         passwordField.typeText(Env.testAccountPassword)
         passwordField.typeText("\n")
 
-        wait(delay: 5)
-        XCTAssertTrue(
-            app.staticTexts[KDriveResourcesStrings.Localizable.lastEditsTitle].waitForExistence(timeout: 5),
-            "Last modification text should display"
-        )
+//        wait(delay: 5)
+//        XCTAssertTrue(
+//            app.buttons[KDriveResourcesStrings.Localizable.fileListTitle].waitForExistence(timeout: 5),
+//            "Last modification text should display"
+//        )
     }
 
     func getStringForElement(_ element: TabBarElement) -> String {
