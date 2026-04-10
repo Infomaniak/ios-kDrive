@@ -144,7 +144,7 @@ class AppUITest: XCTestCase {
         }
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
         XCTAssertTrue(photospickerApp.images.debugDescription.isEmpty, "No photos in photo library")
-        photospickerApp.images.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.5,dy: 0.5)).tap()
+        photospickerApp.images.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         photospickerApp/*@START_MENU_TOKEN@*/
             .buttons["Add"]/*[[".navigationBars",".buttons[\"Terminé\"]",".buttons[\"Add\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
             .firstMatch.tap()
@@ -561,7 +561,8 @@ class AppUITest: XCTestCase {
         tablesQuery.staticTexts[KDriveResourcesStrings.Localizable.addCategoriesTitle].tap()
         tablesQuery.cells.firstMatch.tap()
         app/*@START_MENU_TOKEN@*/
-            .buttons[KDriveResourcesStrings.Localizable.buttonBack]/*[[".navigationBars",".buttons[\"Filtres\"]",".buttons[\"BackButton\"]",".buttons"],[[[-1,2],[-1,1],[-1,3],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
+            .buttons[KDriveResourcesStrings.Localizable
+                .buttonBack]/*[[".navigationBars",".buttons[\"Filtres\"]",".buttons[\"BackButton\"]",".buttons"],[[[-1,2],[-1,1],[-1,3],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
             .firstMatch.tap()
         app.staticTexts[KDriveResourcesStrings.Localizable.buttonApplyFilters].firstMatch.tap()
         XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory with category should be in result")
