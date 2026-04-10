@@ -57,6 +57,7 @@ final class FileProviderExtension: NSFileProviderExtension {
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
+    // periphery:ignore
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .fileProviderExtension)
 

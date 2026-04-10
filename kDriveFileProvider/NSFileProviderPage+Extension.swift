@@ -19,6 +19,7 @@
 import Foundation
 import kDriveCore
 
+// periphery:ignore:all
 extension NSFileProviderPage {
     init?(_ cursor: FileCursor) {
         guard let cursorData = cursor.data(using: .utf8) else { return nil }

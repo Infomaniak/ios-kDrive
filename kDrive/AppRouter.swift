@@ -778,6 +778,7 @@ public struct AppRouter: AppNavigable {
         presentingViewController.present(SFSafariViewController(url: url), animated: true)
     }
 
+    // periphery:ignore
     public func refreshCacheScanLibraryAndUpload(preload: Bool, isSwitching: Bool) async {
         Log.sceneDelegate("refreshCacheScanLibraryAndUpload preload:\(preload) isSwitching:\(preload)")
 

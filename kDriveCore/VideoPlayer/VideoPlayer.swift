@@ -94,6 +94,7 @@ public final class VideoPlayer: Pausable {
         onPlaybackEnded?()
     }
 
+    // periphery:ignore
     @objc func playerStateChanged(notification: Notification) {
         guard let file else { return }
         guard let player else { return }

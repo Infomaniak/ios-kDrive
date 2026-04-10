@@ -24,6 +24,8 @@ import UIKit
 import VersionChecker
 
 final class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
+    
+    // periphery:ignore
     /// Making sure the DI is registered at a very early stage of the app launch.
     private let dependencyInjectionHook = EarlyDIHook(context: .shareExtension)
 

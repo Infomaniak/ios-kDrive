@@ -22,6 +22,7 @@ import InfomaniakDI
 import kDriveCore
 import RealmSwift
 
+// periphery:ignore:all
 class RootEnumerator: NSObject, NSFileProviderEnumerator {
     private let driveFileManager: DriveFileManager
     private let domain: NSFileProviderDomain?
