@@ -26,7 +26,7 @@ public struct PublicShareMetadata: Decodable, Equatable {
     public let validUntil: TimeInterval?
     public let capabilities: Rights
 
-    public let createdBy: TimeInterval
+    public let createdBy: Int
     public let createdAt: TimeInterval
     public let updatedAt: TimeInterval
     public let accessBlocked: Bool
