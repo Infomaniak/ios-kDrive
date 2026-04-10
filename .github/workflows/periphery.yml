@@ -15,6 +15,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
+        with:
+          cache: false
       - name: Create test env
         env:
           ENV_PATH: "kDriveTestShared/Env.swift"
