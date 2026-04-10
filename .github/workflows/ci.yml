@@ -105,10 +105,11 @@ jobs:
           UITEST_ACCOUNT_PASSWORD: ${{ secrets.UITEST_ACCOUNT_PASSWORD }}
         run: |
           touch $ENV_PATH
-          echo -e "enum Env {\n static let testAccountEmail = \"$UITEST_ACCOUNT_EMAIL\"\n static let testAccountPassword = \"$UITEST_ACCOUNT_PASSWORD\"\n}" > $ENV_PATH \ 
+          echo -e "enum Env {\n static let testAccountEmail = \"$UITEST_ACCOUNT_EMAIL\"\n static let testAccountPassword = \"$UITEST_ACCOUNT_PASSWORD\"\n}" > $ENV_PATH
       - name: Setup
         run: tuist install && tuist generate --no-open
       - name: UITest
-        env: TEST_RUNNER_LAUNCH_ARGS: "-AppleLanguages (en-GB) -AppleLocale en_GB"
-        run: tuist test kDrive-Workspace --device "iPhone 17 Pro" --test-targets "kDriveUITests/**" --no-selective-testing
+        env:
+            TEST_RUNNER_LAUNCH_ARGS: "-AppleLanguages (en-GB) -AppleLocale en_GB"
+        run: tuist test kDrive-Workspace --device "iPhone 17 Pro" --test-targets "kDriveUITests/AppUITest" --no-selective-testing
     

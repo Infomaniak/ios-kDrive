@@ -66,8 +66,9 @@ public enum Logging {
     public static func resetAppForUITestsIfNeeded() {
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("resetData") {
-            UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
-            UserDefaults.shared.removePersistentDomain(forName: Bundle.main.bundleIdentifier!)
+            guard let bundleIdentifier = Bundle.main.bundleIdentifier else { return }
+            UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
+            UserDefaults.shared.removePersistentDomain(forName: bundleIdentifier)
 
             for identifier in AppIdentifierBuilder.knownAppKeychainIdentifiers {
                 KeychainHelper(accessGroup: identifier).deleteAllTokens()
