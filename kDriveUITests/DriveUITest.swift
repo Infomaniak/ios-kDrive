@@ -93,7 +93,6 @@ class AppUITest: XCTestCase {
     // MARK: - Tests setup
 
     func testLogin() {
-        setUp()
         launchAppFromScratch()
         login()
     }
@@ -143,11 +142,9 @@ class AppUITest: XCTestCase {
             }
         }
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
-        XCTAssertTrue(photospickerApp.images.debugDescription.isEmpty, "No photos in photo library")
+        XCTAssertFalse(photospickerApp.images.debugDescription.isEmpty, "No photos in photo library")
         photospickerApp.images.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        photospickerApp/*@START_MENU_TOKEN@*/
-            .buttons["Add"]/*[[".navigationBars",".buttons[\"Terminé\"]",".buttons[\"Add\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-            .firstMatch.tap()
+        photospickerApp.buttons[KDriveResourcesStrings.Localizable.buttonAdd].firstMatch.tap()
         let buttonSave = app.buttons[KDriveResourcesStrings.Localizable.buttonSave]
         XCTAssertTrue(buttonSave.waitForExistence(timeout: 4), "Save button should be displayed")
         buttonSave.tap()
@@ -293,13 +290,14 @@ class AppUITest: XCTestCase {
         openFileMenu(named: root)
         let shareAndRights = collectionViewsQuery.cells.staticTexts[KDriveResourcesStrings.Localizable.buttonFileRights]
         shareAndRights.tap()
-        let directoryShareAndRights = app.navigationBars["Partage et droits du dossier \(root)"]
+        let directoryShareAndRights = app.navigationBars[KDriveResourcesStrings.Localizable.fileShareDetailsFolderTitle(root)]
         XCTAssertTrue(directoryShareAndRights.waitForExistence(timeout: 3), "Share view should be displayed")
 
         // Share file by email
         let userMail = "kdriveiostests+uitest@ik.me"
         shareWithMail(address: userMail)
         let closeButton = app.buttons[KDriveResourcesStrings.Localizable.buttonClose]
+        XCTAssertTrue(closeButton.waitForExistence(timeout: 3), "Close button should be visible")
         closeButton.tap()
 
         // Check rights
@@ -575,7 +573,7 @@ class AppUITest: XCTestCase {
         app.buttons[KDriveResourcesStrings.Localizable.buttonNext].firstMatch.tap()
         app.buttons[KDriveResourcesStrings.Localizable.buttonNext].firstMatch.tap()
 
-        let loginButton = app.buttons[KDriveResourcesStrings.Localizable.buttonLogin].firstMatch
+        let loginButton = app.buttons.element(boundBy: 0)
         _ = loginButton.waitForExistence(timeout: defaultTimeOut)
         loginButton.tap()
         let loginWebView = app.webViews.firstMatch
