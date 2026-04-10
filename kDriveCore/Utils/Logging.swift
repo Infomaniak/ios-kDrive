@@ -81,9 +81,11 @@ public enum Logging {
                 for fileURL in appGroupFileURLs {
                     try FileManager.default.removeItem(at: fileURL)
                 }
+                guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+                else { return }
 
                 let documentFileURLs = try FileManager.default.contentsOfDirectory(
-                    at: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!,
+                    at: documentDirectory,
                     includingPropertiesForKeys: nil,
                     options: .skipsHiddenFiles
                 )
