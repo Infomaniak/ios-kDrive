@@ -147,7 +147,7 @@ let project = Project(name: "kDrive",
                                   product: .uiTests,
                                   bundleId: "com.infomaniak.drive.uiTests",
                                   deploymentTargets: Constants.deploymentTarget,
-                                  infoPlist: .extendingDefault(with: ["CFBundleDevelopmentRegion": "en-UK"]),
+                                  infoPlist: .extendingDefault(with: ["CFBundleDevelopmentRegion": "en-GB", "CFBundleLocalizations": ["en-GB"]]),
                                   sources: "kDriveUITests/**",
                                   dependencies: [
                                       .target(name: "kDrive"),

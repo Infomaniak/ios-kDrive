@@ -51,8 +51,8 @@ class AppUITest: XCTestCase {
             app.launchArguments += ["resetData"]
         }
         app.launchArguments += ["testing"]
-        app.launchArguments += ["-AppleLanguages", "(en)"]
-        app.launchArguments += ["-AppleLocale", "en_UK"]
+        app.launchArguments += ["-AppleLanguages", "(en-GB)"]
+        app.launchArguments += ["-AppleLocale", "en_GB"]
         app.launch()
     }
 
