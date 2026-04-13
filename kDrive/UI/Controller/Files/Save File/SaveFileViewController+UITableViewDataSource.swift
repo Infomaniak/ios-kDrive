@@ -47,7 +47,11 @@ extension SaveFileViewController: UITableViewDataSource {
                     isFirst: indexPath.row == 0,
                     isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1
                 )
-                cell.configureWith(importedFile: item)
+                cell.configureWith(importedFile: item) {
+                    self.items.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .fade)
+                    tableView.reloadData()
+                }
                 return cell
             } else {
                 let cell = tableView.dequeueReusableCell(type: FileNameTableViewCell.self, for: indexPath)

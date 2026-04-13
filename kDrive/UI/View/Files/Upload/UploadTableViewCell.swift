@@ -202,6 +202,22 @@ final class UploadTableViewCell: InsetTableViewCell {
         thumbnailRequest = .qlThumbnailRequest(request)
     }
 
+    func configureWith(importedFile: ImportedFile, cancelButtonPressedHandler: @escaping () -> Void) {
+        cardContentView.cancelButton?.isHidden = false
+        cardContentView.retryButton?.isHidden = true
+        cardContentView.editImage?.isHidden = false
+        cardContentView.cancelButtonPressedHandler = cancelButtonPressedHandler
+
+        cardContentView.editImage?.image = KDriveResourcesAsset.edit.image
+        cardContentView.iconView.image = ConvertedType.fromUTI(importedFile.uti).icon
+        cardContentView.titleLabel.text = importedFile.name
+        cardContentView.detailsLabel.isHidden = true
+        let request = importedFile.getThumbnail { [weak self] image in
+            self?.addThumbnail(image: image)
+        }
+        thumbnailRequest = .qlThumbnailRequest(request)
+    }
+
     func updateProgress(frozenUploadFile: UploadFile, progress: CGFloat, animated: Bool = true) {
         assert(frozenUploadFile.isFrozen, "Expecting a Frozen object")
         guard let currentFileId, frozenUploadFile.id == currentFileId else { return }
