@@ -145,17 +145,17 @@ class AppUITest: XCTestCase {
         // Import photo from photo library
         openTab(.add)
         tablesQuery.staticTexts[KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo].tap()
-        let galleryPermissionApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow")
-        if galleryPermissionApp.state == .runningForeground {
-            let shareAll = galleryPermissionApp.buttons.allElementsBoundByIndex[1].firstMatch
-            if shareAll.exists {
-                shareAll.tap()
-            }
+        let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let acceptAllButton = springboardApp.buttons.element(boundBy: 1).firstMatch
+        if acceptAllButton.exists {
+            acceptAllButton.tap()
         }
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
         XCTAssertGreaterThan(photospickerApp.images.debugDescription.count, 1, "No photos in photo library")
         photospickerApp.images.element(boundBy: 1).coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+
         photospickerApp.buttons[KDriveResourcesStrings.Localizable.buttonAdd].firstMatch.tap()
+
         let buttonSave = app.buttons[KDriveResourcesStrings.Localizable.buttonSave]
         XCTAssertTrue(buttonSave.waitForExistence(timeout: 4), "Save button should be displayed")
         buttonSave.tap()
@@ -479,7 +479,6 @@ class AppUITest: XCTestCase {
     func testCancelAction() {
         let testName = "UITest - Cancel action - \(Date())"
         launchAppFromScratch()
-
         let root = createDirectoryWithPhoto(name: testName)
         currentName = root
 
