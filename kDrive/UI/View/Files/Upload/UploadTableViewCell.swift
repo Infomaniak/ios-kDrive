@@ -187,21 +187,6 @@ final class UploadTableViewCell: InsetTableViewCell {
         progressObservation = liveFile.observe(keyPaths: ["progress"], observationClosure)
     }
 
-    func configureWith(importedFile: ImportedFile) {
-        cardContentView.cancelButton?.isHidden = true
-        cardContentView.retryButton?.isHidden = true
-        cardContentView.editImage?.isHidden = false
-
-        cardContentView.editImage?.image = KDriveResourcesAsset.edit.image
-        cardContentView.iconView.image = ConvertedType.fromUTI(importedFile.uti).icon
-        cardContentView.titleLabel.text = importedFile.name
-        cardContentView.detailsLabel.isHidden = true
-        let request = importedFile.getThumbnail { [weak self] image in
-            self?.addThumbnail(image: image)
-        }
-        thumbnailRequest = .qlThumbnailRequest(request)
-    }
-
     func configureWith(importedFile: ImportedFile, cancelButtonPressedHandler: @escaping () -> Void) {
         cardContentView.cancelButton?.isHidden = false
         cardContentView.retryButton?.isHidden = true
