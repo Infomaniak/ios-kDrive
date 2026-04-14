@@ -59,10 +59,10 @@ extension RootViewControllerState: Equatable {
              (.appLock, .appLock),
              (.updateRequired, .updateRequired):
             return true
-        case let (.mainViewController(lhsDriveFileManager), .mainViewController(rhsDriveFileManager)):
+        case (.mainViewController(let lhsDriveFileManager), .mainViewController(let rhsDriveFileManager)):
             return lhsDriveFileManager.driveId == rhsDriveFileManager.driveId
                 && lhsDriveFileManager.drive.userId == rhsDriveFileManager.drive.userId
-        case let (.preloading(lhsApiToken), .preloading(rhsApiToken)):
+        case (.preloading(let lhsApiToken), .preloading(let rhsApiToken)):
             return lhsApiToken.userId == rhsApiToken.userId
         default:
             return false
