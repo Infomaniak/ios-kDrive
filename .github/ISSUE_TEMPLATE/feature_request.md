@@ -7,17 +7,14 @@ assignees: ''
 
 ---
 
-<!--Note: English is the preferred language, but if you prefer you can write in French.
-L'anglais est la langue préférée, mais si vous préférez, vous pouvez écrire en français.-->
+## ⚠️ ✨ Feature Requests
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+Thank you for your interest in improving this project! 🙌
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+⚠️ We don’t handle feature requests in this issue tracker.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+👉 Please share your idea here instead:  
+**[Submit your feedback (EN)](https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/)**  
+**[Soumettre une demande (FR)](https://feedback.userreport.com/98c496bd-384f-4805-8a0b-d9f73f35cf96/)**
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+Thanks for your understanding 💙
