@@ -1,3 +1,5 @@
+- L'état de l'application est conservé lors du passage en arrière-plan
+- Supprimer les images de la sélection avant l'importation
 - Sélection multiple à deux doigts
 - Correction d'un problème de partage public lorsque deux utilisateurs appartiennent à la même organisation
 - Améliorations de la stabilité et corrections de bugs
