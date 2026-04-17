@@ -147,11 +147,12 @@ let project = Project(name: "kDrive",
                                   product: .uiTests,
                                   bundleId: "com.infomaniak.drive.uiTests",
                                   deploymentTargets: Constants.deploymentTarget,
-                                  infoPlist: .default,
+                                  infoPlist: .extendingDefault(with: ["CFBundleDevelopmentRegion": "en-GB", "CFBundleLocalizations": ["en-GB"]]),
                                   sources: "kDriveUITests/**",
                                   dependencies: [
                                       .target(name: "kDrive"),
-                                      .target(name: "kDriveCore")
+                                      .target(name: "kDriveCore"),
+                                      .target(name: "kDriveResources")
                                   ],
                                   settings: .settings(base: Constants.testSettings)),
                           .target(name: "kDriveResources",

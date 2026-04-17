@@ -87,4 +87,29 @@ jobs:
         run: tuist install && tuist generate
       - name: Test API
         run: tuist test kDriveAPITests --test-targets kDriveAPITests/DriveApiTests --no-selective-testing
-        
+  ui_tests:
+    name: UI Tests
+    runs-on: [ self-hosted, iOS ]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup mise
+        uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
+        with:
+          cache: false
+      - name: Create test env
+        env:
+          ENV_PATH: "kDriveUITests/Env.swift"
+          UITEST_ACCOUNT_EMAIL: ${{ secrets.UITEST_ACCOUNT_EMAIL }}
+          UITEST_ACCOUNT_PASSWORD: ${{ secrets.UITEST_ACCOUNT_PASSWORD }}
+        run: |
+          touch $ENV_PATH
+          echo -e "enum Env {\n static let testAccountEmail = \"$UITEST_ACCOUNT_EMAIL\"\n static let testAccountPassword = \"$UITEST_ACCOUNT_PASSWORD\"\n}" > $ENV_PATH
+      - name: Setup
+        run: tuist install && tuist generate --no-open
+      - name: UITest
+        env:
+            TEST_RUNNER_LAUNCH_ARGS: "-AppleLanguages (en-GB) -AppleLocale en_GB"
+        run: tuist test kDrive-Workspace --device "iPhone 17 Pro" --test-targets "kDriveUITests/AppUITest" --no-selective-testing
+    

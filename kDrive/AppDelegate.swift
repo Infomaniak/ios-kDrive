@@ -59,6 +59,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication,
                      willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        Logging.resetAppForUITestsIfNeeded()
         Logging.initLogging()
         Log.appDelegate("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
 

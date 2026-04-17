@@ -63,6 +63,43 @@ public enum Logging {
         fatalError(function + " needs to be overridden")
     }
 
+    public static func resetAppForUITestsIfNeeded() {
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("resetData") {
+            guard let bundleIdentifier = Bundle.main.bundleIdentifier else { return }
+            UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
+            UserDefaults.shared.removePersistentDomain(forName: bundleIdentifier)
+
+            for identifier in AppIdentifierBuilder.knownAppKeychainIdentifiers {
+                KeychainHelper(accessGroup: identifier).deleteAllTokens()
+            }
+
+            @InjectService var appGroupPathProvider: AppGroupPathProvidable
+            do {
+                let appGroupFileURLs = try FileManager.default.contentsOfDirectory(at: appGroupPathProvider.groupDirectoryURL,
+                                                                                   includingPropertiesForKeys: nil,
+                                                                                   options: .skipsHiddenFiles)
+                for fileURL in appGroupFileURLs {
+                    try FileManager.default.removeItem(at: fileURL)
+                }
+                guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+                else { return }
+
+                let documentFileURLs = try FileManager.default.contentsOfDirectory(
+                    at: documentDirectory,
+                    includingPropertiesForKeys: nil,
+                    options: .skipsHiddenFiles
+                )
+                for fileURL in documentFileURLs {
+                    try FileManager.default.removeItem(at: fileURL)
+                }
+            } catch {
+                Logger.general.error("resetAppForUITestsIfNeeded \(error)")
+            }
+        }
+        #endif
+    }
+
     private static func initLogger() {
         DDOSLogger.sharedInstance.logFormatter = LogFormatter()
         DDLog.add(DDOSLogger.sharedInstance)
