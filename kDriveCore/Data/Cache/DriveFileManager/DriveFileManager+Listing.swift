@@ -28,13 +28,14 @@ public extension DriveFileManager {
             return try await files(in: directory, cursor: nil, sortType: sortType, forceRefresh: forceRefresh)
         }
 
-        let lastCursor = forceRefresh ? nil : try directory.resolve(within: self).lastCursor
+        var lastCursor = forceRefresh ? nil : try directory.resolve(within: self).lastCursor
 
         var result: ValidServerResponse<ListingResult>
         do {
             result = try await apiFetcher.files(in: directory, advancedListingCursor: lastCursor, sortType: sortType)
         } catch let error as DriveError where error == DriveError.invalidCursorError {
             result = try await apiFetcher.files(in: directory, advancedListingCursor: nil, sortType: sortType)
+            lastCursor = nil
         }
 
         let children = result.validApiResponse.data.files
