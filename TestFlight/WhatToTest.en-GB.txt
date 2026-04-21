@@ -1,4 +1,5 @@
-- App state persists when switching in backgound
+- Fix a rare issue while paginating files
+- App state persists when switching in background
 - Remove pictures from selection before importing
 - Multi-select using two fingers
 - Fixed a public share issue when two users are within the same organisation
