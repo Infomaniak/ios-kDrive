@@ -77,8 +77,8 @@ class AppUITest: XCTestCase {
     override func tearDown() {
         super.tearDown()
         guard let currentName else { return }
-        print("Deleting \(currentName)")
         tearDownTest(directoryName: currentName)
+        self.currentName = nil
     }
 
     func wait(delay: TimeInterval = 5) {
@@ -541,12 +541,7 @@ class AppUITest: XCTestCase {
         currentName = root
 
         openTab(.home)
-        app.buttons[KDriveResourcesStrings.Localizable.searchTitle].firstMatch.tap()
-        app.searchFields[KDriveResourcesStrings.Localizable.searchViewHint].tap()
-        app.typeText("UITest - Search file")
-        app.typeText("\n")
-
-        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "Directory should be listed in results")
+        searchFileOrFolder(name: "UITest - Search file")
 
         navigationBars[KDriveResourcesStrings.Localizable.searchTitle].buttons[KDriveResourcesStrings.Localizable.buttonClose]
             .tap()
@@ -579,6 +574,191 @@ class AppUITest: XCTestCase {
         app.staticTexts[KDriveResourcesStrings.Localizable.buttonApplyFilters].firstMatch.tap()
         XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory with category should be in result")
         navigationBars.buttons[KDriveResourcesStrings.Localizable.buttonClose].tap()
+    }
+
+    func testPreviewImage() {
+        verifyPreview(filetype: "jpeg")
+    }
+
+    func testPreviewVideo() {
+        playVideo(offline: false)
+    }
+
+    func testPreviewOfflineVideo() {
+        playVideo(offline: true)
+    }
+
+    func testPreviewAudio() {
+        playAudio(offline: false)
+    }
+
+    func testPreviewOfflineAudio() {
+        playAudio(offline: true)
+    }
+
+    func testPreviewPDF() {
+        verifyPreview(filetype: "pdf")
+    }
+
+    func testPreviewSpreadsheet() {
+        verifyPreview(filetype: "xlsx")
+    }
+
+    func testPreviewText() {
+        verifyPreview(filetype: "txt")
+    }
+
+    func testPreviewCode() {
+        verifyPreview(filetype: "swift")
+    }
+
+    func testPreviewArchive() {
+        verifyPreview(filetype: "zip")
+    }
+
+    func testPreviewPresentation() {
+        verifyPreview(filetype: "pptx")
+    }
+
+    func playVideo(offline: Bool) {
+        let folderName = "Test médias - Ne pas supprimer"
+        let videoName = "video.mp4"
+        launchAppFromScratch()
+        searchFileOrFolder(name: folderName)
+
+        let folder = app.staticTexts[folderName]
+        folder.tap()
+
+        let video = app.staticTexts[videoName]
+        XCTAssertTrue(video.waitForExistence(timeout: 5), "Video should be displayed")
+
+        if offline {
+            activateAvailableOffline(name: videoName)
+        }
+
+        video.tap()
+
+        app.tap()
+        wait(delay: 1)
+        app.tap()
+        wait(delay: 3)
+        app.tap()
+
+        let back10seconds = app.buttons["Skip Backward"].firstMatch
+        XCTAssertTrue(back10seconds.waitForExistence(timeout: 3), "Go back 10 seconds should be displayed")
+        back10seconds.tap()
+        wait(delay: 1)
+        let skip10seconds = app.buttons["Skip Forward"].firstMatch
+        XCTAssertTrue(skip10seconds.waitForExistence(timeout: 3), "Skip forward 10 seconds should be displayed")
+        skip10seconds.tap()
+        wait(delay: 1)
+        back10seconds.tap()
+
+        let slider = app.sliders["Current position"].firstMatch
+        XCTAssertTrue(slider.waitForExistence(timeout: 3), "Slider should be displayed")
+        slider.tap()
+        slider.swipeRight()
+
+        let playButton = app.buttons["Play/Pause"].firstMatch
+        XCTAssertTrue(playButton.waitForExistence(timeout: 3), "Play/Pause button should be displayed")
+        playButton.tap()
+        wait(delay: 1)
+        let closeButton = app.buttons["Close Button"].firstMatch
+        XCTAssertTrue(closeButton.waitForExistence(timeout: 3), "Close button should be displayed")
+        closeButton.tap()
+
+        if offline {
+            let backButtonTitle = KDriveResourcesStrings.Localizable.buttonBack != "Back" ? KDriveResourcesStrings.Localizable
+                .buttonBack : "BackButton"
+            app.buttons[backButtonTitle].firstMatch.tap()
+            activateAvailableOffline(name: videoName)
+        }
+    }
+
+    func playAudio(offline: Bool) {
+        let folderName = "Test médias - Ne pas supprimer"
+        let audioName = "music.mp3"
+        launchAppFromScratch()
+        searchFileOrFolder(name: folderName)
+
+        let folder = app.staticTexts[folderName]
+        folder.tap()
+
+        let audio = app.staticTexts[audioName]
+        XCTAssertTrue(audio.waitForExistence(timeout: 5), "Video should be displayed")
+
+        if offline {
+            activateAvailableOffline(name: audioName)
+        }
+        audio.tap()
+        wait(delay: 1)
+        app.buttons["play"].tap()
+        wait(delay: 3)
+        app.sliders.element(boundBy: 0).swipeRight()
+
+        wait(delay: 2)
+        app.buttons["pause"].tap()
+        wait(delay: 1)
+
+        let backButtonTitle = KDriveResourcesStrings.Localizable.buttonBack != "Back" ? KDriveResourcesStrings.Localizable
+            .buttonBack : "BackButton"
+        app.buttons[backButtonTitle].firstMatch.tap()
+
+        if offline {
+            activateAvailableOffline(name: audioName)
+        }
+    }
+
+    func activateAvailableOffline(name: String) {
+        let file = collectionViewsQuery.cells.containing(.staticText, identifier: name)
+        file.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
+
+        app.swipeUp()
+
+        let offlineButton = app.staticTexts[KDriveCoreStrings.Localizable.buttonAvailableOffline].firstMatch
+        XCTAssertTrue(offlineButton.waitForExistence(timeout: 3), "Available offline switch should be displayed")
+        offlineButton.tap()
+        wait(delay: 1)
+        closeFileMenu()
+    }
+
+    func verifyPreview(filetype: String) {
+        let fileName = "sample.\(filetype)"
+        let folderName = "Test Preview - Ne pas supprimer"
+        launchAppFromScratch()
+        goToMyFolders()
+        searchFileOrFolder(name: folderName)
+
+        let folder = app.staticTexts[folderName]
+        folder.tap()
+
+        let file = app.staticTexts[fileName]
+        XCTAssertTrue(file.waitForExistence(timeout: 5), "Video should be displayed")
+
+        file.tap()
+
+        if filetype != "zip" {
+            XCTAssertFalse(
+                app.staticTexts[KDriveCoreStrings.Localizable.previewLoadError].waitForExistence(timeout: 5),
+                "Preview should be displayed"
+            )
+        } else {
+            XCTAssertTrue(
+                app.staticTexts[KDriveCoreStrings.Localizable.previewNoPreview].waitForExistence(timeout: 5),
+                "Preview shouldn't be displayed"
+            )
+        }
+
+        app.swipeUp()
+        app.cells[KDriveCoreStrings.Localizable.fileDetailsInfosTitle].firstMatch.tap()
+
+        XCTAssertTrue(app.staticTexts[fileName].waitForExistence(timeout: 5), "File should be displayed")
+
+        let backButtonTitle = KDriveResourcesStrings.Localizable.buttonBack != "Back" ? KDriveResourcesStrings.Localizable
+            .buttonBack : "BackButton"
+        app.buttons[backButtonTitle].firstMatch.tap()
+
+        app.buttons[backButtonTitle].firstMatch.tap()
     }
 
     func login() {
