@@ -90,26 +90,78 @@ jobs:
   ui_tests:
     name: UI Tests
     runs-on: [ self-hosted, iOS ]
-    
+    env:
+      DEVICE_NAME: "iPhone 17 Pro"
+      BUNDLE_ID: "com.infomaniak.drive"
+
     steps:
+      - name: Uninstall app from simulators and grant permissions
+        run: |
+          set -euo pipefail
+          IFS=$'\n\t'
+
+          DEVICE_NAME="${DEVICE_NAME}"
+          BUNDLE_ID="${BUNDLE_ID}"
+
+          echo "Looking for booted simulators named \"$DEVICE_NAME\"..."
+          UDIDS=$(xcrun simctl list devices --json | python3 -c 'import sys,json;data=json.load(sys.stdin);name=sys.argv[1];res=[d.get("udid") for devices in data.get("devices",{}).values() for d in devices if d.get("name")==name and d.get("state")=="Booted"];print("\n".join(res))' "$DEVICE_NAME")
+
+          if [ -z "$UDIDS" ]; then
+            echo "No booted simulators found for \"$DEVICE_NAME\", searching all states..."
+            UDIDS=$(xcrun simctl list devices --json | python3 -c 'import sys,json;data=json.load(sys.stdin);name=sys.argv[1];res=[d.get("udid") for devices in data.get("devices",{}).values() for d in devices if d.get("name")==name];print("\n".join(res))' "$DEVICE_NAME")
+            if [ -n "$UDIDS" ]; then
+              FIRST=$(echo "$UDIDS" | head -n1)
+              echo "Booting first matching simulator: $FIRST"
+              xcrun simctl boot "$FIRST" || true
+              xcrun simctl bootstatus "$FIRST" -b || true
+              UDIDS="$FIRST"
+            fi
+          fi
+
+          if [ -z "$UDIDS" ]; then
+            echo "No simulators found matching \"$DEVICE_NAME\"; skipping uninstall and permission steps."
+            exit 0
+          fi
+
+          echo "Found UDIDs:"
+          echo "$UDIDS"
+
+          SERVICES=("photos" "camera" "microphone" "contacts" "calendar" "reminders" "location")
+
+          for UDID in $UDIDS; do
+            echo "Uninstalling $BUNDLE_ID from $UDID"
+            xcrun simctl uninstall "$UDID" "$BUNDLE_ID" || echo "Uninstall failed or app not installed on $UDID"
+            for SERVICE in "${SERVICES[@]}"; do
+              echo "Granting $SERVICE to $BUNDLE_ID on $UDID"
+              xcrun simctl privacy "$UDID" grant "$SERVICE" "$BUNDLE_ID" || echo "Failed to grant $SERVICE on $UDID; continuing"
+            done
+          done
+
       - name: Checkout
         uses: actions/checkout@v6
+
       - name: Setup mise
         uses: jdx/mise-action@6d1e696aa24c1aa1bcc1adea0212707c71ab78a8
         with:
           cache: false
+
       - name: Create test env
         env:
           ENV_PATH: "kDriveUITests/Env.swift"
           UITEST_ACCOUNT_EMAIL: ${{ secrets.UITEST_ACCOUNT_EMAIL }}
           UITEST_ACCOUNT_PASSWORD: ${{ secrets.UITEST_ACCOUNT_PASSWORD }}
         run: |
-          touch $ENV_PATH
-          echo -e "enum Env {\n static let testAccountEmail = \"$UITEST_ACCOUNT_EMAIL\"\n static let testAccountPassword = \"$UITEST_ACCOUNT_PASSWORD\"\n}" > $ENV_PATH
+          touch "$ENV_PATH"
+          echo -e "enum Env {\n static let testAccountEmail = \"${UITEST_ACCOUNT_EMAIL}\"\n static let testAccountPassword = \"${UITEST_ACCOUNT_PASSWORD}\"\n}" > "$ENV_PATH"
+
       - name: Setup
         run: tuist install && tuist generate --no-open
+
       - name: UITest
         env:
-            TEST_RUNNER_LAUNCH_ARGS: "-AppleLanguages (en-GB) -AppleLocale en_GB"
-        run: tuist test kDrive-Workspace --device "iPhone 17 Pro" --test-targets "kDriveUITests/AppUITest" --no-selective-testing
-    
+          TEST_RUNNER_LAUNCH_ARGS: "-AppleLanguages (en-GB) -AppleLocale en_GB"
+        run: |
+          tuist test kDrive-Workspace \
+            --device "$DEVICE_NAME" \
+            --test-targets "kDriveUITests/AppUITest" \
+            --no-selective-testing
