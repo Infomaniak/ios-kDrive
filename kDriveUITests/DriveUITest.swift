@@ -620,6 +620,135 @@ class AppUITest: XCTestCase {
         verifyPreview(filetype: "pptx")
     }
 
+    func testFileAction() {
+        let testName = "UITests - File Action - \(Date())"
+        launchAppFromScratch()
+        let root = createDirectoryWithPhoto(name: testName)
+        currentName = root
+
+        goToMyFolders()
+        let folder = app.staticTexts[testName]
+        XCTAssertTrue(folder.waitForExistence(timeout: 3), "Folder should display")
+        folder.tap()
+
+        let file = collectionViewsQuery.cells.containing(.staticText, identifier: AppUITest.imageFileName)
+        XCTAssertTrue(folder.waitForExistence(timeout: 3), "Image should display")
+        file.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
+
+        app.swipeUp()
+
+        let copyButton = app.cells[KDriveCoreStrings.Localizable.buttonSendCopy].firstMatch
+        XCTAssertTrue(copyButton.waitForExistence(timeout: 3), "Copy button should display")
+        copyButton.tap()
+
+        let sharingUIServiceApp = XCUIApplication(bundleIdentifier: "com.apple.SharingUIService")
+        sharingUIServiceApp.images["download"].firstMatch.tap()
+
+        app.activate()
+
+        let cellsQuery = app.cells
+        cellsQuery/*@START_MENU_TOKEN@*/ .containing(.image, identifier: "download")
+            .firstMatch
+            .tap()
+        XCTAssertTrue(
+            app.staticTexts[KDriveCoreStrings.Localizable.snackbarImageSavedConfirmation].waitForExistence(timeout: 5),
+            "Snackbar should display"
+        )
+
+        cellsQuery.containing(.image, identifier: "folder-select")
+            .firstMatch
+            .tap()
+        let createButton = app.buttons[KDriveCoreStrings.Localizable.buttonCreateFolder].firstMatch
+        XCTAssertTrue(createButton.waitForExistence(timeout: 3), "Create folder button should be displayed")
+        createButton.tap()
+
+        cellsQuery.containing(.staticText, identifier: "Private or shared folder")
+            .firstMatch
+            .tap()
+        app
+            .staticTexts[KDriveResourcesStrings.Localizable.createFolderMeOnly]
+            .firstMatch.tap()
+        app
+            .textFields[KDriveResourcesStrings.Localizable.hintInputDirName]
+            .firstMatch.tap()
+
+        app
+            .textFields[KDriveResourcesStrings.Localizable.hintInputDirName]
+            .firstMatch.typeText("Test")
+        app
+            .buttons[KDriveCoreStrings.Localizable.buttonCreateFolder]
+            .firstMatch.tap()
+
+        app.windows
+            .firstMatch
+            .tap()
+
+        let createFolderButton = app.buttons.matching(identifier: KDriveCoreStrings.Localizable.buttonCreateFolder)
+            .element(boundBy: 1)
+        XCTAssertTrue(createFolderButton.waitForExistence(timeout: 3), "Create folder button should be displayed")
+        createFolderButton.tap()
+
+        app.staticTexts["Test"].firstMatch.tap()
+        app
+            .buttons[KDriveCoreStrings.Localizable.buttonSelectTheFolder]
+            .firstMatch.tap()
+
+        let renameButton = app.staticTexts[KDriveResourcesStrings.Localizable.buttonRename].firstMatch
+        XCTAssertTrue(renameButton.waitForExistence(timeout: 3), "Rename button should be displayed")
+        renameButton.tap()
+        app.textFields[KDriveResourcesStrings.Localizable.hintInputFileName].firstMatch.tap()
+        app.textFields[KDriveResourcesStrings.Localizable.hintInputFileName].firstMatch.typeText("Test")
+
+        app.staticTexts[KDriveResourcesStrings.Localizable.buttonSave].firstMatch.tap()
+
+        XCTAssertTrue(app.staticTexts["Test.jpeg"].firstMatch.waitForExistence(timeout: 3), "Renamed file should be displayed")
+
+        app.staticTexts[KDriveResourcesStrings.Localizable.modalMoveTrashTitle].firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.buttonMove].firstMatch.tap()
+
+        deleteLastPhoto()
+    }
+
+    func testPhotoSync() {
+        let testName = "UITests - Photo Sync - \(Date())"
+        launchAppFromScratch()
+        let root = createDirectory(name: testName)
+        currentName = root
+
+        app.buttons[KDriveResourcesStrings.Localizable.buttonMenu].firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.buttonSnackBarGoToSettings].firstMatch.tap()
+
+        let cellsQuery = app.cells
+        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.syncSettingsTitle).firstMatch.tap()
+        app.switches[KDriveResourcesStrings.Localizable.syncSettingsButtonActiveSync].firstMatch.tap()
+
+        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.buttonSelectTheFolder).firstMatch.tap()
+        app.staticTexts[root].firstMatch.tap()
+        app.buttons[KDriveResourcesStrings.Localizable.buttonSelectTheFolder].firstMatch.tap()
+        let element = app
+            .switches[
+                "\(KDriveResourcesStrings.Localizable.createDatedSubFoldersTitle), \(KDriveResourcesStrings.Localizable.createDatedSubFoldersDescription)"
+            ]
+            .firstMatch
+        element.tap()
+        app.swipeDown()
+        app.staticTexts[KDriveResourcesStrings.Localizable.syncSettingsSaveDateNowValue].firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.syncSettingsSaveDateAllPictureValue].firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.buttonValid].firstMatch.tap()
+
+        app.swipeUp()
+        app.buttons[KDriveResourcesStrings.Localizable.buttonSave].firstMatch.tap()
+
+        let success = app.staticTexts[KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(6)].firstMatch
+        XCTAssertTrue(success.waitForExistence(timeout: 5), "All upload should be finished")
+
+        goToMyFolders()
+        app.staticTexts[root].tap()
+
+        let folder2011 = app.staticTexts["2011"].firstMatch
+        XCTAssertTrue(folder2011.waitForExistence(timeout: 5), "2011 Folder should exist")
+    }
+
     func playVideo(offline: Bool) {
         let folderName = "Test médias - Ne pas supprimer"
         let videoName = "video.mp4"
@@ -832,5 +961,27 @@ class AppUITest: XCTestCase {
         if acceptAllPhotosButton.exists {
             acceptAllPhotosButton.tap()
         }
+    }
+
+    func deleteLastPhoto() {
+        let photos = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow")
+        photos.activate()
+
+        let lastPhoto = photos.images.matching(identifier: "Photo, 30 March 2018, 21:14").element(boundBy: 2)
+        XCTAssertTrue(lastPhoto.waitForExistence(timeout: 5), "Photo should be displayed")
+        wait(delay: 1)
+        lastPhoto.tap()
+
+        for _ in 0 ... 1 {
+            photos.buttons["PUOneUpBarButtonItemIdentifierTrashBin"].firstMatch.tap()
+            photos.buttons["Delete Photo"].firstMatch.tap()
+        }
+
+        photos.buttons["Back"].tap()
+
+        let app = XCUIApplication(bundleIdentifier: "com.infomaniak.drive")
+        app.activate()
+
+        app.staticTexts[KDriveResourcesStrings.Localizable.buttonLater].firstMatch.tap()
     }
 }
