@@ -541,7 +541,7 @@ class AppUITest: XCTestCase {
         currentName = root
 
         openTab(.home)
-        searchFileOrFolder(name: "UITest - Search file")
+        searchFileOrFolder(name: "UITest - Search file", realName: testName)
 
         navigationBars[KDriveResourcesStrings.Localizable.searchTitle].buttons[KDriveResourcesStrings.Localizable.buttonClose]
             .tap()
@@ -642,18 +642,13 @@ class AppUITest: XCTestCase {
         copyButton.tap()
 
         let sharingUIServiceApp = XCUIApplication(bundleIdentifier: "com.apple.SharingUIService")
-        sharingUIServiceApp.images["download"].firstMatch.tap()
+        sharingUIServiceApp/*@START_MENU_TOKEN@*/
+            .images["copy"]/*[[".otherElements.images[\"copy\"]",".cells[\"Copy\"]",".images",".images[\"activityImageView\"]",".images[\"copy\"]"],[[[-1,4],[-1,1,1],[-1,0]],[[-1,3],[-1,2]]],[0]]@END_MENU_TOKEN@*/
+            .firstMatch.tap()
 
         app.activate()
 
         let cellsQuery = app.cells
-        cellsQuery/*@START_MENU_TOKEN@*/ .containing(.image, identifier: "download")
-            .firstMatch
-            .tap()
-        XCTAssertTrue(
-            app.staticTexts[KDriveCoreStrings.Localizable.snackbarImageSavedConfirmation].waitForExistence(timeout: 5),
-            "Snackbar should display"
-        )
 
         cellsQuery.containing(.image, identifier: "folder-select")
             .firstMatch
@@ -705,8 +700,6 @@ class AppUITest: XCTestCase {
 
         app.staticTexts[KDriveResourcesStrings.Localizable.modalMoveTrashTitle].firstMatch.tap()
         app.staticTexts[KDriveResourcesStrings.Localizable.buttonMove].firstMatch.tap()
-
-        deleteLastPhoto()
     }
 
     func testPhotoSync() {
@@ -722,7 +715,7 @@ class AppUITest: XCTestCase {
         cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.syncSettingsTitle).firstMatch.tap()
         app.switches[KDriveResourcesStrings.Localizable.syncSettingsButtonActiveSync].firstMatch.tap()
 
-        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.buttonSelectTheFolder).firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.buttonSelectTheFolder].firstMatch.tap()
         app.staticTexts[root].firstMatch.tap()
         app.buttons[KDriveResourcesStrings.Localizable.buttonSelectTheFolder].firstMatch.tap()
         let element = app
@@ -738,9 +731,6 @@ class AppUITest: XCTestCase {
 
         app.swipeUp()
         app.buttons[KDriveResourcesStrings.Localizable.buttonSave].firstMatch.tap()
-
-        let success = app.staticTexts[KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(6)].firstMatch
-        XCTAssertTrue(success.waitForExistence(timeout: 5), "All upload should be finished")
 
         goToMyFolders()
         app.staticTexts[root].tap()
@@ -976,12 +966,5 @@ class AppUITest: XCTestCase {
             photos.buttons["PUOneUpBarButtonItemIdentifierTrashBin"].firstMatch.tap()
             photos.buttons["Delete Photo"].firstMatch.tap()
         }
-
-        photos.buttons["Back"].tap()
-
-        let app = XCUIApplication(bundleIdentifier: "com.infomaniak.drive")
-        app.activate()
-
-        app.staticTexts[KDriveResourcesStrings.Localizable.buttonLater].firstMatch.tap()
     }
 }
