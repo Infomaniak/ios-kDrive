@@ -126,15 +126,10 @@ jobs:
           echo "Found UDIDs:"
           echo "$UDIDS"
 
-          SERVICES=("photos" "camera" "microphone" "contacts" "calendar" "reminders" "location")
 
           for UDID in $UDIDS; do
             echo "Uninstalling $BUNDLE_ID from $UDID"
             xcrun simctl uninstall "$UDID" "$BUNDLE_ID" || echo "Uninstall failed or app not installed on $UDID"
-            for SERVICE in "${SERVICES[@]}"; do
-              echo "Granting $SERVICE to $BUNDLE_ID on $UDID"
-              xcrun simctl privacy "$UDID" grant "$SERVICE" "$BUNDLE_ID" || echo "Failed to grant $SERVICE on $UDID; continuing"
-            done
           done
 
       - name: Checkout

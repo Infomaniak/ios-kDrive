@@ -147,11 +147,7 @@ class AppUITest: XCTestCase {
         // Import photo from photo library
         openTab(.add)
         tablesQuery.staticTexts[KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo].tap()
-        let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
-        let acceptAllButton = springboardApp.buttons.element(boundBy: 1).firstMatch
-        if acceptAllButton.exists {
-            acceptAllButton.tap()
-        }
+        acceptPhotosPermissions()
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
         let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
         if acceptAllPhotosButton.exists {
@@ -494,13 +490,23 @@ class AppUITest: XCTestCase {
         currentName = root
 
         wait(delay: 1)
-        openFileMenu(named: root, fullSize: true)
+
+        let file = collectionViewsQuery.cells.containing(.staticText, identifier: AppUITest.imageFileName).firstMatch
+        XCTAssertTrue(file.waitForExistence(timeout: 3), "Image should display")
+        file.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
+
+        app.swipeUp()
+
         let delete = app.staticTexts[KDriveResourcesStrings.Localizable.modalMoveTrashTitle].firstMatch
         XCTAssertTrue(delete.waitForExistence(timeout: 4), "Move to trash action should be displayed")
         delete.tap()
         app.buttons[KDriveResourcesStrings.Localizable.buttonMove].firstMatch.tap()
-        app.buttons[KDriveResourcesStrings.Localizable.buttonCancel].tap()
+        let cancelButton = app.buttons[KDriveResourcesStrings.Localizable.buttonCancel].firstMatch
+        XCTAssertTrue(cancelButton.waitForExistence(timeout: 5), "cancel button should be displayed")
+        cancelButton.tap()
 
+        sortByLatest()
+        goToMyFolders()
         app.staticTexts[testName].firstMatch.tap()
         XCTAssertTrue(
             app.staticTexts[AppUITest.imageFileName].waitForExistence(timeout: 3),
@@ -602,7 +608,7 @@ class AppUITest: XCTestCase {
 
         wait(delay: 5)
         XCTAssertTrue(
-            app.buttons[KDriveResourcesStrings.Localizable.fileListTitle].waitForExistence(timeout: 5),
+            app.buttons[KDriveResourcesStrings.Localizable.fileListTitle].waitForExistence(timeout: 10),
             "Last modification text should display"
         )
     }
@@ -619,6 +625,32 @@ class AppUITest: XCTestCase {
             return KDriveResourcesStrings.Localizable.galleryTitle
         case .menu:
             return KDriveResourcesStrings.Localizable.menuTitle
+        }
+    }
+
+    func searchFileOrFolder(name: String, realName: String? = nil) {
+        app.buttons[KDriveResourcesStrings.Localizable.searchTitle].firstMatch.tap()
+        app.searchFields[KDriveResourcesStrings.Localizable.searchViewHint].tap()
+        app.typeText(name)
+        app.typeText("\n")
+        if let text = realName {
+            XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 10), "Directory should be listed in results")
+        } else {
+            XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 10), "Directory should be listed in results")
+        }
+    }
+
+    func acceptPhotosPermissions() {
+        let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let acceptAllButton = springboardApp.buttons.element(boundBy: 1).firstMatch
+        if acceptAllButton.exists {
+            acceptAllButton.tap()
+        }
+        let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
+
+        let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
+        if acceptAllPhotosButton.exists {
+            acceptAllPhotosButton.tap()
         }
     }
 }
