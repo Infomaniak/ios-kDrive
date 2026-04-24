@@ -153,6 +153,10 @@ class AppUITest: XCTestCase {
             acceptAllButton.tap()
         }
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
+        let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
+        if acceptAllPhotosButton.exists {
+            acceptAllPhotosButton.tap()
+        }
         let photoElement = photospickerApp.images.element(boundBy: 1)
         XCTAssertTrue(photoElement.waitForExistence(timeout: 5), "No photos in photo library")
         photoElement.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
