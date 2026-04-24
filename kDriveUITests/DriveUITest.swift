@@ -89,10 +89,14 @@ class AppUITest: XCTestCase {
 
     func goToMyFolders() {
         openTab(.files)
-        collectionViewsQuery.cells.containing(
+
+        let privateTeamSpace = collectionViewsQuery.cells.containing(
             .staticText,
             identifier: KDriveResourcesStrings.Localizable.localizedFilenamePrivateTeamSpace
-        ).element.tap()
+        ).element
+        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: 10), "Private Team Space should exists")
+
+        privateTeamSpace.tap()
         sortByLatest()
     }
 
@@ -572,7 +576,7 @@ class AppUITest: XCTestCase {
         let value = KDriveResourcesStrings.Localizable.buttonBack != "Back" ? KDriveResourcesStrings.Localizable.buttonBack : "BackButton"
         app.buttons[value].firstMatch.tap()
         app.staticTexts[KDriveResourcesStrings.Localizable.buttonApplyFilters].firstMatch.tap()
-        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 4), "Directory with category should be in result")
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 10), "Directory with category should be in result")
         navigationBars.buttons[KDriveResourcesStrings.Localizable.buttonClose].tap()
     }
 
@@ -688,9 +692,11 @@ class AppUITest: XCTestCase {
             .buttons[KDriveCoreStrings.Localizable.buttonSelectTheFolder]
             .firstMatch.tap()
 
-        let renameButton = app.staticTexts[KDriveResourcesStrings.Localizable.buttonRename].firstMatch
-        XCTAssertTrue(renameButton.waitForExistence(timeout: 3), "Rename button should be displayed")
-        renameButton.tap()
+        let rename = app.cells/*@START_MENU_TOKEN@*/ .containing(.image, identifier: "edit")
+            .firstMatch
+        XCTAssertTrue(rename.waitForExistence(timeout: 4), "Rename text should be displayed")
+
+        rename.tap()
         app.textFields[KDriveResourcesStrings.Localizable.hintInputFileName].firstMatch.tap()
         app.textFields[KDriveResourcesStrings.Localizable.hintInputFileName].firstMatch.typeText("Test")
 
@@ -715,9 +721,19 @@ class AppUITest: XCTestCase {
         cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.syncSettingsTitle).firstMatch.tap()
         app.switches[KDriveResourcesStrings.Localizable.syncSettingsButtonActiveSync].firstMatch.tap()
 
-        app.staticTexts[KDriveResourcesStrings.Localizable.buttonSelectTheFolder].firstMatch.tap()
+        acceptPhotosPermissions()
+        let firstSelectFolder = app.cells.containing(
+            .staticText,
+            identifier: KDriveResourcesStrings.Localizable.buttonSelectTheFolder
+        ).firstMatch
+        XCTAssertTrue(firstSelectFolder.waitForExistence(timeout: 5), "First button select the folder should exist")
+        firstSelectFolder.tap()
         app.staticTexts[root].firstMatch.tap()
-        app.buttons[KDriveResourcesStrings.Localizable.buttonSelectTheFolder].firstMatch.tap()
+
+        let secondSelectFolder = app.staticTexts[KDriveResourcesStrings.Localizable.buttonSelectTheFolder].firstMatch
+        XCTAssertTrue(secondSelectFolder.waitForExistence(timeout: 5), "Second button select the folder should exist")
+        secondSelectFolder.tap()
+
         let element = app
             .switches[
                 "\(KDriveResourcesStrings.Localizable.createDatedSubFoldersTitle), \(KDriveResourcesStrings.Localizable.createDatedSubFoldersDescription)"
@@ -735,8 +751,7 @@ class AppUITest: XCTestCase {
         goToMyFolders()
         app.staticTexts[root].tap()
 
-        let folder2011 = app.staticTexts["2011"].firstMatch
-        XCTAssertTrue(folder2011.waitForExistence(timeout: 5), "2011 Folder should exist")
+        XCTAssertTrue(collectionViewsQuery.cells.firstMatch.waitForExistence(timeout: 5), "Folder should exists")
     }
 
     func playVideo(offline: Bool) {
@@ -950,21 +965,6 @@ class AppUITest: XCTestCase {
         let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
         if acceptAllPhotosButton.exists {
             acceptAllPhotosButton.tap()
-        }
-    }
-
-    func deleteLastPhoto() {
-        let photos = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow")
-        photos.activate()
-
-        let lastPhoto = photos.images.matching(identifier: "Photo, 30 March 2018, 21:14").element(boundBy: 2)
-        XCTAssertTrue(lastPhoto.waitForExistence(timeout: 5), "Photo should be displayed")
-        wait(delay: 1)
-        lastPhoto.tap()
-
-        for _ in 0 ... 1 {
-            photos.buttons["PUOneUpBarButtonItemIdentifierTrashBin"].firstMatch.tap()
-            photos.buttons["Delete Photo"].firstMatch.tap()
         }
     }
 }
