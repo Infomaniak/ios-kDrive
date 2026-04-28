@@ -49,8 +49,16 @@ public extension DriveFileManager {
                         updateFile(updatedFile: file, lastActionAt: activity.lastActionAt, writableRealm: writableRealm)
                         updatedFiles.append(file)
                     } else if [FileActivityType.fileDelete, FileActivityType.fileTrash].contains(activity.lastAction) {
+                        let fileUid = File.uid(driveId: drive.id, fileId: activity.fileId)
+
+                        SentryDebug.offlineFileRemovedByServerActivity(
+                            fileId: activity.fileId,
+                            fileUid: fileUid,
+                            activityType: activity.lastAction?.rawValue ?? "unknown"
+                        )
+
                         removeFileInDatabase(
-                            fileUid: File.uid(driveId: drive.id, fileId: activity.fileId),
+                            fileUid: fileUid,
                             cascade: false,
                             writableRealm: writableRealm
                         )
