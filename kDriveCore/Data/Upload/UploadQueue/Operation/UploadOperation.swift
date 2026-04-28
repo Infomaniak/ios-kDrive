@@ -538,6 +538,17 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                     .filter("id == %@", driveFile.parentId)
                     .first
 
+                // Track if we're about to overwrite an offline file without preserving the flag
+                if let existingFile = writableRealm.object(ofType: File.self, forPrimaryKey: driveFile.uid),
+                   !existingFile.isInvalidated {
+                    SentryDebug.uploadCompletionOfflineCheck(
+                        fileId: driveFile.id,
+                        fileUid: driveFile.uid,
+                        existingFileWasOffline: existingFile.isAvailableOffline,
+                        newFileIsOffline: driveFile.isAvailableOffline
+                    )
+                }
+
                 writableRealm.add(driveFile, update: .modified)
 
                 // Make sure the parent folder state is consistent, if available
