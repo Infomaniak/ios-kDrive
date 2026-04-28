@@ -45,6 +45,8 @@ public enum SentryDebug {
         case cacheCleanup
 
         case tokenMigrator
+
+        case availableOffline
     }
 
     public enum EventNames {
