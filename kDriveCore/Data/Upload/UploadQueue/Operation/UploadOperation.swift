@@ -547,6 +547,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                         existingFileWasOffline: existingFile.isAvailableOffline,
                         newFileIsOffline: driveFile.isAvailableOffline
                     )
+
+                    // Preserve offline status from existing file
+                    driveFile.isAvailableOffline = existingFile.isAvailableOffline
                 }
 
                 writableRealm.add(driveFile, update: .modified)
