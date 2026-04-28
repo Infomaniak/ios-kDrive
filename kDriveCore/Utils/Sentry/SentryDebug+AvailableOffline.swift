@@ -91,7 +91,7 @@ public extension SentryDebug {
             level: .info,
             metadata: metadata
         )
-        
+
         capture(
             message: message,
             level: .warning,
