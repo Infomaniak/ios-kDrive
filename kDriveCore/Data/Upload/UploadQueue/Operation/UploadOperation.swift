@@ -548,13 +548,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                         newFileIsOffline: driveFile.isAvailableOffline
                     )
 
-                    // Preserve offline status from existing file
                     driveFile.isAvailableOffline = existingFile.isAvailableOffline
                 }
 
                 writableRealm.add(driveFile, update: .modified)
 
-                // Make sure the parent folder state is consistent, if available
                 parentFolder?.children.insert(driveFile)
             }
         }
