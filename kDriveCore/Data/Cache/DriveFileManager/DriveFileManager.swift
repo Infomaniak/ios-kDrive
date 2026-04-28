@@ -1172,6 +1172,14 @@ public final class DriveFileManager {
             return
         }
 
+        if rootLiveFile.isAvailableOffline {
+            SentryDebug.offlineFileRemovedFromDatabase(
+                fileId: rootLiveFile.id,
+                fileUid: rootLiveFile.uid,
+                cascade: cascade
+            )
+        }
+
         try? rootLiveFile.clearOnFileSystemIfNeeded()
 
         var fileUidsToProcess: [String] = rootLiveFile.children.map(\.uid)
