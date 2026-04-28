@@ -1310,6 +1310,8 @@ public final class DriveFileManager {
     public func keepCacheAttributesForFile(newFile: File, keepProperties: FilePropertiesOptions, writableRealm: Realm) {
         guard let savedChild = writableRealm.object(ofType: File.self, forPrimaryKey: newFile.uid),
               !savedChild.isInvalidated else {
+            // Track when we can't find the saved file - this could lead to losing offline status
+            SentryDebug.keepCacheAttributesMissingSavedFile(fileId: newFile.id, fileUid: newFile.uid)
             return
         }
 
