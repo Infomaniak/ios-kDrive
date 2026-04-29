@@ -763,13 +763,16 @@ class AppUITest: XCTestCase {
         let folder = app.staticTexts[folderName]
         folder.tap()
 
-        let video = app.staticTexts[videoName]
+        let video = collectionViewsQuery.cells.containing(
+            .staticText,
+            identifier: videoName
+        ).firstMatch
         XCTAssertTrue(video.waitForExistence(timeout: 5), "Video should be displayed")
 
         if offline {
             activateAvailableOffline(name: videoName)
         }
-
+        wait(delay: 1)
         video.tap()
 
         app.tap()
