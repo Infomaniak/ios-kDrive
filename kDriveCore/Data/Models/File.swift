@@ -594,7 +594,7 @@ public final class File: Object, Codable {
         return containerBuilder(from: DriveFileManager.constants.cacheDirectoryURL)
     }
 
-    private func containerBuilder(from directory:URL) -> URL {
+    private func containerBuilder(from directory: URL) -> URL {
         return directory.appendingPathComponent("\(driveId)", isDirectory: true)
             .appendingPathComponent("\(id)", isDirectory: true)
     }
