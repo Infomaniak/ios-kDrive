@@ -599,6 +599,11 @@ public final class DriveFileManager {
     public func setLocalFiles(_ files: [File], root: File, deleteOrphans: Bool) {
         guard let liveRoot = root.thaw() else { return }
         try? database.writeTransaction { writableRealm in
+            for file in files {
+                // Missing keeping the local state
+                keepCacheAttributesForFile(newFile: file, keepProperties: [.minimum], writableRealm: writableRealm)
+            }
+
             try writeChildrenToParent(
                 files,
                 liveParent: liveRoot,
@@ -1289,7 +1294,9 @@ public final class DriveFileManager {
         public static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
         public static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
         public static let lastActionAt = FilePropertiesOptions(rawValue: 1 << 8)
+        public static let parents = FilePropertiesOptions(rawValue: 1 << 9)
 
+        public static let minimum: FilePropertiesOptions = []
         public static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastActionAt, .lastCursor]
         public static let extras: FilePropertiesOptions = [.path, .users, .version]
         public static let all: FilePropertiesOptions = [
