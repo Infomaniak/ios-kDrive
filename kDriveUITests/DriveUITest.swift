@@ -77,7 +77,11 @@ class AppUITest: XCTestCase {
     override func tearDown() {
         super.tearDown()
         guard let currentName else { return }
-        tearDownTest(directoryName: currentName)
+        if currentName == "AppLock" {
+            disableAppLock()
+        } else {
+            tearDownTest(directoryName: currentName)
+        }
         self.currentName = nil
     }
 
@@ -754,6 +758,36 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(collectionViewsQuery.cells.firstMatch.waitForExistence(timeout: 5), "Folder should exists")
     }
 
+    func testAppLock() {
+        currentName = "AppLock"
+        launchAppFromScratch()
+        let app = XCUIApplication()
+        app.activate()
+
+        enableAppLock()
+
+        wait(delay: 1)
+
+        app.terminate()
+
+        app.activate()
+
+        unlockApp()
+
+        let laterText = app.staticTexts[KDriveResourcesStrings.Localizable.buttonLater].firstMatch
+
+        if laterText.exists {
+            laterText.tap()
+        }
+        XCTAssertTrue(app
+            .staticTexts[KDriveResourcesStrings.Localizable.lastEditsTitle]
+            .firstMatch.waitForExistence(timeout: 10), "App should be unlocked")
+        app
+            .buttons[KDriveResourcesStrings.Localizable
+                .buttonMenu]
+            .firstMatch.tap()
+    }
+
     func playVideo(offline: Bool) {
         let folderName = "Test médias - Ne pas supprimer"
         let videoName = "video.mp4"
@@ -969,5 +1003,64 @@ class AppUITest: XCTestCase {
         if acceptAllPhotosButton.exists {
             acceptAllPhotosButton.tap()
         }
+    }
+
+    func enableAppLock() {
+        app.buttons[KDriveResourcesStrings.Localizable.buttonMenu].firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
+
+        let cellsQuery = app.cells
+        cellsQuery.containing(.staticText, identifier: "Security")
+            .firstMatch
+            .tap()
+        let disabled = cellsQuery.containing(.staticText, identifier: "Disabled")
+            .firstMatch
+
+        if disabled.waitForExistence(timeout: 10) {
+            disabled.tap()
+        } else {
+            XCTAssertTrue(false, "App shouldn't be locked")
+        }
+
+        app
+            .switches["0"]
+            .firstMatch.tap()
+
+        unlockApp()
+    }
+
+    func disableAppLock() {
+        app.buttons[KDriveResourcesStrings.Localizable.buttonMenu].firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
+
+        let cellsQuery = app.cells
+        cellsQuery.containing(.staticText, identifier: "Security")
+            .firstMatch
+            .tap()
+
+        let enabled = cellsQuery.containing(.staticText, identifier: "Enabled").firstMatch
+
+        if enabled.waitForExistence(timeout: 10) {
+            enabled.tap()
+        } else {
+            XCTAssertTrue(false, "App should be locked")
+        }
+
+        app
+            .switches["1"]
+            .firstMatch.tap()
+
+        unlockApp()
+    }
+
+    func unlockApp() {
+        let localAuthenticationUApp = XCUIApplication(bundleIdentifier: "com.apple.LocalAuthenticationUIService")
+        let element = localAuthenticationUApp
+            .secureTextFields["Passcode field"]
+            .firstMatch
+
+        XCTAssertTrue(element.waitForExistence(timeout: 5), "App is not locked")
+        element.tap()
+        element.typeText("a\r")
     }
 }
