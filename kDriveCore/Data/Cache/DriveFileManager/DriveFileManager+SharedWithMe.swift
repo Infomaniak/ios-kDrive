@@ -27,6 +27,7 @@ public extension DriveFileManager {
             let file: File = try await apiFetcher
                 .perform(request: apiFetcher.authenticatedRequest(endpoint))
             try database.writeTransaction { mutableRealm in
+                // No need for a keepCacheAttributesForFile since this is called for "share with me" only
                 mutableRealm.add(file, update: .modified)
             }
 
