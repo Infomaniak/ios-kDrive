@@ -577,6 +577,7 @@ public final class File: Object, Codable {
             .appendingPathComponent("\(id)", isDirectory: true)
     }
 
+    // TODO: Refactor to no longer rely on implicit isAvailableOffline from the database
     public var localUrl: URL {
         return localContainerUrl.appendingPathComponent(name, isDirectory: isDirectory)
     }
