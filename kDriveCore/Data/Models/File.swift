@@ -587,6 +587,10 @@ public final class File: Object, Codable {
         return isAvailableOffline ? offlineContainerUrl : cacheLocalContainerUrl
     }
 
+    public func localFileUrl(from directory: URL) -> URL {
+        return directory.appendingPathComponent(name, isDirectory: isDirectory)
+    }
+
     public var offlineContainerUrl: URL {
         return containerBuilder(from: DriveFileManager.constants.realmRootURL)
     }
