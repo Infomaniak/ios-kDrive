@@ -96,7 +96,7 @@ public extension DriveFileManager {
                 setFileAvailableOfflineWithRemoteCopy(frozenFile: frozenFile, completion: completion)
             }
         } else {
-            setFileNotAvailableOffline(liveFile: liveFile, oldUrl: oldUrl, completion: completion)
+            setFileNotAvailableOffline(liveFile: liveFile, completion: completion)
         }
     }
 
@@ -137,13 +137,15 @@ public extension DriveFileManager {
         downloadQueue.addToQueue(file: frozenFile, userId: drive.userId, itemIdentifier: nil)
     }
 
-    private func setFileNotAvailableOffline(liveFile: File, oldUrl: URL, completion: @escaping (Error?) -> Void) {
+    private func setFileNotAvailableOffline(liveFile: File, completion: @escaping (Error?) -> Void) {
+        let oldUrl = liveFile.localUrl
+
         markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
 
         let frozenFile = liveFile.freeze()
         if oldUrl != frozenFile.localUrl {
-            try? fileManager.createDirectory(at: frozenFile.localContainerUrl, withIntermediateDirectories: true)
-            try? fileManager.moveItem(at: oldUrl, to: frozenFile.localUrl)
+            try? fileManager.createDirectory(at: frozenFile.cacheLocalContainerUrl, withIntermediateDirectories: true)
+            try? fileManager.moveItem(at: oldUrl, to: frozenFile.localFileUrl(from: frozenFile.cacheLocalContainerUrl))
             try? fileManager.removeItem(at: oldUrl)
         }
 
