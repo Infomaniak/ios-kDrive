@@ -600,7 +600,7 @@ public final class DriveFileManager {
         guard let liveRoot = root.thaw() else { return }
         try? database.writeTransaction { writableRealm in
             for file in files {
-                // Missing keeping the local state
+                // We need to preserve the isAvailableOffline property
                 keepCacheAttributesForFile(newFile: file, keepProperties: [.minimum], writableRealm: writableRealm)
             }
 
