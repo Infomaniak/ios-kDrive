@@ -788,6 +788,27 @@ class AppUITest: XCTestCase {
             .firstMatch.tap()
     }
 
+    func testSwitchDrive() {
+        launchAppFromScratch()
+
+        let firstDrive = "Team Mobile Test"
+        let secondDrive = "John Appleseed"
+
+        app.staticTexts[firstDrive].firstMatch.tap()
+        app.staticTexts[secondDrive].firstMatch.tap()
+
+        goToMyFolders()
+
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10), "Folders for second drive should exists")
+
+        openTab(.menu)
+        app.buttons[KDriveResourcesStrings.Localizable.buttonSwitchDrive].firstMatch.tap()
+        app.staticTexts[firstDrive].firstMatch.tap()
+
+        goToMyFolders()
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10), "Folders for first drive should exists")
+    }
+
     func playVideo(offline: Bool) {
         let folderName = "Test médias - Ne pas supprimer"
         let videoName = "video.mp4"
