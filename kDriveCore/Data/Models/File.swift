@@ -581,6 +581,7 @@ public final class File: Object, Codable {
         return localContainerUrl.appendingPathComponent(name, isDirectory: isDirectory)
     }
 
+    // TODO: Refactor to no longer rely on implicit isAvailableOffline from the database
     public var localContainerUrl: URL {
         return isAvailableOffline ? offlineContainerUrl : cacheLocalContainerUrl
     }
