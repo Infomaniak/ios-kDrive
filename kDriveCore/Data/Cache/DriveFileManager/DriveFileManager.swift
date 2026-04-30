@@ -601,7 +601,7 @@ public final class DriveFileManager {
         try? database.writeTransaction { writableRealm in
             for file in files {
                 // We need to preserve the isAvailableOffline property
-                keepCacheAttributesForFile(newFile: file, keepProperties: [.minimum], writableRealm: writableRealm)
+                keepCacheAttributesForFile(newFile: file, keepProperties: [.standard], writableRealm: writableRealm)
             }
 
             try writeChildrenToParent(
@@ -1292,9 +1292,7 @@ public final class DriveFileManager {
         public static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
         public static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
         public static let lastActionAt = FilePropertiesOptions(rawValue: 1 << 8)
-        public static let parents = FilePropertiesOptions(rawValue: 1 << 9)
 
-        public static let minimum: FilePropertiesOptions = []
         public static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastActionAt, .lastCursor]
         public static let extras: FilePropertiesOptions = [.path, .users, .version]
         public static let all: FilePropertiesOptions = [
