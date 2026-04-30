@@ -628,8 +628,14 @@ public final class DriveFileManager {
                 return
             }
 
-            for child in lastPicturesRootInContext.children {
-                removeFileInDatabase(fileUid: child.uid, cascade: false, writableRealm: writableRealm)
+            let childrenToProcess = Array(lastPicturesRootInContext.children)
+            for child in childrenToProcess {
+                if child.parentLink.count == 1 {
+                    removeFileInDatabase(fileUid: child.uid, cascade: false, writableRealm: writableRealm)
+                } else {
+                    // The file has multiple parents, we only remove the link with the root
+                    lastPicturesRootInContext.children.remove(child)
+                }
             }
             writableRealm.add(lastPicturesRootInContext, update: .modified)
         }
