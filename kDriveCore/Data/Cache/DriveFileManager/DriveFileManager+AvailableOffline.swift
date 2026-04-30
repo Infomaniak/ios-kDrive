@@ -108,7 +108,7 @@ public extension DriveFileManager {
     ) {
         do {
             if oldUrl != newUrl {
-                try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
+                try fileManager.createDirectory(at: liveFile.offlineContainerUrl, withIntermediateDirectories: true)
                 try fileManager.moveItem(at: oldUrl, to: newUrl)
             }
 
