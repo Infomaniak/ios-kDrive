@@ -116,6 +116,7 @@ public extension DriveFileManager {
             completion(nil)
         } catch {
             markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
+            try? fileManager.removeItem(at: oldUrl)
             completion(error)
         }
     }
