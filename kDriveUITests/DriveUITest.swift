@@ -805,6 +805,58 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10), "Folders for first drive should exists")
     }
 
+    func testAppExtension() {
+        let testName = "UITest - App Extension - \(Date())"
+        launchAppFromScratch()
+        let root = createDirectory(name: testName)
+        currentName = root
+
+        let mobileslideshowApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow")
+        mobileslideshowApp.activate()
+        let closeShare = mobileslideshowApp.buttons["header.closeButton"].firstMatch
+        if closeShare.exists {
+            closeShare.tap()
+        }
+
+        let closeImage = mobileslideshowApp.buttons["PUOneUpBarButtonItemIdentifierDone"].firstMatch
+        if closeImage.exists {
+            closeImage.tap()
+        }
+
+        mobileslideshowApp.images["Photo, 08 August 2012, 23:55"].firstMatch.tap()
+        wait(delay: 0.5)
+        let shareButton = mobileslideshowApp.buttons["PUOneUpBarButtonItemIdentifierShare"].firstMatch
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5), "Share button should exists")
+        shareButton.tap()
+        wait(delay: 0.5)
+        mobileslideshowApp.cells["kDrive"].images["activityImageView"].firstMatch.tap()
+
+        let shareExtensionApp = XCUIApplication(bundleIdentifier: "com.infomaniak.drive.ShareExtension")
+        let myFolder = shareExtensionApp.cells.containing(.staticText, identifier: "My folder").firstMatch
+        XCTAssertTrue(myFolder.waitForExistence(timeout: 5), "My folder button should exists")
+        myFolder.tap()
+        shareExtensionApp.staticTexts[testName].firstMatch.tap()
+        shareExtensionApp.buttons[KDriveResourcesStrings.Localizable.buttonSelectTheFolder].firstMatch.tap()
+        shareExtensionApp.staticTexts[KDriveResourcesStrings.Localizable.buttonSave].firstMatch.tap()
+
+        wait(delay: 3)
+        app.activate()
+        dismissBottomSheet()
+        XCUIDevice.shared.press(.home)
+        wait(delay: 2)
+        let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        springboardApp.icons["kDrive"].firstMatch.tap()
+        wait(delay: 2)
+        goToMyFolders()
+
+        app.cells.containing(.staticText, identifier: testName).firstMatch.tap()
+
+        XCTAssertTrue(
+            app.staticTexts["IMG_0005.jpeg"].firstMatch.waitForExistence(timeout: 100),
+            "Photo should be displayed"
+        )
+    }
+
     func testShowInFiles() {
         let testName = "UI Test - Show in Files - \(Date())"
         launchAppFromScratch()
