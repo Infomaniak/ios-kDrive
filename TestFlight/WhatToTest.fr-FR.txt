@@ -1,6 +1,2 @@
-- Correction d'un problème rare lors de la pagination des fichiers
-- L'état de l'application est conservé lors du passage en arrière-plan
-- Supprimer les images de la sélection avant l'importation
-- Sélection multiple à deux doigts
-- Correction d'un problème de partage public lorsque deux utilisateurs appartiennent à la même organisation
+- Correction d'un problème qui permettait l'éviction incorrecte de fichiers hors ligne
 - Améliorations de la stabilité et corrections de bugs
