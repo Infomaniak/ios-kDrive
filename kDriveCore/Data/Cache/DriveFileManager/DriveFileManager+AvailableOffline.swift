@@ -79,24 +79,34 @@ public extension DriveFileManager {
             return
         }
 
-        let oldUrl = liveFile.localUrl
-        let fileExists = FileManager.default.fileExists(atPath: file.localUrl.path)
-
         if available {
+            let offlineSyncFileUrl = file.localFileUrl(from: file.offlineContainerUrl)
+            let cachedFileUrl = file.localFileUrl(from: file.cacheLocalContainerUrl)
+            let offlineSyncFileExists = FileManager.default.fileExists(atPath: offlineSyncFileUrl.path)
+            let cachedFileExists = FileManager.default.fileExists(atPath: cachedFileUrl.path)
+
             updateFileProperty(fileUid: liveFile.uid) { writableFile in
                 writableFile.isAvailableOffline = true
             }
-            let newUrl = liveFile.localUrl
+
             let isLocalVersionOlderThanRemote = file.isLocalVersionOlderThanRemote
 
-            if fileExists, !isLocalVersionOlderThanRemote {
-                setFileAvailableOfflineWithLocalCopy(liveFile: liveFile, oldUrl: oldUrl, newUrl: newUrl, completion: completion)
+            if offlineSyncFileExists, !isLocalVersionOlderThanRemote {
+                setFileAvailableOfflineWithLocalCopy(liveFile: liveFile,
+                                                     oldUrl: offlineSyncFileUrl,
+                                                     newUrl: offlineSyncFileUrl,
+                                                     completion: completion)
+            } else if cachedFileExists, !isLocalVersionOlderThanRemote {
+                setFileAvailableOfflineWithLocalCopy(liveFile: liveFile,
+                                                     oldUrl: cachedFileUrl,
+                                                     newUrl: offlineSyncFileUrl,
+                                                     completion: completion)
             } else {
                 let frozenFile = liveFile.freeze()
                 setFileAvailableOfflineWithRemoteCopy(frozenFile: frozenFile, completion: completion)
             }
         } else {
-            setFileNotAvailableOffline(liveFile: liveFile, oldUrl: oldUrl, completion: completion)
+            setFileNotAvailableOffline(liveFile: liveFile, completion: completion)
         }
     }
 
@@ -108,7 +118,7 @@ public extension DriveFileManager {
     ) {
         do {
             if oldUrl != newUrl {
-                try fileManager.createDirectory(at: liveFile.localContainerUrl, withIntermediateDirectories: true)
+                try fileManager.createDirectory(at: liveFile.offlineContainerUrl, withIntermediateDirectories: true)
                 try fileManager.moveItem(at: oldUrl, to: newUrl)
             }
 
@@ -116,6 +126,7 @@ public extension DriveFileManager {
             completion(nil)
         } catch {
             markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
+            try? fileManager.removeItem(at: oldUrl)
             completion(error)
         }
     }
@@ -137,13 +148,15 @@ public extension DriveFileManager {
         downloadQueue.addToQueue(file: frozenFile, userId: drive.userId, itemIdentifier: nil)
     }
 
-    private func setFileNotAvailableOffline(liveFile: File, oldUrl: URL, completion: @escaping (Error?) -> Void) {
+    private func setFileNotAvailableOffline(liveFile: File, completion: @escaping (Error?) -> Void) {
+        let oldUrl = liveFile.localUrl
+
         markAsUnavailableOfflineAndStopDownload(fileUid: liveFile.uid, fileId: liveFile.id)
 
         let frozenFile = liveFile.freeze()
         if oldUrl != frozenFile.localUrl {
-            try? fileManager.createDirectory(at: frozenFile.localContainerUrl, withIntermediateDirectories: true)
-            try? fileManager.moveItem(at: oldUrl, to: frozenFile.localUrl)
+            try? fileManager.createDirectory(at: frozenFile.cacheLocalContainerUrl, withIntermediateDirectories: true)
+            try? fileManager.moveItem(at: oldUrl, to: frozenFile.localFileUrl(from: frozenFile.cacheLocalContainerUrl))
             try? fileManager.removeItem(at: oldUrl)
         }
 

@@ -599,6 +599,11 @@ public final class DriveFileManager {
     public func setLocalFiles(_ files: [File], root: File, deleteOrphans: Bool) {
         guard let liveRoot = root.thaw() else { return }
         try? database.writeTransaction { writableRealm in
+            for file in files {
+                // We need to preserve the isAvailableOffline property
+                keepCacheAttributesForFile(newFile: file, keepProperties: [.standard], writableRealm: writableRealm)
+            }
+
             try writeChildrenToParent(
                 files,
                 liveParent: liveRoot,
@@ -623,8 +628,14 @@ public final class DriveFileManager {
                 return
             }
 
-            for child in lastPicturesRootInContext.children {
-                removeFileInDatabase(fileUid: child.uid, cascade: false, writableRealm: writableRealm)
+            let childrenToProcess = Array(lastPicturesRootInContext.children)
+            for child in childrenToProcess {
+                if child.parentLink.count == 1 {
+                    removeFileInDatabase(fileUid: child.uid, cascade: false, writableRealm: writableRealm)
+                } else {
+                    // The file has multiple parents, we only remove the link with the root
+                    lastPicturesRootInContext.children.remove(child)
+                }
             }
             writableRealm.add(lastPicturesRootInContext, update: .modified)
         }

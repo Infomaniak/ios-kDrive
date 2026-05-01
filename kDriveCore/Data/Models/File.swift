@@ -577,13 +577,29 @@ public final class File: Object, Codable {
             .appendingPathComponent("\(id)", isDirectory: true)
     }
 
+    // TODO: Refactor to no longer rely on implicit isAvailableOffline from the database
     public var localUrl: URL {
         return localContainerUrl.appendingPathComponent(name, isDirectory: isDirectory)
     }
 
+    // TODO: Refactor to no longer rely on implicit isAvailableOffline from the database
     public var localContainerUrl: URL {
-        let directory = isAvailableOffline ? DriveFileManager.constants.realmRootURL : DriveFileManager.constants
-            .cacheDirectoryURL
+        return isAvailableOffline ? offlineContainerUrl : cacheLocalContainerUrl
+    }
+
+    public func localFileUrl(from directory: URL) -> URL {
+        return directory.appendingPathComponent(name, isDirectory: isDirectory)
+    }
+
+    public var offlineContainerUrl: URL {
+        return containerBuilder(from: DriveFileManager.constants.realmRootURL)
+    }
+
+    public var cacheLocalContainerUrl: URL {
+        return containerBuilder(from: DriveFileManager.constants.cacheDirectoryURL)
+    }
+
+    private func containerBuilder(from directory: URL) -> URL {
         return directory.appendingPathComponent("\(driveId)", isDirectory: true)
             .appendingPathComponent("\(id)", isDirectory: true)
     }
