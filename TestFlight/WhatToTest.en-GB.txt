@@ -1,6 +1,2 @@
-- Fix a rare issue while paginating files
-- App state persists when switching in background
-- Remove pictures from selection before importing
-- Multi-select using two fingers
-- Fixed a public share issue when two users are within the same organisation
+- Fix an issue that would allow for offline files to be wrongly evicted
 - Stability improvements and bug fixes
