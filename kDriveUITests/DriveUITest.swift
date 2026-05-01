@@ -869,7 +869,9 @@ class AppUITest: XCTestCase {
         app.cells.containing(.staticText, identifier: "Security").firstMatch.tap()
 
         let toggle = app.switches.firstMatch
-        toggle.tap()
+        if toggle.value as? String == "1" {
+            toggle.tap()
+        }
 
         let documentsApp = XCUIApplication(bundleIdentifier: "com.apple.DocumentsApp")
         wait(delay: 2)
@@ -890,10 +892,10 @@ class AppUITest: XCTestCase {
         app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
         app.cells.containing(.staticText, identifier: "Security").firstMatch.tap()
 
-        let toggle2 = app
-            .switches
-            .firstMatch
-        toggle2.tap()
+        let toggle2 = app.switches.firstMatch
+        if toggle2.value as? String == "0" {
+            toggle2.tap()
+        }
 
         documentsApp.activate()
         documentsApp.tabBars.buttons["Browse"].firstMatch.tap()
