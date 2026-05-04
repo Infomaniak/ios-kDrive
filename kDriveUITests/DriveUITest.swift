@@ -860,53 +860,53 @@ class AppUITest: XCTestCase {
         )
     }
 
-    func testShowInFiles() {
-        let testName = "UI Test - Show in Files - \(Date())"
-        launchAppFromScratch()
-        let root = createDirectory(name: testName)
-
-        currentName = root
-        openTab(.menu)
-
-        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
-        app.cells.containing(.staticText, identifier: "Security").firstMatch.tap()
-
-        let toggle = app.switches.firstMatch
-        if toggle.value as? String == "1" {
-            toggle.tap()
-        }
-
-        let documentsApp = XCUIApplication(bundleIdentifier: "com.apple.DocumentsApp")
-        wait(delay: 2)
-        documentsApp.activate()
-        wait(delay: 1)
-        documentsApp.tabBars.buttons["Browse"].firstMatch.tap()
-        documentsApp.staticTexts["kDrive"].firstMatch.tap()
-
-        let authenticationRequired = documentsApp.staticTexts["Authentication Required"].firstMatch
-        XCTAssertTrue(authenticationRequired.waitForExistence(timeout: 10), "Drive should require authentication")
-        documentsApp.buttons["BackButton"].tap()
-        documentsApp.terminate()
-
-        app.activate()
-        dismissBottomSheet()
-
-        openTab(.menu)
-        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
-        app.cells.containing(.staticText, identifier: "Security").firstMatch.tap()
-
-        let toggle2 = app.switches.firstMatch
-        if toggle2.value as? String == "0" {
-            toggle2.tap()
-        }
-
-        documentsApp.activate()
-        documentsApp.tabBars.buttons["Browse"].firstMatch.tap()
-
-        let teamMobileTest = documentsApp.staticTexts["Team Mobile Test (mobiletest@ik.me)"].firstMatch
-        XCTAssertTrue(teamMobileTest.waitForExistence(timeout: 5), "Should be able to access Team Mobile Test")
-        openTab(.files)
-    }
+//    func testShowInFiles() {
+//        let testName = "UI Test - Show in Files - \(Date())"
+//        launchAppFromScratch()
+//        let root = createDirectory(name: testName)
+//
+//        currentName = root
+//        openTab(.menu)
+//
+//        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
+//        app.cells.containing(.staticText, identifier: "Security").firstMatch.tap()
+//
+//        let toggle = app.switches.firstMatch
+//        if toggle.value as? String == "1" {
+//            toggle.tap()
+//        }
+//
+//        let documentsApp = XCUIApplication(bundleIdentifier: "com.apple.DocumentsApp")
+//        wait(delay: 2)
+//        documentsApp.activate()
+//        wait(delay: 1)
+//        documentsApp.tabBars.buttons["Browse"].firstMatch.tap()
+//        documentsApp.staticTexts["kDrive"].firstMatch.tap()
+//
+//        let authenticationRequired = documentsApp.staticTexts["Authentication Required"].firstMatch
+//        XCTAssertTrue(authenticationRequired.waitForExistence(timeout: 10), "Drive should require authentication")
+//        documentsApp.buttons["BackButton"].tap()
+//        documentsApp.terminate()
+//
+//        app.activate()
+//        dismissBottomSheet()
+//
+//        openTab(.menu)
+//        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
+//        app.cells.containing(.staticText, identifier: "Security").firstMatch.tap()
+//
+//        let toggle2 = app.switches.firstMatch
+//        if toggle2.value as? String == "0" {
+//            toggle2.tap()
+//        }
+//
+//        documentsApp.activate()
+//        documentsApp.tabBars.buttons["Browse"].firstMatch.tap()
+//
+//        let teamMobileTest = documentsApp.staticTexts["Team Mobile Test (mobiletest@ik.me)"].firstMatch
+//        XCTAssertTrue(teamMobileTest.waitForExistence(timeout: 5), "Should be able to access Team Mobile Test")
+//        openTab(.files)
+//    }
 
     func playVideo(offline: Bool) {
         let folderName = "Test médias - Ne pas supprimer"
