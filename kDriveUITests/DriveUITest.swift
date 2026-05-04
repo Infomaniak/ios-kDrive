@@ -98,7 +98,7 @@ class AppUITest: XCTestCase {
             .staticText,
             identifier: KDriveResourcesStrings.Localizable.localizedFilenamePrivateTeamSpace
         ).element
-        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: 10), "Private Team Space should exists")
+        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: 10), "Private Team Space should exist")
 
         privateTeamSpace.tap()
         sortByLatest()
@@ -640,8 +640,11 @@ class AppUITest: XCTestCase {
         folder.tap()
 
         let file = collectionViewsQuery.cells.containing(.staticText, identifier: AppUITest.imageFileName)
-        XCTAssertTrue(folder.waitForExistence(timeout: 3), "Image should display")
-        file.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
+
+        let fileCell = file.firstMatch
+        XCTAssertTrue(fileCell.waitForExistence(timeout: 3), "Image should display")
+
+        fileCell.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
 
         app.swipeUp()
 
@@ -650,8 +653,8 @@ class AppUITest: XCTestCase {
         copyButton.tap()
 
         let sharingUIServiceApp = XCUIApplication(bundleIdentifier: "com.apple.SharingUIService")
-        sharingUIServiceApp/*@START_MENU_TOKEN@*/
-            .images["copy"]/*[[".otherElements.images[\"copy\"]",".cells[\"Copy\"]",".images",".images[\"activityImageView\"]",".images[\"copy\"]"],[[[-1,4],[-1,1,1],[-1,0]],[[-1,3],[-1,2]]],[0]]@END_MENU_TOKEN@*/
+        sharingUIServiceApp
+            .images["copy"]
             .firstMatch.tap()
 
         app.activate()
@@ -665,7 +668,7 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(createButton.waitForExistence(timeout: 3), "Create folder button should be displayed")
         createButton.tap()
 
-        cellsQuery.containing(.staticText, identifier: "Private or shared folder")
+        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.folderDescription)
             .firstMatch
             .tap()
         app
@@ -973,7 +976,7 @@ class AppUITest: XCTestCase {
         folder.tap()
 
         let audio = app.staticTexts[audioName]
-        XCTAssertTrue(audio.waitForExistence(timeout: 5), "Video should be displayed")
+        XCTAssertTrue(audio.waitForExistence(timeout: 5), "Audio should be displayed")
 
         if offline {
             activateAvailableOffline(name: audioName)
@@ -1021,7 +1024,7 @@ class AppUITest: XCTestCase {
         folder.tap()
 
         let file = app.staticTexts[fileName]
-        XCTAssertTrue(file.waitForExistence(timeout: 5), "Video should be displayed")
+        XCTAssertTrue(file.waitForExistence(timeout: 5), "File should be displayed")
 
         file.tap()
 
@@ -1127,16 +1130,16 @@ class AppUITest: XCTestCase {
         app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
 
         let cellsQuery = app.cells
-        cellsQuery.containing(.staticText, identifier: "Security")
+        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.securityTitle)
             .firstMatch
             .tap()
-        let disabled = cellsQuery.containing(.staticText, identifier: "Disabled")
+        let disabled = cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.allDisabled)
             .firstMatch
 
         if disabled.waitForExistence(timeout: 10) {
             disabled.tap()
         } else {
-            XCTAssertTrue(false, "App shouldn't be locked")
+            XCTFail("App shouldn't be locked")
         }
 
         app
@@ -1151,11 +1154,11 @@ class AppUITest: XCTestCase {
         app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
 
         let cellsQuery = app.cells
-        cellsQuery.containing(.staticText, identifier: "Security")
+        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.securityTitle)
             .firstMatch
             .tap()
 
-        let enabled = cellsQuery.containing(.staticText, identifier: "Enabled").firstMatch
+        let enabled = cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.allActivated).firstMatch
 
         if enabled.waitForExistence(timeout: 10) {
             enabled.tap()
