@@ -88,6 +88,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         statusBarView.frame.height
     }
 
+    private var networkObserver: ObservationToken?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -127,6 +129,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.contentMode = .center
         pdfPageLabel.numberOfLines = 1
 
+        observeNetwork()
         observeFileUpdated()
     }
 
@@ -164,6 +167,26 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
                 self.collectionView.endEditing(true)
                 self.reloadItemsAfterOneLoop(at: self.currentIndex)
+            }
+        }
+    }
+
+    private func observeNetwork() {
+        guard networkObserver == nil else { return }
+        networkObserver = ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
+            Task { @MainActor in
+                guard let self else { return }
+
+                if status != .offline {
+                    guard let index = self.previewFiles.firstIndex(where: { $0.id == self.currentPreviewedFileId }) else {
+                        return
+                    }
+
+                    let file = self.previewFiles[index]
+                    self.previewErrors[file.id] = nil
+
+                    self.reloadItemsAfterOneLoop(at: IndexPath(item: index, section: 0))
+                }
             }
         }
     }
@@ -522,7 +545,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
         // cellForItemAt and iOS 18 seems unhappy about this.
-        reloadItemsAfterOneLoop(at: IndexPath(item: index, section: 0))
     }
 
     func handleAudioPreviewError(_ error: Error, previewIndex: Int) {
