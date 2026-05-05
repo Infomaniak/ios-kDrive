@@ -824,7 +824,7 @@ extension FileDetailViewController: FileDetailDelegate {
             break
         case .activity:
             // Fetch first page
-            if activitiesInfo.cursor == nil && fetchActivityTask == nil {
+            if activities.isEmpty && fetchActivityTask == nil {
                 fetchNextActivities()
             }
         case .comments:
