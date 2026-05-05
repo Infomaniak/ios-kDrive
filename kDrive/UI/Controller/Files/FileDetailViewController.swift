@@ -43,7 +43,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
 
-    private var requestedActivityAPI = false
+    private var fetchActivityTask: Task<Void, Error>?
 
     lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
@@ -290,8 +290,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
     private func fetchNextActivities() {
         activitiesInfo.isLoading = true
-        requestedActivityAPI = true
-        Task { [proxyFile = file.proxify()] in
+        fetchActivityTask = Task { [proxyFile = file.proxify()] in
             do {
                 let cursoredActivities = try await driveFileManager.apiFetcher.fileActivities(
                     file: proxyFile,
@@ -825,7 +824,7 @@ extension FileDetailViewController: FileDetailDelegate {
             break
         case .activity:
             // Fetch first page
-            if activitiesInfo.cursor == nil && !requestedActivityAPI {
+            if activitiesInfo.cursor == nil && fetchActivityTask == nil {
                 fetchNextActivities()
             }
         case .comments:
