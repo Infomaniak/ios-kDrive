@@ -182,13 +182,17 @@ public enum CacheItem {
         switch self {
         case .fileSystem(let url):
             do {
-                try FileManager.default.removeItem(at: url)
-
-                // Recreate directory to avoid any issue if directory
-                guard isDirectory else {
-                    return
+                if isDirectory {
+                    let content = try FileManager.default.contentsOfDirectory(
+                        at: url,
+                        includingPropertiesForKeys: nil
+                    )
+                    for itemUrl in content {
+                        try FileManager.default.removeItem(at: itemUrl)
+                    }
+                } else {
+                    try FileManager.default.removeItem(at: url)
                 }
-                try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             } catch {
                 DDLogError("Failed to remove item for path: \(url) with error: \(error)")
             }
