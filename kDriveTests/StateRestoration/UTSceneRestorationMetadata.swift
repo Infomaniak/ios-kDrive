@@ -30,7 +30,7 @@ final class UTSceneRestorationMetadata: XCTestCase {
     override static func setUp() {
         super.setUp()
         MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .minimal)
+        MockingHelper(configuration: .minimal)
 
         @InjectService var driveInfosManager: DriveInfosManager
         @InjectService var mckAccountManager: AccountManageable

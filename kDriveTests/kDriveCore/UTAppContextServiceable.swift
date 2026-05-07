@@ -22,7 +22,7 @@ import XCTest
 final class UTAppContextServiceable: XCTestCase {
     override func setUp() {
         MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .minimal)
+        MockingHelper(configuration: .minimal)
     }
 
     func testIsExtension_app() {

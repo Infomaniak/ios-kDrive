@@ -41,20 +41,20 @@ final class MckRoutable_navigate: Routable {
 final class UTNavigationManager: XCTestCase {
     override func setUp() {
         MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .minimal)
+        MockingHelper(configuration: .minimal)
         super.setUp()
     }
 
     // MARK: - Upload observation
 
-    @MainActor func testDeeplinkFileSharing() async {
+    @MainActor func testDeeplinkFileSharing() async throws {
         // GIVEN
         let mckNavigation = MckRoutable_navigate()
         let routerFactory = Factory(type: Routable.self) { _, _ in
             return mckNavigation
         }
         SimpleResolver.sharedResolver.store(factory: routerFactory)
-        let expectedFile = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .aiff)
+        let expectedFile = try ImportedFile(name: "name", path: XCTUnwrap(URL(string: "http://infoamaniak.com")), uti: .aiff)
         let expectedRoute = NavigationRoutes.saveFiles(files: [expectedFile])
 
         // WHEN
@@ -102,9 +102,9 @@ final class UTNavigationRoutes: XCTestCase {
 
     // MARK: File
 
-    func testRouteEqual_File() {
+    func testRouteEqual_File() throws {
         // GIVEN
-        let expectedFile = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .aiff)
+        let expectedFile = try ImportedFile(name: "name", path: XCTUnwrap(URL(string: "http://infoamaniak.com")), uti: .aiff)
         let routeA = NavigationRoutes.saveFiles(files: [expectedFile])
         let routeB = NavigationRoutes.saveFiles(files: [expectedFile])
 
@@ -112,10 +112,10 @@ final class UTNavigationRoutes: XCTestCase {
         XCTAssertEqual(routeA, routeB)
     }
 
-    func testRouteNotEqualUTI_File() {
+    func testRouteNotEqualUTI_File() throws {
         // GIVEN
-        let fileA = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .aiff)
-        let fileB = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .jpeg)
+        let fileA = try ImportedFile(name: "name", path: XCTUnwrap(URL(string: "http://infoamaniak.com")), uti: .aiff)
+        let fileB = try ImportedFile(name: "name", path: XCTUnwrap(URL(string: "http://infoamaniak.com")), uti: .jpeg)
         let routeA = NavigationRoutes.saveFiles(files: [fileA])
         let routeB = NavigationRoutes.saveFiles(files: [fileB])
 
@@ -123,10 +123,10 @@ final class UTNavigationRoutes: XCTestCase {
         XCTAssertNotEqual(routeA, routeB)
     }
 
-    func testRouteNotEqualURL_File() {
+    func testRouteNotEqualURL_File() throws {
         // GIVEN
-        let fileA = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .jpeg)
-        let fileB = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.ch")!, uti: .jpeg)
+        let fileA = try ImportedFile(name: "name", path: XCTUnwrap(URL(string: "http://infoamaniak.com")), uti: .jpeg)
+        let fileB = try ImportedFile(name: "name", path: XCTUnwrap(URL(string: "http://infoamaniak.ch")), uti: .jpeg)
         let routeA = NavigationRoutes.saveFiles(files: [fileA])
         let routeB = NavigationRoutes.saveFiles(files: [fileB])
 
@@ -134,10 +134,10 @@ final class UTNavigationRoutes: XCTestCase {
         XCTAssertNotEqual(routeA, routeB)
     }
 
-    func testRouteNotEqualName_File() {
+    func testRouteNotEqualName_File() throws {
         // GIVEN
-        let fileA = ImportedFile(name: "name", path: URL(string: "http://infoamaniak.com")!, uti: .jpeg)
-        let fileB = ImportedFile(name: "another", path: URL(string: "http://infoamaniak.com")!, uti: .jpeg)
+        let fileA = try ImportedFile(name: "name", path: XCTUnwrap(URL(string: "http://infoamaniak.com")), uti: .jpeg)
+        let fileB = try ImportedFile(name: "another", path: XCTUnwrap(URL(string: "http://infoamaniak.com")), uti: .jpeg)
         let routeA = NavigationRoutes.saveFiles(files: [fileA])
         let routeB = NavigationRoutes.saveFiles(files: [fileB])
 

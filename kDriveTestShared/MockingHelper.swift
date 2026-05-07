@@ -35,82 +35,95 @@ public enum MockingConfiguration {
     case minimal
 }
 
-/// Something to help using the DI in the test target
-public enum MockingHelper {
-    /// Register "real" instances like in the app
-    static func registerConcreteTypes(configuration: MockingConfiguration) {
+public class MockingHelper: FactoryService {
+    private static var configuration: MockingConfiguration?
+
+    private static let realAppFactories = [
+        Factory(type: AppContextServiceable.self) { _, _ in
+            AppContextService(context: .app)
+        },
+        Factory(type: AppRestorationServiceable.self) { _, _ in
+            AppRestorationService()
+        },
+        Factory(type: AppNavigable.self) { _, _ in
+            AppRouter()
+        },
+        Factory(type: PhotoLibraryUploader.self) { _, _ in
+            PhotoLibraryUploader()
+        },
+        Factory(type: PhotoLibraryUploadable.self) { _, resolver in
+            try resolver.resolve(type: PhotoLibraryUploader.self,
+                                 forCustomTypeIdentifier: nil,
+                                 factoryParameters: nil,
+                                 resolver: resolver)
+        },
+        Factory(type: PhotoLibraryQueryable.self) { _, resolver in
+            try resolver.resolve(type: PhotoLibraryUploader.self,
+                                 forCustomTypeIdentifier: nil,
+                                 factoryParameters: nil,
+                                 resolver: resolver)
+        },
+        Factory(type: PhotoLibraryScanable.self) { _, resolver in
+            try resolver.resolve(type: PhotoLibraryUploader.self,
+                                 forCustomTypeIdentifier: nil,
+                                 factoryParameters: nil,
+                                 resolver: resolver)
+        },
+        Factory(type: PhotoLibrarySyncable.self) { _, resolver in
+            try resolver.resolve(type: PhotoLibraryUploader.self,
+                                 forCustomTypeIdentifier: nil,
+                                 factoryParameters: nil,
+                                 resolver: resolver)
+        }
+    ]
+
+    private static let minimalFactories = [
+        Factory(type: AppContextServiceable.self) { _, _ in
+            AppContextService(context: .appTests)
+        },
+        Factory(type: AppRestorationServiceable.self) { _, _ in
+            AppRestorationService()
+        },
+        Factory(type: AppNavigable.self) { _, _ in
+            MCKRouter()
+        },
+        Factory(type: PhotoLibraryUploadable.self) { _, _ in
+            MCKPhotoLibraryUploadable()
+        },
+        Factory(type: PhotoLibraryQueryable.self) { _, _ in
+            MCKPhotoLibraryQueryable()
+        },
+        Factory(type: PhotoLibraryScanable.self) { _, _ in
+            MCKPhotoLibraryScanable()
+        },
+        Factory(type: PhotoLibrarySyncable.self) { _, _ in
+            MCKPhotoLibrarySyncable()
+        },
+        Factory(type: DeviceManagerable.self) { _, _ in
+            MCKDeviceManagerable()
+        }
+    ]
+
+    public init(configuration: MockingConfiguration) {
+        Self.configuration = configuration
+        super.init()
+    }
+
+    override public class func getTargetServices() -> [Factory] {
+        guard let configuration else {
+            fatalError("Configuration should be initialized.")
+        }
+
         let extraFactories: [Factory]
 
         switch configuration {
         case .realApp:
-            extraFactories = [
-                Factory(type: AppContextServiceable.self) { _, _ in
-                    AppContextService(context: .app)
-                },
-                Factory(type: AppRestorationServiceable.self) { _, _ in
-                    AppRestorationService()
-                },
-                Factory(type: AppNavigable.self) { _, _ in
-                    AppRouter()
-                },
-                Factory(type: PhotoLibraryUploader.self) { _, _ in
-                    PhotoLibraryUploader()
-                },
-                Factory(type: PhotoLibraryUploadable.self) { _, resolver in
-                    try resolver.resolve(type: PhotoLibraryUploader.self,
-                                         forCustomTypeIdentifier: nil,
-                                         factoryParameters: nil,
-                                         resolver: resolver)
-                },
-                Factory(type: PhotoLibraryQueryable.self) { _, resolver in
-                    try resolver.resolve(type: PhotoLibraryUploader.self,
-                                         forCustomTypeIdentifier: nil,
-                                         factoryParameters: nil,
-                                         resolver: resolver)
-                },
-                Factory(type: PhotoLibraryScanable.self) { _, resolver in
-                    try resolver.resolve(type: PhotoLibraryUploader.self,
-                                         forCustomTypeIdentifier: nil,
-                                         factoryParameters: nil,
-                                         resolver: resolver)
-                },
-                Factory(type: PhotoLibrarySyncable.self) { _, resolver in
-                    try resolver.resolve(type: PhotoLibraryUploader.self,
-                                         forCustomTypeIdentifier: nil,
-                                         factoryParameters: nil,
-                                         resolver: resolver)
-                }
-            ]
+            extraFactories = realAppFactories
         case .minimal:
-            extraFactories = [
-                Factory(type: AppContextServiceable.self) { _, _ in
-                    AppContextService(context: .appTests)
-                },
-                Factory(type: AppRestorationServiceable.self) { _, _ in
-                    AppRestorationService()
-                },
-                Factory(type: AppNavigable.self) { _, _ in
-                    MCKRouter()
-                },
-                Factory(type: PhotoLibraryUploadable.self) { _, _ in
-                    MCKPhotoLibraryUploadable()
-                },
-                Factory(type: PhotoLibraryQueryable.self) { _, _ in
-                    MCKPhotoLibraryQueryable()
-                },
-                Factory(type: PhotoLibraryScanable.self) { _, _ in
-                    MCKPhotoLibraryScanable()
-                },
-                Factory(type: PhotoLibrarySyncable.self) { _, _ in
-                    MCKPhotoLibrarySyncable()
-                },
-                Factory(type: DeviceManagerable.self) { _, _ in
-                    MCKDeviceManagerable()
-                }
-            ]
+            extraFactories = minimalFactories
         }
 
-        FactoryService.setupDependencyInjection(other: extraFactories)
+        return super.getTargetServices() + extraFactories
     }
 
     /// Register most instances with mocks

@@ -27,7 +27,7 @@ import os.log
 public class KDriveTargetAssembly: FactoryService {
     private static var context: DriveAppContext?
     public init(context: DriveAppContext) {
-        os_log("EarlyDIHook")
+        os_log("KDriveTargetAssembly")
         Self.context = context
         super.init()
 

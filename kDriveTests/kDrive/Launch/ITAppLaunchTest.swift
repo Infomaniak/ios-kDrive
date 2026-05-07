@@ -43,7 +43,7 @@ final class ITAppLaunchTest: XCTestCase {
         super.setUp()
 
         MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .realApp)
+        MockingHelper(configuration: .realApp)
 
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()

@@ -27,7 +27,7 @@ import XCTest
 final class MenuViewControllerTests: XCTestCase {
     override func setUp() {
         MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .minimal)
+        MockingHelper(configuration: .minimal)
     }
 
     // MARK: - Upload observation

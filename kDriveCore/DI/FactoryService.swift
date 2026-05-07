@@ -314,13 +314,21 @@ open class FactoryService: TargetAssembly {
         super.init()
     }
 
-//    override public class func getCommonServices() -> [Factory] {}
-
     override open class func getTargetServices() -> [Factory] {
         return networkingServices + miscServices
     }
 
     override public class func getServicesWithIdentifier() -> [FactoryWithIdentifier] {
         return debugServices + transactionableServices + uploadQueues
+    }
+}
+
+public extension SimpleResolver {
+    static func register(_ factories: [Factory]) {
+        factories.forEach { SimpleResolver.sharedResolver.store(factory: $0) }
+    }
+
+    static func register(_ factoriesWithIdentifier: [FactoryWithIdentifier]) {
+        factoriesWithIdentifier.forEach { SimpleResolver.sharedResolver.store(factory: $0.0, forCustomTypeIdentifier: $0.1) }
     }
 }

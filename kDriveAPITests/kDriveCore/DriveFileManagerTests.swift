@@ -34,7 +34,7 @@ final class DriveFileManagerTests: XCTestCase {
 
         MockingHelper.clearRegisteredTypes()
         // TODO: Mock TokenStore
-        MockingHelper.registerConcreteTypes(configuration: .realApp)
+        MockingHelper(configuration: .realApp)
 
         @InjectService var driveInfosManager: DriveInfosManager
         @InjectService var accountManager: AccountManageable

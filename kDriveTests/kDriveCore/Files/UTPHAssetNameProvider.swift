@@ -24,7 +24,7 @@ import XCTest
 final class UTPHAssetNameProvider: XCTestCase {
     override func setUp() {
         MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .minimal)
+        MockingHelper(configuration: .minimal)
     }
 
     // MARK: - Fallback Name
