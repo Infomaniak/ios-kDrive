@@ -113,18 +113,23 @@ public enum CacheItem {
 
     /// Get the file size of a single file at path
     private func getFileSize(at path: String) -> UInt64 {
-        var fileSize: UInt64 = 0
         do {
+            let url = URL(fileURLWithPath: path)
+            let resourceValues = try url.resourceValues(forKeys: [.totalFileAllocatedSizeKey, .fileAllocatedSizeKey])
+            if let allocatedSize = resourceValues.totalFileAllocatedSize ?? resourceValues.fileAllocatedSize {
+                return UInt64(allocatedSize)
+            }
+
             let attributes = try FileManager.default.attributesOfItem(atPath: path)
             if let sizeAttribute = attributes[.size] as? NSNumber {
-                fileSize = sizeAttribute.uint64Value
+                return sizeAttribute.uint64Value
             } else {
                 DDLogError("Failed to get a size attribute from path: \(path)")
             }
         } catch {
             DDLogError("Failed to get file attributes for path: \(path) with error: \(error)")
         }
-        return fileSize
+        return 0
     }
 
     var isDirectory: Bool {
