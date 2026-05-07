@@ -77,7 +77,11 @@ class AppUITest: XCTestCase {
     override func tearDown() {
         super.tearDown()
         guard let currentName else { return }
-        tearDownTest(directoryName: currentName)
+        if currentName == "AppLock" {
+            disableAppLock()
+        } else {
+            tearDownTest(directoryName: currentName)
+        }
         self.currentName = nil
     }
 
@@ -94,7 +98,7 @@ class AppUITest: XCTestCase {
             .staticText,
             identifier: KDriveResourcesStrings.Localizable.localizedFilenamePrivateTeamSpace
         ).element
-        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: 10), "Private Team Space should exists")
+        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: 10), "Private Team Space should exist")
 
         privateTeamSpace.tap()
         sortByLatest()
@@ -625,7 +629,7 @@ class AppUITest: XCTestCase {
     }
 
     func testFileAction() {
-        let testName = "UITests - File Action - \(Date())"
+        let testName = "UITest - File Action - \(Date())"
         launchAppFromScratch()
         let root = createDirectoryWithPhoto(name: testName)
         currentName = root
@@ -636,8 +640,11 @@ class AppUITest: XCTestCase {
         folder.tap()
 
         let file = collectionViewsQuery.cells.containing(.staticText, identifier: AppUITest.imageFileName)
-        XCTAssertTrue(folder.waitForExistence(timeout: 3), "Image should display")
-        file.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
+
+        let fileCell = file.firstMatch
+        XCTAssertTrue(fileCell.waitForExistence(timeout: 3), "Image should display")
+
+        fileCell.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
 
         app.swipeUp()
 
@@ -646,8 +653,8 @@ class AppUITest: XCTestCase {
         copyButton.tap()
 
         let sharingUIServiceApp = XCUIApplication(bundleIdentifier: "com.apple.SharingUIService")
-        sharingUIServiceApp/*@START_MENU_TOKEN@*/
-            .images["copy"]/*[[".otherElements.images[\"copy\"]",".cells[\"Copy\"]",".images",".images[\"activityImageView\"]",".images[\"copy\"]"],[[[-1,4],[-1,1,1],[-1,0]],[[-1,3],[-1,2]]],[0]]@END_MENU_TOKEN@*/
+        sharingUIServiceApp
+            .images["copy"]
             .firstMatch.tap()
 
         app.activate()
@@ -661,7 +668,7 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(createButton.waitForExistence(timeout: 3), "Create folder button should be displayed")
         createButton.tap()
 
-        cellsQuery.containing(.staticText, identifier: "Private or shared folder")
+        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.folderDescription)
             .firstMatch
             .tap()
         app
@@ -709,7 +716,7 @@ class AppUITest: XCTestCase {
     }
 
     func testPhotoSync() {
-        let testName = "UITests - Photo Sync - \(Date())"
+        let testName = "UITest - Photo Sync - \(Date())"
         launchAppFromScratch()
         let root = createDirectory(name: testName)
         currentName = root
@@ -753,6 +760,153 @@ class AppUITest: XCTestCase {
 
         XCTAssertTrue(collectionViewsQuery.cells.firstMatch.waitForExistence(timeout: 5), "Folder should exists")
     }
+
+    func testAppLock() {
+        currentName = "AppLock"
+        launchAppFromScratch()
+        let app = XCUIApplication()
+        app.activate()
+
+        enableAppLock()
+
+        wait(delay: 1)
+
+        app.terminate()
+
+        app.activate()
+
+        unlockApp()
+
+        dismissBottomSheet()
+        XCTAssertTrue(app
+            .staticTexts[KDriveResourcesStrings.Localizable.lastEditsTitle]
+            .firstMatch.waitForExistence(timeout: 10), "App should be unlocked")
+        app
+            .buttons[KDriveResourcesStrings.Localizable
+                .buttonMenu]
+            .firstMatch.tap()
+    }
+
+    func testSwitchDrive() {
+        launchAppFromScratch()
+
+        let firstDrive = "Team Mobile Test"
+        let secondDrive = "John Appleseed"
+
+        app.staticTexts[firstDrive].firstMatch.tap()
+        app.staticTexts[secondDrive].firstMatch.tap()
+
+        goToMyFolders()
+
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10), "Folders for second drive should exists")
+
+        openTab(.menu)
+        app.buttons[KDriveResourcesStrings.Localizable.buttonSwitchDrive].firstMatch.tap()
+        app.staticTexts[firstDrive].firstMatch.tap()
+
+        goToMyFolders()
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10), "Folders for first drive should exists")
+    }
+
+    func testAppExtension() {
+        let testName = "UITest - App Extension - \(Date())"
+        launchAppFromScratch()
+        let root = createDirectory(name: testName)
+        currentName = root
+
+        let mobileslideshowApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow")
+        mobileslideshowApp.activate()
+        let closeShare = mobileslideshowApp.buttons["header.closeButton"].firstMatch
+        if closeShare.exists {
+            closeShare.tap()
+        }
+
+        let closeImage = mobileslideshowApp.buttons["PUOneUpBarButtonItemIdentifierDone"].firstMatch
+        if closeImage.exists {
+            closeImage.tap()
+        }
+
+        mobileslideshowApp.images["Photo, 08 August 2012, 23:55"].firstMatch.tap()
+        wait(delay: 0.5)
+        let shareButton = mobileslideshowApp.buttons["PUOneUpBarButtonItemIdentifierShare"].firstMatch
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5), "Share button should exists")
+        shareButton.tap()
+        wait(delay: 0.5)
+        mobileslideshowApp.cells["kDrive"].images["activityImageView"].firstMatch.tap()
+
+        let shareExtensionApp = XCUIApplication(bundleIdentifier: "com.infomaniak.drive.ShareExtension")
+        let myFolder = shareExtensionApp.cells.containing(.staticText, identifier: "My folder").firstMatch
+        XCTAssertTrue(myFolder.waitForExistence(timeout: 5), "My folder button should exists")
+        myFolder.tap()
+        shareExtensionApp.staticTexts[testName].firstMatch.tap()
+        shareExtensionApp.buttons[KDriveResourcesStrings.Localizable.buttonSelectTheFolder].firstMatch.tap()
+        shareExtensionApp.staticTexts[KDriveResourcesStrings.Localizable.buttonSave].firstMatch.tap()
+
+        wait(delay: 3)
+        app.activate()
+        dismissBottomSheet()
+        XCUIDevice.shared.press(.home)
+        wait(delay: 2)
+        let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        springboardApp.icons["kDrive"].firstMatch.tap()
+        wait(delay: 2)
+        goToMyFolders()
+
+        app.cells.containing(.staticText, identifier: testName).firstMatch.tap()
+
+        XCTAssertTrue(
+            app.staticTexts["IMG_0005.jpeg"].firstMatch.waitForExistence(timeout: 100),
+            "Photo should be displayed"
+        )
+    }
+
+//    func testShowInFiles() {
+//        let testName = "UI Test - Show in Files - \(Date())"
+//        launchAppFromScratch()
+//        let root = createDirectory(name: testName)
+//
+//        currentName = root
+//        openTab(.menu)
+//
+//        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
+//        app.cells.containing(.staticText, identifier: "Security").firstMatch.tap()
+//
+//        let toggle = app.switches.firstMatch
+//        if toggle.value as? String == "1" {
+//            toggle.tap()
+//        }
+//
+//        let documentsApp = XCUIApplication(bundleIdentifier: "com.apple.DocumentsApp")
+//        wait(delay: 2)
+//        documentsApp.activate()
+//        wait(delay: 1)
+//        documentsApp.tabBars.buttons["Browse"].firstMatch.tap()
+//        documentsApp.staticTexts["kDrive"].firstMatch.tap()
+//
+//        let authenticationRequired = documentsApp.staticTexts["Authentication Required"].firstMatch
+//        XCTAssertTrue(authenticationRequired.waitForExistence(timeout: 10), "Drive should require authentication")
+//        documentsApp.buttons["BackButton"].tap()
+//        documentsApp.terminate()
+//
+//        app.activate()
+//        dismissBottomSheet()
+//
+//        openTab(.menu)
+//        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
+//        app.cells.containing(.staticText, identifier: "Security").firstMatch.tap()
+//
+//        let toggle2 = app.switches.firstMatch
+//        if toggle2.value as? String == "0" {
+//            toggle2.tap()
+//        }
+//
+//        documentsApp.activate()
+//        documentsApp.tabBars.buttons["Browse"].firstMatch.tap()
+//
+//        let teamMobileTest = documentsApp.staticTexts["Team Mobile Test (mobiletest@ik.me)"].firstMatch
+//        XCTAssertTrue(teamMobileTest.waitForExistence(timeout: 5), "Should be able to access Team Mobile Test")
+//        openTab(.files)
+//    }
 
     func playVideo(offline: Bool) {
         let folderName = "Test médias - Ne pas supprimer"
@@ -822,7 +976,7 @@ class AppUITest: XCTestCase {
         folder.tap()
 
         let audio = app.staticTexts[audioName]
-        XCTAssertTrue(audio.waitForExistence(timeout: 5), "Video should be displayed")
+        XCTAssertTrue(audio.waitForExistence(timeout: 5), "Audio should be displayed")
 
         if offline {
             activateAvailableOffline(name: audioName)
@@ -870,7 +1024,7 @@ class AppUITest: XCTestCase {
         folder.tap()
 
         let file = app.staticTexts[fileName]
-        XCTAssertTrue(file.waitForExistence(timeout: 5), "Video should be displayed")
+        XCTAssertTrue(file.waitForExistence(timeout: 5), "File should be displayed")
 
         file.tap()
 
@@ -968,6 +1122,72 @@ class AppUITest: XCTestCase {
         let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
         if acceptAllPhotosButton.exists {
             acceptAllPhotosButton.tap()
+        }
+    }
+
+    func enableAppLock() {
+        app.buttons[KDriveResourcesStrings.Localizable.buttonMenu].firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
+
+        let cellsQuery = app.cells
+        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.securityTitle)
+            .firstMatch
+            .tap()
+        let disabled = cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.allDisabled)
+            .firstMatch
+
+        if disabled.waitForExistence(timeout: 10) {
+            disabled.tap()
+        } else {
+            XCTFail("App shouldn't be locked")
+        }
+
+        app
+            .switches["0"]
+            .firstMatch.tap()
+
+        unlockApp()
+    }
+
+    func disableAppLock() {
+        app.buttons[KDriveResourcesStrings.Localizable.buttonMenu].firstMatch.tap()
+        app.staticTexts[KDriveResourcesStrings.Localizable.settingsTitle].firstMatch.tap()
+
+        let cellsQuery = app.cells
+        cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.securityTitle)
+            .firstMatch
+            .tap()
+
+        let enabled = cellsQuery.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.allActivated).firstMatch
+
+        if enabled.waitForExistence(timeout: 10) {
+            enabled.tap()
+        } else {
+            XCTAssertTrue(false, "App should be locked")
+        }
+
+        app
+            .switches["1"]
+            .firstMatch.tap()
+
+        unlockApp()
+    }
+
+    func unlockApp() {
+        let localAuthenticationUApp = XCUIApplication(bundleIdentifier: "com.apple.LocalAuthenticationUIService")
+        let element = localAuthenticationUApp
+            .secureTextFields["Passcode field"]
+            .firstMatch
+
+        XCTAssertTrue(element.waitForExistence(timeout: 5), "App is not locked")
+        element.tap()
+        element.typeText("a\r")
+    }
+
+    func dismissBottomSheet() {
+        let laterButton = app.buttons[KDriveResourcesStrings.Localizable.buttonLater].firstMatch
+        if laterButton.exists {
+            laterButton.tap()
         }
     }
 }
