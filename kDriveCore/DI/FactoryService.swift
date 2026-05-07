@@ -35,7 +35,7 @@ import os.log
 public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
 /// Something that setups the service factories
-public enum FactoryService {
+open class FactoryService: TargetAssembly {
     private static let appGroupName = "group.\(bundleId)"
     private static let sharedAppGroupName = "group.com.infomaniak"
     private static let realmRootPath = "drives"
@@ -46,19 +46,9 @@ public enum FactoryService {
                                                                string: "https://\(ApiEnvironment.current.loginHost)/"
                                                            )!,
                                                            accessType: nil)
-
-    public static func setupDependencyInjection(other: [Factory] = []) {
-        ApiEnvironment.current = .prod
-
-        let factoriesWithIdentifier = debugServices + transactionableServices + uploadQueues
-        SimpleResolver.register(factoriesWithIdentifier)
-        let factories = networkingServices + miscServices + other
-        SimpleResolver.register(factories)
-    }
-
     /// Networking related services
     private static var networkingServices: [Factory] {
-        let services = [
+        return [
             Factory(type: InfomaniakNetworkLogin.self) { _, _ in
                 return InfomaniakNetworkLogin(config: loginConfig)
             },
@@ -123,12 +113,11 @@ public enum FactoryService {
                 PublicShareApiFetcher()
             }
         ]
-        return services
     }
 
     /// Misc services
     private static var miscServices: [Factory] {
-        let services = [
+        return [
             Factory(type: KeychainHelper.self) { _, _ in
                 KeychainHelper(accessGroup: AccountManager.accessGroup)
             },
@@ -242,8 +231,6 @@ public enum FactoryService {
                 BugTracker(info: BugTrackerInfo(project: "app-mobile-drive"))
             }
         ]
-
-        return services
     }
 
     /// Debug services
@@ -256,7 +243,7 @@ public enum FactoryService {
             return Logger(subsystem: subsystem, category: category)
         }
 
-        let services = [
+        return [
             (loggerFactory, "UploadOperation"),
             (loggerFactory, "BackgroundSessionManager"),
             (loggerFactory, "UploadQueue"),
@@ -271,7 +258,6 @@ public enum FactoryService {
             (loggerFactory, "FileList"),
             (loggerFactory, "Default")
         ]
-        return services
     }
 
     /// DB Transactions
@@ -292,12 +278,10 @@ public enum FactoryService {
             return TransactionExecutor(realmAccessible: realmAccessible)
         }
 
-        let services = [
+        return [
             (uploadsTransactionable, kDriveDBID.uploads),
             (driveInfoTransactionable, kDriveDBID.driveInfo)
         ]
-
-        return services
     }
 
     static var uploadQueues: [FactoryWithIdentifier] {
@@ -319,20 +303,24 @@ public enum FactoryService {
             return PhotoUploadQueue(delegate: uploadQueueDelegate)
         }
 
-        let services = [
+        return [
             (globalUploadQueue, UploadQueueID.global),
             (photoUploadQueue, UploadQueueID.photo)
         ]
-        return services
-    }
-}
-
-public extension SimpleResolver {
-    static func register(_ factories: [Factory]) {
-        factories.forEach { SimpleResolver.sharedResolver.store(factory: $0) }
     }
 
-    static func register(_ factoriesWithIdentifier: [FactoryWithIdentifier]) {
-        factoriesWithIdentifier.forEach { SimpleResolver.sharedResolver.store(factory: $0.0, forCustomTypeIdentifier: $0.1) }
+    override public init() {
+        ApiEnvironment.current = .prod
+        super.init()
+    }
+
+//    override public class func getCommonServices() -> [Factory] {}
+
+    override open class func getTargetServices() -> [Factory] {
+        return networkingServices + miscServices
+    }
+
+    override public class func getServicesWithIdentifier() -> [FactoryWithIdentifier] {
+        return debugServices + transactionableServices + uploadQueues
     }
 }
