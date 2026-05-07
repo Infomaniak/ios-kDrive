@@ -39,7 +39,7 @@ public struct CacheModel {
         self.datasource = datasource
         let datasourceSize = datasource.size
         size = datasourceSize
-        formattedSize = Constants.formatFileSize(Int64(datasourceSize))
+        formattedSize = Constants.formatFileSize(Int64(datasourceSize), countStyle: .file)
         isDirectory = datasource.isDirectory
         name = datasource.name
         directoryTitle = datasource.directoryTitle

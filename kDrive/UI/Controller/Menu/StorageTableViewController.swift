@@ -143,7 +143,7 @@ final class StorageTableViewController: UITableViewController {
         case .header:
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.totalStorageUsedTitle
-            cell.valueLabel.text = Constants.formatFileSize(Int64(totalSize))
+            cell.valueLabel.text = Constants.formatFileSize(Int64(totalSize), countStyle: .file)
             cell.selectionStyle = .none
         case .directories:
             let directory = directories[indexPath.row]

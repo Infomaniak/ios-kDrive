@@ -169,9 +169,10 @@ public enum Constants {
         return dateFormatter.string(from: deletionDate)
     }
 
-    public static func formatFileSize(_ size: Int64, decimals: Int = 0, unit: Bool = true) -> String {
+    public static func formatFileSize(_ size: Int64, decimals: Int = 0, unit: Bool = true,
+                                      countStyle: ByteCountFormatter.CountStyle = .binary) -> String {
         let byteCountFormatter = ByteCountFormatter()
-        byteCountFormatter.countStyle = .binary
+        byteCountFormatter.countStyle = countStyle
         byteCountFormatter.includesUnit = unit
         return byteCountFormatter.string(fromByteCount: size)
     }
