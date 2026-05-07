@@ -90,17 +90,8 @@ final class StorageTableViewController: UITableViewController {
         let appGroupSize = CacheItem.fileSystem(url: DriveFileManager.constants.groupDirectoryURL).size
 
         // Compute app space usage
-        let appSize: UInt64
-        if let documentsURL = DriveFileManager.constants.appDocumentsDirectoryURL,
-           let libraryURL = DriveFileManager.constants.appLibraryDirectoryURL {
-            // Image cache is contained within the app library folder
-            let librarySize = CacheItem.fileSystem(url: libraryURL).size
-            let documentSize = CacheItem.fileSystem(url: documentsURL).size
-            let temporarySize = temporaryCacheItem.size
-            appSize = documentSize + librarySize + temporarySize
-        } else {
-            appSize = 0
-        }
+        let appContainerURL = URL(fileURLWithPath: NSHomeDirectory())
+        let appSize = CacheItem.fileSystem(url: appContainerURL).size
 
         let usedSize = appSize + appGroupSize
 
