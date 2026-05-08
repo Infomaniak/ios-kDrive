@@ -38,22 +38,21 @@ public extension MediaMetadata {
         let artist: String
         var artwork: UIImage?
 
-        let metadataDictionary = Dictionary(uniqueKeysWithValues: metadata.map { ($0.commonKey, $0) })
-        if let titleItem = metadataDictionary[.commonKeyTitle],
+        if let titleItem = metadata.first(where: { $0.commonKey == .commonKeyTitle }),
            let titleString = try? await titleItem.load(.value) as? String {
             title = titleString
         } else {
             title = playableFileName ?? KDriveResourcesStrings.Localizable.unknownTitle
         }
 
-        if let artistItem = metadataDictionary[.commonKeyArtist],
+        if let artistItem = metadata.first(where: { $0.commonKey == .commonKeyArtist }),
            let artistString = try? await artistItem.load(.value) as? String {
             artist = artistString
         } else {
             artist = KDriveResourcesStrings.Localizable.unknownArtist
         }
 
-        if let artworkItem = metadataDictionary[.commonKeyArtwork],
+        if let artworkItem = metadata.first(where: { $0.commonKey == .commonKeyArtwork }),
            let artworkData = try? await artworkItem.load(.value) as? Data {
             artwork = UIImage(data: artworkData)
         }
