@@ -39,6 +39,8 @@ final class StorageTableViewController: UITableViewController {
     @MainActor private var directories = [CacheModel]()
     @MainActor private var files = [CacheModel]()
 
+    private var reloadTask: Task<Void, Never>?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -48,14 +50,24 @@ final class StorageTableViewController: UITableViewController {
 
         title = KDriveResourcesStrings.Localizable.manageStorageTitle
 
-        Task {
-            await reload()
-        }
+        updateTableViewContent()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateTableViewContent),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "Storage"])
+    }
+
+    deinit {
+        reloadTask?.cancel()
+        NotificationCenter.default.removeObserver(self)
     }
 
     private func reload() async {
@@ -90,17 +102,8 @@ final class StorageTableViewController: UITableViewController {
         let appGroupSize = CacheItem.fileSystem(url: DriveFileManager.constants.groupDirectoryURL).size
 
         // Compute app space usage
-        let appSize: UInt64
-        if let documentsURL = DriveFileManager.constants.appDocumentsDirectoryURL,
-           let libraryURL = DriveFileManager.constants.appLibraryDirectoryURL {
-            // Image cache is contained within the app library folder
-            let librarySize = CacheItem.fileSystem(url: libraryURL).size
-            let documentSize = CacheItem.fileSystem(url: documentsURL).size
-            let temporarySize = temporaryCacheItem.size
-            appSize = documentSize + librarySize + temporarySize
-        } else {
-            appSize = 0
-        }
+        let appContainerURL = URL(fileURLWithPath: NSHomeDirectory())
+        let appSize = CacheItem.fileSystem(url: appContainerURL).size
 
         let usedSize = appSize + appGroupSize
 
@@ -122,6 +125,15 @@ final class StorageTableViewController: UITableViewController {
                 "appGroupSize": appGroupSize
             ]
             SentryDebug.appSizeUsage(metadata)
+        }
+    }
+
+    @objc private func updateTableViewContent() {
+        reloadTask?.cancel()
+        reloadTask = Task { [weak self] in
+            guard let self else { return }
+            await reload()
+            self.reloadTask = nil
         }
     }
 
@@ -152,7 +164,7 @@ final class StorageTableViewController: UITableViewController {
         case .header:
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.totalStorageUsedTitle
-            cell.valueLabel.text = Constants.formatFileSize(Int64(totalSize))
+            cell.valueLabel.text = Constants.formatFileSize(Int64(totalSize), countStyle: .file)
             cell.selectionStyle = .none
         case .directories:
             let directory = directories[indexPath.row]
