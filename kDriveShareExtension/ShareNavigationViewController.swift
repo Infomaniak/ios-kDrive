@@ -25,7 +25,7 @@ import VersionChecker
 
 final class ShareNavigationViewController: TitleSizeAdjustingNavigationController {
     /// Making sure the DI is registered at a very early stage of the app launch.
-    private let dependencyInjectionHook = EarlyDIHook(context: .shareExtension)
+    private let dependencyInjectionHook = KDriveTargetAssembly(context: .shareExtension)
 
     // Not lazy to force init of the object early, and set a userID in Sentry
     @InjectService var accountManager: AccountManageable

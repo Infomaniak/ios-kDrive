@@ -42,8 +42,8 @@ final class ITAppLaunchTest: XCTestCase {
     override func setUp() {
         super.setUp()
 
-        MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .realApp)
+        TestTargetAssemblyHelper.clearRegisteredTypes()
+        TestTargetAssemblyHelper(configuration: .realApp)
 
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()

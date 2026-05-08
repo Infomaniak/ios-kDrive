@@ -78,7 +78,7 @@ let package = Package(
         .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "9.8.0")),
         .package(url: "https://github.com/Infomaniak/DropDown", branch: "master"),
         .package(url: "https://github.com/Infomaniak/ios-bug-tracker", .upToNextMajor(from: "17.0.1")),
-        .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "18.9.0")),
+        .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "18.10.2")),
         .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "24.5.0")),
         .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.5")),
         .package(url: "https://github.com/Infomaniak/ios-device-check", .upToNextMajor(from: "1.1.1")),

@@ -23,8 +23,8 @@ import XCTest
 /// Unit tests of image asset name generation
 final class UTPHAssetNameProvider: XCTestCase {
     override func setUp() {
-        MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .minimal)
+        TestTargetAssemblyHelper.clearRegisteredTypes()
+        TestTargetAssemblyHelper(configuration: .minimal)
     }
 
     // MARK: - Fallback Name

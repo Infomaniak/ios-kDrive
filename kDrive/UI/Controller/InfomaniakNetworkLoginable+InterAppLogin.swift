@@ -42,8 +42,8 @@ extension InfomaniakNetworkLoginable {
     func derivateApiToken(_ token: ApiToken) async throws -> ApiToken {
         let attestationToken = try await InfomaniakDeviceCheck(environment: deviceCheckEnvironment)
             .generateAttestationFor(
-                targetUrl: FactoryService.loginConfig.loginURL.appendingPathComponent("token"),
-                bundleId: FactoryService.bundleId,
+                targetUrl: CoreTargetAssembly.loginConfig.loginURL.appendingPathComponent("token"),
+                bundleId: CoreTargetAssembly.bundleId,
                 bypassValidation: deviceCheckEnvironment == .preprod
             )
 

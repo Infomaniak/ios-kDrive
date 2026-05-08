@@ -114,8 +114,8 @@ final class DriveApiTests: XCTestCase {
 
     override static func setUp() {
         super.setUp()
-        MockingHelper.clearRegisteredTypes()
-        MockingHelper.registerConcreteTypes(configuration: .realApp)
+        TestTargetAssemblyHelper.clearRegisteredTypes()
+        TestTargetAssemblyHelper(configuration: .realApp)
     }
 
     override func tearDown() async throws {

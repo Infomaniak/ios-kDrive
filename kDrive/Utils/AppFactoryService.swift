@@ -17,16 +17,30 @@
  */
 
 import Foundation
+import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import os.log
 
 /// Something that loads the DI on init
-public struct EarlyDIHook {
+public class KDriveTargetAssembly: CoreTargetAssembly {
+    private static var context: DriveAppContext?
     public init(context: DriveAppContext) {
-        os_log("EarlyDIHook")
+        os_log("KDriveTargetAssembly")
+        Self.context = context
+        super.init()
 
+        // Load ASAP Matomo from the mainthread to prevent a deadlock - issue opened on Matomo's GH
+        _ = try? SimpleResolver.sharedResolver.resolve(type: MatomoUtils.self,
+                                                       forCustomTypeIdentifier: nil,
+                                                       resolver: SimpleResolver.sharedResolver)
+    }
+
+    override public class func getTargetServices() -> [Factory] {
+        guard let context else {
+            fatalError("context not initialized")
+        }
         var extraDependencies = [
             Factory(type: AppContextServiceable.self) { _, _ in
                 AppContextService(context: context)
@@ -53,12 +67,6 @@ public struct EarlyDIHook {
         ]
         #endif
 
-        // setup DI ASAP
-        FactoryService.setupDependencyInjection(other: extraDependencies)
-
-        // FIXME: Load ASAP matomo from the mainthread to prevent a deadlock
-        try? SimpleResolver.sharedResolver.resolve(type: MatomoUtils.self,
-                                                   forCustomTypeIdentifier: nil,
-                                                   resolver: SimpleResolver.sharedResolver)
+        return super.getTargetServices() + extraDependencies
     }
 }

@@ -39,7 +39,7 @@ import VersionChecker
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
     /// Making sure the DI is registered at a very early stage of the app launch.
-    private let dependencyInjectionHook = EarlyDIHook(context: .app)
+    private let dependencyInjectionHook = KDriveTargetAssembly(context: .app)
 
     private var reachabilityListener: ReachabilityListener!
 
