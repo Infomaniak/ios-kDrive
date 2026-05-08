@@ -1223,9 +1223,10 @@ public final class DriveFileManager {
         var orphanFiles = [File]()
 
         for maybeOrphanFile in maybeOrphanFiles {
+            let localContainerUrl = maybeOrphanFile.localContainerUrl
             if newFiles == nil || !(newFiles ?? []).contains(maybeOrphanFile) {
-                if fileManager.fileExists(atPath: maybeOrphanFile.localContainerUrl.path) {
-                    try? fileManager.removeItem(at: maybeOrphanFile.localContainerUrl) // Check that it was correctly removed?
+                if fileManager.fileExists(atPath: localContainerUrl.path) {
+                    try? fileManager.removeItem(at: localContainerUrl) // Check that it was correctly removed?
                 }
                 orphanFiles.append(maybeOrphanFile)
             }
@@ -1269,8 +1270,9 @@ public final class DriveFileManager {
     }
 
     public func renameCachedFile(updatedFile: File, oldFile: File) throws {
-        if updatedFile.name != oldFile.name && fileManager.fileExists(atPath: oldFile.localUrl.path) {
-            try fileManager.moveItem(atPath: oldFile.localUrl.path, toPath: updatedFile.localUrl.path)
+        let oldLocalUrl = oldFile.localUrl.path
+        if updatedFile.name != oldFile.name && fileManager.fileExists(atPath: oldLocalUrl) {
+            try fileManager.moveItem(atPath: oldLocalUrl, toPath: updatedFile.localUrl.path)
         }
     }
 

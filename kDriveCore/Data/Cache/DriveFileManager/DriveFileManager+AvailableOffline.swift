@@ -155,8 +155,9 @@ public extension DriveFileManager {
 
         let frozenFile = liveFile.freeze()
         if oldUrl != frozenFile.localUrl {
-            try? fileManager.createDirectory(at: frozenFile.cacheLocalContainerUrl, withIntermediateDirectories: true)
-            try? fileManager.moveItem(at: oldUrl, to: frozenFile.localFileUrl(from: frozenFile.cacheLocalContainerUrl))
+            let cacheLocalContainerUrl = frozenFile.cacheLocalContainerUrl
+            try? fileManager.createDirectory(at: cacheLocalContainerUrl, withIntermediateDirectories: true)
+            try? fileManager.moveItem(at: oldUrl, to: frozenFile.localFileUrl(from: cacheLocalContainerUrl))
             try? fileManager.removeItem(at: oldUrl)
         }
 
