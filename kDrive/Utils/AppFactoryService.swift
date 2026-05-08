@@ -31,9 +31,10 @@ public class KDriveTargetAssembly: CoreTargetAssembly {
         Self.context = context
         super.init()
 
-        try? SimpleResolver.sharedResolver.resolve(type: MatomoUtils.self,
-                                                   forCustomTypeIdentifier: nil,
-                                                   resolver: SimpleResolver.sharedResolver)
+        // Load ASAP Matomo from the mainthread to prevent a deadlock - issue opened on Matomo's GH
+        _ = try? SimpleResolver.sharedResolver.resolve(type: MatomoUtils.self,
+                                                       forCustomTypeIdentifier: nil,
+                                                       resolver: SimpleResolver.sharedResolver)
     }
 
     override public class func getTargetServices() -> [Factory] {
