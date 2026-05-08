@@ -43,22 +43,23 @@ class OfficePreviewCollectionViewCell: PreviewCollectionViewCell {
 
     override func configureWith(file: File) {
         fileId = file.id
+        let localUrl = file.localUrl
         if file.uti.conforms(to: .plainText) {
             // Load data for plain text to have correct encoding
             do {
-                let data = try Data(contentsOf: file.localUrl)
+                let data = try Data(contentsOf: localUrl)
                 documentPreview.load(
                     data,
                     mimeType: file.uti.preferredMIMEType ?? "text/plain",
                     characterEncodingName: "UTF8",
-                    baseURL: file.localUrl
+                    baseURL: localUrl
                 )
             } catch {
                 // Fallback on file loading
-                documentPreview.loadFileURL(file.localUrl, allowingReadAccessTo: file.localUrl)
+                documentPreview.loadFileURL(localUrl, allowingReadAccessTo: localUrl)
             }
         } else {
-            documentPreview.loadFileURL(file.localUrl, allowingReadAccessTo: file.localUrl)
+            documentPreview.loadFileURL(localUrl, allowingReadAccessTo: localUrl)
         }
     }
 }

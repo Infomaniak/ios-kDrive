@@ -112,8 +112,9 @@ extension DragAndDropFile: NSItemProviderWriting {
             }
             return nil
         } else {
+            let localUrl = file.localUrl
             if !file.isLocalVersionOlderThanRemote {
-                loadLocalData(for: file.localUrl, completionHandler: completionHandler)
+                loadLocalData(for: localUrl, completionHandler: completionHandler)
                 return nil
             } else {
                 let progress = Progress(totalUnitCount: 100)
@@ -130,7 +131,7 @@ extension DragAndDropFile: NSItemProviderWriting {
                     if let error {
                         completionHandler(nil, error)
                     } else {
-                        let url = file.isDirectory ? file.temporaryUrl : file.localUrl
+                        let url = file.isDirectory ? file.temporaryUrl : localUrl
                         loadLocalData(for: url, completionHandler: completionHandler)
                     }
                 }

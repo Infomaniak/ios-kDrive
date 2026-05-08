@@ -128,6 +128,9 @@ public final class FileActionsHelper {
     public static func save(file: File, from viewController: UIViewController? = nil, showSuccessSnackBar: Bool = true) {
         guard !file.isInvalidated else { return }
 
+        let localUrl = file.localUrl
+        let temporaryUrl = file.temporaryUrl
+
         @InjectService var appNavigable: AppNavigable
         let presenterViewController = viewController != nil
             ? viewController
@@ -141,23 +144,23 @@ public final class FileActionsHelper {
                 .snackbarVideoSavedConfirmation : KDriveResourcesStrings.Localizable
                 .snackbarImageSavedConfirmation
             saveMedia(
-                url: file.localUrl,
+                url: localUrl,
                 type: convertedType.assetMediaType,
                 successMessage: showSuccessSnackBar ? successMessage : nil
             )
         case .folder:
-            guard FileManager.default.fileExists(atPath: file.temporaryUrl.path) else {
+            guard FileManager.default.fileExists(atPath: temporaryUrl.path) else {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
                 return
             }
-            let documentExportViewController = UIDocumentPickerViewController(forExporting: [file.temporaryUrl], asCopy: true)
+            let documentExportViewController = UIDocumentPickerViewController(forExporting: [temporaryUrl], asCopy: true)
             presenterViewController?.present(documentExportViewController, animated: true)
         default:
-            guard FileManager.default.fileExists(atPath: file.localUrl.path) else {
+            guard FileManager.default.fileExists(atPath: localUrl.path) else {
                 UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorDownload)
                 return
             }
-            let documentExportViewController = UIDocumentPickerViewController(forExporting: [file.localUrl], asCopy: true)
+            let documentExportViewController = UIDocumentPickerViewController(forExporting: [localUrl], asCopy: true)
             presenterViewController?.present(documentExportViewController, animated: true)
         }
     }

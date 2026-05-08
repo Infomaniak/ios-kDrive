@@ -228,8 +228,9 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
 
     private func moveFileToCache(downloadPath: URL) throws {
         DDLogInfo("[DownloadOperation] moveFileToCache")
-        try fileManager.removeItemIfExists(at: file.localContainerUrl)
-        try fileManager.createDirectory(at: file.localContainerUrl, withIntermediateDirectories: true)
+        let localContainerUrl = file.localContainerUrl
+        try fileManager.removeItemIfExists(at: localContainerUrl)
+        try fileManager.createDirectory(at: localContainerUrl, withIntermediateDirectories: true)
         try fileManager.moveItem(at: downloadPath, to: file.localUrl)
         file.applyLastModifiedDateToLocalFile()
         file.excludeFileFromSystemBackup()
