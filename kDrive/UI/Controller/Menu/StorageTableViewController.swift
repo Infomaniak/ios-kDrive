@@ -65,6 +65,10 @@ final class StorageTableViewController: UITableViewController {
         matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "Storage"])
     }
 
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
     private func reload() async {
         // Get directories
         let temporaryCacheItem = CacheItem.fileSystem(url: FileManager.default.temporaryDirectory)
