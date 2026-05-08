@@ -39,6 +39,8 @@ final class StorageTableViewController: UITableViewController {
     @MainActor private var directories = [CacheModel]()
     @MainActor private var files = [CacheModel]()
 
+    private var reloadTask: Task<Void, Never>?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -48,9 +50,7 @@ final class StorageTableViewController: UITableViewController {
 
         title = KDriveResourcesStrings.Localizable.manageStorageTitle
 
-        Task {
-            await reload()
-        }
+        updateTableViewContent()
 
         NotificationCenter.default.addObserver(
             self,
@@ -66,6 +66,7 @@ final class StorageTableViewController: UITableViewController {
     }
 
     deinit {
+        reloadTask?.cancel()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -128,8 +129,11 @@ final class StorageTableViewController: UITableViewController {
     }
 
     @objc private func updateTableViewContent() {
-        Task {
+        reloadTask?.cancel()
+        reloadTask = Task { [weak self] in
+            guard let self else { return }
             await reload()
+            self.reloadTask = nil
         }
     }
 
