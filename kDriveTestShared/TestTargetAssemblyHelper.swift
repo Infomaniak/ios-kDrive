@@ -35,7 +35,7 @@ public enum MockingConfiguration {
     case minimal
 }
 
-public class MockingHelper: FactoryService {
+public class TestTargetAssemblyHelper: CoreTargetAssembly {
     private static var configuration: MockingConfiguration?
 
     private static let realAppFactories = [

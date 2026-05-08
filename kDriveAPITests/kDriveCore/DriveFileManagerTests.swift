@@ -32,9 +32,9 @@ final class DriveFileManagerTests: XCTestCase {
     override func setUp() async throws {
         try await super.setUp()
 
-        MockingHelper.clearRegisteredTypes()
+        TestTargetAssemblyHelper.clearRegisteredTypes()
         // TODO: Mock TokenStore
-        MockingHelper(configuration: .realApp)
+        TestTargetAssemblyHelper(configuration: .realApp)
 
         @InjectService var driveInfosManager: DriveInfosManager
         @InjectService var accountManager: AccountManageable

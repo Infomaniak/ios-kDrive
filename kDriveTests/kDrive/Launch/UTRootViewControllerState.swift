@@ -41,8 +41,8 @@ final class UTRootViewControllerState: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        MockingHelper.clearRegisteredTypes()
-        MockingHelper(configuration: .minimal)
+        TestTargetAssemblyHelper.clearRegisteredTypes()
+        TestTargetAssemblyHelper(configuration: .minimal)
 
         let services = [
             Factory(type: KeychainHelper.self) { _, _ in
@@ -181,8 +181,8 @@ final class UTRootViewControllerState: XCTestCase {
 final class UTRootViewControllerPreloading: XCTestCase {
     override func setUp() {
         super.setUp()
-        MockingHelper.clearRegisteredTypes()
-        MockingHelper(configuration: .realApp)
+        TestTargetAssemblyHelper.clearRegisteredTypes()
+        TestTargetAssemblyHelper(configuration: .realApp)
 
         let accountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
             let accountManager = MockAccountManager()

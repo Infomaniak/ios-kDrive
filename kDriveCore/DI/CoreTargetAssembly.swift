@@ -35,7 +35,7 @@ import os.log
 public typealias FactoryWithIdentifier = (factory: Factory, identifier: String?)
 
 /// Something that setups the service factories
-open class FactoryService: TargetAssembly {
+open class CoreTargetAssembly: TargetAssembly {
     private static let appGroupName = "group.\(bundleId)"
     private static let sharedAppGroupName = "group.com.infomaniak"
     private static let realmRootPath = "drives"

@@ -24,7 +24,7 @@ import kDriveCore
 import os.log
 
 /// Something that loads the DI on init
-public class KDriveTargetAssembly: FactoryService {
+public class KDriveTargetAssembly: CoreTargetAssembly {
     private static var context: DriveAppContext?
     public init(context: DriveAppContext) {
         os_log("KDriveTargetAssembly")
