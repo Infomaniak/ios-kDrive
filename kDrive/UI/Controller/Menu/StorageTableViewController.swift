@@ -51,6 +51,13 @@ final class StorageTableViewController: UITableViewController {
         Task {
             await reload()
         }
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateTableViewContent),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -113,6 +120,12 @@ final class StorageTableViewController: UITableViewController {
                 "appGroupSize": appGroupSize
             ]
             SentryDebug.appSizeUsage(metadata)
+        }
+    }
+
+    @objc private func updateTableViewContent() {
+        Task {
+            await reload()
         }
     }
 
