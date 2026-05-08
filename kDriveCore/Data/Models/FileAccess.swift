@@ -44,8 +44,8 @@ public struct FileAccessSettings: Encodable {
         teamIds: [Int]? = nil,
         userIds: [Int]? = nil
     ) {
-        let languageCode = Locale.current.identifier
-        if allowedLanguageCodes.contains(languageCode) {
+        let languageCode = Locale.current.language.languageCode?.identifier
+        if let languageCode, allowedLanguageCodes.contains(languageCode) {
             lang = languageCode
         } else {
             lang = "en"
