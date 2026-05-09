@@ -16,13 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OSLog
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import LinkPresentation
+import OSLog
 import UIKit
 
 final class FileActionsFloatingPanelViewController: UICollectionViewController {

@@ -21,8 +21,8 @@ import FileProvider
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
-import UIKit
 import OSLog
+import UIKit
 
 public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
     private static let logger = Logger(category: "DownloadArchiveOperation")
@@ -79,7 +79,8 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
     }
 
     func authenticatedDownload() {
-        Self.logger.info("Downloading Archive of files \(self.archiveId) with session \(self.urlSession.identifier)")
+        let logMessage = "Downloading Archive of files \(archiveId) with session \(urlSession.identifier)"
+        Self.logger.info("\(logMessage)")
 
         let url = Endpoint.getArchive(drive: driveFileManager.drive, uuid: archiveId).url
 
@@ -114,9 +115,10 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
     func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
+        let archiveId = self.archiveId
         if let error {
             // Client-side error
-            Self.logger.error("Client-side error for \(self.archiveId): \(error)")
+            Self.logger.error("Client-side error for \(archiveId): \(error)")
             if self.error == .taskRescheduled {
                 // We return because we don't want end() to be called as it is already called in the expiration handler
                 return
@@ -128,7 +130,7 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
             }
         } else if let url {
             // Success
-            Self.logger.info("Download of \(self.archiveId) successful")
+            Self.logger.info("Download of \(archiveId) successful")
             do {
                 let temporaryUrl = FileManager.default.temporaryDirectory.appendingPathComponent(archiveId, isDirectory: false)
                     .appendingPathExtension("zip")
@@ -143,19 +145,20 @@ public class DownloadArchiveOperation: DownloadOperation, @unchecked Sendable {
                 try FileManager.default.moveItem(at: url, to: temporaryUrl)
                 archiveUrl = temporaryUrl
             } catch {
-                Self.logger.error("Error moving file \(self.archiveId): \(error)")
+                Self.logger.error("Error moving file \(archiveId): \(error)")
                 self.error = .localError
             }
         } else {
             // Server-side error
-            Self.logger.error("Server error for \(self.archiveId) (code: \(statusCode))")
+            Self.logger.error("Server error for \(archiveId) (code: \(statusCode))")
             self.error = .serverError
         }
         end(sessionUrl: task?.originalRequest?.url)
     }
 
     private func end(sessionUrl: URL?) {
-        Self.logger.info("Download of archive \(self.archiveId) ended")
+        let logMessage = "Download of archive \(archiveId) ended"
+        Self.logger.info("\(logMessage)")
         endBackgroundTaskObservation()
     }
 }

@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OSLog
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDeviceCheck
@@ -25,6 +24,7 @@ import InfomaniakLogin
 import InterAppLogin
 import kDriveCore
 import kDriveResources
+import OSLog
 
 public final class LoginDelegateHandler: ObservableObject, @preconcurrency InfomaniakLoginDelegate {
     @LazyInjectService private var matomo: MatomoUtils

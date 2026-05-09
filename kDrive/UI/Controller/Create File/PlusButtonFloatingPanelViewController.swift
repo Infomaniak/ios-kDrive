@@ -17,13 +17,13 @@
  */
 
 import AVFoundation
-import OSLog
 import FloatingPanel
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import PhotosUI
 import UIKit
 import Vision

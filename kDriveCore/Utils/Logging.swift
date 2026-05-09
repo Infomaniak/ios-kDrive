@@ -152,17 +152,11 @@ public enum Logging {
 
         do {
             let documentDrivesPath = debugDirectory.appendingPathComponent("drive", isDirectory: true).path
-            let documentLogsPath = debugDirectory.appendingPathComponent("logs", isDirectory: true).path
 
             try? fileManager.removeItem(atPath: documentDrivesPath)
-            try? fileManager.removeItem(atPath: documentLogsPath)
 
             if fileManager.fileExists(atPath: DriveFileManager.constants.realmRootURL.path) {
                 try fileManager.copyItem(atPath: DriveFileManager.constants.realmRootURL.path, toPath: documentDrivesPath)
-            }
-            let cachedLogsUrl = DriveFileManager.constants.cacheDirectoryURL.appendingPathComponent("logs", isDirectory: true)
-            if fileManager.fileExists(atPath: cachedLogsUrl.path) {
-                try fileManager.copyItem(atPath: cachedLogsUrl.path, toPath: documentLogsPath)
             }
         } catch {
             Logger.general.error("Failed to copy debug informations \(error)")

@@ -16,9 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OSLog
 import kDriveCore
 import kDriveResources
+import OSLog
 import UIKit
 import VisionKit
 

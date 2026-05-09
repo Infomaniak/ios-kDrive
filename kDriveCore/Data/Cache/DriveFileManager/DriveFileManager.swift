@@ -17,12 +17,12 @@
  */
 
 import Alamofire
-import OSLog
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
+import OSLog
 import RealmSwift
 import SwiftRegex
 

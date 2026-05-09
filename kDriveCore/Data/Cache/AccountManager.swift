@@ -423,7 +423,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             logoutCurrentAccountAndSwitchToNextIfPossible()
         } else {
             Logger.general
-                .info("user with token error \(accountToDeleteDescription)) do not match current account, doing nothing")
+                .info("user with token error \(accountToDeleteDescription) do not match current account, doing nothing")
             removeAccountFor(userId: accountToDelete.userId)
         }
     }

@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OSLog
 import DifferenceKit
 import Foundation
 import InfomaniakCoreCommonUI
 import kDriveCore
 import kDriveResources
+import OSLog
 import RealmSwift
 
 class PhotoListViewModel: FileListViewModel {

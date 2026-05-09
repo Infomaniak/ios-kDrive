@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OSLog
 import DifferenceKit
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
+import OSLog
 import RealmSwift
 import UIKit
 

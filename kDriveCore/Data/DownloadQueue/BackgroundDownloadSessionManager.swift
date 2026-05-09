@@ -17,9 +17,9 @@
  */
 
 import Foundation
-import OSLog
 import InfomaniakCoreDB
 import InfomaniakDI
+import OSLog
 
 protocol BackgroundDownloadSessionManagable: NSObject, URLSessionTaskDelegate {
     // MARK: - Type aliases

@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OSLog
 import DTFoundation
 import Foundation
 import kDriveCore
 import Kvitto
+import OSLog
 import StoreKit
 
 protocol StoreObserverDelegate: AnyObject {

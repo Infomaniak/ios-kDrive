@@ -18,11 +18,11 @@
 
 import Alamofire
 import DifferenceKit
-import OSLog
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
+import OSLog
 import Photos
 import QuickLook
 import RealmSwift

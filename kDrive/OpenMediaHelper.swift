@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OSLog
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import PhotosUI
 import Vision
 import VisionKit

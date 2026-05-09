@@ -47,9 +47,9 @@ public final class DownloadPublicShareArchiveOperation: DownloadArchiveOperation
     }
 
     func publicShareDownload() {
-        Self.logger.info(
-            "Downloading Archive of public share files \(self.archiveId) with session \(self.urlSession.identifier)"
-        )
+        let archiveId = self.archiveId
+        let sessionIdentifier = urlSession.identifier
+        Self.logger.info("Downloading Archive of public share files \(archiveId) with session \(sessionIdentifier)")
 
         let url = Endpoint.downloadPublicShareArchive(
             drive: shareDrive,

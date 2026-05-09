@@ -17,8 +17,8 @@
  */
 
 import Foundation
-import OSLog
 import InfomaniakCoreDB
+import OSLog
 import Realm
 import RealmSwift
 

@@ -53,14 +53,16 @@ public final class DownloadPublicShareOperation: DownloadAuthenticatedOperation,
 
     override public func main() {
         let fileId = file.id
-        Self.logger.info("Start for \(fileId) with session \(self.urlSession.identifier)")
+        let sessionIdentifier = urlSession.identifier
+        Self.logger.info("Start for \(fileId) with session \(sessionIdentifier)")
 
         downloadPublicShareFile(publicShareProxy: publicShareProxy)
     }
 
     private func downloadPublicShareFile(publicShareProxy: PublicShareProxy) {
         let fileId = file.id
-        Self.logger.info("Downloading publicShare \(fileId) with session \(self.urlSession.identifier)")
+        let sessionIdentifier = urlSession.identifier
+        Self.logger.info("Downloading publicShare \(fileId) with session \(sessionIdentifier)")
 
         let url = Endpoint.download(file: file, publicShareProxy: publicShareProxy).url
 

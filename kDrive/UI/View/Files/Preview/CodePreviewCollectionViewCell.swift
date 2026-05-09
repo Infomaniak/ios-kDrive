@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import OSLog
 import HighlightSwift
 import kDriveCore
 import kDriveResources
 import MarkdownKit
+import OSLog
 import UIKit
 
 /// Something to read a file outside of the main actor

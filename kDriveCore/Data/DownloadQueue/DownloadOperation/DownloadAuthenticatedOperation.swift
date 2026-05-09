@@ -139,14 +139,16 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
 
     override public func main() {
         let fileId = file.id
-        Self.logger.info("Start for \(fileId) with session \(self.urlSession.identifier)")
+        let sessionIdentifier = urlSession.identifier
+        Self.logger.info("Start for \(fileId) with session \(sessionIdentifier)")
 
         downloadFile()
     }
 
     private func downloadFile() {
         let fileId = file.id
-        Self.logger.info("Downloading \(fileId) with session \(self.urlSession.identifier)")
+        let sessionIdentifier = urlSession.identifier
+        Self.logger.info("Downloading \(fileId) with session \(sessionIdentifier)")
 
         let url = Endpoint.download(file: file).url
 

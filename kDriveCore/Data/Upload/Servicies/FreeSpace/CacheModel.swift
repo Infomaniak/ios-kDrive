@@ -17,9 +17,9 @@
  */
 
 import Foundation
-import OSLog
 import kDriveResources
 import Kingfisher
+import OSLog
 
 /// Something to be used for UI, wrapping a CacheItem
 public struct CacheModel {

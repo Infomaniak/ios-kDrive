@@ -28,7 +28,6 @@ import InfomaniakNotifications
 import kDriveCore
 import kDriveResources
 import Kingfisher
-import OSLog
 import Sentry
 import StoreKit
 import UIKit
