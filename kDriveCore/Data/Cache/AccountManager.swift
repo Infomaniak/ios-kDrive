@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import DeviceAssociation
 import Foundation
 import InfomaniakBugTracker
@@ -26,6 +25,7 @@ import InfomaniakLogin
 import InfomaniakNotifications
 import kDriveResources
 import MyKSuite
+import OSLog
 import RealmSwift
 import Sentry
 
@@ -259,7 +259,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         if let matchingAccount, let currentAccount, matchingAccount.userId != currentAccount.userId {
-            DDLogInfo("switching to account \(matchingAccount.userId) to accommodate sharedWithMeLink navigation")
+            Logger.general.info("switching to account \(matchingAccount.userId) to accommodate sharedWithMeLink navigation")
             deeplinkService.setLastDeeplink(deeplink)
             switchAccount(newAccount: matchingAccount)
             Task {
@@ -281,7 +281,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         if deeplink.driveId != currentDriveId && !(deeplink is PrivateShareLink) {
-            DDLogInfo("switching to drive \(deeplink.driveId) to accommodate sharedWithMeLink navigation")
+            Logger.general.info("switching to drive \(deeplink.driveId) to accommodate sharedWithMeLink navigation")
 
             try? await driveFileManager.switchDriveAndReloadUI()
             deeplinkService.setLastDeeplink(deeplink)
@@ -313,7 +313,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         do {
             try driveInfosManager.storePublicShareDrive(drive: publicShareDrive)
         } catch {
-            DDLogError("Failed to store public share drive in base, \(error)")
+            Logger.general.error("Failed to store public share drive in base, \(error)")
             return nil
         }
 
@@ -411,16 +411,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             SentryDebug.capture(message: "Failed matching failed token to account \(tokenUserId)",
                                 context: context,
                                 contextKey: "Token Infos")
-            DDLogError("Failed matching failed token to account \(tokenUserId)")
+            Logger.general.error("Failed matching failed token to account \(tokenUserId)")
             return
         }
 
+        let accountToDeleteDescription = String(describing: accountToDelete)
         if accountToDelete.userId == currentAccount?.userId {
-            DDLogInfo("matched \(String(describing: currentAccount)) to \(accountToDelete), removing current account")
+            let currentAccountDescription = String(describing: currentAccount)
+            Logger.general.info("matched \(currentAccountDescription) to \(accountToDeleteDescription), removing current account")
             notificationHelper.sendDisconnectedNotification()
             logoutCurrentAccountAndSwitchToNextIfPossible()
         } else {
-            DDLogInfo("user with token error \(accountToDelete) do not match current account, doing nothing")
+            Logger.general
+                .info("user with token error \(accountToDeleteDescription)) do not match current account, doing nothing")
             removeAccountFor(userId: accountToDelete.userId)
         }
     }
@@ -646,7 +649,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         networkLogin.deleteApiToken(token: removedToken) { result in
             guard case .failure(let error) = result else { return }
-            DDLogError("Failed to delete api token: \(error.localizedDescription)")
+            Logger.general.error("Failed to delete api token: \(error.localizedDescription)")
         }
     }
 

@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
+import OSLog
 import DifferenceKit
 import Foundation
 import InfomaniakCoreCommonUI
@@ -120,7 +120,7 @@ class PhotoListViewModel: FileListViewModel {
                     newResults = results
                 case .error(let error):
                     newResults = nil
-                    DDLogError("[Realm Observation] Error \(error)")
+                    Logger.realmObservation.error("Error \(error)")
                 }
 
                 guard let newResults else { return }

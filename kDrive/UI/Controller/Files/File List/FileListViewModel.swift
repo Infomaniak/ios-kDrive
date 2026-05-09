@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Combine
 import Foundation
 import InfomaniakCore
@@ -24,7 +23,9 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import RealmSwift
+import UIKit
 
 enum FileListBarButtonType {
     case selectAll
@@ -229,7 +230,7 @@ class FileListViewModel: SelectDelegate {
                     newResults = results
                     SentryDebug.filesObservationBreadcrumb(state: "update")
                 case .error(let error):
-                    DDLogError("[Realm Observation] Error \(error)")
+                    Logger.realmObservation.error("Error \(error)")
                     newResults = nil
                 }
 

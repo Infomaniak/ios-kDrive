@@ -16,9 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import kDriveCore
+import UIKit
 
 /// Routing methods available from both the AppExtension mode and App
 public struct AppExtensionRouter: AppExtensionRoutable {

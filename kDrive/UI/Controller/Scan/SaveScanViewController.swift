@@ -16,13 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
+import OSLog
 import kDriveCore
 import kDriveResources
 import UIKit
 import VisionKit
 
 final class SaveScanViewController: SaveFileViewController {
+    private static let logger = Logger(category: "Scan")
+
     var scan: VNDocumentCameraScan!
     var scanType = ScanFileFormat.pdf
     var worker: SaveScanWorker?
@@ -129,12 +131,12 @@ extension SaveScanViewController: SaveScanWorkerDelegate {
     func recognizedStrings(_ strings: [String]) {
         // Use the first string as the filename
         guard let firstResult = strings.first else {
-            DDLogInfo("[Scan] Unable to recognise text.")
+            Self.logger.info("Unable to recognise text.")
             return
         }
 
         guard let fileNameSection = sections.firstIndex(of: .fileName) else {
-            DDLogError("[Scan] Unable refresh section for fileName.")
+            Self.logger.error("Unable refresh section for fileName.")
             return
         }
 
@@ -143,6 +145,6 @@ extension SaveScanViewController: SaveScanWorkerDelegate {
     }
 
     func errorWhileProcessing(_ error: Error?) {
-        DDLogError("[Scan] failed with error: \(String(describing: error)).")
+        Self.logger.error("failed with error: \(error).")
     }
 }

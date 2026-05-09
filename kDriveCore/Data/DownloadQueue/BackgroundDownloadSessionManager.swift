@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
+import OSLog
 import InfomaniakCoreDB
 import InfomaniakDI
 
@@ -53,6 +53,8 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) private var uploadsDatabase: Transactionable
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var downloadQueue: DownloadQueueable
+
+    private static let logger = Logger(category: "BackgroundDownloadSessionManager")
 
     public var identifier: String {
         return backgroundSession.identifier
@@ -112,10 +114,10 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
             task?.cancel { data in
                 let rescheduledTask: URLSessionDownloadTask
                 if let data {
-                    DDLogInfo("[BackgroundUploadSession] Rescheduled task \(request.url?.absoluteString ?? "") with resume data")
+                    Self.logger.info("Rescheduled task \(request.url?.absoluteString ?? "") with resume data")
                     rescheduledTask = self.backgroundSession.downloadTask(withResumeData: data)
                 } else {
-                    DDLogInfo("[BackgroundUploadSession] Rescheduled task \(request.url?.absoluteString ?? "")")
+                    Self.logger.info("Rescheduled task \(request.url?.absoluteString ?? "")")
                     rescheduledTask = self.backgroundSession.downloadTask(with: request)
                 }
                 rescheduledTask.resume()

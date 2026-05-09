@@ -17,12 +17,11 @@
  */
 
 import Atlantis
-import CocoaLumberjack
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
+import OSLog
 import RealmSwift
 import Sentry
 
@@ -30,18 +29,11 @@ public enum Logging {
     public static func initLogging() {
         // TODO: change
         UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
-        initLogger()
         initNetworkLogging()
         initSentry()
         copyDebugInformations()
 
         Log.appDelegate("initLogging done")
-    }
-
-    class LogFormatter: NSObject, DDLogFormatter {
-        func format(message logMessage: DDLogMessage) -> String? {
-            return "[Infomaniak] \(logMessage.message)"
-        }
     }
 
     public static func reportRealmOpeningError(_ error: Error, realmConfiguration: Realm.Configuration, afterRetry: Bool) {
@@ -53,7 +45,7 @@ public enum Logging {
 
         #if DEBUG
         copyDebugInformations()
-        DDLogError(
+        Logger.general.error(
             "Realm files \(realmConfiguration.fileURL?.lastPathComponent ?? "") will be deleted to prevent migration error"
         )
         #endif
@@ -98,22 +90,6 @@ public enum Logging {
             }
         }
         #endif
-    }
-
-    private static func initLogger() {
-        DDOSLogger.sharedInstance.logFormatter = LogFormatter()
-        DDLog.add(DDOSLogger.sharedInstance)
-        let logFileManager = DDLogFileManagerDefault(logsDirectory: DriveFileManager.constants.cacheDirectoryURL
-            .appendingPathComponent(
-                "logs",
-                isDirectory: true
-            ).path)
-        let fileLogger = DDFileLogger(logFileManager: logFileManager)
-        // 24-hour rolling, 50 MB max per file, 7 files max.
-        fileLogger.rollingFrequency = 60 * 60 * 24
-        fileLogger.maximumFileSize = 50 * 1024 * 1024
-        fileLogger.logFileManager.maximumNumberOfLogFiles = 7
-        DDLog.add(fileLogger)
     }
 
     private static func initNetworkLogging() {
@@ -189,7 +165,7 @@ public enum Logging {
                 try fileManager.copyItem(atPath: cachedLogsUrl.path, toPath: documentLogsPath)
             }
         } catch {
-            DDLogError("Failed to copy debug informations \(error)")
+            Logger.general.error("Failed to copy debug informations \(error)")
         }
         #endif
     }

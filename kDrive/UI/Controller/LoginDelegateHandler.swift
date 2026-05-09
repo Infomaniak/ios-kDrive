@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
+import OSLog
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDeviceCheck
@@ -114,7 +114,7 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
     }
 
     @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: ApiToken?) {
-        DDLogError("Error on didCompleteLoginWith \(error)")
+        Logger.general.error("Error on didCompleteLoginWith: \(error)")
 
         guard let topMostViewController = router.topMostViewController else { return }
 

@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
+import OSLog
 import InfomaniakCoreDB
 import Realm
 import RealmSwift
@@ -93,7 +93,7 @@ final class RealmAccessor: RealmAccessible {
         excludeFromBackup = false
 
         guard var realmURL else {
-            DDLogError("not realmURL to work with")
+            Logger.general.error("not realmURL to work with")
             return
         }
 
@@ -103,9 +103,9 @@ final class RealmAccessor: RealmAccessible {
 
         do {
             try realmURL.setResourceValues(metadata)
-            DDLogInfo("Excluding realm URL from backup: \(realmURL)")
+            Logger.general.info("Excluding realm URL from backup: \(realmURL)")
         } catch {
-            DDLogError("Error excluding realm URL from backup: \(realmURL) \(error)")
+            Logger.general.error("Error excluding realm URL from backup: \(realmURL) \(error)")
         }
     }
 }

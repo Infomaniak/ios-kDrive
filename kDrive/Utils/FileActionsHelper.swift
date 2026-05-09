@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
+import OSLog
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
@@ -28,6 +28,8 @@ import UIKit
 
 @MainActor
 public final class FileActionsHelper {
+    private static let logger = Logger(category: "FileActionsHelper")
+
     private var interactionController: UIDocumentInteractionController!
 
     public static let instance = FileActionsHelper()
@@ -36,7 +38,7 @@ public final class FileActionsHelper {
 
     public func openWith(file: File, from rect: CGRect, in view: UIView, delegate: UIDocumentInteractionControllerDelegate) {
         guard let rootFolderURL = DriveFileManager.constants.openInPlaceDirectoryURL else {
-            DDLogError("Open in place directory not found")
+            Self.logger.error("Open in place directory not found")
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             return
         }
@@ -68,7 +70,7 @@ public final class FileActionsHelper {
             interactionController.delegate = delegate
             interactionController.presentOpenInMenu(from: rect, in: view, animated: true)
         } catch {
-            DDLogError("Cannot present interaction controller: \(error)")
+            Self.logger.error("Cannot present interaction controller: \(error)")
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
         }
     }
@@ -80,7 +82,7 @@ public final class FileActionsHelper {
                 @InjectService var appNavigable: AppNavigable
                 appNavigable.present(file: file, driveFileManager: driveFileManager, office: office)
             } catch {
-                DDLogError("[FileActionsHelper] Failed to get file [\(driveFileManager.driveId) - \(id)]: \(error)")
+                Self.logger.error("Failed to get file [\(driveFileManager.driveId) - \(id)]: \(error)")
                 UIConstants.showSnackBarIfNeeded(error: error)
             }
         }
@@ -188,7 +190,7 @@ public final class FileActionsHelper {
                 if (error as? PHPhotosError)?.code == PHPhotosError.notEnoughSpace {
                     await UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
                 } else {
-                    DDLogError("Cannot save media: \(error)")
+                    Logger.general.error("Cannot save media: \(error)")
                     let message = "Failed to save media"
                     let context = ["Underlying Error": error]
                     SentryDebug.capture(message: message, context: context, contextKey: "Error")
@@ -307,7 +309,7 @@ public final class FileActionsHelper {
                           observer: observer,
                           driveFileManager: driveFileManager)
         } catch {
-            DDLogError("Error while performing bulk action: \(error)")
+            logger.error("Error while performing bulk action: \(error)")
         }
     }
 

@@ -16,13 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakConcurrency
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveResources
+import OSLog
 import Photos
 import RealmSwift
 
@@ -67,6 +67,8 @@ public enum ImportError: LocalizedError {
 }
 
 public final class FileImportHelper {
+    private static let logger = Logger(category: "FileImportHelper")
+
     /// Shorthand for default FileManager
     private let fileManager = FileManager.default
 
@@ -270,7 +272,7 @@ public final class FileImportHelper {
                 }
 
             } catch {
-                DDLogError("[FileImportHelper] importItems error:\(error)")
+                Self.logger.error("importItems error:\(error)")
             }
         }
 

@@ -17,11 +17,11 @@
  */
 
 import Algorithms
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import RealmSwift
+import FileProvider
 
 // MARK: - Publish
 

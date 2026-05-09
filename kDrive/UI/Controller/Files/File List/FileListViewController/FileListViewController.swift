@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Combine
 import DifferenceKit
 import FloatingPanel
@@ -25,6 +24,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import RealmSwift
 import UIKit
 
@@ -32,6 +32,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     @LazyInjectService var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+
+    private static let logger = Logger(category: "FileListViewController")
 
     // MARK: - Properties
 
@@ -474,7 +476,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         switch actionType {
         case .file:
             guard let file = files.first else {
-                DDLogError("[FileListViewController] Unable to show quick actions panel without a file")
+                Self.logger.error("Unable to show quick actions panel without a file")
                 return
             }
 
