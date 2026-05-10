@@ -132,7 +132,7 @@ public extension Target {
                            .external(name: "InfomaniakDI"),
                            .external(name: "InfomaniakLogin"),
                            .external(name: "KSuite"),
-                           .external(name: "Kingfisher"),
+                           .external(name: "Nuke"),
                            .external(name: "Lottie"),
                            .external(name: "MaterialOutlinedTextField"),
                            .external(name: "Realm"),
