@@ -19,122 +19,83 @@
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
-import MQTTNIO
+import MQTT
 import OSLog
 
-public class MQService {
+public final class MQService {
     private static let logger = Logger(category: "MQService")
+
     private lazy var decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }()
 
-    private let queue = DispatchQueue(label: "com.infomaniak.drive.mqservice")
     private static let environment = ApiEnvironment.current
-    private static let configuration = MQTTClient.Configuration(
-        keepAliveInterval: .seconds(30),
-        connectTimeout: .seconds(20),
-        userName: "ips:ips-public",
-        password: environment.mqttPass,
-        useSSL: true,
-        useWebSockets: true,
-        webSocketURLPath: "/ws"
-    )
-    private let client = MQTTClient(
-        host: environment.mqttHost,
-        port: 443,
-        identifier: generateClientIdentifier(),
-        eventLoopGroupProvider: .createNew,
-        configuration: configuration
-    )
-
-    private let initialReconnectionTimeout: Double = 1
-    private let maxReconnectionTimeout: Double = 300
+    private let client: MQTTClient.V3
 
     private var currentToken: IPSToken?
-    private var reconnections = 0
     private var actionProgressObservers = [UUID: (ActionProgressNotification) -> Void]()
 
-    private var reconnectionDelay: Double {
-        reconnections += 1
-        return min(initialReconnectionTimeout * Double(2 * reconnections), maxReconnectionTimeout)
+    public init() {
+        let endpoint = Endpoint.wss(
+            host: Self.environment.mqttHost,
+            port: 443,
+            path: "/ws"
+        )
+        client = MQTTClient.V3(endpoint)
+        client.config.keepAlive = 30
+        client.config.pingTimeout = 5
+        client.config.pingEnabled = true
+        client.config.connectTimeout = 20
+        client.delegate = self
+
+        client.startMonitor()
+        client.startRetrier()
     }
 
     deinit {
-        try? client.syncShutdownGracefully()
-    }
-
-    public init() {
-        // META: keep SonarCloud happy
+        client.stopMonitor()
+        client.stopRetrier()
+        client.close()
     }
 
     public func registerForNotifications(with token: IPSToken) {
-        queue.async { [self] in
-            if !client.isActive() {
-                do {
-                    _ = try client.connect().wait()
-                    Self.logger.info("Connection successful")
-                } catch {
-                    Self.logger.error("Error while connecting: \(error)")
-                }
-            }
-
+        Task {
             if let currentToken {
-                actionProgressObservers.removeAll()
-                do {
-                    try client.unsubscribe(from: [topic(for: currentToken)]).wait()
-                } catch {
-                    Self.logger.error("Error while unsubscribing: \(error)")
-                }
+                await unsubscribe(from: currentToken)
             }
 
             currentToken = token
-            do {
-                _ = try client.subscribe(to: [MQTTSubscribeInfo(topicFilter: topic(for: token), qos: .atMostOnce)]).wait()
-                client.addPublishListener(named: "Drive notifications listener") { result in
-                    switch result {
-                    case .success(let message):
-                        var buffer = message.payload
-                        guard let data = buffer.readData(length: buffer.readableBytes) else {
-                            return
-                        }
 
-                        if let message = try? self.decoder.decode(ActionProgressNotification.self, from: data) {
-                            for observer in self.actionProgressObservers.values {
-                                observer(message)
-                            }
-                        } else if let notification = try? self.decoder.decode(ActionNotification.self, from: data) {
-                            self.handleNotification(notification)
-                        } else if let notification = try? self.decoder.decode(ExternalImportNotification.self, from: data) {
-                            self.handleExternalImportNotification(notification)
-                        }
-                    case .failure(let error):
-                        Self.logger.error("Error while listening: \(error)")
-                    }
+            do {
+                if !client.isOpened {
+                    let identity = Identity(
+                        Self.generateClientIdentifier(),
+                        username: "ips:ips-public",
+                        password: Self.environment.mqttPass
+                    )
+
+                    try await client.open(identity, cleanStart: false).wait()
+                    Self.logger.info("Connection successful")
+
+                    try await client.subscribe(to: topic(for: token), qos: .atMostOnce).wait()
+                } else {
+                    try await client.subscribe(to: topic(for: token), qos: .atMostOnce).wait()
                 }
-                client.addCloseListener(named: "Drive close listener") { _ in
-                    Self.logger.warning("Connection closed")
-                    self.reconnect()
-                }
+                Self.logger.info("Subscription successful")
             } catch {
-                Self.logger.error("Error while subscribing: \(error)")
+                Self.logger.error("Error while connecting/subscribing: \(error)")
             }
         }
     }
 
-    func reconnect() {
-        queue.asyncAfter(deadline: .now() + reconnectionDelay) {
-            guard !self.client.isActive() else { return }
-            Self.logger.info("Reconnecting…")
-            do {
-                _ = try self.client.connect(cleanSession: false).wait()
-                Self.logger.info("Connection successful")
-                self.reconnections = 0
-            } catch {
-                Self.logger.error("Error while connecting: \(error)")
-                self.reconnect()
-            }
+    private func unsubscribe(from currentToken: IPSToken) async {
+        actionProgressObservers.removeAll()
+        do {
+            try await client.unsubscribe(from: topic(for: currentToken)).wait()
+        } catch {
+            Self.logger.error("Error while unsubscribing: \(error)")
         }
     }
 
@@ -161,6 +122,32 @@ public class MQService {
         let prefix = "mqttios_kdrive_"
         let letters = "abcdefghijklmnopqrstuvwxyz"
         return prefix + String((0 ..< length).map { _ in letters.randomElement()! })
+    }
+}
+
+// MARK: - MQTTDelegate
+
+extension MQService: MQTTDelegate {
+    public func mqtt(_ mqtt: MQTTClient, didUpdate status: Status, prev: Status) {
+        if case .closed = status {
+            Self.logger.warning("Connection closed (was: \(prev))")
+        }
+    }
+
+    public func mqtt(_ mqtt: MQTTClient, didReceive error: any Error) {
+        Self.logger.error("Error: \(error)")
+    }
+
+    public func mqtt(_ mqtt: MQTTClient, didReceive message: Message) {
+        if let notification = try? decoder.decode(ActionProgressNotification.self, from: message.payload) {
+            for observer in actionProgressObservers.values {
+                observer(notification)
+            }
+        } else if let notification = try? decoder.decode(ActionNotification.self, from: message.payload) {
+            handleNotification(notification)
+        } else if let notification = try? decoder.decode(ExternalImportNotification.self, from: message.payload) {
+            handleExternalImportNotification(notification)
+        }
     }
 }
 
