@@ -18,7 +18,7 @@
 
 import Foundation
 import kDriveResources
-import Kingfisher
+import Nuke
 import OSLog
 
 /// Something to be used for UI, wrapping a CacheItem
@@ -55,7 +55,7 @@ public enum CacheItem {
     /// The cache is a folder or a file on file system
     case fileSystem(url: URL)
 
-    /// The cache is Kingfisher image storage on disk
+    /// The cache is Nuke image storage on disk
     case storageImageCache
 
     /// Generate a collection of StorageToClean files from a source URL
@@ -91,7 +91,7 @@ public enum CacheItem {
             return getPathSize(at: url.path)
 
         case .storageImageCache:
-            let cacheSize = try? ImageCache.default.diskStorage.totalSize()
+            let cacheSize = (ImagePipeline.shared.configuration.dataCache as? DataCache)?.totalSize
             return UInt64(cacheSize ?? 0)
         }
     }
@@ -203,7 +203,7 @@ public enum CacheItem {
             }
 
         case .storageImageCache:
-            ImageCache.default.clearDiskCache()
+            ImagePipeline.shared.cache.removeAll()
 
             /// wait for the non await-able image cache library to process
             try? await Task.sleep(nanoseconds: 350_000_000)

@@ -18,7 +18,7 @@
 
 import AVKit
 import kDriveCore
-import Kingfisher
+import Nuke
 import UIKit
 
 protocol DownloadProgressObserver {
@@ -42,7 +42,7 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
     private var file: File!
     var tapGestureRecognizer: UITapGestureRecognizer!
     private var tapToZoomRecognizer: UITapGestureRecognizer!
-    var previewDownloadTask: Kingfisher.DownloadTask?
+    var previewDownloadTask: ImageTask?
 
     override func awakeFromNib() {
         super.awakeFromNib()

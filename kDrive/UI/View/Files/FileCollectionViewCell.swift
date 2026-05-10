@@ -20,7 +20,7 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
-import Kingfisher
+import Nuke
 import UIKit
 
 protocol FileCellDelegate: AnyObject {
@@ -55,7 +55,7 @@ protocol FileCellDelegate: AnyObject {
 
     private var downloadProgressObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
-    var thumbnailDownloadTask: Kingfisher.DownloadTask?
+    var thumbnailDownloadTask: ImageTask?
     @LazyInjectService var downloadQueue: DownloadQueueable
 
     var title: String {

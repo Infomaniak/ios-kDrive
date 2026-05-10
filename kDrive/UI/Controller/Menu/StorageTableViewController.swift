@@ -22,7 +22,6 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
-import Kingfisher
 import UIKit
 
 final class StorageTableViewController: UITableViewController {

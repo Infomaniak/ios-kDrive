@@ -21,7 +21,6 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
-import Kingfisher
 
 /// Server can notify us of publicShare limitations.
 public enum PublicShareLimitation: String {

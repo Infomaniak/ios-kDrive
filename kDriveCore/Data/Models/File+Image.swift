@@ -17,7 +17,7 @@
  */
 
 import InfomaniakCore
-import Kingfisher
+import Nuke
 import UIKit
 
 public extension File {
@@ -27,7 +27,7 @@ public extension File {
                                  publicDriveId: Int,
                                  publicFileId: Int,
                                  token: String? = nil,
-                                 completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
+                                 completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
         guard supportedBy.contains(.thumbnail) else {
             completion(icon, false)
             return nil
@@ -38,37 +38,36 @@ public extension File {
                                                            fileId: publicFileId,
                                                            token: token).url
 
-        return KingfisherManager.shared.retrieveImage(with: thumbnailURL) { result in
+        let request = ImageRequest(url: thumbnailURL)
+        return ImagePipeline.shared.loadImage(with: request) { result in
             if let image = try? result.get().image {
                 completion(image, true)
             } else {
                 // The file can become invalidated while retrieving the icon online
-                completion(
-                    self.isInvalidated ? ConvertedType.unknown.icon : self
-                        .icon,
-                    false
-                )
+                completion(self.isInvalidated ? ConvertedType.unknown.icon : self.icon, false)
             }
         }
     }
 
     /// Get a Thumbnail for a file for the current DriveFileManager
     @discardableResult
-    func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> Kingfisher.DownloadTask? {
-        if supportedBy.contains(.thumbnail), let currentDriveFileManager = accountManager.currentDriveFileManager {
-            return KingfisherManager.shared.retrieveImage(with: thumbnailURL,
-                                                          options: [.requestModifier(currentDriveFileManager.apiFetcher
-                                                                  .authenticatedKF)]) { result in
-                if let image = try? result.get().image {
-                    completion(image, true)
-                } else {
-                    // The file can become invalidated while retrieving the icon online
-                    completion(self.isInvalidated ? ConvertedType.unknown.icon : self.icon, false)
-                }
-            }
-        } else {
+    func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
+        guard supportedBy.contains(.thumbnail),
+              let authenticatedRequest = ImageRequest.authenticatedImageRequest(
+                  url: thumbnailURL,
+                  driveFileManager: accountManager.currentDriveFileManager
+              ) else {
             completion(icon, false)
             return nil
+        }
+
+        return ImagePipeline.shared.loadImage(with: authenticatedRequest) { result in
+            if let image = try? result.get().image {
+                completion(image, true)
+            } else {
+                // The file can become invalidated while retrieving the icon online
+                completion(self.isInvalidated ? ConvertedType.unknown.icon : self.icon, false)
+            }
         }
     }
 
@@ -77,13 +76,14 @@ public extension File {
                                publicDriveId: Int,
                                publicFileId: Int,
                                token: String? = nil,
-                               completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
+                               completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
         let previewURL = Endpoint.shareLinkFilePreview(driveId: publicDriveId,
                                                        linkUuid: publicShareId,
                                                        fileId: publicFileId,
                                                        token: token).url
 
-        return KingfisherManager.shared.retrieveImage(with: previewURL) { result in
+        let request = ImageRequest(url: previewURL)
+        return ImagePipeline.shared.loadImage(with: request) { result in
             if let image = try? result.get().image {
                 completion(image)
             } else {
@@ -93,17 +93,15 @@ public extension File {
     }
 
     @discardableResult
-    func getPreview(completion: @escaping ((UIImage?) -> Void)) -> Kingfisher.DownloadTask? {
-        guard let currentDriveFileManager = accountManager.currentDriveFileManager else {
+    func getPreview(completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
+        guard let authenticatedRequest = ImageRequest.authenticatedImageRequest(
+            url: imagePreviewUrl,
+            driveFileManager: accountManager.currentDriveFileManager
+        ) else {
             return nil
         }
 
-        return KingfisherManager.shared.retrieveImage(with: imagePreviewUrl,
-                                                      options: [
-                                                          .requestModifier(currentDriveFileManager.apiFetcher
-                                                              .authenticatedKF),
-                                                          .preloadAllAnimationData
-                                                      ]) { result in
+        return ImagePipeline.shared.loadImage(with: authenticatedRequest) { result in
             if let image = try? result.get().image {
                 completion(image)
             } else {

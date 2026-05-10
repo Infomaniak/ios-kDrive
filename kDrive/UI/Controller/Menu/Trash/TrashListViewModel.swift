@@ -22,7 +22,7 @@ import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
-import Kingfisher
+import Nuke
 import RealmSwift
 import UIKit
 
@@ -128,8 +128,7 @@ final class TrashListViewModel: InMemoryFileListViewModel {
     private func emptyTrash() async {
         do {
             // Quickwin for privacy, remove all image cache after a permanent clean
-            try? ImageCache.default.diskStorage.removeAll()
-            ImageCache.default.memoryStorage.removeAll()
+            ImagePipeline.shared.cache.removeAll()
 
             let success = try await driveFileManager.apiFetcher.emptyTrash(drive: driveFileManager.drive)
             let message = success ? KDriveResourcesStrings.Localizable.snackbarEmptyTrashConfirmation : KDriveResourcesStrings
@@ -218,8 +217,7 @@ final class TrashListViewModel: InMemoryFileListViewModel {
             await self?.removeFiles(deletedFiles)
 
             // Quickwin for privacy, remove all image cache after a permanent clean
-            try? ImageCache.default.diskStorage.removeAll()
-            ImageCache.default.memoryStorage.removeAll()
+            ImagePipeline.shared.cache.removeAll()
         }
     }
 }
