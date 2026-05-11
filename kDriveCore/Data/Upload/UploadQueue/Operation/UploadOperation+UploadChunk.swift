@@ -20,7 +20,8 @@ import Foundation
 import InfomaniakCore
 
 extension UploadOperation {
-    /// Generate some chunks into a temporary folder from a file
+    /// Compute SHA256 hash for chunks that need it, then fan out for upload.
+    /// This optimized version reads directly from the source file without writing temporary chunk files.
     func generateChunksAndFanOutIfNeeded() async throws {
         Log.uploadOperation("generateChunksAndFanOutIfNeeded ufid:\(uploadFileId)")
         try checkCancelation()
@@ -35,12 +36,11 @@ extension UploadOperation {
             }
 
             filePath = file.pathURL?.path ?? ""
-            let sessionToken = uploadingSessionTask.token
 
-            // Look for the next chunk to generate
+            // Look for the next chunk that needs hash computation
             let chunksToGenerate = uploadingSessionTask.chunkTasks
                 .filter(UploadingChunkTask.notDoneUploadingPredicate)
-                .filter { $0.hasLocalChunk == false }
+                .filter { !$0.isReadyForUpload }
             guard let chunkTask = chunksToGenerate.first else {
                 Log.uploadOperation("generateChunksAndFanOutIfNeeded no remaining chunks to generate ufid:\(self.uploadFileId)")
                 return
@@ -51,58 +51,30 @@ extension UploadOperation {
             let chunkNumber = chunkTask.chunkNumber
             let range = chunkTask.range
             let fileUrl = try self.getFileUrlIfReadable(file: file)
+
+            // Read chunk data from source file to compute SHA256 hash
             guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: [range]),
-                  let chunk = chunkProvider.next() else {
+                  let chunkData = chunkProvider.next() else {
                 Log.uploadOperation("Unable to get a ChunkProvider for \(self.uploadFileId)", level: .error)
                 throw ErrorDomain.chunkError
             }
 
             Log.uploadOperation(
-                "Storing Chunk count:\(chunkNumber) of \(chunksToGenerateCount) to write, ufid:\(self.uploadFileId)"
+                "Computing hash for chunk:\(chunkNumber) of \(chunksToGenerateCount) remaining, ufid:\(self.uploadFileId)"
             )
-            do {
-                try self.checkCancelation()
 
-                let chunkSHA256 = chunk.SHA256DigestString
-                let chunkPath = try self.storeChunk(chunk,
-                                                    number: chunkNumber,
-                                                    uploadFileId: self.uploadFileId,
-                                                    sessionToken: sessionToken,
-                                                    hash: chunkSHA256)
-                Log.uploadOperation("chunk stored count:\(chunkNumber) for:\(self.uploadFileId)")
+            try self.checkCancelation()
 
-                // set path + sha
-                chunkTask.path = chunkPath.path
-                chunkTask.sha256 = chunkSHA256
+            // Compute and store only the SHA256 hash - no temp file needed
+            let chunkSHA256 = chunkData.SHA256DigestString
+            chunkTask.sha256 = chunkSHA256
 
-            } catch {
-                Log.uploadOperation(
-                    "Unable to save a chunk to storage. number:\(chunkNumber) error:\(error) for:\(self.uploadFileId)",
-                    level: .error
-                )
-                throw error
-            }
+            Log.uploadOperation("Hash computed for chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
         }
 
         // Schedule next step
         try await scheduleNextChunk(filePath: filePath,
                                     chunksToGenerateCount: chunksToGenerateCount)
-    }
-
-    /// Store a chunk at the root of NSTemporaryDirectory with a stable name
-    func storeChunk(_ buffer: Data, number: Int64,
-                    uploadFileId: String,
-                    sessionToken: String,
-                    hash: String) throws -> URL {
-        // Store chunks at the root of NSTemporaryDirectory
-        let tempRoot = FileManager.default.temporaryDirectory
-        let chunkName = chunkName(number: number, fileId: uploadFileId, sessionToken: sessionToken, hash: hash)
-        let chunkPath = tempRoot.appendingPathComponent(chunkName)
-
-        try buffer.write(to: chunkPath, options: [.atomic])
-        Log.uploadOperation("wrote chunk:\(chunkPath) ufid:\(uploadFileId)")
-
-        return chunkPath
     }
 
     /// Prepare chunk upload requests, and start them.
@@ -133,6 +105,8 @@ extension UploadOperation {
     }
 
     /// Prepare chunk upload requests, and start them.
+    /// This optimized version reads chunk data directly from the source file using memory mapping,
+    /// avoiding the need to write temporary chunk files to disk.
     func fanOutChunks() async throws {
         try checkCancelation()
         try checkForRestrictedUploadOverDataMode()
@@ -156,7 +130,7 @@ extension UploadOperation {
 
             let chunksToUpload = Array(uploadingSessionTask.chunkTasks
                 .filter(UploadingChunkTask.canStartUploadingPreconditionPredicate)
-                .filter { $0.hasLocalChunk == true })
+                .filter { $0.isReadyForUpload })
                 .prefix(freeSlots) // Iterate over only the available worker slots
 
             Log.uploadOperation("fanOut chunksToUpload:\(chunksToUpload.count) freeSlots:\(freeSlots) for:\(self.uploadFileId)")
@@ -168,20 +142,44 @@ extension UploadOperation {
                 throw ErrorDomain.unableToBuildRequest
             }
 
+            // Get the source file URL for reading chunk data
+            let sourceFileUrl = try self.getFileUrlIfReadable(file: file)
+
+            // Memory-map the source file for efficient chunk reading
+            let mappedFileData: Data
+            do {
+                mappedFileData = try Data(contentsOf: sourceFileUrl, options: .mappedIfSafe)
+            } catch {
+                Log.uploadOperation("Failed to memory-map source file: \(error) ufid:\(self.uploadFileId)", level: .error)
+                throw error
+            }
+
             // Schedule all the chunks to be uploaded
             for chunkToUpload: UploadingChunkTask in chunksToUpload {
                 try self.checkCancelation()
 
                 do {
-                    guard let chunkPath = chunkToUpload.path,
-                          let sha256 = chunkToUpload.sha256 else {
+                    guard let sha256 = chunkToUpload.sha256 else {
                         throw ErrorDomain.missingChunkHash
                     }
 
                     let chunkHashHeader = "sha256:\(sha256)"
-                    let chunkUrl = URL(fileURLWithPath: chunkPath, isDirectory: false)
                     let chunkNumber = chunkToUpload.chunkNumber
                     let chunkSize = chunkToUpload.chunkSize
+                    let range = chunkToUpload.range
+
+                    // Extract chunk data directly from memory-mapped source file
+                    let startIndex = Int(range.lowerBound)
+                    let endIndex = Int(range.upperBound) + 1 // upperBound is inclusive in DataRange
+                    guard startIndex >= 0, endIndex <= mappedFileData.count else {
+                        Log.uploadOperation(
+                            "Chunk range out of bounds: \(range) for file size \(mappedFileData.count) ufid:\(self.uploadFileId)",
+                            level: .error
+                        )
+                        throw ErrorDomain.chunkError
+                    }
+                    let chunkData = mappedFileData[startIndex ..< endIndex]
+
                     let request = try self.buildRequest(chunkNumber: chunkNumber,
                                                         chunkSize: chunkSize,
                                                         chunkHash: chunkHashHeader,
@@ -190,8 +188,9 @@ extension UploadOperation {
                                                         accessToken: accessToken,
                                                         host: uploadSession.uploadHost)
 
+                    // Upload directly from memory-mapped data slice - no temp file needed
                     let uploadTask = self.urlSession.uploadTask(with: request,
-                                                                fromFile: chunkUrl,
+                                                                from: chunkData,
                                                                 completionHandler: self.uploadCompletion)
                     // Extra 512 bytes for request headers
                     uploadTask.countOfBytesClientExpectsToSend = Int64(chunkSize) + 512
@@ -217,12 +216,6 @@ extension UploadOperation {
                 }
             }
         }
-    }
-
-    private func chunkName(number: Int64, fileId: String, sessionToken: String, hash: String) -> String {
-        // Hashing name as it can break path building. Also it keeps it short
-        let fileName = "upload_\(fileId)_\(hash)_\(number)_\(sessionToken)".SHA256DigestString
-        return fileName + ".part"
     }
 
     /// Make sure all `uploadTasks` canceled or completed are up to date in database.
