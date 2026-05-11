@@ -416,17 +416,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 assertionFailure("unable to lookup chunk task id, ufid:\(self.uploadFileId)")
             }
 
-            // Cleanup chunks in storage
-            if let path = chunkTask.path {
-                let url = URL(fileURLWithPath: path, isDirectory: false)
-                let chunkNumber = chunkTask.chunkNumber
-                Log.uploadOperation("cleanup chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
-                do {
-                    try self.fileManager.removeItem(at: url)
-                } catch {
-                    Log.uploadOperation("failed to clean chunk \(error) ufid:\(self.uploadFileId)", level: .error)
-                }
-            }
+            // Note: No temp file cleanup needed - chunks are now uploaded directly from memory-mapped source file
         } notFound: {
             Log.uploadOperation("matching chunk:\(uploadedChunk.number) failed ufid:\(self.uploadFileId)", level: .error)
             let context = ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId]
