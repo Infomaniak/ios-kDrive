@@ -131,6 +131,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                 date
             )
             shareLinkStackView.isHidden = false
+            rightArrow.isHidden = false
             fileShareLinkSettingTitle.alpha = 1
             fileShareLinkSettingTitle.isUserInteractionEnabled = true
             url = shareLink.url
@@ -151,6 +152,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                 .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable
                 .shareLinkRestrictedRightFileDescriptionShort
             shareLinkStackView.isHidden = false
+            rightArrow.isHidden = false
             url = file.privateSharePath(host: ApiEnvironment.current.driveHost)
             fileShareLinkSettingTitle.alpha = 0
             fileShareLinkSettingTitle.isUserInteractionEnabled = false
