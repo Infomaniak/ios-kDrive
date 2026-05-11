@@ -313,9 +313,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 )
             }
 
-            // If task is cancelled, remove it from list
+            // If task is cancelled, remove it from list and clean source file
             if file.error == DriveError.taskCancelled {
                 shouldCleanUploadFile = true
+
+                // Also clean source file for cancelled uploads to prevent data leaks
+                if file.cleanSourceFileIfNeeded() {
+                    Log.uploadOperation(
+                        "Removed local file for cancelled upload at path:\(String(describing: file.pathURL)) ufid:\(self.uploadFileId)"
+                    )
+                }
             }
 
             // otherwise only reset success
