@@ -233,6 +233,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
                 cell.accessRightView.accessibilityLabel = right.title
                 cell.accessRightLabel.text = right.title
                 cell.accessRightImage.image = right.icon
+                cell.accessRightImage.isAccessibilityElement = false
             }
             return cell
         }

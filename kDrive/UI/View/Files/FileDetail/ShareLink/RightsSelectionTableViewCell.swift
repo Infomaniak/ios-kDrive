@@ -81,6 +81,7 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         rightsDetailLabel.text = file.isDirectory ? right.folderDescription : file.isOfficeFile ? right
             .documentDescription : right.fileDescription
         rightsIconImageView.image = right.icon
+        rightsIconImageView.isAccessibilityElement = false
 
         if let upgradeDescription = right.upgradeDescription {
             upgradeLabel.text = upgradeDescription

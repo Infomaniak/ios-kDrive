@@ -180,6 +180,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
             cell.iconImageView.image = KDriveResourcesAsset.colorBucket.image
             cell.iconImageView.tintColor = KDriveResourcesAsset.iconColor.color
             cell.iconImageView.isHidden = false
+            cell.iconImageView.isAccessibilityElement = false
             return wrapperCell
         case .colorSelection:
             let cell = collectionView.dequeueReusableCell(type: ColorSelectionCollectionViewCell.self, for: indexPath)

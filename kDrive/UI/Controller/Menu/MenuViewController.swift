@@ -267,6 +267,7 @@ extension MenuViewController {
             cell.titleLabel.numberOfLines = 0
             cell.logoImage.image = action.image
             cell.logoImage.tintColor = KDriveResourcesAsset.iconColor.color
+            cell.logoImage.isAccessibilityElement = false
             return cell
         }
     }

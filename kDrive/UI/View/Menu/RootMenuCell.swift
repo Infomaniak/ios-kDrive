@@ -135,6 +135,7 @@ class RootMenuCell: UICollectionViewCell {
     func configure(title: String, icon: UIImage?) {
         titleLabel.text = title
         iconImageView.image = icon
+        iconImageView.isAccessibilityElement = false
     }
 
     open func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = 6) {
