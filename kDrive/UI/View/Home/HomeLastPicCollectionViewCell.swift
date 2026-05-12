@@ -18,7 +18,7 @@
 
 import kDriveCore
 import kDriveResources
-import Kingfisher
+import Nuke
 import UIKit
 
 class HomeLastPicCollectionViewCell: UICollectionViewCell {
@@ -28,7 +28,7 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
     @IBOutlet var checkmarkImage: UIImageView!
     @IBOutlet var videoGradientView: UIView!
 
-    private var thumbnailDownloadTask: Kingfisher.DownloadTask?
+    private var thumbnailDownloadTask: ImageTask?
     private let videoGradientLayer = CAGradientLayer()
 
     override var isSelected: Bool {

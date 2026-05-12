@@ -23,8 +23,8 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
-import Kingfisher
 import MediaPlayer
+import Nuke
 import UIKit
 
 class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate {
@@ -46,7 +46,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     weak var parentViewController: UIViewController?
     weak var floatingPanelController: FloatingPanelController?
 
-    private var previewDownloadTask: Kingfisher.DownloadTask?
+    private var previewDownloadTask: ImageTask?
     private var file: File?
     private var videoPlayer: VideoPlayer?
 

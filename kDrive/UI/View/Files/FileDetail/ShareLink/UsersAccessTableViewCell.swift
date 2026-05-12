@@ -20,7 +20,6 @@ import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
-import Kingfisher
 import UIKit
 
 class UsersAccessTableViewCell: InsetTableViewCell {

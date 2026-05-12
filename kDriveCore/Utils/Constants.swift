@@ -78,10 +78,10 @@ public enum Constants {
     public static let bulkActionThreshold = 10
     public static let activitiesReloadTimeOut: Double = 7_776_000 // 90 days
 
-    /// Constants used by Kingfisher to manage image cache
+    /// Constants used by Nuke to manage image cache
     public enum ImageCache {
         public static let memorySizeLimit = 10 * 1024 * 1024 // 10 Mi
-        public static let diskSizeLimit: UInt = 512 * 1024 * 1024 // 512 Mi
+        public static let diskSizeLimit = 512 * 1024 * 1024 // 512 Mi
     }
 
     public static let yearOneDate = Date(timeIntervalSince1970: -62_135_597_361)

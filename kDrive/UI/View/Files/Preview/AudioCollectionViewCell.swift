@@ -22,8 +22,8 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
-import Kingfisher
 import MediaPlayer
+import Nuke
 import UIKit
 
 final class AudioCollectionViewCell: PreviewCollectionViewCell {
@@ -44,7 +44,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     lazy var singleTrackPlayer = SingleTrackPlayer(driveFileManager: driveFileManager)
 
     private var cancellables = Set<AnyCancellable>()
-    private var thumbnailDownloadTask: Kingfisher.DownloadTask?
+    private var thumbnailDownloadTask: ImageTask?
 
     override func awakeFromNib() {
         super.awakeFromNib()

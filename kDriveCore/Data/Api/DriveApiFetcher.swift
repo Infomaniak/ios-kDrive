@@ -21,25 +21,19 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
-import Kingfisher
+import Nuke
 import Sentry
 import UIKit
 
-public class AuthenticatedImageRequestModifier: ImageDownloadRequestModifier {
-    weak var apiFetcher: ApiFetcher?
-
-    init(apiFetcher: ApiFetcher) {
-        self.apiFetcher = apiFetcher
-    }
-
-    public func modified(for request: URLRequest) -> URLRequest? {
-        if let token = apiFetcher?.currentToken?.accessToken {
-            var newRequest = request
-            newRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            return newRequest
-        } else {
+extension ImageRequest {
+    static func authenticatedImageRequest(url: URL, driveFileManager: DriveFileManager?) -> ImageRequest? {
+        guard let token = driveFileManager?.apiFetcher.currentToken?.accessToken else {
             return nil
         }
+
+        var urlRequest = URLRequest(url: url)
+        urlRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return ImageRequest(urlRequest: urlRequest)
     }
 }
 
@@ -54,11 +48,8 @@ public class DriveApiFetcher: ApiFetcher {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var tokenable: InfomaniakNetworkLoginable
 
-    public var authenticatedKF: AuthenticatedImageRequestModifier!
-
     public init() {
         super.init(decoder: Self.decoder)
-        authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
 
     public convenience init(token: ApiToken, delegate: RefreshTokenDelegate) {
@@ -66,7 +57,6 @@ public class DriveApiFetcher: ApiFetcher {
         createAuthenticatedSession(token,
                                    authenticator: SyncedAuthenticator(refreshTokenDelegate: delegate),
                                    additionalAdapters: [RequestContextIdAdaptor(), UserAgentAdapter()])
-        authenticatedKF = AuthenticatedImageRequestModifier(apiFetcher: self)
     }
 
     override public func perform<T: Decodable>(request: DataRequest,

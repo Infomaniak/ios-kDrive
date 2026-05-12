@@ -27,7 +27,8 @@ import InfomaniakLogin
 import InfomaniakNotifications
 import kDriveCore
 import kDriveResources
-import Kingfisher
+import Nuke
+import os.log
 import Sentry
 import StoreKit
 import UIKit
@@ -61,14 +62,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         Logging.initLogging()
         Log.appDelegate("Application starting in foreground ? \(UIApplication.shared.applicationState != .background)")
 
-        ImageCache.default.memoryStorage.config.totalCostLimit = Constants.ImageCache.memorySizeLimit
-        // Must define a limit, unlimited otherwise
-        ImageCache.default.diskStorage.config.sizeLimit = Constants.ImageCache.diskSizeLimit
-        let sessionConfiguration = ImageDownloader.default.sessionConfiguration
-        sessionConfiguration.httpAdditionalHeaders = [
-            "User-Agent": Constants.userAgent
-        ]
-        ImageDownloader.default.sessionConfiguration = sessionConfiguration
+        setupImageCache()
 
         reachabilityListener = ReachabilityListener.instance
 
@@ -96,6 +90,27 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         SKPaymentQueue.default().add(StoreObserver.shared)
 
         return true
+    }
+
+    private func setupImageCache() {
+        let configuration = URLSessionConfiguration.default
+        configuration.httpAdditionalHeaders = [
+            "User-Agent": Constants.userAgent
+        ]
+
+        let dataLoader = DataLoader(configuration: configuration)
+
+        let pipeline = ImagePipeline {
+            $0.dataLoader = dataLoader
+            $0.imageCache = ImageCache(costLimit: Constants.ImageCache.memorySizeLimit)
+
+            let dataCache = try? DataCache(name: "com.infomaniak.drive.imagecache")
+            dataCache?.sizeLimit = Constants.ImageCache.diskSizeLimit
+
+            $0.dataCache = dataCache
+        }
+
+        ImagePipeline.shared = pipeline
     }
 
     func application(_ application: UIApplication,
