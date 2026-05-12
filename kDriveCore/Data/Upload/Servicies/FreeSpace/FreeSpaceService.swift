@@ -86,6 +86,7 @@ public struct FreeSpaceService {
 
         cleanOrphanImportFolderFiles()
         cleanOrphanRootImportFiles()
+        CacheItem.removeLegacyKingfisherImageCacheFolder()
         cleanCacheIfAlmostFull()
     }
 

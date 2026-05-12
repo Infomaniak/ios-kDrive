@@ -206,14 +206,14 @@ public enum CacheItem {
         case .storageImageCache:
             ImagePipeline.shared.cache.removeAll()
 
-            removeLegacyKingfisherImageCacheFolder()
+            Self.removeLegacyKingfisherImageCacheFolder()
 
             // wait for the non await-able image cache library to process
             try? await Task.sleep(nanoseconds: 350_000_000)
         }
     }
 
-    private func removeLegacyKingfisherImageCacheFolder() {
+    public static func removeLegacyKingfisherImageCacheFolder() {
         let fileManager = FileManager.default
         guard let cachesDirectory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             return
