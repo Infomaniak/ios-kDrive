@@ -52,6 +52,8 @@ public struct CacheModel {
 
 /// Represents abstract cache item (file/ folder/ cache library …)
 public enum CacheItem {
+    private static let legacyKingfisherCacheNameMarker = "Kingfisher.ImageCache"
+
     /// The cache is a folder or a file on file system
     case fileSystem(url: URL)
 
@@ -79,10 +81,9 @@ public enum CacheItem {
             options: .skipsHiddenFiles
         )) ?? [URL]()
 
-        let storages = children.reduce([CacheItem]()) { partial, child in
+        return children.reduce([CacheItem]()) { partial, child in
             return partial + CacheItem.exploreFiles(for: child)
         }
-        return storages
     }
 
     public var size: UInt64 {
@@ -205,8 +206,37 @@ public enum CacheItem {
         case .storageImageCache:
             ImagePipeline.shared.cache.removeAll()
 
-            /// wait for the non await-able image cache library to process
+            removeLegacyKingfisherImageCacheFolder()
+
+            // wait for the non await-able image cache library to process
             try? await Task.sleep(nanoseconds: 350_000_000)
+        }
+    }
+
+    private func removeLegacyKingfisherImageCacheFolder() {
+        let fileManager = FileManager.default
+        guard let cachesDirectory = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+            return
+        }
+
+        guard let content = try? fileManager.contentsOfDirectory(
+            at: cachesDirectory,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: []
+        ) else {
+            return
+        }
+
+        let legacyCacheDirectories = content.filter { item in
+            item.lastPathComponent.contains(Self.legacyKingfisherCacheNameMarker)
+        }
+
+        guard !legacyCacheDirectories.isEmpty else {
+            return
+        }
+
+        for legacyCacheDirectory in legacyCacheDirectories {
+            try? fileManager.removeItem(at: legacyCacheDirectory)
         }
     }
 }
