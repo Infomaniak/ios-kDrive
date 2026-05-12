@@ -82,6 +82,7 @@ class TrashFloatingPanelTableViewController: UITableViewController, FloatingPane
         cell.titleLabel.text = option.title
         cell.accessoryImageView.image = option.icon
         cell.accessoryImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        cell.accessoryImageView.isAccessibilityElement = false
         cell.separator?.isHidden = true
 
         return cell

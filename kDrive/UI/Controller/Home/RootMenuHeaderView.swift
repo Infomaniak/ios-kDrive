@@ -146,6 +146,7 @@ class RootMenuHeaderView: UICollectionReusableView {
             uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadPausedTitle
             uploadCardView.progressView.isHidden = true
             uploadCardView.iconView.image = UIImage(systemName: "exclamationmark.arrow.triangle.2.circlepath")
+            uploadCardView.iconView.isAccessibilityElement = false
             uploadCardView.iconView.isHidden = false
             uploadCardView.iconView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([

@@ -131,6 +131,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
 
         imageView.contentMode = .scaleAspectFit
         imageView.image = KDriveResourcesAsset.lockExternal.image
+        imageView.isAccessibilityElement = false
 
         imageView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false

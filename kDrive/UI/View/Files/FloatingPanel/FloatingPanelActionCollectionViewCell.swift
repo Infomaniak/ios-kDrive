@@ -69,6 +69,7 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         titleLabel.text = action.name
         iconImageView.image = action.image
         iconImageView.tintColor = action.tintColor
+        iconImageView.isAccessibilityElement = false
 
         switch action {
         case .offline:

@@ -240,6 +240,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
             cell.selectionStyle = .none
             cell.titleLabel.text = newPermission.title
             cell.logoImage?.image = newPermission.icon
+            cell.logoImage.isAccessibilityElement = false
             return cell
         case .message:
             let cell = tableView.dequeueReusableCell(type: MessageTableViewCell.self, for: indexPath)

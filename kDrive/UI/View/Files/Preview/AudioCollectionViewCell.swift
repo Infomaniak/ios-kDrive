@@ -62,6 +62,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         elapsedTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         remainingTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
         positionSlider.setThumbImage(circleImage, for: .normal)
+        artworkImageView.isAccessibilityElement = false
 
         NotificationCenter.default.addObserver(
             self,
@@ -79,6 +80,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         positionSlider.value = 0.0
         playButton.isEnabled = enabled
         landscapePlayButton.isEnabled = enabled
+        playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
+        landscapePlayButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
     }
 
     override func prepareForReuse() {

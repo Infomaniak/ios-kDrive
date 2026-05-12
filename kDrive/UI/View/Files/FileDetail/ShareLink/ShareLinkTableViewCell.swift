@@ -131,10 +131,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                 date
             )
             shareLinkStackView.isHidden = false
+            rightArrow.isHidden = false
             fileShareLinkSettingTitle.alpha = 1
             fileShareLinkSettingTitle.isUserInteractionEnabled = true
             url = shareLink.url
             shareIconImageView.image = KDriveResourcesAsset.unlock.image
+            shareIconImageView.isAccessibilityElement = false
         } else if file.isDropbox {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkTitle
             shareLinkDescriptionLabel.text = KDriveResourcesStrings.Localizable.dropboxSharedLinkDescription
@@ -142,6 +144,7 @@ class ShareLinkTableViewCell: InsetTableViewCell {
             url = ""
             rightArrow.isHidden = true
             shareIconImageView.image = KDriveResourcesAsset.folderDropBox.image
+            shareIconImageView.isAccessibilityElement = false
         } else {
             shareLinkTitleLabel.text = KDriveResourcesStrings.Localizable.privateSharedLinkTitle
             shareLinkDescriptionLabel.text = file.isDirectory ? KDriveResourcesStrings.Localizable
@@ -149,10 +152,12 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                 .shareLinkRestrictedRightDocumentDescriptionShort : KDriveResourcesStrings.Localizable
                 .shareLinkRestrictedRightFileDescriptionShort
             shareLinkStackView.isHidden = false
+            rightArrow.isHidden = false
             url = file.privateSharePath(host: ApiEnvironment.current.driveHost)
             fileShareLinkSettingTitle.alpha = 0
             fileShareLinkSettingTitle.isUserInteractionEnabled = false
             shareIconImageView.image = KDriveResourcesAsset.lock.image
+            shareIconImageView.isAccessibilityElement = false
         }
 
         setupChipView(driveFileManager: driveFileManager, packId: currentPackId, fileHasShareLink: file.hasSharelink)

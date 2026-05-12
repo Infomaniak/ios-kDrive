@@ -73,6 +73,7 @@ public class UpsaleViewController: UIViewController {
     func configureHeader() {
         titleImageView.contentMode = .scaleAspectFit
         titleImageView.image = KDriveResourcesAsset.upsaleHeader.image
+        titleImageView.isAccessibilityElement = false
     }
 
     func configureButtons() {
@@ -202,6 +203,7 @@ public class UpsaleViewController: UIViewController {
     private func createRow(text: String) -> UIStackView {
         let imageView = UIImageView(image: KDriveResourcesAsset.select.image)
         imageView.contentMode = .scaleAspectFit
+        imageView.isAccessibilityElement = false
 
         NSLayoutConstraint.activate([
             imageView.heightAnchor.constraint(equalToConstant: 20),

@@ -200,6 +200,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             self?.buttonAddClicked()
         })
         addButton.translatesAutoresizingMaskIntoConstraints = false
+        addButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAdd
         return addButton
     }()
 
@@ -353,6 +354,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 let buttonMenu = UIBarButtonItem(image: avatar, primaryAction: UIAction { [weak self] _ in
                     self?.buttonMenuClicked()
                 })
+                buttonMenu.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMenu
                 self.navigationItem.rightBarButtonItem = buttonMenu
             }
 
