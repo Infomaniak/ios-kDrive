@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import DTFoundation
 import Foundation
 import kDriveCore
 import Kvitto
+import OSLog
 import StoreKit
 
 protocol StoreObserverDelegate: AnyObject {
@@ -31,6 +31,8 @@ protocol StoreObserverDelegate: AnyObject {
 }
 
 class StoreObserver: NSObject {
+    private static let logger = Logger(category: "StoreObserver")
+
     static let shared = StoreObserver()
 
     /// Indicates whether the user is allowed to make payments.
@@ -85,10 +87,10 @@ class StoreObserver: NSObject {
 
                 return receiptData.base64EncodedString()
             } catch {
-                DDLogError("Couldn't read receipt data with error: \(error.localizedDescription)")
+                Self.logger.error("Couldn't read receipt data with error: \(error.localizedDescription)")
             }
         } else {
-            DDLogError("Cannot find App Store receipt")
+            Self.logger.error("Cannot find App Store receipt")
         }
 
         return nil
@@ -102,7 +104,7 @@ class StoreObserver: NSObject {
 
     private func handlePurchased(_ transaction: SKPaymentTransaction) {
         purchased.append(transaction)
-        DDLogInfo("Deliver content for \(transaction.payment.productIdentifier)")
+        Self.logger.info("Deliver content for \(transaction.payment.productIdentifier)")
 
         if let receiptString = getReceipt() {
             Task { @MainActor in
@@ -118,7 +120,7 @@ class StoreObserver: NSObject {
 
         if let error = transaction.error {
             message += "\nError: \(error.localizedDescription)"
-            DDLogError("[StoreObserver] Transaction error: \(error.localizedDescription)")
+            Self.logger.error("Transaction error: \(error.localizedDescription)")
         }
 
         // Do not send any notifications when the user cancels the purchase
@@ -139,7 +141,7 @@ class StoreObserver: NSObject {
     private func handleRestored(_ transaction: SKPaymentTransaction) {
         hasRestorablePurchases = true
         restored.append(transaction)
-        DDLogInfo("[StoreObserver] Restore content for \(transaction.payment.productIdentifier)")
+        Self.logger.info("Restore content for \(transaction.payment.productIdentifier)")
 
         Task { @MainActor in
             self.delegate?.storeObserverRestoreDidSucceed()
@@ -175,7 +177,7 @@ extension StoreObserver: SKPaymentTransactionObserver {
     func paymentQueue(_ queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction]) {
         // Logs all transactions that have been removed from the payment queue
         for transaction in transactions {
-            DDLogInfo("[StoreObserver] \(transaction.payment.productIdentifier) was removed from the payment queue.")
+            Self.logger.info("\(transaction.payment.productIdentifier) was removed from the payment queue.")
         }
     }
 
@@ -190,7 +192,7 @@ extension StoreObserver: SKPaymentTransactionObserver {
 
     func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
         // Called when all restorable transactions have been processed by the payment queue
-        DDLogInfo("[StoreObserver] All restorable transactions have been processed by the payment queue.")
+        Self.logger.info("All restorable transactions have been processed by the payment queue.")
 
         if !hasRestorablePurchases {
             Task { @MainActor in

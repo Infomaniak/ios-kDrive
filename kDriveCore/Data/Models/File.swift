@@ -17,12 +17,12 @@
  */
 
 import Alamofire
-import CocoaLumberjackSwift
 import DifferenceKit
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
+import OSLog
 import Photos
 import QuickLook
 import RealmSwift
@@ -421,6 +421,7 @@ public enum FileSupportedBy: String, PersistableEnum, Codable {
 public typealias FileCursor = String
 
 public final class File: Object, Codable {
+    private static let logger = Logger(category: "File")
     private let fileManager = FileManager.default
 
     @LazyInjectService var accountManager: AccountManageable
@@ -622,7 +623,7 @@ public final class File: Object, Codable {
         } else if fileManager.fileExists(atPath: temporaryPath) {
             pathToUse = temporaryPath
         } else {
-            DDLogError("[File] no local copy to read from")
+            Self.logger.error("no local copy to read from")
             return false
         }
 
@@ -644,7 +645,7 @@ public final class File: Object, Codable {
                 return false
             }
         } catch {
-            DDLogError("[File] unable to read metadata on disk: \(error)")
+            Self.logger.error("unable to read metadata on disk: \(error)")
         }
 
         return true
@@ -824,7 +825,7 @@ public final class File: Object, Codable {
                 return nil
             }
         } catch {
-            DDLogError("Error while decoding bookmark: \(error)")
+            Self.logger.error("Error while decoding bookmark: \(error)")
             return nil
         }
     }

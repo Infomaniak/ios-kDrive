@@ -16,13 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import RealmSwift
 import SwiftRegex
 import UIKit
@@ -183,7 +183,7 @@ public extension AppRouter {
                 }
 
             } catch {
-                DDLogError(
+                Logger.general.error(
                     "[AppRouter+PublicShare] Failed to get public folder [driveId:\(driveId) linkUuid:\(linkUuid) fileId:\(fileId)]: \(error)"
                 )
                 await UIConstants.showSnackBarIfNeeded(error: error)

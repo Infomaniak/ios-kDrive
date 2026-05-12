@@ -19,7 +19,6 @@
 import Atlantis
 import AVFoundation
 import BackgroundTasks
-import CocoaLumberjackSwift
 import InAppTwoFactorAuthentication
 import InfomaniakCore
 import InfomaniakCoreUIKit
@@ -29,7 +28,6 @@ import InfomaniakNotifications
 import kDriveCore
 import kDriveResources
 import Kingfisher
-import os.log
 import Sentry
 import StoreKit
 import UIKit

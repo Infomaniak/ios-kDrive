@@ -120,8 +120,6 @@ public extension Target {
                            .target(name: "kDriveCore"),
                            .target(name: "kDriveResources"),
                            .external(name: "Alamofire"),
-                           .external(name: "CocoaLumberjack"),
-                           .external(name: "CocoaLumberjackSwift"),
                            .external(name: "DesignSystem"),
                            .external(name: "DifferenceKit"),
                            .external(name: "DropDown"),

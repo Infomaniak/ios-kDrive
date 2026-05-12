@@ -31,7 +31,7 @@ public struct TokenMigrator {
     @InjectService private var networkLoginService: InfomaniakNetworkLoginable
     @InjectService private var accountManager: AccountManageable
 
-    private let logger = Logger(category: "TokenMigrator")
+    private static let logger = Logger(category: "TokenMigrator")
 
     public init() {}
 
@@ -80,7 +80,7 @@ public struct TokenMigrator {
 
             return true
         } catch {
-            logger.error("Failed migrating token: \(error)")
+            Self.logger.error("Failed migrating token: \(error)")
 
             SentryDebug.capture(error: error,
                                 context: [
@@ -94,7 +94,7 @@ public struct TokenMigrator {
     }
 
     private func logToSentry(message: String, token: AssociatedApiToken, device: UserDevice) {
-        logger.info("\(message)")
+        Self.logger.info("\(message)")
 
         SentryDebug.addBreadcrumb(
             message: message,

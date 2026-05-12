@@ -16,10 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
+import FileProvider
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
+import OSLog
 import RealmSwift
 
 /// Something to centralize schema versioning
@@ -245,9 +246,9 @@ public class DriveFileManagerConstants {
         cacheDirectoryURL = pathProvider.cacheDirectoryURL
         openInPlaceDirectoryURL = pathProvider.openInPlaceDirectoryURL
 
-        DDLogInfo(
-            "App working path is: \(fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString ?? "")"
-        )
-        DDLogInfo("Group container path is: \(groupDirectoryURL.absoluteString)")
+        let documentDirectoryURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first?.absoluteString ?? ""
+        Logger.general.info("App working path is: \(documentDirectoryURL)")
+        let groupDirectoryURLString = groupDirectoryURL.absoluteString
+        Logger.general.info("Group container path is: \(groupDirectoryURLString)")
     }
 }

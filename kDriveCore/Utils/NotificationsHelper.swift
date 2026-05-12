@@ -16,12 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveResources
+import OSLog
+import UIKit
 import UserNotifications
 
 public protocol NotificationsHelpable {
@@ -101,7 +102,7 @@ public struct NotificationsHelper: NotificationsHelpable {
         let options: UNAuthorizationOptions = [.alert, .sound, .badge, .provisional, .providesAppNotificationSettings]
         UNUserNotificationCenter.current().requestAuthorization(options: options) { granted, _ in
             if !granted {
-                DDLogInfo("User has declined notifications")
+                Logger.general.info("User has declined notifications")
             }
         }
     }

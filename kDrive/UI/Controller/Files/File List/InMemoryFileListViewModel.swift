@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCoreDB
 import kDriveCore
+import OSLog
 import RealmSwift
 
 class InMemoryFileListViewModel: FileListViewModel {

@@ -16,13 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import LinkPresentation
+import OSLog
 import UIKit
 
 final class FileActionsFloatingPanelViewController: UICollectionViewController {
@@ -112,7 +112,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     func updateAndObserveFile(withFileUid fileUid: String, driveFileManager: DriveFileManager) {
         guard let freshFrozenFile = driveFileManager.database.fetchObject(ofType: File.self, forPrimaryKey: fileUid)?.freeze()
         else {
-            DDLogError("Failed to fetch the file in database for fileUid: \(fileUid)")
+            Logger.general.error("Failed to fetch the file in database for fileUid: \(fileUid)")
             dismiss(animated: true)
             return
         }

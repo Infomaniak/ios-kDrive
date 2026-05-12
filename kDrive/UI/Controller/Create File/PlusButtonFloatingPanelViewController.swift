@@ -17,13 +17,13 @@
  */
 
 import AVFoundation
-import CocoaLumberjackSwift
 import FloatingPanel
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import PhotosUI
 import UIKit
 import Vision
@@ -264,7 +264,7 @@ public class PlusButtonFloatingPanelViewController: UITableViewController, Float
 
     private func scanAction(_ mainTabViewController: UIViewController) {
         guard VNDocumentCameraViewController.isSupported else {
-            DDLogError("VNDocumentCameraViewController is not supported on this device")
+            Logger.general.error("VNDocumentCameraViewController is not supported on this device")
             return
         }
 

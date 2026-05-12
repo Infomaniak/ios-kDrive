@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import HighlightSwift
 import kDriveCore
 import kDriveResources
 import MarkdownKit
+import OSLog
 import UIKit
 
 /// Something to read a file outside of the main actor
@@ -124,7 +124,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
                 let contentString = try await codePreviewWorker.readDataToStringInferEncoding(localUrl: localUrl)
                 try await displayContent(with: file, content: contentString)
             } catch {
-                DDLogError("Failed to read file content: \(error)")
+                Logger.general.error("Failed to read file content: \(error)")
                 previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
             }
         }

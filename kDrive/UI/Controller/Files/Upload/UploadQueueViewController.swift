@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Combine
 import DifferenceKit
 import InfomaniakCore
@@ -24,6 +23,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import RealmSwift
 import UIKit
 
@@ -94,9 +94,9 @@ final class UploadQueueViewController: UIViewController {
                 self.isWifiOnly = syncSettings.isWifiOnly
                 reloadCollectionView(with: self.frozenUploadingFiles)
             case .error(let error):
-                DDLogError("[Realm Observation] Error sync settings \(error)")
+                Logger.realmObservation.error("Error sync settings \(error)")
             case .deleted:
-                DDLogError("[Realm Observation] Deleted sync settings")
+                Logger.realmObservation.error("Deleted sync settings")
             }
         }
     }
@@ -137,7 +137,7 @@ final class UploadQueueViewController: UIViewController {
                     newResults = results
                 case .error(let error):
                     newResults = nil
-                    DDLogError("Realm observer error: \(error)")
+                    Logger.realmObservation.error("Realm observer error: \(error)")
                 }
 
                 guard let newResults else {

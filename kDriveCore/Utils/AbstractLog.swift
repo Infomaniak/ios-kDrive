@@ -16,10 +16,9 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakDI
-import os.log
+import OSLog
 import Sentry
 
 /// A representation of sandard log levels
@@ -70,19 +69,17 @@ public enum AbstractLogLevel {
 
 private let categoryKey = "category"
 
-/// Abstract log mechanism, wrapping cocoalumberjack and OSLog
-///
-/// OSLog messages are only enabled on iOS 14.0 and up, also enabled if the `DEBUG` flag is set.
+/// Abstract log mechanism, using OSLog only.
 ///
 /// - Parameters:
 ///   - message: the message we want to log
+///   - category: the log category
 ///   - level: the log level
 ///   - context: the context
 ///   - file: the file name this event originates from
 ///   - function: the function name this event originates from
 ///   - line: the line this event originates from
 ///   - tag: any extra info
-///   - async: Should this be async?
 public func ABLog(_ message: @autoclosure () -> Any,
                   category: String = "Default",
                   level: AbstractLogLevel = .info,
@@ -90,11 +87,9 @@ public func ABLog(_ message: @autoclosure () -> Any,
                   file: StaticString = #file,
                   function: StaticString = #function,
                   line: UInt = #line,
-                  tag: Any? = nil,
-                  asynchronous async: Bool = asyncLoggingEnabled) {
+                  tag: Any? = nil) {
     let messageString = message() as! String
 
-    #if DEBUG
     let factoryParameters = [categoryKey: category]
     @InjectService(customTypeIdentifier: category, factoryParameters: factoryParameters) var logger: Logger
 
@@ -114,29 +109,4 @@ public func ABLog(_ message: @autoclosure () -> Any,
     case .fault:
         logger.fault("\(messageString, privacy: .public)")
     }
-
-    #else
-    // Forward to cocoaLumberjack
-    let buffer = "[\(category)] " + messageString
-    switch level {
-    case .error:
-        DDLogError(buffer,
-                   context: context,
-                   file: file,
-                   function: function,
-                   line: line,
-                   tag: tag,
-                   asynchronous: async,
-                   ddlog: .sharedInstance)
-    default:
-        DDLogInfo(buffer,
-                  context: context,
-                  file: file,
-                  function: function,
-                  line: line,
-                  tag: tag,
-                  asynchronous: async,
-                  ddlog: .sharedInstance)
-    }
-    #endif
 }

@@ -16,13 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import MQTTNIO
+import OSLog
 
 public class MQService {
+    private static let logger = Logger(category: "MQService")
     private lazy var decoder: JSONDecoder = {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -73,9 +74,9 @@ public class MQService {
             if !client.isActive() {
                 do {
                     _ = try client.connect().wait()
-                    DDLogInfo("[MQService] Connection successful")
+                    Self.logger.info("Connection successful")
                 } catch {
-                    DDLogError("[MQService] Error while connecting: \(error)")
+                    Self.logger.error("Error while connecting: \(error)")
                 }
             }
 
@@ -84,7 +85,7 @@ public class MQService {
                 do {
                     try client.unsubscribe(from: [topic(for: currentToken)]).wait()
                 } catch {
-                    DDLogError("[MQService] Error while unsubscribing: \(error)")
+                    Self.logger.error("Error while unsubscribing: \(error)")
                 }
             }
 
@@ -109,15 +110,15 @@ public class MQService {
                             self.handleExternalImportNotification(notification)
                         }
                     case .failure(let error):
-                        DDLogError("[MQService] Error while listening: \(error)")
+                        Self.logger.error("Error while listening: \(error)")
                     }
                 }
                 client.addCloseListener(named: "Drive close listener") { _ in
-                    DDLogWarn("[MQService] Connection closed")
+                    Self.logger.warning("Connection closed")
                     self.reconnect()
                 }
             } catch {
-                DDLogError("[MQService] Error while subscribing: \(error)")
+                Self.logger.error("Error while subscribing: \(error)")
             }
         }
     }
@@ -125,13 +126,13 @@ public class MQService {
     func reconnect() {
         queue.asyncAfter(deadline: .now() + reconnectionDelay) {
             guard !self.client.isActive() else { return }
-            DDLogInfo("[MQService] Reconnecting…")
+            Self.logger.info("Reconnecting…")
             do {
                 _ = try self.client.connect(cleanSession: false).wait()
-                DDLogInfo("[MQService] Connection successful")
+                Self.logger.info("Connection successful")
                 self.reconnections = 0
             } catch {
-                DDLogError("[MQService] Error while connecting: \(error)")
+                Self.logger.error("Error while connecting: \(error)")
                 self.reconnect()
             }
         }

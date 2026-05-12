@@ -16,10 +16,10 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import kDriveResources
 import Kingfisher
+import OSLog
 
 /// Something to be used for UI, wrapping a CacheItem
 public struct CacheModel {
@@ -124,10 +124,10 @@ public enum CacheItem {
             if let sizeAttribute = attributes[.size] as? NSNumber {
                 return sizeAttribute.uint64Value
             } else {
-                DDLogError("Failed to get a size attribute from path: \(path)")
+                Logger.general.error("Failed to get a size attribute from path: \(path)")
             }
         } catch {
-            DDLogError("Failed to get file attributes for path: \(path) with error: \(error)")
+            Logger.general.error("Failed to get file attributes for path: \(path) with error: \(error)")
         }
         return 0
     }
@@ -199,7 +199,7 @@ public enum CacheItem {
                     try FileManager.default.removeItem(at: url)
                 }
             } catch {
-                DDLogError("Failed to remove item for path: \(url) with error: \(error)")
+                Logger.general.error("Failed to remove item for path: \(url) with error: \(error)")
             }
 
         case .storageImageCache:

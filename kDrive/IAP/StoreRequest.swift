@@ -17,10 +17,10 @@
  */
 
 import Alamofire
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import kDriveCore
+import OSLog
 
 struct ReceiptInfo: Encodable {
     let latestReceipt: String
@@ -33,6 +33,8 @@ struct ReceiptInfo: Encodable {
 
 class StoreRequest {
     static let shared = StoreRequest()
+
+    private static let logger = Logger(category: "StoreRequest")
 
     let jsonDecoder = JSONDecoder()
 
@@ -47,16 +49,16 @@ class StoreRequest {
                 switch response.result {
                 case .success(let result):
                     if let data = result.data, data {
-                        DDLogInfo("[StoreRequest] Success")
+                        Self.logger.info("Success")
                     } else {
-                        DDLogError("[StoreRequest] Server error")
+                        Self.logger.error("Server error")
                         if let error = result.error {
-                            DDLogError("[StoreRequest] \(error)")
+                            Self.logger.error("\(error)")
                             SentryDebug.capture(error: error)
                         }
                     }
                 case .failure(let error):
-                    DDLogError("[StoreRequest] Client error: \(error)")
+                    Self.logger.error("Client error: \(error)")
                 }
             }
     }

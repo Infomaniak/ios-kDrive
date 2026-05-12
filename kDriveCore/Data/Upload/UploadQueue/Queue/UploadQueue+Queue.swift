@@ -17,7 +17,7 @@
  */
 
 import Algorithms
-import CocoaLumberjackSwift
+import FileProvider
 import Foundation
 import InfomaniakCore
 import InfomaniakDI

@@ -16,11 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import Photos
 import PhotosUI
 import UIKit
@@ -35,7 +35,7 @@ class PhotoPickerDelegate: NSObject {
 
     @MainActor
     private func handleError(_ error: Error) {
-        DDLogError("Error while uploading file: \(error)")
+        Logger.general.error("Error while uploading file: \(error)")
         UIConstants.showSnackBarIfNeeded(error: error)
     }
 

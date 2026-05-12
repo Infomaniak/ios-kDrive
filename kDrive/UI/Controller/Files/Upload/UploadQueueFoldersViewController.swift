@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import DifferenceKit
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
+import OSLog
 import RealmSwift
 import UIKit
 
@@ -78,7 +78,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
             case .update(let results, _, _, _):
                 updateFolders(from: results)
             case .error(let error):
-                DDLogError("Realm observer error: \(error)")
+                Logger.realmObservation.error("Realm observer error: \(error)")
             }
         }
     }

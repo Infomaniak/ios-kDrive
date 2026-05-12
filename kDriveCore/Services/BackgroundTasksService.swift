@@ -17,10 +17,10 @@
  */
 
 import BackgroundTasks
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
+import UIKit
 
 /* To debug background tasks:
   Launch ->

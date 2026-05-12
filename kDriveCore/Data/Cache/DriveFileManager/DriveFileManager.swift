@@ -17,12 +17,12 @@
  */
 
 import Alamofire
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
+import OSLog
 import RealmSwift
 import SwiftRegex
 
@@ -306,7 +306,7 @@ public final class DriveFileManager {
                 let fileUserId = matches[1]
                 let fileDriveId = matches[2]
                 if Int(fileUserId) == userId && (driveId == nil || Int(fileDriveId) == driveId) {
-                    DDLogInfo("Deleting file: \(file.lastPathComponent)")
+                    Logger.general.info("Deleting file: \(file.lastPathComponent)")
                     try? FileManager.default.removeItem(at: file)
                 }
             }
@@ -707,7 +707,8 @@ public final class DriveFileManager {
             SentryDebug.capture(message: message)
         }
         // Silently handle error
-        DDLogError("Error while fetching [\(file.id) - \(file.name)] in [\(driveId) - \(drive.name)]: \(message)")
+        let error = "Error while fetching [\(file.id) - \(file.name)] in [\(driveId) - \(drive.name)]: \(message)"
+        Logger.general.error("\(error)")
     }
 
     public func add(category: Category, to file: ProxyFile) async throws {

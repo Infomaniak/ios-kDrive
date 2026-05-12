@@ -16,13 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
+import OSLog
 
 public final class DownloadPublicShareArchiveOperation: DownloadArchiveOperation, @unchecked Sendable {
+    private static let logger = Logger(category: "DownloadPublicShareArchiveOperation")
     private let publicShareProxy: PublicShareProxy
 
     public init(archiveId: String,
@@ -46,9 +47,9 @@ public final class DownloadPublicShareArchiveOperation: DownloadArchiveOperation
     }
 
     func publicShareDownload() {
-        DDLogInfo(
-            "[DownloadPublicShareArchiveOperation] Downloading Archive of public share files \(archiveId) with session \(urlSession.identifier)"
-        )
+        let archiveId = self.archiveId
+        let sessionIdentifier = urlSession.identifier
+        Self.logger.info("Downloading Archive of public share files \(archiveId) with session \(sessionIdentifier)")
 
         let url = Endpoint.downloadPublicShareArchive(
             drive: shareDrive,

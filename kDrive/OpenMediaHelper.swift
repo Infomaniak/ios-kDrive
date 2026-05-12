@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import PhotosUI
 import Vision
 import VisionKit
@@ -92,7 +92,7 @@ class OpenMediaHelper: NSObject {
             }
 
             guard UIImagePickerController.isSourceTypeAvailable(sourceType) else {
-                DDLogError("Source type \(sourceType) is not available on this device")
+                Logger.general.error("Source type \(String(describing: sourceType)) is not available on this device")
                 return
             }
 
@@ -107,7 +107,7 @@ class OpenMediaHelper: NSObject {
 
     func openScan(_ mainTabViewController: UIViewController, _ presentedAboveFileList: Bool) {
         guard VNDocumentCameraViewController.isSupported else {
-            DDLogError("VNDocumentCameraViewController is not supported on this device")
+            Logger.general.error("VNDocumentCameraViewController is not supported on this device")
             return
         }
 

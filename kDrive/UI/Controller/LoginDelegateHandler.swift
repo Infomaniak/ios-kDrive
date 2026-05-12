@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDeviceCheck
@@ -25,6 +24,7 @@ import InfomaniakLogin
 import InterAppLogin
 import kDriveCore
 import kDriveResources
+import OSLog
 
 public final class LoginDelegateHandler: ObservableObject, @preconcurrency InfomaniakLoginDelegate {
     @LazyInjectService private var matomo: MatomoUtils
@@ -114,7 +114,7 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
     }
 
     @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: ApiToken?) {
-        DDLogError("Error on didCompleteLoginWith \(error)")
+        Logger.general.error("Error on didCompleteLoginWith: \(error)")
 
         guard let topMostViewController = router.topMostViewController else { return }
 

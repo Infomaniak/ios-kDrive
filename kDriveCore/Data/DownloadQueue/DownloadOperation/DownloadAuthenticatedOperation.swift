@@ -16,13 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import FileProvider
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreDB
 import InfomaniakDI
 import InfomaniakLogin
+import OSLog
+import UIKit
 
 public protocol DownloadFileOperationable: Operationable {
     /// Called upon request completion
@@ -32,8 +33,7 @@ public protocol DownloadFileOperationable: Operationable {
 }
 
 public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOperationable, @unchecked Sendable {
-    // MARK: - Attributes
-
+    private static let logger = Logger(category: "DownloadAuthenticatedOperation")
     private let fileManager = FileManager.default
     private let itemIdentifier: NSFileProviderItemIdentifier?
 
@@ -79,10 +79,11 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
     override public func start() {
         assert(!isExecuting, "Operation is already started")
 
-        DDLogInfo("[DownloadOperation] Download of \(file.id) started")
+        let fileId = file.id
+        Self.logger.info("Download of \(fileId) started")
         // Always check for cancellation before launching the task
         if isCancelled {
-            DDLogInfo("[DownloadOperation] Download of \(file.id) canceled")
+            Self.logger.info("Download of \(fileId) canceled")
             // Must move the operation to the finished state if it is canceled.
             end(sessionUrl: nil)
             return
@@ -91,7 +92,7 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
         if !appContextService.isExtension {
             backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "File Downloader") {
                 self.downloadQueue.suspendAllOperations()
-                DDLogInfo("[DownloadOperation] Background task expired")
+                Self.logger.info("Background task expired")
                 if let rescheduledSessionId = self.downloadManager.rescheduleForBackground(task: self.task),
                    let task = self.task,
                    let sessionUrl = task.originalRequest?.url?.absoluteString {
@@ -137,13 +138,17 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
     }
 
     override public func main() {
-        DDLogInfo("[DownloadOperation] Start for \(file.id) with session \(urlSession.identifier)")
+        let fileId = file.id
+        let sessionIdentifier = urlSession.identifier
+        Self.logger.info("Start for \(fileId) with session \(sessionIdentifier)")
 
         downloadFile()
     }
 
     private func downloadFile() {
-        DDLogInfo("[DownloadOperation] Downloading \(file.id) with session \(urlSession.identifier)")
+        let fileId = file.id
+        let sessionIdentifier = urlSession.identifier
+        Self.logger.info("Downloading \(fileId) with session \(sessionIdentifier)")
 
         let url = Endpoint.download(file: file).url
 
@@ -194,9 +199,10 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
     public func downloadCompletion(url: URL?, response: URLResponse?, error: Error?) {
         let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
 
+        let fileId = file.id
         if let error {
             // Client-side error
-            DDLogError("[DownloadOperation] Client-side error for \(file.id): \(error)")
+            Self.logger.error("Client-side error for \(fileId): \(error)")
             if self.error == .taskRescheduled {
                 // We return because we don't want end() to be called as it is already called in the expiration handler
                 return
@@ -207,7 +213,7 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
             }
         } else if let url {
             // Success
-            DDLogInfo("[DownloadOperation] Download of \(file.id) successful")
+            Self.logger.info("Download of \(fileId) successful")
             do {
                 if file.isDirectory {
                     try moveFileToTemporaryDirectory(downloadPath: url)
@@ -215,19 +221,19 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
                     try moveFileToCache(downloadPath: url)
                 }
             } catch {
-                DDLogError("[DownloadOperation] Error moving file \(file.id): \(error)")
+                Self.logger.error("Error moving file \(fileId): \(error)")
                 self.error = .localError
             }
         } else {
             // Server-side error
-            DDLogError("[DownloadOperation] Server error for \(file.id) (code: \(statusCode))")
+            Self.logger.error("Server error for \(fileId) (code: \(statusCode))")
             self.error = .serverError
         }
         end(sessionUrl: task?.originalRequest?.url)
     }
 
     private func moveFileToCache(downloadPath: URL) throws {
-        DDLogInfo("[DownloadOperation] moveFileToCache")
+        Self.logger.info("moveFileToCache")
         let localContainerUrl = file.localContainerUrl
         try fileManager.removeItemIfExists(at: localContainerUrl)
         try fileManager.createDirectory(at: localContainerUrl, withIntermediateDirectories: true)
@@ -237,14 +243,15 @@ public class DownloadAuthenticatedOperation: DownloadOperation, DownloadFileOper
     }
 
     private func moveFileToTemporaryDirectory(downloadPath: URL) throws {
-        DDLogInfo("[DownloadOperation] moveFileToTemporaryDirectory")
+        Self.logger.info("moveFileToTemporaryDirectory")
         try fileManager.removeItemIfExists(at: file.temporaryContainerUrl)
         try fileManager.createDirectory(at: file.temporaryContainerUrl, withIntermediateDirectories: true)
         try fileManager.moveItem(at: downloadPath, to: file.temporaryUrl)
     }
 
     private func end(sessionUrl: URL?) {
-        DDLogInfo("[DownloadOperation] Download of \(file.id) ended")
+        let fileId = file.id
+        Self.logger.info("Download of \(fileId) ended")
 
         defer {
             endBackgroundTaskObservation()

@@ -16,13 +16,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import CocoaLumberjackSwift
 import DropDown
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import LinkPresentation
+import OSLog
 import UIKit
 
 class ShareAndRightsViewController: UIViewController {
@@ -97,7 +97,7 @@ class ShareAndRightsViewController: UIViewController {
                 self.ignoredEmails = fetchedAccess.invitations.compactMap { $0.user != nil ? nil : $0.email }
                 self.tableView.reloadData()
             } catch {
-                DDLogError("Cannot get file access: \(error)")
+                Logger.general.error("Cannot get file access: \(error)")
             }
         }
     }
