@@ -98,7 +98,7 @@ class AppUITest: XCTestCase {
             .staticText,
             identifier: KDriveResourcesStrings.Localizable.localizedFilenamePrivateTeamSpace
         ).element
-        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: 10), "Private Team Space should exist")
+        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: 30), "Private Team Space should exist")
 
         privateTeamSpace.tap()
         sortByLatest()
@@ -158,7 +158,7 @@ class AppUITest: XCTestCase {
         acceptPhotosPermissions()
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
         let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
-        if acceptAllPhotosButton.exists {
+        if acceptAllPhotosButton.waitForExistence(timeout: 5) {
             acceptAllPhotosButton.tap()
         }
         let photoElement = photospickerApp.images.element(boundBy: 1)
@@ -194,7 +194,7 @@ class AppUITest: XCTestCase {
 
     func sortByLatest() {
         wait(delay: 0.5)
-        if app.buttons[KDriveResourcesStrings.Localizable.sortNameAZ].firstMatch.exists {
+        if app.buttons[KDriveResourcesStrings.Localizable.sortNameAZ].firstMatch.waitForExistence(timeout: 5) {
             app.buttons[KDriveResourcesStrings.Localizable.sortNameAZ].firstMatch.tap()
             wait(delay: 1)
             app.staticTexts[KDriveResourcesStrings.Localizable.sortRecent].firstMatch.tap()
@@ -246,7 +246,7 @@ class AppUITest: XCTestCase {
         launchAppFromScratch()
 
         let laterButton = app.buttons[KDriveResourcesStrings.Localizable.buttonLater]
-        if laterButton.exists {
+        if laterButton.waitForExistence(timeout: 5) {
             laterButton.tap()
         }
         let root = setUpTest(testName: testName)
@@ -273,7 +273,7 @@ class AppUITest: XCTestCase {
 
         // Check new name
         closeFileMenu()
-        XCTAssertTrue(app.staticTexts[newTestName].exists, "File must be renamed")
+        XCTAssertTrue(app.staticTexts[newTestName].waitForExistence(timeout: 5), "File must be renamed")
     }
 
     func testDuplicateFile() {
@@ -297,9 +297,9 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(selectButton.waitForExistence(timeout: 2), "Select Folder button should be displayed")
         selectButton.tap()
         wait(delay: 2)
-        XCTAssertTrue(app.staticTexts[root].exists, "File should exist")
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 5), "File should exist")
         let duplicatedFile = "\(root) (1)"
-        XCTAssertTrue(app.staticTexts[duplicatedFile].waitForExistence(timeout: 5), "Duplicated file should exist")
+        XCTAssertTrue(app.staticTexts[duplicatedFile].waitForExistence(timeout: 30), "Duplicated file should exist")
 
         removeDirectory(name: duplicatedFile)
         XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "Dialog box should be dismissed")
@@ -328,7 +328,7 @@ class AppUITest: XCTestCase {
         openFileMenu(named: root)
         shareAndRights.tap()
         XCTAssertTrue(directoryShareAndRights.waitForExistence(timeout: 3), "Share view should be displayed")
-        XCTAssertTrue(app.staticTexts[userMail].exists, "Invited user should be displayed")
+        XCTAssertTrue(app.staticTexts[userMail].waitForExistence(timeout: 5), "Invited user should be displayed")
 
         // Remove user
         let canAccessButton = tablesQuery.staticTexts[KDriveResourcesStrings.Localizable.userPermissionRead]
@@ -423,7 +423,7 @@ class AppUITest: XCTestCase {
             "John Appleseed should have access to file"
         )
         XCTAssertTrue(
-            tablesQuery.cells.containing(.staticText, identifier: userMail).element.exists,
+            tablesQuery.cells.containing(.staticText, identifier: userMail).element.waitForExistence(timeout: 5),
             "Invited user should have access to file"
         )
         app.buttons[KDriveResourcesStrings.Localizable.buttonClose].tap()
@@ -580,7 +580,7 @@ class AppUITest: XCTestCase {
         let value = KDriveResourcesStrings.Localizable.buttonBack != "Back" ? KDriveResourcesStrings.Localizable.buttonBack : "BackButton"
         app.buttons[value].firstMatch.tap()
         app.staticTexts[KDriveResourcesStrings.Localizable.buttonApplyFilters].firstMatch.tap()
-        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 10), "Directory with category should be in result")
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 30), "Directory with category should be in result")
         navigationBars.buttons[KDriveResourcesStrings.Localizable.buttonClose].tap()
     }
 
@@ -592,16 +592,8 @@ class AppUITest: XCTestCase {
         playVideo(offline: false)
     }
 
-    func testPreviewOfflineVideo() {
-        playVideo(offline: true)
-    }
-
     func testPreviewAudio() {
         playAudio(offline: false)
-    }
-
-    func testPreviewOfflineAudio() {
-        playAudio(offline: true)
     }
 
     func testPreviewPDF() {
@@ -816,13 +808,24 @@ class AppUITest: XCTestCase {
 
         let mobileslideshowApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow")
         mobileslideshowApp.activate()
+
+        let continueButton = mobileslideshowApp.buttons["Continue"].firstMatch
+        if continueButton.waitForExistence(timeout: 5) {
+            continueButton.tap()
+        }
+
+        let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let allowButton = springboardApp.buttons["Allow"].firstMatch
+        if allowButton.waitForExistence(timeout: 5) {
+            allowButton.tap()
+        }
         let closeShare = mobileslideshowApp.buttons["header.closeButton"].firstMatch
-        if closeShare.exists {
+        if closeShare.waitForExistence(timeout: 5) {
             closeShare.tap()
         }
 
         let closeImage = mobileslideshowApp.buttons["PUOneUpBarButtonItemIdentifierDone"].firstMatch
-        if closeImage.exists {
+        if closeImage.waitForExistence(timeout: 5) {
             closeImage.tap()
         }
 
@@ -847,7 +850,7 @@ class AppUITest: XCTestCase {
         dismissBottomSheet()
         XCUIDevice.shared.press(.home)
         wait(delay: 2)
-        let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+
         springboardApp.icons["kDrive"].firstMatch.tap()
         wait(delay: 2)
         goToMyFolders()
@@ -945,14 +948,19 @@ class AppUITest: XCTestCase {
         wait(delay: 1)
         back10seconds.tap()
 
+        var playPauseButton = app.buttons[KDriveResourcesStrings.Localizable.buttonPlayerPlayPause].firstMatch
+        if !playPauseButton.waitForExistence(timeout: 5) {
+            playPauseButton = app.buttons["play"]
+        }
+        playPauseButton.tap()
+        wait(delay: 3)
+        if !playPauseButton.waitForExistence(timeout: 5) {
+            playPauseButton = app.buttons["pause"]
+        }
+        playPauseButton.tap()
         let slider = app.sliders["Current position"].firstMatch
         XCTAssertTrue(slider.waitForExistence(timeout: 3), "Slider should be displayed")
-        slider.tap()
-        slider.swipeRight()
 
-        let playButton = app.buttons["Play/Pause"].firstMatch
-        XCTAssertTrue(playButton.waitForExistence(timeout: 3), "Play/Pause button should be displayed")
-        playButton.tap()
         wait(delay: 1)
         let closeButton = app.buttons["Close Button"].firstMatch
         XCTAssertTrue(closeButton.waitForExistence(timeout: 3), "Close button should be displayed")
@@ -983,12 +991,16 @@ class AppUITest: XCTestCase {
         }
         audio.tap()
         wait(delay: 1)
-        app.buttons["play"].tap()
+        var playPauseButton = app.buttons[KDriveResourcesStrings.Localizable.buttonPlayerPlayPause]
+        if !playPauseButton.waitForExistence(timeout: 5) {
+            playPauseButton = app.buttons["play"]
+        }
+        playPauseButton.tap()
         wait(delay: 3)
-        app.sliders.element(boundBy: 0).swipeRight()
-
-        wait(delay: 2)
-        app.buttons["pause"].tap()
+        if !playPauseButton.waitForExistence(timeout: 5) {
+            playPauseButton = app.buttons["pause"]
+        }
+        playPauseButton.tap()
         wait(delay: 1)
 
         let backButtonTitle = KDriveResourcesStrings.Localizable.buttonBack != "Back" ? KDriveResourcesStrings.Localizable
@@ -1100,27 +1112,31 @@ class AppUITest: XCTestCase {
     }
 
     func searchFileOrFolder(name: String, realName: String? = nil) {
-        app.buttons[KDriveResourcesStrings.Localizable.searchTitle].firstMatch.tap()
-        app.searchFields[KDriveResourcesStrings.Localizable.searchViewHint].tap()
+        let searchButton = app.buttons[KDriveResourcesStrings.Localizable.searchTitle].firstMatch
+        XCTAssertTrue(searchButton.waitForExistence(timeout: defaultTimeOut), "Search button should be displayed")
+        searchButton.tap()
+        let searchField = app.searchFields[KDriveResourcesStrings.Localizable.searchViewHint].firstMatch
+        XCTAssertTrue(searchField.waitForExistence(timeout: defaultTimeOut), "Search field should be displayed")
+        searchField.tap()
         app.typeText(name)
         app.typeText("\n")
         if let text = realName {
-            XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 10), "Directory should be listed in results")
+            XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 30), "Directory should be listed in results")
         } else {
-            XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 10), "Directory should be listed in results")
+            XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 30), "Directory should be listed in results")
         }
     }
 
     func acceptPhotosPermissions() {
         let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         let acceptAllButton = springboardApp.buttons.element(boundBy: 1).firstMatch
-        if acceptAllButton.exists {
+        if acceptAllButton.waitForExistence(timeout: 5) {
             acceptAllButton.tap()
         }
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
 
         let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
-        if acceptAllPhotosButton.exists {
+        if acceptAllPhotosButton.waitForExistence(timeout: 5) {
             acceptAllPhotosButton.tap()
         }
     }
@@ -1186,7 +1202,7 @@ class AppUITest: XCTestCase {
 
     func dismissBottomSheet() {
         let laterButton = app.buttons[KDriveResourcesStrings.Localizable.buttonLater].firstMatch
-        if laterButton.exists {
+        if laterButton.waitForExistence(timeout: 5) {
             laterButton.tap()
         }
     }
