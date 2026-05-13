@@ -313,9 +313,16 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 )
             }
 
-            // If task is cancelled, remove it from list
+            // If task is cancelled, remove it from list and clean source file
             if file.error == DriveError.taskCancelled {
                 shouldCleanUploadFile = true
+
+                // Also clean source file for cancelled uploads to prevent data leaks
+                if file.cleanSourceFileIfNeeded() {
+                    Log.uploadOperation(
+                        "Removed local file for cancelled upload at path:\(String(describing: file.pathURL)) ufid:\(self.uploadFileId)"
+                    )
+                }
             }
 
             // otherwise only reset success
@@ -416,17 +423,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 assertionFailure("unable to lookup chunk task id, ufid:\(self.uploadFileId)")
             }
 
-            // Cleanup chunks in storage
-            if let path = chunkTask.path {
-                let url = URL(fileURLWithPath: path, isDirectory: false)
-                let chunkNumber = chunkTask.chunkNumber
-                Log.uploadOperation("cleanup chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
-                do {
-                    try self.fileManager.removeItem(at: url)
-                } catch {
-                    Log.uploadOperation("failed to clean chunk \(error) ufid:\(self.uploadFileId)", level: .error)
-                }
-            }
+            // Note: No temp file cleanup needed - chunks are now uploaded directly from memory-mapped source file
         } notFound: {
             Log.uploadOperation("matching chunk:\(uploadedChunk.number) failed ufid:\(self.uploadFileId)", level: .error)
             let context = ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId]
