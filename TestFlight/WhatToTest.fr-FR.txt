@@ -1,2 +1,3 @@
-- Correction d'un problème qui permettait l'éviction incorrecte de fichiers hors ligne
+- Dépendances du cache d'images remaniées
+- Passage au mécanisme de log natif du système
 - Améliorations de la stabilité et corrections de bugs
