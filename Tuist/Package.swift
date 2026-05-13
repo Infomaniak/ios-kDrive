@@ -9,12 +9,6 @@ let packageSettings = PackageSettings(
     productTypes: [
         "Alamofire": .framework,
         "Atlantis": .framework,
-        "Atomics": .framework,
-        "CNIODarwin": .framework,
-        "CNIOLinux": .framework,
-        "CNIOOpenBSD": .framework,
-        "CNIOWindows": .framework,
-        "DequeModule": .framework,
         "DesignSystem": .framework,
         "DeviceAssociation": .framework,
         "DifferenceKit": .framework,
@@ -34,17 +28,12 @@ let packageSettings = PackageSettings(
         "InfomaniakNotifications": .framework,
         "InfomaniakOnboarding": .framework,
         "InterAppLogin": .framework,
-        "InternalCollectionsUtilities": .framework,
         "KSuiteUtils": .framework,
         "KSuite": .framework,
         "LocalizeKit": .framework,
         "Lottie": .framework,
         "MaterialOutlinedTextField": .framework,
         "MyKSuite": .framework,
-        "NIOConcurrencyHelpers": .framework,
-        "NIOCore": .framework,
-        "NIOTransportServices": .framework,
-        "NIO": .framework,
         "NukeUI": .framework,
         "Nuke": .framework,
         "RealmSwift": .framework,
@@ -52,9 +41,7 @@ let packageSettings = PackageSettings(
         "Sentry-Dynamic": .framework,
         "SwiftRegex": .framework,
         "VersionChecker": .framework,
-        "_LottieStub": .framework,
-        "_NIOBase64": .framework,
-        "_NIODataStructures": .framework
+        "_LottieStub": .framework
     ]
 )
 #endif
@@ -90,7 +77,7 @@ let package = Package(
         .package(url: "https://github.com/ra1028/DifferenceKit", .upToNextMajor(from: "1.3.0")),
         .package(url: "https://github.com/realm/realm-swift", .upToNextMajor(from: "10.52.0")),
         .package(url: "https://github.com/SCENEE/FloatingPanel", .upToNextMajor(from: "3.0.0")),
-        .package(url: "https://github.com/swift-server-community/mqtt-nio", .upToNextMajor(from: "2.12.0")),
+        .package(url: "https://github.com/emqx/swift-mqtt", .upToNextMajor(from: "1.5.0")),
         .package(url: "https://github.com/FelixHerrmann/swift-package-list", .upToNextMajor(from: "4.10.0"))
     ]
 )
