@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DropDown
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
@@ -48,7 +47,6 @@ class SelectDriveViewController: UIViewController {
     }
 
     private var sections: [Section] = []
-    private let dropDown = DropDown()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,8 +56,6 @@ class SelectDriveViewController: UIViewController {
         tableView.register(cellView: NoAccountTableViewCell.self)
         tableView.register(cellView: DriveSwitchTableViewCell.self)
         tableView.register(cellView: UserAccountTableViewCell.self)
-
-        DropDown.startListeningToKeyboard()
 
         var selectedUser: UserProfile?
         Task {
@@ -94,29 +90,6 @@ class SelectDriveViewController: UIViewController {
             await self.accountManager.userProfileStore.getUserProfile(id: $0.userId)
         }
         driveList = Array(driveInfosManager.getDrives(for: user.id))
-        dropDown.dataSource = users.map(\.displayName)
-    }
-
-    func configureDropDownWith(selectUserCell: UserAccountTableViewCell) {
-        dropDown.anchorView = selectUserCell.contentInsetView
-        dropDown.bottomOffset = CGPoint(x: 0, y: (dropDown.anchorView?.plainView.bounds.height)!)
-        dropDown.cellHeight = 65
-        dropDown.cellNib = UINib(nibName: "UsersDropDownTableViewCell", bundle: nil)
-
-        dropDown.customCellConfiguration = { [weak self] (index: Index, _: String, cell: DropDownCell) in
-            guard let self else { return }
-            guard let cell = cell as? UsersDropDownTableViewCell else { return }
-            let account = users[index]
-            cell.configureWith(user: account)
-        }
-        dropDown.selectionAction = { [weak self] (index: Int, _: String) in
-            Task { [weak self] in
-                guard let self else { return }
-                let account = users[index]
-                await initForCurrentUser(account)
-                tableView.reloadSections([0, 1], with: .fade)
-            }
-        }
     }
 
     class func instantiate() -> SelectDriveViewController {
@@ -156,7 +129,6 @@ extension SelectDriveViewController: UITableViewDataSource {
                     cell.logoImage.image = image
                 }
             }
-            configureDropDownWith(selectUserCell: cell)
             return cell
         case .selectDrive:
             let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
