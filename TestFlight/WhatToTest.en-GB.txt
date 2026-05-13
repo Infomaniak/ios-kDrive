@@ -1,2 +1,3 @@
-- Fix an issue that would allow for offline files to be wrongly evicted
+- Reworked image cache dependencies
+- Switched to native system log mechanism
 - Stability improvements and bug fixes
