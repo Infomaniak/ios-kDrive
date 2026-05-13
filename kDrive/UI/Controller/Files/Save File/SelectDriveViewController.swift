@@ -179,8 +179,10 @@ extension SelectDriveViewController: UITableViewDelegate {
             break
         case .selectAccount:
             tableView.deselectRow(at: indexPath, animated: true)
-            dropDown.setupCornerRadius(UIConstants.cornerRadius)
-            dropDown.show()
+            let selectAccountViewController = SelectAccountViewController(users: users)
+            let navigationController = UINavigationController(rootViewController: selectAccountViewController)
+            navigationController.modalPresentationStyle = .fullScreen
+            present(navigationController, animated: true)
         case .selectDrive:
             let drive = driveList[indexPath.row]
             delegate?.didSelectDrive(drive)
