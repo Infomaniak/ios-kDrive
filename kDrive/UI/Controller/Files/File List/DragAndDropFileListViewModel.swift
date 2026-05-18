@@ -45,8 +45,12 @@ class DraggableFileListViewModel {
         itemProvider.suggestedName = draggedFile.name
         let draggedItem = UIDragItem(itemProvider: itemProvider)
         if let previewImageView = (collectionView.cellForItem(at: indexPath) as? FileCollectionViewCell)?.logoImage {
+            let parameters = UIDragPreviewParameters()
+            parameters.backgroundColor = .clear
+            parameters.shadowPath = UIBezierPath()
+
             draggedItem.previewProvider = {
-                UIDragPreview(view: previewImageView)
+                UIDragPreview(view: previewImageView, parameters: parameters)
             }
         }
         session.localContext = draggedFile
