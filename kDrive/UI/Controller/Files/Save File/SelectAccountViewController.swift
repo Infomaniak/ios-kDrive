@@ -22,7 +22,7 @@ import kDriveResources
 import UIKit
 
 protocol SelectAccountDelegate: AnyObject {
-    func didChangeAccount(id: Int)
+    func didChangeAccount(account: UserProfile)
 }
 
 final class SelectAccountViewController: UIViewController {
@@ -47,7 +47,6 @@ final class SelectAccountViewController: UIViewController {
         title = "Sélectionner un compte"
 
         setupTableView()
-        setupBottomButton()
     }
 
     private func setupTableView() {
@@ -71,41 +70,7 @@ final class SelectAccountViewController: UIViewController {
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .stop,
-            target: self,
-            action: #selector(cancelButtonPressed)
-        )
-        navigationItem.leftBarButtonItem?.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         navigationItem.largeTitleDisplayMode = .always
-    }
-
-    private func setupBottomButton() {
-        let saveButton = IKLargeButton(frame: .zero)
-        saveButton.translatesAutoresizingMaskIntoConstraints = false
-        saveButton.setTitle(KDriveCoreStrings.Localizable.buttonSave, for: .normal)
-        saveButton.addTarget(self, action: #selector(saveButtonPressed(_:)), for: .touchUpInside)
-
-        view.addSubview(saveButton)
-
-        NSLayoutConstraint.activate([
-            saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: UIConstants.Padding.standard),
-            saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -UIConstants.Padding.standard),
-            saveButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -32),
-            saveButton.heightAnchor.constraint(equalToConstant: 60)
-        ])
-
-        view.bringSubviewToFront(saveButton)
-    }
-
-    @objc func cancelButtonPressed() {
-        dismiss(animated: true)
-    }
-
-    @objc func saveButtonPressed(_ sender: Any) {
-        let userId = users[tableView.indexPathForSelectedRow?.row ?? 0].id
-        delegate?.didChangeAccount(id: userId)
-        dismiss(animated: true)
     }
 }
 
@@ -126,5 +91,15 @@ extension SelectAccountViewController: UITableViewDelegate, UITableViewDataSourc
             cell.logoImage.image = image
         }
         return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedAccount = users[indexPath.row]
+        delegate?.didChangeAccount(account: selectedAccount)
+        if let navigationController {
+            navigationController.popViewController(animated: true)
+        } else {
+            dismiss(animated: true)
+        }
     }
 }
