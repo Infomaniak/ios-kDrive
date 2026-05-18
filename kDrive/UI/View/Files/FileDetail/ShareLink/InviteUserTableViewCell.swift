@@ -26,6 +26,7 @@ import UIKit
 protocol SearchUserDelegate: AnyObject {
     func didSelect(shareable: Shareable)
     func didSelect(email: String)
+    func inviteUserCellDidTapSearch(cell: InviteUserTableViewCell)
 }
 
 class InviteUserTableViewCell: InsetTableViewCell {
@@ -157,8 +158,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
 extension InviteUserTableViewCell: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        dropDown.setupCornerRadius(UIConstants.cornerRadius)
-        dropDown.show()
+        delegate?.inviteUserCellDidTapSearch(cell: self)
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

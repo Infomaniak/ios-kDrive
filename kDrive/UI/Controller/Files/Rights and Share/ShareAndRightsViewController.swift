@@ -47,6 +47,8 @@ class ShareAndRightsViewController: UIViewController {
     private var fileAccess: FileAccess?
     private var fileAccessElements = [FileAccessElement]()
     private var selectedElement: FileAccessElement?
+    private var searchController: UISearchController!
+    private var animator: UIViewPropertyAnimator?
 
     var driveFileManager: DriveFileManager!
     var file: File!
@@ -70,6 +72,7 @@ class ShareAndRightsViewController: UIViewController {
         updateShareList()
         hideKeyboardWhenTappedAround()
         setTitle()
+        setupSearchController()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -367,6 +370,47 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
     }
 }
 
+// MARK: - Search Controller delegate
+
+extension ShareAndRightsViewController: UISearchControllerDelegate {
+    private func setupSearchController() {
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.delegate = self
+        searchController.obscuresBackgroundDuringPresentation = true
+
+        definesPresentationContext = true
+
+        navigationItem.searchController = searchController
+        navigationItem.searchController?.searchBar.isHidden = true
+        searchController.searchBar.alpha = 1
+        navigationItem.hidesSearchBarWhenScrolling = false
+        view.addSubview(searchController.searchBar)
+    }
+
+    private func showSearch(cell: InviteUserTableViewCell) {
+        tableView.layoutIfNeeded()
+
+        UIView.animate(withDuration: 0.3, animations: {
+            self.view.layoutIfNeeded()
+            cell.alpha = 0
+        }) { _ in
+            self.searchController.isActive = true
+            self.navigationItem.searchController?.searchBar.isHidden = false
+        }
+    }
+
+    func didDismissSearchController(_ searchController: UISearchController) {
+        let indexPath = IndexPath(row: 0, section: 0)
+        guard let cell = tableView.cellForRow(at: indexPath) else { return }
+
+        UIView.animate(withDuration: 0.3, animations: {
+            self.view.layoutIfNeeded()
+            self.navigationItem.searchController?.searchBar.isHidden = true
+            cell.alpha = 1
+        })
+    }
+}
+
 // MARK: - Search user delegate
 
 extension ShareAndRightsViewController: SearchUserDelegate {
@@ -376,5 +420,9 @@ extension ShareAndRightsViewController: SearchUserDelegate {
 
     func didSelect(email: String) {
         showInviteView(emails: [email])
+    }
+
+    func inviteUserCellDidTapSearch(cell: InviteUserTableViewCell) {
+        showSearch(cell: cell)
     }
 }

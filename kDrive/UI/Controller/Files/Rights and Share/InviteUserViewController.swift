@@ -294,6 +294,10 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: - Search user delegate
 
 extension InviteUserViewController: SearchUserDelegate {
+    func inviteUserCellDidTapSearch(cell: InviteUserTableViewCell) {
+        return
+    }
+
     func didSelect(shareable: Shareable) {
         shareables.append(shareable)
         ignoredShareables.append(shareable)
