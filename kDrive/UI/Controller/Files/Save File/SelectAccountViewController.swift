@@ -21,9 +21,15 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+protocol SelectAccountDelegate: AnyObject {
+    func didChangeAccount(id: Int)
+}
+
 final class SelectAccountViewController: UIViewController {
     let users: [UserProfile]
     private let tableView = UITableView(frame: .zero, style: .plain)
+
+    weak var delegate: SelectAccountDelegate?
 
     init(users: [UserProfile]) {
         self.users = users
@@ -78,7 +84,7 @@ final class SelectAccountViewController: UIViewController {
         let saveButton = IKLargeButton(frame: .zero)
         saveButton.translatesAutoresizingMaskIntoConstraints = false
         saveButton.setTitle(KDriveCoreStrings.Localizable.buttonSave, for: .normal)
-        saveButton.addTarget(self, action: #selector(cancelButtonPressed), for: .touchUpInside)
+        saveButton.addTarget(self, action: #selector(saveButtonPressed(_:)), for: .touchUpInside)
 
         view.addSubview(saveButton)
 
@@ -93,6 +99,12 @@ final class SelectAccountViewController: UIViewController {
     }
 
     @objc func cancelButtonPressed() {
+        dismiss(animated: true)
+    }
+
+    @objc func saveButtonPressed(_ sender: Any) {
+        let userId = users[tableView.indexPathForSelectedRow?.row ?? 0].id
+        delegate?.didChangeAccount(id: userId)
         dismiss(animated: true)
     }
 }

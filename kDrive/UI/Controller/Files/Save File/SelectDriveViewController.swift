@@ -152,6 +152,7 @@ extension SelectDriveViewController: UITableViewDelegate {
         case .selectAccount:
             tableView.deselectRow(at: indexPath, animated: true)
             let selectAccountViewController = SelectAccountViewController(users: users)
+            selectAccountViewController.delegate = self
             let navigationController = UINavigationController(rootViewController: selectAccountViewController)
             navigationController.modalPresentationStyle = .fullScreen
             present(navigationController, animated: true)
@@ -163,6 +164,18 @@ extension SelectDriveViewController: UITableViewDelegate {
             } else {
                 dismiss(animated: true)
             }
+        }
+    }
+}
+
+extension SelectDriveViewController: SelectAccountDelegate {
+    func didChangeAccount(id: Int) {
+        Task {
+            guard let newAccount = await accountManager.userProfileStore.getUserProfile(id: id) else {
+                return
+            }
+            await initForCurrentUser(newAccount)
+            tableView.reloadSections([0, 1], with: .fade)
         }
     }
 }
