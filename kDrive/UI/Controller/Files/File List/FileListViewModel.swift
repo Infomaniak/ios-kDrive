@@ -399,6 +399,207 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
+    #if !ISEXTENSION
+    func didMenuAction(
+        _ action: FloatingPanelAction,
+        at indexPath: IndexPath,
+        presentingParent: UIViewController,
+        sourceView: UIView
+    ) {
+        if let file = getFile(at: indexPath) {
+            switch action {
+            case .informations:
+                informationsAction(frozenFile: file, presentingParent: presentingParent)
+            case .sendCopy:
+                sendCopyAction(
+                    action,
+                    at: indexPath,
+                    frozenFile: file,
+                    presentingParent: presentingParent,
+                    sourceView: sourceView
+                )
+            case .shareAndRights:
+                shareAndRightsAction(frozenFile: file, presentingParent: presentingParent)
+            case .shareLink:
+                shareLinkAction(
+                    action,
+                    at: indexPath,
+                    frozenFile: file,
+                    presentingParent: presentingParent,
+                    sourceView: sourceView
+                )
+            default:
+                break
+            }
+        }
+    }
+
+    private func informationsAction(frozenFile: File, presentingParent: UIViewController) {
+        let fileDetailViewController = FileDetailViewController.instantiate(driveFileManager: driveFileManager, file: frozenFile)
+        presentingParent.navigationController?.pushViewController(fileDetailViewController, animated: true)
+    }
+
+    private func sendCopyAction(
+        _ action: FloatingPanelAction,
+        at indexPath: IndexPath,
+        frozenFile: File,
+        presentingParent: UIViewController,
+        sourceView: UIView
+    ) {
+        if frozenFile.isMostRecentDownloaded {
+            presentShareSheet(
+                from: indexPath,
+                frozenFile: frozenFile,
+                presentingParent: presentingParent,
+                sourceView: sourceView
+            )
+        } else {
+            downloadFile(action: action,
+                         indexPath: indexPath,
+                         frozenFile: frozenFile,
+                         presentingParent: presentingParent) { [weak self] in
+                self?.presentShareSheet(
+                    from: indexPath,
+                    frozenFile: frozenFile,
+                    presentingParent: presentingParent,
+                    sourceView: sourceView
+                )
+            }
+        }
+    }
+
+    private func shareAndRightsAction(frozenFile: File, presentingParent: UIViewController) {
+        guard let liveFile = frozenFile.thaw() else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
+            return
+        }
+        let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, liveFile: liveFile)
+        presentingParent.navigationController?.pushViewController(shareVC, animated: true)
+    }
+
+    private func shareLinkAction(
+        _ action: FloatingPanelAction,
+        at indexPath: IndexPath,
+        frozenFile: File,
+        presentingParent: UIViewController,
+        sourceView: UIView
+    ) {
+        if let link = frozenFile.dropbox?.url {
+            // Copy share link
+            copyShareLinkToPasteboard(
+                from: indexPath,
+                link: link,
+                presentingParent: presentingParent,
+                frozenFile: frozenFile,
+                sourceView: sourceView
+            )
+        } else if let link = frozenFile.sharelink?.url {
+            // Copy share link
+            copyShareLinkToPasteboard(
+                from: indexPath,
+                link: link,
+                presentingParent: presentingParent,
+                frozenFile: frozenFile,
+                sourceView: sourceView
+            )
+        } else {
+            // Create share link
+            Task { [proxyFile = frozenFile.proxify()] in
+                do {
+                    let shareLink = try await driveFileManager.createShareLink(for: proxyFile)
+                    copyShareLinkToPasteboard(
+                        from: indexPath,
+                        link: shareLink.url,
+                        presentingParent: presentingParent,
+                        frozenFile: frozenFile,
+                        sourceView: sourceView
+                    )
+                } catch {
+                    if let error = error as? DriveError, error == .shareLinkAlreadyExists {
+                        // This should never happen
+                        let shareLink = try? await driveFileManager.apiFetcher.shareLink(for: proxyFile)
+                        if let shareLink {
+                            driveFileManager.setFileShareLink(file: proxyFile, shareLink: shareLink)
+                            copyShareLinkToPasteboard(
+                                from: indexPath,
+                                link: shareLink.url,
+                                presentingParent: presentingParent,
+                                frozenFile: frozenFile,
+                                sourceView: sourceView
+                            )
+                        }
+                    } else {
+                        UIConstants.showSnackBarIfNeeded(error: error)
+                    }
+                }
+            }
+        }
+    }
+
+    func presentShareSheet(from indexPath: IndexPath, frozenFile: File, presentingParent: UIViewController, sourceView: UIView) {
+        let activityViewController = UIActivityViewController(activityItems: [frozenFile.localUrl], applicationActivities: nil)
+        activityViewController.popoverPresentationController?.sourceView = sourceView
+        presentingParent.present(activityViewController, animated: true)
+    }
+
+    func copyShareLinkToPasteboard(
+        from indexPath: IndexPath,
+        link: String,
+        presentingParent: UIViewController,
+        frozenFile: File,
+        sourceView: UIView
+    ) {
+        UIConstants.presentLinkPreviewForFile(
+            frozenFile,
+            link: link,
+            from: presentingParent,
+            sourceView: sourceView
+        )
+    }
+
+    func downloadFile(action: FloatingPanelAction,
+                      indexPath: IndexPath,
+                      frozenFile: File,
+                      presentingParent: UIViewController,
+                      completion: @escaping () -> Void) {
+        guard let activeScene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+            let observerViewController = activeScene.windows.first?.rootViewController else {
+            return
+        }
+
+        let fileListViewController = presentingParent as? FileListViewController
+
+        fileListViewController?.downloadAction = action
+        fileListViewController?.downloadObserver?.cancel()
+        fileListViewController?.downloadObserver = fileListViewController?.downloadQueue
+            .observeFileDownloaded(observerViewController, fileId: frozenFile.id) { [weak self] _, error in
+                fileListViewController?.downloadAction = nil
+                Task { @MainActor in
+                    guard error == nil else {
+                        UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
+                        return
+                    }
+                    completion()
+                }
+            }
+
+        if let publicShareProxy = driveFileManager.publicShareProxy {
+            fileListViewController?.downloadQueue.addPublicShareToQueue(file: frozenFile,
+                                                                        driveFileManager: driveFileManager,
+                                                                        publicShareProxy: publicShareProxy,
+                                                                        itemIdentifier: nil,
+                                                                        onOperationCreated: nil,
+                                                                        completion: nil)
+        } else {
+            fileListViewController?.downloadQueue.addToQueue(file: frozenFile,
+                                                             userId: fileListViewController!.accountManager.currentUserId,
+                                                             itemIdentifier: nil)
+        }
+    }
+
+    #endif
+
     func getRefreshedCurrentDirectory() -> File {
         // Directory is not managed by realm so there is no concept of "refresh"
         guard currentDirectory.isManagedByRealm else { return currentDirectory }
@@ -496,8 +697,8 @@ class FileListViewModel: SelectDelegate {
 }
 
 extension Publisher where Self.Failure == Never {
-    func assignNoRetain<Root>(to keyPath: ReferenceWritableKeyPath<Root, Self.Output>, on object: Root) -> AnyCancellable
-        where Root: AnyObject {
+    func assignNoRetain<Root: AnyObject>(to keyPath: ReferenceWritableKeyPath<Root, Self.Output>,
+                                         on object: Root) -> AnyCancellable {
         sink { [weak object] value in
             object?[keyPath: keyPath] = value
         }

@@ -32,6 +32,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     @LazyInjectService var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService var downloadQueue: DownloadQueueable
+    #if !ISEXTENSION
+    var downloadAction: FloatingPanelAction?
+    #endif
+    var downloadObserver: ObservationToken?
 
     private static let logger = Logger(category: "FileListViewController")
 
@@ -572,22 +577,67 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     // MARK: - Actions
 
-    @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
+    @objc func handleLongPress(indexPath: IndexPath) {
         guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel,
               !multipleSelectionViewModel.isMultipleSelectionEnabled
         else { return }
 
-        let pos = sender.location(in: collectionView)
-        if let indexPath = collectionView.indexPathForItem(at: pos) {
-            multipleSelectionViewModel.isMultipleSelectionEnabled = true
-            // Necessary for events to trigger in the right order
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                if let file = getDisplayedFile(at: indexPath) {
-                    multipleSelectionViewModel.didSelectFile(file, at: indexPath)
-                }
+        multipleSelectionViewModel.isMultipleSelectionEnabled = true
+        // Necessary for events to trigger in the right order
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if let file = getDisplayedFile(at: indexPath) {
+                multipleSelectionViewModel.didSelectFile(file, at: indexPath)
             }
         }
+    }
+
+    func makeContextMenuQuickActions(indexPath: IndexPath) -> [UIAction] {
+        #if !ISEXTENSION
+        let actions = FloatingPanelAction.quickActions
+        return actions.map { action in
+            UIAction(
+                title: action.name,
+                image: action.image,
+            ) { _ in
+                self.viewModel.didMenuAction(
+                    action,
+                    at: indexPath,
+                    presentingParent: self,
+                    sourceView: self.collectionView.cellForItem(at: indexPath) ?? self.collectionView
+                )
+            }
+        }
+        #endif
+        return []
+    }
+
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemsAt indexPaths: [IndexPath],
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard let indexPath = indexPaths.first else { return nil }
+
+        return UIContextMenuConfiguration(
+            actionProvider: { _ in
+                let selectionAction = UIAction(
+                    title: KDriveResourcesStrings.Localizable.buttonSelect,
+                    image: KDriveResourcesAsset.checklist.image
+                ) { _ in
+                    self.handleLongPress(indexPath: indexPath)
+                }
+                let listQuickActions = self.makeContextMenuQuickActions(indexPath: indexPaths.first!)
+
+                return UIMenu(
+                    options: .displayInline,
+                    children: [
+                        UIMenu(options: .displayInline, children: [selectionAction]),
+                        UIMenu(options: .displayInline, children: [listQuickActions].flatMap { $0 })
+                    ]
+                )
+            }
+        )
     }
 
     @objc func barButtonPressed(_ sender: FileListBarButton) {
