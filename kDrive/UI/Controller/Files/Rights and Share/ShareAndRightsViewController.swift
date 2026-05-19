@@ -96,6 +96,7 @@ class ShareAndRightsViewController: UIViewController {
                 self.fileAccessElements = fetchedAccess.elements
                 self.ignoredEmails = fetchedAccess.invitations.compactMap { $0.user != nil ? nil : $0.email }
                 self.tableView.reloadData()
+                configureSearchViewControllers()
             } catch {
                 Logger.general.error("Cannot get file access: \(error)")
             }
@@ -186,6 +187,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.delegate = self
+            cell.transform = .identity
             return cell
         case .link:
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
@@ -374,13 +376,8 @@ extension ShareAndRightsViewController: UISearchControllerDelegate, UISearchResu
         searchController.delegate = self
         searchController.obscuresBackgroundDuringPresentation = true
         searchController.searchResultsUpdater = self
+        searchController.searchBar.placeholder = KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail
 
-        definesPresentationContext = true
-
-        navigationItem.searchController = searchController
-        navigationItem.searchController?.searchBar.isHidden = true
-        searchController.searchBar.alpha = 1
-        navigationItem.hidesSearchBarWhenScrolling = false
         view.addSubview(searchController.searchBar)
 
         configureSearchViewControllers()
@@ -395,26 +392,25 @@ extension ShareAndRightsViewController: UISearchControllerDelegate, UISearchResu
 
     private func showSearch(cell: InviteUserTableViewCell) {
         tableView.layoutIfNeeded()
-
-        UIView.animate(withDuration: 0.3, animations: {
+        navigationItem.searchController = searchController
+        UIView.animate(withDuration: 0.1, animations: {
             self.view.layoutIfNeeded()
+            cell.transform = CGAffineTransform(translationX: 0, y: -50)
             cell.alpha = 0
-        }) { _ in
-            self.searchController.isActive = true
-            self.navigationItem.searchController?.searchBar.isHidden = false
+        }, completion: { _ in
             self.searchController.searchBar.becomeFirstResponder()
-        }
+        })
     }
 
     func didDismissSearchController(_ searchController: UISearchController) {
         let indexPath = IndexPath(row: 0, section: 0)
         guard let cell = tableView.cellForRow(at: indexPath) else { return }
-
-        UIView.animate(withDuration: 0.3, animations: {
+        navigationItem.searchController = nil
+        UIView.animate(withDuration: 0.1) {
             self.view.layoutIfNeeded()
-            self.navigationItem.searchController?.searchBar.isHidden = true
+            cell.transform = .identity
             cell.alpha = 1
-        })
+        }
     }
 
     func updateSearchResults(for searchController: UISearchController) {
