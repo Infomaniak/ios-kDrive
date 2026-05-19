@@ -47,8 +47,8 @@ class ShareAndRightsViewController: UIViewController {
     private var fileAccess: FileAccess?
     private var fileAccessElements = [FileAccessElement]()
     private var selectedElement: FileAccessElement?
+    private var searchUserViewController: SearchUserViewController!
     private var searchController: UISearchController!
-    private var animator: UIViewPropertyAnimator?
 
     var driveFileManager: DriveFileManager!
     var file: File!
@@ -58,7 +58,7 @@ class ShareAndRightsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Documentation says it's better to put it in AppDelegate but why ?
-        DropDown.startListeningToKeyboard()
+//        DropDown.startListeningToKeyboard()
 
         navigationController?.navigationBar.isTranslucent = true
 
@@ -372,11 +372,13 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
 
 // MARK: - Search Controller delegate
 
-extension ShareAndRightsViewController: UISearchControllerDelegate {
+extension ShareAndRightsViewController: UISearchControllerDelegate, UISearchResultsUpdating {
     private func setupSearchController() {
-        searchController = UISearchController(searchResultsController: nil)
+        searchUserViewController = SearchUserViewController()
+        searchController = UISearchController(searchResultsController: searchUserViewController)
         searchController.delegate = self
         searchController.obscuresBackgroundDuringPresentation = true
+        searchController.searchResultsUpdater = self
 
         definesPresentationContext = true
 
@@ -385,6 +387,15 @@ extension ShareAndRightsViewController: UISearchControllerDelegate {
         searchController.searchBar.alpha = 1
         navigationItem.hidesSearchBarWhenScrolling = false
         view.addSubview(searchController.searchBar)
+
+        configureSearchViewControllers()
+    }
+
+    private func configureSearchViewControllers() {
+        searchUserViewController.canUseTeam = file.capabilities.canUseTeam
+        searchUserViewController.drive = driveFileManager.drive
+        searchUserViewController.ignoredShareables = fileAccessElements.compactMap(\.shareable)
+        searchUserViewController.ignoredEmails = ignoredEmails
     }
 
     private func showSearch(cell: InviteUserTableViewCell) {
@@ -396,6 +407,7 @@ extension ShareAndRightsViewController: UISearchControllerDelegate {
         }) { _ in
             self.searchController.isActive = true
             self.navigationItem.searchController?.searchBar.isHidden = false
+            self.searchController.searchBar.becomeFirstResponder()
         }
     }
 
@@ -408,6 +420,10 @@ extension ShareAndRightsViewController: UISearchControllerDelegate {
             self.navigationItem.searchController?.searchBar.isHidden = true
             cell.alpha = 1
         })
+    }
+
+    func updateSearchResults(for searchController: UISearchController) {
+        searchUserViewController.performSearch(query: searchController.searchBar.text ?? "")
     }
 }
 
