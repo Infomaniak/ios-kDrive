@@ -22,9 +22,7 @@ import InfomaniakDI
 import kDriveCore
 import UIKit
 
-protocol SearchUserDelegate: AnyObject {
-    func didSelect(shareable: Shareable)
-    func didSelect(email: String)
+protocol InviteUserCellDelegate: AnyObject {
     func inviteUserCellDidTapSearch(cell: InviteUserTableViewCell)
 }
 
@@ -33,7 +31,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     @IBOutlet var textField: UITextField!
 
-    weak var delegate: SearchUserDelegate?
+    weak var delegate: InviteUserCellDelegate?
 
     override func awakeFromNib() {
         super.awakeFromNib()

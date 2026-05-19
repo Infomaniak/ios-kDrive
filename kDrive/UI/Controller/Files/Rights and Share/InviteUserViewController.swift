@@ -23,7 +23,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class InviteUserViewController: UIViewController {
+class InviteUserViewController: UIViewController, InviteUserCellDelegate {
     @IBOutlet var tableView: UITableView!
 
     @LazyInjectService private var matomo: MatomoUtils

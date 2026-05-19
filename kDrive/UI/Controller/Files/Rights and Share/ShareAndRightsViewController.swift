@@ -368,6 +368,8 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
 extension ShareAndRightsViewController: UISearchControllerDelegate, UISearchResultsUpdating {
     private func setupSearchController() {
         searchUserViewController = SearchUserViewController()
+        searchUserViewController.delegate = self
+
         searchController = UISearchController(searchResultsController: searchUserViewController)
         searchController.delegate = self
         searchController.obscuresBackgroundDuringPresentation = true
@@ -420,6 +422,14 @@ extension ShareAndRightsViewController: UISearchControllerDelegate, UISearchResu
     }
 }
 
+// MARK: - Invite cell delegate
+
+extension ShareAndRightsViewController: InviteUserCellDelegate {
+    func inviteUserCellDidTapSearch(cell: InviteUserTableViewCell) {
+        showSearch(cell: cell)
+    }
+}
+
 // MARK: - Search user delegate
 
 extension ShareAndRightsViewController: SearchUserDelegate {
@@ -429,9 +439,5 @@ extension ShareAndRightsViewController: SearchUserDelegate {
 
     func didSelect(email: String) {
         showInviteView(emails: [email])
-    }
-
-    func inviteUserCellDidTapSearch(cell: InviteUserTableViewCell) {
-        showSearch(cell: cell)
     }
 }

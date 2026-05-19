@@ -22,9 +22,15 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
+ protocol SearchUserDelegate: AnyObject {
+    func didSelect(shareable: Shareable)
+    func didSelect(email: String)
+ }
 
 class SearchUserViewController: UITableViewController {
     @LazyInjectService private var driveInfosManager: DriveInfosManager
+
+    weak var delegate: SearchUserDelegate?
 
     var canUseTeam = false
     var ignoredEmails: [String] = []
@@ -138,5 +144,16 @@ class SearchUserViewController: UITableViewController {
         cell.titleLabel.text = email
         cell.userEmailLabel.text = KDriveResourcesStrings.Localizable.userInviteByEmail
         cell.logoImage.image = KDriveResourcesAsset.circleSend.image
+    }
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+
+        switch results[indexPath.row] {
+        case let .shareable(shareable):
+            delegate?.didSelect(shareable: shareable)
+        case let .email(email):
+            delegate?.didSelect(email: email)
+        }
     }
 }
