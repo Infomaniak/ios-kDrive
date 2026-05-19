@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import DropDown
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
@@ -57,8 +56,6 @@ class ShareAndRightsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Documentation says it's better to put it in AppDelegate but why ?
-//        DropDown.startListeningToKeyboard()
 
         navigationController?.navigationBar.isTranslucent = true
 
@@ -188,10 +185,6 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.canUseTeam = file.capabilities.canUseTeam
-            cell.drive = driveFileManager?.drive
-            cell.ignoredShareables = fileAccessElements.compactMap(\.shareable)
-            cell.ignoredEmails = ignoredEmails
             cell.delegate = self
             return cell
         case .link:
