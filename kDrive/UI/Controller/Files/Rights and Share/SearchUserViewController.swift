@@ -22,10 +22,10 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
- protocol SearchUserDelegate: AnyObject {
+protocol SearchUserDelegate: AnyObject {
     func didSelect(shareable: Shareable)
     func didSelect(email: String)
- }
+}
 
 class SearchUserViewController: UITableViewController {
     @LazyInjectService private var driveInfosManager: DriveInfosManager
@@ -64,6 +64,8 @@ class SearchUserViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: UserAccountTableViewCell.self)
+        tableView.backgroundColor = KDriveCoreAsset.backgroundColor.color
+        tableView.separatorStyle = .none
     }
 
     func performSearch(query: String) {
@@ -105,7 +107,7 @@ class SearchUserViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
-        cell.initWithPositionAndShadow(isFirst: true, isLast: true)
+        cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == results.count - 1)
         cell.accessoryImageView.image = nil
         cell.logoImage.isAccessibilityElement = false
 
