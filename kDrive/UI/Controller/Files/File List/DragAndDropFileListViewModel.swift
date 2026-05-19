@@ -44,7 +44,7 @@ class DraggableFileListViewModel {
         let itemProvider = NSItemProvider(object: dragAndDropFile)
         itemProvider.suggestedName = draggedFile.name
         let draggedItem = UIDragItem(itemProvider: itemProvider)
-        if let previewImageView = (collectionView.cellForItem(at: indexPath) as? FileCollectionViewCell)?.logoImage {
+        if let previewImageView = previewImageView(for: collectionView.cellForItem(at: indexPath)) {
             let parameters = UIDragPreviewParameters()
             parameters.backgroundColor = .clear
             parameters.shadowPath = UIBezierPath()
@@ -56,6 +56,16 @@ class DraggableFileListViewModel {
         session.localContext = draggedFile
 
         return [draggedItem]
+    }
+
+    private func previewImageView(for myView: UICollectionViewCell?) -> UIImageView? {
+        if let cell = myView as? FileGridCollectionViewCell {
+            return cell.logoImage.isHidden ? cell.largeIconImageView : cell.logoImage
+        } else if let cell = myView as? FileCollectionViewCell {
+            return cell.logoImage
+        }
+
+        return nil
     }
 }
 
