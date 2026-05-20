@@ -31,6 +31,15 @@ public final class MQService {
         return decoder
     }()
 
+    private let initialReconnectionTimeout: Double = 1
+    private let maxReconnectionTimeout: Double = 300
+    private var reconnectionDelay: Double {
+        reconnections += 1
+        return min(initialReconnectionTimeout * Double(2 * reconnections), maxReconnectionTimeout)
+    }
+
+    private var reconnections = 0
+
     private static let environment = ApiEnvironment.current
     private let client: MQTTClient.V3
 
@@ -51,12 +60,10 @@ public final class MQService {
         client.delegate = self
 
         client.startMonitor()
-        client.startRetrier()
     }
 
     deinit {
         client.stopMonitor()
-        client.stopRetrier()
         client.close()
     }
 
@@ -67,27 +74,32 @@ public final class MQService {
             }
 
             currentToken = token
+            reconnections = 0
 
             do {
-                if !client.isOpened {
-                    let identity = Identity(
-                        Self.generateClientIdentifier(),
-                        username: "ips:ips-public",
-                        password: Self.environment.mqttPass
-                    )
-
-                    try await client.open(identity, cleanStart: false).wait()
-                    Self.logger.info("Connection successful")
-
-                    try await client.subscribe(to: topic(for: token), qos: .atMostOnce).wait()
-                } else {
-                    try await client.subscribe(to: topic(for: token), qos: .atMostOnce).wait()
-                }
-                Self.logger.info("Subscription successful")
+                try await connectWith(token: token)
             } catch {
                 Self.logger.error("Error while connecting/subscribing: \(error)")
             }
         }
+    }
+
+    private func connectWith(token: IPSToken) async throws {
+        if client.isOpened {
+            try await client.subscribe(to: topic(for: token), qos: .atMostOnce).wait()
+        } else {
+            let identity = Identity(
+                Self.generateClientIdentifier(),
+                username: "ips:ips-public",
+                password: Self.environment.mqttPass
+            )
+
+            try await client.open(identity, cleanStart: false).wait()
+            Self.logger.info("Connection successful")
+
+            try await client.subscribe(to: topic(for: token), qos: .atMostOnce).wait()
+        }
+        Self.logger.info("Subscription successful")
     }
 
     private func unsubscribe(from currentToken: IPSToken) async {
@@ -123,14 +135,39 @@ public final class MQService {
         let letters = "abcdefghijklmnopqrstuvwxyz"
         return prefix + String((0 ..< length).map { _ in letters.randomElement()! })
     }
+
+    private func reconnect() async {
+        guard let token = currentToken else {
+            return
+        }
+
+        try? await Task.sleep(for: .seconds(reconnectionDelay))
+
+        do {
+            client.startMonitor()
+
+            Self.logger.warning("Reconnecting...")
+            try await connectWith(token: token)
+        } catch {
+            Self.logger.error("Error while reconnecting: \(error)")
+        }
+    }
 }
 
 // MARK: - MQTTDelegate
 
 extension MQService: MQTTDelegate {
     public func mqtt(_ mqtt: MQTTClient, didUpdate status: Status, prev: Status) {
-        if case .closed = status {
-            Self.logger.warning("Connection closed (was: \(prev))")
+        switch status {
+        case .closed:
+            Task {
+                client.stopMonitor()
+
+                Self.logger.warning("Connection closed (was: \(prev))")
+                await self.reconnect()
+            }
+        default:
+            break
         }
     }
 
