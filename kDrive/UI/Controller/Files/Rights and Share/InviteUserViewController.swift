@@ -76,6 +76,7 @@ class InviteUserViewController: UIViewController {
         searchControllerManager.setup(in: self, tableView: tableView, file: file, driveFileManager: driveFileManager,
                                       ignoredShareables: ignoredShareables, ignoredEmails: ignoredEmails)
         searchControllerManager.delegate = self
+        searchControllerManager.onDismiss = { self.reloadInvited() }
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(
@@ -233,6 +234,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
             cell.delegate = searchControllerManager
+            cell.transform = .identity
             return cell
         case .rights:
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
@@ -300,7 +302,6 @@ extension InviteUserViewController: SearchUserDelegate {
         shareables.append(shareable)
         ignoredShareables.append(shareable)
         searchControllerManager.searchUserViewController.ignoredShareables = ignoredShareables
-        reloadInvited()
         searchControllerManager.searchController.isActive = false
     }
 
@@ -308,7 +309,6 @@ extension InviteUserViewController: SearchUserDelegate {
         emails.append(email)
         ignoredEmails.append(email)
         searchControllerManager.searchUserViewController.ignoredEmails = ignoredEmails
-        reloadInvited()
         searchControllerManager.searchController.isActive = false
     }
 }

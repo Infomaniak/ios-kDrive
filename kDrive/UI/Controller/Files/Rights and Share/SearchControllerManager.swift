@@ -24,6 +24,7 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
     weak var hostViewController: UIViewController?
     weak var hostTableView: UITableView?
     weak var delegate: SearchUserDelegate?
+    var onDismiss: (() -> Void)?
 
     var searchUserViewController: SearchUserViewController!
     var searchController: UISearchController!
@@ -50,17 +51,22 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
                                       ignoredShareable: ignoredShareables, ignoredEmails: ignoredEmails)
     }
 
+    func updateIgnoredUser(ignoredShareable: [Shareable], ignoredEmails: [String]) {
+        searchUserViewController.ignoredShareables = ignoredShareable
+        searchUserViewController.ignoredEmails = ignoredEmails
+    }
+
     private func configureSearchViewController(file: File, driveFileManager: DriveFileManager,
                                                ignoredShareable: [Shareable], ignoredEmails: [String]) {
         searchUserViewController.canUseTeam = file.capabilities.canUseTeam
         searchUserViewController.drive = driveFileManager.drive
-        searchUserViewController.ignoredShareables = ignoredShareable
-        searchUserViewController.ignoredEmails = ignoredEmails
+        updateIgnoredUser(ignoredShareable: ignoredShareable, ignoredEmails: ignoredEmails)
     }
 
     private func showSearch(cell: InviteUserTableViewCell) {
         hostTableView?.layoutIfNeeded()
         hostViewController?.navigationItem.searchController = searchController
+
         UIView.animate(withDuration: 0.1, animations: {
             self.hostViewController?.view.layoutIfNeeded()
             cell.transform = CGAffineTransform(translationX: 0, y: -50)
@@ -70,14 +76,28 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
         })
     }
 
+    func willDismissSearchController(_ searchController: UISearchController) {
+        DispatchQueue.main.async {
+            UIView.performWithoutAnimation {
+                self.onDismiss?()
+                self.hostViewController?.navigationItem.searchController = nil
+                self.hostViewController?.view.layoutIfNeeded()
+                self.hostTableView?.layoutIfNeeded()
+            }
+        }
+    }
+
     func didDismissSearchController(_ searchController: UISearchController) {
         let indexPath = IndexPath(row: 0, section: 0)
-        guard let cell = hostTableView?.cellForRow(at: indexPath) else { return }
-        hostViewController?.navigationItem.searchController = nil
-        UIView.animate(withDuration: 0.1) {
-            self.hostViewController?.view.layoutIfNeeded()
-            cell.transform = .identity
-            cell.alpha = 1
+        guard let cell = hostTableView?.cellForRow(at: indexPath) else {
+            hostViewController?.navigationItem.searchController = nil
+            return
+        }
+        DispatchQueue.main.async {
+            UIView.animate(withDuration: 0.1) {
+                cell.transform = .identity
+                cell.alpha = 1
+            }
         }
     }
 

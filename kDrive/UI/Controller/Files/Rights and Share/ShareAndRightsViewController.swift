@@ -98,6 +98,8 @@ class ShareAndRightsViewController: UIViewController {
                 self.fileAccess = fetchedAccess
                 self.fileAccessElements = fetchedAccess.elements
                 self.ignoredEmails = fetchedAccess.invitations.compactMap { $0.user != nil ? nil : $0.email }
+                searchControllerManager.updateIgnoredUser(ignoredShareable: fileAccessElements.compactMap(\.shareable),
+                                                          ignoredEmails: ignoredEmails)
                 self.tableView.reloadData()
             } catch {
                 Logger.general.error("Cannot get file access: \(error)")
@@ -372,9 +374,11 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
 extension ShareAndRightsViewController: SearchUserDelegate {
     func didSelect(shareable: Shareable) {
         showInviteView(shareables: [shareable])
+        searchControllerManager.searchController.isActive = false
     }
 
     func didSelect(email: String) {
         showInviteView(emails: [email])
+        searchControllerManager.searchController.isActive = false
     }
 }
