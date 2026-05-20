@@ -77,7 +77,7 @@ final class SelectAccountViewController: UIViewController {
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
 extension SelectAccountViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_: UITableView, numberOfRowsInSection: Int) -> Int {
         return users.count
     }
 
@@ -93,7 +93,7 @@ extension SelectAccountViewController: UITableViewDelegate, UITableViewDataSourc
         return cell
     }
 
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedAccount = users[indexPath.row]
         delegate?.didChangeAccount(account: selectedAccount)
         if let navigationController {

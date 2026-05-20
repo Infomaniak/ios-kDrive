@@ -101,7 +101,7 @@ class SearchUserViewController: UITableViewController {
         return text.trimmingCharacters(in: .whitespaces).lowercased()
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_: UITableView, numberOfRowsInSection: Int) -> Int {
         return results.count
     }
 

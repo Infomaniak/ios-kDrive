@@ -76,7 +76,7 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
         })
     }
 
-    func willDismissSearchController(_ searchController: UISearchController) {
+    func willDismissSearchController(_: UISearchController) {
         DispatchQueue.main.async {
             UIView.performWithoutAnimation {
                 self.onDismiss?()
@@ -87,7 +87,7 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
         }
     }
 
-    func didDismissSearchController(_ searchController: UISearchController) {
+    func didDismissSearchController(_: UISearchController) {
         let indexPath = IndexPath(row: 0, section: 0)
         guard let cell = hostTableView?.cellForRow(at: indexPath) else {
             hostViewController?.navigationItem.searchController = nil
