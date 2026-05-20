@@ -46,8 +46,7 @@ class ShareAndRightsViewController: UIViewController {
     private var fileAccess: FileAccess?
     private var fileAccessElements = [FileAccessElement]()
     private var selectedElement: FileAccessElement?
-    private var searchUserViewController: SearchUserViewController!
-    private var searchController: UISearchController!
+    private var searchControllerManager: SearchControllerManager!
 
     var driveFileManager: DriveFileManager!
     var file: File!
@@ -69,7 +68,11 @@ class ShareAndRightsViewController: UIViewController {
         updateShareList()
         hideKeyboardWhenTappedAround()
         setTitle()
-        setupSearchController()
+
+        searchControllerManager = SearchControllerManager()
+        searchControllerManager.setup(in: self, tableView: tableView, file: file, driveFileManager: driveFileManager,
+                                      ignoredShareables: fileAccessElements.compactMap(\.shareable), ignoredEmails: ignoredEmails)
+        searchControllerManager.delegate = self
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -96,7 +99,6 @@ class ShareAndRightsViewController: UIViewController {
                 self.fileAccessElements = fetchedAccess.elements
                 self.ignoredEmails = fetchedAccess.invitations.compactMap { $0.user != nil ? nil : $0.email }
                 self.tableView.reloadData()
-                configureSearchViewControllers()
             } catch {
                 Logger.general.error("Cannot get file access: \(error)")
             }
@@ -186,7 +188,7 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-            cell.delegate = self
+            cell.delegate = searchControllerManager
             cell.transform = .identity
             return cell
         case .link:
@@ -362,67 +364,6 @@ extension ShareAndRightsViewController: ShareLinkTableViewCellDelegate {
         shareLinkSettingsViewController.driveFileManager = driveFileManager
         shareLinkSettingsViewController.file = file
         navigationController?.pushViewController(shareLinkSettingsViewController, animated: true)
-    }
-}
-
-// MARK: - Search Controller delegate
-
-extension ShareAndRightsViewController: UISearchControllerDelegate, UISearchResultsUpdating {
-    private func setupSearchController() {
-        searchUserViewController = SearchUserViewController()
-        searchUserViewController.delegate = self
-
-        searchController = UISearchController(searchResultsController: searchUserViewController)
-        searchController.delegate = self
-        searchController.obscuresBackgroundDuringPresentation = true
-        searchController.searchResultsUpdater = self
-        searchController.searchBar.placeholder = KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail
-
-        view.addSubview(searchController.searchBar)
-
-        configureSearchViewControllers()
-    }
-
-    private func configureSearchViewControllers() {
-        searchUserViewController.canUseTeam = file.capabilities.canUseTeam
-        searchUserViewController.drive = driveFileManager.drive
-        searchUserViewController.ignoredShareables = fileAccessElements.compactMap(\.shareable)
-        searchUserViewController.ignoredEmails = ignoredEmails
-    }
-
-    private func showSearch(cell: InviteUserTableViewCell) {
-        tableView.layoutIfNeeded()
-        navigationItem.searchController = searchController
-        UIView.animate(withDuration: 0.1, animations: {
-            self.view.layoutIfNeeded()
-            cell.transform = CGAffineTransform(translationX: 0, y: -50)
-            cell.alpha = 0
-        }, completion: { _ in
-            self.searchController.searchBar.becomeFirstResponder()
-        })
-    }
-
-    func didDismissSearchController(_ searchController: UISearchController) {
-        let indexPath = IndexPath(row: 0, section: 0)
-        guard let cell = tableView.cellForRow(at: indexPath) else { return }
-        navigationItem.searchController = nil
-        UIView.animate(withDuration: 0.1) {
-            self.view.layoutIfNeeded()
-            cell.transform = .identity
-            cell.alpha = 1
-        }
-    }
-
-    func updateSearchResults(for searchController: UISearchController) {
-        searchUserViewController.performSearch(query: searchController.searchBar.text ?? "")
-    }
-}
-
-// MARK: - Invite cell delegate
-
-extension ShareAndRightsViewController: InviteUserCellDelegate {
-    func inviteUserCellDidTapSearch(cell: InviteUserTableViewCell) {
-        showSearch(cell: cell)
     }
 }
 

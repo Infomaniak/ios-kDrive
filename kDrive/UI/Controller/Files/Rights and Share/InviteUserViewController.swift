@@ -23,7 +23,7 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-class InviteUserViewController: UIViewController, InviteUserCellDelegate {
+class InviteUserViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
 
     @LazyInjectService private var matomo: MatomoUtils
@@ -58,6 +58,8 @@ class InviteUserViewController: UIViewController, InviteUserCellDelegate {
     private var message: String?
     private var emptyInvitation = false
     private var savedText = String()
+    private var fileAccessElements = [FileAccessElement]()
+    private var searchControllerManager: SearchControllerManager!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,6 +71,12 @@ class InviteUserViewController: UIViewController, InviteUserCellDelegate {
 
         hideKeyboardWhenTappedAround()
         setTitle()
+
+        searchControllerManager = SearchControllerManager()
+        searchControllerManager.setup(in: self, tableView: tableView, file: file, driveFileManager: driveFileManager,
+                                      ignoredShareables: ignoredShareables, ignoredEmails: ignoredEmails)
+        searchControllerManager.delegate = self
+
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .stop,
@@ -224,7 +232,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
-            cell.delegate = self
+            cell.delegate = searchControllerManager
             return cell
         case .rights:
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
@@ -288,20 +296,20 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
 // MARK: - Search user delegate
 
 extension InviteUserViewController: SearchUserDelegate {
-    func inviteUserCellDidTapSearch(cell: InviteUserTableViewCell) {
-        return
-    }
-
     func didSelect(shareable: Shareable) {
         shareables.append(shareable)
         ignoredShareables.append(shareable)
+        searchControllerManager.searchUserViewController.ignoredShareables = ignoredShareables
         reloadInvited()
+        searchControllerManager.searchController.isActive = false
     }
 
     func didSelect(email: String) {
         emails.append(email)
         ignoredEmails.append(email)
+        searchControllerManager.searchUserViewController.ignoredEmails = ignoredEmails
         reloadInvited()
+        searchControllerManager.searchController.isActive = false
     }
 }
 
@@ -311,12 +319,14 @@ extension InviteUserViewController: SelectedUsersDelegate {
     func didDelete(shareable: Shareable) {
         shareables.removeAll { $0.id == shareable.id }
         ignoredShareables.removeAll { $0.id == shareable.id }
+        searchControllerManager.searchUserViewController.ignoredShareables = ignoredShareables
         reloadInvited()
     }
 
     func didDelete(email: String) {
         emails.removeAll { $0 == email }
         ignoredEmails.removeAll { $0 == email }
+        searchControllerManager.searchUserViewController.ignoredEmails = ignoredEmails
         reloadInvited()
     }
 }
