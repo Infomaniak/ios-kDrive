@@ -33,9 +33,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
-    #if !ISEXTENSION
-    var downloadAction: FloatingPanelAction?
-    #endif
+
     var downloadObserver: ObservationToken?
 
     private static let logger = Logger(category: "FileListViewController")
@@ -118,9 +116,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         )
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
         collectionView.allowsMultipleSelectionDuringEditing = true
-        #if !ISEXTENSION
-        collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
-        #endif
         collectionView.dropDelegate = self
         collectionView.dragDelegate = self
 
@@ -594,7 +589,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     func makeContextMenuQuickActions(indexPath: IndexPath) -> [UIAction] {
         #if !ISEXTENSION
-        let actions = FloatingPanelAction.quickActions
+        let actions = setupQuickActions(frozenFile: viewModel.getFile(at: indexPath))
+        guard !actions.isEmpty else { return [] }
         return actions.map { action in
             UIAction(
                 title: action.name,
@@ -612,6 +608,44 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         return []
     }
 
+    #if !ISEXTENSION
+    private func setupQuickActions(frozenFile: File?) -> [FloatingPanelAction] {
+        let offline = ReachabilityListener.instance.currentStatus == .offline
+        var quickActions: [FloatingPanelAction]
+
+        guard let frozenFile else { return [] }
+
+        if driveFileManager.isPublicShare {
+            quickActions = []
+        } else if frozenFile.isDirectory {
+            quickActions = FloatingPanelAction.folderQuickActions
+        } else {
+            quickActions = FloatingPanelAction.quickActions
+        }
+
+        for action in quickActions {
+            switch action {
+            case .shareAndRights:
+                if !frozenFile.capabilities.canShare || offline {
+                    action.isEnabled = false
+                }
+            case .shareLink:
+                if (!frozenFile.capabilities.canBecomeSharelink || offline) && !frozenFile.hasSharelink && !frozenFile.isDropbox {
+                    action.isEnabled = false
+                }
+            case .add:
+                if !frozenFile.capabilities.canCreateFile || !frozenFile.capabilities.canCreateDirectory {
+                    action.isEnabled = false
+                }
+            default:
+                break
+            }
+        }
+
+        return quickActions
+    }
+    #endif
+
     override func collectionView(
         _ collectionView: UICollectionView,
         contextMenuConfigurationForItemsAt indexPaths: [IndexPath],
@@ -620,6 +654,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         guard let indexPath = indexPaths.first else { return nil }
 
         return UIContextMenuConfiguration(
+            // swiftlint:disable:next trailing_closure
             actionProvider: { _ in
                 let selectionAction = UIAction(
                     title: KDriveResourcesStrings.Localizable.buttonSelect,
@@ -627,7 +662,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 ) { _ in
                     self.handleLongPress(indexPath: indexPath)
                 }
-                let listQuickActions = self.makeContextMenuQuickActions(indexPath: indexPaths.first!)
+                let listQuickActions = self.makeContextMenuQuickActions(indexPath: indexPath)
 
                 return UIMenu(
                     options: .displayInline,

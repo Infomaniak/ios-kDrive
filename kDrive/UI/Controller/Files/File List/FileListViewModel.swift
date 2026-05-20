@@ -410,10 +410,10 @@ class FileListViewModel: SelectDelegate {
             switch action {
             case .informations:
                 informationsAction(frozenFile: file, presentingParent: presentingParent)
+            case .add:
+                addAction(frozenFile: file, presentingParent: presentingParent)
             case .sendCopy:
                 sendCopyAction(
-                    action,
-                    at: indexPath,
                     frozenFile: file,
                     presentingParent: presentingParent,
                     sourceView: sourceView
@@ -422,8 +422,6 @@ class FileListViewModel: SelectDelegate {
                 shareAndRightsAction(frozenFile: file, presentingParent: presentingParent)
             case .shareLink:
                 shareLinkAction(
-                    action,
-                    at: indexPath,
                     frozenFile: file,
                     presentingParent: presentingParent,
                     sourceView: sourceView
@@ -439,27 +437,35 @@ class FileListViewModel: SelectDelegate {
         presentingParent.navigationController?.pushViewController(fileDetailViewController, animated: true)
     }
 
+    private func addAction(frozenFile: File, presentingParent: UIViewController) {
+        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
+        let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager,
+                                                                                   folder: frozenFile,
+                                                                                   presentedFromPlusButton: false)
+        floatingPanelViewController.isRemovalInteractionEnabled = true
+        floatingPanelViewController.delegate = fileInformationsViewController
+
+        floatingPanelViewController.set(contentViewController: fileInformationsViewController)
+        floatingPanelViewController.track(scrollView: fileInformationsViewController.tableView)
+
+        presentingParent.present(floatingPanelViewController, animated: true)
+    }
+
     private func sendCopyAction(
-        _ action: FloatingPanelAction,
-        at indexPath: IndexPath,
         frozenFile: File,
         presentingParent: UIViewController,
         sourceView: UIView
     ) {
         if frozenFile.isMostRecentDownloaded {
             presentShareSheet(
-                from: indexPath,
                 frozenFile: frozenFile,
                 presentingParent: presentingParent,
                 sourceView: sourceView
             )
         } else {
-            downloadFile(action: action,
-                         indexPath: indexPath,
-                         frozenFile: frozenFile,
+            downloadFile(frozenFile: frozenFile,
                          presentingParent: presentingParent) { [weak self] in
                 self?.presentShareSheet(
-                    from: indexPath,
                     frozenFile: frozenFile,
                     presentingParent: presentingParent,
                     sourceView: sourceView
@@ -478,8 +484,6 @@ class FileListViewModel: SelectDelegate {
     }
 
     private func shareLinkAction(
-        _ action: FloatingPanelAction,
-        at indexPath: IndexPath,
         frozenFile: File,
         presentingParent: UIViewController,
         sourceView: UIView
@@ -487,7 +491,6 @@ class FileListViewModel: SelectDelegate {
         if let link = frozenFile.dropbox?.url {
             // Copy share link
             copyShareLinkToPasteboard(
-                from: indexPath,
                 link: link,
                 presentingParent: presentingParent,
                 frozenFile: frozenFile,
@@ -496,7 +499,6 @@ class FileListViewModel: SelectDelegate {
         } else if let link = frozenFile.sharelink?.url {
             // Copy share link
             copyShareLinkToPasteboard(
-                from: indexPath,
                 link: link,
                 presentingParent: presentingParent,
                 frozenFile: frozenFile,
@@ -508,7 +510,6 @@ class FileListViewModel: SelectDelegate {
                 do {
                     let shareLink = try await driveFileManager.createShareLink(for: proxyFile)
                     copyShareLinkToPasteboard(
-                        from: indexPath,
                         link: shareLink.url,
                         presentingParent: presentingParent,
                         frozenFile: frozenFile,
@@ -521,7 +522,6 @@ class FileListViewModel: SelectDelegate {
                         if let shareLink {
                             driveFileManager.setFileShareLink(file: proxyFile, shareLink: shareLink)
                             copyShareLinkToPasteboard(
-                                from: indexPath,
                                 link: shareLink.url,
                                 presentingParent: presentingParent,
                                 frozenFile: frozenFile,
@@ -536,14 +536,13 @@ class FileListViewModel: SelectDelegate {
         }
     }
 
-    func presentShareSheet(from indexPath: IndexPath, frozenFile: File, presentingParent: UIViewController, sourceView: UIView) {
+    func presentShareSheet(frozenFile: File, presentingParent: UIViewController, sourceView: UIView) {
         let activityViewController = UIActivityViewController(activityItems: [frozenFile.localUrl], applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = sourceView
         presentingParent.present(activityViewController, animated: true)
     }
 
     func copyShareLinkToPasteboard(
-        from indexPath: IndexPath,
         link: String,
         presentingParent: UIViewController,
         frozenFile: File,
@@ -557,9 +556,7 @@ class FileListViewModel: SelectDelegate {
         )
     }
 
-    func downloadFile(action: FloatingPanelAction,
-                      indexPath: IndexPath,
-                      frozenFile: File,
+    func downloadFile(frozenFile: File,
                       presentingParent: UIViewController,
                       completion: @escaping () -> Void) {
         guard let activeScene = UIApplication.shared.connectedScenes
@@ -568,13 +565,11 @@ class FileListViewModel: SelectDelegate {
             return
         }
 
-        let fileListViewController = presentingParent as? FileListViewController
+        guard let fileListViewController = presentingParent as? FileListViewController else { return }
 
-        fileListViewController?.downloadAction = action
-        fileListViewController?.downloadObserver?.cancel()
-        fileListViewController?.downloadObserver = fileListViewController?.downloadQueue
+        fileListViewController.downloadObserver?.cancel()
+        fileListViewController.downloadObserver = fileListViewController.downloadQueue
             .observeFileDownloaded(observerViewController, fileId: frozenFile.id) { [weak self] _, error in
-                fileListViewController?.downloadAction = nil
                 Task { @MainActor in
                     guard error == nil else {
                         UIConstants.showSnackBarIfNeeded(error: DriveError.downloadFailed)
@@ -585,16 +580,16 @@ class FileListViewModel: SelectDelegate {
             }
 
         if let publicShareProxy = driveFileManager.publicShareProxy {
-            fileListViewController?.downloadQueue.addPublicShareToQueue(file: frozenFile,
-                                                                        driveFileManager: driveFileManager,
-                                                                        publicShareProxy: publicShareProxy,
-                                                                        itemIdentifier: nil,
-                                                                        onOperationCreated: nil,
-                                                                        completion: nil)
+            fileListViewController.downloadQueue.addPublicShareToQueue(file: frozenFile,
+                                                                       driveFileManager: driveFileManager,
+                                                                       publicShareProxy: publicShareProxy,
+                                                                       itemIdentifier: nil,
+                                                                       onOperationCreated: nil,
+                                                                       completion: nil)
         } else {
-            fileListViewController?.downloadQueue.addToQueue(file: frozenFile,
-                                                             userId: fileListViewController!.accountManager.currentUserId,
-                                                             itemIdentifier: nil)
+            fileListViewController.downloadQueue.addToQueue(file: frozenFile,
+                                                            userId: fileListViewController.accountManager.currentUserId,
+                                                            itemIdentifier: nil)
         }
     }
 
