@@ -65,14 +65,14 @@ class ShareAndRightsViewController: UIViewController {
         tableView.register(cellView: ShareLinkTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
 
-        updateShareList()
-        hideKeyboardWhenTappedAround()
-        setTitle()
-
         searchControllerManager = SearchControllerManager()
         searchControllerManager.setup(in: self, tableView: tableView, file: file, driveFileManager: driveFileManager,
                                       ignoredShareables: fileAccessElements.compactMap(\.shareable), ignoredEmails: ignoredEmails)
         searchControllerManager.delegate = self
+
+        updateShareList()
+        hideKeyboardWhenTappedAround()
+        setTitle()
     }
 
     override func viewDidAppear(_ animated: Bool) {

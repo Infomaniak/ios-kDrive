@@ -58,7 +58,6 @@ class InviteUserViewController: UIViewController {
     private var message: String?
     private var emptyInvitation = false
     private var savedText = String()
-    private var fileAccessElements = [FileAccessElement]()
     private var searchControllerManager: SearchControllerManager!
 
     override func viewDidLoad() {
@@ -76,7 +75,7 @@ class InviteUserViewController: UIViewController {
         searchControllerManager.setup(in: self, tableView: tableView, file: file, driveFileManager: driveFileManager,
                                       ignoredShareables: ignoredShareables, ignoredEmails: ignoredEmails)
         searchControllerManager.delegate = self
-        searchControllerManager.onDismiss = { self.reloadInvited() }
+        searchControllerManager.onDismiss = { [weak self] in self?.reloadInvited() }
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(

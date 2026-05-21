@@ -112,9 +112,9 @@ class SearchUserViewController: UITableViewController {
         cell.logoImage.isAccessibilityElement = false
 
         switch results[indexPath.row] {
-        case let .shareable(shareable):
+        case .shareable(let shareable):
             configureCellForShareable(cell, shareable: shareable)
-        case let .email(email):
+        case .email(let email):
             configureCellForEmail(cell, email: email)
         }
 
@@ -152,9 +152,9 @@ class SearchUserViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
 
         switch results[indexPath.row] {
-        case let .shareable(shareable):
+        case .shareable(let shareable):
             delegate?.didSelect(shareable: shareable)
-        case let .email(email):
+        case .email(let email):
             delegate?.didSelect(email: email)
         }
     }

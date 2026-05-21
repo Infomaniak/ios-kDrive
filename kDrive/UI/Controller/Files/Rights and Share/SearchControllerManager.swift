@@ -46,6 +46,7 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
         searchController.obscuresBackgroundDuringPresentation = true
         searchController.searchResultsUpdater = self
         searchController.searchBar.placeholder = KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail
+        hostViewController?.definesPresentationContext = true
 
         configureSearchViewController(file: file, driveFileManager: driveFileManager,
                                       ignoredShareable: ignoredShareables, ignoredEmails: ignoredEmails)
