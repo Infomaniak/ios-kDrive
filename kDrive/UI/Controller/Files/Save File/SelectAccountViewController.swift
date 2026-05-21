@@ -44,7 +44,7 @@ final class SelectAccountViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "Sélectionner un compte"
+        title = KDriveResourcesStrings.Localizable.selectAccountTitle
 
         setupTableView()
     }
