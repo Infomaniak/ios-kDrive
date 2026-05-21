@@ -24,10 +24,11 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
     weak var hostViewController: UIViewController?
     weak var hostTableView: UITableView?
     weak var delegate: SearchUserDelegate?
-    var onDismiss: (() -> Void)?
 
     var searchUserViewController: SearchUserViewController!
     var searchController: UISearchController!
+
+    var addUserCellIndex = IndexPath(row: 0, section: 0)
 
     func setup(in viewController: UIViewController,
                tableView: UITableView,
@@ -81,7 +82,6 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
     func willDismissSearchController(_: UISearchController) {
         DispatchQueue.main.async {
             UIView.performWithoutAnimation {
-                self.onDismiss?()
                 self.hostViewController?.navigationItem.searchController = nil
                 self.hostViewController?.view.layoutIfNeeded()
                 self.hostTableView?.layoutIfNeeded()
@@ -90,11 +90,16 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
     }
 
     func didDismissSearchController(_: UISearchController) {
-        let indexPath = IndexPath(row: 0, section: 0)
-        guard let cell = hostTableView?.cellForRow(at: indexPath) else {
+        guard let cell = hostTableView?.cellForRow(at: addUserCellIndex) else {
             hostViewController?.navigationItem.searchController = nil
             return
         }
+
+        UIView.performWithoutAnimation {
+            cell.transform = CGAffineTransform(translationX: 0, y: -50)
+            cell.alpha = 0
+        }
+
         DispatchQueue.main.async {
             UIView.animate(withDuration: 0.1) {
                 cell.transform = .identity

@@ -75,7 +75,8 @@ class InviteUserViewController: UIViewController {
         searchControllerManager.setup(in: self, tableView: tableView, file: file, driveFileManager: driveFileManager,
                                       ignoredShareables: ignoredShareables, ignoredEmails: ignoredEmails)
         searchControllerManager.delegate = self
-        searchControllerManager.onDismiss = { [weak self] in self?.reloadInvited() }
+
+        reloadInvited()
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(
@@ -183,8 +184,10 @@ class InviteUserViewController: UIViewController {
 
         if emptyInvitation {
             rows = [.addUser, .rights, .message]
+            searchControllerManager.addUserCellIndex = IndexPath(row: 0, section: 0)
         } else {
             rows = [.invited, .addUser, .rights, .message]
+            searchControllerManager.addUserCellIndex = IndexPath(row: 1, section: 0)
         }
 
         tableView.reloadSections([0], with: .automatic)
@@ -300,6 +303,7 @@ extension InviteUserViewController: SearchUserDelegate {
     func didSelect(shareable: Shareable) {
         shareables.append(shareable)
         ignoredShareables.append(shareable)
+        reloadInvited()
         searchControllerManager.searchUserViewController.ignoredShareables = ignoredShareables
         searchControllerManager.searchController.isActive = false
     }
@@ -307,6 +311,7 @@ extension InviteUserViewController: SearchUserDelegate {
     func didSelect(email: String) {
         emails.append(email)
         ignoredEmails.append(email)
+        reloadInvited()
         searchControllerManager.searchUserViewController.ignoredEmails = ignoredEmails
         searchControllerManager.searchController.isActive = false
     }
