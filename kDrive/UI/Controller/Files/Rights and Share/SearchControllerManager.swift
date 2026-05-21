@@ -74,6 +74,7 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
             cell.alpha = 0
         }, completion: { _ in
             self.searchController.searchBar.becomeFirstResponder()
+            self.searchController.showsSearchResultsController = true
         })
     }
 
