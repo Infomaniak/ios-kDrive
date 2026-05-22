@@ -1,3 +1,6 @@
+- Amélioration de l'affichage du dossier lors d'un glisser-déposer
+- Correction d'un bug qui affichait deux fois l'option pour colorer un dossier
+- La state restoration fonctionne désormais même après un arrêt forcé par l'utilisateur
 - Dépendances du cache d'images remaniées
 - Passage au mécanisme de log natif du système
 - Améliorations de la stabilité et corrections de bugs
