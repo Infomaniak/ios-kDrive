@@ -42,7 +42,7 @@ class HomeRecentActivitiesController {
     var moreComing = true
     var invalidated = false
 
-    private var mergedActivities = [FileActivity]()
+    var mergedActivities = [FileActivity]()
 
     init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.driveFileManager = driveFileManager
@@ -119,8 +119,9 @@ class HomeRecentActivitiesController {
                 return
             }
             Task { @MainActor [activities = self.mergedActivities] in
-                self.homeViewController?.reloadWith(fetchedFiles: activities, isEmpty: self.empty)
-                self.loading = false
+                self.homeViewController?.reloadWith(fetchedFiles: activities, isEmpty: self.empty) { [weak self] in
+                    self?.loading = false
+                }
             }
         }
     }

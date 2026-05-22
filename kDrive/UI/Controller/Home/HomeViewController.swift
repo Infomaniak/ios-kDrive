@@ -204,17 +204,20 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         reload(newViewModel: newViewModel)
     }
 
-    func reloadWith(fetchedFiles: [FileActivity], isEmpty: Bool) {
+    func reloadWith(fetchedFiles: [FileActivity], isEmpty: Bool, completion: (() -> Void)? = nil) {
         refreshControl.endRefreshing()
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
                                          isLoading: false)
-        reload(newViewModel: newViewModel)
+        reload(newViewModel: newViewModel, completion: completion)
     }
 
-    private func reload(newViewModel: HomeViewModel) {
+    private func reload(newViewModel: HomeViewModel, completion: (() -> Void)? = nil) {
         reloadQueue.async { [weak self] in
-            guard let self else { return }
+            guard let self else {
+                completion?()
+                return
+            }
             var newViewModel = newViewModel
             let newChangeset = newViewModel.changeSet
             let oldChangeset = viewModel.changeSet
@@ -222,6 +225,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             DispatchQueue.main.sync {
                 self.collectionView.reload(using: changeset) { data in
                     self.viewModel = HomeViewModel(changeSet: data)
+                    completion?()
                 }
             }
         }
@@ -472,7 +476,9 @@ extension HomeViewController {
         guard let recentActivitiesController else { return }
 
         if HomeSection.allCases[indexPath.section] == .recentFiles {
-            if indexPath.row >= viewModel.recentFilesCount - 10 &&
+            let currentCount = recentActivitiesController.mergedActivities.count
+            if indexPath.row >= currentCount - 10 &&
+                indexPath.row < currentCount &&
                 !recentActivitiesController.loading &&
                 recentActivitiesController.moreComing {
                 reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
