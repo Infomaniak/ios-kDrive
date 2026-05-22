@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Alamofire/Alamofire",
       "state" : {
-        "revision" : "e938f8c66708e7352fc7e3512647fa54255b267a",
-        "version" : "5.11.2"
+        "revision" : "7595cbcf59809f9977c5f6378500de2ad73b7ddb",
+        "version" : "5.12.0"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "2ccbbaa031f11090c8d39b70daaf6a0d4484819d",
-        "version" : "1.34.0"
+        "revision" : "5d9828a3a92e0410ecc89580ebbd912737b9e9fd",
+        "version" : "1.35.0"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "f87155fbc558e28b4818d9cf843690a0cce543ed",
-        "version" : "18.10.2"
+        "revision" : "abce7c839e7da92252432f08b4c7dc1ba71b903c",
+        "version" : "18.11.1"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "9f838764a22cac07960974cc71227bca9d7daee1",
-        "version" : "24.7.0"
+        "revision" : "8f50d7bcba8e926be5af324b32be0c1e5d70d6a2",
+        "version" : "24.11.0"
       }
     },
     {
@@ -258,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "3a22ecd00ad1398747bfd587e44df82716908dd3",
-        "version" : "9.10.0"
+        "revision" : "193d313fbfd9affaf2be1692a0284a3b6574c515",
+        "version" : "9.14.0"
       }
     },
     {
