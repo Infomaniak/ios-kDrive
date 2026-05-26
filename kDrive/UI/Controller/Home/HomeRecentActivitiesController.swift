@@ -42,7 +42,7 @@ class HomeRecentActivitiesController {
     var moreComing = true
     var invalidated = false
 
-    private var mergedActivities = [FileActivity]()
+    private(set) var mergedActivities = [FileActivity]()
 
     init(driveFileManager: DriveFileManager, homeViewController: HomeViewController) {
         self.driveFileManager = driveFileManager
@@ -51,7 +51,7 @@ class HomeRecentActivitiesController {
 
     func restoreCachedPages() {
         invalidated = false
-        homeViewController?.reloadWith(fetchedFiles: mergedActivities, isEmpty: empty)
+        homeViewController?.reloadWith(fetchedFiles: mergedActivities)
     }
 
     func refreshIfNeeded() {
@@ -119,8 +119,14 @@ class HomeRecentActivitiesController {
                 return
             }
             Task { @MainActor [activities = self.mergedActivities] in
-                self.homeViewController?.reloadWith(fetchedFiles: activities, isEmpty: self.empty)
-                self.loading = false
+                guard let homeViewController = self.homeViewController else {
+                    self.loading = false
+                    return
+                }
+
+                homeViewController.reloadWith(fetchedFiles: activities) { [weak self] in
+                    self?.loading = false
+                }
             }
         }
     }
