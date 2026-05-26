@@ -204,7 +204,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         reload(newViewModel: newViewModel)
     }
 
-    func reloadWith(fetchedFiles: [FileActivity], isEmpty: Bool, completion: (() -> Void)? = nil) {
+    func reloadWith(fetchedFiles: [FileActivity], completion: (() -> Void)? = nil) {
         refreshControl.endRefreshing()
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
