@@ -32,9 +32,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     @LazyInjectService var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService var downloadQueue: DownloadQueueable
-
-    var downloadObserver: ObservationToken?
 
     private static let logger = Logger(category: "FileListViewController")
 
@@ -572,7 +569,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     // MARK: - Actions
 
-    @objc func handleLongPress(indexPath: IndexPath) {
+    func handleLongPress(indexPath: IndexPath) {
         guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel,
               !multipleSelectionViewModel.isMultipleSelectionEnabled
         else { return }
@@ -589,62 +586,29 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     func makeContextMenuQuickActions(indexPath: IndexPath) -> [UIAction] {
         #if !ISEXTENSION
-        let actions = setupQuickActions(frozenFile: viewModel.getFile(at: indexPath))
+        let file = displayedFiles[indexPath.row]
+        let fileInformationsViewController = FileActionsFloatingPanelViewController(frozenFile: file,
+                                                                                    driveFileManager: driveFileManager,
+                                                                                    sourceView: collectionView
+                                                                                        .cellForItem(at: indexPath) ??
+                                                                                        collectionView)
+        fileInformationsViewController.presentingParent = self
+        fileInformationsViewController.setupContent()
+        let actions = fileInformationsViewController.quickActions
+
         guard !actions.isEmpty else { return [] }
         return actions.map { action in
             UIAction(
                 title: action.name,
                 image: action.image,
+                attributes: action.isEnabled ? [] : .disabled,
             ) { _ in
-                self.viewModel.didMenuAction(
-                    action,
-                    at: indexPath,
-                    presentingParent: self,
-                    sourceView: self.collectionView.cellForItem(at: indexPath) ?? self.collectionView
-                )
+                fileInformationsViewController.handleAction(action, at: indexPath, isFromMenu: true)
             }
         }
         #endif
         return []
     }
-
-    #if !ISEXTENSION
-    private func setupQuickActions(frozenFile: File?) -> [FloatingPanelAction] {
-        let offline = ReachabilityListener.instance.currentStatus == .offline
-        var quickActions: [FloatingPanelAction]
-
-        guard let frozenFile else { return [] }
-
-        if driveFileManager.isPublicShare {
-            quickActions = []
-        } else if frozenFile.isDirectory {
-            quickActions = FloatingPanelAction.folderQuickActions
-        } else {
-            quickActions = FloatingPanelAction.quickActions
-        }
-
-        for action in quickActions {
-            switch action {
-            case .shareAndRights:
-                if !frozenFile.capabilities.canShare || offline {
-                    action.isEnabled = false
-                }
-            case .shareLink:
-                if (!frozenFile.capabilities.canBecomeSharelink || offline) && !frozenFile.hasSharelink && !frozenFile.isDropbox {
-                    action.isEnabled = false
-                }
-            case .add:
-                if !frozenFile.capabilities.canCreateFile || !frozenFile.capabilities.canCreateDirectory {
-                    action.isEnabled = false
-                }
-            default:
-                break
-            }
-        }
-
-        return quickActions
-    }
-    #endif
 
     override func collectionView(
         _ collectionView: UICollectionView,
@@ -652,7 +616,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
         guard let indexPath = indexPaths.first else { return nil }
-
+        if viewModel.getFile(at: indexPath)?.isDirectory == false && ReachabilityListener.instance.currentStatus == .offline {
+            return nil
+        }
         return UIContextMenuConfiguration(
             // swiftlint:disable:next trailing_closure
             actionProvider: { _ in
