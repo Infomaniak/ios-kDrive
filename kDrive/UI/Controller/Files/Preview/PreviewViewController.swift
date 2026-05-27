@@ -47,6 +47,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var normalFolderHierarchy = true
     private var initialLoading = true
     private var presentationOrigin = PresentationOrigin.fileList
+    private var shouldScrollToCurrentIndex = true
     private var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
             saveSceneState()
@@ -338,6 +339,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        if shouldScrollToCurrentIndex {
+            collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
+            shouldScrollToCurrentIndex = false
+        }
         floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view.safeAreaInsets.bottom, 5))
     }
 
