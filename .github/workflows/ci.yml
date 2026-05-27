@@ -92,46 +92,7 @@ jobs:
     runs-on: [ self-hosted, iOS ]
     env:
       DEVICE_NAME: "iPhone 17 Pro"
-      BUNDLE_ID: "com.infomaniak.drive"
-
     steps:
-      - name: Uninstall app from simulators and grant permissions
-        run: |
-          set -euo pipefail
-          IFS=$'\n\t'
-
-          DEVICE_NAME="${DEVICE_NAME}"
-          BUNDLE_ID="${BUNDLE_ID}"
-
-          echo "Looking for booted simulators named \"$DEVICE_NAME\"..."
-          UDIDS=$(xcrun simctl list devices --json | python3 -c 'import sys,json;data=json.load(sys.stdin);name=sys.argv[1];res=[d.get("udid") for devices in data.get("devices",{}).values() for d in devices if d.get("name")==name and d.get("state")=="Booted"];print("\n".join(res))' "$DEVICE_NAME")
-
-          if [ -z "$UDIDS" ]; then
-            echo "No booted simulators found for \"$DEVICE_NAME\", searching all states..."
-            UDIDS=$(xcrun simctl list devices --json | python3 -c 'import sys,json;data=json.load(sys.stdin);name=sys.argv[1];res=[d.get("udid") for devices in data.get("devices",{}).values() for d in devices if d.get("name")==name];print("\n".join(res))' "$DEVICE_NAME")
-            if [ -n "$UDIDS" ]; then
-              FIRST=$(echo "$UDIDS" | head -n1)
-              echo "Booting first matching simulator: $FIRST"
-              xcrun simctl boot "$FIRST" || true
-              xcrun simctl bootstatus "$FIRST" -b || true
-              UDIDS="$FIRST"
-            fi
-          fi
-
-          if [ -z "$UDIDS" ]; then
-            echo "No simulators found matching \"$DEVICE_NAME\"; skipping uninstall and permission steps."
-            exit 0
-          fi
-
-          echo "Found UDIDs:"
-          echo "$UDIDS"
-
-
-          for UDID in $UDIDS; do
-            echo "Uninstalling $BUNDLE_ID from $UDID"
-            xcrun simctl uninstall "$UDID" "$BUNDLE_ID" || echo "Uninstall failed or app not installed on $UDID"
-          done
-
       - name: Checkout
         uses: actions/checkout@v6
 
