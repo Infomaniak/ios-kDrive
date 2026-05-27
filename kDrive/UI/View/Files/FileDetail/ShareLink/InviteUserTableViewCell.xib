@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -34,9 +34,6 @@
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibPlaceholderLocKey" value="shareFileInputUserAndEmail"/>
                                 </userDefinedRuntimeAttributes>
-                                <connections>
-                                    <action selector="editingDidChanged:" destination="KGk-i7-Jjw" eventType="editingChanged" id="7gj-Fk-dLj"/>
-                                </connections>
                             </textField>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -66,7 +63,6 @@
             <connections>
                 <outlet property="bottomConstraint" destination="2bt-FH-sPC" id="6C4-s4-dUO"/>
                 <outlet property="contentInsetView" destination="hfV-If-K1y" id="3Wc-Zk-Cbg"/>
-                <outlet property="dropDownAnchorView" destination="qnd-d8-TOm" id="m5x-C6-nLh"/>
                 <outlet property="textField" destination="D2y-Vg-Ung" id="oDE-P8-igO"/>
                 <outlet property="topConstraint" destination="znS-mg-qNb" id="OaQ-A2-Klg"/>
             </connections>
@@ -75,7 +71,7 @@
     </objects>
     <resources>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

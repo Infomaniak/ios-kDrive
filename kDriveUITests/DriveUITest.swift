@@ -217,11 +217,13 @@ class AppUITest: XCTestCase {
 
     func shareWithMail(address mail: String) {
         let emailTextField = tablesQuery.textFields[KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail]
-        XCTAssertTrue(emailTextField.waitForExistence(timeout: 3), "Email text field should be displayed")
+        XCTAssertTrue(emailTextField.waitForExistence(timeout: 3), "Search field should be displayed")
         emailTextField.tap()
-        emailTextField.typeText(mail)
-        let dropdownMail = app.otherElements["drop_down"].staticTexts[mail]
-        XCTAssertTrue(dropdownMail.waitForExistence(timeout: 3), "Dropdown mail should be displayed")
+        let searchField = app.searchFields[KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail].firstMatch
+        XCTAssertTrue(searchField.waitForExistence(timeout: defaultTimeOut), "tableView should be displayed")
+        searchField.typeText(mail)
+        let dropdownMail = app.staticTexts[mail]
+        XCTAssertTrue(dropdownMail.waitForExistence(timeout: 3), "Mail should be displayed")
         dropdownMail.tap()
         let shareButton = tablesQuery.buttons[KDriveResourcesStrings.Localizable.buttonShare]
         XCTAssertTrue(shareButton.waitForExistence(timeout: 3), "Share button should be displayed")

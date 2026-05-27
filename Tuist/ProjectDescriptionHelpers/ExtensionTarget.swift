@@ -122,7 +122,6 @@ public extension Target {
                            .external(name: "Alamofire"),
                            .external(name: "DesignSystem"),
                            .external(name: "DifferenceKit"),
-                           .external(name: "DropDown"),
                            .external(name: "FloatingPanel"),
                            .external(name: "HorizonCalendar"),
                            .external(name: "InfomaniakCore"),

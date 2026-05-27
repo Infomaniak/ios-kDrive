@@ -29,15 +29,6 @@
       }
     },
     {
-      "identity" : "dropdown",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Infomaniak/DropDown",
-      "state" : {
-        "branch" : "master",
-        "revision" : "ed31441d29eb05972dee2e32904c16df0ade94aa"
-      }
-    },
-    {
       "identity" : "dtfoundation",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Cocoanetics/DTFoundation.git",

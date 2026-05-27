@@ -58,6 +58,7 @@ class InviteUserViewController: UIViewController {
     private var message: String?
     private var emptyInvitation = false
     private var savedText = String()
+    private var searchControllerManager: SearchControllerManager!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,6 +70,14 @@ class InviteUserViewController: UIViewController {
 
         hideKeyboardWhenTappedAround()
         setTitle()
+
+        searchControllerManager = SearchControllerManager()
+        searchControllerManager.setup(in: self, tableView: tableView, file: file, driveFileManager: driveFileManager,
+                                      ignoredShareables: ignoredShareables, ignoredEmails: ignoredEmails)
+        searchControllerManager.delegate = self
+
+        reloadInvited()
+
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             barButtonSystemItem: .stop,
@@ -175,8 +184,10 @@ class InviteUserViewController: UIViewController {
 
         if emptyInvitation {
             rows = [.addUser, .rights, .message]
+            searchControllerManager.addUserCellIndex = IndexPath(row: 0, section: 0)
         } else {
             rows = [.invited, .addUser, .rights, .message]
+            searchControllerManager.addUserCellIndex = IndexPath(row: 1, section: 0)
         }
 
         tableView.reloadSections([0], with: .automatic)
@@ -224,13 +235,8 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
         case .addUser:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
-            cell.canUseTeam = file.capabilities.canUseTeam
-            cell.drive = driveFileManager.drive
-            cell.textField.text = savedText
-            cell.textField.placeholder = KDriveResourcesStrings.Localizable.shareFileInputUserAndEmail
-            cell.ignoredShareables = ignoredShareables
-            cell.ignoredEmails = ignoredEmails
-            cell.delegate = self
+            cell.delegate = searchControllerManager
+            cell.transform = .identity
             return cell
         case .rights:
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
@@ -298,12 +304,16 @@ extension InviteUserViewController: SearchUserDelegate {
         shareables.append(shareable)
         ignoredShareables.append(shareable)
         reloadInvited()
+        searchControllerManager.searchUserViewController.ignoredShareables = ignoredShareables
+        searchControllerManager.searchController.isActive = false
     }
 
     func didSelect(email: String) {
         emails.append(email)
         ignoredEmails.append(email)
         reloadInvited()
+        searchControllerManager.searchUserViewController.ignoredEmails = ignoredEmails
+        searchControllerManager.searchController.isActive = false
     }
 }
 
@@ -313,12 +323,14 @@ extension InviteUserViewController: SelectedUsersDelegate {
     func didDelete(shareable: Shareable) {
         shareables.removeAll { $0.id == shareable.id }
         ignoredShareables.removeAll { $0.id == shareable.id }
+        searchControllerManager.searchUserViewController.ignoredShareables = ignoredShareables
         reloadInvited()
     }
 
     func didDelete(email: String) {
         emails.removeAll { $0 == email }
         ignoredEmails.removeAll { $0 == email }
+        searchControllerManager.searchUserViewController.ignoredEmails = ignoredEmails
         reloadInvited()
     }
 }
