@@ -1,5 +1,5 @@
 {
-  "originHash" : "e615561160774b9456b455ee041962f9365ab4abebc05159e2742b7cac60c613",
+  "originHash" : "1586482aa28847c0f3ac69da418ee2241ba271f3b718546746ee4025f6704803",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "abce7c839e7da92252432f08b4c7dc1ba71b903c",
-        "version" : "18.11.1"
+        "branch" : "chore/upgrade-realm",
+        "revision" : "d9c14f63978ce9f5cf18eb068fcc1822ccfe626e"
       }
     },
     {
@@ -240,8 +240,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-core.git",
       "state" : {
-        "revision" : "cccb3ca9e26ec452a29f2f0d4050d1e38b8a3d43",
-        "version" : "14.14.0"
+        "revision" : "4cc46f8607516226e5465062fdacd088fbd94552",
+        "version" : "20.1.4"
       }
     },
     {
@@ -249,8 +249,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-swift",
       "state" : {
-        "revision" : "1c105d34f25af7851c5a3ff146be006de247a6b4",
-        "version" : "10.54.6"
+        "revision" : "600e187711e5fa4e8e2c0429cacee27e8e44f112",
+        "version" : "20.0.4"
       }
     },
     {
