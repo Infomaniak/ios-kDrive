@@ -238,10 +238,19 @@ class FileListViewModel: SelectDelegate {
                 guard let newResults else { return }
                 currentDirectory = getRefreshedCurrentDirectory()
                 files = Array(newResults.freezeIfNeeded())
+
+                let fileTypeCounts = files.reduce(into: (files: 0, directories: 0)) { counts, file in
+                    if file.isDirectory {
+                        counts.directories += 1
+                    } else {
+                        counts.files += 1
+                    }
+                }
+
                 directoryFilesCount = FileCount(
                     count: files.count,
-                    files: files.filter { !$0.isDirectory }.count,
-                    directories: files.filter { $0.isDirectory }.count
+                    files: fileTypeCounts.files,
+                    directories: fileTypeCounts.directories
                 )
                 isShowingEmptyView = shouldShowEmptyView()
             }

@@ -223,8 +223,8 @@ class MultipleSelectionFileListViewModel {
     func enableMultipleSelection(realmDirectoryCount: FileCount? = nil) {
         isMultipleSelectionEnabled = true
         directoryCount = realmDirectoryCount
+        rightBarButtons = [.loading]
         Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
-            rightBarButtons = [.loading]
             if let publicShareProxy = driveFileManager.publicShareProxy {
                 directoryCount = try await PublicShareApiFetcher()
                     .countPublicShare(drive: publicShareProxy.proxyDrive,
@@ -240,7 +240,6 @@ class MultipleSelectionFileListViewModel {
 
     func selectAll() {
         selectedItems.removeAll()
-        isSelectAllModeEnabled = true
         setRightBarButtons(from: .selectAll)
         onSelectAll?()
     }
@@ -284,6 +283,7 @@ class MultipleSelectionFileListViewModel {
         guard let directoryCount else { return }
         switch from {
         case .selectAll:
+            isSelectAllModeEnabled = true
             selectedCount = directoryCount.count
             rightBarButtons = [.deselectAll]
         case .deselectAll:
