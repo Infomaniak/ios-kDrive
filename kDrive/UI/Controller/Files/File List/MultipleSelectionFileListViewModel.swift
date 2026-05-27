@@ -119,6 +119,8 @@ class MultipleSelectionFileListViewModel {
     private var currentDirectory: File
     private var configuration: FileListViewModel.Configuration
 
+    private var directoryCount: FileCount?
+
     init(configuration: FileListViewModel.Configuration, driveFileManager: DriveFileManager, currentDirectory: File) {
         isMultipleSelectionEnabled = false
         selectedCount = 0
@@ -218,30 +220,29 @@ class MultipleSelectionFileListViewModel {
         }
     }
 
+    func enableMultipleSelection(realmDirectoryCount: FileCount? = nil) {
+        isMultipleSelectionEnabled = true
+        directoryCount = realmDirectoryCount
+        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
+            rightBarButtons = [.loading]
+            if let publicShareProxy = driveFileManager.publicShareProxy {
+                directoryCount = try await PublicShareApiFetcher()
+                    .countPublicShare(drive: publicShareProxy.proxyDrive,
+                                      linkUuid: publicShareProxy.shareLinkUid,
+                                      fileId: publicShareProxy.fileId,
+                                      token: publicShareProxy.token)
+            } else {
+                directoryCount = try await driveFileManager.apiFetcher.count(of: proxyCurrentDirectory)
+            }
+        }
+        setRightBarButtons()
+    }
+
     func selectAll() {
         selectedItems.removeAll()
         isSelectAllModeEnabled = true
-        rightBarButtons = [.loading]
+        setRightBarButtons(from: .selectAll)
         onSelectAll?()
-        Task { [proxyCurrentDirectory = currentDirectory.proxify()] in
-            do {
-                let directoryCount: FileCount
-                if let publicShareProxy = driveFileManager.publicShareProxy {
-                    directoryCount = try await PublicShareApiFetcher()
-                        .countPublicShare(drive: publicShareProxy.proxyDrive,
-                                          linkUuid: publicShareProxy.shareLinkUid,
-                                          fileId: publicShareProxy.fileId,
-                                          token: publicShareProxy.token)
-                } else {
-                    directoryCount = try await driveFileManager.apiFetcher.count(of: proxyCurrentDirectory)
-                }
-
-                selectedCount = directoryCount.count
-                rightBarButtons = [.deselectAll]
-            } catch {
-                deselectAll()
-            }
-        }
     }
 
     func deselectAll() {
@@ -249,7 +250,7 @@ class MultipleSelectionFileListViewModel {
         selectedItems.removeAll()
         exceptItemIds.removeAll()
         isSelectAllModeEnabled = false
-        rightBarButtons = [.selectAll]
+        setRightBarButtons(from: .deselectAll)
         onDeselectAll?()
     }
 
@@ -261,6 +262,7 @@ class MultipleSelectionFileListViewModel {
             selectedItems.insert(file)
             selectedCount = selectedItems.count
         }
+        setRightBarButtons()
         onItemSelected?(indexPath)
     }
 
@@ -274,6 +276,25 @@ class MultipleSelectionFileListViewModel {
         } else {
             selectedItems.remove(file)
             selectedCount = selectedItems.count
+        }
+        setRightBarButtons()
+    }
+
+    private func setRightBarButtons(from: FileListBarButtonType? = nil) {
+        guard let directoryCount else { return }
+        switch from {
+        case .selectAll:
+            selectedCount = directoryCount.count
+            rightBarButtons = [.deselectAll]
+        case .deselectAll:
+            selectedCount = 0
+            rightBarButtons = [.selectAll]
+        default:
+            if selectedCount == directoryCount.count {
+                rightBarButtons = [.deselectAll]
+            } else {
+                rightBarButtons = [.selectAll]
+            }
         }
     }
 
