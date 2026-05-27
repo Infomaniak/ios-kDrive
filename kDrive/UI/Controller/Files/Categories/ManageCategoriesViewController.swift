@@ -89,6 +89,7 @@ final class ManageCategoriesViewController: UITableViewController {
 
         createButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonCreate
         navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
         if presentingViewController != nil && viewControllersCount < 2 {
             // Show cancel button
@@ -145,6 +146,7 @@ final class ManageCategoriesViewController: UITableViewController {
         } else {
             tableView.reloadData()
         }
+        showEmptyViewIfNeeded()
     }
 
     private func selectCategories(files: [File]) {

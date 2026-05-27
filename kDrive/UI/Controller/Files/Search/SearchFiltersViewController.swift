@@ -70,6 +70,7 @@ class SearchFiltersViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        navigationItem.largeTitleDisplayMode = .never
         navigationItem.hideBackButtonText()
 
         clearsSelectionOnViewWillAppear = false
