@@ -51,19 +51,19 @@ public final class UploadQueueSuspensionObserver {
         }
 
         guard let previousIsSuspend else {
-            delegate?.operationQueueNotSuspend(uploadQueue)
+            delegate?.operationQueueNoLongerSuspended(uploadQueue)
             if currentIsSuspend {
-                delegate?.operationQueueBecameSuspend(uploadQueue)
+                delegate?.operationQueueBecameSuspended(uploadQueue)
             } else {
-                delegate?.operationQueueNotSuspend(uploadQueue)
+                delegate?.operationQueueNoLongerSuspended(uploadQueue)
             }
             return
         }
 
         if currentIsSuspend {
-            delegate?.operationQueueBecameSuspend(uploadQueue)
+            delegate?.operationQueueBecameSuspended(uploadQueue)
         } else if previousIsSuspend && !currentIsSuspend {
-            delegate?.operationQueueNotSuspend(uploadQueue)
+            delegate?.operationQueueNoLongerSuspended(uploadQueue)
         }
     }
 }

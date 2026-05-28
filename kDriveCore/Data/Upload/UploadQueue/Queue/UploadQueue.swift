@@ -26,8 +26,8 @@ import Sentry
 public protocol UploadQueueDelegate: AnyObject {
     func operationQueueBecameEmpty(_ queue: UploadQueue)
     func operationQueueNoLongerEmpty(_ queue: UploadQueue)
-    func operationQueueBecameSuspend(_ queue: UploadQueue)
-    func operationQueueNotSuspend(_ queue: UploadQueue)
+    func operationQueueBecameSuspended(_ queue: UploadQueue)
+    func operationQueueNoLongerSuspended(_ queue: UploadQueue)
 }
 
 public class UploadQueue: ParallelismHeuristicDelegate {
