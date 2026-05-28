@@ -46,19 +46,23 @@ public final class UploadQueueSuspensionObserver {
     }
 
     func suspendStateDidChange(previousIsSuspend: Bool?, newIsSuspend: Bool?) {
-        guard let newIsSuspend else {
-            delegate?.operationQueueBecameSuspend(uploadQueue)
+        guard let currentIsSuspend = newIsSuspend ?? previousIsSuspend else {
             return
         }
 
         guard let previousIsSuspend else {
             delegate?.operationQueueNotSuspend(uploadQueue)
+            if currentIsSuspend {
+                delegate?.operationQueueBecameSuspend(uploadQueue)
+            } else {
+                delegate?.operationQueueNotSuspend(uploadQueue)
+            }
             return
         }
 
-        if newIsSuspend {
+        if currentIsSuspend {
             delegate?.operationQueueBecameSuspend(uploadQueue)
-        } else if previousIsSuspend && !newIsSuspend {
+        } else if previousIsSuspend && !currentIsSuspend {
             delegate?.operationQueueNotSuspend(uploadQueue)
         }
     }
