@@ -33,6 +33,9 @@ public protocol UploadPublishable {
                                    driveId: Int)
 
     func publishFileUploaded(result: UploadCompletionResult)
+
+    func publishQueueSuspended(queueName: String)
+    func publishQueueResumed(queueName: String)
 }
 
 // MARK: - Publish
@@ -95,6 +98,16 @@ extension UploadService: UploadPublishable {
                 }
             }
         }
+    }
+
+    public func publishQueueSuspended(queueName: String) {
+        Log.uploadQueue("Queue \(queueName) SUSPENDED")
+        suspendedQueueNames.append(queueName)
+    }
+
+    public func publishQueueResumed(queueName: String) {
+        Log.uploadQueue("Queue \(queueName) RESUMED")
+        suspendedQueueNames.removeAll { $0 == queueName }
     }
 
     // MARK: Private

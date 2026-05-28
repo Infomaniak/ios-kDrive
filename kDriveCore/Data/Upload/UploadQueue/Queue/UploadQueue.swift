@@ -26,6 +26,8 @@ import Sentry
 public protocol UploadQueueDelegate: AnyObject {
     func operationQueueBecameEmpty(_ queue: UploadQueue)
     func operationQueueNoLongerEmpty(_ queue: UploadQueue)
+    func operationQueueBecameSuspend(_ queue: UploadQueue)
+    func operationQueueNotSuspend(_ queue: UploadQueue)
 }
 
 public class UploadQueue: ParallelismHeuristicDelegate {
@@ -33,6 +35,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     @LazyInjectService var uploadPublisher: UploadPublishable
 
     private var queueObserver: UploadQueueObserver?
+    private var queueSuspensionObserver: UploadQueueSuspensionObserver?
 
     public var fileUploadedCount = 0
     public var fileUploadFailedCount = 0
@@ -52,7 +55,9 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     weak var delegate: UploadQueueDelegate?
 
-    var name = "kDrive base upload queue"
+    public var name: String {
+        "kDrive base upload queue"
+    }
 
     /// Something to track an operation for a File ID
     let keyedUploadOperations = KeyedUploadOperationable()
@@ -102,6 +107,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         self.delegate = delegate
 
         queueObserver = UploadQueueObserver(uploadQueue: self, delegate: delegate)
+        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, delegate: delegate)
     }
 
     // MARK: - ParallelismHeuristicDelegate

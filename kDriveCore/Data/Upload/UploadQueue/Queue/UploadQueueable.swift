@@ -55,4 +55,6 @@ public protocol UploadQueueable {
     var fileUploadedCount: Int { get set }
 
     var fileUploadFailedCount: Int { get set }
+
+    var name: String { get }
 }

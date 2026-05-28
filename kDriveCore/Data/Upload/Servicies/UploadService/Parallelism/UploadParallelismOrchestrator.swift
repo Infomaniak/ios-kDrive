@@ -117,6 +117,14 @@ extension UploadParallelismOrchestrator: UploadQueueDelegate {
     public func operationQueueNoLongerEmpty(_ queue: UploadQueue) {
         computeUploadParallelismPerQueueAndApply()
     }
+
+    public func operationQueueBecameSuspend(_ queue: UploadQueue) {
+        computeUploadParallelismPerQueueAndApply()
+    }
+
+    public func operationQueueNotSuspend(_ queue: UploadQueue) {
+        computeUploadParallelismPerQueueAndApply()
+    }
 }
 
 extension UploadParallelismOrchestrator: ParallelismHeuristicDelegate {
