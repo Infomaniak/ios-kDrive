@@ -458,8 +458,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) {
         // Silent handling if error if cancel error
-        guard let nsError = error as? NSError,
-              nsError.code == NSURLErrorCancelled else {
+        if let nsError = error as? NSError,
+           nsError.code == NSURLErrorCancelled {
             return
         }
 
