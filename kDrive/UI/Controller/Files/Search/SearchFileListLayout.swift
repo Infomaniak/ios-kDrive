@@ -27,7 +27,7 @@ struct SearchFileListLayout: FileListLayout {
             return DefaultFileListLayout().createLayoutFor(viewModel: viewModel)
         }
 
-        if searchViewModel.isDisplayingSearchResults {
+        if !searchViewModel.isDisplayingSearchResults {
             return createRecentSearchesLayoutFor(viewModel: viewModel)
         } else {
             return DefaultFileListLayout().createLayoutFor(viewModel: viewModel)
