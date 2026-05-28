@@ -32,6 +32,8 @@ public struct UploadCompletionResult {
 }
 
 public final class UploadOperation: AsynchronousOperation, UploadOperationable {
+    typealias ChunkUploadCompletion = (data: Data?, response: URLResponse?, error: Error?)
+
     /// Local specialized errors
     enum ErrorDomain: Error {
         /// Building a request failed
@@ -75,7 +77,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
 
     /// The number of chunks we try to upload in parallel in one UploadOperation.
-    private static let parallelism = 2
+    private static let parallelism = 1
 
     /// An Activity to prevent the system from interrupting it without been notified beforehand
     private var expiringActivity: ExpiringActivityable?
@@ -83,6 +85,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     /// Local tracking of running network tasks
     /// The key used is the and absolute identifier of the task.
     let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
+
+    /// Current serial chunk upload continuation.
+    var chunkUploadContinuation: CheckedContinuation<ChunkUploadCompletion, Error>?
 
     /// The url session used to upload chunks
     let urlSession: URLSession
@@ -362,24 +367,34 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     /// Chunk upload network callback.
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         enqueueCatching {
-            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-
-            // Success
-            if let data,
-               error == nil,
-               statusCode >= 200, statusCode < 300 {
-                try await self.uploadCompletionSuccess(data: data, response: response, error: error)
+            guard let continuation = self.chunkUploadContinuation else {
+                Log.uploadOperation("completion without continuation ufid:\(self.uploadFileId)", level: .error)
+                return
             }
 
-            // Client-side error
-            else if let error {
-                try self.uploadCompletionLocalFailure(data: data, response: response, error: error)
-            }
+            self.chunkUploadContinuation = nil
+            continuation.resume(returning: (data, response, error))
+        }
+    }
 
-            // Server-side error
-            else {
-                self.uploadCompletionRemoteFailure(data: data, response: response, error: error)
-            }
+    func processChunkUploadResult(data: Data?, response: URLResponse?, error: Error?) async throws {
+        let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+
+        // Success
+        if let data,
+           error == nil,
+           statusCode >= 200, statusCode < 300 {
+            try await uploadCompletionSuccess(data: data, response: response, error: error)
+        }
+
+        // Client-side error
+        else if let error {
+            try uploadCompletionLocalFailure(data: data, response: response, error: error)
+        }
+
+        // Server-side error
+        else {
+            try uploadCompletionRemoteFailure(data: data, response: response, error: error)
         }
     }
 
@@ -421,9 +436,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         // Update UI progress state
         updateUploadProgress()
-
-        // Decide if we should send the complete call, do next chunk, or retry the upload
-        enqueueTryFinishOrEnqueueNextChunk()
     }
 
     private func uploadCompletionLocalFailure(data: Data?, response: URLResponse?, error: Error) throws {
@@ -442,9 +454,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             var iterator = uploadTasks.makeIterator()
             try cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
 
-            // Decide if we should send the complete call, do next chunk, or retry the upload
-            enqueueTryFinishOrEnqueueNextChunk()
-
             return
         default:
             handleLocalErrors(error: error)
@@ -452,15 +461,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
     }
 
-    private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) {
+    private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) throws {
         // Silent handling if error if cancel error
-        guard let nsError = error as? NSError,
-              nsError.code == NSURLErrorCancelled else {
+        if let nsError = error as? NSError,
+           nsError.code == NSURLErrorCancelled {
             return
-        }
-
-        defer {
-            end()
         }
 
         if let data {
@@ -481,22 +486,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
 
         Log.uploadOperation("completion  Server-side error:\(driveError) ufid:\(uploadFileId) ", level: .error)
-        handleRemoteErrors(error: driveError)
-    }
-
-    // MARK: Misc
-
-    /// Decide if we should send the complete call, do next chunk, or retry the upload
-    private func enqueueTryFinishOrEnqueueNextChunk() {
-        enqueueCatching {
-            // Decide if we should send the complete call or retry the upload
-            try await self.completeUploadSessionOrRetryIfPossible()
-
-            // Follow up with more chunk uploads
-            if self.availableWorkerSlots() > 0 {
-                try await self.fanOutChunks()
-            }
-        }
+        throw driveError
     }
 
     /// Propagate the newly uploaded DriveFile / File into the specialized Realms
