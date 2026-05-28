@@ -422,8 +422,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
                 // We may be running both the app and the extension
                 assertionFailure("unable to lookup chunk task id, ufid:\(self.uploadFileId)")
             }
-
-            // Note: No temp file cleanup needed - chunks are now uploaded directly from memory-mapped source file
         } notFound: {
             Log.uploadOperation("matching chunk:\(uploadedChunk.number) failed ufid:\(self.uploadFileId)", level: .error)
             let context = ["Chunk number": uploadedChunk.number, "fid": self.uploadFileId]
