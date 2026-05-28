@@ -139,14 +139,6 @@ extension UploadOperation {
 
             let sourceFileUrl = try self.getFileUrlIfReadable(file: file)
 
-            let mappedFileData: Data
-            do {
-                mappedFileData = try Data(contentsOf: sourceFileUrl, options: .mappedIfSafe)
-            } catch {
-                Log.uploadOperation("Failed to memory-map source file: \(error) ufid:\(self.uploadFileId)", level: .error)
-                throw error
-            }
-
             // Schedule all the chunks to be uploaded
             for chunkToUpload: UploadingChunkTask in chunksToUpload {
                 try self.checkCancelation()
@@ -161,17 +153,11 @@ extension UploadOperation {
                     let chunkSize = chunkToUpload.chunkSize
                     let range = chunkToUpload.range
 
-                    // Extract chunk data directly from memory-mapped source file
-                    let startIndex = Int(range.lowerBound)
-                    let endIndex = Int(range.upperBound) + 1 // upperBound is inclusive in DataRange
-                    guard startIndex >= 0, endIndex <= mappedFileData.count else {
-                        Log.uploadOperation(
-                            "Chunk range out of bounds: \(range) for file size \(mappedFileData.count) ufid:\(self.uploadFileId)",
-                            level: .error
-                        )
+                    guard let chunkProvider = ChunkProvider(fileURL: sourceFileUrl, ranges: [range]),
+                          let chunkData = chunkProvider.next() else {
+                        Log.uploadOperation("Unable to read chunk data for \(self.uploadFileId)", level: .error)
                         throw ErrorDomain.chunkError
                     }
-                    let chunkData = mappedFileData[startIndex ..< endIndex]
 
                     let request = try self.buildRequest(chunkNumber: chunkNumber,
                                                         chunkSize: chunkSize,
