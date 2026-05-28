@@ -52,7 +52,6 @@ extension UploadOperation {
             let range = chunkTask.range
             let fileUrl = try self.getFileUrlIfReadable(file: file)
 
-            // Read chunk data from source file to compute SHA256 hash
             guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: [range]),
                   let chunkData = chunkProvider.next() else {
                 Log.uploadOperation("Unable to get a ChunkProvider for \(self.uploadFileId)", level: .error)
@@ -65,7 +64,6 @@ extension UploadOperation {
 
             try self.checkCancelation()
 
-            // Compute and store only the SHA256 hash - no temp file needed
             let chunkSHA256 = chunkData.SHA256DigestString
             chunkTask.sha256 = chunkSHA256
 
@@ -105,8 +103,6 @@ extension UploadOperation {
     }
 
     /// Prepare chunk upload requests, and start them.
-    /// This optimized version reads chunk data directly from the source file using memory mapping,
-    /// avoiding the need to write temporary chunk files to disk.
     func fanOutChunks() async throws {
         try checkCancelation()
         try checkForRestrictedUploadOverDataMode()
@@ -142,10 +138,8 @@ extension UploadOperation {
                 throw ErrorDomain.unableToBuildRequest
             }
 
-            // Get the source file URL for reading chunk data
             let sourceFileUrl = try self.getFileUrlIfReadable(file: file)
 
-            // Memory-map the source file for efficient chunk reading
             let mappedFileData: Data
             do {
                 mappedFileData = try Data(contentsOf: sourceFileUrl, options: .mappedIfSafe)
@@ -188,7 +182,6 @@ extension UploadOperation {
                                                         accessToken: accessToken,
                                                         host: uploadSession.uploadHost)
 
-                    // Upload directly from memory-mapped data slice - no temp file needed
                     let uploadTask = self.urlSession.uploadTask(with: request,
                                                                 from: chunkData,
                                                                 completionHandler: self.uploadCompletion)
