@@ -36,7 +36,7 @@ struct SearchFileListLayout: FileListLayout {
 
     private func createRecentSearchesLayoutFor(viewModel: FileListViewModel) -> UICollectionViewLayout {
         let layout = UICollectionViewCompositionalLayout { _, layoutEnvironment in
-            DefaultFileListLayout().createListLayout(environment: layoutEnvironment, viewModel: viewModel)
+            DefaultFileListLayout().createListLayout(environment: layoutEnvironment, viewModel: viewModel, showsHeader: false)
         }
 
         return layout

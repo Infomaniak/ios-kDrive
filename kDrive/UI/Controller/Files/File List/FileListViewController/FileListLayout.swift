@@ -55,7 +55,7 @@ struct DefaultFileListLayout: FileListLayout {
     }
 
     func createGridLayout(environment: any NSCollectionLayoutEnvironment,
-                          headerEstimatedHeight: CGFloat = 1) -> NSCollectionLayoutSection {
+                          headerEstimatedHeight: CGFloat = 1, showsHeader: Bool = true) -> NSCollectionLayoutSection {
         let effectiveContentWidth = environment.container.effectiveContentSize.width - UIConstants.Padding.mediumSmall * 2
         let gridColumns = getColumnCountFor(width: effectiveContentWidth)
 
@@ -82,14 +82,16 @@ struct DefaultFileListLayout: FileListLayout {
             bottom: 0,
             trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
-
-        addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
+        if showsHeader {
+            addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
+        }
 
         return section
     }
 
     func createListLayout(environment: any NSCollectionLayoutEnvironment,
-                          viewModel: FileListViewModel, headerEstimatedHeight: CGFloat = 1) -> NSCollectionLayoutSection {
+                          viewModel: FileListViewModel, headerEstimatedHeight: CGFloat = 1,
+                          showsHeader: Bool = true) -> NSCollectionLayoutSection {
         var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         configuration.backgroundColor = .clear
         configuration.showsSeparators = false
@@ -108,8 +110,9 @@ struct DefaultFileListLayout: FileListLayout {
             bottom: 0,
             trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
         )
-
-        addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
+        if showsHeader {
+            addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
+        }
 
         return section
     }
