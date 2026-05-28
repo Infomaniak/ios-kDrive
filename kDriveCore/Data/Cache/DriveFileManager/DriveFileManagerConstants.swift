@@ -26,7 +26,7 @@ import RealmSwift
 /// Something to centralize schema versioning
 public enum RealmSchemaVersion {
     /// Current version of the Upload Realm
-    static let upload: UInt64 = 22
+    static let upload: UInt64 = 23
 
     /// Current version of the Drive Realm
     static let drive: UInt64 = 14

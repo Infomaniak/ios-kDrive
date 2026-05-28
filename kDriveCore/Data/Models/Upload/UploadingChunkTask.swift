@@ -41,7 +41,6 @@ public final class UploadingChunkTask: EmbeddedObject {
 
     @Persisted public var chunkNumber: Int64
     @Persisted public var chunkSize: Int64
-    @Persisted public var sha256: String?
 
     /// Current upload session token
     @Persisted public var sessionToken: String?
@@ -54,9 +53,6 @@ public final class UploadingChunkTask: EmbeddedObject {
 
     /// Tracking the upload request
     @Persisted public var requestUrl: String?
-
-    /// The path to the chunk file on the file system
-    @Persisted public var path: String?
 
     /// The persisted lowerBound of the `DataRange`
     @Persisted public var _lowerBound: Int64
@@ -90,15 +86,6 @@ public final class UploadingChunkTask: EmbeddedObject {
         )
 
     // MARK: - Computed Properties
-
-    /// The chunk hash has been computed and is ready for upload.
-    public var isReadyForUpload: Bool {
-        guard let sha256,
-              !sha256.isEmpty else {
-            return false
-        }
-        return true
-    }
 
     /// The range of the original file
     public var range: DataRange {

@@ -124,7 +124,6 @@ extension UploadOperation {
                      .splitError,
                      .chunkError,
                      .parseError,
-                     .missingChunkHash,
                      .retryCountIsZero,
                      .uploadSessionTaskMissing,
                      .uploadSessionInvalid:
@@ -350,5 +349,7 @@ extension UploadOperation {
 
 /// Provide a useable debug output of `ApiError`
 extension ApiError: CustomDebugStringConvertible {
-    public var debugDescription: String { "<ApiError: code:\(code) description:\(description)>" }
+    public var debugDescription: String {
+        "<ApiError: code:\(code) description:\(description)>"
+    }
 }

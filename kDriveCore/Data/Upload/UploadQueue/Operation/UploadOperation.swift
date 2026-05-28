@@ -46,8 +46,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         case splitError
         /// Unable to split a file into [Data]
         case chunkError
-        /// SHA of the file is unavailable at the moment
-        case missingChunkHash
         /// Unable to parse some data
         case parseError
         /// UploadFile is probably deleted in another thread
@@ -76,7 +74,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
 
-    /// The number of chunks we try to keep ready to upload in one UploadOperation
+    /// The number of chunks we try to upload in parallel in one UploadOperation.
     private static let parallelism = 2
 
     /// An Activity to prevent the system from interrupting it without been notified beforehand
@@ -147,8 +145,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             // Re-Load or Setup an UploadingSessionTask within the UploadingFile
             try await self.refreshUploadSessionOrCreate()
 
-            // Start chunking
-            try await self.generateChunksAndFanOutIfNeeded()
+            // Start chunk uploads
+            try await self.fanOutChunks()
         }
     }
 
@@ -161,11 +159,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         expiringActivity = activity
     }
 
-    /// Return the available chunking slots.
+    /// Return the available upload slots.
     func availableWorkerSlots() -> Int {
-        let uploadTasksCount = uploadTasks.count
-        let free = max(Self.parallelism - uploadTasksCount, 0)
-        return free
+        return max(Self.parallelism - uploadTasks.count, 0)
     }
 
     func fileSize(fileUrl: URL) throws -> UInt64 {
@@ -363,7 +359,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
     // MARK: Network callback
 
-    // Chunk upload network callback
+    /// Chunk upload network callback.
     public func uploadCompletion(data: Data?, response: URLResponse?, error: Error?) {
         enqueueCatching {
             let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
@@ -441,8 +437,8 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
         switch nsError.code {
         case NSURLErrorCancelled, NSURLErrorNetworkConnectionLost:
-            /// Here a Chunk request canceled on .taskRescheduled _or_ the network connection was lost
-            /// Either way we catch silently the issue, the operation will seamlessly retry the chunk
+            // Here a Chunk request canceled on .taskRescheduled _or_ the network connection was lost.
+            // Either way we catch silently the issue, the operation will seamlessly retry the chunk.
             var iterator = uploadTasks.makeIterator()
             try cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
 
@@ -496,9 +492,9 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
             // Decide if we should send the complete call or retry the upload
             try await self.completeUploadSessionOrRetryIfPossible()
 
-            // Follow up with chunking again
+            // Follow up with more chunk uploads
             if self.availableWorkerSlots() > 0 {
-                try await self.generateChunksAndFanOutIfNeeded()
+                try await self.fanOutChunks()
             }
         }
     }

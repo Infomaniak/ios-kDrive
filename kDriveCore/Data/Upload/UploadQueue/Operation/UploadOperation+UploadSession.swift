@@ -341,8 +341,6 @@ extension UploadOperation {
                 uploadingChunkTask.sessionIdentifier = nil
                 uploadingChunkTask.taskIdentifier = nil
                 uploadingChunkTask.requestUrl = nil
-                uploadingChunkTask.path = nil
-                uploadingChunkTask.sha256 = nil
                 uploadingChunkTask.error = nil
             }
 

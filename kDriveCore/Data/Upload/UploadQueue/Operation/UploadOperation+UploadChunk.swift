@@ -20,87 +20,6 @@ import Foundation
 import InfomaniakCore
 
 extension UploadOperation {
-    /// Compute SHA256 hash for chunks that need it, then fan out for upload.
-    func generateChunksAndFanOutIfNeeded() async throws {
-        Log.uploadOperation("generateChunksAndFanOutIfNeeded ufid:\(uploadFileId)")
-        try checkCancelation()
-        try checkForRestrictedUploadOverDataMode()
-
-        var filePath = ""
-        var chunksToGenerateCount = 0
-        try transactionWithFile { file in
-            // Get the current uploading session
-            guard let uploadingSessionTask = file.uploadingSession else {
-                throw ErrorDomain.uploadSessionTaskMissing
-            }
-
-            filePath = file.pathURL?.path ?? ""
-
-            // Look for the next chunk that needs hash computation
-            let chunksToGenerate = uploadingSessionTask.chunkTasks
-                .filter(UploadingChunkTask.notDoneUploadingPredicate)
-                .filter { !$0.isReadyForUpload }
-            guard let chunkTask = chunksToGenerate.first else {
-                Log.uploadOperation("generateChunksAndFanOutIfNeeded no remaining chunks to generate ufid:\(self.uploadFileId)")
-                return
-            }
-            Log.uploadOperation("generateChunksAndFanOutIfNeeded working with:\(chunkTask.chunkNumber) ufid:\(self.uploadFileId)")
-
-            chunksToGenerateCount = chunksToGenerate.count
-            let chunkNumber = chunkTask.chunkNumber
-            let range = chunkTask.range
-            let fileUrl = try self.getFileUrlIfReadable(file: file)
-
-            guard let chunkProvider = ChunkProvider(fileURL: fileUrl, ranges: [range]),
-                  let chunkData = chunkProvider.next() else {
-                Log.uploadOperation("Unable to get a ChunkProvider for \(self.uploadFileId)", level: .error)
-                throw ErrorDomain.chunkError
-            }
-
-            Log.uploadOperation(
-                "Computing hash for chunk:\(chunkNumber) of \(chunksToGenerateCount) remaining, ufid:\(self.uploadFileId)"
-            )
-
-            try self.checkCancelation()
-
-            let chunkSHA256 = chunkData.SHA256DigestString
-            chunkTask.sha256 = chunkSHA256
-
-            Log.uploadOperation("Hash computed for chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
-        }
-
-        // Schedule next step
-        try await scheduleNextChunk(filePath: filePath,
-                                    chunksToGenerateCount: chunksToGenerateCount)
-    }
-
-    /// Prepare chunk upload requests, and start them.
-    private func scheduleNextChunk(filePath: String, chunksToGenerateCount: Int) async throws {
-        do {
-            try checkCancelation()
-            try checkForRestrictedUploadOverDataMode()
-
-            // Fan-out the chunk we just made
-            enqueueCatching {
-                try await self.fanOutChunks()
-            }
-
-            // Chain the next chunk generation if necessary
-            let slots = availableWorkerSlots()
-            if chunksToGenerateCount > 0 && slots > 0 {
-                Log.uploadOperation(
-                    "remaining chunks to generate:\(chunksToGenerateCount) slots:\(slots) scheduleNextChunk OP ufid:\(uploadFileId)"
-                )
-                enqueueCatching {
-                    try await self.generateChunksAndFanOutIfNeeded()
-                }
-            }
-        } catch {
-            Log.uploadOperation("Unable to schedule next chunk. error:\(error) for:\(uploadFileId)", level: .error)
-            throw error
-        }
-    }
-
     /// Prepare chunk upload requests, and start them.
     func fanOutChunks() async throws {
         try checkCancelation()
@@ -124,8 +43,7 @@ extension UploadOperation {
             }
 
             let chunksToUpload = Array(uploadingSessionTask.chunkTasks
-                .filter(UploadingChunkTask.canStartUploadingPreconditionPredicate)
-                .filter { $0.isReadyForUpload })
+                .filter(UploadingChunkTask.canStartUploadingPreconditionPredicate))
                 .prefix(freeSlots) // Iterate over only the available worker slots
 
             Log.uploadOperation("fanOut chunksToUpload:\(chunksToUpload.count) freeSlots:\(freeSlots) for:\(self.uploadFileId)")
@@ -152,11 +70,6 @@ extension UploadOperation {
                 try self.checkCancelation()
 
                 do {
-                    guard let sha256 = chunkToUpload.sha256 else {
-                        throw ErrorDomain.missingChunkHash
-                    }
-
-                    let chunkHashHeader = "sha256:\(sha256)"
                     let chunkNumber = chunkToUpload.chunkNumber
                     let chunkSize = chunkToUpload.chunkSize
                     let range = chunkToUpload.range
@@ -172,6 +85,7 @@ extension UploadOperation {
                         throw ErrorDomain.chunkError
                     }
                     let chunkData = mappedFileData[startIndex ..< endIndex]
+                    let chunkHashHeader = "sha256:\(chunkData.SHA256DigestString)"
 
                     let request = try self.buildRequest(chunkNumber: chunkNumber,
                                                         chunkSize: chunkSize,
@@ -226,6 +140,10 @@ extension UploadOperation {
                         return
                     }
 
+                    // Clear tracking fields so the chunk can be retried
+                    chunkTask.sessionIdentifier = nil
+                    chunkTask.taskIdentifier = nil
+                    chunkTask.requestUrl = nil
                     chunkTask.error = .taskRescheduled
                 } notFound: {
                     Log.uploadOperation(

@@ -21,7 +21,7 @@ import Foundation
 extension UploadOperation {
     // MARK: Model
 
-    /// Count of the chunks to upload, independent of chunk produced on local storage
+    /// Count of the chunks still pending upload.
     func chunkTasksToUploadCount() throws -> Int {
         var count: Int!
         try transactionWithFile { file in
@@ -77,7 +77,7 @@ extension UploadOperation {
         return count
     }
 
-    /// Count of the uploaded chunks to upload, independent of chunk produced on local storage
+    /// Count of chunks that reached a terminal upload state.
     func chunkTasksUploadedCount() throws -> Int {
         var count: Int!
         try transactionWithFile { file in
@@ -121,7 +121,7 @@ extension UploadOperation {
         return count
     }
 
-    /// Count of the chunks to upload, independent of chunk produced on local storage
+    /// Count of chunks in the upload session.
     func chunkTasksTotalCount() throws -> Int {
         let file = try readOnlyFile()
         guard let uploadingSessionTask = file.uploadingSession else {
