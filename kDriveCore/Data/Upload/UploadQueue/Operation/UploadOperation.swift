@@ -460,6 +460,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         // Silent handling if error if cancel error
         if let nsError = error as? NSError,
            nsError.code == NSURLErrorCancelled {
+            Log.uploadOperation(
+                "uploadCompletionRemoteFailure NSURLErrorCancelled ufid:\(uploadFileId)",
+                level: .error
+            )
             return
         }
 
