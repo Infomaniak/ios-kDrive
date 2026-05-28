@@ -31,7 +31,7 @@ public struct UploadCompletionResult {
     var driveFile: File?
 }
 
-public final class UploadOperation: AsynchronousOperation, UploadOperationable {
+public final class UploadOperation: AsynchronousOperation, UploadOperationable, @unchecked Sendable {
     /// Local specialized errors
     enum ErrorDomain: Error {
         /// Building a request failed
