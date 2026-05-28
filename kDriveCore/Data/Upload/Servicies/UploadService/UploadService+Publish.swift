@@ -102,12 +102,19 @@ extension UploadService: UploadPublishable {
 
     public func publishQueueSuspended(queueName: String) {
         Log.uploadQueue("Queue \(queueName) SUSPENDED")
-        suspendedQueueNames.append(queueName)
+        serialEventQueue.async { [weak self] in
+            guard let self else { return }
+            guard !suspendedQueueNames.contains(queueName) else { return }
+            suspendedQueueNames.append(queueName)
+        }
     }
 
     public func publishQueueResumed(queueName: String) {
         Log.uploadQueue("Queue \(queueName) RESUMED")
-        suspendedQueueNames.removeAll { $0 == queueName }
+        serialEventQueue.async { [weak self] in
+            guard let self else { return }
+            suspendedQueueNames.removeAll { $0 == queueName }
+        }
     }
 
     // MARK: Private
