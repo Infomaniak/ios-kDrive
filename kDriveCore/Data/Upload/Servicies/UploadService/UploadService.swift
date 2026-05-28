@@ -125,33 +125,22 @@ extension UploadService: UploadServiceable {
     }
 
     public func getFileUploadCountForAllQueues() -> Int {
-        return allQueues.reduce(0) { $0 + $1.fileUploadedCount }
+        return allQueues.reduce(0) { $0 + $1.getUploadedCount() }
     }
 
     public func getFileUploadFailedCountForAllQueues() -> Int {
-        return allQueues.reduce(0) { $0 + $1.fileUploadFailedCount }
+        return allQueues.reduce(0) { $0 + $1.getFailedCount() }
     }
 
-    public func setFileUploadCountForAllQueues(with value: Int, for indice: Int? = nil) {
+    public func resetAllQueueCounters(for indice: Int? = nil) {
         guard let indice else {
             for i in allQueues.indices {
-                allQueues[i].fileUploadedCount = value
+                allQueues[i].resetCounters()
             }
 
             return
         }
-        allQueues[indice].fileUploadedCount = value
-    }
-
-    public func setFileUploadFailedCountForAllQueues(with value: Int, for indice: Int? = nil) {
-        guard let indice else {
-            for i in allQueues.indices {
-                allQueues[i].fileUploadFailedCount = value
-            }
-
-            return
-        }
-        allQueues[indice].fileUploadFailedCount = value
+        allQueues[indice].resetCounters()
     }
 
     private func rebuildUploadQueueFromObjectsInRealm() {

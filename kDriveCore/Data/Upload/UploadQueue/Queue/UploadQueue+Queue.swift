@@ -264,4 +264,19 @@ extension UploadQueue: UploadQueueable {
             fileUploadFailedCount += 1
         }
     }
+
+    public func getUploadedCount() -> Int {
+        serialEventQueue.sync { fileUploadedCount }
+    }
+
+    public func getFailedCount() -> Int {
+        serialEventQueue.sync { fileUploadFailedCount }
+    }
+
+    public func resetCounters() {
+        serialEventQueue.sync {
+            fileUploadedCount = 0
+            fileUploadFailedCount = 0
+        }
+    }
 }

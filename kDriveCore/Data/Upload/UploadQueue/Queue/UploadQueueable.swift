@@ -46,6 +46,12 @@ public protocol UploadQueueable {
 
     func updateQueueSuspension()
 
+    func getUploadedCount() -> Int
+
+    func getFailedCount() -> Int
+
+    func resetCounters()
+
     var operationCount: Int { get }
 
     var isSuspended: Bool { get }
