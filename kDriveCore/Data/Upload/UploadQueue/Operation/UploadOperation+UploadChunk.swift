@@ -21,7 +21,6 @@ import InfomaniakCore
 
 extension UploadOperation {
     /// Compute SHA256 hash for chunks that need it, then fan out for upload.
-    /// This optimized version reads directly from the source file without writing temporary chunk files.
     func generateChunksAndFanOutIfNeeded() async throws {
         Log.uploadOperation("generateChunksAndFanOutIfNeeded ufid:\(uploadFileId)")
         try checkCancelation()

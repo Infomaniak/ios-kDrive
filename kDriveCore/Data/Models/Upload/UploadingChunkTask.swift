@@ -92,8 +92,6 @@ public final class UploadingChunkTask: EmbeddedObject {
     // MARK: - Computed Properties
 
     /// The chunk hash has been computed and is ready for upload.
-    /// With the streaming upload optimization, we no longer write temp chunk files.
-    /// We only need the SHA256 hash to be computed from the source file range.
     public var isReadyForUpload: Bool {
         guard let sha256,
               !sha256.isEmpty else {
