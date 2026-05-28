@@ -51,4 +51,8 @@ public protocol UploadQueueable {
     var isSuspended: Bool { get }
 
     var isActive: Bool { get }
+
+    var fileUploadedCount: Int { get set }
+
+    var fileUploadFailedCount: Int { get set }
 }

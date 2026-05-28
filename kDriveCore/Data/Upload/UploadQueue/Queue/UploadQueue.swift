@@ -34,6 +34,19 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     private var queueObserver: UploadQueueObserver?
 
+    public var fileUploadedCount = 0
+    public var fileUploadFailedCount = 0
+    let serialEventQueue: DispatchQueue = {
+        @InjectService var appContextService: AppContextServiceable
+        let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
+
+        return DispatchQueue(
+            label: "com.infomaniak.drive.upload-service.event",
+            qos: .default,
+            autoreleaseFrequency: autoreleaseFrequency
+        )
+    }()
+
     static let silentErrors: [DriveError] =
         [.taskRescheduled, .taskCancelled, .uploadOverDataRestrictedError, .uploadNotTerminatedError, .uploadNotTerminated]
 

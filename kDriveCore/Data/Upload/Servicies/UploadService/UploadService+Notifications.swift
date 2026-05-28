@@ -57,22 +57,16 @@ extension UploadService: UploadNotifiable {
                 return
             }
 
-            if uploadFile.error == nil {
-                fileUploadedCount += 1
-            } else {
-                fileUploadFailedCount += 1
-            }
-
             guard operationCount == 0 else { return }
 
-            if fileUploadFailedCount > 0 {
+            if getFileUploadFailedCountForAllQueues() > 0 {
                 sendUploadErrorNotification(for: uploadFile, result: result)
             } else {
                 sendUploadSuccessNotification(uploadFile: uploadFile, result: result)
             }
 
-            fileUploadedCount = 0
-            fileUploadFailedCount = 0
+            setFileUploadCountForAllQueues(with: 0)
+            setFileUploadFailedCountForAllQueues(with: 0)
         }
     }
 
@@ -83,13 +77,14 @@ extension UploadService: UploadNotifiable {
             notificationHelper.sendNotEnoughSpaceForUpload(filename: uploadedFileName)
         } else {
             notificationHelper.sendFailedUpload(
-                failedUpload: fileUploadFailedCount,
-                totalUpload: fileUploadedCount + fileUploadFailedCount
+                failedUpload: getFileUploadFailedCountForAllQueues(),
+                totalUpload: getFileUploadCountForAllQueues() + getFileUploadFailedCountForAllQueues()
             )
         }
     }
 
     private func sendUploadSuccessNotification(uploadFile: UploadFile, result: UploadCompletionResult) {
+        let fileUploadedCount = getFileUploadCountForAllQueues()
         if fileUploadedCount == 1 && uploadFile.error == nil {
             let uploadedFileName = result.driveFile?.name ?? uploadFile.name
             notificationHelper.sendUploadDoneNotification(filename: uploadedFileName,
