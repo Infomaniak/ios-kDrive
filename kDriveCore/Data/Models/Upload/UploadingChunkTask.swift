@@ -102,13 +102,6 @@ public final class UploadingChunkTask: EmbeddedObject {
         return true
     }
 
-    /// Legacy property for backward compatibility during migration.
-    /// Now delegates to `isReadyForUpload` since we no longer write temp chunk files.
-    @available(*, deprecated, renamed: "isReadyForUpload")
-    public var hasLocalChunk: Bool {
-        return isReadyForUpload
-    }
-
     /// The range of the original file
     public var range: DataRange {
         get {
