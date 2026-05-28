@@ -251,20 +251,17 @@ extension UploadQueue: UploadQueueable {
 
     public func incrementCounterOfFileOrError(with result: UploadCompletionResult) {
         Log.uploadQueue("incrementCounterOfFileOrError")
-        serialEventQueue.async { [weak self] in
-            guard let self else { return }
-            guard let uploadFile = result.uploadFile,
-                  uploadFile.error != .taskRescheduled,
-                  uploadFile.error != .taskCancelled,
-                  !uploadFile.ownedByFileProvider else {
-                return
-            }
+        guard let uploadFile = result.uploadFile,
+              uploadFile.error != .taskRescheduled,
+              uploadFile.error != .taskCancelled,
+              !uploadFile.ownedByFileProvider else {
+            return
+        }
 
-            if uploadFile.error == nil {
-                fileUploadedCount += 1
-            } else {
-                fileUploadFailedCount += 1
-            }
+        if uploadFile.error == nil {
+            fileUploadedCount += 1
+        } else {
+            fileUploadFailedCount += 1
         }
     }
 }
