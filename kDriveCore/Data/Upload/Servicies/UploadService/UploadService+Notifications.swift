@@ -65,7 +65,7 @@ extension UploadService: UploadNotifiable {
                 sendUploadSuccessNotification(uploadFile: uploadFile, result: result)
             }
 
-            resetAllQueueCounters()
+            resetAllActiveQueueCounters()
         }
     }
 

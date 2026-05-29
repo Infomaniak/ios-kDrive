@@ -71,7 +71,7 @@ public final class UploadService {
 
     public var activeOperationCount: Int {
         allQueues
-            .filter { !suspendedQueueNames.contains($0.name) }
+            .filter { $0.isActive }
             .reduce(0) { $0 + $1.operationCount }
     }
 
@@ -129,15 +129,10 @@ extension UploadService: UploadServiceable {
         return allQueues.reduce(0) { $0 + $1.getFailedCount() }
     }
 
-    public func resetAllQueueCounters(for indice: Int? = nil) {
-        guard let indice else {
-            for i in allQueues.indices {
-                allQueues[i].resetCounters()
-            }
-
-            return
+    public func resetAllActiveQueueCounters() {
+        allQueues.filter { $0.operationCount == 0 }.forEach { queue in
+            queue.resetCounters()
         }
-        allQueues[indice].resetCounters()
     }
 
     private func rebuildUploadQueueFromObjectsInRealm() {

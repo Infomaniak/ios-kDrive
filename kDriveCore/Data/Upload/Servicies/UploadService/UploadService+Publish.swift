@@ -33,9 +33,6 @@ public protocol UploadPublishable {
                                    driveId: Int)
 
     func publishFileUploaded(result: UploadCompletionResult)
-
-    func publishQueueSuspended(queueName: String)
-    func publishQueueResumed(queueName: String)
 }
 
 // MARK: - Publish
@@ -97,23 +94,6 @@ extension UploadService: UploadPublishable {
                     closure(uploadFile, result.driveFile)
                 }
             }
-        }
-    }
-
-    public func publishQueueSuspended(queueName: String) {
-        Log.uploadQueue("Queue \(queueName) SUSPENDED")
-        serialEventQueue.async { [weak self] in
-            guard let self else { return }
-            guard !suspendedQueueNames.contains(queueName) else { return }
-            suspendedQueueNames.append(queueName)
-        }
-    }
-
-    public func publishQueueResumed(queueName: String) {
-        Log.uploadQueue("Queue \(queueName) RESUMED")
-        serialEventQueue.async { [weak self] in
-            guard let self else { return }
-            suspendedQueueNames.removeAll { $0 == queueName }
         }
     }
 

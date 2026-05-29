@@ -67,8 +67,6 @@ extension UploadQueue: UploadQueueable {
 
         forceSuspendQueue = true
         operationQueue.isSuspended = true
-
-        uploadPublisher.publishQueueSuspended(queueName: name)
     }
 
     public func resumeAllOperations() {
@@ -80,8 +78,6 @@ extension UploadQueue: UploadQueueable {
 
         forceSuspendQueue = false
         operationQueue.isSuspended = shouldSuspendQueue
-
-        uploadPublisher.publishQueueResumed(queueName: name)
     }
 
     public func rescheduleRunningOperations() {
@@ -236,17 +232,8 @@ extension UploadQueue: UploadQueueable {
 
     public func updateQueueSuspension() {
         let suspended = (shouldSuspendQueue || forceSuspendQueue)
-        let wasSuspended = operationQueue.isSuspended
         operationQueue.isSuspended = suspended
         Log.uploadQueue("\(self) update isSuspended to :\(suspended)")
-
-        if wasSuspended != suspended {
-            if suspended {
-                uploadPublisher.publishQueueSuspended(queueName: name)
-            } else {
-                uploadPublisher.publishQueueResumed(queueName: name)
-            }
-        }
     }
 
     public func incrementCounterOfFileOrError(with result: UploadCompletionResult) {
