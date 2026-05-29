@@ -1,3 +1,5 @@
+- Téléversement de gros fichiers plus efficient
+- Amélioration de l'affichage de la recherche
 - Amélioration de l'affichage du dossier lors d'un glisser-déposer
 - Correction d'un bug qui affichait deux fois l'option pour colorer un dossier
 - La state restoration fonctionne désormais même après un arrêt forcé par l'utilisateur
