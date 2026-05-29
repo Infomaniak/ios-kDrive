@@ -24,10 +24,10 @@ import RealmSwift
 import Sentry
 
 public protocol UploadQueueDelegate: AnyObject {
-    func operationQueueBecameEmpty(_ queue: UploadQueue)
-    func operationQueueNoLongerEmpty(_ queue: UploadQueue)
-    func operationQueueBecameSuspended(_ queue: UploadQueue)
-    func operationQueueNoLongerSuspended(_ queue: UploadQueue)
+    func operationQueueBecameEmpty()
+    func operationQueueNoLongerEmpty()
+    func operationQueueBecameSuspended()
+    func operationQueueNoLongerSuspended()
 }
 
 public class UploadQueue: ParallelismHeuristicDelegate {

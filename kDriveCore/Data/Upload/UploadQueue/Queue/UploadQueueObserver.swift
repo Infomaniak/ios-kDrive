@@ -50,19 +50,19 @@ public final class UploadQueueObserver {
 
     private func operationCountDidChange(previousCount: Int?, newCount: Int?) {
         guard let newCount else {
-            delegate?.operationQueueBecameEmpty(uploadQueue)
+            delegate?.operationQueueBecameEmpty()
             return
         }
 
         guard let previousCount else {
-            delegate?.operationQueueNoLongerEmpty(uploadQueue)
+            delegate?.operationQueueNoLongerEmpty()
             return
         }
 
         if newCount == 0 {
-            delegate?.operationQueueBecameEmpty(uploadQueue)
+            delegate?.operationQueueBecameEmpty()
         } else if previousCount == 0 && newCount > 0 {
-            delegate?.operationQueueNoLongerEmpty(uploadQueue)
+            delegate?.operationQueueNoLongerEmpty()
         }
     }
 }

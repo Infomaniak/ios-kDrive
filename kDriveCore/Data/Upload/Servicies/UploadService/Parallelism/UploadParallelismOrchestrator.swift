@@ -110,19 +110,19 @@ public final class UploadParallelismOrchestrator {
 }
 
 extension UploadParallelismOrchestrator: UploadQueueDelegate {
-    public func operationQueueBecameEmpty(_ queue: UploadQueue) {
+    public func operationQueueBecameEmpty() {
         computeUploadParallelismPerQueueAndApply()
     }
 
-    public func operationQueueNoLongerEmpty(_ queue: UploadQueue) {
+    public func operationQueueNoLongerEmpty() {
         computeUploadParallelismPerQueueAndApply()
     }
 
-    public func operationQueueBecameSuspended(_ queue: UploadQueue) {
+    public func operationQueueBecameSuspended() {
         computeUploadParallelismPerQueueAndApply()
     }
 
-    public func operationQueueNoLongerSuspended(_ queue: UploadQueue) {
+    public func operationQueueNoLongerSuspended() {
         computeUploadParallelismPerQueueAndApply()
     }
 }
