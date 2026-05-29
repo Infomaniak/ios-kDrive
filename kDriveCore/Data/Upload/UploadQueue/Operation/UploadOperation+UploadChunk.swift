@@ -26,15 +26,12 @@ extension UploadOperation {
         try checkCancelation()
         try checkForRestrictedUploadOverDataMode()
 
-        var filePath = ""
         var chunksToGenerateCount = 0
         try transactionWithFile { file in
             // Get the current uploading session
             guard let uploadingSessionTask = file.uploadingSession else {
                 throw ErrorDomain.uploadSessionTaskMissing
             }
-
-            filePath = file.pathURL?.path ?? ""
 
             // Look for the next chunk that needs hash computation
             let chunksToGenerate = uploadingSessionTask.chunkTasks
@@ -70,12 +67,11 @@ extension UploadOperation {
         }
 
         // Schedule next step
-        try await scheduleNextChunk(filePath: filePath,
-                                    chunksToGenerateCount: chunksToGenerateCount)
+        try await scheduleNextChunk(chunksToGenerateCount: chunksToGenerateCount)
     }
 
     /// Prepare chunk upload requests, and start them.
-    private func scheduleNextChunk(filePath: String, chunksToGenerateCount: Int) async throws {
+    private func scheduleNextChunk(chunksToGenerateCount: Int) async throws {
         do {
             try checkCancelation()
             try checkForRestrictedUploadOverDataMode()
