@@ -382,7 +382,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             // Server-side error
             else {
-                self.uploadCompletionRemoteFailure(data: data, response: response)
+                self.uploadCompletionRemoteFailure(data: data)
             }
         }
     }
@@ -456,7 +456,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
     }
 
-    private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?) {
+    private func uploadCompletionRemoteFailure(data: Data?) {
         defer {
             end()
         }
