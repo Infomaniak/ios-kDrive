@@ -1,5 +1,5 @@
 {
-  "originHash" : "1586482aa28847c0f3ac69da418ee2241ba271f3b718546746ee4025f6704803",
+  "originHash" : "168580aabb8a478549c86b6c02196e06d5c01cc399b092f0f1b40368e1a2d08c",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "5d9828a3a92e0410ecc89580ebbd912737b9e9fd",
-        "version" : "1.35.0"
+        "revision" : "6427600ec87d516a43754e4eaa7762f3271ac77f",
+        "version" : "1.36.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-dependency-injection",
       "state" : {
-        "revision" : "46250e9cccf918c2a03bcd6cff6b16cdc2adb9ee",
-        "version" : "2.0.6"
+        "revision" : "c24d45e86efe13e864b707f4711b7a9fd4b75ac0",
+        "version" : "2.0.7"
       }
     },
     {
@@ -249,8 +249,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "193d313fbfd9affaf2be1692a0284a3b6574c515",
-        "version" : "9.14.0"
+        "revision" : "cef29e94feb00b1b712514443d6d70b09ef20355",
+        "version" : "9.15.0"
       }
     },
     {
@@ -285,8 +285,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-argument-parser",
       "state" : {
-        "revision" : "626b5b7b2f45e1b0b1c6f4a309296d1d21d7311b",
-        "version" : "1.7.1"
+        "revision" : "ca37474853a4b5f59a22c74bfdd449b1f6bc4cc2",
+        "version" : "1.8.1"
       }
     },
     {
@@ -294,8 +294,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/swift-concurrency",
       "state" : {
-        "revision" : "97ae7c9b998a43812d3f57ae106cb447a853bf3b",
-        "version" : "1.0.0"
+        "revision" : "696ea95ad5974bd04f63d353f317cf5ecd9235e8",
+        "version" : "1.0.1"
       }
     },
     {
