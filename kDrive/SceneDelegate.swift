@@ -206,7 +206,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
         backgroundTasksService.scheduleBackgroundRefresh()
 
-        if UserDefaults.standard.isAppLockEnabled {
+        if UserDefaults.shared.isAppLockEnabled {
             lockHelper.setTime()
         }
     }

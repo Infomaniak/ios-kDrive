@@ -38,7 +38,7 @@ class AppLockSettingsViewController: UIViewController {
         navigationBar.shadowImage = UIImage()
         navigationBar.setBackgroundImage(UIImage(), for: .default)
 
-        faceIdSwitch.setOn(UserDefaults.standard.isAppLockEnabled, animated: false)
+        faceIdSwitch.setOn(UserDefaults.shared.isAppLockEnabled, animated: false)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -66,7 +66,7 @@ class AppLockSettingsViewController: UIViewController {
             context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
                 Task { @MainActor in
                     if success {
-                        UserDefaults.standard.isAppLockEnabled = sender.isOn
+                        UserDefaults.shared.isAppLockEnabled = sender.isOn
                         self.appLockHelper.setTime()
                     } else {
                         sender.setOn(!sender.isOn, animated: true)

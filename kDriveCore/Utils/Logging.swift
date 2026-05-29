@@ -115,7 +115,7 @@ public enum Logging {
                 // if the application is in debug mode discard the events
                 @InjectService var photoLibraryUploader: PhotoLibraryUploadable
                 event.context?["AppState"] = [
-                    "AppLock enabled": UserDefaults.standard.isAppLockEnabled,
+                    "AppLock enabled": UserDefaults.shared.isAppLockEnabled,
                     "Wifi only enabled": photoLibraryUploader.isWifiOnly
                 ]
 

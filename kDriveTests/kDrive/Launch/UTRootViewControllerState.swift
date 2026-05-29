@@ -77,7 +77,8 @@ final class UTRootViewControllerState: XCTestCase {
             Factory(type: AppLockHelper.self) { _, _ in
                 AppLockHelper(
                     logoImage: KDriveCoreAsset.logo.swiftUIImage,
-                    lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage
+                    lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage,
+                    userDefaults: UserDefaults.shared
                 )
             }
         ]
@@ -89,7 +90,7 @@ final class UTRootViewControllerState: XCTestCase {
 
     func testFirstLaunchState() {
         // GIVEN empty accounts
-        UserDefaults.standard.isAppLockEnabled = false
+        UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = true
 
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
@@ -107,7 +108,7 @@ final class UTRootViewControllerState: XCTestCase {
 
     func testOnboardingState() {
         // GIVEN empty accounts
-        UserDefaults.standard.isAppLockEnabled = false
+        UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = false
 
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
@@ -125,7 +126,7 @@ final class UTRootViewControllerState: XCTestCase {
 
     func testOnboardingWithAppLockState() {
         // GIVEN empty accounts BUT AppLock enabled
-        UserDefaults.standard.isAppLockEnabled = true
+        UserDefaults.shared.isAppLockEnabled = true
         UserDefaults.shared.legacyIsFirstLaunch = false
 
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
@@ -143,7 +144,7 @@ final class UTRootViewControllerState: XCTestCase {
 
     func testNoDriveFileManagerState() {
         // GIVEN
-        UserDefaults.standard.isAppLockEnabled = false
+        UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = false
 
         let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
@@ -183,7 +184,7 @@ final class UTRootViewControllerPreloading: XCTestCase {
 
     func testMainViewControllerState() {
         // GIVEN
-        UserDefaults.standard.isAppLockEnabled = false
+        UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = false
 
         // WHEN
