@@ -221,7 +221,7 @@ extension UploadOperation {
             SentryDebug.uploadOperationChunkInFailureCannotCloseSessionBreadcrumb(
                 uploadFileId,
                 [
-                    "chunksTasksPending": uploadTasks.count,
+                    "chunksTasksPending": currentUploadTask == nil ? 0 : 1,
                     "chunksInErrorCount": chunksInErrorCount,
                     "maxOperationRetryCount": maxOperationRetryCount,
                     "errors": errors

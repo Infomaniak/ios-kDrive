@@ -24,38 +24,35 @@ extension UploadOperation: ExpiringActivityDelegate {
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
         SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
 
-        // Take a snapshot of the running tasks
-        var rescheduleIterator = uploadTasks.makeIterator()
-        var cancelIterator = uploadTasks.makeIterator()
+        // Snapshot the in-flight chunk task identifier (if any) so we can mark it
+        // as rescheduled in DB before cancelling the underlying network request.
+        let inflightTaskIdentifier: String?
+        if let task = currentUploadTask {
+            inflightTaskIdentifier = urlSession.identifier(for: task)
+        } else {
+            inflightTaskIdentifier = nil
+        }
 
-        // Schedule a db transaction to set .taskRescheduled error on chunks
+        // Schedule a db transaction to flag the upload and chunk as rescheduled.
         enqueueCatching {
             try self.transactionWithFile { file in
                 file.error = .taskRescheduled
-                Log
-                    .uploadOperation(
-                        "Rescheduling didReschedule .taskRescheduled uploadTasks:\(self.uploadTasks) ufid:\(self.uploadFileId)"
-                    )
+                Log.uploadOperation("Rescheduling .taskRescheduled ufid:\(self.uploadFileId)")
 
                 // Make sure the main app can continue the upload next retry.
                 file.ownedByFileProvider = false
 
-                // Mark all chunks in base with a .taskRescheduled error
-                var iterator = self.uploadTasks.makeIterator()
-                try self.cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
-
-                while let (taskIdentifier, _) = rescheduleIterator.next() {
-                    // Match chunk in base and set error to .taskRescheduled
-                    let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(
+                if let inflightTaskIdentifier {
+                    let chunkTaskToReschedule = file.uploadingSession?.chunkTasks.filter(NSPredicate(
                         format: "taskIdentifier = %@",
-                        taskIdentifier
+                        inflightTaskIdentifier
                     )).first
 
-                    if let chunkTasksToClean {
-                        chunkTasksToClean.error = .taskRescheduled
-                    } else {
+                    if let chunkTaskToReschedule, chunkTaskToReschedule.chunk == nil {
+                        chunkTaskToReschedule.error = .taskRescheduled
+                    } else if chunkTaskToReschedule == nil {
                         Log.uploadOperation(
-                            "Unable to match chunk to reschedule for identifier:\(taskIdentifier) ufid:\(self.uploadFileId)",
+                            "Unable to match chunk to reschedule for identifier:\(inflightTaskIdentifier) ufid:\(self.uploadFileId)",
                             level: .error
                         )
                     }
@@ -76,10 +73,8 @@ extension UploadOperation: ExpiringActivityDelegate {
             Log.uploadOperation("Rescheduling end ufid:\(self.uploadFileId)")
         }
 
-        // Cancel all chunk network requests ASAP
-        while let (_, sessionUploadTask) = cancelIterator.next() {
-            sessionUploadTask.cancel()
-        }
+        // Cancel the in-flight chunk network request ASAP
+        currentUploadTask?.cancel()
 
         Log.uploadOperation("exit reschedule ufid:\(uploadFileId)")
     }

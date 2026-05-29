@@ -18,13 +18,10 @@
 
 import Foundation
 import InfomaniakCore
-import InfomaniakDI
 import RealmSwift
 
 /// Tracks the upload of a chunk
 public final class UploadingChunkTask: EmbeddedObject {
-    @LazyInjectService var fileManager: FileManagerable
-
     override public init() {
         // Required by Realm
         super.init()
@@ -94,16 +91,22 @@ public final class UploadingChunkTask: EmbeddedObject {
 
     // MARK: - Computed Properties
 
-    /// The chunk is stored locally inside a file, with a path and we have a valid hash of it.
-    public var hasLocalChunk: Bool {
-        guard let path,
-              !path.isEmpty,
-              fileManager.isReadableFile(atPath: path),
-              let sha256,
+    /// The chunk hash has been computed and is ready for upload.
+    /// With the streaming upload optimization, we no longer write temp chunk files.
+    /// We only need the SHA256 hash to be computed from the source file range.
+    public var isReadyForUpload: Bool {
+        guard let sha256,
               !sha256.isEmpty else {
             return false
         }
         return true
+    }
+
+    /// Legacy property for backward compatibility during migration.
+    /// Now delegates to `isReadyForUpload` since we no longer write temp chunk files.
+    @available(*, deprecated, renamed: "isReadyForUpload")
+    public var hasLocalChunk: Bool {
+        return isReadyForUpload
     }
 
     /// The range of the original file
