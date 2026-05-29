@@ -58,34 +58,4 @@ final class ITAppLaunchTest: XCTestCase {
         }
         SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
     }
-
-    @MainActor func testUnlock() throws {
-        // GIVEN applock enabled
-        UserDefaults.shared.isAppLockEnabled = true
-
-        @InjectService var router: AppNavigable
-        router.showAppLock()
-
-        let scene = UIApplication.shared.connectedScenes.first
-        let sceneDelegate = (scene?.delegate as? SceneDelegate)
-        let window = sceneDelegate?.window
-        let rootViewController = window?.rootViewController
-        XCTAssertNotNil(
-            rootViewController as? LockedAppViewController,
-            "Should be a LockedAppViewController, got \(rootViewController as UIViewController?)"
-        )
-
-        // WHEN
-        let lockedAppViewController = LockedAppViewController.instantiate()
-        lockedAppViewController.unlockApp()
-
-        // THEN
-        guard let rootViewControllerRefresh = window?.rootViewController else {
-            XCTFail("Expecting a rootViewController")
-            return
-        }
-
-        let lockView = rootViewControllerRefresh as? LockedAppViewController
-        XCTAssertNil(lockView, "no longer expecting a lock view, got \(lockView as LockedAppViewController?)")
-    }
 }
