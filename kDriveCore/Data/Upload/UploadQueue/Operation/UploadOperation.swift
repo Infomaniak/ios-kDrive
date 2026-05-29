@@ -31,7 +31,7 @@ public struct UploadCompletionResult {
     var driveFile: File?
 }
 
-public final class UploadOperation: AsynchronousOperation, UploadOperationable {
+public final class UploadOperation: AsynchronousOperation, UploadOperationable, @unchecked Sendable {
     /// Local specialized errors
     enum ErrorDomain: Error {
         /// Building a request failed
@@ -382,7 +382,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
             // Server-side error
             else {
-                self.uploadCompletionRemoteFailure(data: data, response: response, error: error)
+                self.uploadCompletionRemoteFailure(data: data)
             }
         }
     }
@@ -414,18 +414,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
 
                 // We may be running both the app and the extension
                 assertionFailure("unable to lookup chunk task id, ufid:\(self.uploadFileId)")
-            }
-
-            // Cleanup chunks in storage
-            if let path = chunkTask.path {
-                let url = URL(fileURLWithPath: path, isDirectory: false)
-                let chunkNumber = chunkTask.chunkNumber
-                Log.uploadOperation("cleanup chunk:\(chunkNumber) ufid:\(self.uploadFileId)")
-                do {
-                    try self.fileManager.removeItem(at: url)
-                } catch {
-                    Log.uploadOperation("failed to clean chunk \(error) ufid:\(self.uploadFileId)", level: .error)
-                }
             }
         } notFound: {
             Log.uploadOperation("matching chunk:\(uploadedChunk.number) failed ufid:\(self.uploadFileId)", level: .error)
@@ -468,13 +456,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         }
     }
 
-    private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) {
-        // Silent handling if error if cancel error
-        guard let nsError = error as? NSError,
-              nsError.code == NSURLErrorCancelled else {
-            return
-        }
-
+    private func uploadCompletionRemoteFailure(data: Data?) {
         defer {
             end()
         }
@@ -490,10 +472,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable {
         if let data,
            let apiError = try? DriveApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
             driveError = DriveError(apiError: apiError)
-        }
-
-        if let error {
-            driveError = driveError.wrapping(error)
         }
 
         Log.uploadOperation("completion  Server-side error:\(driveError) ufid:\(uploadFileId) ", level: .error)

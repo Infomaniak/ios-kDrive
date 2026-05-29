@@ -18,13 +18,10 @@
 
 import Foundation
 import InfomaniakCore
-import InfomaniakDI
 import RealmSwift
 
 /// Tracks the upload of a chunk
 public final class UploadingChunkTask: EmbeddedObject {
-    @LazyInjectService var fileManager: FileManagerable
-
     override public init() {
         // Required by Realm
         super.init()
@@ -94,12 +91,9 @@ public final class UploadingChunkTask: EmbeddedObject {
 
     // MARK: - Computed Properties
 
-    /// The chunk is stored locally inside a file, with a path and we have a valid hash of it.
-    public var hasLocalChunk: Bool {
-        guard let path,
-              !path.isEmpty,
-              fileManager.isReadableFile(atPath: path),
-              let sha256,
+    /// The chunk hash has been computed and is ready for upload.
+    public var isReadyForUpload: Bool {
+        guard let sha256,
               !sha256.isEmpty else {
             return false
         }
