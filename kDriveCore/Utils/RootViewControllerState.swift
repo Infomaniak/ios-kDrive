@@ -32,7 +32,6 @@ public enum RootViewControllerState {
 
     public static func getCurrentState() -> RootViewControllerState {
         @InjectService var accountManager: AccountManageable
-        @InjectService var lockHelper: AppLockHelper
 
         guard let currentAccount = accountManager.currentAccount else {
             return .onboarding
