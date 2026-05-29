@@ -178,9 +178,6 @@ class SaveFileViewController: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
         tableView.reloadData()
-        guard UserDefaults.standard.isAppLockEnabled && appLockHelper.isAppLocked else {
-            return
-        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
