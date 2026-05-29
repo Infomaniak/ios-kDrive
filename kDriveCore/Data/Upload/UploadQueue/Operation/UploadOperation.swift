@@ -382,7 +382,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
             // Server-side error
             else {
-                self.uploadCompletionRemoteFailure(data: data, response: response, error: error)
+                self.uploadCompletionRemoteFailure(data: data, response: response)
             }
         }
     }
@@ -456,17 +456,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
     }
 
-    private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?, error: Error?) {
-        // Silent handling if error if cancel error
-        if let nsError = error as? NSError,
-           nsError.code == NSURLErrorCancelled {
-            Log.uploadOperation(
-                "uploadCompletionRemoteFailure NSURLErrorCancelled ufid:\(uploadFileId)",
-                level: .error
-            )
-            return
-        }
-
+    private func uploadCompletionRemoteFailure(data: Data?, response: URLResponse?) {
         defer {
             end()
         }
@@ -482,10 +472,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         if let data,
            let apiError = try? DriveApiFetcher.decoder.decode(ApiResponse<Empty>.self, from: data).error {
             driveError = DriveError(apiError: apiError)
-        }
-
-        if let error {
-            driveError = driveError.wrapping(error)
         }
 
         Log.uploadOperation("completion  Server-side error:\(driveError) ufid:\(uploadFileId) ", level: .error)
