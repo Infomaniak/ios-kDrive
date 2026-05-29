@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
@@ -177,20 +178,8 @@ class SaveFileViewController: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
         tableView.reloadData()
-        guard UserDefaults.shared.isAppLockEnabled && appLockHelper.isAppLocked else {
+        guard UserDefaults.standard.isAppLockEnabled && appLockHelper.isAppLocked else {
             return
-        }
-
-        Task {
-            let unlocked = await (try? appLockHelper.evaluatePolicy(
-                reason: KDriveResourcesStrings.Localizable.lockAppTitle
-            )) == true
-
-            if unlocked {
-                appLockHelper.setTime()
-            } else {
-                close(self)
-            }
         }
     }
 

@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import Foundation
 import InfomaniakCore
 import InfomaniakCoreCommonUI
@@ -25,7 +26,6 @@ import InfomaniakLogin
 public enum RootViewControllerState {
     case splashScreen
     case onboarding
-    case appLock
     case mainViewController(driveFileManager: DriveFileManager)
     case updateRequired
     case preloading(ApiToken)
@@ -40,8 +40,7 @@ public enum RootViewControllerState {
 
         if UserDefaults.shared.legacyIsFirstLaunch || accountManager.accounts.isEmpty {
             return .onboarding
-        } else if UserDefaults.shared.isAppLockEnabled && lockHelper.isAppLocked {
-            return .appLock
+
         } else if let driveFileManager = accountManager.currentDriveFileManager,
                   driveFileManager.getCachedMyFilesRoot() != nil {
             return .mainViewController(driveFileManager: driveFileManager)
@@ -56,7 +55,6 @@ extension RootViewControllerState: Equatable {
         switch (lhs, rhs) {
         case (.splashScreen, .splashScreen),
              (.onboarding, .onboarding),
-             (.appLock, .appLock),
              (.updateRequired, .updateRequired):
             return true
         case (.mainViewController(let lhsDriveFileManager), .mainViewController(let rhsDriveFileManager)):

@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
@@ -27,7 +28,7 @@ import VersionChecker
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
     @LazyInjectService private var matomo: MatomoUtils
-    @LazyInjectService var lockHelper: AppLockHelper
+    @InjectService var lockHelper: AppLockHelper
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
@@ -205,8 +206,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
         backgroundTasksService.scheduleBackgroundRefresh()
 
-        if UserDefaults.shared.isAppLockEnabled,
-           !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
+        if UserDefaults.standard.isAppLockEnabled {
             lockHelper.setTime()
         }
     }
@@ -312,7 +312,7 @@ extension SceneDelegate {
         }
 
         switch currentState {
-        case .mainViewController, .appLock:
+        case .mainViewController:
             UserDefaults.shared.numberOfConnections += 1
             if UserDefaults.shared.object(forKey: "actionUntilReview") != nil {
                 UserDefaults.shared.actionUntilReview -= 1

@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
@@ -74,7 +75,10 @@ final class UTRootViewControllerState: XCTestCase {
                 InfomaniakLogin(config: self.loginConfig)
             },
             Factory(type: AppLockHelper.self) { _, _ in
-                AppLockHelper()
+                AppLockHelper(
+                    logoImage: KDriveCoreAsset.logo.swiftUIImage,
+                    lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage
+                )
             }
         ]
 

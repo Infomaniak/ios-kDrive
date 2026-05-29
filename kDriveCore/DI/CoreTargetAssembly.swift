@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import BackgroundTasks
 import DeviceAssociation
 import Foundation
@@ -164,7 +165,10 @@ open class CoreTargetAssembly: TargetAssembly {
                 BGTaskScheduler.shared
             },
             Factory(type: AppLockHelper.self) { _, _ in
-                AppLockHelper()
+                AppLockHelper(
+                    logoImage: KDriveCoreAsset.logo.swiftUIImage,
+                    lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage
+                )
             },
             Factory(type: FileManagerable.self) { _, _ in
                 FileManager.default

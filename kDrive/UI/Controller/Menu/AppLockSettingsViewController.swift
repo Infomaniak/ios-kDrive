@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
@@ -28,6 +29,7 @@ class AppLockSettingsViewController: UIViewController {
     @IBOutlet var navigationBar: UINavigationBar!
 
     @LazyInjectService private var matomo: MatomoUtils
+    @LazyInjectService private var appLockHelper: AppLockHelper
 
     var closeActionHandler: (() -> Void)?
 
@@ -36,7 +38,7 @@ class AppLockSettingsViewController: UIViewController {
         navigationBar.shadowImage = UIImage()
         navigationBar.setBackgroundImage(UIImage(), for: .default)
 
-        faceIdSwitch.setOn(UserDefaults.shared.isAppLockEnabled, animated: false)
+        faceIdSwitch.setOn(UserDefaults.standard.isAppLockEnabled, animated: false)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -64,7 +66,8 @@ class AppLockSettingsViewController: UIViewController {
             context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
                 Task { @MainActor in
                     if success {
-                        UserDefaults.shared.isAppLockEnabled = sender.isOn
+                        UserDefaults.standard.isAppLockEnabled = sender.isOn
+                        self.appLockHelper.setTime()
                     } else {
                         sender.setOn(!sender.isOn, animated: true)
                     }

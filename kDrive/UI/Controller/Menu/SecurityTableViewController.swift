@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
@@ -65,7 +66,7 @@ class SecurityTableViewController: BaseGroupedTableViewController {
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
             cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.appSecurityTitle
-            cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveResourcesStrings.Localizable
+            cell.valueLabel.text = UserDefaults.standard.isAppLockEnabled ? KDriveResourcesStrings.Localizable
                 .allActivated : KDriveResourcesStrings.Localizable.allDisabled
             return cell
         case .fileProviderExtension:

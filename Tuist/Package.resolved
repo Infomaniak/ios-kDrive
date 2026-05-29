@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "8f50d7bcba8e926be5af324b32be0c1e5d70d6a2",
-        "version" : "24.11.0"
+        "branch" : "feat/remove-app-lock",
+        "revision" : "e56afe2c4be77962a3d7389bf05433bff16f9cfe"
       }
     },
     {

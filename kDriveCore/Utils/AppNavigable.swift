@@ -34,8 +34,6 @@ public protocol RouterAppNavigable {
 
     @MainActor func showOnboarding()
 
-    @MainActor func showAppLock()
-
     @MainActor func showLaunchFloatingPanel()
 
     @MainActor func showUpsaleFloatingPanel()

@@ -227,8 +227,6 @@ public struct AppRouter: AppNavigable {
         switch currentState {
         case .splashScreen:
             showSplashScreen()
-        case .appLock:
-            showAppLock()
         case .mainViewController(let driveFileManager):
             restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
 
@@ -533,16 +531,6 @@ public struct AppRouter: AppNavigable {
 
         keychainHelper.deleteAllTokens()
         window.rootViewController = WaveViewController(slides: Slide.onboardingSlides)
-        window.makeKeyAndVisible()
-    }
-
-    @MainActor public func showAppLock() {
-        guard let window else {
-            SentryDebug.captureNoWindow()
-            return
-        }
-
-        window.rootViewController = LockedAppViewController.instantiate()
         window.makeKeyAndVisible()
     }
 
@@ -928,10 +916,6 @@ public struct AppRouter: AppNavigable {
     ) {
         guard let window,
               let rootViewController = window.rootViewController else {
-            return
-        }
-
-        if let topMostViewController, (topMostViewController as? LockedAppViewController) != nil {
             return
         }
 
