@@ -178,6 +178,22 @@ class SaveFileViewController: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.setInfomaniakAppearanceNavigationBar()
         tableView.reloadData()
+
+        guard UserDefaults.shared.isAppLockEnabled && appLockHelper.isAppLocked else {
+            return
+        }
+
+        Task {
+            let unlocked = await (try? appLockHelper.evaluatePolicy(
+                reason: KDriveResourcesStrings.Localizable.lockAppTitle
+            )) == true
+
+            if unlocked {
+                appLockHelper.setTime()
+            } else {
+                close(self)
+            }
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
