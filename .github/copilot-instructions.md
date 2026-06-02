@@ -8,6 +8,8 @@ Before reading this file, please read AGENTS.md to learn more about the project 
     - Make sure new code is properly abstracted, split, and added to the correct layer (UI / Core …)
     - You can ask to add unit tests in core related code that can be easily tested.
 - Ensure strings are localized with KDriveResourcesStrings.Localizable.
+- When reviewing Realm model changes, check whether the persisted schema changed: added, removed, renamed, or type-changed persisted properties, changed optionality, lists, embedded objects, or object types.
+- If the persisted Realm schema changed, ensure the matching `RealmSchemaVersion` (`drive` or `upload`) was incremented in `kDriveCore/Data/Cache/DriveFileManager/DriveFileManagerConstants.swift`, and that the relevant migration block is updated when existing data needs migration.
 - Ensure new UI wrote in UIKit is done in code. It should not rely on XIB, NIB, Storyboards for new features.
     - Regarding UIKit code, make sure we use safeAreaLayoutGuide and size classes to support modern iPhones and iPads. Please warn if something will break on iPad.
     - Regarding UIKit code, prefer the use of UIStackView rather than manually using Auto Layout rules, where reasonably possible.
