@@ -109,6 +109,14 @@ extension UploadService: UploadServiceable {
         allQueues.allSatisfy(\.isSuspended)
     }
 
+    public var fileUploadCountForAllQueues: Int {
+        allQueues.reduce(0) { $0 + $1.getUploadedCount() }
+    }
+
+    public var fileUploadFailedCountForAllQueues: Int {
+        allQueues.reduce(0) { $0 + $1.getFailedCount() }
+    }
+
     public func blockingRebuildUploadQueue() {
         serialTransactionQueue.sync {
             self.rebuildUploadQueueFromObjectsInRealm()
@@ -119,14 +127,6 @@ extension UploadService: UploadServiceable {
         serialTransactionQueue.async {
             self.rebuildUploadQueueFromObjectsInRealm()
         }
-    }
-
-    public func getFileUploadCountForAllQueues() -> Int {
-        return allQueues.reduce(0) { $0 + $1.getUploadedCount() }
-    }
-
-    public func getFileUploadFailedCountForAllQueues() -> Int {
-        return allQueues.reduce(0) { $0 + $1.getFailedCount() }
     }
 
     public func resetAllActiveQueueCounters() {
