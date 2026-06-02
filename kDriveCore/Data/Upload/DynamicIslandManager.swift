@@ -30,6 +30,7 @@ final class DynamicIslandManager: ObservableObject {
 
     private var realmObservationToken: NotificationToken?
     private var totalUploadCount: Int
+    private var progessUploading: Int
     private var cancellables: Set<AnyCancellable> = []
     private var overallProgress: Progress?
 
@@ -42,6 +43,7 @@ final class DynamicIslandManager: ObservableObject {
     init(driveFileManager: DriveFileManager?) {
         self.driveFileManager = driveFileManager
         totalUploadCount = 0
+        progessUploading = 0
         initObservation()
     }
 
@@ -76,11 +78,21 @@ final class DynamicIslandManager: ObservableObject {
                 switch change {
                 case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
                     let remaining = results.count
-                    let completed = max(0, self.totalUploadCount - remaining)
-                    self.overallProgress?.completedUnitCount = Int64(completed)
+                    totalUploadCount = max(totalUploadCount, remaining + progessUploading)
+                    progessUploading = totalUploadCount - remaining
+
+                    let percentOfProgress = totalUploadCount > 0 ? Double(progessUploading) / Double(totalUploadCount) : 0
+                    let completedCount = Int64(percentOfProgress * Double(totalUploadCount))
+
+                    self.overallProgress?.totalUnitCount = Int64(totalUploadCount)
+                    self.overallProgress?.completedUnitCount = completedCount
                 case .error:
                     self.overallProgress?.completedUnitCount = 0
                 }
             }
+    }
+
+    func getTotalUploadCount() -> Int {
+        return totalUploadCount
     }
 }
