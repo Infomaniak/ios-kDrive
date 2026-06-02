@@ -18,11 +18,11 @@
 
 import Foundation
 
-public final class UploadQueueObserver {
+public final class UploadQueueSuspensionObserver {
     private var observation: NSKeyValueObservation?
 
     private let serialEventQueue = DispatchQueue(
-        label: "com.infomaniak.drive.upload-queue-observer.event.\(UUID().uuidString)",
+        label: "com.infomaniak.drive.upload-queue-suspension-observer.event.\(UUID().uuidString)",
         qos: .default
     )
 
@@ -36,33 +36,34 @@ public final class UploadQueueObserver {
         setupObservation()
     }
 
-    private func setupObservation() {
-        observation = uploadQueue.operationQueue.observe(\.operationCount, options: [
-            .new,
-            .old
-        ]) { [weak self] _, change in
+    func setupObservation() {
+        observation = uploadQueue.operationQueue.observe(\.isSuspended, options: [.new, .old]) { [weak self] _, change in
             guard let self else { return }
             self.serialEventQueue.async {
-                self.operationCountDidChange(previousCount: change.oldValue, newCount: change.newValue)
+                self.suspendStateDidChange(previousIsSuspend: change.oldValue, newIsSuspend: change.newValue)
             }
         }
     }
 
-    private func operationCountDidChange(previousCount: Int?, newCount: Int?) {
-        guard let newCount else {
-            delegate?.operationQueueBecameEmpty()
+    func suspendStateDidChange(previousIsSuspend: Bool?, newIsSuspend: Bool?) {
+        guard let currentIsSuspend = newIsSuspend ?? previousIsSuspend else {
             return
         }
 
-        guard let previousCount else {
-            delegate?.operationQueueNoLongerEmpty()
+        guard let previousIsSuspend else {
+            delegate?.operationQueueNoLongerSuspended()
+            if currentIsSuspend {
+                delegate?.operationQueueBecameSuspended()
+            } else {
+                delegate?.operationQueueNoLongerSuspended()
+            }
             return
         }
 
-        if newCount == 0 {
-            delegate?.operationQueueBecameEmpty()
-        } else if previousCount == 0 && newCount > 0 {
-            delegate?.operationQueueNoLongerEmpty()
+        if currentIsSuspend {
+            delegate?.operationQueueBecameSuspended()
+        } else if previousIsSuspend && !currentIsSuspend {
+            delegate?.operationQueueNoLongerSuspended()
         }
     }
 }

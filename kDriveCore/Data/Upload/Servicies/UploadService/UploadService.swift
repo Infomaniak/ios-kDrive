@@ -57,8 +57,8 @@ public final class UploadService {
 
     lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
-    var fileUploadedCount = 0
-    var fileUploadFailedCount = 0
+    var suspendedQueueNames: [String] = []
+
     var observations = (
         didUploadFile: [UUID: (UploadFile, File?) -> Void](),
         didChangeUploadCountInParent: [UUID: (Int, Int) -> Void](),
@@ -67,6 +67,12 @@ public final class UploadService {
 
     public var operationCount: Int {
         allQueues.reduce(0) { $0 + $1.operationCount }
+    }
+
+    public var activeOperationCount: Int {
+        allQueues
+            .filter { $0.isActive }
+            .reduce(0) { $0 + $1.operationCount }
     }
 
     public var pausedNotificationSent = false
@@ -103,6 +109,14 @@ extension UploadService: UploadServiceable {
         allQueues.allSatisfy(\.isSuspended)
     }
 
+    public var fileUploadCountForAllQueues: Int {
+        allQueues.reduce(0) { $0 + $1.getUploadedCount() }
+    }
+
+    public var fileUploadFailedCountForAllQueues: Int {
+        allQueues.reduce(0) { $0 + $1.getFailedCount() }
+    }
+
     public func blockingRebuildUploadQueue() {
         serialTransactionQueue.sync {
             self.rebuildUploadQueueFromObjectsInRealm()
@@ -112,6 +126,12 @@ extension UploadService: UploadServiceable {
     public func rebuildUploadQueue() {
         serialTransactionQueue.async {
             self.rebuildUploadQueueFromObjectsInRealm()
+        }
+    }
+
+    public func resetAllActiveQueueCounters() {
+        allQueues.filter { $0.operationCount == 0 }.forEach { queue in
+            queue.resetCounters()
         }
     }
 

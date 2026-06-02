@@ -215,6 +215,7 @@ extension UploadQueue: UploadQueueable {
                 return
             }
 
+            self.incrementCounterOfFileOrError(with: operation.result)
             uploadPublisher.publishFileUploaded(result: operation.result)
             uploadPublisher.publishUploadCount(withParent: parentId, userId: userId, driveId: driveId)
             OperationQueueHelper.disableIdleTimer(false)
@@ -233,5 +234,36 @@ extension UploadQueue: UploadQueueable {
         let suspended = (shouldSuspendQueue || forceSuspendQueue)
         operationQueue.isSuspended = suspended
         Log.uploadQueue("\(self) update isSuspended to :\(suspended)")
+    }
+
+    public func incrementCounterOfFileOrError(with result: UploadCompletionResult) {
+        Log.uploadQueue("incrementCounterOfFileOrError")
+        guard let uploadFile = result.uploadFile,
+              uploadFile.error != .taskRescheduled,
+              uploadFile.error != .taskCancelled,
+              !uploadFile.ownedByFileProvider else {
+            return
+        }
+
+        if uploadFile.error == nil {
+            fileUploadedCount += 1
+        } else {
+            fileUploadFailedCount += 1
+        }
+    }
+
+    public func getUploadedCount() -> Int {
+        serialEventQueue.sync { fileUploadedCount }
+    }
+
+    public func getFailedCount() -> Int {
+        serialEventQueue.sync { fileUploadFailedCount }
+    }
+
+    public func resetCounters() {
+        serialEventQueue.sync {
+            fileUploadedCount = 0
+            fileUploadFailedCount = 0
+        }
     }
 }
