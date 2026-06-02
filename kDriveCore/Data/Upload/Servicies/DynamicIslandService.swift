@@ -89,6 +89,13 @@ public struct DynamicIslandService {
                 }
             }
 
+            // TODO: Add gestion when uploadCount == 1 file
+            let uploadCount = dynamicIslandManager.getTotalUploadCount()
+            task.updateTitle(
+                KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
+                subtitle: KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
+            )
+
             task.setTaskCompleted(success: true)
             cancellable?.cancel()
         }
