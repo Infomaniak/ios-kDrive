@@ -59,7 +59,6 @@ final class DynamicIslandManager: ObservableObject {
         realmObservationToken?.invalidate()
         cancellables.removeAll()
 
-        // TODO: totalUploadCount tracks the number of files currently uploading at a given moment. During a large sync, this number may rise, but it is not currently taken into account.
         totalUploadCount = uploadDataSource.getUploadingFiles(userId: accountManager.currentUserId, driveIds: [driveId]).count
 
         overallProgress = Progress(totalUnitCount: Int64(totalUploadCount))
@@ -71,7 +70,6 @@ final class DynamicIslandManager: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // TODO: The calculations aren't accurate, but they let you see the upload progress
         realmObservationToken = uploadDataSource.getUploadingFiles(userId: accountManager.currentUserId, driveIds: [driveId])
             .observe(on: .main) { [weak self] change in
                 guard let self else { return }
@@ -94,5 +92,11 @@ final class DynamicIslandManager: ObservableObject {
 
     func getTotalUploadCount() -> Int {
         return totalUploadCount
+    }
+
+    func reset() {
+        totalUploadCount = 0
+        progessUploading = 0
+        fractionCompleted = 0
     }
 }
