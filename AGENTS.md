@@ -162,6 +162,7 @@ tuist test # Or via Xcode Test Navigator
 - **Endpoint definitions:** Define API endpoints in `Endpoint.swift` and extend with `Endpoint+Files.swift`, `Endpoint+Share.swift`, etc.
 - **Concurrency:** Use `async/await` and structured concurrency.
 - **Data persistence:** Realm models must be thread-safe; use `RealmAccessor` for background writes.
+- **Realm migrations:** Any schema-affecting change to a Realm `Object` or `EmbeddedObject` must increment the matching `RealmSchemaVersion` (`drive` or `upload`) in `kDriveCore/Data/Cache/DriveFileManager/DriveFileManagerConstants.swift`. Update the corresponding migration block when existing data needs migration.
 - **Manager pattern:** Core data managers follow the *Manager naming (AccountManager, DriveFileManager, DriveInfosManager, AvailableOfflineManager).
 - **File Provider:** `BackgroundUploadSessionManager` and `BackgroundDownloadSessionManager` handle background upload/download.
 
@@ -180,6 +181,7 @@ tuist test # Or via Xcode Test Navigator
 - Use Conventional Commits for commit messages.
 - Localize all user-facing strings via resource files.
 - Ensure Realm models define proper primary keys for thread safety.
+- When modifying Realm models, verify the matching `RealmSchemaVersion` was incremented and the migration block handles existing data when needed.
 - Never use `ci_scripts/` locally.
 - Test background uploads/downloads if modifying File Provider.
 
