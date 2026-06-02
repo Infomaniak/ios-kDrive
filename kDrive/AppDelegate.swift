@@ -120,6 +120,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
         application.registerForRemoteNotifications()
 
+        if #available(iOS 26.0, *) {
+            DynamicIslandService.shared.registerTask()
+        }
+
         return true
     }
 
