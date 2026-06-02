@@ -98,6 +98,7 @@ public struct DynamicIslandService {
 
             task.setTaskCompleted(success: true)
             cancellable?.cancel()
+            dynamicIslandManager.reset()
         }
     }
 }
