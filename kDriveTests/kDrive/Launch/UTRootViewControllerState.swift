@@ -62,6 +62,9 @@ final class UTRootViewControllerState: XCTestCase {
             Factory(type: UploadServiceable.self) { _, _ in
                 UploadService()
             },
+            Factory(type: DynamicIslandManager.self) { _, _ in
+                DynamicIslandManager(driveFileManager: nil)
+            },
             Factory(type: DownloadQueueable.self) { _, _ in
                 DownloadQueue()
             },
