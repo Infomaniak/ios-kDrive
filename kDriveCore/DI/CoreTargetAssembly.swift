@@ -134,6 +134,9 @@ open class CoreTargetAssembly: TargetAssembly {
             Factory(type: UploadServiceable.self) { _, _ in
                 UploadService()
             },
+            Factory(type: DynamicIslandManager.self) { _, _ in
+                DynamicIslandManager(driveFileManager: nil)
+            },
             Factory(type: UploadServiceDataSourceable.self) { _, resolver in
                 try resolver.resolve(type: UploadServiceable.self,
                                      forCustomTypeIdentifier: nil,
