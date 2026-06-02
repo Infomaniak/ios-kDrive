@@ -87,6 +87,12 @@ public final class UploadParallelismOrchestrator {
     }
 
     private func computeUploadParallelismPerQueueAndApply() {
+        if #available(iOS 26.0, *) {
+            if allQueues.filter(\.isActive).isEmpty == false {
+                DynamicIslandService.shared.submitTask()
+            }
+        }
+
         serialEventQueue.async {
             let currentAvailableParallelism = self.availableParallelism
             Log.uploadQueue("Current total available upload parallelism :\(currentAvailableParallelism)")
