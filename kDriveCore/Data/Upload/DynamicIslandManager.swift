@@ -61,15 +61,6 @@ final class DynamicIslandManager: ObservableObject {
 
         totalUploadCount = uploadDataSource.getUploadingFiles(userId: accountManager.currentUserId, driveIds: [driveId]).count
 
-        overallProgress = Progress(totalUnitCount: Int64(totalUploadCount))
-        overallProgress?
-            .publisher(for: \.fractionCompleted)
-            .throttle(for: .milliseconds(500), scheduler: RunLoop.main, latest: true)
-            .sink { [weak self] fractionCompleted in
-                self?.fractionCompleted = fractionCompleted
-            }
-            .store(in: &cancellables)
-
         realmObservationToken = uploadDataSource.getUploadingFiles(userId: accountManager.currentUserId, driveIds: [driveId])
             .observe(on: .main) { [weak self] change in
                 guard let self else { return }
@@ -80,12 +71,10 @@ final class DynamicIslandManager: ObservableObject {
                     progessUploading = totalUploadCount - remaining
 
                     let percentOfProgress = totalUploadCount > 0 ? Double(progessUploading) / Double(totalUploadCount) : 0
-                    let completedCount = Int64(percentOfProgress * Double(totalUploadCount))
 
-                    self.overallProgress?.totalUnitCount = Int64(totalUploadCount)
-                    self.overallProgress?.completedUnitCount = completedCount
+                    self.fractionCompleted = percentOfProgress
                 case .error:
-                    self.overallProgress?.completedUnitCount = 0
+                    self.fractionCompleted = 0
                 }
             }
     }
