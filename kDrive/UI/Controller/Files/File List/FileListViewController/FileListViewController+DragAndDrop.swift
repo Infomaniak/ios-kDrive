@@ -53,7 +53,8 @@ extension FileListViewController: UICollectionViewDropDelegate {
                 session,
                 in: collectionView,
                 with: destinationIndexPath,
-                destinationFile: file
+                destinationFile: file,
+                selectedFileIds: viewModel.multipleSelectionViewModel?.selectedItems.map(\.id) ?? []
             )
         } else {
             return UICollectionViewDropProposal(operation: .cancel, intent: .unspecified)

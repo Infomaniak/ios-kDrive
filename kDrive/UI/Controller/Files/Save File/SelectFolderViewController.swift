@@ -220,7 +220,7 @@ final class SelectFolderViewController: FileListViewController {
         let file = displayedFiles[indexPath.row]
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! FileCollectionViewCell
 
-        cell.setEnabled(file.isDirectory && file.id != fileToMove?.id)
+        cell.setEnabled(file.isDirectory && file.id != fileToMove?.id && !disabledDirectoriesSelection.contains(file.id))
         cell.moreButton.isHidden = true
         return cell
     }

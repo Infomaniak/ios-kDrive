@@ -85,8 +85,10 @@ final class DroppableFileListViewModel {
 
     private func handleDropOverDirectory(_ directory: File,
                                          in collectionView: UICollectionView,
-                                         at indexPath: IndexPath) -> UICollectionViewDropProposal {
-        guard directory.capabilities.canUpload && directory.capabilities.canMoveInto else {
+                                         at indexPath: IndexPath,
+                                         selectedFileIds: [Int]) -> UICollectionViewDropProposal {
+        guard directory.capabilities.canUpload && directory.capabilities.canMoveInto && !selectedFileIds.contains(directory.id)
+        else {
             return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
         }
 
@@ -169,7 +171,8 @@ final class DroppableFileListViewModel {
     func updateDropSession(_ session: UIDropSession,
                            in collectionView: UICollectionView,
                            with destinationIndexPath: IndexPath?,
-                           destinationFile: File?) -> UICollectionViewDropProposal {
+                           destinationFile: File?,
+                           selectedFileIds: [Int]) -> UICollectionViewDropProposal {
         if let indexPath = destinationIndexPath,
            let destinationFile,
            destinationFile.isDirectory {
@@ -180,7 +183,12 @@ final class DroppableFileListViewModel {
                 }
                 return UICollectionViewDropProposal(operation: .forbidden, intent: .insertIntoDestinationIndexPath)
             } else {
-                return handleDropOverDirectory(destinationFile, in: collectionView, at: indexPath)
+                return handleDropOverDirectory(
+                    destinationFile,
+                    in: collectionView,
+                    at: indexPath,
+                    selectedFileIds: selectedFileIds
+                )
             }
         } else {
             if let indexPath = lastDropPosition?.indexPath {
