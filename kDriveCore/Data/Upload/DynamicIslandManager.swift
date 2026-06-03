@@ -33,6 +33,8 @@ final class DynamicIslandManager: ObservableObject {
     private var progessUploading: Int
     private var cancellables: Set<AnyCancellable> = []
     private var overallProgress: Progress?
+    private var lastUpdateTime: ContinuousClock.Instant?
+    private var clock = ContinuousClock()
 
     var driveFileManager: DriveFileManager? {
         didSet {
@@ -61,18 +63,24 @@ final class DynamicIslandManager: ObservableObject {
 
         totalUploadCount = uploadDataSource.getUploadingFiles(userId: accountManager.currentUserId, driveIds: [driveId]).count
 
+        lastUpdateTime = clock.now
+
         overallProgress = Progress(totalUnitCount: Int64(totalUploadCount))
         overallProgress?
             .publisher(for: \.fractionCompleted)
             .throttle(for: .milliseconds(50), scheduler: RunLoop.main, latest: true)
             .sink { [weak self] fractionCompleted in
                 self?.fractionCompleted = fractionCompleted
+                self?.keepAlive()
             }
             .store(in: &cancellables)
 
         realmObservationToken = uploadDataSource.getUploadingFiles(userId: accountManager.currentUserId, driveIds: [driveId])
             .observe(on: .main) { [weak self] change in
                 guard let self else { return }
+
+                self.lastUpdateTime = clock.now
+
                 switch change {
                 case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
                     let remaining = results.count
@@ -82,14 +90,20 @@ final class DynamicIslandManager: ObservableObject {
                     let percentOfProgress = totalUploadCount > 0 ? Double(progessUploading) / Double(totalUploadCount) : 0
                     let completedCount = Int64(percentOfProgress * Double(totalUploadCount))
 
-                    self.fractionCompleted = percentOfProgress
                     self.overallProgress?.totalUnitCount = Int64(totalUploadCount)
                     self.overallProgress?.completedUnitCount = completedCount
                 case .error:
-                    self.fractionCompleted = 0
                     self.overallProgress?.completedUnitCount = 0
                 }
             }
+    }
+
+    func keepAlive() {
+        guard let lastUpdateTime else { return }
+        let delay = clock.now - lastUpdateTime
+        if delay > .milliseconds(50) {
+            overallProgress?.completedUnitCount = Int64(fractionCompleted)
+        }
     }
 
     func getTotalUploadCount() -> Int {
