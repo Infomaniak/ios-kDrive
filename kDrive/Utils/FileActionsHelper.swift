@@ -213,7 +213,7 @@ public final class FileActionsHelper {
                             presentViewController: (UIViewController) -> Void,
                             completion: (() -> Void)? = nil) {
         // Current directory is always disabled.
-        var disabledDirectoriesIds = [currentDirectory.id]
+        var disabledDirectoriesIds = [currentDirectory.id] + files.map(\.id)
         if let firstSelectedParentId = files.first?.parentId,
            firstSelectedParentId != currentDirectory.id,
            files.allSatisfy({ $0.parentId == firstSelectedParentId }) {
