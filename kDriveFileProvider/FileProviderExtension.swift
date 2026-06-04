@@ -324,12 +324,6 @@ final class FileProviderExtension: NSFileProviderExtension {
         completion: @escaping (Error?) -> Void
     ) {
         Log.fileProvider("downloadFreshRemoteFile file:\(file.id)")
-        // Prevent observing file multiple times
-        guard !downloadQueue.hasOperation(for: file.id) else {
-            Log.fileProvider("downloadFreshRemoteFile in queue, skip", level: .error)
-            completion(nil)
-            return
-        }
 
         var observationToken: ObservationToken?
         observationToken = downloadQueue.observeFileDownloaded(self, fileId: file.id) { _, error in
@@ -354,6 +348,12 @@ final class FileProviderExtension: NSFileProviderExtension {
                 Log.fileProvider("downloadRemoteFile error:\(error)", level: .error)
                 completion(error)
             }
+        }
+
+        // Prevent enqueuing multiple times the same file if startProvidingItem is called several times before the download completes
+        guard !downloadQueue.hasOperation(for: file.id) else {
+            Log.fileProvider("downloadFreshRemoteFile in queue, observing existing download", level: .info)
+            return
         }
 
         downloadQueue.addToQueue(
