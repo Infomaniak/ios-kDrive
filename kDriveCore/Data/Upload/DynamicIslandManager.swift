@@ -36,9 +36,13 @@ final class DynamicIslandManager: ObservableObject {
     private var lastUpdateTime: ContinuousClock.Instant?
     private var clock = ContinuousClock()
 
+    private var globalQueueActive = false
+    private var photoQueueActive = false
+    private var isObserving = false
+
     var driveFileManager: DriveFileManager? {
         didSet {
-            initObservation()
+            refreshObservation()
         }
     }
 
@@ -46,7 +50,7 @@ final class DynamicIslandManager: ObservableObject {
         self.driveFileManager = driveFileManager
         totalUploadCount = 0
         progessUploading = 0
-        initObservation()
+        refreshObservation()
     }
 
     func setup() {
@@ -54,7 +58,22 @@ final class DynamicIslandManager: ObservableObject {
         driveFileManager = accountManager.currentDriveFileManager
     }
 
-    private func initObservation() {
+    private func refreshObservation() {
+        let shouldObserve = globalQueueActive || photoQueueActive
+        if !shouldObserve {
+            if isObserving {
+                stopObservation()
+                isObserving = false
+            }
+            return
+        }
+        if !isObserving {
+            startObservation()
+            isObserving = true
+        }
+    }
+
+    private func startObservation() {
         guard let driveFileManager else { return }
         let driveId = driveFileManager.driveId
 
@@ -96,6 +115,19 @@ final class DynamicIslandManager: ObservableObject {
                     self.overallProgress?.completedUnitCount = 0
                 }
             }
+    }
+
+    private func stopObservation() {
+        realmObservationToken?.invalidate()
+        realmObservationToken = nil
+        cancellables.removeAll()
+        overallProgress = nil
+    }
+
+    func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
+        self.globalQueueActive = globalQueueActive
+        self.photoQueueActive = photoQueueActive
+        refreshObservation()
     }
 
     func keepAlive() {
