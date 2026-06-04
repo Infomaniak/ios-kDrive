@@ -267,7 +267,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             message: "startProvidingItem",
             category: .fileProvider,
             level: .info,
-            metadata: ["urlLastPathComponent": url.lastPathComponent,]
+            metadata: ["urlLastPathComponent": url.lastPathComponent]
         )
 
         guard let fileId = fileProviderService.identifier(for: url, domain: domain)?.toFileId(),
@@ -450,7 +450,8 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
         }
 
-        // Prevent enqueuing multiple times the same file if startProvidingItem is called several times before the download completes
+        // Prevent enqueuing multiple times the same file
+        // if startProvidingItem is called several times before the download completes
         guard !downloadQueue.hasOperation(for: file.id) else {
             SentryDebug.addBreadcrumb(
                 message: "File already in queue, observing existing download",
