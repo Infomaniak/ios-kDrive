@@ -8,7 +8,7 @@
 	<string>$(AppIdentifierPrefix)</string>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.infomaniak.drive.background-upload-dynamic-island.*</string>
+		<string>com.infomaniak.drive.background-upload-dynamic-island</string>
 		<string>com.infomaniak.background.refresh</string>
 		<string>com.infomaniak.background.long-refresh</string>
 	</array>
