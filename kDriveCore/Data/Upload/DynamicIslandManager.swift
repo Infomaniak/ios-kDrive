@@ -102,7 +102,11 @@ final class DynamicIslandManager: ObservableObject {
         guard let lastUpdateTime else { return }
         let delay = clock.now - lastUpdateTime
         if delay > .milliseconds(50) {
-            overallProgress?.completedUnitCount = Int64(fractionCompleted)
+            let percentOfProgress = totalUploadCount > 0 ? Double(progessUploading) / Double(totalUploadCount) : 0
+            let completedCount = Int64(percentOfProgress * Double(totalUploadCount))
+
+            overallProgress?.totalUnitCount = Int64(totalUploadCount)
+            overallProgress?.completedUnitCount = completedCount
         }
     }
 
