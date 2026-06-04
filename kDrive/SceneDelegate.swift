@@ -28,7 +28,7 @@ import VersionChecker
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
     @LazyInjectService private var matomo: MatomoUtils
-    @InjectService var lockHelper: AppLockHelper
+    @LazyInjectService var lockHelper: AppLockHelper
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
@@ -127,6 +127,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
+        lockHelper.startObservation()
         let newState = RootViewControllerState.getCurrentState()
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
         if window?.rootViewController == nil {
