@@ -113,9 +113,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         )
         collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: paddingBottom, right: 0)
         collectionView.allowsMultipleSelectionDuringEditing = true
-        #if !ISEXTENSION
-        collectionView.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress)))
-        #endif
         collectionView.dropDelegate = self
         collectionView.dragDelegate = self
 
@@ -572,23 +569,76 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     // MARK: - Actions
 
-    @objc func handleLongPress(_ sender: UILongPressGestureRecognizer) {
+    func handleLongPress(indexPath: IndexPath) {
         guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel,
               !multipleSelectionViewModel.isMultipleSelectionEnabled
         else { return }
 
-        let pos = sender.location(in: collectionView)
-        if let indexPath = collectionView.indexPathForItem(at: pos) {
-            multipleSelectionViewModel.isMultipleSelectionEnabled = true
-            // Necessary for events to trigger in the right order
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                if let file = getDisplayedFile(at: indexPath) {
-                    multipleSelectionViewModel.didSelectFile(file, at: indexPath)
-                }
+        multipleSelectionViewModel.isMultipleSelectionEnabled = true
+        // Necessary for events to trigger in the right order
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            if let file = getDisplayedFile(at: indexPath) {
+                multipleSelectionViewModel.didSelectFile(file, at: indexPath)
             }
         }
     }
+
+    #if !ISEXTENSION
+    func makeContextMenuQuickActions(indexPath: IndexPath) -> [UIAction] {
+        let file = displayedFiles[indexPath.row]
+        let fileInformationsViewController = FileActionsFloatingPanelViewController(frozenFile: file,
+                                                                                    driveFileManager: driveFileManager,
+                                                                                    sourceView: collectionView
+                                                                                        .cellForItem(at: indexPath) ??
+                                                                                        collectionView)
+        fileInformationsViewController.presentingParent = self
+        fileInformationsViewController.setupContent()
+        let actions = fileInformationsViewController.quickActions
+
+        guard !actions.isEmpty else { return [] }
+        return actions.map { action in
+            UIAction(
+                title: action.name,
+                image: action.image,
+                attributes: action.isEnabled ? [] : .disabled,
+            ) { _ in
+                fileInformationsViewController.handleAction(action, at: indexPath, isFromMenu: true)
+            }
+        }
+    }
+
+    override func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemsAt indexPaths: [IndexPath],
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard let indexPath = indexPaths.first else { return nil }
+        if viewModel.getFile(at: indexPath)?.isDirectory == false && ReachabilityListener.instance.currentStatus == .offline {
+            return nil
+        }
+        return UIContextMenuConfiguration(
+            // swiftlint:disable:next trailing_closure
+            actionProvider: { _ in
+                let selectionAction = UIAction(
+                    title: KDriveResourcesStrings.Localizable.buttonSelect,
+                    image: KDriveResourcesAsset.checklist.image
+                ) { _ in
+                    self.handleLongPress(indexPath: indexPath)
+                }
+                let listQuickActions = self.makeContextMenuQuickActions(indexPath: indexPath)
+
+                return UIMenu(
+                    options: .displayInline,
+                    children: [
+                        UIMenu(options: .displayInline, children: [selectionAction]),
+                        UIMenu(options: .displayInline, children: [listQuickActions].flatMap { $0 })
+                    ]
+                )
+            }
+        )
+    }
+    #endif
 
     @objc func barButtonPressed(_ sender: FileListBarButton) {
         viewModel.barButtonPressed(sender: sender, type: sender.type)

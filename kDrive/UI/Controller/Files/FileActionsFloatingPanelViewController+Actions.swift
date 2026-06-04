@@ -132,18 +132,18 @@ extension FileActionsFloatingPanelViewController {
 
     // MARK: Handling
 
-    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    func handleAction(_ action: FloatingPanelAction, at indexPath: IndexPath, isFromMenu: Bool = false) {
         switch action {
         case .informations:
             informationsAction()
         case .add:
             addAction()
         case .sendCopy:
-            sendCopyAction(action, at: indexPath)
+            sendCopyAction(action, at: indexPath, isFromMenu: isFromMenu)
         case .shareAndRights:
             shareAndRightsAction()
         case .shareLink:
-            shareLinkAction(action, at: indexPath)
+            shareLinkAction(action, at: indexPath, isFromMenu: isFromMenu)
         case .openWith:
             openWithAction(action, at: indexPath)
         case .edit:
@@ -206,13 +206,13 @@ extension FileActionsFloatingPanelViewController {
         }
     }
 
-    private func sendCopyAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    private func sendCopyAction(_ action: FloatingPanelAction, at indexPath: IndexPath, isFromMenu: Bool) {
         if frozenFile.isMostRecentDownloaded {
-            presentShareSheet(from: indexPath)
+            presentShareSheet(from: indexPath, isFromMenu: isFromMenu)
         } else {
             downloadFile(action: action,
                          indexPath: indexPath) { [weak self] in
-                self?.presentShareSheet(from: indexPath)
+                self?.presentShareSheet(from: indexPath, isFromMenu: isFromMenu)
             }
         }
     }
@@ -227,13 +227,13 @@ extension FileActionsFloatingPanelViewController {
         dismiss(animated: true)
     }
 
-    private func shareLinkAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+    private func shareLinkAction(_ action: FloatingPanelAction, at indexPath: IndexPath, isFromMenu: Bool) {
         if let link = frozenFile.dropbox?.url {
             // Copy share link
-            copyShareLinkToPasteboard(from: indexPath, link: link)
+            copyShareLinkToPasteboard(from: indexPath, link: link, isFromMenu: isFromMenu)
         } else if let link = frozenFile.sharelink?.url {
             // Copy share link
-            copyShareLinkToPasteboard(from: indexPath, link: link)
+            copyShareLinkToPasteboard(from: indexPath, link: link, isFromMenu: isFromMenu)
         } else {
             // Create share link
             setLoading(true, action: action, at: indexPath)
@@ -241,7 +241,7 @@ extension FileActionsFloatingPanelViewController {
                 do {
                     let shareLink = try await driveFileManager.createShareLink(for: proxyFile)
                     setLoading(false, action: action, at: indexPath)
-                    copyShareLinkToPasteboard(from: indexPath, link: shareLink.url)
+                    copyShareLinkToPasteboard(from: indexPath, link: shareLink.url, isFromMenu: isFromMenu)
                 } catch {
                     if let error = error as? DriveError, error == .shareLinkAlreadyExists {
                         // This should never happen
@@ -249,7 +249,7 @@ extension FileActionsFloatingPanelViewController {
                         setLoading(false, action: action, at: indexPath)
                         if let shareLink {
                             driveFileManager.setFileShareLink(file: proxyFile, shareLink: shareLink)
-                            copyShareLinkToPasteboard(from: indexPath, link: shareLink.url)
+                            copyShareLinkToPasteboard(from: indexPath, link: shareLink.url, isFromMenu: isFromMenu)
                         }
                     } else {
                         setLoading(false, action: action, at: indexPath)

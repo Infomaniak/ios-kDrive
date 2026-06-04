@@ -36,6 +36,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     private(set) var frozenFile: File
     private(set) var driveFileManager: DriveFileManager
+    private(set) var sourceView: UIView?
 
     var normalFolderHierarchy = true
     var presentationOrigin = PresentationOrigin.fileList
@@ -70,9 +71,10 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
     // MARK: - Public methods
 
-    init(frozenFile: File, driveFileManager: DriveFileManager) {
+    init(frozenFile: File, driveFileManager: DriveFileManager, sourceView: UIView? = nil) {
         self.frozenFile = frozenFile
         self.driveFileManager = driveFileManager
+        self.sourceView = sourceView
         super.init(collectionViewLayout: FileActionsFloatingPanelViewController.createLayout())
 
         let frozenFileUid = frozenFile.uid
@@ -192,11 +194,12 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func presentShareSheet(from indexPath: IndexPath) {
+    func presentShareSheet(from indexPath: IndexPath, isFromMenu: Bool) {
+        let localSourceView = sourceView ?? collectionView.cellForItem(at: indexPath) ?? collectionView
+        guard let localSourceView else { return }
         let activityViewController = UIActivityViewController(activityItems: [frozenFile.localUrl], applicationActivities: nil)
-        activityViewController.popoverPresentationController?.sourceView = collectionView
-            .cellForItem(at: indexPath) ?? collectionView
-        present(activityViewController, animated: true)
+        activityViewController.popoverPresentationController?.sourceView = localSourceView
+        (isFromMenu ? presentingParent : self)?.present(activityViewController, animated: true)
     }
 
     func downloadFile(action: FloatingPanelAction,
@@ -238,12 +241,15 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String) {
+    func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String, isFromMenu: Bool) {
+        let localSourceView = sourceView ?? collectionView.cellForItem(at: indexPath) ?? collectionView
+        guard let localSourceView else { return }
+        let fromView = isFromMenu ? (presentingParent ?? self) : self
         UIConstants.presentLinkPreviewForFile(
             frozenFile,
             link: link,
-            from: self,
-            sourceView: collectionView.cellForItem(at: indexPath) ?? collectionView
+            from: fromView,
+            sourceView: localSourceView
         )
     }
 

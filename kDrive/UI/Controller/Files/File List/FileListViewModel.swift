@@ -496,8 +496,8 @@ class FileListViewModel: SelectDelegate {
 }
 
 extension Publisher where Self.Failure == Never {
-    func assignNoRetain<Root>(to keyPath: ReferenceWritableKeyPath<Root, Self.Output>, on object: Root) -> AnyCancellable
-        where Root: AnyObject {
+    func assignNoRetain<Root: AnyObject>(to keyPath: ReferenceWritableKeyPath<Root, Self.Output>,
+                                         on object: Root) -> AnyCancellable {
         sink { [weak object] value in
             object?[keyPath: keyPath] = value
         }
