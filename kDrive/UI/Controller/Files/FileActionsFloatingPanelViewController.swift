@@ -244,10 +244,11 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     func copyShareLinkToPasteboard(from indexPath: IndexPath, link: String, isFromMenu: Bool) {
         let localSourceView = sourceView ?? collectionView.cellForItem(at: indexPath) ?? collectionView
         guard let localSourceView else { return }
+        let fromView = isFromMenu ? (presentingParent ?? self) : self
         UIConstants.presentLinkPreviewForFile(
             frozenFile,
             link: link,
-            from: isFromMenu ? presentingParent! : self,
+            from: fromView,
             sourceView: localSourceView
         )
     }

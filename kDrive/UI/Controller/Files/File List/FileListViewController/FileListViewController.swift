@@ -584,8 +584,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
     }
 
+    #if !ISEXTENSION
     func makeContextMenuQuickActions(indexPath: IndexPath) -> [UIAction] {
-        #if !ISEXTENSION
         let file = displayedFiles[indexPath.row]
         let fileInformationsViewController = FileActionsFloatingPanelViewController(frozenFile: file,
                                                                                     driveFileManager: driveFileManager,
@@ -606,8 +606,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 fileInformationsViewController.handleAction(action, at: indexPath, isFromMenu: true)
             }
         }
-        #endif
-        return []
     }
 
     override func collectionView(
@@ -640,6 +638,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             }
         )
     }
+    #endif
 
     @objc func barButtonPressed(_ sender: FileListBarButton) {
         viewModel.barButtonPressed(sender: sender, type: sender.type)
