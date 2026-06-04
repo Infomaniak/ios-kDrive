@@ -36,7 +36,7 @@ public struct DynamicIslandService {
     private let taskIdentifier: String
 
     private init() {
-        taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island.\(UUID().uuidString)"
+        taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island"
     }
 
     public func registerTask() {
