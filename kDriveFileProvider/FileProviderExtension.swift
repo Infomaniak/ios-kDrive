@@ -36,7 +36,8 @@ extension DriveFileManager {
               let file = getCachedFile(id: fileId, freeze: freeze, using: realm),
               !file.isInvalidated else {
             let context = ["itemIdentifier": itemIdentifier.rawValue]
-            SentryDebug.capture(message: "getCachedFile using realm failed", context: context, level: .error)
+            SentryDebug.capture(message: "getCachedFile using realm failed", context: context,
+                                contextKey: "FileProvider", level: .error)
             throw NSFileProviderError(.noSuchItem)
         }
 
@@ -48,7 +49,8 @@ extension DriveFileManager {
         guard let fileId = itemIdentifier.toFileId(),
               let file = getCachedFile(id: fileId, freeze: freeze) else {
             let context = ["itemIdentifier": itemIdentifier.rawValue]
-            SentryDebug.capture(message: "getCachedFile failed", context: context, level: .error)
+            SentryDebug.capture(message: "getCachedFile failed", context: context,
+                                contextKey: "FileProvider", level: .error)
             throw NSFileProviderError(.noSuchItem)
         }
 
@@ -138,7 +140,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                 Log.fileProvider("Unable to bridge UploadFile \(uploadedFile.id) to File \(remoteFileId)", level: .error)
                 let context = ["uploadedFileId": uploadedFile.id, "remoteFileId": remoteFileId,
                                "identifier": identifier.rawValue] as [String: Any]
-                SentryDebug.capture(message: "Unable to bridge UploadFile to File", context: context, level: .error)
+                SentryDebug.capture(message: "Unable to bridge UploadFile to File", context: context,
+                                    contextKey: "FileProvider", level: .error)
                 throw NSFileProviderError(.noSuchItem)
             }
 
@@ -158,7 +161,8 @@ final class FileProviderExtension: NSFileProviderExtension {
         // did not match anything
         Log.fileProvider("item for identifier - nsError(code: .noSuchItem)", level: .error)
         let context = ["identifier": identifier.rawValue]
-        SentryDebug.capture(message: "item for identifier failed to find item", context: context, level: .error)
+        SentryDebug.capture(message: "item for identifier failed to find item", context: context,
+                            contextKey: "FileProvider", level: .error)
         throw NSFileProviderError(.noSuchItem)
     }
 
@@ -179,7 +183,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                     Log.fileProvider("urlForItem - Unable to bridge UploadFile to File \(remoteFileId)", level: .error)
                     let context = ["uploadedFileId": uploadedFile.id, "remoteFileId": remoteFileId,
                                    "identifier": identifier.rawValue] as [String: Any]
-                    SentryDebug.capture(message: "urlForItem - Unable to bridge UploadFile to File", context: context, level: .error)
+                    SentryDebug.capture(message: "urlForItem - Unable to bridge UploadFile to File", context: context,
+                                        contextKey: "FileProvider", level: .error)
                     return nil
                 }
 
@@ -262,7 +267,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             message: "startProvidingItem",
             category: .fileProvider,
             level: .info,
-            metadata: ["url": url.path]
+            metadata: ["urlLastPathComponent": url.lastPathComponent,]
         )
 
         guard let fileId = fileProviderService.identifier(for: url, domain: domain)?.toFileId(),
@@ -272,11 +277,13 @@ final class FileProviderExtension: NSFileProviderExtension {
                     message: "file exists locally but cached file was not found",
                     category: .fileProvider,
                     level: .info,
-                    metadata: ["url": url.path]
+                    metadata: ["urlLastPathComponent": url.lastPathComponent]
                 )
                 completionHandler(nil)
             } else {
-                SentryDebug.capture(message: "startProvidingItem failed to find file", context: ["url": url.path], level: .error)
+                SentryDebug.capture(message: "startProvidingItem failed to find file",
+                                    context: ["urlLastPathComponent": url.lastPathComponent],
+                                    contextKey: "FileProvider", level: .error)
                 completionHandler(NSFileProviderError(.noSuchItem))
             }
             return
@@ -284,9 +291,11 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         guard let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain) as? FileProviderItem
         else {
-            let context = ["fileId": fileId, "fileUrl": file.localUrl.path, "isFullyDownloaded": file.fullyDownloaded,
+            let context = ["fileId": fileId, "fileUrlLastPathComponent": file.localUrl.lastPathComponent,
+                           "isFullyDownloaded": file.fullyDownloaded,
                            "isLocalVersionOlderThanRemote": file.isLocalVersionOlderThanRemote] as [String: Any]
-            SentryDebug.capture(message: "startProvidingItem failed to convert file to FileProviderItem", context: context, level: .error)
+            SentryDebug.capture(message: "startProvidingItem failed to convert file to FileProviderItem", context: context,
+                                contextKey: "FileProvider", level: .error)
             completionHandler(NSFileProviderError(.noSuchItem))
             return
         }
@@ -297,10 +306,10 @@ final class FileProviderExtension: NSFileProviderExtension {
                 category: .fileProvider,
                 level: .info,
                 metadata: [
-                    "url": url.path,
+                    "urlLastPathComponent": url.lastPathComponent,
                     "fileId": file.id,
-                    "filePath": file.localUrl.path,
-                    "itemPath": item.storageUrl.path
+                    "fileName": file.localUrl.lastPathComponent,
+                    "itemName": item.storageUrl.lastPathComponent
                 ]
             )
             // File is in the file provider and is the same, nothing to do...
@@ -310,7 +319,10 @@ final class FileProviderExtension: NSFileProviderExtension {
                 message: "file is a directory, we create it",
                 category: .fileProvider,
                 level: .info,
-                metadata: ["url": url.path, "fileId": file.id]
+                metadata: [
+                    "urlLastPathComponent": url.lastPathComponent,
+                    "fileId": file.id
+                ]
             )
             try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             completionHandler(nil)
@@ -319,7 +331,10 @@ final class FileProviderExtension: NSFileProviderExtension {
                 message: "file is not current, downloading remote file",
                 category: .fileProvider,
                 level: .info,
-                metadata: ["url": url.path, "fileId": file.id]
+                metadata: [
+                    "urlLastPathComponent": url.lastPathComponent,
+                    "fileId": file.id
+                ]
             )
             downloadRemoteFile(file, for: item, completion: completionHandler)
         }
@@ -331,7 +346,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             message: "stopProvidingItem",
             category: .fileProvider,
             level: .info,
-            metadata: ["url": url.path]
+            metadata: ["urlLastPathComponent": url.lastPathComponent]
         )
 
         cleanupAt(url: url)
@@ -391,7 +406,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 level: error == nil ? .info : .error,
                 metadata: [
                     "fileId": file.id,
-                    "filePath": file.localUrl.path
+                    "fileName": file.localUrl.lastPathComponent
                 ]
             )
 
@@ -416,8 +431,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                     level: .info,
                     metadata: [
                         "fileId": file.id,
-                        "sourceUrl": file.localUrl.path,
-                        "destinationUrl": item.storageUrl.path
+                        "sourceFileName": file.localUrl.lastPathComponent,
+                        "destinationFileName": item.storageUrl.lastPathComponent
                     ]
                 )
                 Log.fileProvider("downloadRemoteFile completion")
@@ -425,10 +440,11 @@ final class FileProviderExtension: NSFileProviderExtension {
             } catch {
                 let context = [
                     "fileId": file.id,
-                    "sourceUrl": file.localUrl.path,
-                    "destinationUrl": item.storageUrl.path
+                    "sourceFileName": file.localUrl.lastPathComponent,
+                    "destinationFileName": item.storageUrl.lastPathComponent
                 ] as [String: Any]
-                SentryDebug.capture(message: "Copy failed", context: context, level: .error)
+                SentryDebug.capture(message: "Copy failed", context: context,
+                                    contextKey: "FileProvider", level: .error)
                 Log.fileProvider("downloadRemoteFile error:\(error)", level: .error)
                 completion(error)
             }
@@ -442,8 +458,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                 level: .info,
                 metadata: [
                     "fileId": file.id,
-                    "sourceUrl": file.localUrl.path,
-                    "destinationUrl": item.storageUrl.path
+                    "sourceFileName": file.localUrl.lastPathComponent,
+                    "destinationFileName": item.storageUrl.lastPathComponent
                 ]
             )
             Log.fileProvider("downloadFreshRemoteFile in queue, observing existing download", level: .info)
@@ -456,8 +472,8 @@ final class FileProviderExtension: NSFileProviderExtension {
             level: .info,
             metadata: [
                 "fileId": file.id,
-                "sourceUrl": file.localUrl.path,
-                "destinationUrl": item.storageUrl.path
+                "sourceFileName": file.localUrl.lastPathComponent,
+                "destinationFileName": item.storageUrl.lastPathComponent
             ]
         )
 
@@ -481,11 +497,12 @@ final class FileProviderExtension: NSFileProviderExtension {
         } catch {
             let context = [
                 "fileId": file.id,
-                "sourceUrl": file.localUrl.path,
-                "destinationUrl": item.storageUrl.path
+                "sourceFileName": file.localUrl.lastPathComponent,
+                "destinationFileName": item.storageUrl.lastPathComponent
             ] as [String: Any]
 
-            SentryDebug.capture(message: "saveFreshLocalFile copy failed", context: context, level: .error)
+            SentryDebug.capture(message: "saveFreshLocalFile copy failed", context: context,
+                                contextKey: "FileProvider", level: .error)
             completion(error)
         }
     }

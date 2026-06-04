@@ -46,7 +46,7 @@ public enum SentryDebug {
 
         case tokenMigrator
 
-        case fileProvider
+        case fileProvider = "FileProvider"
     }
 
     public enum EventNames {
