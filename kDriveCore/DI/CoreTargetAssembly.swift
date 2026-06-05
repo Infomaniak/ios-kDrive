@@ -166,8 +166,11 @@ open class CoreTargetAssembly: TargetAssembly {
             },
             Factory(type: AppLockHelper.self) { _, _ in
                 AppLockHelper(
-                    logoImage: KDriveCoreAsset.logo.swiftUIImage,
-                    lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage,
+                    appLockUIConfiguration: AppLockUIConfiguration(
+                        logoImage: KDriveCoreAsset.logo.swiftUIImage,
+                        lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage,
+                        ikButtonTheme: .drive
+                    ),
                     userDefaults: UserDefaults.shared
                 )
             },

@@ -114,20 +114,6 @@ class WaveViewController: UIViewController {
     }
 }
 
-extension IKButtonTheme {
-    static let drive = IKButtonTheme(
-        primary: KDriveResourcesAsset.infomaniakColor.swiftUIColor,
-        secondary: .white,
-        tertiary: KDriveResourcesAsset.backgroundCardViewColor.swiftUIColor,
-        disabledPrimary: KDriveResourcesAsset.buttonDisabledBackgroundColor.swiftUIColor,
-        disabledSecondary: KDriveResourcesAsset.buttonDisabledBackgroundColor.swiftUIColor,
-        error: KDriveResourcesAsset.binColor.swiftUIColor,
-        smallFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)),
-        mediumFont: Font(UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 16), weight: .medium)),
-        cornerRadius: UIConstants.Button.cornerRadius
-    )
-}
-
 extension WaveViewController: OnboardingViewControllerDelegate {
     func shouldAnimateBottomViewForIndex(_ index: Int) -> Bool {
         guard slides.count > 1 else { return false }
