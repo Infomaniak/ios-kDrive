@@ -327,7 +327,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 level: .info,
                 metadata: [
                     "fileId": file.id,
-                    "itemIdentifier": item.itemIdentifier.rawValue,
+                    "itemIdentifier": item.itemIdentifier.rawValue
                 ]
             )
             downloadRemoteFile(file, for: item, completion: completionHandler)
