@@ -266,8 +266,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         SentryDebug.addBreadcrumb(
             message: "startProvidingItem",
             category: .fileProvider,
-            level: .info,
-            metadata: ["urlLastPathComponent": url.lastPathComponent]
+            level: .info
         )
 
         guard let fileId = fileProviderService.identifier(for: url, domain: domain)?.toFileId(),
@@ -276,14 +275,11 @@ final class FileProviderExtension: NSFileProviderExtension {
                 SentryDebug.addBreadcrumb(
                     message: "file exists locally but cached file was not found",
                     category: .fileProvider,
-                    level: .info,
-                    metadata: ["urlLastPathComponent": url.lastPathComponent]
+                    level: .info
                 )
                 completionHandler(nil)
             } else {
-                SentryDebug.capture(message: "startProvidingItem failed to find file",
-                                    context: ["urlLastPathComponent": url.lastPathComponent],
-                                    contextKey: "FileProvider", level: .error)
+                SentryDebug.capture(message: "startProvidingItem failed to find file", level: .error)
                 completionHandler(NSFileProviderError(.noSuchItem))
             }
             return
@@ -291,7 +287,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         guard let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain) as? FileProviderItem
         else {
-            let context = ["fileId": fileId, "fileUrlLastPathComponent": file.localUrl.lastPathComponent,
+            let context = ["fileId": fileId,
                            "isFullyDownloaded": file.fullyDownloaded,
                            "isLocalVersionOlderThanRemote": file.isLocalVersionOlderThanRemote] as [String: Any]
             SentryDebug.capture(message: "startProvidingItem failed to convert file to FileProviderItem", context: context,
@@ -306,10 +302,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                 category: .fileProvider,
                 level: .info,
                 metadata: [
-                    "urlLastPathComponent": url.lastPathComponent,
                     "fileId": file.id,
-                    "fileName": file.localUrl.lastPathComponent,
-                    "itemName": item.storageUrl.lastPathComponent
+                    "itemIdentifier": item.itemIdentifier.rawValue
                 ]
             )
             // File is in the file provider and is the same, nothing to do...
@@ -320,8 +314,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                 category: .fileProvider,
                 level: .info,
                 metadata: [
-                    "urlLastPathComponent": url.lastPathComponent,
-                    "fileId": file.id
+                    "fileId": file.id,
+                    "itemIdentifier": item.itemIdentifier.rawValue
                 ]
             )
             try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
@@ -332,8 +326,8 @@ final class FileProviderExtension: NSFileProviderExtension {
                 category: .fileProvider,
                 level: .info,
                 metadata: [
-                    "urlLastPathComponent": url.lastPathComponent,
-                    "fileId": file.id
+                    "fileId": file.id,
+                    "itemIdentifier": item.itemIdentifier.rawValue,
                 ]
             )
             downloadRemoteFile(file, for: item, completion: completionHandler)
@@ -342,11 +336,12 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     override func stopProvidingItem(at url: URL) {
         Log.fileProvider("stopProvidingItem at url:\(url)")
+        let fileId = fileProviderService.identifier(for: url, domain: domain)?.toFileId()
         SentryDebug.addBreadcrumb(
             message: "stopProvidingItem",
             category: .fileProvider,
             level: .info,
-            metadata: ["urlLastPathComponent": url.lastPathComponent]
+            metadata: ["fileId": fileId ?? "nil"]
         )
 
         cleanupAt(url: url)
@@ -407,8 +402,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 level: .info,
                 metadata: [
                     "fileId": file.id,
-                    "sourceFileName": file.localUrl.lastPathComponent,
-                    "destinationFileName": item.storageUrl.lastPathComponent
+                    "itemIdentifier": item.itemIdentifier.rawValue
                 ]
             )
             Log.fileProvider("downloadFreshRemoteFile in queue, observing existing download", level: .info)
@@ -428,8 +422,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                         message: "Observed download completed but file storage is not current",
                         context: [
                             "fileId": file.id,
-                            "sourceFileName": file.localUrl.lastPathComponent,
-                            "destinationFileName": item.storageUrl.lastPathComponent
+                            "itemIdentifier": item.itemIdentifier.rawValue
                         ],
                         contextKey: "FileProvider",
                         level: .error
@@ -450,10 +443,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                 message: "downloadFreshRemoteFile callback",
                 category: .fileProvider,
                 level: error == nil ? .info : .error,
-                metadata: [
-                    "fileId": file.id,
-                    "fileName": file.localUrl.lastPathComponent
-                ]
+                metadata: ["fileId": file.id]
             )
 
             observationToken?.cancel()
@@ -477,8 +467,7 @@ final class FileProviderExtension: NSFileProviderExtension {
                     level: .info,
                     metadata: [
                         "fileId": file.id,
-                        "sourceFileName": file.localUrl.lastPathComponent,
-                        "destinationFileName": item.storageUrl.lastPathComponent
+                        "itemIdentifier": item.itemIdentifier.rawValue
                     ]
                 )
                 Log.fileProvider("downloadRemoteFile completion")
@@ -486,8 +475,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             } catch {
                 let context = [
                     "fileId": file.id,
-                    "sourceFileName": file.localUrl.lastPathComponent,
-                    "destinationFileName": item.storageUrl.lastPathComponent
+                    "itemIdentifier": item.itemIdentifier.rawValue
                 ] as [String: Any]
                 SentryDebug.capture(message: "Copy failed", context: context,
                                     contextKey: "FileProvider", level: .error)
@@ -502,8 +490,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             level: .info,
             metadata: [
                 "fileId": file.id,
-                "sourceFileName": file.localUrl.lastPathComponent,
-                "destinationFileName": item.storageUrl.lastPathComponent
+                "itemIdentifier": item.itemIdentifier.rawValue
             ]
         )
 
@@ -527,8 +514,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         } catch {
             let context = [
                 "fileId": file.id,
-                "sourceFileName": file.localUrl.lastPathComponent,
-                "destinationFileName": item.storageUrl.lastPathComponent
+                "itemIdentifier": item.itemIdentifier.rawValue
             ] as [String: Any]
 
             SentryDebug.capture(message: "saveFreshLocalFile copy failed", context: context,
