@@ -398,6 +398,52 @@ final class FileProviderExtension: NSFileProviderExtension {
     ) {
         Log.fileProvider("downloadFreshRemoteFile file:\(file.id)")
 
+        // If the file is already being downloaded,
+        // we observe the existing download instead of starting a new one
+        guard !downloadQueue.hasOperation(for: file.id) else {
+            SentryDebug.addBreadcrumb(
+                message: "File already in queue, observing existing download",
+                category: .fileProvider,
+                level: .info,
+                metadata: [
+                    "fileId": file.id,
+                    "sourceFileName": file.localUrl.lastPathComponent,
+                    "destinationFileName": item.storageUrl.lastPathComponent
+                ]
+            )
+            Log.fileProvider("downloadFreshRemoteFile in queue, observing existing download", level: .info)
+
+            var observationToken: ObservationToken?
+            observationToken = downloadQueue.observeFileDownloaded(self, fileId: file.id) { _, error in
+                observationToken?.cancel()
+                observationToken = nil
+
+                guard error == nil else {
+                    completion(NSFileProviderError(.serverUnreachable))
+                    return
+                }
+
+                guard self.fileStorageIsCurrent(item: item, file: file) else {
+                    SentryDebug.capture(
+                        message: "Observed download completed but file storage is not current",
+                        context: [
+                            "fileId": file.id,
+                            "sourceFileName": file.localUrl.lastPathComponent,
+                            "destinationFileName": item.storageUrl.lastPathComponent
+                        ],
+                        contextKey: "FileProvider",
+                        level: .error
+                    )
+                    completion(NSFileProviderError(.noSuchItem))
+                    return
+                }
+
+                completion(nil)
+            }
+
+            return
+        }
+
         var observationToken: ObservationToken?
         observationToken = downloadQueue.observeFileDownloaded(self, fileId: file.id) { _, error in
             SentryDebug.addBreadcrumb(
@@ -448,23 +494,6 @@ final class FileProviderExtension: NSFileProviderExtension {
                 Log.fileProvider("downloadRemoteFile error:\(error)", level: .error)
                 completion(error)
             }
-        }
-
-        // Prevent enqueuing multiple times the same file
-        // if startProvidingItem is called several times before the download completes
-        guard !downloadQueue.hasOperation(for: file.id) else {
-            SentryDebug.addBreadcrumb(
-                message: "File already in queue, observing existing download",
-                category: .fileProvider,
-                level: .info,
-                metadata: [
-                    "fileId": file.id,
-                    "sourceFileName": file.localUrl.lastPathComponent,
-                    "destinationFileName": item.storageUrl.lastPathComponent
-                ]
-            )
-            Log.fileProvider("downloadFreshRemoteFile in queue, observing existing download", level: .info)
-            return
         }
 
         SentryDebug.addBreadcrumb(
