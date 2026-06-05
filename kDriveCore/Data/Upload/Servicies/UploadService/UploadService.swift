@@ -187,6 +187,42 @@ extension UploadService: UploadServiceable {
         }
     }
 
+    public func waitForCompletionForActiveQueues(_ completionHandler: @escaping () -> Void) {
+        DispatchQueue.global(qos: .default).async { [weak self] in
+            guard let self else { completionHandler(); return }
+
+            var emptyLoops = 0
+            let requiredEmptyLoops = 3
+
+            while true {
+                let group = DispatchGroup()
+                var hasActiveQueue = false
+
+                for queue in self.allQueues {
+                    guard queue.isActive else { continue }
+                    hasActiveQueue = true
+                    group.enter()
+                    queue.waitForCompletionIsActive {
+                        group.leave()
+                    }
+                }
+
+                if !hasActiveQueue {
+                    emptyLoops += 1
+                    if emptyLoops >= requiredEmptyLoops {
+                        completionHandler()
+                        return
+                    }
+                    Thread.sleep(forTimeInterval: 0.2)
+                    continue
+                }
+
+                group.wait()
+                emptyLoops = 0
+            }
+        }
+    }
+
     public func retry(_ uploadFileId: String) {
         Log.uploadQueue("retry ufid:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {
