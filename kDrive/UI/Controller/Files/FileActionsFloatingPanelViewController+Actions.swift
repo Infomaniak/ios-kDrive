@@ -196,6 +196,7 @@ extension FileActionsFloatingPanelViewController {
         let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager,
                                                                                    folder: frozenFile,
                                                                                    presentedFromPlusButton: false)
+        (presentingParent as? FileListViewController)?.mediaHelper = fileInformationsViewController.mediaHelper
         floatingPanelViewController.isRemovalInteractionEnabled = true
         floatingPanelViewController.delegate = fileInformationsViewController
 

@@ -55,6 +55,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
         didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
     ) {
         picker.dismiss(animated: true)
+        (viewController as? FileListViewController)?.mediaHelper = nil
 
         guard let mediaType = info[.mediaType] as? String, let uti = UTI(mediaType) else {
             return
@@ -101,6 +102,7 @@ extension PhotoPickerDelegate: UIImagePickerControllerDelegate, UINavigationCont
 extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true) {
+            (self.viewController as? FileListViewController)?.mediaHelper = nil
             guard !results.isEmpty else {
                 return
             }
@@ -117,5 +119,6 @@ extension PhotoPickerDelegate: PHPickerViewControllerDelegate {
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
+        (viewController as? FileListViewController)?.mediaHelper = nil
     }
 }

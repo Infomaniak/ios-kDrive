@@ -52,6 +52,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     #if !ISEXTENSION
     lazy var filePresenter = FilePresenter(viewController: self)
+    var mediaHelper: OpenMediaHelper?
     #endif
 
     private var networkObserver: ObservationToken?
