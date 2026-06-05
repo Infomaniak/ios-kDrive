@@ -1,8 +1,2 @@
-- More efficient upload of large files
-- Improved search display
-- Improved folder display during drag and drop
-- Fixed a bug that displayed the option to color a folder twice
-- State restoration now works even after a force quit by the user
-- Reworked image cache dependencies
-- Switched to native system log mechanism
+- New context menu when long-pressing on a file or folder
 - Stability improvements and bug fixes
