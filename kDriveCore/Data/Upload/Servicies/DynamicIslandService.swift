@@ -68,7 +68,7 @@ public actor DynamicIslandService {
             title: "Uploading",
             subtitle: "Preparation..."
         )
-        request.strategy = .fail
+        request.strategy = .queue
 
         do {
             try BGTaskScheduler.shared.submit(request)
@@ -144,7 +144,7 @@ public actor DynamicIslandService {
                     let box = ContinuationBox(continuation)
                     self.uploadContinuationBox = box
 
-                    dynamicIslandManager.uploadService.waitForCompletion {
+                    dynamicIslandManager.uploadService.waitForCompletionForActiveQueues {
                         box.resume()
                     }
                 }
