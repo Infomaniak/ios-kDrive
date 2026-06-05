@@ -38,7 +38,11 @@ final class DynamicIslandManager: ObservableObject {
 
     private var globalQueueActive = false
     private var photoQueueActive = false
+    private var changeQueueObserver = false
     private var isObserving = false
+
+    static let photoAssetPredicate = NSPredicate(format: "rawType = %@", argumentArray: [UploadFileType.phAsset.rawValue])
+    static let globalAssetPredicate = NSPredicate(format: "rawType != %@", argumentArray: [UploadFileType.phAsset.rawValue])
 
     var driveFileManager: DriveFileManager? {
         didSet {
@@ -67,7 +71,7 @@ final class DynamicIslandManager: ObservableObject {
             }
             return
         }
-        if !isObserving {
+        if !isObserving || changeQueueObserver {
             startObservation()
             isObserving = true
         }
@@ -77,10 +81,16 @@ final class DynamicIslandManager: ObservableObject {
         guard let driveFileManager else { return }
         let driveId = driveFileManager.driveId
 
+        let optionalPredicate: NSPredicate? = uploadingFilesObserverOption()
+
         realmObservationToken?.invalidate()
         cancellables.removeAll()
 
-        totalUploadCount = uploadDataSource.getUploadingFiles(userId: accountManager.currentUserId, driveIds: [driveId]).count
+        totalUploadCount = uploadDataSource.getUploadingFiles(
+            userId: accountManager.currentUserId,
+            driveIds: [driveId],
+            optionalPredicate: optionalPredicate
+        ).count
 
         lastUpdateTime = clock.now
 
@@ -94,27 +104,31 @@ final class DynamicIslandManager: ObservableObject {
             }
             .store(in: &cancellables)
 
-        realmObservationToken = uploadDataSource.getUploadingFiles(userId: accountManager.currentUserId, driveIds: [driveId])
-            .observe(on: .main) { [weak self] change in
-                guard let self else { return }
+        realmObservationToken = uploadDataSource.getUploadingFiles(
+            userId: accountManager.currentUserId,
+            driveIds: [driveId],
+            optionalPredicate: optionalPredicate
+        )
+        .observe(on: .main) { [weak self] change in
+            guard let self else { return }
 
-                self.lastUpdateTime = clock.now
+            self.lastUpdateTime = clock.now
 
-                switch change {
-                case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
-                    let remaining = results.count
-                    totalUploadCount = max(totalUploadCount, remaining + progessUploading)
-                    progessUploading = totalUploadCount - remaining
+            switch change {
+            case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
+                let remaining = results.count
+                totalUploadCount = max(totalUploadCount, remaining + progessUploading)
+                progessUploading = totalUploadCount - remaining
 
-                    let percentOfProgress = totalUploadCount > 0 ? Double(progessUploading) / Double(totalUploadCount) : 0
-                    let completedCount = Int64(percentOfProgress * Double(totalUploadCount))
+                let percentOfProgress = totalUploadCount > 0 ? Double(progessUploading) / Double(totalUploadCount) : 0
+                let completedCount = Int64(percentOfProgress * Double(totalUploadCount))
 
-                    self.overallProgress?.totalUnitCount = Int64(totalUploadCount)
-                    self.overallProgress?.completedUnitCount = completedCount
-                case .error:
-                    self.overallProgress?.completedUnitCount = 0
-                }
+                self.overallProgress?.totalUnitCount = Int64(totalUploadCount)
+                self.overallProgress?.completedUnitCount = completedCount
+            case .error:
+                self.overallProgress?.completedUnitCount = 0
             }
+        }
     }
 
     private func stopObservation() {
@@ -124,9 +138,26 @@ final class DynamicIslandManager: ObservableObject {
         overallProgress = nil
     }
 
+    private func uploadingFilesObserverOption() -> NSPredicate? {
+        if globalQueueActive && photoQueueActive {
+            return nil
+        } else {
+            if !globalQueueActive {
+                return DynamicIslandManager.photoAssetPredicate
+            } else {
+                return DynamicIslandManager.globalAssetPredicate
+            }
+        }
+    }
+
     func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
+        if globalQueueActive != self.globalQueueActive || photoQueueActive != self.photoQueueActive {
+            changeQueueObserver = true
+        }
+
         self.globalQueueActive = globalQueueActive
         self.photoQueueActive = photoQueueActive
+
         refreshObservation()
     }
 
