@@ -88,7 +88,7 @@ public actor DynamicIslandService {
 
     private func handleExpiration() {
         Self.logger.error("Handling task expiration")
-
+        uploadService.suspendAllOperations()
         lastError = DomainError.expiredTask
         uploadContinuationBox?.resume(throwing: DomainError.expiredTask)
         uploadContinuationBox = nil
@@ -120,7 +120,10 @@ public actor DynamicIslandService {
             var cancellable: AnyCancellable?
             defer {
                 cancellable?.cancel()
-                dynamicIslandManager.reset()
+                let isExpiredTask = (lastError as? DomainError) == .expiredTask
+                if !isExpiredTask {
+                    dynamicIslandManager.reset()
+                }
                 currentTask = nil
                 uploadContinuationBox = nil
                 lastError = nil
@@ -173,7 +176,7 @@ public actor DynamicIslandService {
         if let domainError = error as? DomainError {
             switch domainError {
             case .expiredTask:
-                return ("En arrière-plan", "Ouvrez l'app pour reprendre")
+                return ("Importation en pause", "Ouvrez l'app pour reprendre")
             }
         }
 
