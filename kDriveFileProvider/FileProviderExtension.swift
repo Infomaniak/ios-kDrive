@@ -35,7 +35,7 @@ extension DriveFileManager {
         guard let fileId = itemIdentifier.toFileId(),
               let file = getCachedFile(id: fileId, freeze: freeze, using: realm),
               !file.isInvalidated else {
-            let context = ["itemIdentifier": itemIdentifier.rawValue]
+            let context = ["itemIdentifier": itemIdentifier.rawValue] as [String: Any]
             SentryDebug.capture(message: "getCachedFile using realm failed", context: context,
                                 contextKey: "FileProvider", level: .error)
             throw NSFileProviderError(.noSuchItem)
@@ -48,7 +48,7 @@ extension DriveFileManager {
                        freeze: Bool = true) throws -> File {
         guard let fileId = itemIdentifier.toFileId(),
               let file = getCachedFile(id: fileId, freeze: freeze) else {
-            let context = ["itemIdentifier": itemIdentifier.rawValue]
+            let context = ["itemIdentifier": itemIdentifier.rawValue] as [String: Any]
             SentryDebug.capture(message: "getCachedFile failed", context: context,
                                 contextKey: "FileProvider", level: .error)
             throw NSFileProviderError(.noSuchItem)
@@ -160,7 +160,7 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         // did not match anything
         Log.fileProvider("item for identifier - nsError(code: .noSuchItem)", level: .error)
-        let context = ["identifier": identifier.rawValue]
+        let context = ["identifier": identifier.rawValue] as [String: Any]
         SentryDebug.capture(message: "item for identifier failed to find item", context: context,
                             contextKey: "FileProvider", level: .error)
         throw NSFileProviderError(.noSuchItem)
