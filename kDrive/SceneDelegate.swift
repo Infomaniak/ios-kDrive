@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
@@ -126,6 +127,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
+        lockHelper.startObservation()
         let newState = RootViewControllerState.getCurrentState()
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
         if window?.rootViewController == nil {
@@ -205,8 +207,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
         backgroundTasksService.scheduleBackgroundRefresh()
 
-        if UserDefaults.shared.isAppLockEnabled,
-           !(window?.rootViewController?.isKind(of: LockedAppViewController.self) ?? false) {
+        if UserDefaults.shared.isAppLockEnabled {
             lockHelper.setTime()
         }
     }
@@ -312,7 +313,7 @@ extension SceneDelegate {
         }
 
         switch currentState {
-        case .mainViewController, .appLock:
+        case .mainViewController:
             UserDefaults.shared.numberOfConnections += 1
             if UserDefaults.shared.object(forKey: "actionUntilReview") != nil {
                 UserDefaults.shared.actionUntilReview -= 1

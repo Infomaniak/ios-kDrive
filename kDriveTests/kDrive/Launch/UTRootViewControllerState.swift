@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppLock
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
@@ -74,7 +75,14 @@ final class UTRootViewControllerState: XCTestCase {
                 InfomaniakLogin(config: self.loginConfig)
             },
             Factory(type: AppLockHelper.self) { _, _ in
-                AppLockHelper()
+                AppLockHelper(
+                    appLockUIConfiguration: AppLockUIConfiguration(
+                        logoImage: KDriveCoreAsset.logo.swiftUIImage,
+                        lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage,
+                        ikButtonTheme: .drive
+                    ),
+                    userDefaults: UserDefaults.shared
+                )
             }
         ]
 
@@ -83,7 +91,7 @@ final class UTRootViewControllerState: XCTestCase {
         }
     }
 
-    func testFirstLaunchState() throws {
+    func testFirstLaunchState() {
         // GIVEN empty accounts
         UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = true
@@ -101,7 +109,7 @@ final class UTRootViewControllerState: XCTestCase {
         XCTAssertEqual(currentState, .onboarding, "State should be onboarding")
     }
 
-    func testOnboardingState() throws {
+    func testOnboardingState() {
         // GIVEN empty accounts
         UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = false
@@ -119,7 +127,7 @@ final class UTRootViewControllerState: XCTestCase {
         XCTAssertEqual(currentState, .onboarding, "State should be onboarding")
     }
 
-    func testOnboardingWithAppLockState() throws {
+    func testOnboardingWithAppLockState() {
         // GIVEN empty accounts BUT AppLock enabled
         UserDefaults.shared.isAppLockEnabled = true
         UserDefaults.shared.legacyIsFirstLaunch = false
@@ -137,28 +145,7 @@ final class UTRootViewControllerState: XCTestCase {
         XCTAssertEqual(currentState, .onboarding, "State should be onboarding")
     }
 
-    func testAppLockState() throws {
-        // GIVEN
-        UserDefaults.shared.isAppLockEnabled = true
-        UserDefaults.shared.legacyIsFirstLaunch = false
-
-        let emptyAccountManagerFactory = Factory(type: AccountManageable.self) { _, _ in
-            let accountManager = MockAccountManager()
-            accountManager.accounts.append(Self.fakeAccount)
-            accountManager.currentAccount = Self.fakeAccount
-            accountManager.currentUserId = Self.fakeAccount.userId
-            return accountManager
-        }
-        SimpleResolver.sharedResolver.store(factory: emptyAccountManagerFactory)
-
-        // WHEN
-        let currentState = RootViewControllerState.getCurrentState()
-
-        // THEN
-        XCTAssertEqual(currentState, .appLock, "State should be applock, got \(currentState)")
-    }
-
-    func testNoDriveFileManagerState() throws {
+    func testNoDriveFileManagerState() {
         // GIVEN
         UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = false
@@ -198,7 +185,7 @@ final class UTRootViewControllerPreloading: XCTestCase {
         SimpleResolver.sharedResolver.store(factory: accountManagerFactory)
     }
 
-    func testMainViewControllerState() throws {
+    func testMainViewControllerState() {
         // GIVEN
         UserDefaults.shared.isAppLockEnabled = false
         UserDefaults.shared.legacyIsFirstLaunch = false
@@ -219,8 +206,6 @@ final class UTRootViewControllerPreloading: XCTestCase {
 extension RootViewControllerState: Equatable {
     public static func == (lhs: RootViewControllerState, rhs: RootViewControllerState) -> Bool {
         switch (lhs, rhs) {
-        case (.appLock, .appLock):
-            return true
         case (.onboarding, .onboarding):
             return true
         case (.mainViewController(let lhsMailboxManager), .mainViewController(let rhsMailboxManager)):
