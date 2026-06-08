@@ -149,12 +149,21 @@ public actor DynamicIslandService {
                     }
                 }
 
-                // TODO: Add gestion when uploadCount == 1 file
-                let uploadCount = dynamicIslandManager.getTotalUploadCount()
-                task.updateTitle(
-                    KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                    subtitle: KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadCount)
-                )
+                let progessUploading = dynamicIslandManager.getProgessUploading()
+                let totalUploadCount = dynamicIslandManager.getTotalUploadCount() + progessUploading
+
+                if uploadService.operationCount > 0 {
+                    // Photo isn't finish, wait wifi
+                    task.updateTitle(
+                        "Attente de Wifi",
+                        subtitle: "\(progessUploading) / \(totalUploadCount) upload réussi"
+                    )
+                } else {
+                    task.updateTitle(
+                        KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
+                        subtitle: KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(progessUploading)
+                    )
+                }
 
                 task.setTaskCompleted(success: true)
             } catch {
