@@ -148,8 +148,8 @@ public actor DynamicIslandService {
                     }
                 }
 
-                let progressUploading = dynamicIslandManager.getProgressUploading()
-                let totalUploadCount = dynamicIslandManager.getTotalUploadCount() + progressUploading
+                let progressUploading = dynamicIslandManager.getProgessUploading() + (dynamicIslandManager.lastIsChunck() ? 1 : 0)
+                let totalUploadCount = dynamicIslandManager.getTotalUploadCount() + progessUploading
 
                 let status = ReachabilityListener.instance.currentStatus
                 let shouldBeSuspended = status != .wifi
