@@ -19,6 +19,7 @@
 import BackgroundTasks
 @preconcurrency import Combine
 import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
 import OSLog
@@ -29,6 +30,7 @@ public actor DynamicIslandService {
 
     @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
     @LazyInjectService private var uploadService: UploadServiceable
+    @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploadable
 
     private let taskIdentifier: String
 
@@ -152,7 +154,11 @@ public actor DynamicIslandService {
                 let progessUploading = dynamicIslandManager.getProgessUploading()
                 let totalUploadCount = dynamicIslandManager.getTotalUploadCount() + progessUploading
 
-                if uploadService.operationCount > 0 {
+                let status = ReachabilityListener.instance.currentStatus
+                let shouldBeSuspended = status != .wifi
+                let wifiSynchro = photoLibraryUploader.isWifiOnly
+
+                if uploadService.operationCount > 0 && shouldBeSuspended && wifiSynchro {
                     // Photo isn't finish, wait wifi
                     task.updateTitle(
                         "Attente de Wifi",
