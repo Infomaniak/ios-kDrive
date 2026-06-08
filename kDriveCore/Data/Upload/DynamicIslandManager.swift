@@ -139,14 +139,15 @@ final class DynamicIslandManager: ObservableObject {
     }
 
     private func uploadingFilesObserverOption() -> NSPredicate? {
-        if globalQueueActive && photoQueueActive {
+        switch (globalQueueActive, photoQueueActive) {
+        case (true, true):
             return nil
-        } else {
-            if !globalQueueActive {
-                return DynamicIslandManager.photoAssetPredicate
-            } else {
-                return DynamicIslandManager.globalAssetPredicate
-            }
+        case (true, false):
+            return DynamicIslandManager.globalAssetPredicate
+        case(false, true):
+            return DynamicIslandManager.photoAssetPredicate
+        default:
+            return nil
         }
     }
 
@@ -175,6 +176,10 @@ final class DynamicIslandManager: ObservableObject {
 
     func getTotalUploadCount() -> Int {
         return totalUploadCount
+    }
+
+    func getProgessUploading() -> Int {
+        return progessUploading
     }
 
     func reset() {
