@@ -116,7 +116,8 @@ let project = Project(name: "kDrive",
                                       .external(name: "InfomaniakDI"),
                                       .external(name: "InfomaniakLogin"),
                                       .external(name: "RealmSwift"),
-                                      .external(name: "Realm")
+                                      .external(name: "Realm"),
+                                      .external(name: "AppLock")
                                   ],
                                   settings: .settings(base: Constants.testSettings)),
                           .target(name: "kDriveAPITests",
@@ -145,7 +146,10 @@ let project = Project(name: "kDrive",
                                   product: .uiTests,
                                   bundleId: "com.infomaniak.drive.uiTests",
                                   deploymentTargets: Constants.deploymentTarget,
-                                  infoPlist: .extendingDefault(with: ["CFBundleDevelopmentRegion": "en-GB", "CFBundleLocalizations": ["en-GB"]]),
+                                  infoPlist: .extendingDefault(with: [
+                                      "CFBundleDevelopmentRegion": "en-GB",
+                                      "CFBundleLocalizations": ["en-GB"]
+                                  ]),
                                   sources: "kDriveUITests/**",
                                   dependencies: [
                                       .target(name: "kDrive"),
@@ -208,7 +212,8 @@ let project = Project(name: "kDrive",
                                       .external(name: "Realm"),
                                       .external(name: "Sentry-Dynamic"),
                                       .external(name: "SwiftRegex"),
-                                      .external(name: "VersionChecker")
+                                      .external(name: "VersionChecker"),
+                                      .external(name: "AppLock")
                                   ]),
                           .target(name: "kDriveFileProvider",
                                   destinations: Constants.destinations,

@@ -136,7 +136,8 @@ public extension Target {
                            .external(name: "MaterialOutlinedTextField"),
                            .external(name: "Realm"),
                            .external(name: "RealmSwift"),
-                           .external(name: "VersionChecker")
+                           .external(name: "VersionChecker"),
+                           .external(name: "AppLock")
                        ],
                        settings: settings)
     }

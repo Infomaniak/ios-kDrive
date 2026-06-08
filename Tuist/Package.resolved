@@ -1,5 +1,5 @@
 {
-  "originHash" : "a39d7c254353a238290bc5328669fd4c23cdb8d619e68750ea2f0f29d26314f6",
+  "originHash" : "55100f19e00a1022871607cda75a1700284f2709aa67685aa3ae789dc653c99a",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "branch" : "feat/remove-app-lock",
-        "revision" : "e56afe2c4be77962a3d7389bf05433bff16f9cfe"
+        "revision" : "3b76e240507426e9e00283097158c5336443251f",
+        "version" : "24.12.0"
       }
     },
     {
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "branch" : "feat/app-lock",
-        "revision" : "8705deb82812207bb8b184afd6221e689a71138a"
+        "revision" : "24f1d37409f91593f751c8c51527cf3cb82b9966",
+        "version" : "8.10.1"
       }
     },
     {
