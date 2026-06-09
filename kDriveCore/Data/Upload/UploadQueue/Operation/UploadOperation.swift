@@ -79,9 +79,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     /// The number of chunks we try to keep ready to upload in one UploadOperation
     private static let parallelism = 2
 
-    /// An Activity to prevent the system from interrupting it without been notified beforehand
-    private var expiringActivity: ExpiringActivityable?
-
     /// Local tracking of running network tasks
     /// The key used is the and absolute identifier of the task.
     let uploadTasks = SendableDictionary<String, URLSessionUploadTask>()
@@ -93,8 +90,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         """
         <\(type(of: self)):\(super.debugDescription)
         uploading file id:'\(uploadFileId)'
-        parallelism :\(Self.parallelism)
-        expiringActivity:'\(String(describing: expiringActivity))'>
+        parallelism :\(Self.parallelism)>
         """
     }
 
@@ -124,9 +120,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             try self.checkCancelation()
             try self.freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
 
-            // Fetch a background task identifier
-            self.beginExpiringActivity()
-
             // Clean existing error if any
             try self.cleanUploadFileError()
 
@@ -153,13 +146,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     }
 
     // MARK: - Process steps
-
-    /// Start to track the app going to background to be notified when the system would like to terminate
-    func beginExpiringActivity() {
-        let activity = ExpiringActivity(id: uploadFileId, delegate: self)
-        activity.start()
-        expiringActivity = activity
-    }
 
     /// Return the available chunking slots.
     func availableWorkerSlots() -> Int {
@@ -277,9 +263,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             // Terminate the NSOperation
             Log.uploadOperation("call finish ufid:\(uploadFileId)")
 
-            // Make sure we stop the expiring activity
-            expiringActivity?.endAll()
-
             // Make sure we stop all the network requests (if any)
             cancelAllUploadRequests()
 
@@ -334,6 +317,10 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
                 try await deleteUploadFile()
             }
         }
+    }
+
+    override public func operationDidCancel() {
+        end()
     }
 
     // MARK: - Private methods -
