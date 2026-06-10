@@ -74,7 +74,7 @@ final class UTRootViewControllerState: XCTestCase {
             Factory(type: InfomaniakLoginable.self) { _, _ in
                 InfomaniakLogin(config: self.loginConfig)
             },
-            Factory(type: AppLockHelper.self) { _, _ in
+            Factory(type: AppLockHelping.self) { _, _ in
                 AppLockHelper(
                     appLockUIConfiguration: AppLockUIConfiguration(
                         logoImage: KDriveCoreAsset.logo.swiftUIImage,

@@ -31,7 +31,7 @@ class SaveFileViewController: UIViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var fileImportHelper: FileImportHelper
     @LazyInjectService var appContextService: AppContextServiceable
-    @InjectService var appLockHelper: AppLockHelper
+    @InjectService var appLockHelper: AppLockHelping
 
     private var originalDriveId: Int = {
         @InjectService var accountManager: AccountManageable

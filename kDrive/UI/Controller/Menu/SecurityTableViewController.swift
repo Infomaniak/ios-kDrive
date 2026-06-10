@@ -29,7 +29,7 @@ class SecurityTableViewController: BaseGroupedTableViewController {
         case fileProviderExtension
     }
 
-    @LazyInjectService private var lockHelper: AppLockHelper
+    @LazyInjectService private var lockHelper: AppLockHelping
     @LazyInjectService private var matomo: MatomoUtils
 
     private var tableContent = [SecurityOption]()
@@ -41,7 +41,7 @@ class SecurityTableViewController: BaseGroupedTableViewController {
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.register(cellView: ParameterWifiTableViewCell.self)
 
-        if lockHelper.isAvailable() {
+        if lockHelper.isAvailable(nil) {
             tableContent = SecurityOption.allCases
         } else {
             tableContent = [.fileProviderExtension]

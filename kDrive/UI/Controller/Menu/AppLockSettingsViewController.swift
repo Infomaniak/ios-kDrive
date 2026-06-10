@@ -29,7 +29,7 @@ class AppLockSettingsViewController: UIViewController {
     @IBOutlet var navigationBar: UINavigationBar!
 
     @LazyInjectService private var matomo: MatomoUtils
-    @LazyInjectService private var appLockHelper: AppLockHelper
+    @LazyInjectService private var appLockHelper: AppLockHelping
 
     var closeActionHandler: (() -> Void)?
 

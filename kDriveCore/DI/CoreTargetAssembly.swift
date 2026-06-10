@@ -164,7 +164,7 @@ open class CoreTargetAssembly: TargetAssembly {
             Factory(type: BGTaskScheduler.self) { _, _ in
                 BGTaskScheduler.shared
             },
-            Factory(type: AppLockHelper.self) { _, _ in
+            Factory(type: AppLockHelping.self) { _, _ in
                 AppLockHelper(
                     appLockUIConfiguration: AppLockUIConfiguration(
                         logoImage: KDriveCoreAsset.logo.swiftUIImage,
