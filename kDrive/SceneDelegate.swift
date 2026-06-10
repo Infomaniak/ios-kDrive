@@ -28,7 +28,7 @@ import VersionChecker
 
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDelegate {
     @LazyInjectService private var matomo: MatomoUtils
-    @LazyInjectService var lockHelper: AppLockHelper
+    @LazyInjectService var lockHelper: AppLockHelping
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var backgroundTasksService: BackgroundTasksServiceable
