@@ -124,7 +124,9 @@ public final class SingleTrackPlayer: Pausable {
 
     private func setupStreamingAsset(_ urlAsset: AVURLAsset, fileName: String) async {
         player = AVPlayer(playerItem: AVPlayerItem(asset: urlAsset))
-        await setMetaData(from: urlAsset.commonMetadata, playableFileName: fileName)
+
+        let commonMetadata = try? await urlAsset.load(.commonMetadata)
+        await setMetaData(from: commonMetadata ?? [], playableFileName: fileName)
 
         currentItemStatusObserver = player?.observe(\.currentItem?.status) { _, _ in
             self.handleItemStatusChange()
