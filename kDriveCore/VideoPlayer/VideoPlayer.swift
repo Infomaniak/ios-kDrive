@@ -189,8 +189,8 @@ public final class VideoPlayer: Pausable {
     private func updateMetadata(asset: AVAsset?, defaultName: String) {
         guard let asset else { return }
         Task {
-            let commonMetadata = try await asset.load(.commonMetadata)
-            let metadata = await MediaMetadata.extractTrackMetadata(from: commonMetadata,
+            let commonMetadata = try? await asset.load(.commonMetadata)
+            let metadata = await MediaMetadata.extractTrackMetadata(from: commonMetadata ?? [],
                                                                     playableFileName: defaultName)
             setNowPlayingMetadata(metadata: metadata)
         }
