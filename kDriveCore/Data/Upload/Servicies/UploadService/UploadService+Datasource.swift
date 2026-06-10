@@ -48,6 +48,12 @@ public protocol UploadServiceDataSourceable {
     @discardableResult
     func saveToRealm(_ uploadFile: UploadFile,
                      itemIdentifier: NSFileProviderItemIdentifier?,
+                     addToQueue: Bool,
+                     writeExpiringActivity: Bool) -> UploadOperationable?
+
+    @discardableResult
+    func saveToRealm(_ uploadFile: UploadFile,
+                     itemIdentifier: NSFileProviderItemIdentifier?,
                      addToQueue: Bool) -> UploadOperationable?
 }
 
@@ -163,10 +169,20 @@ extension UploadService: UploadServiceDataSourceable {
     public func saveToRealm(_ uploadFile: UploadFile,
                             itemIdentifier: NSFileProviderItemIdentifier? = nil,
                             addToQueue: Bool = true) -> UploadOperationable? {
-        let expiringActivity = ExpiringActivity()
-        expiringActivity.start()
-        defer {
-            expiringActivity.endAll()
+        saveToRealm(uploadFile, itemIdentifier: itemIdentifier, addToQueue: addToQueue, writeExpiringActivity: true)
+    }
+
+    @discardableResult
+    public func saveToRealm(_ uploadFile: UploadFile,
+                            itemIdentifier: NSFileProviderItemIdentifier? = nil,
+                            addToQueue: Bool = true,
+                            writeExpiringActivity: Bool = true) -> UploadOperationable? {
+        if writeExpiringActivity {
+            let expiringActivity = ExpiringActivity()
+            expiringActivity.start()
+            defer {
+                expiringActivity.endAll()
+            }
         }
 
         Log.uploadQueue("saveToRealm addToQueue:\(addToQueue) ufid:\(uploadFile.id)")
