@@ -1,5 +1,5 @@
 {
-  "originHash" : "d4e78eb87876fa8831c3aaa9e9f6f67b9ae940c0c0aa55d26129d63fd705ac6e",
+  "originHash" : "874fc88e9c571b44bed1c547d7bd35d2a84c858e1b29878222ef4054b0e0cc9d",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -79,7 +79,7 @@
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
         "branch" : "fix/ExpiringActivity",
-        "revision" : "8ac69bdcc8170f372241ac7f11764059d9e23c8f"
+        "revision" : "4ffb5abfb652c535ad605706fe9c875d72759504"
       }
     },
     {
