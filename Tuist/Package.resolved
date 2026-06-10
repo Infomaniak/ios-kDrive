@@ -1,5 +1,5 @@
 {
-  "originHash" : "203f0d0a4d2740684c529dbac9d5f5cec26d4c3e03f47152a0a3e14896e2d4f0",
+  "originHash" : "74e57b890ea6d956e7a632cd0b499e44e3f74ee9e7500ad67cfcb1407d616ba4",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "branch" : "chore/upgrade-realm",
-        "revision" : "d9c14f63978ce9f5cf18eb068fcc1822ccfe626e"
+        "revision" : "da017d3a8f2a44c2602e5880d3edca552b4a8e96",
+        "version" : "18.12.0"
       }
     },
     {
