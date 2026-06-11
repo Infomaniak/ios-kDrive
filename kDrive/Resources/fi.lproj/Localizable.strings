@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: fi, Finnish
  * Tagged: ios
- * Exported by: Baptiste Griva
- * Exported at: Thu, 21 May 2026 09:28:50 +0200
+ * Exported by: Kylian Grandy
+ * Exported at: Thu, 11 Jun 2026 12:37:56 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -775,6 +775,12 @@
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Dropbox-jakolinkki";
 
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Valmistelu…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessfull" = " Lataaminen onnistui: %d/%d";
+
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "Muutos näkyy kaikille kDrive-käyttäjille, joilla on pääsy luokkiin.";
 
@@ -903,6 +909,9 @@
 
 /* loco:6569aef523dcf4dc2a0f5c92 */
 "errorWrongPassword" = "Väärä salasana";
+
+/* loco:6a2a79154feaf554c0020962 */
+"exceedQuotaTitle" = "Kiintiö ylitetty";
 
 /* loco:6049df4d5c2c3a04bc3979a9 */
 "favoritesNoFile" = "Ei suosikkeja tällä hetkellä";
@@ -1258,6 +1267,12 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Vanhenemisaika";
 
+/* loco:6a2a7acf5a2fec6b940785b2 */
+"insufficientSpaceDescription" = "Vapauta tilaa";
+
+/* loco:6a2a7a5f1dc6dc2d210f4ea4 */
+"insufficientSpaceTitle" = "Tilaa ei ole tarpeeksi";
+
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Viimeisimmät muutokset";
 
@@ -1278,6 +1293,9 @@
 
 /* loco:67f509c180ba041c690a8e02 */
 "maintenanceAsleepTitle" = "kDrivesi %@ on ottanut pienet nokoset!";
+
+/* loco:6a2a79b7bdb4d0e90a02bfc4 */
+"maintenanceTitle" = "Huolto";
 
 /* loco:67f50e36f46a2825af088213 */
 "maintenanceWakeUpButton" = "Käynnistä kDriveni uudelleen";
@@ -1536,6 +1554,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Tallenna muistosi turvallisesti";
+
+/* loco:6a2a78ccb80096108403dcd2 */
+"openAppToContinue" = "Avaa sovellus jatkaaksesi";
 
 /* loco:6660083917d29585d5010582 */
 "openInPlaceDirectory" = "Avaa paikallaan";
@@ -2116,6 +2137,9 @@
 /* loco:69bcfe53aed2af87a302d467 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
 
+/* loco:6a2a7a248dcf552aa702ad43 */
+"tryAgainLater" = "Yritä myöhemmin uudelleen";
+
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Tuntematon esittäjä";
 
@@ -2176,6 +2200,9 @@
 /* loco:6049df4d5c2c3a04bc397a86 */
 "uploadInProgressRestartUploadTitle" = "Käynnistä lähetykset uudelleen";
 
+/* loco:6a2a7751b7cc09a6da053fc2 */
+"uploadInProgressSubTitle" = "Edistyminen %d%%";
+
 /* loco:6049df4d5c2c3a04bc397a87 */
 "uploadInProgressTitle" = "Lähetys käynnissä";
 
@@ -2202,6 +2229,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Lähetys keskeytetty";
+
+/* loco:6a2a73b3d69b30963b02d5b2 */
+"uploadingTitle" = "Lataaminen";
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";
