@@ -92,21 +92,15 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         navController.disappearCallback = { [weak self] in
             self?.matomo.track(eventWithCategory: .mediaPlayer, name: "pause")
             self?.videoPlayer?.stopPlayback()
-            self?.presentFloatingPanel()
+            self?.previewDelegate?.setFullscreen(false)
         }
         navController.setNavigationBarHidden(true, animated: false)
         navController.modalPresentationStyle = .overFullScreen
         navController.modalTransitionStyle = .crossDissolve
 
-        presentFloatingPanel()
+        previewDelegate?.setFullscreen(true)
         parentViewController?.present(navController, animated: true) {
             playerViewController.player?.play()
-        }
-    }
-
-    private func presentFloatingPanel() {
-        if let floatingPanelController = parentViewController?.presentedViewController as? FloatingPanelController {
-            floatingPanelController.dismiss(animated: true)
         }
     }
 
