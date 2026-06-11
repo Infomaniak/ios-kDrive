@@ -58,17 +58,15 @@ public actor DynamicIslandService {
     }
 
     public func submitTask() {
-        // Avoid creating multiple tasks
         guard currentTask == nil else {
             Self.logger.info("Task already in progress, skipping submit")
             return
         }
 
-        // TODO: Strings are hard-coded, use string resources with Loco
         let request = BGContinuedProcessingTaskRequest(
             identifier: taskIdentifier,
-            title: "Uploading",
-            subtitle: "Preparation..."
+            title: KDriveResourcesStrings.Localizable.uploadingTitle,
+            subtitle: KDriveResourcesStrings.Localizable.dynamicIslandPreparationTitle
         )
         request.strategy = .queue
 
@@ -122,7 +120,7 @@ public actor DynamicIslandService {
             var cancellable: AnyCancellable?
             defer {
                 cancellable?.cancel()
-                let isExpiredTask = (lastError as? DomainError) == .expiredTask
+                let isExpiredTask = (self.lastError as? DomainError) == .expiredTask
                 if !isExpiredTask {
                     dynamicIslandManager.reset()
                 }
@@ -132,12 +130,11 @@ public actor DynamicIslandService {
             }
             task.progress.totalUnitCount = 100
 
-            // TODO: Check the value of progress
             cancellable = dynamicIslandManager.$fractionCompleted.sink { progress in
                 task.progress.completedUnitCount = Int64(progress * 100)
                 task.updateTitle(
                     KDriveResourcesStrings.Localizable.uploadInProgressTitle,
-                    subtitle: "Progress \(progress.formatted(.defaultPercent))"
+                    subtitle: KDriveResourcesStrings.Localizable.uploadInProgressSubTitle(Int(progress * 100))
                 )
             }
 
@@ -159,15 +156,20 @@ public actor DynamicIslandService {
                 let wifiSynchro = photoLibraryUploader.isWifiOnly
 
                 if uploadService.operationCount > 0 && shouldBeSuspended && wifiSynchro {
-                    // Photo isn't finish, wait wifi
                     task.updateTitle(
-                        "Attente de Wifi",
-                        subtitle: "\(progessUploading) / \(totalUploadCount) upload réussi"
+                        KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
+                        subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessfull(
+                            progessUploading,
+                            totalUploadCount
+                        )
                     )
                 } else {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                        subtitle: KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(progessUploading)
+                        subtitle: progessUploading > 1 ?
+                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(progessUploading)
+                            : KDriveResourcesStrings.Localizable
+                            .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
                     )
                 }
 
@@ -191,32 +193,41 @@ public actor DynamicIslandService {
         if let domainError = error as? DomainError {
             switch domainError {
             case .expiredTask:
-                return ("Importation en pause", "Ouvrez l'app pour reprendre")
+                return (
+                    KDriveResourcesStrings.Localizable.uploadPausedTitle,
+                    KDriveResourcesStrings.Localizable.openAppToContinue
+                )
             }
         }
 
         if let driveError = error as? DriveError {
             switch driveError {
             case .quotaExceeded:
-                return ("Quota dépassé", "Espace kDrive insuffisant")
+                return (
+                    KDriveResourcesStrings.Localizable.exceedQuotaTitle,
+                    KDriveResourcesStrings.Localizable.errorQuotaExceeded
+                )
             case .productMaintenance, .driveMaintenance:
-                return ("Maintenance", "Réessayez plus tard")
+                return (
+                    KDriveResourcesStrings.Localizable.maintenanceTitle,
+                    KDriveResourcesStrings.Localizable.tryAgainLater
+                )
             default:
                 break
             }
         }
 
         if error is FreeSpaceService.StorageIssues {
-            return ("Espace insuffisant", "Libérez de l'espace")
+            return (
+                KDriveResourcesStrings.Localizable.insufficientSpaceTitle,
+                KDriveResourcesStrings.Localizable.insufficientSpaceDescription
+            )
         }
 
-        return ("Erreur", "Ouvrez l'app pour continuer")
-    }
-}
-
-public extension FormatStyle where Self == FloatingPointFormatStyle<Double>.Percent {
-    static var defaultPercent: FloatingPointFormatStyle<Double>.Percent {
-        return .percent.precision(.fractionLength(0))
+        return (
+            KDriveResourcesStrings.Localizable.errorTitle,
+            KDriveResourcesStrings.Localizable.openAppToContinue
+        )
     }
 }
 
