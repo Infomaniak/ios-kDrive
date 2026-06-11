@@ -1,3 +1,12 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: pt, Portuguese
+ * Tagged: ios
+ * Exported by: Kylian Grandy
+ * Exported at: Thu, 11 Jun 2026 12:37:56 +0200
+ */
+
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "Aplicação kDrive";
 
@@ -686,7 +695,7 @@
 "deleteMyAccount" = "Eliminar a minha conta";
 
 /* loco:60dc3f19352b5e75d37b8c23 */
-"deletePicturesDescription" = "A aplicação irá pedir-lhe regularmente para eliminar fotos do seu dispositivo que já estão sincronizadas no seu kDrive. Tem sempre de autorizar manualmente a eliminação\n";
+"deletePicturesDescription" = "A aplicação irá pedir-lhe regularmente para eliminar fotos do seu dispositivo que já estão sincronizadas no seu kDrive. Tem sempre de autorizar manualmente a eliminação";
 
 /* loco:60dc3e2e5ea2965b1152dc03 */
 "deletePicturesTitle" = "Eliminar fotos";
@@ -770,7 +779,7 @@
 "dynamicIslandPreparationTitle" = "Preparação…";
 
 /* loco:6a2a782cb5186cdd19002bd2 */
-"dynamicIslandUploadSuccessful" = "Carregamento bem-sucedido: %d/%d";
+"dynamicIslandUploadSuccessfull" = " Carregamento bem-sucedido: %d/%d";
 
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "A modificação será visível para todos os utilizadores do kDrive que têm acesso às categorias.";
@@ -1195,51 +1204,6 @@
 /* loco:6169607a87650c03cf1ded24 */
 "fileTypeFilterTitle" = "Tipo de ficheiro";
 
-/* loco:6a4e51e04bc7bb347c049202 */
-"filter3DModels" = "Modelos 3D";
-
-/* loco:6a4e52e314bd801acc0b0b22 */
-"filterArchives" = "Arquivos";
-
-/* loco:6a4e530b14bd801acc0b0b24 */
-"filterCode" = "Código";
-
-/* loco:6a4e540a4dc47cf929076da2 */
-"filterDiagram" = "Diagrama";
-
-/* loco:6a4e5381e10673371b08af33 */
-"filterEmails" = "E-mails";
-
-/* loco:6a4e4e3718640359270369b2 */
-"filterFiles" = "Ficheiros";
-
-/* loco:6a4e4f98b4b975e0ac024953 */
-"filterFolders" = "Pastas";
-
-/* loco:6a4e53c9ccd4001ab0076192 */
-"filterFont" = "Tipo de letra";
-
-/* loco:6a4e511788423d5f3b095852 */
-"filterImages" = "Fotografias e imagens";
-
-/* loco:6a4e520f357a8b824d0233c2 */
-"filterOfficeGrids" = "Folhas de cálculo";
-
-/* loco:6a4e523876cba7d8ac051243 */
-"filterOfficePresentations" = "Apresentações";
-
-/* loco:6a4e514e29ba6e4ef5031452 */
-"filterOfficeTexts" = "Documentos de texto";
-
-/* loco:6a4e4fe690a314301206ce62 */
-"filterPDF" = "Ficheiros PDF";
-
-/* loco:6a4e52a7990b5c8093012732 */
-"filterSounds" = "Sons";
-
-/* loco:6a4e5287ce98d2f5b60db702 */
-"filterVideos" = "Vídeos";
-
 /* loco:61696046c3498f0db20ca172 */
 "filtersTitle" = "Filtros";
 
@@ -1308,9 +1272,6 @@
 
 /* loco:6a2a7a5f1dc6dc2d210f4ea4 */
 "insufficientSpaceTitle" = "Espaço insuficiente";
-
-/* loco:6a9a68f38cdf25fae40adb63 */
-"itemLabel" = "Item";
 
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Alterações mais recentes";
@@ -1493,7 +1454,7 @@
 "notEnoughStorageUsed" = "utilizado";
 
 /* loco:607947d62b29a7483d1c61a2 */
-"notSupportedExtensionDescription" = "Pretende criar uma cópia do seu ficheiro com uma extensão compatível para edição online? O ficheiro %@ original permanecerá inalterado.";
+"notSupportedExtensionDescription" = "Pretende criar uma cópia do seu ficheiro com uma extensão compatível para edição online? O ficheiro %@ original permanecerá inalterado.\n";
 
 /* loco:60794789c3a8a86f4e611e42 */
 "notSupportedExtensionTitle" = "A extensão %@ não é suportada para edição online";
@@ -1607,7 +1568,7 @@
 "photoFormatTitle" = "Opções";
 
 /* loco:638469dc5d9b75142a430ac2 */
-"photoLibraryAccessLimitedDescription" = "O acesso à sua biblioteca de fotos é necessário para guardar as suas fotos e vídeos.";
+"photoLibraryAccessLimitedDescription" = "O acesso à sua biblioteca de fotos é necessário para guardar as suas fotos e vídeos.       ";
 
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Acesso limitado ou recusado";

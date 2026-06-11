@@ -1,3 +1,12 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: nb, Norwegian Bokmål
+ * Tagged: ios
+ * Exported by: Kylian Grandy
+ * Exported at: Thu, 11 Jun 2026 12:37:56 +0200
+ */
+
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "kDrive-applikasjon";
 
@@ -770,7 +779,7 @@
 "dynamicIslandPreparationTitle" = "Forberedelse…";
 
 /* loco:6a2a782cb5186cdd19002bd2 */
-"dynamicIslandUploadSuccessful" = "Opplasting vellykket: %d/%d";
+"dynamicIslandUploadSuccessfull" = " Opplastingen lyktes: %d/%d";
 
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "Endringen vil være synlig for alle kDrive-brukere som har tilgang til kategoriene.";
@@ -1195,51 +1204,6 @@
 /* loco:6169607a87650c03cf1ded24 */
 "fileTypeFilterTitle" = "Filtype";
 
-/* loco:6a4e51e04bc7bb347c049202 */
-"filter3DModels" = "3D-modeller";
-
-/* loco:6a4e52e314bd801acc0b0b22 */
-"filterArchives" = "Arkiver";
-
-/* loco:6a4e530b14bd801acc0b0b24 */
-"filterCode" = "Kode";
-
-/* loco:6a4e540a4dc47cf929076da2 */
-"filterDiagram" = "Diagram";
-
-/* loco:6a4e5381e10673371b08af33 */
-"filterEmails" = "E-poster";
-
-/* loco:6a4e4e3718640359270369b2 */
-"filterFiles" = "Filer";
-
-/* loco:6a4e4f98b4b975e0ac024953 */
-"filterFolders" = "Mapper";
-
-/* loco:6a4e53c9ccd4001ab0076192 */
-"filterFont" = "Skrifttype";
-
-/* loco:6a4e511788423d5f3b095852 */
-"filterImages" = "Bilder og fotografier";
-
-/* loco:6a4e520f357a8b824d0233c2 */
-"filterOfficeGrids" = "Regneark";
-
-/* loco:6a4e523876cba7d8ac051243 */
-"filterOfficePresentations" = "Presentasjoner";
-
-/* loco:6a4e514e29ba6e4ef5031452 */
-"filterOfficeTexts" = "Tekstdokumenter";
-
-/* loco:6a4e4fe690a314301206ce62 */
-"filterPDF" = "PDF-filer";
-
-/* loco:6a4e52a7990b5c8093012732 */
-"filterSounds" = "Lyder";
-
-/* loco:6a4e5287ce98d2f5b60db702 */
-"filterVideos" = "Videoer";
-
 /* loco:61696046c3498f0db20ca172 */
 "filtersTitle" = "Filter";
 
@@ -1308,9 +1272,6 @@
 
 /* loco:6a2a7a5f1dc6dc2d210f4ea4 */
 "insufficientSpaceTitle" = "For lite plass";
-
-/* loco:6a9a68f38cdf25fae40adb63 */
-"itemLabel" = "Element";
 
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Siste endringer";
@@ -1493,7 +1454,7 @@
 "notEnoughStorageUsed" = "brukt";
 
 /* loco:607947d62b29a7483d1c61a2 */
-"notSupportedExtensionDescription" = "Ønsker du å opprette en kopi av filen din med en kompatibel utvidelse for online redigering? Den originale %@-filen vil forbli uendret.";
+"notSupportedExtensionDescription" = "Ønsker du å opprette en kopi av filen din med en kompatibel utvidelse for online redigering? Den originale %@-filen vil forbli uendret.\n";
 
 /* loco:60794789c3a8a86f4e611e42 */
 "notSupportedExtensionTitle" = "Utvidelsen %@ støttes ikke for online redigering";
@@ -1607,7 +1568,7 @@
 "photoFormatTitle" = "Alternativer";
 
 /* loco:638469dc5d9b75142a430ac2 */
-"photoLibraryAccessLimitedDescription" = "Tilgang til dine bilder er nødvendig for å lagre dine bilder og videoer.";
+"photoLibraryAccessLimitedDescription" = "Tilgang til dine bilder er nødvendig for å lagre dine bilder og videoer.       ";
 
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Begrenset eller nektet tilgang";

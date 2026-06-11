@@ -1,3 +1,12 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: en, English
+ * Tagged: ios
+ * Exported by: Kylian Grandy
+ * Exported at: Thu, 11 Jun 2026 12:37:56 +0200
+ */
+
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "kDrive application";
 
@@ -686,7 +695,7 @@
 "deleteMyAccount" = "Delete my account";
 
 /* loco:60dc3f19352b5e75d37b8c23 */
-"deletePicturesDescription" = "The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion\n";
+"deletePicturesDescription" = "The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion";
 
 /* loco:60dc3e2e5ea2965b1152dc03 */
 "deletePicturesTitle" = "Delete photos";
@@ -770,7 +779,7 @@
 "dynamicIslandPreparationTitle" = "Preparation…";
 
 /* loco:6a2a782cb5186cdd19002bd2 */
-"dynamicIslandUploadSuccessful" = "Upload successful: %d/%d";
+"dynamicIslandUploadSuccessfull" = " Upload successful: %d/%d";
 
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "The modification will be visible to all kDrive users who have access to the categories.";
@@ -1195,51 +1204,6 @@
 /* loco:6169607a87650c03cf1ded24 */
 "fileTypeFilterTitle" = "File type";
 
-/* loco:6a4e51e04bc7bb347c049202 */
-"filter3DModels" = "3D Models";
-
-/* loco:6a4e52e314bd801acc0b0b22 */
-"filterArchives" = "Archives";
-
-/* loco:6a4e530b14bd801acc0b0b24 */
-"filterCode" = "Code";
-
-/* loco:6a4e540a4dc47cf929076da2 */
-"filterDiagram" = "Diagram";
-
-/* loco:6a4e5381e10673371b08af33 */
-"filterEmails" = "Emails";
-
-/* loco:6a4e4e3718640359270369b2 */
-"filterFiles" = "Files";
-
-/* loco:6a4e4f98b4b975e0ac024953 */
-"filterFolders" = "Folders";
-
-/* loco:6a4e53c9ccd4001ab0076192 */
-"filterFont" = "Font";
-
-/* loco:6a4e511788423d5f3b095852 */
-"filterImages" = "Pictures and images";
-
-/* loco:6a4e520f357a8b824d0233c2 */
-"filterOfficeGrids" = "Spreadsheets";
-
-/* loco:6a4e523876cba7d8ac051243 */
-"filterOfficePresentations" = "Presentations";
-
-/* loco:6a4e514e29ba6e4ef5031452 */
-"filterOfficeTexts" = "Text documents";
-
-/* loco:6a4e4fe690a314301206ce62 */
-"filterPDF" = "PDF Files";
-
-/* loco:6a4e52a7990b5c8093012732 */
-"filterSounds" = "Sounds";
-
-/* loco:6a4e5287ce98d2f5b60db702 */
-"filterVideos" = "Videos";
-
 /* loco:61696046c3498f0db20ca172 */
 "filtersTitle" = "Filters";
 
@@ -1308,9 +1272,6 @@
 
 /* loco:6a2a7a5f1dc6dc2d210f4ea4 */
 "insufficientSpaceTitle" = "Insufficient space";
-
-/* loco:6a9a68f38cdf25fae40adb63 */
-"itemLabel" = "Item";
 
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Most recent changes";
@@ -1493,7 +1454,7 @@
 "notEnoughStorageUsed" = "used";
 
 /* loco:607947d62b29a7483d1c61a2 */
-"notSupportedExtensionDescription" = "Would you like to create a copy of your file with a compatible extension for online editing? The original %@ file will remain unchanged.";
+"notSupportedExtensionDescription" = "Would you like to create a copy of your file with a compatible extension for online editing? The original %@ file will remain unchanged.\n";
 
 /* loco:60794789c3a8a86f4e611e42 */
 "notSupportedExtensionTitle" = "The %@ extension is not supported for online editing";
@@ -1607,7 +1568,7 @@
 "photoFormatTitle" = "Options";
 
 /* loco:638469dc5d9b75142a430ac2 */
-"photoLibraryAccessLimitedDescription" = "Access to your photo library is required to save your photos and videos.";
+"photoLibraryAccessLimitedDescription" = "Access to your photo library is required to save your photos and videos.       ";
 
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Restricted or denied access";

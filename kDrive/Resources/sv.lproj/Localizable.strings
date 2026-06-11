@@ -1,3 +1,12 @@
+/*
+ * Loco ios export: Xcode Strings (legacy)
+ * Project: kDrive
+ * Locale: sv, Swedish
+ * Tagged: ios
+ * Exported by: Kylian Grandy
+ * Exported at: Thu, 11 Jun 2026 12:37:56 +0200
+ */
+
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "kDrive-applikation";
 
@@ -770,7 +779,7 @@
 "dynamicIslandPreparationTitle" = "Förberedelser…";
 
 /* loco:6a2a782cb5186cdd19002bd2 */
-"dynamicIslandUploadSuccessful" = "Uppladdning lyckades: %d/%d";
+"dynamicIslandUploadSuccessfull" = " Uppladdningen lyckades: %d/%d";
 
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "Ändringen kommer att vara synlig för alla kDrive-användare som har tillgång till kategorierna.";
@@ -1195,51 +1204,6 @@
 /* loco:6169607a87650c03cf1ded24 */
 "fileTypeFilterTitle" = "Filtyp";
 
-/* loco:6a4e51e04bc7bb347c049202 */
-"filter3DModels" = "3D-modeller";
-
-/* loco:6a4e52e314bd801acc0b0b22 */
-"filterArchives" = "Arkiv";
-
-/* loco:6a4e530b14bd801acc0b0b24 */
-"filterCode" = "Kod";
-
-/* loco:6a4e540a4dc47cf929076da2 */
-"filterDiagram" = "Diagram";
-
-/* loco:6a4e5381e10673371b08af33 */
-"filterEmails" = "Mejl";
-
-/* loco:6a4e4e3718640359270369b2 */
-"filterFiles" = "Filer";
-
-/* loco:6a4e4f98b4b975e0ac024953 */
-"filterFolders" = "Mappar";
-
-/* loco:6a4e53c9ccd4001ab0076192 */
-"filterFont" = "Teckensnitt";
-
-/* loco:6a4e511788423d5f3b095852 */
-"filterImages" = "Foton och bilder";
-
-/* loco:6a4e520f357a8b824d0233c2 */
-"filterOfficeGrids" = "Kalkylblad";
-
-/* loco:6a4e523876cba7d8ac051243 */
-"filterOfficePresentations" = "Presentationer";
-
-/* loco:6a4e514e29ba6e4ef5031452 */
-"filterOfficeTexts" = "Textdokument";
-
-/* loco:6a4e4fe690a314301206ce62 */
-"filterPDF" = "PDF-filer";
-
-/* loco:6a4e52a7990b5c8093012732 */
-"filterSounds" = "Ljud";
-
-/* loco:6a4e5287ce98d2f5b60db702 */
-"filterVideos" = "Videor";
-
 /* loco:61696046c3498f0db20ca172 */
 "filtersTitle" = "Filter";
 
@@ -1308,9 +1272,6 @@
 
 /* loco:6a2a7a5f1dc6dc2d210f4ea4 */
 "insufficientSpaceTitle" = "Otillräckligt utrymme";
-
-/* loco:6a9a68f38cdf25fae40adb63 */
-"itemLabel" = "Objekt";
 
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Senaste ändringar";
@@ -1493,7 +1454,7 @@
 "notEnoughStorageUsed" = "använt";
 
 /* loco:607947d62b29a7483d1c61a2 */
-"notSupportedExtensionDescription" = "Vill du skapa en kopia av din fil med ett kompatibelt filtillägg för redigering online? Den ursprungliga %@ filen kommer att förbli oförändrad.";
+"notSupportedExtensionDescription" = "Vill du skapa en kopia av din fil med ett kompatibelt filtillägg för redigering online? Den ursprungliga %@ filen kommer att förbli oförändrad.\n";
 
 /* loco:60794789c3a8a86f4e611e42 */
 "notSupportedExtensionTitle" = "Filtillägget %@ stöds inte för redigering online";
