@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: fr, French
  * Tagged: ios
- * Exported by: Killian Mathias
- * Exported at: Wed, 08 Jul 2026 16:13:25 +0200
+ * Exported by: Kylian Grandy
+ * Exported at: Thu, 11 Jun 2026 12:37:56 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -775,6 +775,12 @@
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Lien de partage de la boîte de dépôt";
 
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Préparation…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessfull" = " Téléchargement réussi : %d/%d";
+
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "La modification sera visible par tous les utilisateurs du kDrive ayant accès aux catégories.";
 
@@ -903,6 +909,9 @@
 
 /* loco:6569aef523dcf4dc2a0f5c92 */
 "errorWrongPassword" = "Mot de passe incorrect";
+
+/* loco:6a2a79154feaf554c0020962 */
+"exceedQuotaTitle" = "Quota dépassé";
 
 /* loco:6049df4d5c2c3a04bc3979a9 */
 "favoritesNoFile" = "Aucun favori pour le moment";
@@ -1303,6 +1312,12 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Heure d’expiration";
 
+/* loco:6a2a7acf5a2fec6b940785b2 */
+"insufficientSpaceDescription" = "Libérez de l’espace";
+
+/* loco:6a2a7a5f1dc6dc2d210f4ea4 */
+"insufficientSpaceTitle" = "Espace insuffisant";
+
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Dernières modifications";
 
@@ -1323,6 +1338,9 @@
 
 /* loco:67f509c180ba041c690a8e02 */
 "maintenanceAsleepTitle" = "Votre kDrive %@ s’est offert une petite sieste !";
+
+/* loco:6a2a79b7bdb4d0e90a02bfc4 */
+"maintenanceTitle" = "Maintenance";
 
 /* loco:67f50e36f46a2825af088213 */
 "maintenanceWakeUpButton" = "Relancer mon kDrive";
@@ -1581,6 +1599,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Sauvegardez vos souvenirs en sécurité";
+
+/* loco:6a2a78ccb80096108403dcd2 */
+"openAppToContinue" = "Ouvrez l’application pour continuer";
 
 /* loco:6660083917d29585d5010582 */
 "openInPlaceDirectory" = "Ouvert sur place";
@@ -2161,6 +2182,9 @@
 /* loco:69bcfe53aed2af87a302d467 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
 
+/* loco:6a2a7a248dcf552aa702ad43 */
+"tryAgainLater" = "Veuillez réessayer plus tard";
+
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Artiste inconnu";
 
@@ -2221,6 +2245,9 @@
 /* loco:6049df4d5c2c3a04bc397a86 */
 "uploadInProgressRestartUploadTitle" = "Relancer les imports";
 
+/* loco:6a2a7751b7cc09a6da053fc2 */
+"uploadInProgressSubTitle" = "Progression %d%%";
+
 /* loco:6049df4d5c2c3a04bc397a87 */
 "uploadInProgressTitle" = "Importation en cours";
 
@@ -2247,6 +2274,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Importation en pause";
+
+/* loco:6a2a73b3d69b30963b02d5b2 */
+"uploadingTitle" = "Téléchargement";
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/98c496bd-384f-4805-8a0b-d9f73f35cf96/";

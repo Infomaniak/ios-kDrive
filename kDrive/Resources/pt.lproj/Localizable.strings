@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: pt, Portuguese
  * Tagged: ios
- * Exported by: Killian Mathias
- * Exported at: Wed, 08 Jul 2026 16:13:26 +0200
+ * Exported by: Kylian Grandy
+ * Exported at: Thu, 11 Jun 2026 12:37:56 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -695,7 +695,7 @@
 "deleteMyAccount" = "Eliminar a minha conta";
 
 /* loco:60dc3f19352b5e75d37b8c23 */
-"deletePicturesDescription" = "A aplicação irá pedir-lhe regularmente para eliminar fotos do seu dispositivo que já estão sincronizadas no seu kDrive. Tem sempre de autorizar manualmente a eliminação\n";
+"deletePicturesDescription" = "A aplicação irá pedir-lhe regularmente para eliminar fotos do seu dispositivo que já estão sincronizadas no seu kDrive. Tem sempre de autorizar manualmente a eliminação";
 
 /* loco:60dc3e2e5ea2965b1152dc03 */
 "deletePicturesTitle" = "Eliminar fotos";
@@ -774,6 +774,12 @@
 
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Link de partilha Dropbox";
+
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Preparação…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessfull" = " Carregamento bem-sucedido: %d/%d";
 
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "A modificação será visível para todos os utilizadores do kDrive que têm acesso às categorias.";
@@ -903,6 +909,9 @@
 
 /* loco:6569aef523dcf4dc2a0f5c92 */
 "errorWrongPassword" = "Palavra-passe incorreta";
+
+/* loco:6a2a79154feaf554c0020962 */
+"exceedQuotaTitle" = "Quota excedida";
 
 /* loco:6049df4d5c2c3a04bc3979a9 */
 "favoritesNoFile" = "Sem favoritos neste momento";
@@ -1303,6 +1312,12 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Hora de expiração";
 
+/* loco:6a2a7acf5a2fec6b940785b2 */
+"insufficientSpaceDescription" = "Liberte algum espaço";
+
+/* loco:6a2a7a5f1dc6dc2d210f4ea4 */
+"insufficientSpaceTitle" = "Espaço insuficiente";
+
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Alterações mais recentes";
 
@@ -1323,6 +1338,9 @@
 
 /* loco:67f509c180ba041c690a8e02 */
 "maintenanceAsleepTitle" = "O seu kDrive %@ tirou um pequeno cochilo!";
+
+/* loco:6a2a79b7bdb4d0e90a02bfc4 */
+"maintenanceTitle" = "Manutenção";
 
 /* loco:67f50e36f46a2825af088213 */
 "maintenanceWakeUpButton" = "Reiniciar o meu kDrive";
@@ -1581,6 +1599,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Guarde as suas memórias em segurança";
+
+/* loco:6a2a78ccb80096108403dcd2 */
+"openAppToContinue" = "Abra a aplicação para continuar";
 
 /* loco:6660083917d29585d5010582 */
 "openInPlaceDirectory" = "Abrir no local";
@@ -2161,6 +2182,9 @@
 /* loco:69bcfe53aed2af87a302d467 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
 
+/* loco:6a2a7a248dcf552aa702ad43 */
+"tryAgainLater" = "Por favor, tente novamente mais tarde";
+
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Artista desconhecido";
 
@@ -2221,6 +2245,9 @@
 /* loco:6049df4d5c2c3a04bc397a86 */
 "uploadInProgressRestartUploadTitle" = "Reiniciar os carregamentos";
 
+/* loco:6a2a7751b7cc09a6da053fc2 */
+"uploadInProgressSubTitle" = "Progresso %d%%";
+
 /* loco:6049df4d5c2c3a04bc397a87 */
 "uploadInProgressTitle" = "Carregamento em curso";
 
@@ -2247,6 +2274,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Carregamento suspenso";
+
+/* loco:6a2a73b3d69b30963b02d5b2 */
+"uploadingTitle" = "A carregar";
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";
