@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: sv, Swedish
  * Tagged: ios
- * Exported by: Baptiste Griva
- * Exported at: Thu, 21 May 2026 09:28:50 +0200
+ * Exported by: Kylian Grandy
+ * Exported at: Thu, 11 Jun 2026 12:37:56 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -775,6 +775,12 @@
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Dropbox-delningslänk";
 
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Förberedelser…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessfull" = " Uppladdningen lyckades: %d/%d";
+
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "Ändringen kommer att vara synlig för alla kDrive-användare som har tillgång till kategorierna.";
 
@@ -903,6 +909,9 @@
 
 /* loco:6569aef523dcf4dc2a0f5c92 */
 "errorWrongPassword" = "Felaktigt lösenord";
+
+/* loco:6a2a79154feaf554c0020962 */
+"exceedQuotaTitle" = "Kvoten har överskridits";
 
 /* loco:6049df4d5c2c3a04bc3979a9 */
 "favoritesNoFile" = "Inga favoriter för tillfället";
@@ -1258,6 +1267,12 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Utgångstid";
 
+/* loco:6a2a7acf5a2fec6b940785b2 */
+"insufficientSpaceDescription" = "Frigör lite utrymme";
+
+/* loco:6a2a7a5f1dc6dc2d210f4ea4 */
+"insufficientSpaceTitle" = "Otillräckligt utrymme";
+
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Senaste ändringar";
 
@@ -1278,6 +1293,9 @@
 
 /* loco:67f509c180ba041c690a8e02 */
 "maintenanceAsleepTitle" = "Din kDrive %@ har tagit en liten tupplur!";
+
+/* loco:6a2a79b7bdb4d0e90a02bfc4 */
+"maintenanceTitle" = "Underhåll";
 
 /* loco:67f50e36f46a2825af088213 */
 "maintenanceWakeUpButton" = "Starta om min kDrive";
@@ -1536,6 +1554,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Spara dina minnen säkert";
+
+/* loco:6a2a78ccb80096108403dcd2 */
+"openAppToContinue" = "Öppna appen för att fortsätta";
 
 /* loco:6660083917d29585d5010582 */
 "openInPlaceDirectory" = "Öppna på plats";
@@ -2116,6 +2137,9 @@
 /* loco:69bcfe53aed2af87a302d467 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
 
+/* loco:6a2a7a248dcf552aa702ad43 */
+"tryAgainLater" = "Försök igen senare";
+
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Okänd artist";
 
@@ -2176,6 +2200,9 @@
 /* loco:6049df4d5c2c3a04bc397a86 */
 "uploadInProgressRestartUploadTitle" = "Starta om uppladdningarna";
 
+/* loco:6a2a7751b7cc09a6da053fc2 */
+"uploadInProgressSubTitle" = "Framsteg %d%%";
+
 /* loco:6049df4d5c2c3a04bc397a87 */
 "uploadInProgressTitle" = "Uppladdning pågår";
 
@@ -2202,6 +2229,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Uppladdning pausad";
+
+/* loco:6a2a73b3d69b30963b02d5b2 */
+"uploadingTitle" = "Laddar upp";
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";
