@@ -170,8 +170,8 @@ public actor DynamicIslandService {
                 } else {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                        subtitle: totalCount > 1 ?
-                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(totalCount)
+                        subtitle: uploadedCount > 1 ?
+                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadedCount)
                             : KDriveResourcesStrings.Localizable
                             .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
                     )

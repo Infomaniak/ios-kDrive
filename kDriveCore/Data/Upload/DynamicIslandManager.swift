@@ -186,10 +186,6 @@ final class DynamicIslandManager: ObservableObject {
         return progressUploading
     }
 
-    func lastIsChunck() -> Bool {
-        return progessChunckUploading == 1
-    }
-
     func reset() {
         totalUploadCount = 0
         progressUploading = 0
