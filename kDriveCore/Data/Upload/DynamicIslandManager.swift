@@ -31,7 +31,7 @@ final class DynamicIslandManager: ObservableObject {
     private var realmObservationToken: NotificationToken?
     private var totalUploadCount: Int
     private var progressUploading: Int
-    private var progessChunckUploading = 0.0
+    private var progressChunkUploading = 0.0
     private var cancellables: Set<AnyCancellable> = []
     private var overallProgress: Progress?
     private var lastUpdateTime: ContinuousClock.Instant?
@@ -124,17 +124,14 @@ final class DynamicIslandManager: ObservableObject {
                 let remaining = results.count
                 totalUploadCount = max(totalUploadCount, remaining + progressUploading)
                 progressUploading = totalUploadCount - remaining
-                progessChunckUploading = 0.0
+                progressChunkUploading = 0.0
                 for myFile in results {
                     if let myProgress = myFile.progress, myProgress > 0 {
-                        progessChunckUploading += myProgress
+                        progressChunkUploading += myProgress
                     }
                 }
                 self.overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
-                self.overallProgress?.completedUnitCount = Int64((progessChunckUploading + Double(progessUploading)) * scale)
-
-
-
+                self.overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
             case .error:
                 self.overallProgress?.completedUnitCount = 0
             }
@@ -177,7 +174,7 @@ final class DynamicIslandManager: ObservableObject {
         let delay = clock.now - lastUpdateTime
         if delay > .milliseconds(50) {
             overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
-            overallProgress?.completedUnitCount = Int64((progessChunckUploading + Double(progressUploading)) * scale)
+            overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
         }
     }
 

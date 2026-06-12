@@ -40,7 +40,7 @@ public actor DynamicIslandService {
     private var uploadContinuationBox: ContinuationBox?
     private var lastError: Error?
 
-    private var isRegister = false
+    private var hasRegisteredTask = false
 
     private enum DomainError: Error {
         case expiredTask
@@ -51,8 +51,8 @@ public actor DynamicIslandService {
     }
 
     public func registerTask() {
-        guard !isRegister else { return }
-        isRegister = true
+        guard !hasRegisteredTask else { return }
+        hasRegisteredTask = true
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
             guard let self, let task = task as? BGContinuedProcessingTask else { return }
             Task { await self.handle(task: task) }
