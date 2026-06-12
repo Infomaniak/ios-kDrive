@@ -72,8 +72,10 @@ final class DynamicIslandManager: ObservableObject {
             return
         }
         if !isObserving || changeQueueObserver {
+            guard driveFileManager != nil else { return }
             startObservation()
             isObserving = true
+            changeQueueObserver = false
         }
     }
 
