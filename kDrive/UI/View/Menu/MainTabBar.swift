@@ -86,6 +86,17 @@ final class MainTabBar: UITabBar {
         addShadow()
     }
 
+    override var frame: CGRect {
+        get { super.frame }
+        set {
+            var newFrame = newValue
+            if safeAreaInsets.bottom == 0 {
+                newFrame.origin.y -= 16
+            }
+            super.frame = newFrame
+        }
+    }
+
     func createPath() -> CGPath {
         let buttonRadius = tabBarHeight / 2
         let buttonMargin = 8.0

@@ -331,14 +331,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.viewDidLayoutSubviews()
 
         didLayoutLegacyTabBarIfNeeded()
-
-        if view.safeAreaInsets.bottom == 0 {
-            let newFrame = CGRect(
-                origin: CGPoint(x: 0, y: view.frame.size.height - tabBar.frame.height - 16),
-                size: tabBar.frame.size
-            )
-            tabBar.frame = newFrame
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
