@@ -158,7 +158,7 @@ public actor DynamicIslandService {
                 if uploadService.operationCount > 0 && shouldBeSuspended && wifiSynchro {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
-                        subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessfull(
+                        subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessful(
                             progessUploading,
                             totalUploadCount
                         )
