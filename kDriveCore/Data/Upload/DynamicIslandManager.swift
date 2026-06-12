@@ -122,11 +122,8 @@ final class DynamicIslandManager: ObservableObject {
                 totalUploadCount = max(totalUploadCount, remaining + progessUploading)
                 progessUploading = totalUploadCount - remaining
 
-                let percentOfProgress = totalUploadCount > 0 ? Double(progessUploading) / Double(totalUploadCount) : 0
-                let completedCount = Int64(percentOfProgress * Double(totalUploadCount))
-
                 self.overallProgress?.totalUnitCount = Int64(totalUploadCount)
-                self.overallProgress?.completedUnitCount = completedCount
+                self.overallProgress?.completedUnitCount = Int64(progessUploading)
             case .error:
                 self.overallProgress?.completedUnitCount = 0
             }
@@ -168,11 +165,8 @@ final class DynamicIslandManager: ObservableObject {
         guard let lastUpdateTime else { return }
         let delay = clock.now - lastUpdateTime
         if delay > .milliseconds(50) {
-            let percentOfProgress = totalUploadCount > 0 ? Double(progessUploading) / Double(totalUploadCount) : 0
-            let completedCount = Int64(percentOfProgress * Double(totalUploadCount))
-
             overallProgress?.totalUnitCount = Int64(totalUploadCount)
-            overallProgress?.completedUnitCount = completedCount
+            overallProgress?.completedUnitCount = Int64(progessUploading)
         }
     }
 
