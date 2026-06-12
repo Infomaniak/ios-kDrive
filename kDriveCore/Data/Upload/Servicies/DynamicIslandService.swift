@@ -148,8 +148,8 @@ public actor DynamicIslandService {
                     }
                 }
 
-                let progessUploading = dynamicIslandManager.getProgessUploading()
-                let totalUploadCount = dynamicIslandManager.getTotalUploadCount() + progessUploading
+                let progressUploading = dynamicIslandManager.getProgressUploading()
+                let totalUploadCount = dynamicIslandManager.getTotalUploadCount() + progressUploading
 
                 let status = ReachabilityListener.instance.currentStatus
                 let shouldBeSuspended = status != .wifi
@@ -159,15 +159,15 @@ public actor DynamicIslandService {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
                         subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessful(
-                            progessUploading,
+                            progressUploading,
                             totalUploadCount
                         )
                     )
                 } else {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                        subtitle: progessUploading > 1 ?
-                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(progessUploading)
+                        subtitle: progressUploading > 1 ?
+                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(progressUploading)
                             : KDriveResourcesStrings.Localizable
                             .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
                     )
