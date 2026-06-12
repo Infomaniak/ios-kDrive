@@ -766,6 +766,12 @@
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Dropbox-delningslänk";
 
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Förberedelser…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessful" = "Uppladdning lyckades: %d/%d";
+
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "Ändringen kommer att vara synlig för alla kDrive-användare som har tillgång till kategorierna.";
 

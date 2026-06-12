@@ -766,6 +766,12 @@
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Dropbox-jakolinkki";
 
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Valmistelu…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessful" = "Lähetys onnistui: %d/%d";
+
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "Muutos näkyy kaikille kDrive-käyttäjille, joilla on pääsy luokkiin.";
 
