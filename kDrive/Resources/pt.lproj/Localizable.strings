@@ -766,6 +766,12 @@
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Link de partilha Dropbox";
 
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Preparação…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessful" = "Carregamento bem-sucedido: %d/%d";
+
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "A modificação será visível para todos os utilizadores do kDrive que têm acesso às categorias.";
 
