@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DesignSystem
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -84,6 +85,17 @@ final class MainTabBar: UITabBar {
         super.layoutSubviews()
         layer.shadowPath = createPath()
         addShadow()
+    }
+
+    override var frame: CGRect {
+        get { super.frame }
+        set {
+            var newFrame = newValue
+            if safeAreaInsets.bottom == 0 {
+                newFrame.origin.y -= IKPadding.medium
+            }
+            super.frame = newFrame
+        }
     }
 
     func createPath() -> CGPath {
