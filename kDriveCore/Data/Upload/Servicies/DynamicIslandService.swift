@@ -152,9 +152,8 @@ public actor DynamicIslandService {
                     }
                 }
 
-                let uploadedCount = dynamicIslandManager
-                    .getProgressUploading() + 1 // +1 because the progress is updated before the upload is actually completed
                 let totalCount = dynamicIslandManager.getTotalUploadCount()
+                let uploadedCount = min(dynamicIslandManager.getProgressUploading() + 1, totalCount)
 
                 let status = ReachabilityListener.instance.currentStatus
                 let shouldBeSuspended = status != .wifi
@@ -171,8 +170,8 @@ public actor DynamicIslandService {
                 } else {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                        subtitle: uploadedCount > 1 ?
-                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadedCount)
+                        subtitle: totalCount > 1 ?
+                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(totalCount)
                             : KDriveResourcesStrings.Localizable
                             .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
                     )
