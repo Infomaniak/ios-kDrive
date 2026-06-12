@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DesignSystem
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -91,7 +92,7 @@ final class MainTabBar: UITabBar {
         set {
             var newFrame = newValue
             if safeAreaInsets.bottom == 0 {
-                newFrame.origin.y -= 16
+                newFrame.origin.y -= IKPadding.medium
             }
             super.frame = newFrame
         }
