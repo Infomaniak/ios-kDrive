@@ -31,6 +31,7 @@ final class DynamicIslandManager: ObservableObject {
     private var realmObservationToken: NotificationToken?
     private var totalUploadCount: Int
     private var progressUploading: Int
+    private var progressChunkUploading = 0.0
     private var cancellables: Set<AnyCancellable> = []
     private var overallProgress: Progress?
     private var lastUpdateTime: ContinuousClock.Instant?
@@ -40,6 +41,8 @@ final class DynamicIslandManager: ObservableObject {
     private var photoQueueActive = false
     private var changeQueueObserver = false
     private var isObserving = false
+
+    private let scale = 100.0
 
     static let photoAssetPredicate = NSPredicate(format: "rawType = %@", argumentArray: [UploadFileType.phAsset.rawValue])
     static let globalAssetPredicate = NSPredicate(format: "rawType != %@", argumentArray: [UploadFileType.phAsset.rawValue])
@@ -121,9 +124,14 @@ final class DynamicIslandManager: ObservableObject {
                 let remaining = results.count
                 totalUploadCount = max(totalUploadCount, remaining + progressUploading)
                 progressUploading = totalUploadCount - remaining
-
-                self.overallProgress?.totalUnitCount = Int64(totalUploadCount)
-                self.overallProgress?.completedUnitCount = Int64(progressUploading)
+                progressChunkUploading = 0.0
+                for myFile in results {
+                    if let myProgress = myFile.progress, myProgress > 0 {
+                        progressChunkUploading += myProgress
+                    }
+                }
+                self.overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
+                self.overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
             case .error:
                 self.overallProgress?.completedUnitCount = 0
             }
@@ -165,8 +173,8 @@ final class DynamicIslandManager: ObservableObject {
         guard let lastUpdateTime else { return }
         let delay = clock.now - lastUpdateTime
         if delay > .milliseconds(50) {
-            overallProgress?.totalUnitCount = Int64(totalUploadCount)
-            overallProgress?.completedUnitCount = Int64(progressUploading)
+            overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
+            overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
         }
     }
 

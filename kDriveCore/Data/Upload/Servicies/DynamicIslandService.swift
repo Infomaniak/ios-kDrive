@@ -40,6 +40,8 @@ public actor DynamicIslandService {
     private var uploadContinuationBox: ContinuationBox?
     private var lastError: Error?
 
+    private var hasRegisteredTask = false
+
     private enum DomainError: Error {
         case expiredTask
     }
@@ -49,6 +51,8 @@ public actor DynamicIslandService {
     }
 
     public func registerTask() {
+        guard !hasRegisteredTask else { return }
+        hasRegisteredTask = true
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
             guard let self, let task = task as? BGContinuedProcessingTask else { return }
             Task { await self.handle(task: task) }
@@ -148,8 +152,8 @@ public actor DynamicIslandService {
                     }
                 }
 
-                let progressUploading = dynamicIslandManager.getProgressUploading()
-                let totalUploadCount = dynamicIslandManager.getTotalUploadCount() + progressUploading
+                let totalCount = dynamicIslandManager.getTotalUploadCount()
+                let uploadedCount = min(dynamicIslandManager.getProgressUploading() + 1, totalCount)
 
                 let status = ReachabilityListener.instance.currentStatus
                 let shouldBeSuspended = status != .wifi
@@ -159,15 +163,15 @@ public actor DynamicIslandService {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
                         subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessful(
-                            progressUploading,
-                            totalUploadCount
+                            uploadedCount,
+                            totalCount
                         )
                     )
                 } else {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                        subtitle: progressUploading > 1 ?
-                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(progressUploading)
+                        subtitle: totalCount > 1 ?
+                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(totalCount)
                             : KDriveResourcesStrings.Localizable
                             .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
                     )
