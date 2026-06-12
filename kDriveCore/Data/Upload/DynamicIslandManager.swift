@@ -30,7 +30,7 @@ final class DynamicIslandManager: ObservableObject {
 
     private var realmObservationToken: NotificationToken?
     private var totalUploadCount: Int
-    private var progessUploading: Int
+    private var progressUploading: Int
     private var cancellables: Set<AnyCancellable> = []
     private var overallProgress: Progress?
     private var lastUpdateTime: ContinuousClock.Instant?
@@ -53,7 +53,7 @@ final class DynamicIslandManager: ObservableObject {
     init(driveFileManager: DriveFileManager?) {
         self.driveFileManager = driveFileManager
         totalUploadCount = 0
-        progessUploading = 0
+        progressUploading = 0
         refreshObservation()
     }
 
@@ -119,11 +119,11 @@ final class DynamicIslandManager: ObservableObject {
             switch change {
             case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
                 let remaining = results.count
-                totalUploadCount = max(totalUploadCount, remaining + progessUploading)
-                progessUploading = totalUploadCount - remaining
+                totalUploadCount = max(totalUploadCount, remaining + progressUploading)
+                progressUploading = totalUploadCount - remaining
 
                 self.overallProgress?.totalUnitCount = Int64(totalUploadCount)
-                self.overallProgress?.completedUnitCount = Int64(progessUploading)
+                self.overallProgress?.completedUnitCount = Int64(progressUploading)
             case .error:
                 self.overallProgress?.completedUnitCount = 0
             }
@@ -166,7 +166,7 @@ final class DynamicIslandManager: ObservableObject {
         let delay = clock.now - lastUpdateTime
         if delay > .milliseconds(50) {
             overallProgress?.totalUnitCount = Int64(totalUploadCount)
-            overallProgress?.completedUnitCount = Int64(progessUploading)
+            overallProgress?.completedUnitCount = Int64(progressUploading)
         }
     }
 
@@ -174,13 +174,13 @@ final class DynamicIslandManager: ObservableObject {
         return totalUploadCount
     }
 
-    func getProgessUploading() -> Int {
-        return progessUploading
+    func getProgressUploading() -> Int {
+        return progressUploading
     }
 
     func reset() {
         totalUploadCount = 0
-        progessUploading = 0
+        progressUploading = 0
         fractionCompleted = 0
     }
 }
