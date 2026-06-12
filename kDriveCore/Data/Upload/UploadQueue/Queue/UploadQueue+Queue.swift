@@ -48,10 +48,10 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func waitForCompletionIsActive(_ completionHandler: @escaping () -> Void) {
-        DispatchQueue.global(qos: .default).async { [weak self] in
+        Task { [weak self] in
             guard let self else { completionHandler(); return }
             while self.isActive {
-                Thread.sleep(forTimeInterval: 0.2)
+                try? await Task.sleep(for: .milliseconds(200))
             }
             completionHandler()
         }
