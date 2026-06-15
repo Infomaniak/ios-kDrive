@@ -615,7 +615,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
         guard let indexPath = indexPaths.first else { return nil }
-        if viewModel.getFile(at: indexPath)?.isDirectory == false && ReachabilityListener.instance.currentStatus == .offline {
+        if (viewModel.getFile(at: indexPath)?.isDirectory == false && ReachabilityListener.instance.currentStatus == .offline) ||
+            viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
             return nil
         }
         return UIContextMenuConfiguration(
