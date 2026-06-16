@@ -36,6 +36,8 @@ class SearchViewController: FileListViewController {
     private let searchController = UISearchController(searchResultsController: nil)
     private let recentSearchesViewModel = RecentSearchesViewModel()
 
+    private var isFirstAppear = true
+
     // MARK: - Properties
 
     private var searchViewModel: SearchFilesViewModel! {
@@ -75,13 +77,17 @@ class SearchViewController: FileListViewController {
 
         bindSearchViewModel()
         headerView?.isHidden = !searchViewModel.isDisplayingSearchResults
+        searchController.searchBar.enablesReturnKeyAutomatically = false
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        Task { @MainActor in
-            self.searchController.searchBar.becomeFirstResponder()
+        if isFirstAppear {
+            Task { @MainActor in
+                self.searchController.searchBar.becomeFirstResponder()
+            }
         }
+        isFirstAppear = false
     }
 
     override func barButtonPressed(_ sender: FileListBarButton) {
