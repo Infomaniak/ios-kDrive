@@ -575,7 +575,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
               !multipleSelectionViewModel.isMultipleSelectionEnabled
         else { return }
 
-        multipleSelectionViewModel.isMultipleSelectionEnabled = true
+        multipleSelectionViewModel.enableMultipleSelection(realmDirectoryCount: viewModel.directoryFilesCount)
         // Necessary for events to trigger in the right order
         Task { @MainActor [weak self] in
             guard let self else { return }

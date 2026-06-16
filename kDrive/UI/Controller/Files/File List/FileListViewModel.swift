@@ -104,6 +104,7 @@ class FileListViewModel: SelectDelegate {
     var currentDirectoryObservationToken: NotificationToken?
 
     var currentDirectory: File
+    var directoryFilesCount: FileCount?
     var driveFileManager: DriveFileManager {
         didSet {
             multipleSelectionViewModel?.driveFileManager = driveFileManager
@@ -237,6 +238,20 @@ class FileListViewModel: SelectDelegate {
                 guard let newResults else { return }
                 currentDirectory = getRefreshedCurrentDirectory()
                 files = Array(newResults.freezeIfNeeded())
+
+                let fileTypeCounts = files.reduce(into: (files: 0, directories: 0)) { counts, file in
+                    if file.isDirectory {
+                        counts.directories += 1
+                    } else {
+                        counts.files += 1
+                    }
+                }
+
+                directoryFilesCount = FileCount(
+                    count: files.count,
+                    files: fileTypeCounts.files,
+                    directories: fileTypeCounts.directories
+                )
                 isShowingEmptyView = shouldShowEmptyView()
             }
 

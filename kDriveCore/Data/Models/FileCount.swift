@@ -22,4 +22,10 @@ public class FileCount: Codable {
     public let count: Int
     public let files: Int
     public let directories: Int
+
+    public init(count: Int, files: Int, directories: Int) {
+        self.count = count
+        self.files = files
+        self.directories = directories
+    }
 }
