@@ -197,32 +197,38 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         navigationController?.navigationBar.isHidden = true
 
-        let backImage = makeImageWithCircle(
-            icon: KDriveResourcesAsset.chevronLeft.image
-        )
-
-        let adjustedBackImage = backImage.withAlignmentRectInsets(
-            UIEdgeInsets(top: 8, left: -4, bottom: 8, right: 4)
-        )
-
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
         backButtonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.clear]
         backButtonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.clear]
         let navbarAppearance = UINavigationBarAppearance()
-        navbarAppearance.setBackIndicatorImage(adjustedBackImage, transitionMaskImage: adjustedBackImage)
         navbarAppearance.backButtonAppearance = backButtonAppearance
         navbarAppearance.configureWithTransparentBackground()
         navbarAppearance.shadowImage = UIImage()
+
+        if #unavailable(iOS 26.0) {
+            let backImage = makeImageWithCircle(
+                icon: KDriveResourcesAsset.chevronLeft.image
+            )
+
+            let adjustedBackImage = backImage.withAlignmentRectInsets(
+                UIEdgeInsets(top: 8, left: -4, bottom: 8, right: 4)
+            )
+
+            navbarAppearance.setBackIndicatorImage(adjustedBackImage, transitionMaskImage: adjustedBackImage)
+
+            let hideStatusBar = CGAffineTransform(
+                translationX: 0,
+                y: -navBarHeight
+            )
+            statusBarView.transform = hideStatusBar
+        } else {
+            statusBarView.isHidden = true
+        }
+
         navigationController?.navigationBar.standardAppearance = navbarAppearance
         navigationController?.navigationBar.compactAppearance = navbarAppearance
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
         navigationItem.title = nil
-
-        let hideStatusBar = CGAffineTransform(
-            translationX: 0,
-            y: -navBarHeight
-        )
-        statusBarView.transform = hideStatusBar
 
         navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
 
@@ -398,30 +404,45 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.isHidden = true
         navigationItem.titleView = nil
 
-        let editImage = makeImageWithCircle(
-            icon: KDriveResourcesAsset.editDocument.image
-        )
+        if #available(iOS 26.0, *) {
+            let editItem = UIBarButtonItem(image: KDriveResourcesAsset.editDocument.image,
+                                           style: .plain, target: self, action: #selector(editFile))
+            editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
+            navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
+        } else {
+            let editImage = makeImageWithCircle(
+                icon: KDriveResourcesAsset.editDocument.image
+            )
 
-        let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
-        editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
+            let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
+            editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
 
-        editItem.imageInsets = UIEdgeInsets(top: -1, left: -2, bottom: 1, right: 2)
-        navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
+            editItem.imageInsets = UIEdgeInsets(top: -1, left: -2, bottom: 1, right: 2)
+            navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
+        }
     }
 
     private func setNavbarForOpening() {
         pdfPageLabel.isHidden = true
         navigationItem.titleView = nil
 
-        let openImage = makeImageWithCircle(
-            icon: KDriveResourcesAsset.openWith.image
-        )
+        if #available(iOS 26.0, *) {
+            let openItem = UIBarButtonItem(image: KDriveResourcesAsset.openWith.image,
+                                           style: .plain, target: self, action: #selector(openFile))
+            openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
 
-        let openItem = UIBarButtonItem(image: openImage, style: .plain, target: self, action: #selector(openFile))
-        openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
+            navigationItem.rightBarButtonItem = openItem
+        } else {
+            let openImage = makeImageWithCircle(
+                icon: KDriveResourcesAsset.openWith.image
+            )
 
-        openItem.imageInsets = UIEdgeInsets(top: -2, left: -2, bottom: 2, right: 2)
-        navigationItem.rightBarButtonItem = openItem
+            let openItem = UIBarButtonItem(image: openImage, style: .plain, target: self, action: #selector(openFile))
+            openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
+
+            openItem.imageInsets = UIEdgeInsets(top: -2, left: -2, bottom: 2, right: 2)
+            navigationItem.rightBarButtonItem = openItem
+        }
     }
 
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
