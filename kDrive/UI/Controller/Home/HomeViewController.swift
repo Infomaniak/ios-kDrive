@@ -204,8 +204,14 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         reload(newViewModel: newViewModel)
     }
 
+    @MainActor
     func reloadWith(fetchedFiles: [FileActivity], completion: (() -> Void)? = nil) {
         refreshControl.endRefreshing()
+
+        collectionView.backgroundView = fetchedFiles.isEmpty
+            ? EmptyTableView.instantiate(type: recentActivitiesController?.emptyCellType ?? .noActivities)
+            : nil
+
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
                                          isLoading: false)
