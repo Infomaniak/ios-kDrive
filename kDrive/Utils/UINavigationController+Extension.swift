@@ -42,16 +42,34 @@ extension UINavigationController {
     func setInfomaniakAppearanceNavigationBar() {
         navigationBar.layoutMargins.left = 24
         navigationBar.layoutMargins.right = 24
-        let navbarAppearance = UINavigationBarAppearance()
-        navbarAppearance.configureWithTransparentBackground()
-        navbarAppearance.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         let largeTitleStyle = TextStyle.header1
         let titleStyle = TextStyle.header3
-        navbarAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
-        navbarAppearance.titleTextAttributes = [.foregroundColor: titleStyle.color, .font: titleStyle.font]
-        navigationBar.standardAppearance = navbarAppearance
-        navigationBar.compactAppearance = navbarAppearance
-        navigationBar.scrollEdgeAppearance = navbarAppearance
+
+        if #available(iOS 26.0, *) {
+            let standardAppearance = UINavigationBarAppearance()
+            standardAppearance.configureWithDefaultBackground()
+            standardAppearance.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+            standardAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
+            standardAppearance.titleTextAttributes = [.foregroundColor: titleStyle.color, .font: titleStyle.font]
+
+            let scrollEdgeAppearance = UINavigationBarAppearance()
+            scrollEdgeAppearance.configureWithTransparentBackground()
+            scrollEdgeAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
+            scrollEdgeAppearance.titleTextAttributes = [.foregroundColor: titleStyle.color, .font: titleStyle.font]
+
+            navigationBar.standardAppearance = standardAppearance
+            navigationBar.compactAppearance = standardAppearance
+            navigationBar.scrollEdgeAppearance = scrollEdgeAppearance
+        } else {
+            let navbarAppearance = UINavigationBarAppearance()
+            navbarAppearance.configureWithTransparentBackground()
+            navbarAppearance.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+            navbarAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
+            navbarAppearance.titleTextAttributes = [.foregroundColor: titleStyle.color, .font: titleStyle.font]
+            navigationBar.standardAppearance = navbarAppearance
+            navigationBar.compactAppearance = navbarAppearance
+            navigationBar.scrollEdgeAppearance = navbarAppearance
+        }
     }
 
     override open var childForStatusBarStyle: UIViewController? {
