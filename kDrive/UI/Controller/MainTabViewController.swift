@@ -268,6 +268,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     let photoPickerDelegate = PhotoPickerDelegate()
 
     private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
+    private var addButton: UIButton?
 
     lazy var legacyTabBarActive: Bool = {
         if #available(iOS 18.0, *),
@@ -435,29 +436,36 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         var config = UIButton.Configuration.prominentGlass()
         config.image = KDriveAsset.plus.image
 
-        let addButton = UIButton(configuration: config)
-        addButton.translatesAutoresizingMaskIntoConstraints = false
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
 
-        addButton.addTarget(
+        button.addTarget(
             self,
             action: #selector(centerButtonAction),
             for: .touchUpInside
         )
 
-        view.addSubview(addButton)
+        view.addSubview(button)
 
         NSLayoutConstraint.activate([
-            addButton.trailingAnchor.constraint(
+            button.trailingAnchor.constraint(
                 equalTo: view.safeAreaLayoutGuide.trailingAnchor,
                 constant: -UIConstants.Padding.medium
             ),
-            addButton.bottomAnchor.constraint(
+            button.bottomAnchor.constraint(
                 equalTo: view.bottomAnchor,
                 constant: -tabBar.frame.height - UIConstants.Padding.medium
             ),
-            addButton.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
-            addButton.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
+            button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
+            button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
         ])
+
+        addButton = button
+    }
+
+    func hideAddButton(_ hide: Bool) {
+        guard let addButton else { return }
+        addButton.alpha = hide ? 0 : 1
     }
 
     func updateTabBarProfilePicture() {
