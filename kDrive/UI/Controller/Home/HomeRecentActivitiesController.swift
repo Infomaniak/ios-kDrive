@@ -51,7 +51,9 @@ class HomeRecentActivitiesController {
 
     func restoreCachedPages() {
         invalidated = false
-        homeViewController?.reloadWith(fetchedFiles: mergedActivities)
+        Task { @MainActor [mergedActivities] in
+            homeViewController?.reloadWith(fetchedFiles: mergedActivities)
+        }
     }
 
     func refreshIfNeeded() {
