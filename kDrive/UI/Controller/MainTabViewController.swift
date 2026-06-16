@@ -20,6 +20,7 @@ import FloatingPanel
 import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakCoreCommonUI
+import InfomaniakCoreSwiftUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
@@ -286,7 +287,9 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         var rootViewControllers = [UIViewController]()
         rootViewControllers.append(Self.initHomeViewController(driveFileManager: driveFileManager))
         rootViewControllers.append(Self.initRootMenuViewController(driveFileManager: driveFileManager))
-        rootViewControllers.append(Self.initFakeViewController())
+        if #unavailable(iOS 26.0) {
+            rootViewControllers.append(Self.initFakeViewController())
+        }
         rootViewControllers.append(Self.initPhotoListViewController(with: PhotoListViewModel(driveFileManager: driveFileManager)))
         rootViewControllers.append(Self.initMenuViewController(driveFileManager: driveFileManager))
         super.init(nibName: nil, bundle: nil)
@@ -313,12 +316,9 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
         restorationIdentifier = defaultRestorationIdentifier
 
-        setValue(MainTabBar(frame: tabBar.frame), forKey: "tabBar")
-
         delegate = self
-        tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
-        (tabBar as? MainTabBar)?.tabDelegate = self
         photoPickerDelegate.viewController = self
+        setupTabBar()
     }
 
     override func viewWillLayoutSubviews() {
@@ -414,6 +414,50 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
             item.title = ""
             item.imageInsets = inset
         }
+    }
+
+    private func setupTabBar() {
+        if #available(iOS 26.0, *) {
+            setupAddButton()
+        } else {
+            setValue(MainTabBar(frame: tabBar.frame), forKey: "tabBar")
+            tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+            (tabBar as? MainTabBar)?.tabDelegate = self
+        }
+    }
+
+    @objc func centerButtonAction(sender: UIButton) {
+        plusButtonPressed()
+    }
+
+    @available(iOS 26.0, *)
+    private func setupAddButton() {
+        var config = UIButton.Configuration.prominentGlass()
+        config.image = KDriveAsset.plus.image
+
+        let addButton = UIButton(configuration: config)
+        addButton.translatesAutoresizingMaskIntoConstraints = false
+
+        addButton.addTarget(
+            self,
+            action: #selector(centerButtonAction),
+            for: .touchUpInside
+        )
+
+        view.addSubview(addButton)
+
+        NSLayoutConstraint.activate([
+            addButton.trailingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                constant: -UIConstants.Padding.medium
+            ),
+            addButton.bottomAnchor.constraint(
+                equalTo: view.bottomAnchor,
+                constant: -tabBar.frame.height - UIConstants.Padding.medium
+            ),
+            addButton.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
+            addButton.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
+        ])
     }
 
     func updateTabBarProfilePicture() {
