@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -288,7 +288,7 @@
                         <constraints>
                             <constraint firstItem="qIU-Hu-Zbx" firstAttribute="top" secondItem="XG8-QT-Clg" secondAttribute="top" id="B0R-xs-K9J"/>
                             <constraint firstAttribute="trailing" secondItem="Hjz-3J-y1V" secondAttribute="trailing" id="G27-Qm-9is"/>
-                            <constraint firstItem="qIU-Hu-Zbx" firstAttribute="leading" secondItem="XG8-QT-Clg" secondAttribute="leading" id="MED-X6-zXf"/>
+                            <constraint firstItem="qIU-Hu-Zbx" firstAttribute="leading" secondItem="hzs-gF-i3p" secondAttribute="leading" id="MED-X6-zXf"/>
                             <constraint firstItem="Hjz-3J-y1V" firstAttribute="leading" secondItem="XG8-QT-Clg" secondAttribute="leading" id="MVS-6P-6lz"/>
                             <constraint firstItem="qIU-Hu-Zbx" firstAttribute="trailing" secondItem="XG8-QT-Clg" secondAttribute="trailing" id="PnR-Dn-Nv4"/>
                             <constraint firstAttribute="bottom" secondItem="qIU-Hu-Zbx" secondAttribute="bottom" id="Qud-97-aQc"/>
@@ -522,10 +522,10 @@
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="backgroundColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="previewBackgroundColor">
             <color red="0.066666666666666666" green="0.10980392156862745" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

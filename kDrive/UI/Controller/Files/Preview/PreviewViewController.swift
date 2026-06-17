@@ -90,6 +90,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private var networkObserver: ObservationToken?
+    private var indexBeforeBoundsChange: IndexPath?
+    private var boundsObserver: NSKeyValueObservation?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -104,6 +106,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         collectionView.register(cellView: AudioCollectionViewCell.self)
         collectionView.register(cellView: CodePreviewCollectionViewCell.self)
         collectionView.contentInsetAdjustmentBehavior = .never
+
+        boundsObserver = collectionView.observe(\.bounds, options: [.old]) { [weak self] collectionView, change in
+            guard let self,
+                  let oldSize = change.oldValue?.size,
+                  oldSize != collectionView.bounds.size else { return }
+            self.indexBeforeBoundsChange = self.currentIndex
+        }
 
         floatingPanelViewController = DriveFloatingPanelController()
         floatingPanelViewController.isRemovalInteractionEnabled = false
@@ -350,8 +359,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         if shouldScrollToCurrentIndex {
             collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
             shouldScrollToCurrentIndex = false
+        } else if let indexPath = indexBeforeBoundsChange {
+            indexBeforeBoundsChange = nil
+            let wasPagingEnabled = collectionView.isPagingEnabled
+            collectionView.isPagingEnabled = false
+            collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+            collectionView.isPagingEnabled = wasPagingEnabled
         }
         floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view.safeAreaInsets.bottom, 5))
+    }
+
+    deinit {
+        boundsObserver?.invalidate()
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
