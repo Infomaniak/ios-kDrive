@@ -271,6 +271,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     private var buttonAdd: UIButton?
 
     lazy var legacyTabBarActive: Bool = {
+        if #available(iOS 26.0, *),
+           UIDevice.current.userInterfaceIdiom == .pad {
+            self.isTabBarHidden = false
+            return false
+        }
         if #available(iOS 18.0, *),
            UIDevice.current.userInterfaceIdiom == .pad {
             self.isTabBarHidden = true
