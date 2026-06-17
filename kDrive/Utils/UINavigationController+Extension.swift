@@ -40,8 +40,19 @@ extension UINavigationController {
     }
 
     func setInfomaniakAppearanceNavigationBar() {
+        let shouldApplyCustomMargins: Bool
+
+        if #available(iOS 26.0, *) {
+            shouldApplyCustomMargins = UIDevice.current.userInterfaceIdiom != .pad
+        } else {
+            shouldApplyCustomMargins = true
+        }
+
+        if shouldApplyCustomMargins {
+            navigationBar.layoutMargins.right = 24
+        }
+
         navigationBar.layoutMargins.left = 24
-        navigationBar.layoutMargins.right = 24
         let largeTitleStyle = TextStyle.header1
         let titleStyle = TextStyle.header3
 
