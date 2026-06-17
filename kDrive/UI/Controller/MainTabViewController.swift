@@ -268,7 +268,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     let photoPickerDelegate = PhotoPickerDelegate()
 
     private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
-    private var addButton: UIButton?
+    private var buttonAdd: UIButton?
 
     lazy var legacyTabBarActive: Bool = {
         if #available(iOS 18.0, *),
@@ -419,7 +419,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     private func setupTabBar() {
         if #available(iOS 26.0, *) {
-            setupAddButton()
+            setupButtonAdd()
         } else {
             setValue(MainTabBar(frame: tabBar.frame), forKey: "tabBar")
             tabBar.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
@@ -432,7 +432,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 
     @available(iOS 26.0, *)
-    private func setupAddButton() {
+    private func setupButtonAdd() {
         var config = UIButton.Configuration.prominentGlass()
         config.image = KDriveAsset.plus.image
 
@@ -460,12 +460,12 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
             button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
         ])
 
-        addButton = button
+        buttonAdd = button
     }
 
-    func hideAddButton(_ hide: Bool) {
-        guard let addButton else { return }
-        addButton.alpha = hide ? 0 : 1
+    func hideButtonAdd(_ hide: Bool) {
+        guard let buttonAdd else { return }
+        buttonAdd.alpha = hide ? 0 : 1
     }
 
     func updateTabBarProfilePicture() {

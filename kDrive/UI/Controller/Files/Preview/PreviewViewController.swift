@@ -245,7 +245,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
         }
-        (tabBarController as? MainTabViewController)?.hideAddButton(true)
+        (tabBarController as? MainTabViewController)?.hideButtonAdd(true)
     }
 
     private func makeImageWithCircle(
@@ -306,7 +306,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         UIApplication.shared.endReceivingRemoteControlEvents()
         resignFirstResponder()
-        (tabBarController as? MainTabViewController)?.hideAddButton(false)
+        (tabBarController as? MainTabViewController)?.hideButtonAdd(false)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
