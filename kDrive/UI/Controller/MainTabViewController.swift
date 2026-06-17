@@ -519,10 +519,12 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
               currentDirectory.id >= DriveFileManager.constants.rootID,
               !currentDirectory.isTrashed else {
             (tabBar as? MainTabBar)?.centerButton?.isEnabled = false
+            hideButtonAdd(true)
             return
         }
         let canCreateFile = currentDirectory.isRoot || currentDirectory.capabilities.canCreateFile
         (tabBar as? MainTabBar)?.centerButton?.isEnabled = canCreateFile
+        hideButtonAdd(!canCreateFile)
     }
 }
 

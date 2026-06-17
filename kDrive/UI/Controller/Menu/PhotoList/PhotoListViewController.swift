@@ -158,7 +158,6 @@ final class PhotoListViewController: FileListViewController {
         Task {
             try await viewModel.loadFiles()
         }
-        (tabBarController as? MainTabViewController)?.hideButtonAdd(true)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -170,11 +169,6 @@ final class PhotoListViewController: FileListViewController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         applyGradient(view: headerImageView)
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        (tabBarController as? MainTabViewController)?.hideButtonAdd(false)
     }
 
     private func applyGradient(view: UIImageView) {
