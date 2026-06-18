@@ -1,3 +1,5 @@
+- Fix related to multiple selection
+- Dedicated view when no activities are available
 - Opening a music or video preview is now silky smooth
 - New context menu when long-pressing on a file or folder
 - Stability improvements and bug fixes
