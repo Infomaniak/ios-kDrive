@@ -124,6 +124,7 @@ public extension Target {
                            .external(name: "DifferenceKit"),
                            .external(name: "FloatingPanel"),
                            .external(name: "HorizonCalendar"),
+                           .external(name: "IKSnackbar"),
                            .external(name: "InfomaniakCore"),
                            .external(name: "InfomaniakCoreCommonUI"),
                            .external(name: "InfomaniakCoreDB"),

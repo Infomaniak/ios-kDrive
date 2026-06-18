@@ -1,5 +1,5 @@
 {
-  "originHash" : "74e57b890ea6d956e7a632cd0b499e44e3f74ee9e7500ad67cfcb1407d616ba4",
+  "originHash" : "197e37e11eb9a7190ad65b6245abadd9e218ca97dc150bd124c19fd27d41f576",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-bug-tracker",
       "state" : {
-        "revision" : "f6c92f7ed021d3a875083da9f2079f8fd0d00113",
-        "version" : "17.0.1"
+        "revision" : "9949016c59db6b6ca39b87f3c986a77a61d0b5c6",
+        "version" : "18.0.0"
       }
     },
     {
@@ -87,8 +87,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "6c1affc73e19b7c781261603578d52414cc05605",
-        "version" : "24.13.0"
+        "revision" : "ff55c791878a52b776b59d0de0412ff5543b6cb5",
+        "version" : "25.1.0"
+      }
+    },
+    {
+      "identity" : "ios-core-uikit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Infomaniak/ios-core-uikit",
+      "state" : {
+        "revision" : "d21644dc42c74a83caff299376ddc1c9a5fb80f8",
+        "version" : "1.0.0"
       }
     },
     {
@@ -114,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "revision" : "365d443c33f6ba1def1ac120bd2b3f7b7d206cec",
-        "version" : "8.11.0"
+        "revision" : "e95489fa1cb25925bccdeb2a316df59966583fe9",
+        "version" : "9.0.1"
       }
     },
     {
@@ -150,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "ec1b031ef4115e80e79216b9127d3f6d87e949a6",
-        "version" : "16.0.0"
+        "revision" : "b286eabfcf1a832fd801bfc7b8e1960c380ed3cb",
+        "version" : "17.0.0"
       }
     },
     {
@@ -175,7 +184,7 @@
     {
       "identity" : "lottie-spm",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/lottie-spm",
+      "location" : "https://github.com/airbnb/lottie-spm.git",
       "state" : {
         "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
         "version" : "4.5.2"
@@ -335,15 +344,6 @@
       }
     },
     {
-      "identity" : "swiftbackports",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/shaps80/SwiftBackports",
-      "state" : {
-        "revision" : "ddca6a237c1ba2291d5a3cc47ec8480ce6e9f805",
-        "version" : "1.0.3"
-      }
-    },
-    {
       "identity" : "swiftregex",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/flowbe/SwiftRegex",
@@ -359,15 +359,6 @@
       "state" : {
         "revision" : "aead9358a55f635d62d885aeb9105752c0213aec",
         "version" : "27.0.0-beta.1"
-      }
-    },
-    {
-      "identity" : "swiftuibackports",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/shaps80/SwiftUIBackports",
-      "state" : {
-        "revision" : "556d42f391b74059a354b81b8c8e19cc7cb576f4",
-        "version" : "1.15.1"
       }
     }
   ],

@@ -136,6 +136,7 @@ extension WaveViewController: OnboardingViewControllerDelegate {
         return containerView
     }
 
+    @available(iOS 16.4, *)
     func bottomViewForIndex(_ index: Int) -> (any View)? {
         if index != slideCount - 1 {
             return nil

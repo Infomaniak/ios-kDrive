@@ -22,6 +22,7 @@ import InterAppLogin
 import kDriveCore
 import SwiftUI
 
+@available(iOS 16.4, *)
 struct OnboardingBottomButtonsView: View {
     @InjectService private var appNavigable: AppNavigable
     @InjectService private var accountManager: AccountManageable
