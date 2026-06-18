@@ -81,6 +81,41 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private var backgroundExtensionImageView: UIImageView?
+
+    private func setupBackgroundExtensionView() {
+        guard #available(iOS 26.0, *) else { return }
+
+        let extensionView = UIBackgroundExtensionView()
+        let imageView = UIImageView()
+
+        extensionView.translatesAutoresizingMaskIntoConstraints = false
+        extensionView.automaticallyPlacesContentView = false
+
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+
+        extensionView.contentView = imageView
+
+        view.insertSubview(extensionView, at: 0)
+
+        NSLayoutConstraint.activate([
+            extensionView.topAnchor.constraint(equalTo: view.topAnchor),
+            extensionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            extensionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            extensionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            imageView.topAnchor.constraint(equalTo: collectionView.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
+        ])
+
+        backgroundExtensionImageView = imageView
+        updateBackgroundExtensionForCurrentFile()
+    }
+
     private var navBarHeight: CGFloat {
         navigationController?.navigationBar.frame.height ?? 0
     }
@@ -141,6 +176,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         observeNetwork()
         observeFileUpdated()
+        setupBackgroundExtensionView()
     }
 
     func createFullscreenLayout() -> UICollectionViewLayout {
@@ -159,6 +195,20 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         configuration.contentInsetsReference = .none
         let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
         return layout
+    }
+
+    private func updateBackgroundExtensionForCurrentFile() {
+        guard #available(iOS 26.0, *) else { return }
+
+        currentFile.getThumbnail { thumbnail, _ in
+            self.backgroundExtensionImageView?.image = thumbnail
+        }
+
+        currentFile.getPreview { [weak self] image in
+            if let image {
+                self?.backgroundExtensionImageView?.image = image
+            }
+        }
     }
 
     func observeFileUpdated() {
@@ -574,6 +624,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         updateNavigationBar()
         downloadFileIfNeeded(at: currentIndex)
+        updateBackgroundExtensionForCurrentFile()
     }
 
     func errorWhilePreviewing(fileId: Int, error: Error) {

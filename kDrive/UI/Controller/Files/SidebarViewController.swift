@@ -44,6 +44,15 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         return true
     }
 
+    private static var shouldKeepOldSideBar: Bool {
+        if #available(iOS 26.0, *),
+           UIDevice.current.userInterfaceIdiom == .pad {
+            return false
+        }
+
+        return true
+    }
+
     enum RootMenuSection {
         case main
         case recent
@@ -312,7 +321,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         super.viewDidLoad()
         navigationItem.title = driveFileManager.drive.name
 
-        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        if SidebarViewController.shouldKeepOldSideBar {
+            collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        } else {
+            collectionView.backgroundColor = .clear
+        }
         collectionView.contentInset = UIEdgeInsets(
             top: 0,
             left: 0,
@@ -359,7 +372,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             }
 
             collectionView.addSubview(bottomOverlay)
-            bottomOverlay.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+            if SidebarViewController.shouldKeepOldSideBar {
+                bottomOverlay.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+            } else {
+                bottomOverlay.backgroundColor = .clear
+            }
             NSLayoutConstraint.activate([
                 bottomOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 bottomOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -396,7 +413,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        setupBackgroundGradient()
+        if SidebarViewController.shouldKeepOldSideBar {
+            setupBackgroundGradient()
+        }
     }
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -692,7 +711,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         if !(isCompactView || selectMode) {
             let layout = UICollectionViewCompositionalLayout(sectionProvider: { _, layoutEnvironment in
                 var listConfig = UICollectionLayoutListConfiguration(appearance: .sidebar)
-                listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+                if shouldKeepOldSideBar {
+                    listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+                } else {
+                    listConfig.backgroundColor = .clear
+                }
                 return NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
             }, configuration: configuration)
             return layout
