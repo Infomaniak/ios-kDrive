@@ -404,7 +404,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if #available(iOS 26.0, *), isCompactView {
+        if #unavailable(iOS 26.0) {
             setupBackgroundGradient()
         }
     }
