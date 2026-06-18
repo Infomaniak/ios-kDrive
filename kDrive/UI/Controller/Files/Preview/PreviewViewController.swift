@@ -168,6 +168,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
         }
 
+        if #available(iOS 26.0, *),
+           UIDevice.current.userInterfaceIdiom == .pad {
+            floatingPanelViewController.surfaceView.containerMargins = UIEdgeInsets(top: 0,
+                                                                                    left: UIConstants.Padding.medium,
+                                                                                    bottom: 0, right:
+                                                                                    UIConstants.Padding.medium)
+        }
+
         pdfPageLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)
         pdfPageLabel.textColor = .white
         pdfPageLabel.textAlignment = .center
