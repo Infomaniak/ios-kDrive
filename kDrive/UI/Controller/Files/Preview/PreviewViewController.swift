@@ -169,7 +169,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         if #available(iOS 26.0, *),
-           UIDevice.current.userInterfaceIdiom == .pad {
+           !traitCollection.horizontalSizeClass.iskDriveCompactSize {
             floatingPanelViewController.surfaceView.containerMargins = UIEdgeInsets(top: 0,
                                                                                     left: UIConstants.Padding.medium,
                                                                                     bottom: 0, right:
