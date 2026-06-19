@@ -32,7 +32,7 @@ final class StoreCollectionViewCell: UICollectionViewCell {
     @IBOutlet var descriptionLabel: IKLabel!
     @IBOutlet var priceLabel: IKLabel!
     @IBOutlet var tableView: UITableView!
-    @IBOutlet var selectButton: IKLargeButton!
+    @IBOutlet var selectButton: UIButton!
 
     weak var delegate: StoreCellDelegate?
 

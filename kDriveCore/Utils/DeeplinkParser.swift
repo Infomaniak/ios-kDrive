@@ -32,6 +32,7 @@ public struct DeeplinkParser: DeeplinkParsable {
         case store
         case file
         case search
+        case subscriptions
     }
 
     @LazyInjectService private var matomo: MatomoUtils
@@ -43,6 +44,13 @@ public struct DeeplinkParser: DeeplinkParsable {
     }
 
     private func handleDeeplink(url: URL) async -> Bool {
+        if url.host == DeeplinkPath.subscriptions.rawValue {
+            guard let driveFileManager = accountManager.currentDriveFileManager else {
+                return false
+            }
+            await router.navigate(to: .store(driveId: driveFileManager.driveId, userId: accountManager.currentUserId))
+            return true
+        }
         if let sharedWithMeLink = await SharedWithMeLink(sharedWithMeURL: url) {
             await router.navigate(to: .sharedWithMe(sharedWithMeLink: sharedWithMeLink))
             return true
