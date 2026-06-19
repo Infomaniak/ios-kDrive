@@ -208,13 +208,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private func updateBackgroundExtensionForCurrentFile() {
         guard #available(iOS 26.0, *) else { return }
 
-        currentFile.getThumbnail { thumbnail, _ in
+        let currentFileId = currentFile.id
+
+        currentFile.getThumbnail { [weak self] thumbnail, _ in
+            guard let self, self.currentFile.id == currentFileId else { return }
             self.backgroundExtensionImageView?.image = thumbnail
         }
 
         currentFile.getPreview { [weak self] image in
+            guard let self, self.currentFile.id == currentFileId else { return }
             if let image {
-                self?.backgroundExtensionImageView?.image = image
+                self.backgroundExtensionImageView?.image = image
             }
         }
     }
