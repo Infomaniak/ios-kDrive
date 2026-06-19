@@ -289,7 +289,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     private func createLayout() -> UICollectionViewLayout {
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
-        configuration.boundarySupplementaryItems = [HomeViewController.generateHeaderItem(leading: 24)]
 
         let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, _ in
             guard let self else { return nil }
@@ -319,16 +318,24 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
 
-        let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
+        let largeHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
+        let largeHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: largeHeaderSize,
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
 
+        let bottomHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: headerSize,
+            layoutSize: bottomHeaderSize,
             elementKind: RootMenuHeaderView.kind.rawValue,
             alignment: .bottom
         )
-        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
 
-        section.boundarySupplementaryItems = [sectionHeaderItem]
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: UIConstants.Padding.standard,
+                                                        bottom: 0, trailing: UIConstants.Padding.standard)
+
+        section.boundarySupplementaryItems = [largeHeaderItem, sectionHeaderItem]
         return section
     }
 
