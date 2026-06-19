@@ -25,7 +25,7 @@ import kDriveResources
 import OSLog
 
 @available(iOS 26.0, *)
-public actor DynamicIslandService {
+public class DynamicIslandService {
     public static let shared = DynamicIslandService()
 
     @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
@@ -40,7 +40,7 @@ public actor DynamicIslandService {
     private var uploadContinuationBox: ContinuationBox?
     private var lastError: Error?
 
-    private var hasRegisteredTask = false
+    private var registeredTask: Task<Void, Never>?
 
     private enum DomainError: Error {
         case expiredTask
@@ -51,11 +51,10 @@ public actor DynamicIslandService {
     }
 
     public func registerTask() {
-        guard !hasRegisteredTask else { return }
-        hasRegisteredTask = true
+        guard registeredTask == nil else { return }
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
             guard let self, let task = task as? BGContinuedProcessingTask else { return }
-            Task { await self.handle(task: task) }
+            registeredTask = Task { self.handle(task: task) }
         }
 
         dynamicIslandManager.setup()
