@@ -432,7 +432,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         }
     }
 
-    @objc func centerButtonAction(sender: UIButton) {
+    @objc func centerButtonAction(sender _: UIButton) {
         plusButtonPressed()
     }
 
