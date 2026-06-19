@@ -92,7 +92,6 @@ public class DynamicIslandService {
     private func handleExpiration() {
         Self.logger.error("Handling task expiration")
         uploadService.suspendAllOperations()
-        lastError = DomainError.expiredTask
         uploadContinuationBox?.resume(throwing: DomainError.expiredTask)
         uploadContinuationBox = nil
     }
@@ -114,9 +113,7 @@ public class DynamicIslandService {
 
         task.expirationHandler = { [weak self] in
             guard let self else { return }
-            Task {
-                await self.handleExpiration()
-            }
+            self.handleExpiration()
         }
 
         Task {
@@ -193,16 +190,6 @@ public class DynamicIslandService {
     }
 
     private func errorInfo(for error: Error) -> (String, String) {
-        if let domainError = error as? DomainError {
-            switch domainError {
-            case .expiredTask:
-                return (
-                    KDriveResourcesStrings.Localizable.uploadPausedTitle,
-                    KDriveResourcesStrings.Localizable.openAppToContinue
-                )
-            }
-        }
-
         if let driveError = error as? DriveError {
             switch driveError {
             case .quotaExceeded:
