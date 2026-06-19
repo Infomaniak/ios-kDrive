@@ -327,8 +327,10 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             alignment: .bottom
         )
 
-        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: UIConstants.Padding.standard,
-                                                        bottom: 0, trailing: UIConstants.Padding.standard)
+        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0,
+                                                                  leading: UIConstants.Padding.standard,
+                                                                  bottom: 0,
+                                                                  trailing: UIConstants.Padding.standard)
 
         section.boundarySupplementaryItems = [largeHeaderItem, sectionHeaderItem]
         return section

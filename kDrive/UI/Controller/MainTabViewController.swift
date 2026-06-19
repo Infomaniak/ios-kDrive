@@ -459,8 +459,8 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
                 constant: -UIConstants.Padding.medium
             ),
             button.bottomAnchor.constraint(
-                equalTo: tabBar.topAnchor,
-                constant: -UIConstants.Padding.medium
+                equalTo: view.bottomAnchor,
+                constant: -tabBar.frame.height - UIConstants.Padding.medium
             ),
             button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
             button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
