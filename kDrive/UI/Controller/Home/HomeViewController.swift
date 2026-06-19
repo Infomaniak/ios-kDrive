@@ -318,12 +318,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
 
-        let largeHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
-        let largeHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
-            layoutSize: largeHeaderSize,
-            elementKind: UICollectionView.elementKindSectionHeader,
-            alignment: .top
-        )
+        let largeHeaderItem = Self.generateHeaderItem(leading: UIConstants.Padding.standard)
 
         let bottomHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
@@ -332,7 +327,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             alignment: .bottom
         )
 
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: UIConstants.Padding.standard,
+        sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: UIConstants.Padding.standard,
                                                         bottom: 0, trailing: UIConstants.Padding.standard)
 
         section.boundarySupplementaryItems = [largeHeaderItem, sectionHeaderItem]
