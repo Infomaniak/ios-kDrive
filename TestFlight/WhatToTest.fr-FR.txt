@@ -1,5 +1,5 @@
-- Fix relatif a la multi selection
 - Vue dédiée : pas d'activités récentes
+- Fix relatif a la multi selection
 - L'ouverture d'un aperçu musical ou vidéo est désormais fluide
 - Nouveau menu contextuel par appui long sur un fichier ou dossier
 - Améliorations de la stabilité et corrections de bugs
