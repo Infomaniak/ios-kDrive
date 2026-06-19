@@ -93,6 +93,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
         navigationBar.standardAppearance = newStandardNavigationBarAppearance
         navigationBar.compactAppearance = newCompactNavigationBarAppearance
 
+        guard let originalTitle else { return }
         navigationItem.title = alpha < 0.2 ? nil : originalTitle
     }
 

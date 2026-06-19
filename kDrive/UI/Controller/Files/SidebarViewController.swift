@@ -505,10 +505,11 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
         if !(isCompactView || selectMode) {
             let appearance = UINavigationBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = .clear
-            appearance.shadowColor = .clear
+            appearance.configureWithTransparentBackground()
             navigationItem.scrollEdgeAppearance = appearance
+            if #available(iOS 26.0, *) {
+                navigationItem.standardAppearance = appearance
+            }
 
             let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, RootMenuItem> { cell, _, item in
                 var content = item.isHeader ? UIListContentConfiguration.sidebarHeader() : UIListContentConfiguration
