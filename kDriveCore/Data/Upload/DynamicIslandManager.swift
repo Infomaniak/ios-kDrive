@@ -124,12 +124,9 @@ final class DynamicIslandManager: ObservableObject {
                 let remaining = results.count
                 totalUploadCount = max(totalUploadCount, remaining + progressUploading)
                 progressUploading = totalUploadCount - remaining
-                progressChunkUploading = 0.0
-                for myFile in results {
-                    if let myProgress = myFile.progress, myProgress > 0 {
-                        progressChunkUploading += myProgress
-                    }
-                }
+
+                progressChunkUploading = results.compactMap(\.progress).filter { $0 > 0 }.reduce(0, +)
+
                 self.overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
                 self.overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
             case .error:
