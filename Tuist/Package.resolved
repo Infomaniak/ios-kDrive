@@ -79,7 +79,7 @@
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
         "branch" : "fix/ExpiringActivity",
-        "revision" : "ab5457d95efd1872442e0a93a74a485f5ce7be5f"
+        "revision" : "ab3aaff97369238156d787bb4d202554b477f3ae"
       }
     },
     {
