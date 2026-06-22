@@ -194,7 +194,7 @@ extension UploadService: UploadServiceDataSourceable {
         }
 
         let detachedFile = uploadFile.detached()
-        try? uploadsDatabase.writeTransaction(withExpiringActivity: false) { writableRealm in
+        try? uploadsDatabase.writeTransactionWithoutExpiringActivity { writableRealm in
             Log.uploadQueue("save ufid:\(uploadFile.id)")
             writableRealm.add(uploadFile, update: .modified)
             Log.uploadQueue("did save ufid:\(uploadFile.id)")
