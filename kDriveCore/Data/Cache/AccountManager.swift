@@ -334,9 +334,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         guard let firstAvailableDrive = userDrives.first(where: { !$0.inMaintenance }) else {
             if userDrives[0].isInTechnicalMaintenance {
-                throw DriveError.NoDriveError.maintenance(drive: userDrives[0])
+                throw DriveError.NoDriveError.maintenance(drive: userDrives[0].freeze())
             } else {
-                throw DriveError.NoDriveError.blocked(drive: userDrives[0])
+                throw DriveError.NoDriveError.blocked(drive: userDrives[0].freeze())
             }
         }
 
