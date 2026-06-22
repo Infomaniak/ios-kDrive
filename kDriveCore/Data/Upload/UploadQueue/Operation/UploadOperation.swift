@@ -324,10 +324,6 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         }
     }
 
-    override public func operationDidCancel() {
-        end()
-    }
-
     // MARK: - Private methods -
 
     // MARK: Progress
