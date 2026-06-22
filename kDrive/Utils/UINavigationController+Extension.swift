@@ -68,9 +68,16 @@ extension UINavigationController {
             scrollEdgeAppearance.largeTitleTextAttributes = [.foregroundColor: largeTitleStyle.color, .font: largeTitleStyle.font]
             scrollEdgeAppearance.titleTextAttributes = [.foregroundColor: titleStyle.color, .font: titleStyle.font]
 
+            #if !ISEXTENSION
             navigationBar.standardAppearance = standardAppearance
             navigationBar.compactAppearance = standardAppearance
             navigationBar.scrollEdgeAppearance = scrollEdgeAppearance
+            #else
+            scrollEdgeAppearance.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+            navigationBar.standardAppearance = scrollEdgeAppearance
+            navigationBar.compactAppearance = scrollEdgeAppearance
+            navigationBar.scrollEdgeAppearance = scrollEdgeAppearance
+            #endif
         } else {
             let navbarAppearance = UINavigationBarAppearance()
             navbarAppearance.configureWithTransparentBackground()

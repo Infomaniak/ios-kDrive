@@ -317,6 +317,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         } else {
             collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         }
+        #if ISEXTENSION
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        #endif
         collectionView.contentInset = UIEdgeInsets(
             top: 0,
             left: 0,
@@ -504,12 +507,20 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     func configureDataSource(for collectionView: UICollectionView)
         -> UICollectionViewDiffableDataSource<RootMenuSection, RootMenuItem> {
         if !(isCompactView || selectMode) {
+            #if ISEXTENSION
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .clear
+            appearance.shadowColor = .clear
+            navigationItem.scrollEdgeAppearance = appearance
+            #else
             let appearance = UINavigationBarAppearance()
             appearance.configureWithTransparentBackground()
             navigationItem.scrollEdgeAppearance = appearance
             if #available(iOS 26.0, *) {
                 navigationItem.standardAppearance = appearance
             }
+            #endif
 
             let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, RootMenuItem> { cell, _, item in
                 var content = item.isHeader ? UIListContentConfiguration.sidebarHeader() : UIListContentConfiguration
