@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import IKSnackbar
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
