@@ -402,20 +402,16 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
 
         let tokenUserId = token.userId
-        tokenStore.removeTokenFor(userId: token.userId)
 
         if tokenUserId == currentAccount?.userId {
-            let currentAccountDescription = String(describing: currentAccount)
             Logger.general
-                .info(
-                    "Failed token matches current account \(currentAccountDescription), logging out and switching account if possible"
-                )
+                .info("Failed token matches current account \(tokenUserId), logging out and switching account if possible")
             notificationHelper.sendDisconnectedNotification()
             logoutCurrentAccountAndSwitchToNextIfPossible()
         } else {
             Logger.general
-                .info("Failed token belongs to non-current account \(tokenUserId), removing local account data")
-            removeAccountFor(userId: tokenUserId)
+                .info("Failed token belongs to non-current account \(tokenUserId), removing token and local account data")
+            removeTokenAndAccountFor(userId: tokenUserId)
         }
     }
 
@@ -476,8 +472,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty,
               let firstDrive = driveResponse.drives.first(where: { $0.isDriveUser }) else {
-            logoutCurrentAccountAndSwitchToNextIfPossible()
-            removeAccountFor(userId: token.userId)
+            if token.userId == currentAccount?.userId {
+                logoutCurrentAccountAndSwitchToNextIfPossible()
+            } else {
+                removeAccountFor(userId: token.userId)
+            }
             throw DriveError.NoDriveError.noDrive
         }
 
