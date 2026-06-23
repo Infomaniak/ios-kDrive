@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-bug-tracker",
       "state" : {
-        "revision" : "9949016c59db6b6ca39b87f3c986a77a61d0b5c6",
-        "version" : "18.0.0"
+        "branch" : "chore/Bump-ios-core-version",
+        "revision" : "797b5b4782f6ec9efed5613d85220d677b58bd5b"
       }
     },
     {
@@ -79,7 +79,7 @@
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
         "branch" : "fix/ExpiringActivity",
-        "revision" : "7a744955bb7aded8d47c37db1fd57d261cc50998"
+        "revision" : "2c55899762dd209e98336db314961e66c6a3f464"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "ff55c791878a52b776b59d0de0412ff5543b6cb5",
-        "version" : "25.1.0"
+        "branch" : "chore/Bump-ios-core-version",
+        "revision" : "8e5db8e12a11a535951489038fb8acb6bbcd58ed"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-uikit",
       "state" : {
-        "revision" : "d21644dc42c74a83caff299376ddc1c9a5fb80f8",
-        "version" : "1.0.0"
+        "branch" : "chore/Bump-ios-core-version",
+        "revision" : "62abba923a9e7c33b9287ebaeba79744cc71249c"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "b286eabfcf1a832fd801bfc7b8e1960c380ed3cb",
-        "version" : "17.0.0"
+        "branch" : "chore/Bump-ios-core-version",
+        "revision" : "5f055bc8bd9bd407edac2c0695672b7b3fb900e9"
       }
     },
     {
