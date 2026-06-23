@@ -504,7 +504,7 @@ extension UploadService: UploadServiceable {
 
         do {
             let parentProxyFile = ProxyFile(driveId: uploadFile.driveId, id: uploadFile.parentDirectoryId)
-            let response = try await driveFileManager.apiFetcher.files(in: parentProxyFile)
+            let response = try await driveFileManager.apiFetcher.files(in: parentProxyFile, sortType: .newer)
             return response.validApiResponse.data.files.contains { $0.name == uploadFile.name }
         } catch {
             Log.uploadQueue("Error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
