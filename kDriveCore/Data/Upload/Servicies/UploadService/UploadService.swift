@@ -37,6 +37,7 @@ public final class UploadService {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
     @LazyInjectService var freeSpaceService: FreeSpaceService
+    @LazyInjectService var accountManager: AccountManageable
 
     private let serialTransactionQueue = DispatchQueue(
         label: "com.infomaniak.drive.upload-service.rebuild-uploads",
@@ -202,20 +203,34 @@ extension UploadService: UploadServiceable {
 
             let specificQueue = self.uploadQueue(for: frozenFile)
 
-            try? self.uploadsDatabase.writeTransaction { writableRealm in
-                guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                      !file.isInvalidated else {
-                    Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
-                    return
+            Task {
+                let exists = await self.fileExistsOnServer(for: frozenFile)
+
+                try? self.uploadsDatabase.writeTransaction { writableRealm in
+                    guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
+                          !file.isInvalidated else {
+                        Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
+                        return
+                    }
+
+                    specificQueue.cancel(uploadFileId: uploadFileId)
+
+                    if exists {
+                        Log.uploadQueue("retry ufid:\(uploadFileId) file exists on server, marking as uploaded")
+                        file.uploadDate = Date()
+                        file.progress = nil
+                        file.error = nil
+                        file.cleanSourceFileIfNeeded()
+                    } else {
+                        file.clearErrorsForRetry()
+                    }
                 }
 
-                specificQueue.cancel(uploadFileId: uploadFileId)
-
-                file.clearErrorsForRetry()
+                if !exists {
+                    specificQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
+                    self.resumeAllOperations()
+                }
             }
-
-            specificQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
-            self.resumeAllOperations()
         }
     }
 
@@ -478,6 +493,23 @@ extension UploadService: UploadServiceable {
 
     public func updateQueueSuspension() {
         allQueues.forEach { $0.updateQueueSuspension() }
+    }
+
+    private func fileExistsOnServer(for uploadFile: UploadFile) async -> Bool {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: uploadFile.driveId,
+                                                                        userId: uploadFile.userId) else {
+            Log.uploadQueue("Unable to get DriveFileManager for ufid:\(uploadFile.id)", level: .error)
+            return false
+        }
+
+        do {
+            let parentProxyFile = ProxyFile(driveId: uploadFile.driveId, id: uploadFile.parentDirectoryId)
+            let response = try await driveFileManager.apiFetcher.files(in: parentProxyFile)
+            return response.validApiResponse.data.files.contains { $0.name == uploadFile.name }
+        } catch {
+            Log.uploadQueue("Error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
+            return false
+        }
     }
 
     private func uploadQueue(for uploadFile: UploadFile) -> UploadQueueable {
