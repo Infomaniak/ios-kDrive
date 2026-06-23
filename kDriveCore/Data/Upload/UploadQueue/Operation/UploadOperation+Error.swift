@@ -91,8 +91,16 @@ extension UploadOperation {
                     errorHandled = true
                     // _not_ overriding file.error
                     return
+                case NSURLErrorNetworkConnectionLost:
+                    file.progress = nil
+                    file.error = .uploadNotTerminated.wrapping(error)
+                    Task {
+                        @InjectService var uploadService: UploadServiceable
+                        uploadService.retry(self.uploadFileId)
+                    }
+                    errorHandled = true
                 default:
-                    // Any other networking error, including NSURLErrorNetworkConnectionLost,
+                    // Any other networking error,
                     // on any call other than chunks gets a user facing network error.
                     file.error = .networkError.wrapping(error)
                     errorHandled = true
