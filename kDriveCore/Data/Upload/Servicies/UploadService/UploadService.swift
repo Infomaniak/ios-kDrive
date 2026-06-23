@@ -202,8 +202,10 @@ extension UploadService: UploadServiceable {
             }
 
             let specificQueue = self.uploadQueue(for: frozenFile)
+            specificQueue.cancel(uploadFileId: uploadFileId)
 
-            Task {
+            Task { [weak self] in
+                guard let self else { return }
                 let exists = await self.fileExistsOnServer(for: frozenFile)
 
                 try? self.uploadsDatabase.writeTransaction { writableRealm in
@@ -212,8 +214,6 @@ extension UploadService: UploadServiceable {
                         Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
                         return
                     }
-
-                    specificQueue.cancel(uploadFileId: uploadFileId)
 
                     if exists {
                         Log.uploadQueue("retry ufid:\(uploadFileId) file exists on server, marking as uploaded")

@@ -93,7 +93,7 @@ extension UploadOperation {
                     return
                 case NSURLErrorNetworkConnectionLost:
                     file.progress = nil
-                    file.error = .uploadNotTerminated.wrapping(error)
+                    file.error = .uploadNotTerminated.wrapping(baseError)
                     Task {
                         @InjectService var uploadService: UploadServiceable
                         uploadService.retry(self.uploadFileId)
