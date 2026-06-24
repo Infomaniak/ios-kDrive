@@ -25,7 +25,7 @@ import kDriveResources
 import OSLog
 
 @available(iOS 26.0, *)
-public actor DynamicIslandService {
+public class DynamicIslandService {
     public static let shared = DynamicIslandService()
 
     @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
@@ -40,6 +40,8 @@ public actor DynamicIslandService {
     private var uploadContinuationBox: ContinuationBox?
     private var lastError: Error?
 
+    private var registeredTask: Task<Void, Never>?
+
     private enum DomainError: Error {
         case expiredTask
     }
@@ -49,9 +51,10 @@ public actor DynamicIslandService {
     }
 
     public func registerTask() {
+        guard registeredTask == nil else { return }
         BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
             guard let self, let task = task as? BGContinuedProcessingTask else { return }
-            Task { await self.handle(task: task) }
+            registeredTask = Task { self.handle(task: task) }
         }
 
         dynamicIslandManager.setup()
@@ -89,7 +92,6 @@ public actor DynamicIslandService {
     private func handleExpiration() {
         Self.logger.error("Handling task expiration")
         uploadService.suspendAllOperations()
-        lastError = DomainError.expiredTask
         uploadContinuationBox?.resume(throwing: DomainError.expiredTask)
         uploadContinuationBox = nil
     }
@@ -111,9 +113,7 @@ public actor DynamicIslandService {
 
         task.expirationHandler = { [weak self] in
             guard let self else { return }
-            Task {
-                await self.handleExpiration()
-            }
+            self.handleExpiration()
         }
 
         Task {
@@ -148,8 +148,8 @@ public actor DynamicIslandService {
                     }
                 }
 
-                let progressUploading = dynamicIslandManager.getProgressUploading()
-                let totalUploadCount = dynamicIslandManager.getTotalUploadCount() + progressUploading
+                let totalCount = dynamicIslandManager.getTotalUploadCount()
+                let uploadedCount = min(dynamicIslandManager.getProgressUploading() + 1, totalCount)
 
                 let status = ReachabilityListener.instance.currentStatus
                 let shouldBeSuspended = status != .wifi
@@ -159,15 +159,15 @@ public actor DynamicIslandService {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
                         subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessful(
-                            progressUploading,
-                            totalUploadCount
+                            uploadedCount,
+                            totalCount
                         )
                     )
                 } else {
                     task.updateTitle(
                         KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                        subtitle: progressUploading > 1 ?
-                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(progressUploading)
+                        subtitle: totalCount > 1 ?
+                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadedCount)
                             : KDriveResourcesStrings.Localizable
                             .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
                     )
@@ -190,16 +190,6 @@ public actor DynamicIslandService {
     }
 
     private func errorInfo(for error: Error) -> (String, String) {
-        if let domainError = error as? DomainError {
-            switch domainError {
-            case .expiredTask:
-                return (
-                    KDriveResourcesStrings.Localizable.uploadPausedTitle,
-                    KDriveResourcesStrings.Localizable.openAppToContinue
-                )
-            }
-        }
-
         if let driveError = error as? DriveError {
             switch driveError {
             case .quotaExceeded:
