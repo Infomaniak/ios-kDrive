@@ -63,20 +63,15 @@ class DraggableFileListViewModel {
         }
 
         let parameters = UIDragPreviewParameters()
-        parameters.backgroundColor = UIColor(.primary.opacity(0.9))
-        let insetBounds = sourceBounds.insetBy(dx: UIConstants.previewHorizontalInset, dy: 0)
+        parameters.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        let insetBounds = sourceBounds.insetBy(dx: UIConstants.Padding.small, dy: UIConstants.Padding.none)
         parameters.visiblePath = UIBezierPath(
             roundedRect: insetBounds,
-            cornerRadius: UIConstants.previewCornerRadius
+            cornerRadius: CGFloat(UIConstants.cornerRadius)
         )
 
         return UIDragPreview(view: sourceView, parameters: parameters)
     }
-}
-
-extension UIConstants {
-    static let previewCornerRadius: CGFloat = 10
-    static let previewHorizontalInset: CGFloat = 6
 }
 
 @MainActor
