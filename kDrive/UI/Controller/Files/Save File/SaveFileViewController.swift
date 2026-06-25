@@ -218,10 +218,7 @@ class SaveFileViewController: UIViewController {
 
     @IBAction func close(_ sender: Any) {
         importProgress?.cancel()
-        dismiss(animated: true)
-        for path in items.map({ $0.path }) {
-            try? FileManager.default.removeItem(at: path)
-        }
+        dismiss(animated: true, clean: true)
         if let extensionContext {
             extensionContext.completeRequest(returningItems: nil, completionHandler: nil)
         }
@@ -258,8 +255,8 @@ class SaveFileViewController: UIViewController {
 
     func dismiss(animated: Bool, clean: Bool = true, completion: (() -> Void)? = nil) {
         Task {
-            // Cleanup file that were duplicated to appGroup on extension mode
-            if appContextService.isExtension && clean {
+            // Cleanup file that were duplicated to appGroup
+            if clean {
                 await items.concurrentForEach { item in
                     try? FileManager.default.removeItem(at: item.path)
                 }
