@@ -255,7 +255,11 @@ public final class FileImportHelper {
 
                         // Get import URL
                         let appGroupFileURL = appGroupURL.appendingPathComponent(fileName)
-                        try self.fileManager.moveItem(atPath: url.path, toPath: appGroupFileURL.path)
+                        do {
+                            try self.fileManager.moveItem(atPath: url.path, toPath: appGroupFileURL.path)
+                        } catch {
+                            try self.fileManager.copyItem(atPath: url.path, toPath: appGroupFileURL.path)
+                        }
                         finalUrl = appGroupFileURL
                     } else {
                         // Path obtained within the main app are stable, and will stay accessible.
