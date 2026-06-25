@@ -324,17 +324,20 @@ extension UploadService: UploadServiceable {
 
             Log.uploadQueue("cancelAllOperations IDS count:\(allUploadingFilesIds.count) parentId:\(parentId)")
 
+            var filesToClean: [UploadFile] = []
             try? self.uploadsDatabase.writeTransaction { writableRealm in
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
                 let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", allUploadingFilesIds)
 
-                for object in objectsToDelete {
-                    object.cleanSourceFileIfNeeded()
-                }
+                filesToClean = objectsToDelete.map { $0.freeze() }
 
                 writableRealm.delete(objectsToDelete)
                 Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
+            }
+
+            for file in filesToClean {
+                file.cleanSourceFileIfNeeded()
             }
 
             self.globalUploadQueue.cancelAllOperations(uploadingFilesIds: globalUploadingFilesIds)
