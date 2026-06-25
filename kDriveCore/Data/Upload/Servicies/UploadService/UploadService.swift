@@ -329,6 +329,10 @@ extension UploadService: UploadServiceable {
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
                 let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", allUploadingFilesIds)
 
+                for object in objectsToDelete {
+                    object.cleanSourceFileIfNeeded()
+                }
+
                 writableRealm.delete(objectsToDelete)
                 Log.uploadQueue("Done deleting all matching files for parentId:\(parentId)")
             }

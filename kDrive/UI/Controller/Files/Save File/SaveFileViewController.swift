@@ -219,6 +219,9 @@ class SaveFileViewController: UIViewController {
     @IBAction func close(_ sender: Any) {
         importProgress?.cancel()
         dismiss(animated: true)
+        for path in items.map({ $0.path }) {
+            try? FileManager.default.removeItem(at: path)
+        }
         if let extensionContext {
             extensionContext.completeRequest(returningItems: nil, completionHandler: nil)
         }
