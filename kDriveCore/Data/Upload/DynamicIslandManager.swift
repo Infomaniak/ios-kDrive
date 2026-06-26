@@ -29,8 +29,8 @@ final class DynamicIslandManager: ObservableObject {
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     private var realmObservationToken: NotificationToken?
-    private var totalUploadCount: Int
-    private var progressUploading: Int
+    private(set) var totalUploadCount: Int
+    private(set) var progressUploading: Int
     private var progressChunkUploading = 0.0
     private var cancellables: Set<AnyCancellable> = []
     private var overallProgress: Progress?
@@ -149,14 +149,6 @@ final class DynamicIslandManager: ObservableObject {
             overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
             overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
         }
-    }
-
-    func getTotalUploadCount() -> Int {
-        return totalUploadCount
-    }
-
-    func getProgressUploading() -> Int {
-        return progressUploading
     }
 
     func reset() {
