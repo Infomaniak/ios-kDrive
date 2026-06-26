@@ -3,4 +3,5 @@ Post tenebras Liquid glass !
 - Fresh Liquid glass native UI 🎉
 - Sleek drag and drop UI
 - Improved and more resilient maintenance mode
+- Fix a cache space over use issue
 - Stability improvements and bug fixes
