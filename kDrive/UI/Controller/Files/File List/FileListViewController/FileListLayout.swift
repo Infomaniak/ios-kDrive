@@ -76,11 +76,12 @@ struct DefaultFileListLayout: FileListLayout {
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: gridColumns)
 
         let section = NSCollectionLayoutSection(group: group)
+        section.contentInsetsReference = .safeArea
         section.contentInsets = .init(
             top: 0,
-            leading: environment.container.contentInsets.leading + UIConstants.Padding.mediumSmall,
+            leading: UIConstants.Padding.mediumSmall,
             bottom: 0,
-            trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
+            trailing: UIConstants.Padding.mediumSmall
         )
         if showsHeader {
             addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
@@ -104,11 +105,12 @@ struct DefaultFileListLayout: FileListLayout {
 
         let section = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: environment)
 
+        section.contentInsetsReference = .safeArea
         section.contentInsets = .init(
             top: 0,
-            leading: environment.container.contentInsets.leading + UIConstants.Padding.mediumSmall,
+            leading: UIConstants.Padding.mediumSmall,
             bottom: 0,
-            trailing: environment.container.contentInsets.trailing + UIConstants.Padding.mediumSmall
+            trailing: UIConstants.Padding.mediumSmall
         )
         if showsHeader {
             addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
