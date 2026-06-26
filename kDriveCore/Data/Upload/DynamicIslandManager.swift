@@ -47,22 +47,10 @@ final class DynamicIslandManager: ObservableObject {
     static let photoAssetPredicate = NSPredicate(format: "rawType = %@", argumentArray: [UploadFileType.phAsset.rawValue])
     static let globalAssetPredicate = NSPredicate(format: "rawType != %@", argumentArray: [UploadFileType.phAsset.rawValue])
 
-    var driveFileManager: DriveFileManager? {
-        didSet {
-            refreshObservation()
-        }
-    }
-
-    init(driveFileManager: DriveFileManager?) {
-        self.driveFileManager = driveFileManager
+    init() {
         totalUploadCount = 0
         progressUploading = 0
         refreshObservation()
-    }
-
-    func setup() {
-        guard driveFileManager == nil else { return }
-        driveFileManager = accountManager.currentDriveFileManager
     }
 
     private func refreshObservation() {
@@ -75,7 +63,6 @@ final class DynamicIslandManager: ObservableObject {
             return
         }
         if !isObserving || changeQueueObserver {
-            guard driveFileManager != nil else { return }
             startObservation()
             isObserving = true
             changeQueueObserver = false
@@ -83,19 +70,12 @@ final class DynamicIslandManager: ObservableObject {
     }
 
     private func startObservation() {
-        guard let driveFileManager else { return }
-        let driveId = driveFileManager.driveId
-
         let optionalPredicate: NSPredicate? = uploadingFilesObserverOption()
 
         realmObservationToken?.invalidate()
         cancellables.removeAll()
 
-        totalUploadCount = uploadDataSource.getUploadingFiles(
-            userId: accountManager.currentUserId,
-            driveIds: [driveId],
-            optionalPredicate: optionalPredicate
-        ).count
+        totalUploadCount = uploadDataSource.getUploadingFiles(optionalPredicate: optionalPredicate).count
 
         lastUpdateTime = clock.now
 
@@ -109,30 +89,26 @@ final class DynamicIslandManager: ObservableObject {
             }
             .store(in: &cancellables)
 
-        realmObservationToken = uploadDataSource.getUploadingFiles(
-            userId: accountManager.currentUserId,
-            driveIds: [driveId],
-            optionalPredicate: optionalPredicate
-        )
-        .observe(on: .main) { [weak self] change in
-            guard let self else { return }
+        realmObservationToken = uploadDataSource.getUploadingFiles(optionalPredicate: optionalPredicate)
+            .observe(on: .main) { [weak self] change in
+                guard let self else { return }
 
-            self.lastUpdateTime = clock.now
+                self.lastUpdateTime = clock.now
 
-            switch change {
-            case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
-                let remaining = results.count
-                totalUploadCount = max(totalUploadCount, remaining + progressUploading)
-                progressUploading = totalUploadCount - remaining
+                switch change {
+                case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
+                    let remaining = results.count
+                    totalUploadCount = max(totalUploadCount, remaining + progressUploading)
+                    progressUploading = totalUploadCount - remaining
 
-                progressChunkUploading = results.compactMap(\.progress).filter { $0 > 0 }.reduce(0, +)
+                    progressChunkUploading = results.compactMap(\.progress).filter { $0 > 0 }.reduce(0, +)
 
-                self.overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
-                self.overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
-            case .error:
-                self.overallProgress?.completedUnitCount = 0
+                    self.overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
+                    self.overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
+                case .error:
+                    self.overallProgress?.completedUnitCount = 0
+                }
             }
-        }
     }
 
     private func stopObservation() {
