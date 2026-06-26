@@ -151,8 +151,8 @@ public class DynamicIslandService: DynamicIslandServicable {
                     }
                 }
 
-                let totalCount = dynamicIslandManager.getTotalUploadCount()
-                let uploadedCount = min(dynamicIslandManager.getProgressUploading() + 1, totalCount)
+                let totalCount = dynamicIslandManager.totalUploadCount
+                let uploadedCount = min(dynamicIslandManager.progressUploading + 1, totalCount)
 
                 let status = ReachabilityListener.instance.currentStatus
                 let shouldBeSuspended = status != .wifi
