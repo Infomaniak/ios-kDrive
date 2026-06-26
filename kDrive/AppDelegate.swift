@@ -53,6 +53,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var downloadQueue: DownloadQueueable
     @LazyInjectService var tokenStore: TokenStore
     @LazyInjectService var notificationService: InfomaniakNotifications
+    @LazyInjectService var dynamicIslandService: DynamicIslandServicable
 
     // MARK: - UIApplicationDelegate
 
@@ -120,9 +121,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
         application.registerForRemoteNotifications()
 
-        if #available(iOS 26.0, *) {
-            DynamicIslandService.shared.registerTask()
-        }
+        dynamicIslandService.registerTask()
 
         return true
     }
