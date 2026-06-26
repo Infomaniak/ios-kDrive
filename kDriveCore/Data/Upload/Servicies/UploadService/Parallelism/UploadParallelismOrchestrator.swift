@@ -87,18 +87,17 @@ public final class UploadParallelismOrchestrator {
     }
 
     private func computeUploadParallelismPerQueueAndApply() {
-        let globalIsActive = globalUploadQueue.isActive
-        let photoIsActive = photoUploadQueue.isActive
-        if #available(iOS 26.0, *) {
-            Task {
-                await DynamicIslandService.shared.updateQueueActivity(
-                    globalQueueActive: globalIsActive,
-                    photoQueueActive: photoIsActive
+        serialEventQueue.async {
+            if #available(iOS 26.0, *) {
+                let globalQueueActiveForDynamicIsland = self.globalUploadQueue.isActive
+                let photoQueueActiveForDynamicIsland = self.photoUploadQueue.isActive
+
+                DynamicIslandService.shared.updateQueueActivity(
+                    globalQueueActive: globalQueueActiveForDynamicIsland,
+                    photoQueueActive: photoQueueActiveForDynamicIsland
                 )
             }
-        }
 
-        serialEventQueue.async {
             let currentAvailableParallelism = self.availableParallelism
             Log.uploadQueue("Current total available upload parallelism :\(currentAvailableParallelism)")
 
