@@ -171,13 +171,9 @@ extension UploadService: UploadServiceDataSourceable {
                             itemIdentifier: NSFileProviderItemIdentifier? = nil,
                             addToQueue: Bool = true,
                             writeExpiringActivity: Bool = true) -> UploadOperationable? {
-        if writeExpiringActivity {
-            let expiringActivity = ExpiringActivity()
-            expiringActivity.start()
-            defer {
-                expiringActivity.endAll()
-            }
-        }
+        let expiringActivity: ExpiringActivity? = writeExpiringActivity ? ExpiringActivity() : nil
+        expiringActivity?.start()
+        defer { expiringActivity?.endAll() }
 
         Log.uploadQueue("saveToRealm addToQueue:\(addToQueue) ufid:\(uploadFile.id)")
 
