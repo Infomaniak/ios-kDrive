@@ -74,6 +74,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadNotifiable: UploadNotifiable
     @LazyInjectService var notificationHelper: NotificationsHelpable
+    @LazyInjectService var dynamicIslandService: DynamicIslandServicable
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
 
     /// The number of chunks we try to keep ready to upload in one UploadOperation
