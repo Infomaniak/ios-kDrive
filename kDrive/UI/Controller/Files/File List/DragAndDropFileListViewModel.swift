@@ -43,29 +43,34 @@ class DraggableFileListViewModel {
         let dragAndDropFile = DragAndDropFile(file: draggedFile, userId: driveFileManager.drive.userId)
         let itemProvider = NSItemProvider(object: dragAndDropFile)
         itemProvider.suggestedName = draggedFile.name
+
         let draggedItem = UIDragItem(itemProvider: itemProvider)
-        if let previewImageView = previewImageView(for: collectionView.cellForItem(at: indexPath)) {
-            let parameters = UIDragPreviewParameters()
-            parameters.backgroundColor = .clear
-            parameters.shadowPath = UIBezierPath()
-
-            draggedItem.previewProvider = {
-                UIDragPreview(view: previewImageView, parameters: parameters)
-            }
+        if let cell = collectionView.cellForItem(at: indexPath),
+           let preview = preview(for: cell) {
+            draggedItem.previewProvider = { preview }
         }
-        session.localContext = draggedFile
 
+        session.localContext = draggedFile
         return [draggedItem]
     }
 
-    private func previewImageView(for myView: UICollectionViewCell?) -> UIImageView? {
-        if let cell = myView as? FileGridCollectionViewCell {
-            return cell.logoImage.isHidden ? cell.largeIconImageView : cell.logoImage
-        } else if let cell = myView as? FileCollectionViewCell {
-            return cell.logoImage
+    private func preview(for cell: UICollectionViewCell) -> UIDragPreview? {
+        let sourceView = cell.contentView
+        let sourceBounds = sourceView.bounds
+
+        guard sourceBounds.width > 0, sourceBounds.height > 0 else {
+            return nil
         }
 
-        return nil
+        let parameters = UIDragPreviewParameters()
+        parameters.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        let insetBounds = sourceBounds.insetBy(dx: UIConstants.Padding.small, dy: UIConstants.Padding.none)
+        parameters.visiblePath = UIBezierPath(
+            roundedRect: insetBounds,
+            cornerRadius: CGFloat(UIConstants.cornerRadius)
+        )
+
+        return UIDragPreview(view: sourceView, parameters: parameters)
     }
 }
 
