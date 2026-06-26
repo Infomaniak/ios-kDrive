@@ -172,6 +172,10 @@ public final class FileImportHelper {
                     return file
                 }
 
+                if self.appContextService.isExtension {
+                    try? FreeSpaceService().freeTmpSpace()
+                }
+
                 // Dispatch results
                 Task { @MainActor in
                     completion(processedFiles, errorCount)
@@ -272,6 +276,10 @@ public final class FileImportHelper {
 
                     let importedFile = ImportedFile(name: fileName, path: finalUrl, uti: uti)
                     return importedFile
+                }
+
+                if self.appContextService.isExtension {
+                    try? FreeSpaceService().freeTmpSpace()
                 }
 
                 // Dispatch results
