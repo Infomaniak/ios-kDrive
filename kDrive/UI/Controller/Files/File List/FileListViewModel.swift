@@ -461,9 +461,10 @@ class FileListViewModel: SelectDelegate {
                 completion(true)
             }
 
-            let action = UIContextualAction(style: .normal, title: SwipeCellAction.share.title, handler: actionHandler)
+            let action = UIContextualAction(style: .destructive, title: nil, handler: actionHandler)
             action.image = SwipeCellAction.delete.icon
             action.backgroundColor = SwipeCellAction.delete.backgroundColor
+            action.accessibilityLabel = SwipeCellAction.delete.title
             actions.append(action)
         }
 
@@ -473,9 +474,10 @@ class FileListViewModel: SelectDelegate {
                 completion(true)
             }
 
-            let action = UIContextualAction(style: .normal, title: SwipeCellAction.share.title, handler: actionHandler)
+            let action = UIContextualAction(style: .normal, title: nil, handler: actionHandler)
             action.image = SwipeCellAction.share.icon
             action.backgroundColor = SwipeCellAction.share.backgroundColor
+            action.accessibilityLabel = SwipeCellAction.share.title
             actions.append(action)
         }
 

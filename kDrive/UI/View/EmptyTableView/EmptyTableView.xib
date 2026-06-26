@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -17,7 +17,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="w27-f8-1Qx">
-                    <rect key="frame" x="107" y="103" width="200" height="200"/>
+                    <rect key="frame" x="107" y="104" width="200" height="200"/>
                     <subviews>
                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-filled" translatesAutoresizingMaskIntoConstraints="NO" id="tKU-Yd-MGq">
                             <rect key="frame" x="70" y="70" width="60" height="60"/>
@@ -35,7 +35,7 @@
                     </constraints>
                 </view>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="752" verticalCompressionResistancePriority="752" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zQB-Y1-YO0" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                    <rect key="frame" x="24" y="335" width="366" height="21"/>
+                    <rect key="frame" x="24" y="336" width="366" height="20"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                     <color key="textColor" name="titleColor"/>
                     <nil key="highlightedColor"/>
@@ -76,7 +76,7 @@
                 <constraint firstItem="0Jv-j5-tP1" firstAttribute="top" relation="greaterThanOrEqual" secondItem="I0w-c4-6se" secondAttribute="bottom" constant="8" id="4hm-tF-PdF"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="0Jv-j5-tP1" secondAttribute="bottom" constant="32" id="6Ez-ve-oGj"/>
                 <constraint firstItem="I0w-c4-6se" firstAttribute="top" secondItem="zQB-Y1-YO0" secondAttribute="bottom" constant="16" id="ASz-97-CBl"/>
-                <constraint firstItem="w27-f8-1Qx" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="NWU-sH-fV2"/>
+                <constraint firstItem="w27-f8-1Qx" firstAttribute="centerX" secondItem="vUN-kp-3ea" secondAttribute="centerX" id="NWU-sH-fV2"/>
                 <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="I0w-c4-6se" secondAttribute="bottom" constant="8" id="PDv-o8-ob5"/>
                 <constraint firstItem="zQB-Y1-YO0" firstAttribute="top" secondItem="w27-f8-1Qx" secondAttribute="bottom" constant="32" id="Qb5-Cj-IbA"/>
                 <constraint firstItem="zQB-Y1-YO0" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="24" id="VXg-qR-Ae3"/>
@@ -117,7 +117,7 @@
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
             <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

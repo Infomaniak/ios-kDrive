@@ -81,6 +81,41 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private var backgroundExtensionImageView: UIImageView?
+
+    private func setupBackgroundExtensionView() {
+        guard #available(iOS 26.0, *) else { return }
+
+        let extensionView = UIBackgroundExtensionView()
+        let imageView = UIImageView()
+
+        extensionView.translatesAutoresizingMaskIntoConstraints = false
+        extensionView.automaticallyPlacesContentView = false
+
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+
+        extensionView.contentView = imageView
+
+        view.insertSubview(extensionView, at: 0)
+
+        NSLayoutConstraint.activate([
+            extensionView.topAnchor.constraint(equalTo: view.topAnchor),
+            extensionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            extensionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            extensionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            imageView.topAnchor.constraint(equalTo: collectionView.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: collectionView.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: collectionView.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
+        ])
+
+        backgroundExtensionImageView = imageView
+        updateBackgroundExtensionForCurrentFile()
+    }
+
     private var navBarHeight: CGFloat {
         navigationController?.navigationBar.frame.height ?? 0
     }
@@ -90,6 +125,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private var networkObserver: ObservationToken?
+    private var indexBeforeBoundsChange: IndexPath?
+    private var boundsObserver: NSKeyValueObservation?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -104,6 +141,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         collectionView.register(cellView: AudioCollectionViewCell.self)
         collectionView.register(cellView: CodePreviewCollectionViewCell.self)
         collectionView.contentInsetAdjustmentBehavior = .never
+
+        boundsObserver = collectionView.observe(\.bounds, options: [.old]) { [weak self] collectionView, change in
+            guard let self,
+                  let oldSize = change.oldValue?.size,
+                  oldSize != collectionView.bounds.size else { return }
+            self.indexBeforeBoundsChange = self.currentIndex
+        }
 
         floatingPanelViewController = DriveFloatingPanelController()
         floatingPanelViewController.isRemovalInteractionEnabled = false
@@ -124,6 +168,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
         }
 
+        if #available(iOS 26.0, *),
+           !traitCollection.horizontalSizeClass.iskDriveCompactSize {
+            floatingPanelViewController.surfaceView.containerMargins = UIEdgeInsets(top: 0,
+                                                                                    left: UIConstants.Padding.medium,
+                                                                                    bottom: 0, right:
+                                                                                    UIConstants.Padding.medium)
+        }
+
         pdfPageLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)
         pdfPageLabel.textColor = .white
         pdfPageLabel.textAlignment = .center
@@ -132,6 +184,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         observeNetwork()
         observeFileUpdated()
+        setupBackgroundExtensionView()
     }
 
     func createFullscreenLayout() -> UICollectionViewLayout {
@@ -150,6 +203,24 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         configuration.contentInsetsReference = .none
         let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
         return layout
+    }
+
+    private func updateBackgroundExtensionForCurrentFile() {
+        guard #available(iOS 26.0, *) else { return }
+
+        let currentFileId = currentFile.id
+
+        currentFile.getThumbnail { [weak self] thumbnail, _ in
+            guard let self, self.currentFile.id == currentFileId else { return }
+            self.backgroundExtensionImageView?.image = thumbnail
+        }
+
+        currentFile.getPreview { [weak self] image in
+            guard let self, self.currentFile.id == currentFileId else { return }
+            if let image {
+                self.backgroundExtensionImageView?.image = image
+            }
+        }
     }
 
     func observeFileUpdated() {
@@ -197,32 +268,38 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         navigationController?.navigationBar.isHidden = true
 
-        let backImage = makeImageWithCircle(
-            icon: KDriveResourcesAsset.chevronLeft.image
-        )
-
-        let adjustedBackImage = backImage.withAlignmentRectInsets(
-            UIEdgeInsets(top: 8, left: -4, bottom: 8, right: 4)
-        )
-
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
         backButtonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.clear]
         backButtonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.clear]
         let navbarAppearance = UINavigationBarAppearance()
-        navbarAppearance.setBackIndicatorImage(adjustedBackImage, transitionMaskImage: adjustedBackImage)
         navbarAppearance.backButtonAppearance = backButtonAppearance
         navbarAppearance.configureWithTransparentBackground()
         navbarAppearance.shadowImage = UIImage()
+
+        if #unavailable(iOS 26.0) {
+            let backImage = makeImageWithCircle(
+                icon: KDriveResourcesAsset.chevronLeft.image
+            )
+
+            let adjustedBackImage = backImage.withAlignmentRectInsets(
+                UIEdgeInsets(top: 8, left: -4, bottom: 8, right: 4)
+            )
+
+            navbarAppearance.setBackIndicatorImage(adjustedBackImage, transitionMaskImage: adjustedBackImage)
+
+            let hideStatusBar = CGAffineTransform(
+                translationX: 0,
+                y: -navBarHeight
+            )
+            statusBarView.transform = hideStatusBar
+        } else {
+            statusBarView.isHidden = true
+        }
+
         navigationController?.navigationBar.standardAppearance = navbarAppearance
         navigationController?.navigationBar.compactAppearance = navbarAppearance
         navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
         navigationItem.title = nil
-
-        let hideStatusBar = CGAffineTransform(
-            translationX: 0,
-            y: -navBarHeight
-        )
-        statusBarView.transform = hideStatusBar
 
         navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
 
@@ -239,6 +316,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
         }
+        (tabBarController as? MainTabViewController)?.hideButtonAdd(true)
     }
 
     private func makeImageWithCircle(
@@ -299,6 +377,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         UIApplication.shared.endReceivingRemoteControlEvents()
         resignFirstResponder()
+        (tabBarController as? MainTabViewController)?.hideButtonAdd(false)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -342,8 +421,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         if shouldScrollToCurrentIndex {
             collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
             shouldScrollToCurrentIndex = false
+        } else if let indexPath = indexBeforeBoundsChange {
+            indexBeforeBoundsChange = nil
+            let wasPagingEnabled = collectionView.isPagingEnabled
+            collectionView.isPagingEnabled = false
+            collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
+            collectionView.isPagingEnabled = wasPagingEnabled
         }
         floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view.safeAreaInsets.bottom, 5))
+    }
+
+    deinit {
+        boundsObserver?.invalidate()
     }
 
     override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -396,30 +485,45 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         pdfPageLabel.isHidden = true
         navigationItem.titleView = nil
 
-        let editImage = makeImageWithCircle(
-            icon: KDriveResourcesAsset.editDocument.image
-        )
+        if #available(iOS 26.0, *) {
+            let editItem = UIBarButtonItem(image: KDriveResourcesAsset.editDocument.image,
+                                           style: .plain, target: self, action: #selector(editFile))
+            editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
+            navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
+        } else {
+            let editImage = makeImageWithCircle(
+                icon: KDriveResourcesAsset.editDocument.image
+            )
 
-        let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
-        editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
+            let editItem = UIBarButtonItem(image: editImage, style: .plain, target: self, action: #selector(editFile))
+            editItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonEdit
 
-        editItem.imageInsets = UIEdgeInsets(top: -1, left: -2, bottom: 1, right: 2)
-        navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
+            editItem.imageInsets = UIEdgeInsets(top: -1, left: -2, bottom: 1, right: 2)
+            navigationItem.rightBarButtonItem = editButtonHidden ? nil : editItem
+        }
     }
 
     private func setNavbarForOpening() {
         pdfPageLabel.isHidden = true
         navigationItem.titleView = nil
 
-        let openImage = makeImageWithCircle(
-            icon: KDriveResourcesAsset.openWith.image
-        )
+        if #available(iOS 26.0, *) {
+            let openItem = UIBarButtonItem(image: KDriveResourcesAsset.openWith.image,
+                                           style: .plain, target: self, action: #selector(openFile))
+            openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
 
-        let openItem = UIBarButtonItem(image: openImage, style: .plain, target: self, action: #selector(openFile))
-        openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
+            navigationItem.rightBarButtonItem = openItem
+        } else {
+            let openImage = makeImageWithCircle(
+                icon: KDriveResourcesAsset.openWith.image
+            )
 
-        openItem.imageInsets = UIEdgeInsets(top: -2, left: -2, bottom: 2, right: 2)
-        navigationItem.rightBarButtonItem = openItem
+            let openItem = UIBarButtonItem(image: openImage, style: .plain, target: self, action: #selector(openFile))
+            openItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonOpenWith
+
+            openItem.imageInsets = UIEdgeInsets(top: -2, left: -2, bottom: 2, right: 2)
+            navigationItem.rightBarButtonItem = openItem
+        }
     }
 
     private func setNavbarForPdf(currentPage: Int, totalPages: Int) {
@@ -532,6 +636,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         updateNavigationBar()
         downloadFileIfNeeded(at: currentIndex)
+        updateBackgroundExtensionForCurrentFile()
     }
 
     func errorWhilePreviewing(fileId: Int, error: Error) {
