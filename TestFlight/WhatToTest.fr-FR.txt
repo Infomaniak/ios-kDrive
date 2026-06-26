@@ -1,5 +1,6 @@
-- Vue dédiée : pas d'activités récentes
-- Fix relatif a la multi selection
-- L'ouverture d'un aperçu musical ou vidéo est désormais fluide
-- Nouveau menu contextuel par appui long sur un fichier ou dossier
+Post tenebras Liquid glass !
+
+- kDrive fait peau neuve avec Liquid glass 🎉
+- Amélioration de l'UI du glissé déposé
+- Amélioration de la résilience de l'app en mode maintenance
 - Améliorations de la stabilité et corrections de bugs
