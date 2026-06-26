@@ -255,7 +255,7 @@ class SaveFileViewController: UIViewController {
 
     func dismiss(animated: Bool, clean: Bool = true, completion: (() -> Void)? = nil) {
         Task {
-            // Cleanup file that were duplicated to appGroup
+            // Clean up imported temporary files
             if clean {
                 await items.concurrentForEach { item in
                     try? FileManager.default.removeItem(at: item.path)
