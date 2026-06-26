@@ -118,6 +118,13 @@ class PreloadingViewController: UIViewController {
                 )
                 driveErrorNavigationViewController.modalPresentationStyle = .fullScreen
                 present(driveErrorNavigationViewController, animated: true)
+            } catch let error as DriveError where error == .productMaintenance {
+                let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                    errorType: .maintenance,
+                    drive: nil
+                )
+                driveErrorNavigationViewController.modalPresentationStyle = .fullScreen
+                present(driveErrorNavigationViewController, animated: true)
             } catch {
                 SentryDebug.logPreloadingAccountError(error: error, origin: "PreloadingViewController")
                 accountManager.removeTokenAndAccountFor(userId: account.userId)

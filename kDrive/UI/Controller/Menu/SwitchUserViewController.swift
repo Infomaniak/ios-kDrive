@@ -120,6 +120,12 @@ class SwitchUserViewController: UIViewController {
                 drive: drive
             )
             present(driveErrorNavigationViewController, animated: true)
+        } catch let error as DriveError where error == .productMaintenance {
+            let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
+                errorType: .maintenance,
+                drive: nil
+            )
+            present(driveErrorNavigationViewController, animated: true)
         } catch {
             SentryDebug.logPreloadingAccountError(error: error, origin: "SwitchUserViewController")
             // Unknown error, remove the user

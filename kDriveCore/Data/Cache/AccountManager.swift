@@ -334,9 +334,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         guard let firstAvailableDrive = userDrives.first(where: { !$0.inMaintenance }) else {
             if userDrives[0].isInTechnicalMaintenance {
-                throw DriveError.NoDriveError.maintenance(drive: userDrives[0])
+                throw DriveError.NoDriveError.maintenance(drive: userDrives[0].freeze())
             } else {
-                throw DriveError.NoDriveError.blocked(drive: userDrives[0])
+                throw DriveError.NoDriveError.blocked(drive: userDrives[0].freeze())
             }
         }
 
@@ -402,29 +402,16 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
 
         let tokenUserId = token.userId
-        tokenStore.removeTokenFor(userId: token.userId)
 
-        // Remove matching account
-        guard let accountToDelete = accounts.first(where: { account in
-            account.userId == tokenUserId
-        }) else {
-            SentryDebug.capture(message: "Failed matching failed token to account \(tokenUserId)",
-                                context: context,
-                                contextKey: "Token Infos")
-            Logger.general.error("Failed matching failed token to account \(tokenUserId)")
-            return
-        }
-
-        let accountToDeleteDescription = String(describing: accountToDelete)
-        if accountToDelete.userId == currentAccount?.userId {
-            let currentAccountDescription = String(describing: currentAccount)
-            Logger.general.info("matched \(currentAccountDescription) to \(accountToDeleteDescription), removing current account")
+        if tokenUserId == currentAccount?.userId {
+            Logger.general
+                .info("Failed token matches current account \(tokenUserId), logging out and switching account if possible")
             notificationHelper.sendDisconnectedNotification()
             logoutCurrentAccountAndSwitchToNextIfPossible()
         } else {
             Logger.general
-                .info("user with token error \(accountToDeleteDescription) do not match current account, doing nothing")
-            removeAccountFor(userId: accountToDelete.userId)
+                .info("Failed token belongs to non-current account \(tokenUserId), removing token and local account data")
+            removeTokenAndAccountFor(userId: tokenUserId)
         }
     }
 
@@ -485,7 +472,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         let driveResponse = try await apiFetcher.userDrives()
         guard !driveResponse.drives.isEmpty,
               let firstDrive = driveResponse.drives.first(where: { $0.isDriveUser }) else {
-            removeAccountFor(userId: token.userId)
+            if token.userId == currentAccount?.userId {
+                logoutCurrentAccountAndSwitchToNextIfPossible()
+            } else {
+                removeAccountFor(userId: token.userId)
+            }
             throw DriveError.NoDriveError.noDrive
         }
 

@@ -786,6 +786,12 @@ public struct AppRouter: AppNavigable {
                 drive: drive
             )
             await setRootViewController(driveErrorNavigationViewController, animated: true)
+        } catch let error as DriveError where error == .productMaintenance {
+            let driveErrorNavigationViewController = await DriveErrorViewController.instantiateInNavigationController(
+                errorType: .maintenance,
+                drive: nil
+            )
+            await setRootViewController(driveErrorNavigationViewController, animated: true)
         } catch {
             await UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             Log.sceneDelegate("Error while updating user account: \(error)", level: .error)

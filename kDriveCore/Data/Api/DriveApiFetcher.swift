@@ -73,7 +73,18 @@ public class DriveApiFetcher: ApiFetcher {
     // MARK: - API methods
 
     func userDrives() async throws -> DriveResponse {
-        try await perform(request: authenticatedRequest(.initData))
+        do {
+            return try await perform(request: authenticatedRequest(.initData))
+        } catch let error as AFError {
+            if case .responseValidationFailed(let reason) = error,
+               case .unacceptableStatusCode(let code) = reason,
+               [502, 503, 504].contains(code) {
+                throw DriveError.productMaintenance
+            }
+            throw error
+        } catch let error as DriveError where error == .serverError || error == .driveMaintenance {
+            throw DriveError.productMaintenance
+        }
     }
 
     public func createDirectory(in parentDirectory: ProxyFile, name: String, onlyForMe: Bool) async throws -> File {
