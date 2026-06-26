@@ -227,4 +227,14 @@ public struct FreeSpaceService {
             throw StorageIssues.unavailable(wrapping: error)
         }
     }
+
+    public func freeTmpSpace() throws {
+        let tmpURL = FileManager.default.temporaryDirectory
+        do {
+            let contents = try FileManager.default.contentsOfDirectory(at: tmpURL, includingPropertiesForKeys: nil)
+            for url in contents {
+                try FileManager.default.removeItem(at: url)
+            }
+        }
+    }
 }
