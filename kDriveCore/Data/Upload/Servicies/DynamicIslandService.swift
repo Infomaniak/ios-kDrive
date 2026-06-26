@@ -40,7 +40,9 @@ public class DynamicIslandService {
     private var uploadContinuationBox: ContinuationBox?
     private var lastError: Error?
 
-    private var registeredTask: Task<Void, Never>?
+    private var taskHandlingTask: Task<Void, Never>?
+    private var hasRegisteredLaunchHandler = false
+    private let registrationQueue = DispatchQueue(label: "com.infomaniak.drive.dynamic-island-service.registration")
 
     private enum DomainError: Error {
         case expiredTask
@@ -51,10 +53,15 @@ public class DynamicIslandService {
     }
 
     public func registerTask() {
-        guard registeredTask == nil else { return }
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
-            guard let self, let task = task as? BGContinuedProcessingTask else { return }
-            registeredTask = Task { self.handle(task: task) }
+        registrationQueue.sync {
+            guard !hasRegisteredLaunchHandler else { return }
+
+            BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
+                guard let self, let task = task as? BGContinuedProcessingTask else { return }
+                taskHandlingTask = Task { self.handle(task: task) }
+            }
+
+            hasRegisteredLaunchHandler = true
         }
     }
 
