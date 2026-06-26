@@ -25,9 +25,7 @@ import kDriveResources
 import OSLog
 
 @available(iOS 26.0, *)
-public class DynamicIslandService {
-    public static let shared = DynamicIslandService()
-
+public class DynamicIslandService: DynamicIslandServicable {
     @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploadable
@@ -48,7 +46,7 @@ public class DynamicIslandService {
         case expiredTask
     }
 
-    private init() {
+    init() {
         taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island"
     }
 
@@ -244,4 +242,14 @@ private final class ContinuationBox: @unchecked Sendable {
         continuation = nil
         c.resume(throwing: error)
     }
+}
+
+public class UnavailableDynamicIslandService: DynamicIslandServicable {
+    public func registerTask() {}
+
+    public func submitTask() {}
+
+    public func cancelTaskError(_ error: Error) {}
+
+    public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {}
 }
