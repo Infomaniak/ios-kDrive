@@ -25,22 +25,19 @@ final class DynamicIslandManager: ObservableObject {
     @Published var fractionCompleted: Double = 0
 
     @LazyInjectService var uploadService: UploadServiceable
-    @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     private var realmObservationToken: NotificationToken?
-    private(set) var totalUploadCount: Int
-    private(set) var progressUploading: Int
+    private(set) var totalUploadCount = 0
+    private(set) var progressUploading = 0
     private var progressChunkUploading = 0.0
     private var cancellables: Set<AnyCancellable> = []
+    private var observationCancellables: Set<AnyCancellable> = []
     private var overallProgress: Progress?
     private var lastUpdateTime: ContinuousClock.Instant?
     private var clock = ContinuousClock()
 
-    private var globalQueueActive = false
-    private var photoQueueActive = false
-    private var changeQueueObserver = false
-    private var isObserving = false
+    private let queueActivitySubject = CurrentValueSubject<(global: Bool, photo: Bool), Never>((false, false))
 
     private let scale = 100.0
 
@@ -48,35 +45,31 @@ final class DynamicIslandManager: ObservableObject {
     static let globalAssetPredicate = NSPredicate(format: "rawType != %@", argumentArray: [UploadFileType.phAsset.rawValue])
 
     init() {
-        totalUploadCount = 0
-        progressUploading = 0
-        refreshObservation()
+        setupQueueActivityObservation()
     }
 
-    private func refreshObservation() {
-        let shouldObserve = globalQueueActive || photoQueueActive
-        if !shouldObserve {
-            if isObserving {
-                stopObservation()
-                isObserving = false
+    private func setupQueueActivityObservation() {
+        queueActivitySubject
+            .removeDuplicates(by: { $0 == $1 })
+            .receive(on: RunLoop.main)
+            .sink { [weak self] global, photo in
+                guard let self else { return }
+                if global || photo {
+                    self.startObservation(global: global, photo: photo)
+                } else {
+                    self.stopObservation()
+                }
             }
-            return
-        }
-        if !isObserving || changeQueueObserver {
-            startObservation()
-            isObserving = true
-            changeQueueObserver = false
-        }
+            .store(in: &cancellables)
     }
 
-    private func startObservation() {
-        let optionalPredicate: NSPredicate? = uploadingFilesObserverOption()
+    private func startObservation(global: Bool, photo: Bool) {
+        let optionalPredicate: NSPredicate? = uploadingFilesObserverOption(global: global, photo: photo)
 
         realmObservationToken?.invalidate()
-        cancellables.removeAll()
+        observationCancellables.removeAll()
 
         totalUploadCount = uploadDataSource.getUploadingFiles(optionalPredicate: optionalPredicate).count
-
         lastUpdateTime = clock.now
 
         overallProgress = Progress(totalUnitCount: Int64(totalUploadCount))
@@ -87,7 +80,7 @@ final class DynamicIslandManager: ObservableObject {
                 self?.fractionCompleted = fractionCompleted
                 self?.keepAlive()
             }
-            .store(in: &cancellables)
+            .store(in: &observationCancellables)
 
         realmObservationToken = uploadDataSource.getUploadingFiles(optionalPredicate: optionalPredicate)
             .observe(on: .main) { [weak self] change in
@@ -114,32 +107,21 @@ final class DynamicIslandManager: ObservableObject {
     private func stopObservation() {
         realmObservationToken?.invalidate()
         realmObservationToken = nil
-        cancellables.removeAll()
+        observationCancellables.removeAll()
         overallProgress = nil
     }
 
-    private func uploadingFilesObserverOption() -> NSPredicate? {
-        switch (globalQueueActive, photoQueueActive) {
-        case (true, true):
-            return nil
-        case (true, false):
-            return DynamicIslandManager.globalAssetPredicate
-        case(false, true):
-            return DynamicIslandManager.photoAssetPredicate
-        default:
-            return nil
+    private func uploadingFilesObserverOption(global: Bool, photo: Bool) -> NSPredicate? {
+        switch (global, photo) {
+        case (true, true): return nil
+        case (true, false): return DynamicIslandManager.globalAssetPredicate
+        case (false, true): return DynamicIslandManager.photoAssetPredicate
+        default: return nil
         }
     }
 
     func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
-        if globalQueueActive != self.globalQueueActive || photoQueueActive != self.photoQueueActive {
-            changeQueueObserver = true
-        }
-
-        self.globalQueueActive = globalQueueActive
-        self.photoQueueActive = photoQueueActive
-
-        refreshObservation()
+        queueActivitySubject.send((global: globalQueueActive, photo: photoQueueActive))
     }
 
     func keepAlive() {
