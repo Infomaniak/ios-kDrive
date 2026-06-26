@@ -33,9 +33,7 @@ public protocol UploadServiceDataSourceable {
     func getUploadingFiles(userId: Int,
                            driveIds: [Int]) -> Results<UploadFile>
 
-    func getUploadingFiles(userId: Int,
-                           driveIds: [Int],
-                           optionalPredicate: NSPredicate?) -> Results<UploadFile>
+    func getUploadingFiles(optionalPredicate: NSPredicate?) -> Results<UploadFile>
 
     func getAllUploadingFilesFrozen() -> Results<UploadFile>
 
@@ -108,15 +106,11 @@ extension UploadService: UploadServiceDataSourceable {
         }
     }
 
-    public func getUploadingFiles(userId: Int,
-                                  driveIds: [Int],
-                                  optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
+    public func getUploadingFiles(optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
         let ownedByFileProvider = appContextService.context == .fileProviderExtension
         return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
             lazyCollection.filter(
-                "uploadDate = nil AND userId = %d AND driveId IN %@ AND ownedByFileProvider == %@",
-                userId,
-                driveIds,
+                "uploadDate = nil AND ownedByFileProvider == %@",
                 NSNumber(value: ownedByFileProvider)
             )
             .filter(optionalPredicate: optionalPredicate)
