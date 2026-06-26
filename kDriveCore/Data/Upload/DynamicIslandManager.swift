@@ -143,12 +143,12 @@ final class DynamicIslandManager: ObservableObject {
     }
 
     func keepAlive() {
-        guard let lastUpdateTime else { return }
-        let delay = clock.now - lastUpdateTime
-        if delay > .milliseconds(50) {
-            overallProgress?.totalUnitCount = Int64(Double(totalUploadCount) * scale)
-            overallProgress?.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
-        }
+        guard let lastUpdateTime,
+              let overallProgress,
+              (clock.now - lastUpdateTime) > .milliseconds(50)
+        else { return }
+        overallProgress.totalUnitCount = Int64(Double(totalUploadCount) * scale)
+        overallProgress.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
     }
 
     func reset() {
