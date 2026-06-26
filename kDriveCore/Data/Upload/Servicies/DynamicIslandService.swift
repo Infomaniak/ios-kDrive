@@ -56,8 +56,6 @@ public class DynamicIslandService {
             guard let self, let task = task as? BGContinuedProcessingTask else { return }
             registeredTask = Task { self.handle(task: task) }
         }
-
-        dynamicIslandManager.setup()
     }
 
     public func submitTask() {
