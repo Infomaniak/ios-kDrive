@@ -157,9 +157,9 @@ extension UploadQueue: ExpiringActivityDelegate {
             operation.backgroundActivityExpiring()
         }
 
+        let wasSuspended = operationQueue.isSuspended
         operationQueue.isSuspended = true
         forceSuspendQueue = true
-
-        externalDelegate?.operationQueueBecameSuspended()
+        if wasSuspended { externalDelegate?.operationQueueBecameSuspended() }
     }
 }
