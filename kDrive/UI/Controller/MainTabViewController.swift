@@ -29,10 +29,31 @@ import UIKit
 
 /// Enum to explicit tab names
 public enum MainTabBarIndex: Int {
-    case home = 0
-    case files = 1
-    case gallery = 3
-    case profile = 4
+    case home
+    case files
+    case gallery
+    case profile
+
+    public var rawValue: Int {
+        switch self {
+        case .home:
+            return 0
+        case .files:
+            return 1
+        case .gallery:
+            if #available(iOS 26.0, *) {
+                return 2
+            } else {
+                return 3
+            }
+        case .profile:
+            if #available(iOS 26.0, *) {
+                return 3
+            } else {
+                return 4
+            }
+        }
+    }
 }
 
 class RootSplitViewController: UISplitViewController, SidebarViewControllerDelegate {
