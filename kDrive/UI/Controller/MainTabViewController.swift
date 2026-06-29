@@ -337,6 +337,20 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.viewDidLayoutSubviews()
 
         didLayoutLegacyTabBarIfNeeded()
+        if let buttonAdd {
+            NSLayoutConstraint.activate([
+                buttonAdd.trailingAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -UIConstants.Padding.medium
+                ),
+                buttonAdd.bottomAnchor.constraint(
+                    equalTo: view.bottomAnchor,
+                    constant: -tabBar.frame.height - UIConstants.Padding.medium
+                ),
+                buttonAdd.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
+                buttonAdd.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
+            ])
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -452,19 +466,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         )
 
         view.addSubview(button)
-
-        NSLayoutConstraint.activate([
-            button.trailingAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                constant: -UIConstants.Padding.medium
-            ),
-            button.bottomAnchor.constraint(
-                equalTo: view.bottomAnchor,
-                constant: -tabBar.frame.height - UIConstants.Padding.medium
-            ),
-            button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
-            button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
-        ])
 
         buttonAdd = button
     }
