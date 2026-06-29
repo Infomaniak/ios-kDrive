@@ -59,7 +59,7 @@ public final class UploadQueueObserver {
             return
         }
 
-        if newCount == 0 {
+        if newCount == 0 && previousCount > 0 {
             delegate?.operationQueueBecameEmpty()
         } else if previousCount == 0 && newCount > 0 {
             delegate?.operationQueueNoLongerEmpty()
