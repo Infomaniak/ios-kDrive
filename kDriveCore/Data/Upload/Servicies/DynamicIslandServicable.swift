@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public protocol DynamicIslandServicable {
+public protocol DynamicIslandServiceable {
     func registerTask()
 
     func submitTask()

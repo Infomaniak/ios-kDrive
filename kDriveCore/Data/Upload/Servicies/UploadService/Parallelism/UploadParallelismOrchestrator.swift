@@ -24,7 +24,7 @@ public final class UploadParallelismOrchestrator {
     @LazyInjectService(customTypeIdentifier: UploadQueueID.global) private var globalUploadQueue: UploadQueueable
     @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable
     @LazyInjectService private var appContextService: AppContextServiceable
-    @LazyInjectService private var dynamicIslandService: DynamicIslandServicable
+    @LazyInjectService private var dynamicIslandService: DynamicIslandServiceable
 
     private let serialEventQueue = DispatchQueue(
         label: "com.infomaniak.drive.upload-parallelism-orchestrator.event",
