@@ -53,7 +53,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var downloadQueue: DownloadQueueable
     @LazyInjectService var tokenStore: TokenStore
     @LazyInjectService var notificationService: InfomaniakNotifications
-    @LazyInjectService var dynamicIslandService: DynamicIslandServicable
+    @LazyInjectService var dynamicIslandService: DynamicIslandServiceable
 
     // MARK: - UIApplicationDelegate
 
