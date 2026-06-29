@@ -60,8 +60,7 @@ final class SelectFolderViewController: FileListViewController {
         return button
     }()
 
-    // Here
-    let originDirectory: File?
+    private let originDirectory: File?
     let disabledDirectoriesSelection: [Int]
     let fileToMove: ProxyFile?
     weak var delegate: SelectFolderDelegate?
@@ -70,7 +69,7 @@ final class SelectFolderViewController: FileListViewController {
     init(
         viewModel: FileListViewModel,
         originDirectory: File?,
-        disabledDirectoriesSelection: [Int] = [Int](),
+        disabledDirectoriesSelection: [Int] = [],
         fileToMove: ProxyFile? = nil,
         delegate: SelectFolderDelegate? = nil,
         selectHandler: ((File, DriveFileManager) -> Void)? = nil
