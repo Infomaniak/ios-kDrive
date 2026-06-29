@@ -50,7 +50,7 @@ final class DynamicIslandManager: ObservableObject {
 
     private func setupQueueActivityObservation() {
         queueActivitySubject
-            .removeDuplicates(by: { $0 == $1 })
+            .removeDuplicates { $0 == $1 }
             .receive(on: RunLoop.main)
             .sink { [weak self] global, photo in
                 guard let self else { return }
