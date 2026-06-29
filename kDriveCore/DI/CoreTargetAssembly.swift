@@ -134,7 +134,7 @@ open class CoreTargetAssembly: TargetAssembly {
             Factory(type: UploadServiceable.self) { _, _ in
                 UploadService()
             },
-            Factory(type: DynamicIslandServicable.self) { _, _ in
+            Factory(type: DynamicIslandServiceable.self) { _, _ in
                 if #available(iOS 26.0, *) {
                     DynamicIslandService()
                 } else {
