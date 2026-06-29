@@ -52,6 +52,13 @@ class AppLockSettingsViewController: UIViewController {
         closeActionHandler?()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if #available(iOS 26.0, *) {
+            additionalSafeAreaInsets.top = 12
+        }
+    }
+
     @IBAction func buttonCloseClicked(_ sender: Any) {
         closeActionHandler?()
     }
