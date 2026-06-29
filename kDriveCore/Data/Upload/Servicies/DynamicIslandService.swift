@@ -25,7 +25,7 @@ import kDriveResources
 import OSLog
 
 @available(iOS 26.0, *)
-public class DynamicIslandService: DynamicIslandServicable {
+public class DynamicIslandService: DynamicIslandServiceable {
     @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploadable
@@ -244,7 +244,7 @@ private final class ContinuationBox: @unchecked Sendable {
     }
 }
 
-public class UnavailableDynamicIslandService: DynamicIslandServicable {
+public class UnavailableDynamicIslandService: DynamicIslandServiceable {
     public func registerTask() {}
 
     public func submitTask() {}
