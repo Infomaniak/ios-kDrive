@@ -132,6 +132,7 @@ extension UploadQueue: UploadQueueDelegate {
         expiringActivity = nil
         onEmptyHandler?()
         onEmptyHandler = nil
+        onSuspendedHandler = nil
         externalDelegate?.operationQueueBecameEmpty()
     }
 
@@ -148,6 +149,7 @@ extension UploadQueue: UploadQueueDelegate {
     public func operationQueueBecameSuspended() {
         onSuspendedHandler?()
         onSuspendedHandler = nil
+        onEmptyHandler = nil
         externalDelegate?.operationQueueBecameSuspended()
     }
 
