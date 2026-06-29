@@ -75,6 +75,11 @@ class ShareAndRightsViewController: UIViewController {
         setTitle()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        (tabBarController as? PlusButtonObserver)?.hideButtonAdd(true)
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if !initialLoading {

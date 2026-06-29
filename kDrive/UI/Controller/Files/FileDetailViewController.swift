@@ -164,6 +164,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
             loadFileInformation()
         }
         initialLoading = false
+        (tabBarController as? PlusButtonObserver)?.hideButtonAdd(true)
     }
 
     override func viewDidAppear(_ animated: Bool) {

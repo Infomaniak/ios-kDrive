@@ -348,6 +348,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         setupTabBar()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateCenterButton()
+    }
+
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
 
@@ -547,6 +552,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
               currentDirectory.id >= DriveFileManager.constants.rootID,
               !currentDirectory.isTrashed else {
             (tabBar as? MainTabBar)?.centerButton?.isEnabled = false
+            hideButtonAdd(true)
+            return
+        }
+        if #available(iOS 26.0, *),
+           selectedIndex == MainTabBarIndex.profile.rawValue {
             hideButtonAdd(true)
             return
         }
