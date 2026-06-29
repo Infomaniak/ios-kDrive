@@ -55,7 +55,13 @@ extension UploadQueue: UploadQueueable {
 
         Task {
             await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                guard isActive else {
+                    continuation.resume()
+                    return
+                }
+
                 self.onEmptyHandler = { continuation.resume() }
+                self.onSuspendedHandler = { continuation.resume() }
             }
             completionHandler()
         }
