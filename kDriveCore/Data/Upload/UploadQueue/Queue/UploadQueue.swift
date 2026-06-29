@@ -43,6 +43,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     private var expiringActivity: ExpiringActivity?
 
     var onEmptyHandler: (() -> Void)?
+    var onSuspendedHandler: (() -> Void)?
 
     let serialEventQueue: DispatchQueue = {
         @InjectService var appContextService: AppContextServiceable
@@ -145,6 +146,8 @@ extension UploadQueue: UploadQueueDelegate {
     }
 
     public func operationQueueBecameSuspended() {
+        onSuspendedHandler?()
+        onSuspendedHandler = nil
         externalDelegate?.operationQueueBecameSuspended()
     }
 
