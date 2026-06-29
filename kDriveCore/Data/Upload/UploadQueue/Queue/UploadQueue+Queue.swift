@@ -48,10 +48,14 @@ extension UploadQueue: UploadQueueable {
     }
 
     public func waitForCompletionIsActive(_ completionHandler: @escaping () -> Void) {
-        Task { [weak self] in
-            guard let self else { completionHandler(); return }
-            while self.isActive {
-                try? await Task.sleep(for: .milliseconds(200))
+        guard isActive else {
+            completionHandler()
+            return
+        }
+
+        Task {
+            await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+                self.onEmptyHandler = { continuation.resume() }
             }
             completionHandler()
         }
