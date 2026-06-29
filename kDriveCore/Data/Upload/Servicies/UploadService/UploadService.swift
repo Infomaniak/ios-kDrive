@@ -188,38 +188,21 @@ extension UploadService: UploadServiceable {
     }
 
     public func waitForCompletionForActiveQueues(_ completionHandler: @escaping () -> Void) {
-        DispatchQueue.global(qos: .default).async { [weak self] in
+        Task { [weak self] in
             guard let self else { completionHandler(); return }
 
-            var emptyLoops = 0
-            let requiredEmptyLoops = 3
-
-            while true {
-                let group = DispatchGroup()
-                var hasActiveQueue = false
-
+            await withTaskGroup(of: Void.self) { group in
                 for queue in self.allQueues {
                     guard queue.isActive else { continue }
-                    hasActiveQueue = true
-                    group.enter()
-                    queue.waitForCompletionIsActive {
-                        group.leave()
+                    group.addTask {
+                        await withCheckedContinuation { continuation in
+                            queue.waitForCompletionIsActive { continuation.resume() }
+                        }
                     }
                 }
-
-                if !hasActiveQueue {
-                    emptyLoops += 1
-                    if emptyLoops >= requiredEmptyLoops {
-                        completionHandler()
-                        return
-                    }
-                    Thread.sleep(forTimeInterval: 0.2)
-                    continue
-                }
-
-                group.wait()
-                emptyLoops = 0
             }
+
+            completionHandler()
         }
     }
 
