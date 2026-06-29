@@ -203,9 +203,9 @@ final class PhotoListViewController: FileListViewController {
         navbarAppearance.titleTextAttributes = titleTextAttributes
         navbarAppearance.largeTitleTextAttributes = largeTitleTextAttributes
 
-        navigationController?.navigationBar.standardAppearance = navbarAppearance
-        navigationController?.navigationBar.compactAppearance = navbarAppearance
-        navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
+        navigationItem.standardAppearance = navbarAppearance
+        navigationItem.compactAppearance = navbarAppearance
+        navigationItem.scrollEdgeAppearance = navbarAppearance
 
         currentNavigationController = navigationController
     }

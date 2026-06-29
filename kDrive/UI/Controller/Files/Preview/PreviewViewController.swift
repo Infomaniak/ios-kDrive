@@ -296,9 +296,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             statusBarView.isHidden = true
         }
 
-        navigationController?.navigationBar.standardAppearance = navbarAppearance
-        navigationController?.navigationBar.compactAppearance = navbarAppearance
-        navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
+        navigationItem.standardAppearance = navbarAppearance
+        navigationItem.compactAppearance = navbarAppearance
+        navigationItem.scrollEdgeAppearance = navbarAppearance
         navigationItem.title = nil
 
         navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
