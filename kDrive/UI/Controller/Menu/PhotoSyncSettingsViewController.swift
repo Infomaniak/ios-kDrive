@@ -154,7 +154,6 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        navigationController?.navigationBar.isTranslucent = false
 
         matomo.track(view: [MatomoUtils.View.menu.displayName, MatomoUtils.View.settings.displayName, "PhotoSync"])
     }
