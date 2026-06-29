@@ -60,6 +60,8 @@ final class SelectFolderViewController: FileListViewController {
         return button
     }()
 
+    // Here
+    let originDirectory: File?
     let disabledDirectoriesSelection: [Int]
     let fileToMove: ProxyFile?
     weak var delegate: SelectFolderDelegate?
@@ -67,11 +69,13 @@ final class SelectFolderViewController: FileListViewController {
 
     init(
         viewModel: FileListViewModel,
+        originDirectory: File?,
         disabledDirectoriesSelection: [Int] = [Int](),
         fileToMove: ProxyFile? = nil,
         delegate: SelectFolderDelegate? = nil,
         selectHandler: ((File, DriveFileManager) -> Void)? = nil
     ) {
+        self.originDirectory = originDirectory
         self.disabledDirectoriesSelection = disabledDirectoriesSelection
         self.fileToMove = fileToMove
         self.delegate = delegate
@@ -135,6 +139,7 @@ final class SelectFolderViewController: FileListViewController {
             viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: startDirectory),
             selectMode: true,
             isCompactView: isCompactView,
+            originDirectory: startDirectory,
             disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
             fileToMove: fileToMove,
             locationDelegate: delegate,
@@ -150,6 +155,7 @@ final class SelectFolderViewController: FileListViewController {
                   !selectDirectory.isRoot {
                 let selectFolderViewController = SelectFolderViewController(
                     viewModel: SelectFolderViewModel(driveFileManager: driveFileManager, currentDirectory: selectDirectory),
+                    originDirectory: startDirectory,
                     disabledDirectoriesSelection: disabledDirectoriesIdsSelection,
                     fileToMove: fileToMove,
                     delegate: delegate,
@@ -220,7 +226,8 @@ final class SelectFolderViewController: FileListViewController {
         let file = displayedFiles[indexPath.row]
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! FileCollectionViewCell
 
-        cell.setEnabled(file.isDirectory && file.id != fileToMove?.id && !disabledDirectoriesSelection.contains(file.id))
+        cell.setEnabled(file.isDirectory && file.id != fileToMove?.id &&
+            (!disabledDirectoriesSelection.contains(file.id) || file.id == originDirectory?.id))
         cell.moreButton.isHidden = true
         return cell
     }
@@ -239,6 +246,7 @@ final class SelectFolderViewController: FileListViewController {
                 driveFileManager: viewModel.driveFileManager,
                 currentDirectory: selectedFile
             ),
+            originDirectory: originDirectory,
             disabledDirectoriesSelection: disabledDirectoriesSelection,
             fileToMove: fileToMove,
             delegate: delegate,
