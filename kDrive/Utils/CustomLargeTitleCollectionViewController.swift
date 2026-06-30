@@ -50,10 +50,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        // Appearance updates are suppressed while a push/pop transition is in flight (see
-        // updateNavigationBarAppearance) and the navigation bar appearance is shared across the navigation
-        // stack. Force a refresh once the transition has settled so we never leave a stale/outdated bar on
-        // screen. transitionCoordinator is nil here, so applying the appearance is safe.
+        // Refresh once the transition has settled, since updates are skipped during it.
         lastAppliedTitleAlpha = nil
         updateNavigationBarAppearance()
     }
@@ -85,10 +82,8 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
     }
 
     private func updateNavigationBarAppearance() {
-        // Reassigning the navigation bar appearance while a push/pop transition is animating makes iOS 26's
-        // Liquid Glass navigation bar rebuild its transition context, which re-initializes the parallax
-        // dimming view and crashes with "View was already initialized". Never mutate the bar mid-transition
-        // (this also covers the interactive back-swipe, which drives scrollViewDidScroll while transitioning).
+        // Mutating the nav bar appearance mid push/pop re-inits the parallax dimming view on iOS 26
+        // (Liquid Glass) and crashes: "View was already initialized". Skip while transitioning.
         guard navigationController?.transitionCoordinator == nil else { return }
 
         if let title = navigationItem.title {
@@ -102,8 +97,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
         let titleStyle = TextStyle.header3
         let alpha = min(1, max(0, (scrollOffset + headerViewHeight) / navigationBarHeight))
 
-        // Avoid redundant appearance reassignments (e.g. while the alpha stays clamped at 0 or 1 during a
-        // scroll), which needlessly churn the navigation bar transition machinery for no visual change.
+        // Skip redundant reassignments when the alpha hasn't changed.
         if lastAppliedTitleAlpha != alpha {
             lastAppliedTitleAlpha = alpha
             let titleColor = titleStyle.color.withAlphaComponent(alpha)
