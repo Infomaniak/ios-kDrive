@@ -856,7 +856,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         let menuNavigationController = UINavigationController(rootViewController: menuViewController)
         menuViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
-            systemItem: .stop,
+            systemItem: .cancel,
             primaryAction: UIAction { _ in
                 menuNavigationController.dismiss(animated: true)
             }

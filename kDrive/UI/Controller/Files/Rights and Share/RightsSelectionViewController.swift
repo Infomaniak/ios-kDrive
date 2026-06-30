@@ -133,7 +133,7 @@ class RightsSelectionViewController: UIViewController {
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .stop,
+            barButtonSystemItem: .cancel,
             target: self,
             action: #selector(cancelButtonPressed)
         )

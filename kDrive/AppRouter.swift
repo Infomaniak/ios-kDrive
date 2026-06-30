@@ -600,7 +600,7 @@ public struct AppRouter: AppNavigable {
 
             let menuNavigationController = UINavigationController(rootViewController: menuViewController)
             menuViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
-                systemItem: .stop,
+                systemItem: .cancel,
                 primaryAction: UIAction { _ in
                     menuNavigationController.dismiss(animated: true)
                 }
