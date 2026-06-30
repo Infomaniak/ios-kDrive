@@ -82,10 +82,6 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
     }
 
     private func updateNavigationBarAppearance() {
-        // Mutating the nav bar appearance mid push/pop re-inits the parallax dimming view on iOS 26
-        // (Liquid Glass) and crashes: "View was already initialized". Skip while transitioning.
-        guard navigationController?.transitionCoordinator == nil else { return }
-
         if let title = navigationItem.title {
             originalTitle = title
         }
@@ -117,6 +113,10 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
     }
 
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Mutating the nav bar appearance mid push/pop re-inits the parallax dimming view on iOS 26
+        // (Liquid Glass) and crashes: "View was already initialized". Skip scroll-driven updates while
+        // a push/pop (or back-swipe) is animating; viewDidAppear refreshes once it settles.
+        guard navigationController?.transitionCoordinator == nil else { return }
         updateNavigationBarAppearance()
     }
 }
