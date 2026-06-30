@@ -102,7 +102,8 @@ extension FileActionsFloatingPanelViewController {
                     case .folderColor:
                         return frozenFile.capabilities.canColor
                             && !driveFileManager.drive.isFreePack
-                            && driveFileManager.drive.pack.isAnyKSuiteProOffer
+                            && (driveFileManager.drive.pack.isAnyKSuiteProOffer
+                                || driveFileManager.drive.pack.drivePackId == .myKSuitePlus)
                     case .seeFolder:
                         return !normalFolderHierarchy && (frozenFile.parent != nil || frozenFile.parentId != 0)
                     case .offline:
