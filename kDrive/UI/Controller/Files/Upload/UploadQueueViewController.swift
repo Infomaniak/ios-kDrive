@@ -157,6 +157,7 @@ final class UploadQueueViewController: UIViewController {
 
         observedFilesSubject
             .throttle(for: .seconds(1), scheduler: observationQueue, latest: true)
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] throttledFiles in
                 self?.reloadCollectionView(with: throttledFiles)
             }
@@ -167,18 +168,16 @@ final class UploadQueueViewController: UIViewController {
         let newSections = buildSections(files: frozenFiles)
         let changeSet = StagedChangeset(source: sections, target: newSections)
 
-        Task { @MainActor in
-            tableView.reload(using: changeSet,
-                             with: UITableView.RowAnimation.automatic,
-                             interrupt: { $0.changeCount > Endpoint.itemsPerPage },
-                             setData: { newValues in
-                                 frozenUploadingFiles = frozenFiles
-                                 sections = newValues
-                             })
+        tableView.reload(using: changeSet,
+                         with: UITableView.RowAnimation.automatic,
+                         interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                         setData: { newValues in
+                             frozenUploadingFiles = frozenFiles
+                             sections = newValues
+                         })
 
-            if frozenFiles.isEmpty {
-                navigationController?.popViewController(animated: true)
-            }
+        if frozenFiles.isEmpty {
+            navigationController?.popViewController(animated: true)
         }
     }
 
