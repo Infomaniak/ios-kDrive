@@ -28,7 +28,7 @@ import kDriveResources
 import UIKit
 
 /// Enum to explicit tab names
-public enum MainTabBarIndex: Int {
+public enum MainTabBarIndex {
     case home
     case files
     case gallery
@@ -345,11 +345,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
         delegate = self
         photoPickerDelegate.viewController = self
-        setupTabBar()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        setupTabBar()
         updateCenterButton()
     }
 
@@ -363,20 +363,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.viewDidLayoutSubviews()
 
         didLayoutLegacyTabBarIfNeeded()
-        if let buttonAdd {
-            NSLayoutConstraint.activate([
-                buttonAdd.trailingAnchor.constraint(
-                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                    constant: -UIConstants.Padding.medium
-                ),
-                buttonAdd.bottomAnchor.constraint(
-                    equalTo: view.bottomAnchor,
-                    constant: -tabBar.frame.height - UIConstants.Padding.medium
-                ),
-                buttonAdd.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
-                buttonAdd.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
-            ])
-        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -478,6 +464,8 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     @available(iOS 26.0, *)
     private func setupButtonAdd() {
+        guard buttonAdd == nil else { return }
+
         var config = UIButton.Configuration.prominentGlass()
         config.image = KDriveAsset.plus.image
 
@@ -492,6 +480,34 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         )
 
         view.addSubview(button)
+
+        if parent is UISplitViewController {
+            NSLayoutConstraint.activate([
+                button.trailingAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -UIConstants.Padding.standard
+                ),
+                button.bottomAnchor.constraint(
+                    equalTo: view.bottomAnchor,
+                    constant: -tabBar.frame.height - UIConstants.Padding.medium
+                ),
+                button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
+                button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                button.trailingAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -UIConstants.Padding.standard
+                ),
+                button.bottomAnchor.constraint(
+                    equalTo: tabBar.topAnchor,
+                    constant: -UIConstants.Padding.medium
+                ),
+                button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
+                button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
+            ])
+        }
 
         buttonAdd = button
     }
