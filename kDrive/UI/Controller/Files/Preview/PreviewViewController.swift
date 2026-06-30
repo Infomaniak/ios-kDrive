@@ -312,6 +312,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             updateFileForCurrentIndex()
 
             collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
+            if #available(iOS 26.0, *) {
+                collectionView.topEdgeEffect.style = .soft
+            }
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
