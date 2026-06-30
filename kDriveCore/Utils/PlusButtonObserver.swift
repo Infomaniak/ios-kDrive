@@ -20,4 +20,5 @@ import Foundation
 
 public protocol PlusButtonObserver {
     func updateCenterButton()
+    func hideButtonAdd(_ hide: Bool)
 }

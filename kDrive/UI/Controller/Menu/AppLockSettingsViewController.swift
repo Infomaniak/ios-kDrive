@@ -47,6 +47,17 @@ class AppLockSettingsViewController: UIViewController {
                             MatomoUtils.View.security.displayName, "AppLock"])
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if #available(iOS 26.0, *) {
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                additionalSafeAreaInsets.top = 12
+            } else {
+                additionalSafeAreaInsets.top = 16
+            }
+        }
+    }
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         closeActionHandler?()

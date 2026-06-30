@@ -34,7 +34,7 @@ final class FileListBarButton: UIBarButtonItem {
             activityView.startAnimating()
             self.init(customView: activityView)
         case .cancel:
-            self.init(barButtonSystemItem: .stop, target: target, action: action)
+            self.init(barButtonSystemItem: .cancel, target: target, action: action)
             accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         case .search:
             self.init(barButtonSystemItem: .search, target: target, action: action)

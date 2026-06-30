@@ -28,11 +28,32 @@ import kDriveResources
 import UIKit
 
 /// Enum to explicit tab names
-public enum MainTabBarIndex: Int {
-    case home = 0
-    case files = 1
-    case gallery = 3
-    case profile = 4
+public enum MainTabBarIndex {
+    case home
+    case files
+    case gallery
+    case profile
+
+    public var rawValue: Int {
+        switch self {
+        case .home:
+            return 0
+        case .files:
+            return 1
+        case .gallery:
+            if #available(iOS 26.0, *) {
+                return 2
+            } else {
+                return 3
+            }
+        case .profile:
+            if #available(iOS 26.0, *) {
+                return 3
+            } else {
+                return 4
+            }
+        }
+    }
 }
 
 class RootSplitViewController: UISplitViewController, SidebarViewControllerDelegate {
@@ -324,7 +345,12 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
         delegate = self
         photoPickerDelegate.viewController = self
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         setupTabBar()
+        updateCenterButton()
     }
 
     override func viewWillLayoutSubviews() {
@@ -438,6 +464,8 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     @available(iOS 26.0, *)
     private func setupButtonAdd() {
+        guard buttonAdd == nil else { return }
+
         var config = UIButton.Configuration.prominentGlass()
         config.image = KDriveAsset.plus.image
 
@@ -453,18 +481,33 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
         view.addSubview(button)
 
-        NSLayoutConstraint.activate([
-            button.trailingAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                constant: -UIConstants.Padding.medium
-            ),
-            button.bottomAnchor.constraint(
-                equalTo: view.bottomAnchor,
-                constant: -tabBar.frame.height - UIConstants.Padding.medium
-            ),
-            button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
-            button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
-        ])
+        if parent is UISplitViewController {
+            NSLayoutConstraint.activate([
+                button.trailingAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -UIConstants.Padding.standard
+                ),
+                button.bottomAnchor.constraint(
+                    equalTo: view.bottomAnchor,
+                    constant: -tabBar.frame.height - UIConstants.Padding.medium
+                ),
+                button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
+                button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                button.trailingAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                    constant: -UIConstants.Padding.standard
+                ),
+                button.bottomAnchor.constraint(
+                    equalTo: tabBar.topAnchor,
+                    constant: -UIConstants.Padding.medium
+                ),
+                button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
+                button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
+            ])
+        }
 
         buttonAdd = button
     }
@@ -525,6 +568,11 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
               currentDirectory.id >= DriveFileManager.constants.rootID,
               !currentDirectory.isTrashed else {
             (tabBar as? MainTabBar)?.centerButton?.isEnabled = false
+            hideButtonAdd(true)
+            return
+        }
+        if #available(iOS 26.0, *),
+           selectedIndex == MainTabBarIndex.profile.rawValue {
             hideButtonAdd(true)
             return
         }

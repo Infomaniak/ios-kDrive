@@ -168,6 +168,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
+        if #available(iOS 26.0, *) {
+            collectionView.topEdgeEffect.style = .soft
+        }
 
         tryLoadingFilesOrDisplayError()
     }

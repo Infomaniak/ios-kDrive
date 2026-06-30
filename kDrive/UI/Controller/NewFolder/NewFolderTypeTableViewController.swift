@@ -40,7 +40,7 @@ class NewFolderTypeTableViewController: UITableViewController {
         tableView.separatorColor = .clear
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .stop,
+            barButtonSystemItem: .cancel,
             target: self,
             action: #selector(closeButtonPressed)
         )

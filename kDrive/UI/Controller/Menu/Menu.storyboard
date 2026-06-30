@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Let-jx-exJ" customClass="IKLargeButton" customModule="kDriveCore">
-                                <rect key="frame" x="24" y="778" width="366" height="60"/>
+                                <rect key="frame" x="24" y="744" width="366" height="60"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="60" id="jCK-Db-hTf"/>
                                 </constraints>
@@ -131,13 +131,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="748" verticalCompressionResistancePriority="748" image="switch_user" translatesAutoresizingMaskIntoConstraints="NO" id="rBS-RF-o0M">
-                                <rect key="frame" x="16" y="80" width="382" height="170"/>
+                                <rect key="frame" x="16" y="128" width="382" height="170"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="cT4-aO-YYD"/>
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Changer d'utilisateur" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Orz-m0-bIR" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="32" y="298" width="350" height="24"/>
+                                <rect key="frame" x="32" y="346" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -147,7 +147,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6cc-pK-yXN">
-                                <rect key="frame" x="32" y="338" width="46" height="2"/>
+                                <rect key="frame" x="32" y="386" width="46" height="2"/>
                                 <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="2" id="0s8-rW-ZlD"/>
@@ -155,7 +155,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ahf-mt-ZbI" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="32" y="356" width="350" height="81.5"/>
+                                <rect key="frame" x="32" y="404" width="350" height="81.5"/>
                                 <string key="text">Consulter les notifications de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez. </string>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="primaryTextColor"/>
@@ -166,7 +166,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="L3K-dK-zvk">
-                                <rect key="frame" x="0.0" y="453.5" width="414" height="442.5"/>
+                                <rect key="frame" x="0.0" y="501.5" width="414" height="394.5"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="180" id="Bqe-NE-eMP"/>
@@ -258,17 +258,17 @@
             <objects>
                 <viewController storyboardIdentifier="AppLockSettingsViewController" id="c0t-5c-eBh" customClass="AppLockSettingsViewController" customModule="kDrive" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="9eh-5H-O68">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="886"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="848"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="748" verticalCompressionResistancePriority="748" image="face_id_edit" translatesAutoresizingMaskIntoConstraints="NO" id="Wii-vB-zWo">
-                                <rect key="frame" x="16" y="100" width="382" height="170"/>
+                                <rect key="frame" x="16" y="148" width="382" height="170"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="Lbz-PD-KrR"/>
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="32" y="318" width="350" height="24"/>
+                                <rect key="frame" x="32" y="366" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -278,7 +278,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M26-GT-YZh">
-                                <rect key="frame" x="32" y="358" width="46" height="2"/>
+                                <rect key="frame" x="32" y="406" width="46" height="2"/>
                                 <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="46" id="EjK-HW-r8M"/>
@@ -286,7 +286,7 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protégez l'accès à votre application Infomaniak en activant le système de verouillage par reconnaissance faciale Face ID. " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJI-rA-NpO" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="32" y="376" width="350" height="81.5"/>
+                                <rect key="frame" x="32" y="424" width="350" height="81.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -296,10 +296,10 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RCf-P4-yUy" customClass="ShadowView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="32" y="489.5" width="350" height="80"/>
+                                <rect key="frame" x="32" y="537.5" width="350" height="80"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activer le verouillage Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="xyY-1J-PGU" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                        <rect key="frame" x="16" y="30.5" width="261" height="19.5"/>
+                                        <rect key="frame" x="16" y="30.5" width="249" height="19.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
@@ -309,7 +309,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="751" verticalHuggingPriority="751" horizontalCompressionResistancePriority="752" verticalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tl5-GF-GQi">
-                                        <rect key="frame" x="285" y="24.5" width="51" height="31"/>
+                                        <rect key="frame" x="273" y="26" width="63" height="28"/>
                                         <color key="onTintColor" name="infomaniakColor"/>
                                         <connections>
                                             <action selector="didChangeSwitchValue:" destination="c0t-5c-eBh" eventType="valueChanged" id="QLV-uj-7Ig"/>
@@ -332,10 +332,10 @@
                                 </userDefinedRuntimeAttributes>
                             </view>
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="31R-ua-Vke">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="56"/>
+                                <rect key="frame" x="0.0" y="48" width="414" height="54"/>
                                 <items>
                                     <navigationItem id="Yoo-8c-fB5">
-                                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="yGV-IZ-Ryx">
+                                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="yGV-IZ-Ryx">
                                             <connections>
                                                 <action selector="buttonCloseClicked:" destination="c0t-5c-eBh" id="sXl-If-8kb"/>
                                             </connections>
@@ -364,7 +364,7 @@
                             <constraint firstItem="31R-ua-Vke" firstAttribute="leading" secondItem="9eh-5H-O68" secondAttribute="leading" id="iJl-6h-SWA"/>
                             <constraint firstItem="M26-GT-YZh" firstAttribute="top" secondItem="0Ow-gT-FNm" secondAttribute="bottom" constant="16" id="qRS-4T-kKO"/>
                             <constraint firstItem="RCf-P4-yUy" firstAttribute="leading" secondItem="cUS-U3-4VN" secondAttribute="leading" constant="32" id="uhP-lK-OIm"/>
-                            <constraint firstItem="31R-ua-Vke" firstAttribute="top" secondItem="9eh-5H-O68" secondAttribute="top" id="wGL-ir-TRJ"/>
+                            <constraint firstItem="31R-ua-Vke" firstAttribute="top" secondItem="cUS-U3-4VN" secondAttribute="top" id="wGL-ir-TRJ"/>
                             <constraint firstAttribute="trailing" secondItem="31R-ua-Vke" secondAttribute="trailing" id="yKC-UC-Ln5"/>
                         </constraints>
                     </view>
@@ -388,10 +388,10 @@
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="lightTextColor">
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>

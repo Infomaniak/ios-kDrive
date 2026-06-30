@@ -296,9 +296,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             statusBarView.isHidden = true
         }
 
-        navigationController?.navigationBar.standardAppearance = navbarAppearance
-        navigationController?.navigationBar.compactAppearance = navbarAppearance
-        navigationController?.navigationBar.scrollEdgeAppearance = navbarAppearance
+        navigationItem.standardAppearance = navbarAppearance
+        navigationItem.compactAppearance = navbarAppearance
+        navigationItem.scrollEdgeAppearance = navbarAppearance
         navigationItem.title = nil
 
         navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
@@ -312,11 +312,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             updateFileForCurrentIndex()
 
             collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
+            if #available(iOS 26.0, *) {
+                collectionView.topEdgeEffect.style = .soft
+            }
             updateNavigationBar()
             downloadFileIfNeeded(at: currentIndex)
             initialLoading = false
         }
-        (tabBarController as? MainTabViewController)?.hideButtonAdd(true)
+        (tabBarController as? PlusButtonObserver)?.hideButtonAdd(true)
     }
 
     private func makeImageWithCircle(
@@ -377,7 +380,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         UIApplication.shared.endReceivingRemoteControlEvents()
         resignFirstResponder()
-        (tabBarController as? MainTabViewController)?.hideButtonAdd(false)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
