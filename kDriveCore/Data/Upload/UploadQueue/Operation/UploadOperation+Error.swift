@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
@@ -73,7 +74,14 @@ extension UploadOperation {
 
         var errorHandled = false
         try? transactionWithFile { file in
-            let nsError = error as NSError
+            let baseError: Error
+            if let afError = error as? AFError, let underlyingError = afError.underlyingError {
+                baseError = underlyingError
+            } else {
+                baseError = error
+            }
+
+            let nsError = baseError as NSError
             Log.uploadOperation("NSURLError:\(error) ufid:\(self.uploadFileId)")
 
             if nsError.domain == NSURLErrorDomain {
@@ -83,8 +91,16 @@ extension UploadOperation {
                     errorHandled = true
                     // _not_ overriding file.error
                     return
+                case NSURLErrorNetworkConnectionLost:
+                    file.progress = nil
+                    file.error = .uploadNotTerminated.wrapping(baseError)
+                    Task {
+                        @InjectService var uploadService: UploadServiceable
+                        uploadService.retry(self.uploadFileId)
+                    }
+                    errorHandled = true
                 default:
-                    // Any other networking error, including NSURLErrorNetworkConnectionLost,
+                    // Any other networking error,
                     // on any call other than chunks gets a user facing network error.
                     file.error = .networkError.wrapping(error)
                     errorHandled = true
