@@ -56,6 +56,23 @@ public struct FreeSpaceService {
         return requiredSpace
     }
 
+    public func checkEnoughAvailableSpaceForDownload(estimatedSize: Int?) -> Bool {
+        guard let estimatedSize else { return true }
+        let freeSpaceForDownload: Int64
+        do {
+            freeSpaceForDownload = try freeSpace(url: URL(fileURLWithPath: NSHomeDirectory()))
+        } catch {
+            Log.uploadOperation("unable to read available space \(error)", level: .error)
+            return true
+        }
+
+        let safetyMargin: Int64 = 50 * 1024 * 1024 // 50 Mo
+        guard freeSpaceForDownload > (Int64(estimatedSize) + safetyMargin) else {
+            return false
+        }
+        return true
+    }
+
     public var hasEnoughAvailableSpaceForChunkUpload: Bool {
         let freeSpaceInTemporaryDirectory: Int64
         do {
