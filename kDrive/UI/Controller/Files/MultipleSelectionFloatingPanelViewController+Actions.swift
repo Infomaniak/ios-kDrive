@@ -114,6 +114,13 @@ extension MultipleSelectionFloatingPanelViewController {
     }
 
     private func downloadActionMediaOrSingleFile(group: DispatchGroup, at indexPath: IndexPath) {
+        let totalSize = files.compactMap(\.size).reduce(0, +)
+        @LazyInjectService var freeSpaceService: FreeSpaceService
+        guard freeSpaceService.checkEnoughAvailableSpaceForDownload(estimatedSize: totalSize) else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
+            return
+        }
+
         for file in files {
             guard !file.isDownloaded else {
                 FileActionsHelper.save(file: file, from: self, showSuccessSnackBar: false)

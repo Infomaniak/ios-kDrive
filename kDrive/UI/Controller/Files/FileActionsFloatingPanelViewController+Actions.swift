@@ -390,6 +390,12 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func downloadAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+        @LazyInjectService var freeSpaceService: FreeSpaceService
+        guard freeSpaceService.checkEnoughAvailableSpaceForDownload(estimatedSize: frozenFile.size) else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
+            return
+        }
+
         if frozenFile.isMostRecentDownloaded {
             FileActionsHelper.save(file: frozenFile, from: self)
         } else if let operation = downloadQueue.operation(for: frozenFile.id) {
