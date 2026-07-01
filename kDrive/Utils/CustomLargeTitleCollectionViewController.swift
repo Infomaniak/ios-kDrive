@@ -32,6 +32,8 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
 
     private var originalTitle: String?
 
+    private var lastAppliedTitleAlpha: CGFloat?
+
     var isCompactView: Bool {
         guard let rootViewController = appRouter.rootViewController else { return false }
         return rootViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
@@ -43,6 +45,14 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.largeTitleDisplayMode = .never
         navigationItem.hideBackButtonText()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        // Refresh once the transition has settled, since updates are skipped during it.
+        lastAppliedTitleAlpha = nil
+        updateNavigationBarAppearance()
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {
@@ -82,22 +92,31 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
 
         let titleStyle = TextStyle.header3
         let alpha = min(1, max(0, (scrollOffset + headerViewHeight) / navigationBarHeight))
-        let titleColor = titleStyle.color.withAlphaComponent(alpha)
 
-        let newStandardNavigationBarAppearance = navigationBar.standardAppearance
-        let newCompactNavigationBarAppearance = navigationBar.compactAppearance
+        // Skip redundant reassignments when the alpha hasn't changed.
+        if lastAppliedTitleAlpha != alpha {
+            lastAppliedTitleAlpha = alpha
+            let titleColor = titleStyle.color.withAlphaComponent(alpha)
 
-        newStandardNavigationBarAppearance.titleTextAttributes[.foregroundColor] = titleColor
-        newCompactNavigationBarAppearance?.titleTextAttributes[.foregroundColor] = titleColor
+            let newStandardNavigationBarAppearance = navigationBar.standardAppearance
+            let newCompactNavigationBarAppearance = navigationBar.compactAppearance
 
-        navigationBar.standardAppearance = newStandardNavigationBarAppearance
-        navigationBar.compactAppearance = newCompactNavigationBarAppearance
+            newStandardNavigationBarAppearance.titleTextAttributes[.foregroundColor] = titleColor
+            newCompactNavigationBarAppearance?.titleTextAttributes[.foregroundColor] = titleColor
+
+            navigationBar.standardAppearance = newStandardNavigationBarAppearance
+            navigationBar.compactAppearance = newCompactNavigationBarAppearance
+        }
 
         guard let originalTitle else { return }
         navigationItem.title = alpha < 0.2 ? nil : originalTitle
     }
 
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Mutating the nav bar appearance mid push/pop re-inits the parallax dimming view on iOS 26
+        // (Liquid Glass) and crashes: "View was already initialized". Skip scroll-driven updates while
+        // a push/pop (or back-swipe) is animating; viewDidAppear refreshes once it settles.
+        guard navigationController?.transitionCoordinator == nil else { return }
         updateNavigationBarAppearance()
     }
 }
