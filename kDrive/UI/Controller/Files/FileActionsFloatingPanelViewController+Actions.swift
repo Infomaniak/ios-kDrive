@@ -102,7 +102,8 @@ extension FileActionsFloatingPanelViewController {
                     case .folderColor:
                         return frozenFile.capabilities.canColor
                             && !driveFileManager.drive.isFreePack
-                            && driveFileManager.drive.pack.isAnyKSuiteProOffer
+                            && (driveFileManager.drive.pack.isAnyKSuiteProOffer
+                                || driveFileManager.drive.pack.drivePackId == .myKSuitePlus)
                     case .seeFolder:
                         return !normalFolderHierarchy && (frozenFile.parent != nil || frozenFile.parentId != 0)
                     case .offline:
@@ -389,6 +390,12 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func downloadAction(_ action: FloatingPanelAction, at indexPath: IndexPath) {
+        @LazyInjectService var freeSpaceService: FreeSpaceService
+        guard freeSpaceService.checkEnoughAvailableSpaceForDownload(estimatedSize: frozenFile.size) else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
+            return
+        }
+
         if frozenFile.isMostRecentDownloaded {
             FileActionsHelper.save(file: frozenFile, from: self)
         } else if let operation = downloadQueue.operation(for: frozenFile.id) {
