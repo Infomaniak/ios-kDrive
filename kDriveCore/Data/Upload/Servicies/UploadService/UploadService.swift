@@ -187,6 +187,25 @@ extension UploadService: UploadServiceable {
         }
     }
 
+    public func waitForCompletionForActiveQueues(_ completionHandler: @escaping () -> Void) {
+        Task { [weak self] in
+            guard let self else { completionHandler(); return }
+
+            await withTaskGroup(of: Void.self) { group in
+                for queue in self.allQueues {
+                    guard queue.isActive else { continue }
+                    group.addTask {
+                        await withCheckedContinuation { continuation in
+                            queue.waitForCompletionIsActive { continuation.resume() }
+                        }
+                    }
+                }
+            }
+
+            completionHandler()
+        }
+    }
+
     public func retry(_ uploadFileId: String) {
         Log.uploadQueue("retry ufid:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {

@@ -39,6 +39,12 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     public var fileUploadedCount = 0
     public var fileUploadFailedCount = 0
+
+    private var expiringActivity: ExpiringActivity?
+
+    var onEmptyHandler: (() -> Void)?
+    var onSuspendedHandler: (() -> Void)?
+
     let serialEventQueue: DispatchQueue = {
         @InjectService var appContextService: AppContextServiceable
         let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
@@ -54,6 +60,7 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         [.taskRescheduled, .taskCancelled, .uploadOverDataRestrictedError, .uploadNotTerminatedError, .uploadNotTerminated]
 
     weak var delegate: UploadQueueDelegate?
+    private weak var externalDelegate: UploadQueueDelegate?
 
     public var name: String {
         "kDrive base upload queue"
@@ -104,10 +111,11 @@ public class UploadQueue: ParallelismHeuristicDelegate {
             return
         }
 
-        self.delegate = delegate
+        externalDelegate = delegate
+        self.delegate = self
 
-        queueObserver = UploadQueueObserver(uploadQueue: self, delegate: delegate)
-        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, delegate: delegate)
+        queueObserver = UploadQueueObserver(uploadQueue: self, delegate: self)
+        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, delegate: self)
     }
 
     // MARK: - ParallelismHeuristicDelegate
@@ -115,5 +123,52 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     public func parallelismShouldChange(value: Int) {
         Log.uploadQueue("\(self) new parallelism: \(value)", level: .info)
         operationQueue.maxConcurrentOperationCount = value
+    }
+}
+
+extension UploadQueue: UploadQueueDelegate {
+    public func operationQueueBecameEmpty() {
+        expiringActivity?.endAll()
+        expiringActivity = nil
+        onEmptyHandler?()
+        onEmptyHandler = nil
+        onSuspendedHandler = nil
+        externalDelegate?.operationQueueBecameEmpty()
+    }
+
+    public func operationQueueNoLongerEmpty() {
+        guard expiringActivity == nil else {
+            externalDelegate?.operationQueueNoLongerEmpty()
+            return
+        }
+        expiringActivity = ExpiringActivity(id: "UploadQueue-\(name)", delegate: self)
+        expiringActivity?.start()
+        externalDelegate?.operationQueueNoLongerEmpty()
+    }
+
+    public func operationQueueBecameSuspended() {
+        onSuspendedHandler?()
+        onSuspendedHandler = nil
+        onEmptyHandler = nil
+        externalDelegate?.operationQueueBecameSuspended()
+    }
+
+    public func operationQueueNoLongerSuspended() {
+        externalDelegate?.operationQueueNoLongerSuspended()
+    }
+}
+
+extension UploadQueue: ExpiringActivityDelegate {
+    public func backgroundActivityExpiring() {
+        let operations = operationQueue.operations.compactMap { $0 as? UploadOperation }
+
+        for operation in operations {
+            operation.backgroundActivityExpiring()
+        }
+
+        let wasSuspended = operationQueue.isSuspended
+        operationQueue.isSuspended = true
+        forceSuspendQueue = true
+        if wasSuspended { externalDelegate?.operationQueueBecameSuspended() }
     }
 }
