@@ -42,9 +42,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
     private var expiringActivity: ExpiringActivity?
 
-    var onEmptyHandler: (() -> Void)?
-    var onSuspendedHandler: (() -> Void)?
-
     let serialEventQueue: DispatchQueue = {
         @InjectService var appContextService: AppContextServiceable
         let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
@@ -130,9 +127,6 @@ extension UploadQueue: UploadQueueDelegate {
     public func operationQueueBecameEmpty() {
         expiringActivity?.endAll()
         expiringActivity = nil
-        onEmptyHandler?()
-        onEmptyHandler = nil
-        onSuspendedHandler = nil
         externalDelegate?.operationQueueBecameEmpty()
     }
 
@@ -147,9 +141,6 @@ extension UploadQueue: UploadQueueDelegate {
     }
 
     public func operationQueueBecameSuspended() {
-        onSuspendedHandler?()
-        onSuspendedHandler = nil
-        onEmptyHandler = nil
         externalDelegate?.operationQueueBecameSuspended()
     }
 
