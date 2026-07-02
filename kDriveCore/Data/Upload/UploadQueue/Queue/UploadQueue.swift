@@ -114,8 +114,8 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         externalDelegate = delegate
         self.delegate = self
 
-        queueObserver = UploadQueueObserver(uploadQueue: self, delegate: self)
-        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, delegate: self)
+        queueObserver = UploadQueueObserver(uploadQueue: self, delegate: delegate)
+        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, delegate: delegate)
     }
 
     // MARK: - ParallelismHeuristicDelegate
