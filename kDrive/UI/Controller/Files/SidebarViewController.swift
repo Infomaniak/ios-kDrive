@@ -665,8 +665,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             }
 
             let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
-            section.contentInsets.top = -UIConstants.Padding.small
-            section.contentInsets.bottom = UIConstants.Padding.standard
+            section.contentInsetsReference = .safeArea
+            section.contentInsets = .init(
+                top: 0,
+                leading: UIConstants.Padding.mediumSmall,
+                bottom: UIConstants.Padding.standard,
+                trailing: UIConstants.Padding.mediumSmall
+            )
 
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                     heightDimension: .estimated(8))
@@ -692,6 +697,13 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     layoutSize: headerSize,
                     elementKind: ReusableHeaderView.kind.rawValue,
                     alignment: .top
+                )
+
+                sectionHeaderItem.contentInsets = .init(
+                    top: UIConstants.Padding.small,
+                    leading: -UIConstants.Padding.mediumSmall,
+                    bottom: UIConstants.Padding.standard,
+                    trailing: -UIConstants.Padding.mediumSmall
                 )
 
                 section.boundarySupplementaryItems = [sectionHeaderItem]
