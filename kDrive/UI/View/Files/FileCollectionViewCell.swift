@@ -296,7 +296,6 @@ class FileCollectionViewCell: UICollectionViewCell {
             separatorView.bottomAnchor.constraint(equalTo: contentInsetView.bottomAnchor),
             separatorView.heightAnchor.constraint(equalToConstant: 1)
         ])
-        separatorView.isHidden = true
     }
 
     override func prepareForReuse() {
@@ -318,47 +317,8 @@ class FileCollectionViewCell: UICollectionViewCell {
         separatorView.isHidden = true
     }
 
-    func initStyle(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
+    func initStyle(inFolderSelectMode: Bool) {
         separatorView.isHidden = !inFolderSelectMode
-
-        addConstraint(isFirst: isFirst, isLast: isLast, inFolderSelectMode: inFolderSelectMode)
-        contentInsetView.clipsToBounds = true
-    }
-
-    func addConstraint(isFirst: Bool, isLast: Bool, inFolderSelectMode: Bool) {
-        guard inFolderSelectMode else { return }
-
-        trailingConstraint.constant = UIConstants.Padding.mediumSmall
-        leadingConstraint.constant = UIConstants.Padding.mediumSmall
-        logoWidthConstraint.constant = 26
-        logoHeightConstraint.constant = 26
-        logoLeadingConstraint.constant = 16
-        if isFirst {
-            topConstraint.constant = 8
-        }
-
-        applyGroupedCorners(isFirst: isFirst, isLast: isLast)
-    }
-
-    private func applyGroupedCorners(isFirst: Bool, isLast: Bool) {
-        let radius = CGFloat(UIConstants.cornerRadius)
-
-        if isFirst && isLast {
-            contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-                radius: radius
-            )
-        } else if isFirst {
-            contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: radius)
-        } else if isLast {
-            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMinXMaxYCorner], radius: radius)
-        } else {
-            contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-                radius: 0
-            )
-        }
-        contentInsetView.addShadow()
     }
 
     func setEnabled(_ enabled: Bool) {

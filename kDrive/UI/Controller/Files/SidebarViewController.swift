@@ -573,7 +573,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                         selectionMode: false
                     )
                     cell.configure(with: viewModel)
-                    cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast, inFolderSelectMode: true)
+                    cell.initStyle(inFolderSelectMode: true)
                     cell.setEnabled(true)
                     cell.moreButton.isHidden = true
 
@@ -587,7 +587,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     }
 
                     rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-                    rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
                     return rootMenuCell
                 }
             }
