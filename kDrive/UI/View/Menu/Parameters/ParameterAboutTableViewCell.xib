@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -20,17 +20,17 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aqX-hy-10J">
-                        <rect key="frame" x="24" y="8" width="274" height="84"/>
+                        <rect key="frame" x="0.0" y="0.0" width="322" height="100"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BSA-Kc-s9g">
-                                <rect key="frame" x="0.0" y="83" width="274" height="1"/>
+                                <rect key="frame" x="0.0" y="99" width="322" height="1"/>
                                 <color key="backgroundColor" name="separatorColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="APk-Ag-B28"/>
                                 </constraints>
                             </view>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron" translatesAutoresizingMaskIntoConstraints="NO" id="kZU-CD-ye1">
-                                <rect key="frame" x="236" y="35.5" width="13" height="13"/>
+                                <rect key="frame" x="284" y="43.5" width="13" height="13"/>
                                 <color key="tintColor" name="secondaryTextColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="13" id="1gU-FT-MPL"/>
@@ -38,7 +38,7 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="20" y="20" width="208" height="43"/>
+                                <rect key="frame" x="20" y="20" width="256" height="59"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -63,10 +63,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="CCZ-mR-gNe"/>
-                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" constant="8" id="b3L-GJ-LSF"/>
-                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="eo3-Nh-xzM"/>
-                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" constant="24" id="vUN-8O-pqH"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="CCZ-mR-gNe"/>
+                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" id="b3L-GJ-LSF"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="eo3-Nh-xzM"/>
+                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" id="vUN-8O-pqH"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
