@@ -312,6 +312,14 @@ extension MenuViewController {
         }
     }
 
+    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return nil
+    }
+
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 0.0
+    }
+
     // MARK: - Cell Button Action
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {
