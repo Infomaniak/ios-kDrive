@@ -64,14 +64,12 @@ class SecurityTableViewController: BaseGroupedTableViewController {
         switch tableContent[indexPath.row] {
         case .appLock:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.appSecurityTitle
             cell.valueLabel.text = UserDefaults.shared.isAppLockEnabled ? KDriveResourcesStrings.Localizable
                 .allActivated : KDriveResourcesStrings.Localizable.allDisabled
             return cell
         case .fileProviderExtension:
             let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: tableContent.count == 1, isLast: true)
             cell.valueSwitch.isOn = UserDefaults.shared.isFileProviderExtensionEnabled
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionTitle
             cell.detailsLabel.text = KDriveResourcesStrings.Localizable.fileProviderExtensionDescription

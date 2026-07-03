@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DesignSystem
 import InfomaniakConcurrency
 import InfomaniakCore
 import InfomaniakCoreCommonUI
@@ -160,19 +161,16 @@ final class StorageTableViewController: UITableViewController {
         let section = sections[indexPath.section]
         switch section {
         case .header:
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.totalStorageUsedTitle
             cell.valueLabel.text = Constants.formatFileSize(Int64(totalSize), countStyle: .file)
             cell.selectionStyle = .none
         case .directories:
             let directory = directories[indexPath.row]
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == directories.count - 1)
             cell.titleLabel.text = directory.directoryTitle
             cell.valueLabel.text = directory.formattedSize
             cell.selectionStyle = indexPath.row == 0 ? .none : .default
         case .files:
             let file = files[indexPath.row]
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == files.count - 1)
             cell.titleLabel.text = file.name
             cell.valueLabel.text = file.formattedSize
             cell.selectionStyle = .default

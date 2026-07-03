@@ -79,33 +79,27 @@ class AboutTableViewController: BaseGroupedTableViewController {
         switch rows[indexPath.row] {
         case .privacy:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutPrivacyTitle
             return cell
         case .dataPrivacy:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.settingsOptionDataManagement
             return cell
         case .sourceCode:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutSourceCodeTitle
             return cell
         case .libraries:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutLibrariesTitle
             return cell
         case .license:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutLicenseTitle
             cell.detailLabel.text = KDriveResourcesStrings.Localizable.aboutLicenseDescription
             return cell
         case .version:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: isFirst, isLast: isLast)
             cell.accessoryImageView.isHidden = true
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.aboutAppVersionTitle
             cell.detailLabel.text = Constants.appVersionLabel()
