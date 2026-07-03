@@ -37,10 +37,11 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     private var offlineSync: Bool
     weak var delegate: WifiSyncSettingsDelegate?
 
-    init(selectedMode: SyncMode, offlineSync: Bool = false) {
+    init(selectedMode: SyncMode, offlineSync: Bool = false,
+         style: UITableView.Style = .grouped) {
         self.selectedMode = selectedMode
         self.offlineSync = offlineSync
-        super.init()
+        super.init(style: style)
     }
 
     override func viewDidLoad() {
@@ -67,17 +68,24 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return tableContent.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableContent.count
+        return 1
+    }
+
+    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        return nil
+    }
+
+    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 0.0
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: ParameterSyncTableViewCell.self, for: indexPath)
-        cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-        let currentMode = tableContent[indexPath.row]
+        let currentMode = tableContent[indexPath.section]
         cell.syncTitleLabel.text = currentMode.title
         cell.syncDetailLabel.text = currentMode.selectionTitle(offlineSync: offlineSync)
         if currentMode == selectedMode {
@@ -87,7 +95,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let mode = tableContent[indexPath.row]
+        let mode = tableContent[indexPath.section]
         if !offlineSync {
             delegate?.didSelectSyncMode(mode)
             switch mode {

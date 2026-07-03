@@ -317,7 +317,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             navigationController?.pushViewController(SecurityTableViewController(style: .insetGrouped), animated: true)
         case .offlineSync:
             navigationController?.pushViewController(
-                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode, offlineSync: true),
+                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode, offlineSync: true,
+                                               style: .insetGrouped),
                 animated: true
             )
         case .about:
