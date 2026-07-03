@@ -252,14 +252,23 @@ extension PhotoSyncSettingsViewController {
         case .syncSwitch:
             let saveDetailsHeaderText = KDriveResourcesStrings.Localizable.syncSettingsDescription
             // We recycle the header view, it's easier to add \n than setting dynamic constraints
-            let headerView = HomeTitleView.instantiate(title: "\n" + saveDetailsHeaderText + "\n")
+            let headerView = HomeTitleView.instantiate(
+                title: saveDetailsHeaderText,
+                insets: NSDirectionalEdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0)
+            )
             headerView.titleLabel.font = .systemFont(ofSize: 14)
             headerView.titleLabel.numberOfLines = 0
             return headerView
         case .syncLocation:
-            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.syncSettingsSaveOn)
+            return HomeTitleView.instantiate(
+                title: KDriveResourcesStrings.Localizable.syncSettingsSaveOn,
+                insets: NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 0)
+            )
         case .syncSettings:
-            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.settingsTitle)
+            return HomeTitleView.instantiate(
+                title: KDriveResourcesStrings.Localizable.settingsTitle,
+                insets: NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 0)
+            )
         case .syncDenied:
             return nil
         }
@@ -288,7 +297,7 @@ extension PhotoSyncSettingsViewController {
             switch switchSyncRows[indexPath.row] {
             case .syncSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == switchSyncRows.count - 1)
+//                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == switchSyncRows.count - 1)
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonActiveSync
                 cell.valueSwitch.setOn(photoSyncEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -320,12 +329,10 @@ extension PhotoSyncSettingsViewController {
             switch locationRows[indexPath.row] {
             case .driveSelection:
                 let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == locationRows.count - 1)
                 cell.configure(with: driveFileManager?.drive)
                 return cell
             case .folderSelection:
                 let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == locationRows.count - 1)
                 cell.configure(with: selectedDirectory, drive: driveFileManager!.drive)
 
                 return cell
@@ -334,7 +341,6 @@ extension PhotoSyncSettingsViewController {
             switch settingsRows[indexPath.row] {
             case .importPicturesSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncPicture
                 cell.valueSwitch.setOn(liveNewSyncSettings.syncPicturesEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -344,7 +350,6 @@ extension PhotoSyncSettingsViewController {
                 return cell
             case .importVideosSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncVideo
                 cell.valueSwitch.setOn(liveNewSyncSettings.syncVideosEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -354,7 +359,6 @@ extension PhotoSyncSettingsViewController {
                 return cell
             case .importScreenshotsSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSyncScreenshot
                 cell.valueSwitch.setOn(liveNewSyncSettings.syncScreenshotsEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -364,7 +368,6 @@ extension PhotoSyncSettingsViewController {
                 return cell
             case .createDatedSubFolders:
                 let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.createDatedSubFoldersTitle
                 cell.detailsLabel.text = KDriveResourcesStrings.Localizable.createDatedSubFoldersDescription
                 cell.valueSwitch.setOn(liveNewSyncSettings.createDatedSubFolders, animated: true)
@@ -375,7 +378,6 @@ extension PhotoSyncSettingsViewController {
                 return cell
             case .deleteAssetsAfterImport:
                 let cell = tableView.dequeueReusableCell(type: ParameterWifiTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.deletePicturesTitle
                 cell.detailsLabel.text = KDriveResourcesStrings.Localizable.deletePicturesDescription
                 cell.valueSwitch.setOn(liveNewSyncSettings.deleteAssetsAfterImport, animated: true)
@@ -386,7 +388,6 @@ extension PhotoSyncSettingsViewController {
                 return cell
             case .syncMode:
                 let cell = tableView.dequeueReusableCell(type: PhotoSyncSettingsTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonSaveDate
                 cell.valueLabel.text = liveNewSyncSettings.syncMode.title.lowercased()
                 cell.delegate = self
@@ -399,12 +400,10 @@ extension PhotoSyncSettingsViewController {
                 return cell
             case .photoFormat:
                 let cell = tableView.dequeueReusableCell(type: PhotoFormatTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.configure(with: liveNewSyncSettings.photoFormat)
                 return cell
             case .wifiSync:
                 let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == settingsRows.count - 1)
                 cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiPicturesTitle
                 cell.detailLabel.text = liveNewSyncSettings.wifiSync.title
                 return cell

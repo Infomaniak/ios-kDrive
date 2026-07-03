@@ -306,22 +306,22 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         let row = visibleRows[indexPath.row]
         switch row {
         case .storage:
-            navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
+            navigationController?.pushViewController(StorageTableViewController(style: .insetGrouped), animated: true)
         case .photos:
-            navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
+            navigationController?.pushViewController(PhotoSyncSettingsViewController(style: .insetGrouped), animated: true)
         case .theme:
-            navigationController?.pushViewController(SelectThemeTableViewController(), animated: true)
+            navigationController?.pushViewController(SelectThemeTableViewController(style: .insetGrouped), animated: true)
         case .notifications:
-            navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
+            navigationController?.pushViewController(NotificationsSettingsTableViewController(style: .insetGrouped), animated: true)
         case .security:
-            navigationController?.pushViewController(SecurityTableViewController(), animated: true)
+            navigationController?.pushViewController(SecurityTableViewController(style: .insetGrouped), animated: true)
         case .offlineSync:
             navigationController?.pushViewController(
                 WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode, offlineSync: true),
                 animated: true
             )
         case .about:
-            navigationController?.pushViewController(AboutTableViewController(), animated: true)
+            navigationController?.pushViewController(AboutTableViewController(style: .insetGrouped), animated: true)
         case .joinBeta:
             UIApplication.shared.open(URLConstants.testFlight.url)
             matomo.track(eventWithCategory: .settings, name: "joinBetaProgram")

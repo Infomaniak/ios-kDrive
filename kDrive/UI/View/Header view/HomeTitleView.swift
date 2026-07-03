@@ -20,10 +20,20 @@ import UIKit
 
 class HomeTitleView: UIView {
     @IBOutlet var titleLabel: UILabel!
+    @IBOutlet var leadingConstraint: NSLayoutConstraint!
+    @IBOutlet var trailingConstraint: NSLayoutConstraint!
+    @IBOutlet var bottomConstraint: NSLayoutConstraint!
+    @IBOutlet var topConstraint: NSLayoutConstraint!
 
-    class func instantiate(title: String) -> HomeTitleView {
+    class func instantiate(title: String, insets: NSDirectionalEdgeInsets = .zero) -> HomeTitleView {
         let view = Bundle.main.loadNibNamed("HomeTitleView", owner: nil, options: nil)![0] as! HomeTitleView
         view.titleLabel.text = title
+
+        view.leadingConstraint.constant = insets.leading
+        view.trailingConstraint.constant = insets.trailing
+        view.topConstraint.constant = insets.top
+        view.bottomConstraint.constant = insets.bottom
+
         return view
     }
 }
