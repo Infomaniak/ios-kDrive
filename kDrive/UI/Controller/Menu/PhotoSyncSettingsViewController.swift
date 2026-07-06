@@ -297,7 +297,6 @@ extension PhotoSyncSettingsViewController {
             switch switchSyncRows[indexPath.row] {
             case .syncSwitch:
                 let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-//                cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == switchSyncRows.count - 1)
                 cell.valueLabel.text = KDriveResourcesStrings.Localizable.syncSettingsButtonActiveSync
                 cell.valueSwitch.setOn(photoSyncEnabled, animated: true)
                 cell.switchHandler = { [weak self] sender in
@@ -464,7 +463,8 @@ extension PhotoSyncSettingsViewController {
                 selectPhotoFormatViewController.delegate = self
                 navigationController?.pushViewController(selectPhotoFormatViewController, animated: true)
             case .wifiSync:
-                let wifiSyncSettingsViewController = WifiSyncSettingsViewController(selectedMode: liveNewSyncSettings.wifiSync)
+                let wifiSyncSettingsViewController = WifiSyncSettingsViewController(selectedMode: liveNewSyncSettings.wifiSync,
+                                                                                    style: .insetGrouped)
                 wifiSyncSettingsViewController.delegate = self
                 navigationController?.pushViewController(wifiSyncSettingsViewController, animated: true)
             default:
