@@ -35,6 +35,7 @@ class SelectThemeTableViewController: BaseGroupedTableViewController {
 
         tableView.register(cellView: SelectionTableViewCell.self)
         tableView.allowsMultipleSelection = false
+        tableView.sectionFooterHeight = 0
 
         selectedTheme = UserDefaults.shared.theme
     }

@@ -47,6 +47,7 @@ class SwitchUserViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: UserAccountTableViewCell.self)
+        tableView.sectionFooterHeight = 0
 
         // Try to update other accounts infos
         Task {
