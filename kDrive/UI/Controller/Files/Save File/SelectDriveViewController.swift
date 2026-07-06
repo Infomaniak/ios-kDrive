@@ -57,6 +57,8 @@ class SelectDriveViewController: UIViewController {
         tableView.register(cellView: DriveSwitchTableViewCell.self)
         tableView.register(cellView: UserAccountTableViewCell.self)
 
+        tableView.sectionFooterHeight = 0
+
         var selectedUser: UserProfile?
         Task {
             if let selectedUserId = selectedDrive?.userId {
@@ -114,6 +116,10 @@ extension SelectDriveViewController: UITableViewDataSource {
         }
     }
 
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return nil
+    }
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch sections[indexPath.section] {
         case .noAccount:
@@ -121,7 +127,6 @@ extension SelectDriveViewController: UITableViewDataSource {
             return cell
         case .selectAccount:
             let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             if let currentUser {
                 cell.titleLabel.text = currentUser.displayName
                 cell.userEmailLabel.text = currentUser.email
@@ -133,7 +138,6 @@ extension SelectDriveViewController: UITableViewDataSource {
         case .selectDrive:
             let cell = tableView.dequeueReusableCell(type: DriveSwitchTableViewCell.self, for: indexPath)
             let drive = driveList[indexPath.row]
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.style = .selectDrive
             cell.configureWith(drive: drive)
             cell.selectDriveImageView.image = nil
