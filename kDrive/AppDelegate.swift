@@ -121,7 +121,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UNUserNotificationCenter.current().delegate = self
         application.registerForRemoteNotifications()
 
-        dynamicIslandService.registerTask()
+        Task {
+            await dynamicIslandService.registerTask()
+        }
 
         return true
     }

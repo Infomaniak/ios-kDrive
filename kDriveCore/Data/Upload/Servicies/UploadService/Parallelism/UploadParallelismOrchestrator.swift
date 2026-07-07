@@ -93,10 +93,12 @@ public final class UploadParallelismOrchestrator {
             let globalQueueActiveForDynamicIsland = self.globalUploadQueue.isActive
             let photoQueueActiveForDynamicIsland = false
 
-            self.dynamicIslandService.updateQueueActivity(
-                globalQueueActive: globalQueueActiveForDynamicIsland,
-                photoQueueActive: photoQueueActiveForDynamicIsland
-            )
+            Task {
+                await self.dynamicIslandService.updateQueueActivity(
+                    globalQueueActive: globalQueueActiveForDynamicIsland,
+                    photoQueueActive: photoQueueActiveForDynamicIsland
+                )
+            }
 
             let currentAvailableParallelism = self.availableParallelism
             Log.uploadQueue("Current total available upload parallelism :\(currentAvailableParallelism)")
