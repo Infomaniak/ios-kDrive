@@ -29,9 +29,10 @@ public class DynamicIslandService: DynamicIslandServiceable {
     @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploadable
-
+    @LazyInjectService private var taskScheduler: BGTaskScheduler
 
     private let taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island"
+
     private static let logger = Logger(category: "DynamicIslandService")
 
     private var currentTask: BGContinuedProcessingTask?
@@ -50,7 +51,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
         registrationQueue.sync {
             guard !hasRegisteredLaunchHandler else { return }
 
-            BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
+            taskScheduler.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
                 guard let self, let task = task as? BGContinuedProcessingTask else { return }
                 taskHandlingTask = Task { self.handle(task: task) }
             }
@@ -73,7 +74,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
         request.strategy = .queue
 
         do {
-            try BGTaskScheduler.shared.submit(request)
+            try taskScheduler.submit(request)
             Self.logger.info("Dynamic Island task submitted")
         } catch {
             Self.logger.error("Error submitting task : \(error)")
