@@ -21,7 +21,7 @@ import Foundation
 import InfomaniakDI
 import RealmSwift
 
-final class DynamicIslandManager: ObservableObject {
+final class DynamicIslandUploadProgressTracker: ObservableObject {
     @Published var fractionCompleted: Double = 0
 
     @LazyInjectService var uploadService: UploadServiceable
@@ -114,8 +114,8 @@ final class DynamicIslandManager: ObservableObject {
     private func uploadingFilesObserverOption(global: Bool, photo: Bool) -> NSPredicate? {
         switch (global, photo) {
         case (true, true): return nil
-        case (true, false): return DynamicIslandManager.globalAssetPredicate
-        case (false, true): return DynamicIslandManager.photoAssetPredicate
+        case (true, false): return Self.globalAssetPredicate
+        case (false, true): return Self.photoAssetPredicate
         default: return nil
         }
     }
