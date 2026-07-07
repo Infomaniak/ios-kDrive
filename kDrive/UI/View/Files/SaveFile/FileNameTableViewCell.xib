@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -29,8 +29,8 @@
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
                     <constraint firstAttribute="bottom" secondItem="rNo-Bw-yGS" secondAttribute="bottom" constant="8" id="AvH-ee-YZb"/>
-                    <constraint firstItem="rNo-Bw-yGS" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="MGh-qO-rSX"/>
-                    <constraint firstAttribute="trailing" secondItem="rNo-Bw-yGS" secondAttribute="trailing" constant="24" id="Rf1-pS-evG"/>
+                    <constraint firstItem="rNo-Bw-yGS" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="MGh-qO-rSX"/>
+                    <constraint firstAttribute="trailing" secondItem="rNo-Bw-yGS" secondAttribute="trailing" id="Rf1-pS-evG"/>
                     <constraint firstItem="rNo-Bw-yGS" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="lNt-QQ-EzJ"/>
                 </constraints>
             </tableViewCellContentView>
