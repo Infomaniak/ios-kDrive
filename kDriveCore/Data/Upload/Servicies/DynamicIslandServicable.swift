@@ -16,12 +16,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public protocol DynamicIslandServiceable {
-    func registerTask()
+public protocol DynamicIslandServiceable: Sendable {
+    func registerTask() async
 
-    func submitTask()
+    func submitTask() async
 
-    func cancelTaskError(_ error: Error)
+    func cancelTaskError(_ error: Error) async
 
-    func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool)
+    func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) async
 }
