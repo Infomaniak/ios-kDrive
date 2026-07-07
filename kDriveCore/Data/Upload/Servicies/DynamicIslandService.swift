@@ -26,7 +26,7 @@ import OSLog
 
 @available(iOS 26.0, *)
 public actor DynamicIslandService: DynamicIslandServiceable {
-    @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
+    @LazyInjectService private var uploadProgressTracker: DynamicIslandUploadProgressTracker
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploadable
     @LazyInjectService private var taskScheduler: BGTaskScheduler
@@ -92,7 +92,7 @@ public actor DynamicIslandService: DynamicIslandServiceable {
     }
 
     public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
-        dynamicIslandManager.updateQueueActivity(
+        uploadProgressTracker.updateQueueActivity(
             globalQueueActive: globalQueueActive,
             photoQueueActive: photoQueueActive
         )
@@ -122,7 +122,7 @@ public actor DynamicIslandService: DynamicIslandServiceable {
             cancellable?.cancel()
             let isExpiredTask = (self.lastError as? DomainError) == .expiredTask
             if !isExpiredTask {
-                dynamicIslandManager.reset()
+                uploadProgressTracker.reset()
             }
             currentTask = nil
             uploadContinuation = nil
@@ -131,7 +131,7 @@ public actor DynamicIslandService: DynamicIslandServiceable {
 
         task.progress.totalUnitCount = 100
 
-        cancellable = dynamicIslandManager.$fractionCompleted.sink { progress in
+        cancellable = uploadProgressTracker.$fractionCompleted.sink { progress in
             task.progress.completedUnitCount = Int64(progress * 100)
             task.updateTitle(
                 KDriveResourcesStrings.Localizable.uploadInProgressTitle,
@@ -148,8 +148,8 @@ public actor DynamicIslandService: DynamicIslandServiceable {
                 }
             }
 
-            let totalCount = dynamicIslandManager.totalUploadCount
-            let uploadedCount = min(dynamicIslandManager.progressUploading + 1, totalCount)
+            let totalCount = uploadProgressTracker.totalUploadCount
+            let uploadedCount = min(uploadProgressTracker.progressUploading + 1, totalCount)
 
             let status = ReachabilityListener.instance.currentStatus
             let shouldBeSuspended = status != .wifi

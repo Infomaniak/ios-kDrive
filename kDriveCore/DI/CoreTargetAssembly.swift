@@ -141,8 +141,8 @@ open class CoreTargetAssembly: TargetAssembly {
                     UnavailableDynamicIslandService()
                 }
             },
-            Factory(type: DynamicIslandManager.self) { _, _ in
-                DynamicIslandManager()
+            Factory(type: DynamicIslandUploadProgressTracker.self) { _, _ in
+                DynamicIslandUploadProgressTracker()
             },
             Factory(type: UploadServiceDataSourceable.self) { _, resolver in
                 try resolver.resolve(type: UploadServiceable.self,
