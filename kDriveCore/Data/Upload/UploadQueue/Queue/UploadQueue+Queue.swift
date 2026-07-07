@@ -209,7 +209,7 @@ extension UploadQueue: UploadQueueable {
         operation.completionBlock = { [weak self] in
             guard let self else { return }
             Log.uploadQueue("\(self) operation.completionBlock for operation:\(operation) ufid:\(uploadFileId)")
-            keyedUploadOperations.removeObject(forKey: uploadFileId)
+            keyedUploadOperations.removeObject(forKey: uploadFileId, matching: operation)
             if let error = operation.result.uploadFile?.error, Self.silentErrors.contains(error) {
                 Log.uploadQueue("\(self) skipping task")
                 return

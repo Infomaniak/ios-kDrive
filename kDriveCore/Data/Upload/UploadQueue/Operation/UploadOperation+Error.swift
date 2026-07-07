@@ -36,8 +36,12 @@ extension UploadOperation {
         do {
             try await task()
         } catch {
+            let shouldRetryAfterEnd = isNetworkConnectionLost(error)
             defer {
                 end()
+                if shouldRetryAfterEnd {
+                    retryAfterEnd()
+                }
             }
 
             // error tracking
@@ -74,12 +78,7 @@ extension UploadOperation {
 
         var errorHandled = false
         try? transactionWithFile { file in
-            let baseError: Error
-            if let afError = error as? AFError, let underlyingError = afError.underlyingError {
-                baseError = underlyingError
-            } else {
-                baseError = error
-            }
+            let baseError = self.baseError(from: error)
 
             let nsError = baseError as NSError
             Log.uploadOperation("NSURLError:\(error) ufid:\(self.uploadFileId)")
@@ -94,10 +93,6 @@ extension UploadOperation {
                 case NSURLErrorNetworkConnectionLost:
                     file.progress = nil
                     file.error = .uploadNotTerminated.wrapping(baseError)
-                    Task {
-                        @InjectService var uploadService: UploadServiceable
-                        uploadService.retry(self.uploadFileId)
-                    }
                     errorHandled = true
                 default:
                     // Any other networking error,
@@ -278,6 +273,27 @@ extension UploadOperation {
     }
 
     // MARK: - Private
+
+    private func baseError(from error: Error) -> Error {
+        if let afError = error as? AFError, let underlyingError = afError.underlyingError {
+            return underlyingError
+        }
+
+        return error
+    }
+
+    private func isNetworkConnectionLost(_ error: Error) -> Bool {
+        let nsError = baseError(from: error) as NSError
+        return nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorNetworkConnectionLost
+    }
+
+    private func retryAfterEnd() {
+        let retryUploadFileId = uploadFileId
+        Task {
+            @InjectService var uploadService: UploadServiceable
+            uploadService.retry(retryUploadFileId)
+        }
+    }
 
     /// Common tracking upload error with detailed state of the upload operation
     private func sentryTrackingUploadError(_ error: Error) {

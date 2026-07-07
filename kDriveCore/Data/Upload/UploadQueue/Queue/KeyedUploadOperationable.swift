@@ -47,6 +47,16 @@ final class KeyedUploadOperationable {
         }
     }
 
+    func removeObject(forKey key: String, matching object: UploadOperationable) {
+        queue.sync {
+            guard self.operationsInQueue[key] === object else {
+                return
+            }
+
+            self.operationsInQueue.removeValue(forKey: key)
+        }
+    }
+
     var isEmpty: Bool {
         var empty = true
         queue.sync {

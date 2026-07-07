@@ -201,34 +201,40 @@ extension UploadService: UploadServiceable {
                 return
             }
 
-            let specificQueue = self.uploadQueue(for: frozenFile)
-            specificQueue.cancel(uploadFileId: uploadFileId)
+            self.uploadQueue(for: frozenFile).cancel(uploadFileId: uploadFileId)
 
             Task { [weak self] in
                 guard let self else { return }
                 let exists = await self.fileExistsOnServer(for: frozenFile)
 
-                try? self.uploadsDatabase.writeTransaction { writableRealm in
-                    guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                          !file.isInvalidated else {
-                        Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
-                        return
+                self.serialTransactionQueue.async { [weak self] in
+                    guard let self else { return }
+
+                    var fileToRetry: UploadFile?
+                    try? self.uploadsDatabase.writeTransaction { writableRealm in
+                        guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
+                              !file.isInvalidated else {
+                            Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
+                            return
+                        }
+
+                        if exists {
+                            Log.uploadQueue("retry ufid:\(uploadFileId) file exists on server, marking as uploaded")
+                            file.uploadDate = Date()
+                            file.progress = nil
+                            file.error = nil
+                            file.cleanSourceFileIfNeeded()
+                        } else {
+                            file.clearErrorsForRetry()
+                            fileToRetry = file.freeze()
+                        }
                     }
 
-                    if exists {
-                        Log.uploadQueue("retry ufid:\(uploadFileId) file exists on server, marking as uploaded")
-                        file.uploadDate = Date()
-                        file.progress = nil
-                        file.error = nil
-                        file.cleanSourceFileIfNeeded()
-                    } else {
-                        file.clearErrorsForRetry()
+                    if let fileToRetry {
+                        let uploadQueue = self.uploadQueue(for: fileToRetry)
+                        uploadQueue.addToQueue(uploadFile: fileToRetry, itemIdentifier: nil)
+                        self.resumeAllOperations()
                     }
-                }
-
-                if !exists {
-                    specificQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
-                    self.resumeAllOperations()
                 }
             }
         }
@@ -504,8 +510,22 @@ extension UploadService: UploadServiceable {
 
         do {
             let parentProxyFile = ProxyFile(driveId: uploadFile.driveId, id: uploadFile.parentDirectoryId)
-            let response = try await driveFileManager.apiFetcher.files(in: parentProxyFile, sortType: .newer)
-            return response.validApiResponse.data.files.contains { $0.name == uploadFile.name }
+            var cursor: FileCursor?
+
+            repeat {
+                let response = try await driveFileManager.apiFetcher.files(
+                    in: parentProxyFile,
+                    advancedListingCursor: cursor,
+                    sortType: .newer
+                )
+                if response.validApiResponse.data.files.contains(where: { $0.name == uploadFile.name }) {
+                    return true
+                }
+
+                cursor = response.validApiResponse.hasMore ? response.validApiResponse.cursor : nil
+            } while cursor != nil
+
+            return false
         } catch {
             Log.uploadQueue("Error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
             return false
