@@ -295,42 +295,6 @@
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RCf-P4-yUy" customClass="ShadowView" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="32" y="537.5" width="350" height="80"/>
-                                <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activer le verouillage Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="xyY-1J-PGU" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                        <rect key="frame" x="16" y="30.5" width="249" height="19.5"/>
-                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                        <color key="textColor" name="titleColor"/>
-                                        <nil key="highlightedColor"/>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonSettingsLockApp"/>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle1"/>
-                                        </userDefinedRuntimeAttributes>
-                                    </label>
-                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="751" verticalHuggingPriority="751" horizontalCompressionResistancePriority="752" verticalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tl5-GF-GQi">
-                                        <rect key="frame" x="273" y="26" width="63" height="28"/>
-                                        <color key="onTintColor" name="infomaniakColor"/>
-                                        <connections>
-                                            <action selector="didChangeSwitchValue:" destination="c0t-5c-eBh" eventType="valueChanged" id="QLV-uj-7Ig"/>
-                                        </connections>
-                                    </switch>
-                                </subviews>
-                                <color key="backgroundColor" name="backgroundCardViewColor"/>
-                                <constraints>
-                                    <constraint firstItem="xyY-1J-PGU" firstAttribute="centerY" secondItem="RCf-P4-yUy" secondAttribute="centerY" id="1T5-m3-qd0"/>
-                                    <constraint firstItem="Tl5-GF-GQi" firstAttribute="leading" secondItem="xyY-1J-PGU" secondAttribute="trailing" constant="8" id="IIG-qg-BF8"/>
-                                    <constraint firstAttribute="height" constant="80" id="T3I-jx-27r"/>
-                                    <constraint firstAttribute="trailing" secondItem="Tl5-GF-GQi" secondAttribute="trailing" constant="16" id="Wp3-wb-cs5"/>
-                                    <constraint firstItem="xyY-1J-PGU" firstAttribute="leading" secondItem="RCf-P4-yUy" secondAttribute="leading" constant="16" id="eES-Mo-CuW"/>
-                                    <constraint firstItem="Tl5-GF-GQi" firstAttribute="centerY" secondItem="RCf-P4-yUy" secondAttribute="centerY" id="ulX-Ot-wuK"/>
-                                </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
-                                        <real key="value" value="10"/>
-                                    </userDefinedRuntimeAttribute>
-                                </userDefinedRuntimeAttributes>
-                            </view>
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="31R-ua-Vke">
                                 <rect key="frame" x="0.0" y="48" width="414" height="54"/>
                                 <items>
@@ -343,40 +307,44 @@
                                     </navigationItem>
                                 </items>
                             </navigationBar>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="yCS-yd-ffG">
+                                <rect key="frame" x="0.0" y="505.5" width="414" height="342.5"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="cUS-U3-4VN"/>
                         <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="cUS-U3-4VN" firstAttribute="trailing" secondItem="0Ow-gT-FNm" secondAttribute="trailing" constant="32" id="0kw-aY-tEg"/>
+                            <constraint firstAttribute="bottom" secondItem="yCS-yd-ffG" secondAttribute="bottom" id="21e-jb-JcP"/>
                             <constraint firstItem="0Ow-gT-FNm" firstAttribute="top" secondItem="Wii-vB-zWo" secondAttribute="bottom" constant="48" id="Ehl-W4-aVE"/>
-                            <constraint firstItem="RCf-P4-yUy" firstAttribute="top" secondItem="gJI-rA-NpO" secondAttribute="bottom" constant="32" id="HDe-jy-Xzs"/>
+                            <constraint firstAttribute="trailing" secondItem="yCS-yd-ffG" secondAttribute="trailing" id="Gjz-mu-TId"/>
                             <constraint firstItem="0Ow-gT-FNm" firstAttribute="leading" secondItem="cUS-U3-4VN" secondAttribute="leading" constant="32" id="KUF-Cm-cdP"/>
                             <constraint firstItem="Wii-vB-zWo" firstAttribute="centerX" secondItem="9eh-5H-O68" secondAttribute="centerX" id="L6Q-jr-fyF"/>
                             <constraint firstItem="cUS-U3-4VN" firstAttribute="trailing" secondItem="gJI-rA-NpO" secondAttribute="trailing" constant="32" id="O4a-6d-2Be"/>
                             <constraint firstItem="Wii-vB-zWo" firstAttribute="top" secondItem="cUS-U3-4VN" secondAttribute="top" constant="100" id="Ue9-gY-3Yt"/>
                             <constraint firstAttribute="trailing" secondItem="Wii-vB-zWo" secondAttribute="trailing" constant="16" id="VH2-Uf-Z7C"/>
                             <constraint firstItem="M26-GT-YZh" firstAttribute="leading" secondItem="cUS-U3-4VN" secondAttribute="leading" constant="32" id="Vvs-1D-37m"/>
-                            <constraint firstItem="cUS-U3-4VN" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="RCf-P4-yUy" secondAttribute="bottom" constant="16" id="Z96-to-GeY"/>
-                            <constraint firstItem="cUS-U3-4VN" firstAttribute="trailing" secondItem="RCf-P4-yUy" secondAttribute="trailing" constant="32" id="azK-YH-ORe"/>
+                            <constraint firstItem="yCS-yd-ffG" firstAttribute="top" secondItem="gJI-rA-NpO" secondAttribute="bottom" id="bw7-fv-gHa"/>
                             <constraint firstItem="Wii-vB-zWo" firstAttribute="leading" secondItem="9eh-5H-O68" secondAttribute="leading" constant="16" id="c1O-aK-cIV"/>
+                            <constraint firstAttribute="leading" secondItem="yCS-yd-ffG" secondAttribute="leading" id="eJi-ai-nut"/>
                             <constraint firstItem="gJI-rA-NpO" firstAttribute="top" secondItem="M26-GT-YZh" secondAttribute="bottom" constant="16" id="ecp-hp-W2p"/>
                             <constraint firstItem="gJI-rA-NpO" firstAttribute="leading" secondItem="cUS-U3-4VN" secondAttribute="leading" constant="32" id="gW9-BM-hbr"/>
                             <constraint firstItem="31R-ua-Vke" firstAttribute="leading" secondItem="9eh-5H-O68" secondAttribute="leading" id="iJl-6h-SWA"/>
                             <constraint firstItem="M26-GT-YZh" firstAttribute="top" secondItem="0Ow-gT-FNm" secondAttribute="bottom" constant="16" id="qRS-4T-kKO"/>
-                            <constraint firstItem="RCf-P4-yUy" firstAttribute="leading" secondItem="cUS-U3-4VN" secondAttribute="leading" constant="32" id="uhP-lK-OIm"/>
                             <constraint firstItem="31R-ua-Vke" firstAttribute="top" secondItem="cUS-U3-4VN" secondAttribute="top" id="wGL-ir-TRJ"/>
                             <constraint firstAttribute="trailing" secondItem="31R-ua-Vke" secondAttribute="trailing" id="yKC-UC-Ln5"/>
                         </constraints>
                     </view>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
-                        <outlet property="faceIdSwitch" destination="Tl5-GF-GQi" id="BWP-7N-b7q"/>
                         <outlet property="navigationBar" destination="31R-ua-Vke" id="igV-Iq-7Hw"/>
+                        <outlet property="tableView" destination="yCS-yd-ffG" id="KU1-pk-rhY"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cuo-YB-vAU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3217" y="921"/>
+            <point key="canvasLocation" x="3215.9420289855075" y="920.75892857142856"/>
         </scene>
     </scenes>
     <resources>
@@ -384,11 +352,8 @@
         <image name="face_id_edit" width="512" height="434"/>
         <image name="order-success" width="150" height="150"/>
         <image name="switch_user" width="512" height="434"/>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <namedColor name="backgroundColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="infomaniakColor">
             <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -397,7 +362,7 @@
             <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
             <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
