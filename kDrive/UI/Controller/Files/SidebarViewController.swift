@@ -414,7 +414,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        applySnapshot()
+        if !selectMode {
+            applySnapshot()
+        }
         if let lastSelectedDestination {
             guard let rootMenuDestination = lastSelectedDestination.rootMenuDestination else { return }
             let snapshot = dataSource.snapshot()
