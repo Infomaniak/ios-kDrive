@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import Foundation
 import InfomaniakCore
 import InfomaniakDI
@@ -35,8 +36,12 @@ extension UploadOperation {
         do {
             try await task()
         } catch {
+            let shouldRetryAfterEnd = isNetworkConnectionLost(error)
             defer {
                 end()
+                if shouldRetryAfterEnd {
+                    retryAfterEnd()
+                }
             }
 
             // error tracking
@@ -73,7 +78,9 @@ extension UploadOperation {
 
         var errorHandled = false
         try? transactionWithFile { file in
-            let nsError = error as NSError
+            let baseError = self.baseError(from: error)
+
+            let nsError = baseError as NSError
             Log.uploadOperation("NSURLError:\(error) ufid:\(self.uploadFileId)")
 
             if nsError.domain == NSURLErrorDomain {
@@ -83,8 +90,12 @@ extension UploadOperation {
                     errorHandled = true
                     // _not_ overriding file.error
                     return
+                case NSURLErrorNetworkConnectionLost:
+                    file.progress = nil
+                    file.error = .uploadNotTerminated.wrapping(baseError)
+                    errorHandled = true
                 default:
-                    // Any other networking error, including NSURLErrorNetworkConnectionLost,
+                    // Any other networking error,
                     // on any call other than chunks gets a user facing network error.
                     file.error = .networkError.wrapping(error)
                     errorHandled = true
@@ -262,6 +273,27 @@ extension UploadOperation {
     }
 
     // MARK: - Private
+
+    private func baseError(from error: Error) -> Error {
+        if let afError = error as? AFError, let underlyingError = afError.underlyingError {
+            return underlyingError
+        }
+
+        return error
+    }
+
+    private func isNetworkConnectionLost(_ error: Error) -> Bool {
+        let nsError = baseError(from: error) as NSError
+        return nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorNetworkConnectionLost
+    }
+
+    private func retryAfterEnd() {
+        let retryUploadFileId = uploadFileId
+        Task {
+            @InjectService var uploadService: UploadServiceable
+            uploadService.retry(retryUploadFileId)
+        }
+    }
 
     /// Common tracking upload error with detailed state of the upload operation
     private func sentryTrackingUploadError(_ error: Error) {

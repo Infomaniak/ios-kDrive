@@ -37,6 +37,7 @@ public final class UploadService {
     @LazyInjectService var notificationHelper: NotificationsHelpable
     @LazyInjectService var appContextService: AppContextServiceable
     @LazyInjectService var freeSpaceService: FreeSpaceService
+    @LazyInjectService var accountManager: AccountManageable
 
     private let serialTransactionQueue = DispatchQueue(
         label: "com.infomaniak.drive.upload-service.rebuild-uploads",
@@ -200,22 +201,42 @@ extension UploadService: UploadServiceable {
                 return
             }
 
-            let specificQueue = self.uploadQueue(for: frozenFile)
+            self.uploadQueue(for: frozenFile).cancel(uploadFileId: uploadFileId)
 
-            try? self.uploadsDatabase.writeTransaction { writableRealm in
-                guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                      !file.isInvalidated else {
-                    Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
-                    return
+            Task { [weak self] in
+                guard let self else { return }
+                let exists = await self.fileExistsOnServer(for: frozenFile)
+
+                self.serialTransactionQueue.async { [weak self] in
+                    guard let self else { return }
+
+                    var fileToRetry: UploadFile?
+                    try? self.uploadsDatabase.writeTransaction { writableRealm in
+                        guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
+                              !file.isInvalidated else {
+                            Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
+                            return
+                        }
+
+                        if exists {
+                            Log.uploadQueue("retry ufid:\(uploadFileId) file exists on server, marking as uploaded")
+                            file.uploadDate = Date()
+                            file.progress = nil
+                            file.error = nil
+                            file.cleanSourceFileIfNeeded()
+                        } else {
+                            file.clearErrorsForRetry()
+                            fileToRetry = file.freeze()
+                        }
+                    }
+
+                    if let fileToRetry {
+                        let uploadQueue = self.uploadQueue(for: fileToRetry)
+                        uploadQueue.addToQueue(uploadFile: fileToRetry, itemIdentifier: nil)
+                        self.resumeAllOperations()
+                    }
                 }
-
-                specificQueue.cancel(uploadFileId: uploadFileId)
-
-                file.clearErrorsForRetry()
             }
-
-            specificQueue.addToQueue(uploadFile: frozenFile, itemIdentifier: nil)
-            self.resumeAllOperations()
         }
     }
 
@@ -478,6 +499,37 @@ extension UploadService: UploadServiceable {
 
     public func updateQueueSuspension() {
         allQueues.forEach { $0.updateQueueSuspension() }
+    }
+
+    private func fileExistsOnServer(for uploadFile: UploadFile) async -> Bool {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: uploadFile.driveId,
+                                                                        userId: uploadFile.userId) else {
+            Log.uploadQueue("Unable to get DriveFileManager for ufid:\(uploadFile.id)", level: .error)
+            return false
+        }
+
+        do {
+            let parentProxyFile = ProxyFile(driveId: uploadFile.driveId, id: uploadFile.parentDirectoryId)
+            var cursor: FileCursor?
+
+            repeat {
+                let response = try await driveFileManager.apiFetcher.files(
+                    in: parentProxyFile,
+                    advancedListingCursor: cursor,
+                    sortType: .newer
+                )
+                if response.validApiResponse.data.files.contains(where: { $0.name == uploadFile.name }) {
+                    return true
+                }
+
+                cursor = response.validApiResponse.hasMore ? response.validApiResponse.cursor : nil
+            } while cursor != nil
+
+            return false
+        } catch {
+            Log.uploadQueue("Error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
+            return false
+        }
     }
 
     private func uploadQueue(for uploadFile: UploadFile) -> UploadQueueable {
