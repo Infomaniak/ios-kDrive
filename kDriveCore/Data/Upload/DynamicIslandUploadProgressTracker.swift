@@ -132,9 +132,17 @@ final class DynamicIslandUploadProgressTracker: ObservableObject {
         overallProgress.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
     }
 
-    func reset() {
-        totalUploadCount = 0
-        progressUploading = 0
-        fractionCompleted = 0
+    func progressSnapshot() async -> (totalUploadCount: Int, progressUploading: Int) {
+        await MainActor.run {
+            (totalUploadCount: totalUploadCount, progressUploading: progressUploading)
+        }
+    }
+
+    func reset() async {
+        await MainActor.run {
+            totalUploadCount = 0
+            progressUploading = 0
+            fractionCompleted = 0
+        }
     }
 }

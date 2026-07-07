@@ -120,10 +120,6 @@ public actor DynamicIslandService: DynamicIslandServiceable {
         var cancellable: AnyCancellable?
         defer {
             cancellable?.cancel()
-            let isExpiredTask = (self.lastError as? DomainError) == .expiredTask
-            if !isExpiredTask {
-                uploadProgressTracker.reset()
-            }
             currentTask = nil
             uploadContinuation = nil
             lastError = nil
@@ -148,8 +144,9 @@ public actor DynamicIslandService: DynamicIslandServiceable {
                 }
             }
 
-            let totalCount = uploadProgressTracker.totalUploadCount
-            let uploadedCount = min(uploadProgressTracker.progressUploading + 1, totalCount)
+            let progressSnapshot = await uploadProgressTracker.progressSnapshot()
+            let totalCount = progressSnapshot.totalUploadCount
+            let uploadedCount = min(progressSnapshot.progressUploading + 1, totalCount)
 
             let status = ReachabilityListener.instance.currentStatus
             let shouldBeSuspended = status != .wifi
@@ -185,6 +182,14 @@ public actor DynamicIslandService: DynamicIslandServiceable {
             } else {
                 task.setTaskCompleted(success: false)
             }
+        }
+
+        cancellable?.cancel()
+        cancellable = nil
+
+        let isExpiredTask = (lastError as? DomainError) == .expiredTask
+        if !isExpiredTask {
+            await uploadProgressTracker.reset()
         }
     }
 
