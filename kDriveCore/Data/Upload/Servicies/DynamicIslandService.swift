@@ -32,7 +32,6 @@ public class DynamicIslandService: DynamicIslandServiceable {
     @LazyInjectService private var taskScheduler: BGTaskScheduler
 
     private let taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island"
-
     private static let logger = Logger(category: "DynamicIslandService")
 
     private var currentTask: BGContinuedProcessingTask?
@@ -45,10 +44,6 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
     private enum DomainError: Error {
         case expiredTask
-    }
-
-    init() {
-        taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island"
     }
 
     public func registerTask() {
