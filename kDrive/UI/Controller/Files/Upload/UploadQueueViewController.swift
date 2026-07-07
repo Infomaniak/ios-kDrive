@@ -233,17 +233,10 @@ extension UploadQueueViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 && isUploadLimited {
             let cell = tableView.dequeueReusableCell(type: ErrorUploadTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true,
-                                           isLast: true)
             cell.delegate = self
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0,
-                                           isLast: indexPath.row == self.tableView(
-                                               tableView,
-                                               numberOfRowsInSection: indexPath.section
-                                           ) - 1)
 
             guard let frozenUploadingFiles = sections[safe: indexPath.section]?.elements,
                   let file = frozenUploadingFiles[safe: indexPath.row]?.content, !file.isInvalidated else {

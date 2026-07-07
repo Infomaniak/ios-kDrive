@@ -136,8 +136,6 @@ final class UploadQueueFoldersViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(type: UploadFolderTableViewCell.self, for: indexPath)
 
         let folderDisplayed = frozenUploadingFolders[indexPath.row]
-        cell.initWithPositionAndShadow(isFirst: folderDisplayed.isFirstInList,
-                                       isLast: folderDisplayed.isLastInList)
         cell.configure(with: folderDisplayed.content, drive: driveFileManager.drive)
 
         return cell

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -19,16 +19,16 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="o3H-RR-j9t">
-                        <rect key="frame" x="24" y="16" width="272" height="75"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="95"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="cSl-Qq-OTk">
-                                <rect key="frame" x="0.0" y="16" width="236" height="43"/>
+                                <rect key="frame" x="0.0" y="16" width="284" height="63"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="left" semanticContentAttribute="forceLeftToRight" alignment="center" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="ztF-Xu-Gdi">
-                                        <rect key="frame" x="0.0" y="0.0" width="236" height="43"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="284" height="63"/>
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="exclamationmark.arrow.trianglehead.2.clockwise.rotate.90" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="Rx2-wp-Xd2" userLabel="Error Icon Image View">
-                                                <rect key="frame" x="14.666666666666668" y="10.33333333333333" width="24.666666666666661" height="22.666666666666671"/>
+                                                <rect key="frame" x="14.666666666666668" y="20" width="24.666666666666661" height="23.333333333333329"/>
                                                 <color key="tintColor" name="iconColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="24" id="DNg-nk-5hq"/>
@@ -36,7 +36,7 @@
                                                 </constraints>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="5fG-BH-ruV">
-                                                <rect key="frame" x="60" y="0.0" width="176" height="43"/>
+                                                <rect key="frame" x="108" y="7.3333333333333321" width="176" height="48.666666666666671"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Importation suspendue" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AT0-QC-gNC" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="0.0" y="0.0" width="176" height="20.333333333333332"/>
@@ -49,7 +49,7 @@
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="2649 fichiers restants" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KPv-M6-kv9" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                                        <rect key="frame" x="0.0" y="28.333333333333339" width="167.33333333333334" height="14.666666666666668"/>
+                                                        <rect key="frame" x="0.0" y="28.333333333333336" width="167.33333333333334" height="20.333333333333336"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
@@ -72,7 +72,7 @@
                                 </constraints>
                             </stackView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="G0J-Km-hBT">
-                                <rect key="frame" x="244" y="31.666666666666664" width="12" height="12"/>
+                                <rect key="frame" x="292" y="41.666666666666664" width="12" height="12"/>
                                 <color key="tintColor" name="secondaryTextColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="12" id="K6b-Ht-28h"/>
@@ -95,10 +95,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstItem="o3H-RR-j9t" firstAttribute="top" secondItem="n2x-Ua-MxJ" secondAttribute="top" constant="16" id="2lc-gh-YWe"/>
-                    <constraint firstAttribute="bottom" secondItem="o3H-RR-j9t" secondAttribute="bottom" constant="4" id="YDH-6g-mDx"/>
-                    <constraint firstAttribute="trailing" secondItem="o3H-RR-j9t" secondAttribute="trailing" constant="24" id="b26-EC-9sk"/>
-                    <constraint firstItem="o3H-RR-j9t" firstAttribute="leading" secondItem="n2x-Ua-MxJ" secondAttribute="leading" constant="24" id="e0Q-y0-bCJ"/>
+                    <constraint firstItem="o3H-RR-j9t" firstAttribute="top" secondItem="n2x-Ua-MxJ" secondAttribute="top" id="2lc-gh-YWe"/>
+                    <constraint firstAttribute="bottom" secondItem="o3H-RR-j9t" secondAttribute="bottom" id="YDH-6g-mDx"/>
+                    <constraint firstAttribute="trailing" secondItem="o3H-RR-j9t" secondAttribute="trailing" id="b26-EC-9sk"/>
+                    <constraint firstItem="o3H-RR-j9t" firstAttribute="leading" secondItem="n2x-Ua-MxJ" secondAttribute="leading" id="e0Q-y0-bCJ"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="Szh-1S-d6f"/>
@@ -111,8 +111,8 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-right" width="24" height="24"/>
-        <image name="exclamationmark.arrow.trianglehead.2.clockwise.rotate.90" catalog="system" width="128" height="117"/>
+        <image name="chevron-right" width="16" height="16"/>
+        <image name="exclamationmark.arrow.trianglehead.2.clockwise.rotate.90" catalog="system" width="128" height="121"/>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
