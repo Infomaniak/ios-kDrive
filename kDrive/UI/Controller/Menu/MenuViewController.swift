@@ -104,6 +104,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         tableView.register(cellView: UploadsPausedTableViewCell.self)
         tableView.register(KSuiteGetProViewCell.self, forCellReuseIdentifier: KSuiteGetProViewCell.reuseIdentifier)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        tableView.sectionHeaderHeight = 0
 
         updateTableContent()
 
@@ -312,12 +313,8 @@ extension MenuViewController {
         }
     }
 
-    override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    override func tableView(_: UITableView, viewForHeaderInSection _: Int) -> UIView? {
         return nil
-    }
-
-    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 0.0
     }
 
     // MARK: - Cell Button Action

@@ -79,7 +79,7 @@ class AppLockSettingsViewController: UIViewController {
 }
 
 extension AppLockSettingsViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         return 1
     }
 

@@ -51,11 +51,11 @@ class SelectPhotoFormatViewController: UIViewController {
 // MARK: - UITableViewDataSource
 
 extension SelectPhotoFormatViewController: UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in _: UITableView) -> Int {
         return tableContent.count
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection _: Int) -> Int {
         return 1
     }
 

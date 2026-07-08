@@ -68,6 +68,7 @@ final class SelectAccountViewController: UIViewController {
 
         tableView.register(cellView: UserAccountTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        tableView.sectionFooterHeight = 0
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.largeTitleDisplayMode = .always
@@ -77,24 +78,16 @@ final class SelectAccountViewController: UIViewController {
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
 extension SelectAccountViewController: UITableViewDelegate, UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in _: UITableView) -> Int {
         return users.count
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         1
     }
 
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(_: UITableView, viewForHeaderInSection _: Int) -> UIView? {
         return nil
-    }
-
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        return nil
-    }
-
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 0.0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

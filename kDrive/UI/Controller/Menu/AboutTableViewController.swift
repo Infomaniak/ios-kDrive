@@ -65,7 +65,7 @@ class AboutTableViewController: BaseGroupedTableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in _: UITableView) -> Int {
         return 1
     }
 
@@ -74,8 +74,6 @@ class AboutTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let isFirst = indexPath.row == 0
-        let isLast = indexPath.row == rows.count - 1
         switch rows[indexPath.row] {
         case .privacy:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)

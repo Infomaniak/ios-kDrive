@@ -55,6 +55,7 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
 
         tableView.register(cellView: ParameterSyncTableViewCell.self)
         tableView.allowsMultipleSelection = false
+        tableView.sectionFooterHeight = 0
     }
 
     static func instantiate(selectedMode: SyncMode) -> WifiSyncSettingsViewController {
@@ -73,14 +74,6 @@ class WifiSyncSettingsViewController: BaseGroupedTableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
-    }
-
-    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        return nil
-    }
-
-    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 0.0
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

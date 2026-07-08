@@ -154,7 +154,7 @@ extension SwitchUserViewController: UITableViewDelegate {
         switchToConnectedUserId(user.id)
     }
 
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    func tableView(_: UITableView, viewForHeaderInSection _: Int) -> UIView? {
         return nil
     }
 }
@@ -162,7 +162,7 @@ extension SwitchUserViewController: UITableViewDelegate {
 // MARK: - Table view data source
 
 extension SwitchUserViewController: UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in _: UITableView) -> Int {
         return users.count
     }
 
