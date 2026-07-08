@@ -55,7 +55,7 @@ extension SelectPhotoFormatViewController: UITableViewDataSource {
         return tableContent.count
     }
 
-    func tableView(_ tableView: UITableView, numberOfRowsInSection _: Int) -> Int {
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         return 1
     }
 

@@ -653,7 +653,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             .boundarySupplementaryItems = [generateHeaderItem(leading: isCompactView ? UIConstants.Padding.mediumSmall : 0)]
 
         let sectionProvider: UICollectionViewCompositionalLayoutSectionProvider = { sectionIndex, layoutEnvironment in
-            let appearance: UICollectionLayoutListConfiguration.Appearance = (isCompactView || selectMode) ? .insetGrouped : .sidebar
+            let appearance: UICollectionLayoutListConfiguration.Appearance =
+                (isCompactView || selectMode) ? .insetGrouped : .sidebar
 
             var listConfig = UICollectionLayoutListConfiguration(appearance: appearance)
             listConfig.showsSeparators = false

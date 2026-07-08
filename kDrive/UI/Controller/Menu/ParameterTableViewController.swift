@@ -312,7 +312,8 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case .theme:
             navigationController?.pushViewController(SelectThemeTableViewController(style: .insetGrouped), animated: true)
         case .notifications:
-            navigationController?.pushViewController(NotificationsSettingsTableViewController(style: .insetGrouped), animated: true)
+            navigationController?.pushViewController(NotificationsSettingsTableViewController(style: .insetGrouped),
+                                                     animated: true)
         case .security:
             navigationController?.pushViewController(SecurityTableViewController(style: .insetGrouped), animated: true)
         case .offlineSync:
