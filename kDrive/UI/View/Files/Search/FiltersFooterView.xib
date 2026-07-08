@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="19162" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19144"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -15,7 +15,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fyT-KU-cLg" customClass="IKLargeButton" customModule="kDriveCore">
-                    <rect key="frame" x="24" y="84" width="366" height="60"/>
+                    <rect key="frame" x="0.0" y="84" width="414" height="60"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="60" id="6WN-ng-aVa"/>
                     </constraints>
@@ -29,7 +29,7 @@
                     </connections>
                 </button>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dzQ-KU-Urf" customClass="IKLargeButton" customModule="kDriveCore">
-                    <rect key="frame" x="24" y="16" width="366" height="60"/>
+                    <rect key="frame" x="0.0" y="16" width="414" height="60"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="60" id="JQY-cx-rHO"/>
                     </constraints>
@@ -49,22 +49,14 @@
             <constraints>
                 <constraint firstItem="fyT-KU-cLg" firstAttribute="top" secondItem="dzQ-KU-Urf" secondAttribute="bottom" constant="8" symbolic="YES" id="577-3k-ygv"/>
                 <constraint firstItem="dzQ-KU-Urf" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="16" id="Ei0-yg-cIv"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="dzQ-KU-Urf" secondAttribute="trailing" constant="24" id="K3l-pP-tPh"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="fyT-KU-cLg" secondAttribute="bottom" constant="8" id="Vrz-Lh-8C4"/>
-                <constraint firstItem="dzQ-KU-Urf" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="24" id="Vzc-ht-ZKi"/>
-                <constraint firstItem="fyT-KU-cLg" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="24" id="qHN-Bz-Wbw"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="fyT-KU-cLg" secondAttribute="trailing" constant="24" id="z9E-8v-KF5"/>
+                <constraint firstAttribute="trailing" secondItem="dzQ-KU-Urf" secondAttribute="trailing" id="K3l-pP-tPh"/>
+                <constraint firstAttribute="bottom" secondItem="fyT-KU-cLg" secondAttribute="bottom" constant="8" id="Vrz-Lh-8C4"/>
+                <constraint firstItem="dzQ-KU-Urf" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="Vzc-ht-ZKi"/>
+                <constraint firstItem="fyT-KU-cLg" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="qHN-Bz-Wbw"/>
+                <constraint firstAttribute="trailing" secondItem="fyT-KU-cLg" secondAttribute="trailing" id="z9E-8v-KF5"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <point key="canvasLocation" x="131.8840579710145" y="23.4375"/>
         </view>
     </objects>
-    <designables>
-        <designable name="dzQ-KU-Urf">
-            <size key="intrinsicContentSize" width="116" height="30"/>
-        </designable>
-        <designable name="fyT-KU-cLg">
-            <size key="intrinsicContentSize" width="133" height="30"/>
-        </designable>
-    </designables>
 </document>
