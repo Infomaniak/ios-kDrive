@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: it, Italian
  * Tagged: ios
- * Exported by: Baptiste Griva
- * Exported at: Thu, 21 May 2026 09:28:49 +0200
+ * Exported by: Killian Mathias
+ * Exported at: Wed, 08 Jul 2026 16:13:25 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -1194,6 +1194,51 @@
 
 /* loco:6169607a87650c03cf1ded24 */
 "fileTypeFilterTitle" = "Tipo di file";
+
+/* loco:6a4e51e04bc7bb347c049202 */
+"filter3DModels" = "Modelli 3D";
+
+/* loco:6a4e52e314bd801acc0b0b22 */
+"filterArchives" = "Archivi";
+
+/* loco:6a4e530b14bd801acc0b0b24 */
+"filterCode" = "Codice";
+
+/* loco:6a4e540a4dc47cf929076da2 */
+"filterDiagram" = "Diagramma";
+
+/* loco:6a4e5381e10673371b08af33 */
+"filterEmails" = "E-mail";
+
+/* loco:6a4e4e3718640359270369b2 */
+"filterFiles" = "File";
+
+/* loco:6a4e4f98b4b975e0ac024953 */
+"filterFolders" = "Cartelle";
+
+/* loco:6a4e53c9ccd4001ab0076192 */
+"filterFont" = "Carattere";
+
+/* loco:6a4e511788423d5f3b095852 */
+"filterImages" = "Foto e immagini";
+
+/* loco:6a4e520f357a8b824d0233c2 */
+"filterOfficeGrids" = "Fogli di calcolo";
+
+/* loco:6a4e523876cba7d8ac051243 */
+"filterOfficePresentations" = "Presentazioni";
+
+/* loco:6a4e514e29ba6e4ef5031452 */
+"filterOfficeTexts" = "Documenti di testo";
+
+/* loco:6a4e4fe690a314301206ce62 */
+"filterPDF" = "File PDF";
+
+/* loco:6a4e52a7990b5c8093012732 */
+"filterSounds" = "Suoni";
+
+/* loco:6a4e5287ce98d2f5b60db702 */
+"filterVideos" = "Video";
 
 /* loco:61696046c3498f0db20ca172 */
 "filtersTitle" = "Filtri";
