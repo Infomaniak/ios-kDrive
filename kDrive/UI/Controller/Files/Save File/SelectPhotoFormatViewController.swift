@@ -74,7 +74,7 @@ extension SelectPhotoFormatViewController: UITableViewDataSource {
 
 extension SelectPhotoFormatViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        delegate?.didSelectPhotoFormat(tableContent[indexPath.row])
+        delegate?.didSelectPhotoFormat(tableContent[indexPath.section])
         navigationController?.popViewController(animated: true)
     }
 }

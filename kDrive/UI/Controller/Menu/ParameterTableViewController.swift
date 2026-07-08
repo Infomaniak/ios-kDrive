@@ -184,7 +184,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         NSLayoutConstraint.activate([
             label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor),
             label.trailingAnchor.constraint(equalTo: headerView.trailingAnchor),
-            label.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
+            label.topAnchor.constraint(equalTo: headerView.topAnchor, constant: IKPadding.mini),
             label.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -IKPadding.mini)
         ])
 
