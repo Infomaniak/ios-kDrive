@@ -272,7 +272,7 @@ class SearchFiltersViewController: UITableViewController {
             if indexPath.row == 0 {
                 matomo.track(eventWithCategory: .search, name: "filterFileType")
                 var fileTypes = ConvertedType.allCases
-                fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url }
+                fileTypes.removeAll { $0 == .font || $0 == .unknown || $0 == .url || $0 == .form }
                 let sheetViewController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiateSheet(
                     options: fileTypes,
                     selectedOption: filters.fileType,

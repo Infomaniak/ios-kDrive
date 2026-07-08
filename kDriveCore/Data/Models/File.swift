@@ -28,26 +28,30 @@ import QuickLook
 import RealmSwift
 
 public enum ConvertedType: String, CaseIterable, Sendable {
-    case archive
+    case file
+    case folder = "dir"
+    case pdf
+    case image
+    case text
+    case model
+    case spreadsheet
+    case presentation
+    case video
     case audio
+    case archive
     case code
     case email
-    case folder = "dir"
     case font
-    case form
-    case image
-    case model
-    case pdf
-    case presentation
-    case spreadsheet
-    case text
+    case diagram
     case unknown
     case url
-    case video
+    case form
     case searchExtension
 
     public var icon: UIImage {
         switch self {
+        case .file:
+            return KDriveResourcesAsset.fileText.image
         case .archive:
             return KDriveResourcesAsset.fileZip.image
         case .audio:
@@ -78,6 +82,8 @@ public enum ConvertedType: String, CaseIterable, Sendable {
             return KDriveResourcesAsset.fileDefault.image
         case .url:
             return KDriveResourcesAsset.url.image
+        case .diagram:
+            return KDriveResourcesAsset.fileDiagram.image
         case .video:
             return KDriveResourcesAsset.fileVideo.image
         case .searchExtension:
@@ -87,7 +93,7 @@ public enum ConvertedType: String, CaseIterable, Sendable {
 
     public var tintColor: UIColor? {
         switch self {
-        case .folder, .url, .font, .unknown:
+        case .folder, .url, .font, .unknown, .file:
             return KDriveResourcesAsset.secondaryTextColor.color
         default:
             return nil
@@ -96,36 +102,40 @@ public enum ConvertedType: String, CaseIterable, Sendable {
 
     public var title: String {
         switch self {
+        case .file:
+            return KDriveResourcesStrings.Localizable.filterFiles
         case .archive:
-            return KDriveResourcesStrings.Localizable.allArchive
+            return KDriveResourcesStrings.Localizable.filterArchives
         case .audio:
-            return KDriveResourcesStrings.Localizable.allAudio
+            return KDriveResourcesStrings.Localizable.filterSounds
         case .code:
-            return KDriveResourcesStrings.Localizable.allCode
+            return KDriveResourcesStrings.Localizable.filterCode
         case .email:
-            return KDriveResourcesStrings.Localizable.allEmail
+            return KDriveResourcesStrings.Localizable.filterEmails
         case .folder:
-            return KDriveResourcesStrings.Localizable.allFolder
+            return KDriveResourcesStrings.Localizable.filterFolders
         case .font:
-            return KDriveResourcesStrings.Localizable.allFont
-        case .form:
-            return KDriveResourcesStrings.Localizable.allOfficeForm
+            return KDriveResourcesStrings.Localizable.filterFont
         case .image:
-            return KDriveResourcesStrings.Localizable.allPictures
+            return KDriveResourcesStrings.Localizable.filterImages
         case .model:
-            return KDriveResourcesStrings.Localizable.all3DModel
+            return KDriveResourcesStrings.Localizable.filter3DModels
         case .pdf:
-            return KDriveResourcesStrings.Localizable.allPdf
+            return KDriveResourcesStrings.Localizable.filterPDF
         case .presentation:
-            return KDriveResourcesStrings.Localizable.allOfficePoints
+            return KDriveResourcesStrings.Localizable.filterOfficePresentations
         case .spreadsheet:
-            return KDriveResourcesStrings.Localizable.allOfficeGrids
+            return KDriveResourcesStrings.Localizable.filterOfficeGrids
         case .text:
-            return KDriveResourcesStrings.Localizable.allOfficeDocs
+            return KDriveResourcesStrings.Localizable.filterOfficeTexts
         case .unknown, .url:
             return ""
+        case .form:
+            return KDriveResourcesStrings.Localizable.allOfficeForm
         case .video:
-            return KDriveResourcesStrings.Localizable.allVideo
+            return KDriveResourcesStrings.Localizable.filterVideos
+        case .diagram:
+            return KDriveResourcesStrings.Localizable.filterDiagram
         case .searchExtension:
             return KDriveResourcesStrings.Localizable.searchForAnExtension
         }
@@ -133,6 +143,8 @@ public enum ConvertedType: String, CaseIterable, Sendable {
 
     public var uti: UTI {
         switch self {
+        case .file:
+            return .aliasFile
         case .archive:
             return .archive
         case .audio:
@@ -165,6 +177,8 @@ public enum ConvertedType: String, CaseIterable, Sendable {
             return .internetShortcut
         case .video:
             return .movie
+        case .diagram:
+            return .data
         case .searchExtension:
             return .item
         }
@@ -186,7 +200,7 @@ public enum ConvertedType: String, CaseIterable, Sendable {
 
     public static func fromUTI(_ uti: UTI) -> ConvertedType {
         var types = ConvertedType.allCases
-        types.removeAll { $0 == .unknown || $0 == .form }
+        types.removeAll { $0 == .unknown || $0 == .form || $0 == .diagram }
 
         return types.first { uti.conforms(to: $0.uti) } ?? .unknown
     }
