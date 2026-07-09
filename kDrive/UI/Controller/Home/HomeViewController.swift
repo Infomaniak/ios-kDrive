@@ -36,26 +36,36 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let topRows: [HomeTopRow]
         let recentFiles: [FileActivity]
         let isLoading: Bool
+        let showUpload: Bool
 
         var recentFilesCount: Int {
             recentFiles.count
         }
 
-        init(topRows: [HomeViewController.HomeTopRow], recentFiles: [FileActivity], isLoading: Bool) {
+        init(
+            topRows: [HomeViewController.HomeTopRow],
+            recentFiles: [FileActivity],
+            isLoading: Bool,
+            showUpload: Bool = false
+        ) {
             self.topRows = topRows
             self.recentFiles = recentFiles
             self.isLoading = isLoading
+            self.showUpload = showUpload
         }
 
         init(changeSet: [ArraySection<HomeSection, AnyDifferentiable>]) {
             var topRows = [HomeTopRow]()
             var recentActivities = [FileActivity]()
             var isLoading = false
+            var showUpload = false
 
             for section in changeSet {
                 switch section.model {
                 case .top:
                     topRows = section.elements.compactMap { $0.base as? HomeTopRow }
+                case .upload:
+                    showUpload = !section.elements.isEmpty
                 case .recentFiles:
                     for element in section.elements {
                         if let recentFileRow = element.base as? RecentFileRow {
@@ -74,7 +84,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             self.init(
                 topRows: topRows,
                 recentFiles: recentActivities,
-                isLoading: isLoading
+                isLoading: isLoading,
+                showUpload: showUpload
             )
         }
 
@@ -82,6 +93,13 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             var sections = [
                 ArraySection(model: HomeSection.top, elements: topRows.map { AnyDifferentiable($0) })
             ]
+
+            if showUpload {
+                sections.append(ArraySection(
+                    model: HomeSection.upload,
+                    elements: [AnyDifferentiable(UploadRow.card)]
+                ))
+            }
 
             var anyRecentFiles: [AnyDifferentiable] = recentFiles.map { AnyDifferentiable($0) }
 
@@ -98,11 +116,16 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     enum HomeSection: Differentiable, CaseIterable {
         case top
+        case upload
         case recentFiles
     }
 
     enum HomeTopRow: Differentiable {
         case insufficientStorage
+    }
+
+    enum UploadRow: Differentiable {
+        case card
     }
 
     enum RecentFileRow: Differentiable {
@@ -129,6 +152,10 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     private let refreshControl = UIRefreshControl()
 
+    private var uploadCountManager: UploadCountManager?
+    private var uploadCount = 0
+    private var isNetworkOffline = false
+
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
         super.init(collectionViewLayout: .init())
@@ -149,6 +176,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         collectionView.register(supplementaryView: RootMenuHeaderView.self, forSupplementaryViewOfKind: RootMenuHeaderView.kind)
         collectionView.register(cellView: InsufficientStorageCollectionViewCell.self)
         collectionView.register(cellView: RecentActivityCollectionViewCell.self)
+        collectionView.register(cellView: UploadCardCell.self)
 
         collectionView.collectionViewLayout = createLayout()
         collectionView.dataSource = self
@@ -170,6 +198,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         }
 
         initRecentActivitiesController()
+        observeUploadCount()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -200,8 +229,13 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     func reloadTopRows() {
         let newViewModel = HomeViewModel(topRows: getTopRows(),
                                          recentFiles: viewModel.recentFiles,
-                                         isLoading: viewModel.isLoading)
+                                         isLoading: viewModel.isLoading,
+                                         showUpload: uploadCount > 0)
         reload(newViewModel: newViewModel)
+    }
+
+    private func homeSection(at index: Int) -> HomeSection? {
+        viewModel.changeSet[safe: index]?.model
     }
 
     @MainActor
@@ -214,7 +248,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
         let newViewModel = HomeViewModel(topRows: viewModel.topRows,
                                          recentFiles: fetchedFiles,
-                                         isLoading: false)
+                                         isLoading: false,
+                                         showUpload: uploadCount > 0)
         reload(newViewModel: newViewModel, completion: completion)
     }
 
@@ -242,7 +277,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let viewModel = HomeViewModel(
             topRows: getTopRows(),
             recentFiles: [],
-            isLoading: true
+            isLoading: true,
+            showUpload: uploadCount > 0
         )
         reload(newViewModel: viewModel)
         initRecentActivitiesController()
@@ -252,7 +288,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let emptyViewModel = HomeViewModel(
             topRows: viewModel.topRows,
             recentFiles: [],
-            isLoading: false
+            isLoading: false,
+            showUpload: uploadCount > 0
         )
         reload(newViewModel: emptyViewModel)
 
@@ -277,12 +314,14 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         if recentActivitiesController.nextCursor == nil {
             reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                recentFiles: [],
-                                               isLoading: true))
+                                               isLoading: true,
+                                               showUpload: uploadCount > 0))
             recentActivitiesController.loadNextPage()
         } else {
             reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                recentFiles: [],
-                                               isLoading: false))
+                                               isLoading: false,
+                                               showUpload: uploadCount > 0))
             recentActivitiesController.restoreCachedPages()
         }
     }
@@ -290,20 +329,37 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private func createLayout() -> UICollectionViewLayout {
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
 
-        let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, _ in
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] section, layoutEnvironment in
             guard let self else { return nil }
-            switch HomeSection.allCases[section] {
+            switch homeSection(at: section) {
             case .top:
                 return generateTopSectionLayout()
+            case .upload:
+                return generateUploadSectionLayout(layoutEnvironment: layoutEnvironment)
             case .recentFiles:
                 if recentActivitiesController?.empty == true {
                     return recentActivitiesController?.getEmptyLayout()
                 } else {
                     return recentActivitiesController?.getLayout()
                 }
+            case nil:
+                return nil
             }
         }, configuration: configuration)
         return layout
+    }
+
+    private func generateUploadSectionLayout(layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
+        var listConfig = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+        listConfig.showsSeparators = false
+        listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+
+        let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0,
+                                                        leading: UIConstants.Padding.mediumSmall,
+                                                        bottom: 0,
+                                                        trailing: UIConstants.Padding.mediumSmall)
+        return section
     }
 
     private func generateTopSectionLayout() -> NSCollectionLayoutSection {
@@ -318,7 +374,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
 
-        let largeHeaderItem = Self.generateHeaderItem(leading: UIConstants.Padding.standard)
+        let largeHeaderItem = Self.generateHeaderItem(leading: UIConstants.Padding.mediumSmall)
 
         let bottomHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
@@ -328,9 +384,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         )
 
         sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0,
-                                                                  leading: UIConstants.Padding.standard,
+                                                                  leading: UIConstants.Padding.mediumSmall,
                                                                   bottom: 0,
-                                                                  trailing: UIConstants.Padding.standard)
+                                                                  trailing: UIConstants.Padding.mediumSmall)
 
         section.boundarySupplementaryItems = [largeHeaderItem, sectionHeaderItem]
         return section
@@ -373,7 +429,7 @@ extension HomeViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        switch HomeSection.allCases[indexPath.section] {
+        switch homeSection(at: indexPath.section) {
         case .top:
             switch viewModel.topRows[indexPath.row] {
             case .insufficientStorage:
@@ -395,11 +451,21 @@ extension HomeViewController {
                     showInsufficientStorage = false
                     let newViewModel = HomeViewModel(topRows: getTopRows(),
                                                      recentFiles: viewModel.recentFiles,
-                                                     isLoading: viewModel.isLoading)
+                                                     isLoading: viewModel.isLoading,
+                                                     showUpload: uploadCount > 0)
                     reload(newViewModel: newViewModel)
                 }
                 return cell
             }
+        case .upload:
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: UploadCardCell.identifier,
+                for: indexPath
+            ) as? UploadCardCell else {
+                fatalError("Failed to dequeue cell")
+            }
+            cell.configure(driveFileManager: driveFileManager, presenter: self)
+            return cell
         case .recentFiles:
             if let cellType = recentActivitiesController?.listCellType,
                let cell = collectionView.dequeueReusableCell(
@@ -418,6 +484,8 @@ extension HomeViewController {
             } else {
                 fatalError("Unsupported cell type")
             }
+        case nil:
+            fatalError("Unknown section")
         }
     }
 
@@ -427,7 +495,7 @@ extension HomeViewController {
         at indexPath: IndexPath
     ) -> UICollectionReusableView {
         if kind == UICollectionView.elementKindSectionHeader {
-            switch HomeSection.allCases[indexPath.section] {
+            switch homeSection(at: indexPath.section) {
             case .top:
                 let homeLargeTitleHeaderView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
@@ -447,6 +515,8 @@ extension HomeViewController {
                 }
                 headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
+            case .upload:
+                return UICollectionReusableView()
             case .recentFiles:
                 let headerView = collectionView.dequeueReusableSupplementaryView(
                     ofKind: kind,
@@ -459,6 +529,8 @@ extension HomeViewController {
                     headerView.titleLabel.text = ""
                 }
                 return headerView
+            case nil:
+                return UICollectionReusableView()
             }
         } else if kind == RootMenuHeaderView.kind.rawValue {
             let headerView = collectionView.dequeueReusableSupplementaryView(
@@ -473,6 +545,34 @@ extension HomeViewController {
             return UICollectionReusableView()
         }
     }
+
+    private func observeUploadCount() {
+        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
+            guard let self,
+                  let uploadCountManager else { return }
+
+            let newCount = uploadCountManager.uploadCount
+            let shouldReload = (newCount == 0) != (uploadCount == 0)
+            uploadCount = newCount
+            if shouldReload {
+                reloadTopRows()
+            }
+        }
+    }
+
+    private func observeNetworkChange() {
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
+            Task { [weak self] in
+                guard let self else { return }
+
+                let newOfflineStatus = status == .offline
+                if isNetworkOffline != newOfflineStatus {
+                    isNetworkOffline = newOfflineStatus
+                    reloadTopRows()
+                }
+            }
+        }
+    }
 }
 
 // MARK: - UICollectionViewDelegate
@@ -485,7 +585,7 @@ extension HomeViewController {
     ) {
         guard let recentActivitiesController else { return }
 
-        if HomeSection.allCases[indexPath.section] == .recentFiles {
+        if homeSection(at: indexPath.section) == .recentFiles {
             let currentCount = recentActivitiesController.mergedActivities.count
             if indexPath.row >= currentCount - 10 &&
                 indexPath.row < currentCount &&
@@ -493,7 +593,8 @@ extension HomeViewController {
                 recentActivitiesController.moreComing {
                 reload(newViewModel: HomeViewModel(topRows: viewModel.topRows,
                                                    recentFiles: viewModel.recentFiles,
-                                                   isLoading: true))
+                                                   isLoading: true,
+                                                   showUpload: uploadCount > 0))
                 recentActivitiesController.loadNextPage()
             }
         }
