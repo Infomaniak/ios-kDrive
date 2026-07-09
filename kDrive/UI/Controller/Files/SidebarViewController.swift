@@ -45,6 +45,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     enum RootMenuSection {
+        case upload
         case main
         case recent
         case first
@@ -175,6 +176,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     weak var mainTabViewControllerDelegate: MainTabViewControllerDelegate?
 
     let driveFileManager: DriveFileManager
+    private var uploadCountManager: UploadCountManager?
+    private var uploadCount = 0
+    private var isNetworkOffline = false
     private var rootChildrenObservationToken: NotificationToken?
     var rootViewChildren: [File]?
     private lazy var dataSource: MenuDataSource = configureDataSource(for: collectionView)
@@ -264,6 +268,18 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             menuItems[menuItems.count - 1].isLast = true
         }
 
+        #if !ISEXTENSION
+        if uploadCount > 0 {
+            let uploadItem = RootMenuItem(
+                name: "",
+                image: nil,
+                destination: nil
+            )
+            snapshot.appendSections([.upload])
+            snapshot.appendItems([uploadItem], toSection: .upload)
+        }
+        #endif
+
         snapshot.appendSections([RootMenuSection.main])
         snapshot.appendItems(menuItems)
         dataSource.apply(snapshot, animatingDifferences: false)
@@ -328,6 +344,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         )
         collectionView.refreshControl = refreshControl
 
+        #if !ISEXTENSION
+        collectionView.register(cellView: UploadCardCell.self)
+        #endif
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(RootMenuCell.self, forCellWithReuseIdentifier: RootMenuCell.identifier)
         collectionView.register(supplementaryView: HomeLargeTitleHeaderView.self, forSupplementaryViewOfKind: .header)
@@ -340,6 +359,8 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         refreshControl.addTarget(self, action: #selector(forceRefresh), for: .valueChanged)
 
         dataSource = configureDataSource(for: collectionView)
+        observeUploadCount()
+        observeNetworkChange()
         setItemsSnapshot(for: collectionView)
 
         dataSource.sectionSnapshotHandlers.willExpandItem = { _ in
@@ -555,6 +576,17 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 }
 
                 switch menuSection {
+                #if !ISEXTENSION
+                case .upload:
+                    guard let cell = collectionView.dequeueReusableCell(
+                        withReuseIdentifier: UploadCardCell.identifier,
+                        for: indexPath
+                    ) as? UploadCardCell else {
+                        fatalError("Failed to dequeue cell")
+                    }
+                    cell.configure(driveFileManager: self.driveFileManager, presenter: self)
+                    return cell
+                #endif
                 case .recent:
                     guard let cell = collectionView.dequeueReusableCell(
                         withReuseIdentifier: FileCollectionViewCell.identifier,
@@ -578,7 +610,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     cell.moreButton.isHidden = true
 
                     return cell
-                case .main, .first, .second, .third:
+                default:
                     guard let rootMenuCell = collectionView.dequeueReusableCell(
                         withReuseIdentifier: RootMenuCell.identifier,
                         for: indexPath
@@ -795,7 +827,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     func getSection(for index: Int) -> RootMenuSection? {
-        return sections[safe: index]
+        return dataSource.snapshot().sectionIdentifiers[safe: index]
     }
 
     func getIndexOfSection(for menuSection: RootMenuSection) -> Int? {
@@ -854,6 +886,34 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
         menuNavigationController.modalPresentationStyle = .formSheet
         present(menuNavigationController, animated: true)
         #endif
+    }
+
+    private func observeUploadCount() {
+        uploadCountManager = UploadCountManager(driveFileManager: driveFileManager) { [weak self] in
+            guard let self,
+                  let uploadCountManager else { return }
+
+            let newCount = uploadCountManager.uploadCount
+            let shouldApplySnapshot = (newCount == 0) != (uploadCount == 0)
+            uploadCount = newCount
+            if shouldApplySnapshot {
+                applySnapshot()
+            }
+        }
+    }
+
+    private func observeNetworkChange() {
+        ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
+            Task { [weak self] in
+                guard let self else { return }
+
+                let newOfflineStatus = status == .offline
+                if isNetworkOffline != newOfflineStatus {
+                    isNetworkOffline = newOfflineStatus
+                    applySnapshot()
+                }
+            }
+        }
     }
 }
 
