@@ -308,7 +308,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         case .storage:
             navigationController?.pushViewController(StorageTableViewController(style: .insetGrouped), animated: true)
         case .photos:
-            navigationController?.pushViewController(PhotoSyncSettingsViewController(style: .insetGrouped), animated: true)
+            navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
         case .theme:
             navigationController?.pushViewController(SelectThemeTableViewController(style: .insetGrouped), animated: true)
         case .notifications:

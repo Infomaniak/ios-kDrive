@@ -34,6 +34,10 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
     @LazyInjectService var freeSpaceService: FreeSpaceService
     @LazyInjectService var uploadService: UploadServiceable
 
+    override init(style: UITableView.Style = .insetGrouped) {
+        super.init(style: style)
+    }
+
     private enum PhotoSyncSection: Int {
         case syncSwitch
         case syncLocation
