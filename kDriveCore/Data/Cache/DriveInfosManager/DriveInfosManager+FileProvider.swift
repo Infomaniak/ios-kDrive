@@ -112,11 +112,17 @@ public extension DriveInfosManager {
         let expiringActivity = ExpiringActivity(id: "\(#function)_\(UUID().uuidString)", delegate: nil)
         expiringActivity.start()
         Task {
-            let updatedDomains = frozenDrives.map {
-                NSFileProviderDomain(
-                    identifier: NSFileProviderDomainIdentifier($0.objectId),
-                    displayName: "\($0.name) (\(user.email))",
-                    pathRelativeToDocumentStorage: "\($0.objectId)"
+            let updatedDomains = frozenDrives.map { drive in
+                let isKSuitePro = drive.pack.isAnyKSuiteProOffer
+                let organization = drive._account?.name ?? ""
+                let displayName = isKSuitePro
+                    ? "\(drive.name)\n\(organization)\n(\(user.email))"
+                    : "\(drive.name)\n(\(user.email))"
+
+                return NSFileProviderDomain(
+                    identifier: NSFileProviderDomainIdentifier(drive.objectId),
+                    displayName: displayName,
+                    pathRelativeToDocumentStorage: "\(drive.objectId)"
                 )
             }
 
