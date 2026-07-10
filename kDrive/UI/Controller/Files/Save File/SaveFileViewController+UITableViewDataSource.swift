@@ -43,10 +43,6 @@ extension SaveFileViewController: UITableViewDataSource {
             let item = items[indexPath.row]
             if items.count > 1 {
                 let cell = tableView.dequeueReusableCell(type: UploadTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(
-                    isFirst: indexPath.row == 0,
-                    isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1
-                )
                 cell.configureWith(importedFile: item) { [weak self] in
                     guard let self = self else { return }
                     guard let currentRow = self.items.firstIndex(where: { $0 == item }) else { return }
@@ -71,17 +67,14 @@ extension SaveFileViewController: UITableViewDataSource {
             }
         case .driveSelection:
             let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.configure(with: selectedDriveFileManager?.drive)
             return cell
         case .directorySelection:
             let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.configure(with: selectedDirectory, drive: selectedDriveFileManager!.drive)
             return cell
         case .photoFormatOption:
             let cell = tableView.dequeueReusableCell(type: PhotoFormatTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.configure(with: userPreferredPhotoFormat)
             return cell
         case .importing:
@@ -96,18 +89,27 @@ extension SaveFileViewController: UITableViewDataSource {
 
 extension SaveFileViewController {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let title: String
+
         switch sections[section] {
         case .fileName:
-            return HomeTitleView.instantiate(title: "")
+            title = ""
         case .driveSelection:
-            return HomeTitleView.instantiate(title: "kDrive")
+            title = "kDrive"
         case .directorySelection:
-            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.allPathTitle)
+            title = KDriveResourcesStrings.Localizable.allPathTitle
         case .photoFormatOption:
-            return HomeTitleView.instantiate(title: KDriveResourcesStrings.Localizable.photoFormatTitle)
+            title = KDriveResourcesStrings.Localizable.photoFormatTitle
         default:
             return nil
         }
+
+        let header = HomeTitleView.instantiate(
+            title: title,
+            insets: NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 0)
+        )
+
+        return header
     }
 
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {

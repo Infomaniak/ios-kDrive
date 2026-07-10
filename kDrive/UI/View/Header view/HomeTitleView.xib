@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -16,7 +16,7 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" verticalCompressionResistancePriority="1000" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EKQ-tS-4tN" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                    <rect key="frame" x="24" y="0.0" width="366" height="53"/>
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="53"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                     <color key="textColor" name="primaryTextColor"/>
@@ -30,13 +30,17 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
                 <constraint firstItem="EKQ-tS-4tN" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="E8T-eq-dRV"/>
-                <constraint firstAttribute="trailing" secondItem="EKQ-tS-4tN" secondAttribute="trailing" constant="24" id="Ghb-Ho-f80"/>
-                <constraint firstItem="EKQ-tS-4tN" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="24" id="bEK-Mb-90o"/>
+                <constraint firstAttribute="trailing" secondItem="EKQ-tS-4tN" secondAttribute="trailing" id="Ghb-Ho-f80"/>
+                <constraint firstItem="EKQ-tS-4tN" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="bEK-Mb-90o"/>
                 <constraint firstAttribute="bottom" secondItem="EKQ-tS-4tN" secondAttribute="bottom" id="qVs-sJ-kJf"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
+                <outlet property="bottomConstraint" destination="qVs-sJ-kJf" id="ld8-ob-mXA"/>
+                <outlet property="leadingConstraint" destination="bEK-Mb-90o" id="IB6-mx-I9q"/>
                 <outlet property="titleLabel" destination="EKQ-tS-4tN" id="fqH-Jo-UVQ"/>
+                <outlet property="topConstraint" destination="E8T-eq-dRV" id="El7-XN-uID"/>
+                <outlet property="trailingConstraint" destination="Ghb-Ho-f80" id="kDc-ne-csd"/>
             </connections>
             <point key="canvasLocation" x="127.53623188405798" y="-0.33482142857142855"/>
         </view>

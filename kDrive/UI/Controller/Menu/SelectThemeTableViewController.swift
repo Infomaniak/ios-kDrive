@@ -35,6 +35,7 @@ class SelectThemeTableViewController: BaseGroupedTableViewController {
 
         tableView.register(cellView: SelectionTableViewCell.self)
         tableView.allowsMultipleSelection = false
+        tableView.sectionFooterHeight = 0
 
         selectedTheme = UserDefaults.shared.theme
     }
@@ -45,16 +46,16 @@ class SelectThemeTableViewController: BaseGroupedTableViewController {
     }
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return tableContent.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return tableContent.count
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: SelectionTableViewCell.self, for: indexPath)
-        let currentTheme = tableContent[indexPath.row]
+        let currentTheme = tableContent[indexPath.section]
         if currentTheme == selectedTheme {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
@@ -63,7 +64,7 @@ class SelectThemeTableViewController: BaseGroupedTableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let theme = tableContent[indexPath.row]
+        let theme = tableContent[indexPath.section]
         matomo.track(eventWithCategory: .settings, name: "theme\(theme.rawValue.capitalized)")
         UserDefaults.shared.theme = theme
         appNavigable.updateTheme()

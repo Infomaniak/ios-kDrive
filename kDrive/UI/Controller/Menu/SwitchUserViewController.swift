@@ -47,6 +47,7 @@ class SwitchUserViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: UserAccountTableViewCell.self)
+        tableView.sectionFooterHeight = 0
 
         // Try to update other accounts infos
         Task {
@@ -149,22 +150,29 @@ class SwitchUserViewController: UIViewController {
 
 extension SwitchUserViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let user = users[indexPath.row]
+        let user = users[indexPath.section]
         switchToConnectedUserId(user.id)
+    }
+
+    func tableView(_: UITableView, viewForHeaderInSection _: Int) -> UIView? {
+        return nil
     }
 }
 
 // MARK: - Table view data source
 
 extension SwitchUserViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func numberOfSections(in _: UITableView) -> Int {
         return users.count
     }
 
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let user = users[indexPath.row]
+        let user = users[indexPath.section]
         let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
-        cell.initWithPositionAndShadow(isFirst: true, isLast: true)
         cell.titleLabel.text = user.displayName
         cell.userEmailLabel.text = user.email
         cell.logoImage.image = KDriveResourcesAsset.placeholderAvatar.image

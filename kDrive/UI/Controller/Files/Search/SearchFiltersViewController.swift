@@ -60,8 +60,41 @@ class SearchFiltersViewController: UITableViewController {
 
     private let inputCellPath = IndexPath(row: 1, section: 1)
 
+    private enum Section: CaseIterable {
+        case date
+        case type
+        case categoryManagement
+        case categoryBelongAll
+        case categoryBelongOne
+
+        var filterType: FilterType {
+            switch self {
+            case .date:
+                return .date
+            case .type:
+                return .type
+            default:
+                return .categories
+            }
+        }
+
+        var headerTitle: String? {
+            switch self {
+            case .date:
+                return FilterType.date.title
+            case .type:
+                return FilterType.type.title
+            case .categoryManagement:
+                return FilterType.categories.title
+            case .categoryBelongAll, .categoryBelongOne:
+                return nil
+            }
+        }
+    }
+
+    private let sections = Section.allCases
+
     private enum SearchFiltersRowsInSection {
-        static let categories = 3
         static let type = 2
         static let typeSearchExtension = 1
         static let date = 1
@@ -83,8 +116,8 @@ class SearchFiltersViewController: UITableViewController {
             forCellReuseIdentifier: "FileExtensionTextInputTableViewCell"
         )
 
-        let index = filters.belongToAllCategories ? 1 : 2
-        tableView.selectRow(at: IndexPath(row: index, section: 2), animated: false, scrollPosition: .none)
+        let categorySection = filters.belongToAllCategories ? 3 : 4
+        tableView.selectRow(at: IndexPath(row: 0, section: categorySection), animated: false, scrollPosition: .none)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -126,13 +159,13 @@ class SearchFiltersViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return filterTypes.count
+        return sections.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch filterTypes[section] {
-        case .categories:
-            return SearchFiltersRowsInSection.categories
+        switch sections[section] {
+        case .categoryManagement, .categoryBelongAll, .categoryBelongOne:
+            return 1
         case .type:
             // searchExtension has a second cell for input
             guard filters.fileType == .searchExtension else {
@@ -145,13 +178,11 @@ class SearchFiltersViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let filterType = filterTypes[indexPath.section]
-        switch filterType {
+        switch sections[indexPath.section] {
         case .date:
             let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
 
             let filterType = filterTypes[indexPath.section]
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.configure(with: filterType, filters: filters)
 
             return cell
@@ -162,7 +193,6 @@ class SearchFiltersViewController: UITableViewController {
                 let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
 
                 let filterType = filterTypes[indexPath.section]
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.configure(with: filterType, filters: filters)
 
                 return cell
@@ -175,33 +205,36 @@ class SearchFiltersViewController: UITableViewController {
 
             return cell
 
-        case .categories:
-            if indexPath.row == 0 {
-                let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
+        case .categoryManagement:
+            let cell = tableView.dequeueReusableCell(type: ManageCategoriesTableViewCell.self, for: indexPath)
+            cell.configure(with: Array(filters.categories))
+            return cell
 
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                cell.configure(with: Array(filters.categories))
+        case .categoryBelongAll:
+            let cell = tableView.dequeueReusableCell(type: SelectTableViewCell.self, for: indexPath)
+            cell.label.text = KDriveResourcesStrings.Localizable.belongToAllCategoriesFilterDescription
+            return cell
 
-                return cell
-            } else {
-                let cell = tableView.dequeueReusableCell(type: SelectTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-                switch indexPath.row {
-                case 1:
-                    cell.label.text = KDriveResourcesStrings.Localizable.belongToAllCategoriesFilterDescription
-                case 2:
-                    cell.label.text = KDriveResourcesStrings.Localizable.belongToOneCategoryFilterDescription
-                default:
-                    cell.label.text = ""
-                }
-                return cell
-            }
+        case .categoryBelongOne:
+            let cell = tableView.dequeueReusableCell(type: SelectTableViewCell.self, for: indexPath)
+            cell.label.text = KDriveResourcesStrings.Localizable.belongToOneCategoryFilterDescription
+            return cell
         }
     }
 
+    override func tableView(_: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        if sections[section].headerTitle == nil {
+            return .zero
+        }
+        return UITableView.automaticDimension
+    }
+
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let filterType = filterTypes[section]
-        return HomeTitleView.instantiate(title: filterType.title)
+        guard let title = sections[section].headerTitle else { return nil }
+        return HomeTitleView.instantiate(
+            title: title,
+            insets: NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 0)
+        )
     }
 
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -216,8 +249,7 @@ class SearchFiltersViewController: UITableViewController {
     // MARK: - Table view delegate
 
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-        let filterType = filterTypes[indexPath.section]
-        switch filterType {
+        switch sections[indexPath.section] {
         case .date:
             matomo.track(eventWithCategory: .search, name: "filterDate")
             let customDateOption: DateOption
@@ -230,7 +262,7 @@ class SearchFiltersViewController: UITableViewController {
             let sheetViewController = FloatingPanelSelectOptionViewController<DateOption>.instantiateSheet(
                 options: allCases,
                 selectedOption: filters.date,
-                headerTitle: filterType.title,
+                headerTitle: FilterType.date.title,
                 delegate: self
             )
             present(sheetViewController, animated: true)
@@ -244,7 +276,7 @@ class SearchFiltersViewController: UITableViewController {
                 let sheetViewController = FloatingPanelSelectOptionViewController<ConvertedType>.instantiateSheet(
                     options: fileTypes,
                     selectedOption: filters.fileType,
-                    headerTitle: filterType.title,
+                    headerTitle: FilterType.type.title,
                     delegate: self
                 )
                 present(sheetViewController, animated: true)
@@ -253,25 +285,23 @@ class SearchFiltersViewController: UITableViewController {
                 return indexPath
             }
 
-        case .categories:
-            if indexPath.row == 0 {
-                matomo.track(eventWithCategory: .search, name: "filterCategory")
-                let manageCategoriesViewController = ManageCategoriesViewController
-                    .instantiate(driveFileManager: driveFileManager)
-                manageCategoriesViewController.canEdit = false
-                manageCategoriesViewController.selectedCategories = Array(filters.categories)
-                manageCategoriesViewController.delegate = self
-                navigationController?.pushViewController(manageCategoriesViewController, animated: true)
-                return nil
-            } else {
-                return indexPath
-            }
+        case .categoryManagement:
+            matomo.track(eventWithCategory: .search, name: "filterCategory")
+            let manageCategoriesViewController = ManageCategoriesViewController
+                .instantiate(driveFileManager: driveFileManager)
+            manageCategoriesViewController.canEdit = false
+            manageCategoriesViewController.selectedCategories = Array(filters.categories)
+            manageCategoriesViewController.delegate = self
+            navigationController?.pushViewController(manageCategoriesViewController, animated: true)
+            return nil
+
+        case .categoryBelongAll, .categoryBelongOne:
+            return indexPath
         }
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let filterType = filterTypes[indexPath.section]
-        switch filterType {
+        switch sections[indexPath.section] {
         case .date:
             break
         case .type:
@@ -282,10 +312,12 @@ class SearchFiltersViewController: UITableViewController {
                 }
                 return
             }
-        case .categories:
-            if indexPath.row > 0 {
-                filters.belongToAllCategories = indexPath.row == 1
-            }
+        case .categoryManagement:
+            break
+        case .categoryBelongAll:
+            filters.belongToAllCategories = true
+        case .categoryBelongOne:
+            filters.belongToAllCategories = false
         }
     }
 }

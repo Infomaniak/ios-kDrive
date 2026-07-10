@@ -259,9 +259,7 @@ final class ManageCategoriesViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(type: CategoryTableViewCell.self, for: indexPath)
 
         let category = category(at: indexPath)
-        let count = self.tableView(tableView, numberOfRowsInSection: indexPath.section)
 
-        cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == count - 1)
         if category == dummyCategory {
             cell.configureCreateCell(name: searchText ?? "")
         } else {

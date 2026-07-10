@@ -111,8 +111,8 @@ class RootMenuCell: UICollectionViewCell {
             separatorView.heightAnchor.constraint(equalToConstant: 1),
 
             contentInsetView.heightAnchor.constraint(equalToConstant: 60),
-            contentInsetView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 12),
-            contentInsetView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
+            contentInsetView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            contentInsetView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             topConstraint!,
             bottomConstraint!,
 
@@ -136,36 +136,5 @@ class RootMenuCell: UICollectionViewCell {
         titleLabel.text = title
         iconImageView.image = icon
         iconImageView.isAccessibilityElement = false
-    }
-
-    open func initWithPositionAndShadow(isFirst: Bool = false, isLast: Bool = false, elevation: Double = 0, radius: CGFloat = 6) {
-        if isLast && isFirst {
-            separatorView.isHidden = true
-            topConstraint?.constant = 8
-            bottomConstraint?.constant = 8
-            contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-                radius: radius
-            )
-        } else if isFirst {
-            separatorView.isHidden = false
-            topConstraint?.constant = 8
-            bottomConstraint?.constant = 0
-            contentInsetView.roundCorners(corners: [.layerMaxXMinYCorner, .layerMinXMinYCorner], radius: radius)
-        } else if isLast {
-            separatorView.isHidden = true
-            topConstraint?.constant = 0
-            bottomConstraint?.constant = 8
-            contentInsetView.roundCorners(corners: [.layerMaxXMaxYCorner, .layerMinXMaxYCorner], radius: radius)
-        } else {
-            separatorView.isHidden = false
-            topConstraint?.constant = 0
-            bottomConstraint?.constant = 0
-            contentInsetView.roundCorners(
-                corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-                radius: 0
-            )
-        }
-        contentInsetView.addShadow(elevation: elevation)
     }
 }

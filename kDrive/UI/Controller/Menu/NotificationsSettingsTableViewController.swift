@@ -92,7 +92,6 @@ class NotificationsSettingsTableViewController: BaseGroupedTableViewController {
         switch rows[indexPath.row] {
         case .receiveNotification:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationReceiveNotifications
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.isNotificationEnabled
@@ -103,7 +102,6 @@ class NotificationsSettingsTableViewController: BaseGroupedTableViewController {
             return cell
         case .general:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationGeneralChannelName
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
@@ -115,7 +113,6 @@ class NotificationsSettingsTableViewController: BaseGroupedTableViewController {
             return cell
         case .importFile:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationFileUpload
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
@@ -127,7 +124,6 @@ class NotificationsSettingsTableViewController: BaseGroupedTableViewController {
             return cell
         case .sharedWithMe:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow()
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationSharedWithMeChannelName
             cell.separator?.isHidden = true
             cell.valueSwitch.isEnabled = !disableSwitch
@@ -139,7 +135,6 @@ class NotificationsSettingsTableViewController: BaseGroupedTableViewController {
             return cell
         case .newComments:
             let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isLast: true)
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.notificationCommentChannelName
             cell.valueSwitch.isEnabled = !disableSwitch
             cell.valueSwitch.isOn = UserDefaults.shared.newCommentNotificationsEnabled

@@ -45,6 +45,9 @@ class FileNameTableViewCell: UITableViewCell, UITextFieldDelegate {
     override func layoutSubviews() {
         super.layoutSubviews()
         textField.setClearButton()
+        if #available(iOS 26.0, *) {
+            cornerConfiguration = .corners(radius: .fixed(0))
+        }
     }
 
     @objc func textFieldDidChange() {

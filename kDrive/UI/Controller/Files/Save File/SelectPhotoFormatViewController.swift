@@ -34,6 +34,25 @@ class SelectPhotoFormatViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: SelectionTableViewCell.self)
+
+        let footerView = SelectPhotoFormatFooterView.instantiate()
+        tableView.tableFooterView = footerView
+        tableView.sectionHeaderHeight = 0
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard let footerView = tableView.tableFooterView else {
+            return
+        }
+
+        let width = tableView.bounds.size.width
+        let size = footerView.systemLayoutSizeFitting(CGSize(width: width, height: UIView.layoutFittingCompressedSize.height))
+
+        if footerView.frame.size.height != size.height {
+            footerView.frame.size.height = size.height
+            tableView.tableFooterView = footerView
+        }
     }
 
     static func instantiate(selectedFormat: PhotoFileFormat) -> SelectPhotoFormatViewController {
@@ -47,27 +66,22 @@ class SelectPhotoFormatViewController: UIViewController {
 // MARK: - UITableViewDataSource
 
 extension SelectPhotoFormatViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        tableContent.count
+    func numberOfSections(in _: UITableView) -> Int {
+        return tableContent.count
+    }
+
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        return 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: SelectionTableViewCell.self, for: indexPath)
-        let photoFormat = tableContent[indexPath.row]
+        let photoFormat = tableContent[indexPath.section]
         cell.label.text = photoFormat.selectionTitle
         if photoFormat == selectedFormat {
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
         }
         return cell
-    }
-
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return UITableView.automaticDimension
-    }
-
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        let footerView = SelectPhotoFormatFooterView.instantiate()
-        return footerView
     }
 }
 
@@ -75,7 +89,7 @@ extension SelectPhotoFormatViewController: UITableViewDataSource {
 
 extension SelectPhotoFormatViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        delegate?.didSelectPhotoFormat(tableContent[indexPath.row])
+        delegate?.didSelectPhotoFormat(tableContent[indexPath.section])
         navigationController?.popViewController(animated: true)
     }
 }

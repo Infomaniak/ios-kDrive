@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -62,10 +62,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="CCZ-mR-gNe"/>
-                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" constant="8" id="b3L-GJ-LSF"/>
-                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="eo3-Nh-xzM"/>
-                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" constant="24" id="vUN-8O-pqH"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="CCZ-mR-gNe"/>
+                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" id="b3L-GJ-LSF"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="eo3-Nh-xzM"/>
+                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" id="vUN-8O-pqH"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -84,7 +84,7 @@
     </objects>
     <resources>
         <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="separatorColor">
             <color red="0.96862745098039216" green="0.96862745098039216" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

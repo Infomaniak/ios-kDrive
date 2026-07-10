@@ -573,7 +573,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                         selectionMode: false
                     )
                     cell.configure(with: viewModel)
-                    cell.initStyle(isFirst: menuItem.isFirst, isLast: menuItem.isLast, inFolderSelectMode: true)
+                    cell.initStyle(inFolderSelectMode: true)
                     cell.setEnabled(true)
                     cell.moreButton.isHidden = true
 
@@ -587,7 +587,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     }
 
                     rootMenuCell.configure(title: menuItem.name, icon: menuItem.image)
-                    rootMenuCell.initWithPositionAndShadow(isFirst: menuItem.isFirst, isLast: menuItem.isLast)
                     return rootMenuCell
                 }
             }
@@ -649,37 +648,35 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     }
 
     static func createListLayout(selectMode: Bool, isCompactView: Bool) -> UICollectionViewLayout {
-        let sectionProvider: UICollectionViewCompositionalLayoutSectionProvider = { sectionIndex, _ in
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                  heightDimension: .estimated(60))
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        let configuration = UICollectionViewCompositionalLayoutConfiguration()
+        configuration
+            .boundarySupplementaryItems = [generateHeaderItem(leading: isCompactView ? UIConstants.Padding.mediumSmall : 0)]
 
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
-                                                   heightDimension: .estimated(60))
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize,
-                                                           subitems: [item])
+        let sectionProvider: UICollectionViewCompositionalLayoutSectionProvider = { sectionIndex, layoutEnvironment in
+            let appearance: UICollectionLayoutListConfiguration.Appearance =
+                (isCompactView || selectMode) ? .insetGrouped : .sidebar
 
-            let section = NSCollectionLayoutSection(group: group)
-            if selectMode {
-                section.contentInsets = NSDirectionalEdgeInsets(
-                    top: -UIConstants.Padding.small,
-                    leading: UIConstants.Padding.mediumSmall,
-                    bottom: UIConstants.Padding.standard,
-                    trailing: UIConstants.Padding.mediumSmall
-                )
+            var listConfig = UICollectionLayoutListConfiguration(appearance: appearance)
+            listConfig.showsSeparators = false
+
+            if #available(iOS 26.0, *), !selectMode {
+                listConfig.backgroundColor = .clear
             } else {
-                section.contentInsets = NSDirectionalEdgeInsets(
-                    top: -UIConstants.Padding.small,
-                    leading: UIConstants.Padding.none,
-                    bottom: UIConstants.Padding.standard,
-                    trailing: UIConstants.Padding.none
-                )
+                listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
             }
+
+            let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
+            section.contentInsetsReference = .safeArea
+            section.contentInsets = .init(
+                top: 0,
+                leading: UIConstants.Padding.mediumSmall,
+                bottom: UIConstants.Padding.standard,
+                trailing: UIConstants.Padding.mediumSmall
+            )
 
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                     heightDimension: .estimated(8))
-
-            if sectionIndex == 0 && !selectMode {
+            if sectionIndex == 0 && !selectMode && isCompactView {
                 let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
                     layoutSize: headerSize,
                     elementKind: RootMenuHeaderView.kind.rawValue,
@@ -703,31 +700,21 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     alignment: .top
                 )
 
+                sectionHeaderItem.contentInsets = .init(
+                    top: UIConstants.Padding.small,
+                    leading: -UIConstants.Padding.mediumSmall,
+                    bottom: UIConstants.Padding.standard,
+                    trailing: -UIConstants.Padding.mediumSmall
+                )
+
                 section.boundarySupplementaryItems = [sectionHeaderItem]
             }
 
             return section
         }
 
-        let configuration = UICollectionViewCompositionalLayoutConfiguration()
-        configuration
-            .boundarySupplementaryItems = [generateHeaderItem(leading: isCompactView ? UIConstants.Padding.mediumSmall : 0)]
-
-        if !(isCompactView || selectMode) {
-            let layout = UICollectionViewCompositionalLayout(sectionProvider: { _, layoutEnvironment in
-                var listConfig = UICollectionLayoutListConfiguration(appearance: .sidebar)
-                if #available(iOS 26.0, *) {
-                    listConfig.backgroundColor = .clear
-                } else {
-                    listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
-                }
-                return NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
-            }, configuration: configuration)
-            return layout
-        } else {
-            let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
-            return layout
-        }
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
+        return layout
     }
 
     @objc func presentSearch() {

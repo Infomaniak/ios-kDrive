@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -20,10 +20,10 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xFX-mO-AH4">
-                        <rect key="frame" x="24" y="16" width="272" height="75"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="95"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WYb-0j-Zxn" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
-                                <rect key="frame" x="16" y="25.5" width="24" height="24"/>
+                                <rect key="frame" x="16" y="35.5" width="24" height="24"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="24" id="TSL-eL-vaY"/>
@@ -31,10 +31,10 @@
                                 </constraints>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="qT7-Rf-w44">
-                                <rect key="frame" x="48" y="16" width="188" height="43"/>
+                                <rect key="frame" x="48" y="16" width="236" height="63"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Importation en cours" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UNq-hI-wtf" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                        <rect key="frame" x="0.0" y="0.0" width="188" height="20.5"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Importation en cours" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UNq-hI-wtf" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
+                                        <rect key="frame" x="0.0" y="0.0" width="236" height="34.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -44,7 +44,7 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="2649 fichiers restants" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yi9-hz-m6I" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                        <rect key="frame" x="0.0" y="28.5" width="188" height="14.5"/>
+                                        <rect key="frame" x="0.0" y="42.5" width="236" height="20.5"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <nil key="textColor"/>
                                         <nil key="highlightedColor"/>
@@ -55,7 +55,7 @@
                                 </subviews>
                             </stackView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="TPK-if-oYx">
-                                <rect key="frame" x="244" y="31.5" width="12" height="12"/>
+                                <rect key="frame" x="292" y="41.5" width="12" height="12"/>
                                 <color key="tintColor" name="secondaryTextColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="12" id="8j9-Rv-gPY"/>
@@ -81,10 +81,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstAttribute="bottom" secondItem="xFX-mO-AH4" secondAttribute="bottom" constant="4" id="4wC-Fb-QQQ"/>
-                    <constraint firstAttribute="trailing" secondItem="xFX-mO-AH4" secondAttribute="trailing" constant="24" id="XWj-RZ-bw4"/>
-                    <constraint firstItem="xFX-mO-AH4" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="16" id="i98-qz-ZEe"/>
-                    <constraint firstItem="xFX-mO-AH4" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="qZG-EV-4T2"/>
+                    <constraint firstAttribute="bottom" secondItem="xFX-mO-AH4" secondAttribute="bottom" id="4wC-Fb-QQQ"/>
+                    <constraint firstAttribute="trailing" secondItem="xFX-mO-AH4" secondAttribute="trailing" id="XWj-RZ-bw4"/>
+                    <constraint firstItem="xFX-mO-AH4" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="i98-qz-ZEe"/>
+                    <constraint firstItem="xFX-mO-AH4" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="qZG-EV-4T2"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -98,7 +98,7 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-right" width="24" height="24"/>
+        <image name="chevron-right" width="16" height="16"/>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>

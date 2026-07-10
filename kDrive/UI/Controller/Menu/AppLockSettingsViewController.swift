@@ -25,7 +25,7 @@ import LocalAuthentication
 import UIKit
 
 class AppLockSettingsViewController: UIViewController {
-    @IBOutlet var faceIdSwitch: UISwitch!
+    @IBOutlet var tableView: UITableView!
     @IBOutlet var navigationBar: UINavigationBar!
 
     @LazyInjectService private var matomo: MatomoUtils
@@ -38,7 +38,12 @@ class AppLockSettingsViewController: UIViewController {
         navigationBar.shadowImage = UIImage()
         navigationBar.setBackgroundImage(UIImage(), for: .default)
 
-        faceIdSwitch.setOn(UserDefaults.shared.isAppLockEnabled, animated: false)
+        tableView.register(cellView: ParameterSwitchTableViewCell.self)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        tableView.separatorStyle = .none
+        tableView.isScrollEnabled = false
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -67,30 +72,48 @@ class AppLockSettingsViewController: UIViewController {
         closeActionHandler?()
     }
 
-    @IBAction func didChangeSwitchValue(_ sender: UISwitch) {
-        let context = LAContext()
-        let reason = KDriveResourcesStrings.Localizable.appSecurityDescription
-        var error: NSError?
-        matomo.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
-
-        if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
-            context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
-                Task { @MainActor in
-                    if success {
-                        UserDefaults.shared.isAppLockEnabled = sender.isOn
-                        self.appLockHelper.setTime()
-                    } else {
-                        sender.setOn(!sender.isOn, animated: true)
-                    }
-                }
-            }
-        } else {
-            sender.setOn(!sender.isOn, animated: true)
-        }
-    }
-
     class func instantiate() -> AppLockSettingsViewController {
         return Storyboard.menu
             .instantiateViewController(withIdentifier: "AppLockSettingsViewController") as! AppLockSettingsViewController
+    }
+}
+
+extension AppLockSettingsViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        return 1
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
+        cell.valueLabel.text = KDriveCoreStrings.Localizable.buttonSettingsLockApp
+        cell.valueSwitch.isOn = UserDefaults.shared.isAppLockEnabled
+        cell.switchHandler = { [weak self] sender in
+            guard let self else { return }
+
+            let context = LAContext()
+            let reason = KDriveResourcesStrings.Localizable.appSecurityDescription
+            var error: NSError?
+            matomo.track(eventWithCategory: .settings, name: "lockApp", value: sender.isOn)
+
+            if context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) {
+                context.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason) { success, _ in
+                    Task { @MainActor in
+                        if success {
+                            UserDefaults.shared.isAppLockEnabled = sender.isOn
+                            self.appLockHelper.setTime()
+                        } else {
+                            sender.setOn(!sender.isOn, animated: true)
+                        }
+                    }
+                }
+            } else {
+                sender.setOn(!sender.isOn, animated: true)
+            }
+        }
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }

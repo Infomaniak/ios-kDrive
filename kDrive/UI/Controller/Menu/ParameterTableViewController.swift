@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DesignSystem
 import InfomaniakBugTracker
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
@@ -117,7 +118,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
-        super.init()
+        super.init(style: .insetGrouped)
     }
 
     override func viewDidLoad() {
@@ -181,9 +182,10 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         headerView.addSubview(label)
 
         NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 24),
-            label.trailingAnchor.constraint(equalTo: headerView.trailingAnchor, constant: -24),
-            label.centerYAnchor.constraint(equalTo: headerView.centerYAnchor)
+            label.leadingAnchor.constraint(equalTo: headerView.leadingAnchor),
+            label.trailingAnchor.constraint(equalTo: headerView.trailingAnchor),
+            label.topAnchor.constraint(equalTo: headerView.topAnchor, constant: IKPadding.mini),
+            label.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -IKPadding.mini)
         ])
 
         return headerView
@@ -232,10 +234,6 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         switch row {
         case .photos, .theme, .notifications:
             let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(
-                isFirst: indexPath.row == 0,
-                isLast: indexPath.row == visibleRows.count - 1
-            )
             cell.titleLabel.text = row.title
             if row == .photos {
                 cell.valueLabel.text = photoLibraryUploader.isSyncEnabled ? KDriveResourcesStrings.Localizable
@@ -249,19 +247,11 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
         case .security, .storage, .about, .joinBeta, .feedback, .deleteAccount:
             let cell = tableView.dequeueReusableCell(type: ParameterAboutTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(
-                isFirst: indexPath.row == 0,
-                isLast: indexPath.row == visibleRows.count - 1
-            )
             cell.titleLabel.text = row.title
             return cell
 
         case .offlineSync:
             let cell = tableView.dequeueReusableCell(type: AboutDetailTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(
-                isFirst: indexPath.row == 0,
-                isLast: indexPath.row == visibleRows.count - 1
-            )
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.syncWifiSettingsTitle
             cell.detailLabel.text = UserDefaults.shared.syncOfflineMode.title
             return cell
@@ -270,11 +260,6 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
     private func mykSuiteCell(_ tableView: UITableView, forRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: ParameterTableViewCell.self, for: indexPath)
-        cell.initWithPositionAndShadow(
-            isFirst: indexPath.row == 0,
-            isLast: indexPath.row == MykSuiteParameterRow.allCases.count - 1
-        )
-
         let row = MykSuiteParameterRow.allCases[indexPath.row]
         switch row {
         case .email:
@@ -321,22 +306,24 @@ class ParameterTableViewController: BaseGroupedTableViewController {
         let row = visibleRows[indexPath.row]
         switch row {
         case .storage:
-            navigationController?.pushViewController(StorageTableViewController(style: .grouped), animated: true)
+            navigationController?.pushViewController(StorageTableViewController(style: .insetGrouped), animated: true)
         case .photos:
             navigationController?.pushViewController(PhotoSyncSettingsViewController(), animated: true)
         case .theme:
-            navigationController?.pushViewController(SelectThemeTableViewController(), animated: true)
+            navigationController?.pushViewController(SelectThemeTableViewController(style: .insetGrouped), animated: true)
         case .notifications:
-            navigationController?.pushViewController(NotificationsSettingsTableViewController(), animated: true)
+            navigationController?.pushViewController(NotificationsSettingsTableViewController(style: .insetGrouped),
+                                                     animated: true)
         case .security:
-            navigationController?.pushViewController(SecurityTableViewController(), animated: true)
+            navigationController?.pushViewController(SecurityTableViewController(style: .insetGrouped), animated: true)
         case .offlineSync:
             navigationController?.pushViewController(
-                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode, offlineSync: true),
+                WifiSyncSettingsViewController(selectedMode: UserDefaults.shared.syncOfflineMode, offlineSync: true,
+                                               style: .insetGrouped),
                 animated: true
             )
         case .about:
-            navigationController?.pushViewController(AboutTableViewController(), animated: true)
+            navigationController?.pushViewController(AboutTableViewController(style: .insetGrouped), animated: true)
         case .joinBeta:
             UIApplication.shared.open(URLConstants.testFlight.url)
             matomo.track(eventWithCategory: .settings, name: "joinBetaProgram")

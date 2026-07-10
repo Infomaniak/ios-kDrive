@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -72,10 +72,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstAttribute="bottom" secondItem="33t-VZ-VCS" secondAttribute="bottom" constant="8" id="41f-RM-iqV"/>
-                    <constraint firstItem="33t-VZ-VCS" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="MUX-MV-tZW"/>
-                    <constraint firstItem="33t-VZ-VCS" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="YTe-Z2-MZQ"/>
-                    <constraint firstAttribute="trailing" secondItem="33t-VZ-VCS" secondAttribute="trailing" constant="24" id="kKG-ZD-KkC"/>
+                    <constraint firstAttribute="bottom" secondItem="33t-VZ-VCS" secondAttribute="bottom" id="41f-RM-iqV"/>
+                    <constraint firstItem="33t-VZ-VCS" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="MUX-MV-tZW"/>
+                    <constraint firstItem="33t-VZ-VCS" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="YTe-Z2-MZQ"/>
+                    <constraint firstAttribute="trailing" secondItem="33t-VZ-VCS" secondAttribute="trailing" id="kKG-ZD-KkC"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -93,7 +93,7 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-right" width="24" height="24"/>
+        <image name="chevron-right" width="16" height="16"/>
         <image name="folder-filled" width="24" height="24"/>
         <namedColor name="secondaryTextColor">
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

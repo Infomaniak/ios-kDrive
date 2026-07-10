@@ -79,7 +79,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         self.driveFileManager = driveFileManager
         self.isModallyPresented = isModallyPresented
         self.onDismiss = onDismiss
-        super.init(style: .plain)
+        super.init(style: .insetGrouped)
 
         observeUploadCount()
     }
@@ -104,6 +104,7 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         tableView.register(cellView: UploadsPausedTableViewCell.self)
         tableView.register(KSuiteGetProViewCell.self, forCellReuseIdentifier: KSuiteGetProViewCell.reuseIdentifier)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        tableView.sectionHeaderHeight = 0
 
         updateTableContent()
 
@@ -249,12 +250,10 @@ extension MenuViewController {
         } else if section == .uploads {
             if photoLibraryUploader.isWifiOnly && ReachabilityListener.instance.currentStatus == .cellular {
                 let cell = tableView.dequeueReusableCell(type: UploadsPausedTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
                 return cell
             } else {
                 let cell = tableView.dequeueReusableCell(type: UploadsInProgressTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.progressView.enableIndeterminate()
                 cell.setUploadCount(uploadCountManager?.uploadCount ?? 0)
                 return cell
@@ -262,7 +261,6 @@ extension MenuViewController {
         } else {
             let action = section.actions[indexPath.row]
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == section.actions.count - 1)
             cell.titleLabel.text = action.name
             cell.titleLabel.numberOfLines = 0
             cell.logoImage.image = action.image
@@ -313,6 +311,10 @@ extension MenuViewController {
         default:
             break
         }
+    }
+
+    override func tableView(_: UITableView, viewForHeaderInSection _: Int) -> UIView? {
+        return nil
     }
 
     // MARK: - Cell Button Action

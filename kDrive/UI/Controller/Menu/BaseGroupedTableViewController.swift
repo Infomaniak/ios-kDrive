@@ -20,8 +20,8 @@ import kDriveResources
 import UIKit
 
 class BaseGroupedTableViewController: UITableViewController {
-    init() {
-        super.init(style: .grouped)
+    override init(style: UITableView.Style = .grouped) {
+        super.init(style: style)
         tableView.separatorStyle = .none
         tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 

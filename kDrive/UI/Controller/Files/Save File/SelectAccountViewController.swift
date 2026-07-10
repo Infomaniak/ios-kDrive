@@ -27,7 +27,7 @@ protocol SelectAccountDelegate: AnyObject {
 
 final class SelectAccountViewController: UIViewController {
     let users: [UserProfile]
-    private let tableView = UITableView(frame: .zero, style: .plain)
+    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
 
     weak var delegate: SelectAccountDelegate?
 
@@ -57,7 +57,7 @@ final class SelectAccountViewController: UIViewController {
         tableView.separatorStyle = .none
 
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -68,6 +68,7 @@ final class SelectAccountViewController: UIViewController {
 
         tableView.register(cellView: UserAccountTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        tableView.sectionFooterHeight = 0
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.largeTitleDisplayMode = .always
@@ -77,24 +78,31 @@ final class SelectAccountViewController: UIViewController {
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
 extension SelectAccountViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_: UITableView, numberOfRowsInSection: Int) -> Int {
+    func numberOfSections(in _: UITableView) -> Int {
         return users.count
+    }
+
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        1
+    }
+
+    func tableView(_: UITableView, viewForHeaderInSection _: Int) -> UIView? {
+        return nil
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
         cell.accessoryImageView.image = nil
-        cell.initWithPositionAndShadow(isFirst: true, isLast: true)
-        cell.titleLabel.text = users[indexPath.row].displayName
-        cell.userEmailLabel.text = users[indexPath.row].email
-        users[indexPath.row].getAvatar { image in
+        cell.titleLabel.text = users[indexPath.section].displayName
+        cell.userEmailLabel.text = users[indexPath.section].email
+        users[indexPath.section].getAvatar { image in
             cell.logoImage.image = image
         }
         return cell
     }
 
     func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedAccount = users[indexPath.row]
+        let selectedAccount = users[indexPath.section]
         delegate?.didChangeAccount(account: selectedAccount)
         if let navigationController {
             navigationController.popViewController(animated: true)
