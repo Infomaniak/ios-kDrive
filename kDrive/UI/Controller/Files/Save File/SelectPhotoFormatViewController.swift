@@ -37,7 +37,22 @@ class SelectPhotoFormatViewController: UIViewController {
 
         let footerView = SelectPhotoFormatFooterView.instantiate()
         tableView.tableFooterView = footerView
-        tableView.sectionFooterHeight = 0
+        tableView.sectionHeaderHeight = 0
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        guard let footerView = tableView.tableFooterView else {
+            return
+        }
+
+        let width = tableView.bounds.size.width
+        let size = footerView.systemLayoutSizeFitting(CGSize(width: width, height: UIView.layoutFittingCompressedSize.height))
+
+        if footerView.frame.size.height != size.height {
+            footerView.frame.size.height = size.height
+            tableView.tableFooterView = footerView
+        }
     }
 
     static func instantiate(selectedFormat: PhotoFileFormat) -> SelectPhotoFormatViewController {

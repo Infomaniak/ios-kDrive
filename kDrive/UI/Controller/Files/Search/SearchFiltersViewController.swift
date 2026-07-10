@@ -222,7 +222,7 @@ class SearchFiltersViewController: UITableViewController {
         }
     }
 
-    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    override func tableView(_: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if sections[section].headerTitle == nil {
             return .zero
         }
