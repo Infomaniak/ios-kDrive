@@ -25,7 +25,7 @@ enum FileListSectionID: Hashable {
 }
 
 enum FileListItem: Differentiable {
-    case uploadCard(Int)
+    case uploadCard
     case file(File)
 
     var differenceIdentifier: String {
@@ -39,10 +39,10 @@ enum FileListItem: Differentiable {
 
     func isContentEqual(to source: FileListItem) -> Bool {
         switch (self, source) {
-        case (.uploadCard(let lhs), .uploadCard(let rhs)):
-            return lhs == rhs
+        case (.uploadCard, .uploadCard):
+            return true
         case (.file(let lhs), .file(let rhs)):
-            return lhs == rhs
+            return lhs.isContentEqual(to: rhs)
         default:
             return false
         }

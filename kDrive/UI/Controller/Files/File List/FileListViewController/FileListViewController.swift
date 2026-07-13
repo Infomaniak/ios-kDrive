@@ -59,7 +59,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     let viewModel: FileListViewModel
     var uploadCount = 0
-    var sections: [FileListSection] = []
+    var sections: [FileListSection] = [.init(id: .files, elements: [])]
 
     private var fileSectionIndex: Int? {
         sections.firstIndex { $0.id == .files }
@@ -362,7 +362,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         viewModel.barButtonPressed(sender: sender, type: .addToMyDrive)
     }
 
-    private func makeSections(files: [File], uploadCount: Int) -> [FileListSection] {
+    private func makeSections(files: [File]) -> [FileListSection] {
         var sections: [FileListSection] = []
 
         #if !ISEXTENSION
@@ -373,7 +373,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 FileListSection(
                     id: .uploads,
                     elements: [
-                        .uploadCard(uploadCount)
+                        .uploadCard
                     ]
                 )
             )
@@ -391,7 +391,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     func reloadCollectionViewWith(files: [File]) {
-        let newSections = makeSections(files: files, uploadCount: uploadCount)
+        let newSections = makeSections(files: files)
         let changeset = StagedChangeset(source: sections, target: newSections)
 
         collectionView.reload(using: changeset) { [weak self] sections in
@@ -459,7 +459,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     private func updateUploadCard(uploadCount: Int) {
         self.uploadCount = uploadCount
-        let newSections = makeSections(files: viewModel.files, uploadCount: uploadCount)
+        let newSections = makeSections(files: viewModel.files)
         let changeset = StagedChangeset(source: sections, target: newSections)
 
         collectionView.reload(using: changeset) { [weak self] sections in
