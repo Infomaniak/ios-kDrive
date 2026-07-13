@@ -118,7 +118,8 @@ extension MultipleSelectionFloatingPanelViewController {
 
         @LazyInjectService var freeSpaceService: FreeSpaceService
         guard freeSpaceService.checkEnoughAvailableSpaceForDownload(estimatedSize: estimatedSize) else {
-            UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
+            success = false
+            downloadError = .errorDeviceStorage
             return
         }
 
