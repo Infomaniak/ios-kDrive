@@ -40,11 +40,11 @@ struct DefaultFileListLayout: FileListLayout {
                 return createUploadLayout(environment: layoutEnvironment)
             } else if viewModel.listStyle == .list {
                 return createListLayout(environment: layoutEnvironment,
-                                            viewModel: viewModel,
-                                            headerEstimatedHeight: headerEstimatedHeight)
+                                        viewModel: viewModel,
+                                        headerEstimatedHeight: headerEstimatedHeight)
             } else {
                 return createGridLayout(environment: layoutEnvironment,
-                                            headerEstimatedHeight: headerEstimatedHeight)
+                                        headerEstimatedHeight: headerEstimatedHeight)
             }
         }
     }

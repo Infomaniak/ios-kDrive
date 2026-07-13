@@ -46,8 +46,8 @@ class RootMenuHeaderView: UICollectionReusableView {
 
     func configureInCollectionView(
         _ collectionView: UICollectionView,
-        driveFileManager: DriveFileManager,
-        presenter: UIViewController
+        driveFileManager _: DriveFileManager,
+        presenter _: UIViewController
     ) {
         self.collectionView = collectionView
         observeNetworkChange()
@@ -64,18 +64,18 @@ class RootMenuHeaderView: UICollectionReusableView {
     }
 
     private func reloadHeader() {
-            hideIfNeeded()
+        hideIfNeeded()
 
-            guard let collectionView else { return }
-            UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
-                let sectionHeaderContext = UICollectionViewLayoutInvalidationContext()
-                sectionHeaderContext.invalidateSupplementaryElements(
-                    ofKind: RootMenuHeaderView.kind.rawValue,
-                    at: [IndexPath(item: 0, section: 0)]
-                )
-                collectionView.collectionViewLayout.invalidateLayout(with: sectionHeaderContext)
-            }
+        guard let collectionView else { return }
+        UIView.transition(with: collectionView, duration: 0.25, options: .transitionCrossDissolve) {
+            let sectionHeaderContext = UICollectionViewLayoutInvalidationContext()
+            sectionHeaderContext.invalidateSupplementaryElements(
+                ofKind: RootMenuHeaderView.kind.rawValue,
+                at: [IndexPath(item: 0, section: 0)]
+            )
+            collectionView.collectionViewLayout.invalidateLayout(with: sectionHeaderContext)
         }
+    }
 
     private func observeNetworkChange() {
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in

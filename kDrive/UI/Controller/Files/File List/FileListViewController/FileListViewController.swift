@@ -779,7 +779,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                           multipleSelectionViewModel.selectedItems.contains(file) else {
                         continue
                     }
-                    collectionView.selectItem(at: IndexPath(item: i, section: fileSection), animated: false, scrollPosition: scrollPosition)
+                    collectionView.selectItem(at: IndexPath(item: i, section: fileSection),
+                                              animated: false, scrollPosition: scrollPosition)
                 }
             }
         }
@@ -805,7 +806,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 // MARK: - UICollectionViewDataSource
 
 extension FileListViewController {
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+    override func numberOfSections(in _: UICollectionView) -> Int {
         return sections.count
     }
 
