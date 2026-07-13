@@ -34,19 +34,26 @@ struct DefaultFileListLayout: FileListLayout {
 
     func createLayoutFor(viewModel: FileListViewModel) -> UICollectionViewLayout {
         let headerEstimatedHeight = viewModel.currentDirectory.visibility == .isTeamSpace ? 100.0 : 50.0
-
-        let layout = UICollectionViewCompositionalLayout { _, layoutEnvironment in
-            if viewModel.listStyle == .list {
+        return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+            let uploadInProgress = viewModel.uploadViewModel?.uploadCount ?? 0 > 0
+            if uploadInProgress && sectionIndex == 0 {
+                return createUploadLayout(environment: layoutEnvironment)
+            } else if viewModel.listStyle == .list {
                 return createListLayout(environment: layoutEnvironment,
-                                        viewModel: viewModel,
-                                        headerEstimatedHeight: headerEstimatedHeight)
+                                            viewModel: viewModel,
+                                            headerEstimatedHeight: headerEstimatedHeight)
             } else {
                 return createGridLayout(environment: layoutEnvironment,
-                                        headerEstimatedHeight: headerEstimatedHeight)
+                                            headerEstimatedHeight: headerEstimatedHeight)
             }
         }
+    }
 
-        return layout
+    private func createUploadLayout(environment: any NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
+        var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+        configuration.backgroundColor = .clear
+        configuration.showsSeparators = false
+        return NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: environment)
     }
 
     private func getColumnCountFor(width: CGFloat) -> Int {

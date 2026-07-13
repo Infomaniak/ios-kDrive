@@ -27,14 +27,9 @@ import UIKit
 protocol FilesHeaderViewDelegate: AnyObject {
     func sortButtonPressed()
     func gridButtonPressed()
-    func uploadCardSelected()
     func removeFilterButtonPressed(_ filter: Filterable)
     func multipleSelectionActionButtonPressed(_ button: SelectView.MultipleSelectionActionButton)
     func upsaleButtonPressed()
-}
-
-extension FilesHeaderViewDelegate {
-    func uploadCardSelected() {}
 }
 
 class FilesHeaderView: UIView {
@@ -43,7 +38,6 @@ class FilesHeaderView: UIView {
     @IBOutlet var sortView: UIView!
     @IBOutlet var sortButton: UIButton!
     @IBOutlet var listOrGridButton: UIButton!
-    @IBOutlet var uploadCardView: UploadCardView!
     @IBOutlet var filterView: FilterView!
     @IBOutlet var offlineView: UIView!
     @IBOutlet var activityListView: UIView!
@@ -74,20 +68,6 @@ class FilesHeaderView: UIView {
         if ReachabilityListener.instance.currentStatus == .offline {
             offlineView.isHidden = false
         }
-        uploadCardView.iconView.isHidden = true
-        uploadCardView.progressView.setInfomaniakStyle()
-        uploadCardView.roundCorners(
-            corners: [.layerMaxXMaxYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMinXMinYCorner],
-            radius: 10
-        )
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCard))
-        uploadCardView.addGestureRecognizer(tapGestureRecognizer)
-
-        uploadCardView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            uploadCardView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 0),
-            uploadCardView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 0)
-        ])
 
         setupTrashView()
 
@@ -143,10 +123,6 @@ class FilesHeaderView: UIView {
 
     @objc func didTapOnTrashHeaderView() {
         delegate?.upsaleButtonPressed()
-    }
-
-    @objc private func didTapOnCard() {
-        delegate?.uploadCardSelected()
     }
 
     @IBAction func filterButtonPressed(_ sender: UIButton) {

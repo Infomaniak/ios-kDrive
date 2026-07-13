@@ -58,7 +58,12 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     private var networkObserver: ObservationToken?
 
     let viewModel: FileListViewModel
-    var displayedFiles = [File]()
+    var uploadCount = 0
+    var sections: [FileListSection] = []
+
+    private var fileSectionIndex: Int? {
+        sections.firstIndex { $0.id == .files }
+    }
 
     var bindStore = Set<AnyCancellable>()
     var currentFileLoadingTask: Task<Void, Never>?
@@ -107,6 +112,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         collectionView.register(cellView: FileCollectionViewCell.self)
         collectionView.register(cellView: FileGridCollectionViewCell.self)
+        #if !ISEXTENSION
+        collectionView.register(cellView: UploadCardCell.self)
+        #endif
         collectionView.register(
             FilesHeaderReusableView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
@@ -152,13 +160,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             headerView.sortButton.layoutIfNeeded()
             headerView.listOrGridButton.setImage(viewModel.listStyle.icon, for: .normal)
             headerView.listOrGridButton.layoutIfNeeded()
-        }
-
-        if let uploadViewModel = viewModel.uploadViewModel {
-            headerView.uploadCardView.isHidden = uploadViewModel.uploadCount == 0
-            headerView.uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInThisFolderTitle
-            headerView.uploadCardView.setUploadCount(uploadViewModel.uploadCount)
-            headerView.uploadCardView.progressView.enableIndeterminate()
         }
 
         headerView.offlineView.isHidden = ReachabilityListener.instance.currentStatus != .offline
@@ -297,8 +298,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
 
         viewModel.multipleSelectionViewModel?.onSelectAll = { [weak self] in
-            for i in 0 ..< (self?.viewModel.files.count ?? 0) {
-                self?.collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: true, scrollPosition: [])
+            guard let self, let fileSection = fileSectionIndex else { return }
+            for i in 0 ..< self.viewModel.files.count {
+                self.collectionView.selectItem(at: IndexPath(row: i, section: fileSection), animated: true, scrollPosition: [])
             }
         }
 
@@ -360,11 +362,41 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         viewModel.barButtonPressed(sender: sender, type: .addToMyDrive)
     }
 
+    private func makeSections(files: [File], uploadCount: Int) -> [FileListSection] {
+        var sections: [FileListSection] = []
+
+        #if !ISEXTENSION
+        let shouldShowUploadSection = uploadCount > 0 && viewModel.configuration.showUploadingFiles
+
+        if shouldShowUploadSection {
+            sections.append(
+                FileListSection(
+                    id: .uploads,
+                    elements: [
+                        .uploadCard(uploadCount)
+                    ]
+                )
+            )
+        }
+        #endif
+
+        sections.append(
+            FileListSection(
+                id: .files,
+                elements: files.map { .file($0) }
+            )
+        )
+
+        return sections
+    }
+
     func reloadCollectionViewWith(files: [File]) {
-        let changeSet = StagedChangeset(source: displayedFiles, target: files)
-        collectionView.reload(using: changeSet,
-                              interrupt: { $0.changeCount > Endpoint.itemsPerPage },
-                              setData: { self.displayedFiles = $0 })
+        let newSections = makeSections(files: files, uploadCount: uploadCount)
+        let changeset = StagedChangeset(source: sections, target: newSections)
+
+        collectionView.reload(using: changeset) { [weak self] sections in
+            self?.sections = sections
+        }
 
         if let headerView {
             setUpHeaderView(headerView, isEmptyViewHidden: viewModel.isShowingEmptyView)
@@ -372,7 +404,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     func getDisplayedFile(at indexPath: IndexPath) -> File? {
-        return displayedFiles[safe: indexPath.item]
+        guard sections[safe: indexPath.section]?.id == .files,
+              case .file(let file) = sections[indexPath.section].elements[safe: indexPath.item] else {
+            return nil
+        }
+        return file
     }
 
     private func toggleRefreshing(_ refreshing: Bool) {
@@ -390,8 +426,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
         let newLayout = layoutHelper.createLayoutFor(viewModel: viewModel)
 
-        if !displayedFiles.isEmpty {
-            collectionView.reloadSections([0])
+        if let fileSection = fileSectionIndex {
+            collectionView.reloadSections([fileSection])
         }
 
         if let headerView {
@@ -422,21 +458,12 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     private func updateUploadCard(uploadCount: Int) {
-        let shouldHideUploadCard: Bool
-        collectionView.collectionViewLayout.invalidateLayout()
-        if uploadCount > 0 {
-            headerView?.uploadCardView.setUploadCount(uploadCount)
-            shouldHideUploadCard = false
-        } else {
-            shouldHideUploadCard = true
-        }
-        // Only perform reload if needed
-        if shouldHideUploadCard != headerView?.uploadCardView.isHidden {
-            headerView?.uploadCardView.isHidden = shouldHideUploadCard
-        }
+        self.uploadCount = uploadCount
+        let newSections = makeSections(files: viewModel.files, uploadCount: uploadCount)
+        let changeset = StagedChangeset(source: sections, target: newSections)
 
-        if shouldHideUploadCard {
-            tryLoadingFilesOrDisplayError()
+        collectionView.reload(using: changeset) { [weak self] sections in
+            self?.sections = sections
         }
     }
 
@@ -508,7 +535,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             let selectedFiles: [File]
             if viewModel.multipleSelectionViewModel?.isSelectAllModeEnabled == true {
                 allItemsSelected = true
-                selectedFiles = displayedFiles
+                selectedFiles = viewModel.files
                 exceptFileIds = Array(viewModel.multipleSelectionViewModel?.exceptItemIds ?? Set<Int>())
             } else {
                 allItemsSelected = false
@@ -590,7 +617,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     #if !ISEXTENSION
     func makeContextMenuQuickActions(indexPath: IndexPath) -> [UIAction] {
-        let file = displayedFiles[indexPath.row]
+        guard let file = getDisplayedFile(at: indexPath) else { return [] }
         let fileInformationsViewController = FileActionsFloatingPanelViewController(frozenFile: file,
                                                                                     driveFileManager: driveFileManager,
                                                                                     sourceView: collectionView
@@ -617,7 +644,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         contextMenuConfigurationForItemsAt indexPaths: [IndexPath],
         point: CGPoint
     ) -> UIContextMenuConfiguration? {
-        guard let indexPath = indexPaths.first else { return nil }
+        guard let indexPath = indexPaths.first,
+              indexPath.section == fileSectionIndex else { return nil }
         if (viewModel.getFile(at: indexPath)?.isDirectory == false && ReachabilityListener.instance.currentStatus == .offline) ||
             viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true {
             return nil
@@ -733,10 +761,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     func setSelectedCells() {
-        guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else { return }
+        guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel,
+              let fileSection = fileSectionIndex else { return }
         if multipleSelectionViewModel.isSelectAllModeEnabled {
             for i in 0 ..< viewModel.files.count {
-                collectionView.selectItem(at: IndexPath(row: i, section: 0), animated: false, scrollPosition: [])
+                collectionView.selectItem(at: IndexPath(row: i, section: fileSection), animated: false, scrollPosition: [])
             }
         } else {
             if multipleSelectionViewModel.isMultipleSelectionEnabled && !multipleSelectionViewModel.selectedItems.isEmpty {
@@ -746,11 +775,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                  */
                 let scrollPosition: UICollectionView.ScrollPosition = viewIfLoaded?.window != nil ? .centeredVertically : []
                 for i in 0 ..< viewModel.files.count {
-                    guard let file = getDisplayedFile(at: IndexPath(item: i, section: 0)),
+                    guard let file = getDisplayedFile(at: IndexPath(item: i, section: fileSection)),
                           multipleSelectionViewModel.selectedItems.contains(file) else {
                         continue
                     }
-                    collectionView.selectItem(at: IndexPath(item: i, section: 0), animated: false, scrollPosition: scrollPosition)
+                    collectionView.selectItem(at: IndexPath(item: i, section: fileSection), animated: false, scrollPosition: scrollPosition)
                 }
             }
         }
@@ -776,40 +805,62 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 // MARK: - UICollectionViewDataSource
 
 extension FileListViewController {
+    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return sections.count
+    }
+
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return displayedFiles.count
+        return sections[section].elements.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cellType: UICollectionViewCell.Type
-        switch viewModel.listStyle {
-        case .list:
-            cellType = FileCollectionViewCell.self
-        case .grid:
-            cellType = FileGridCollectionViewCell.self
+        let item = sections[indexPath.section].elements[indexPath.item]
+
+        switch item {
+        case .uploadCard:
+            #if !ISEXTENSION
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: UploadCardCell.identifier,
+                for: indexPath
+            ) as? UploadCardCell else {
+                fatalError("Failed to dequeue cell")
+            }
+            cell.configure(driveFileManager: driveFileManager, presenter: self)
+            return cell
+            #else
+            return UICollectionViewCell()
+            #endif
+        case .file(let file):
+            let cellType: UICollectionViewCell.Type
+
+            switch viewModel.listStyle {
+            case .list:
+                cellType = FileCollectionViewCell.self
+            case .grid:
+                cellType = FileGridCollectionViewCell.self
+            }
+
+            let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
+
+            cell.initStyle(inFolderSelectMode: false)
+            cell.configureWith(
+                driveFileManager: viewModel.driveFileManager,
+                file: file,
+                selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true
+            )
+            cell.delegate = self
+            if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
+                cell.setEnabled(false)
+            } else {
+                cell.setEnabled(true)
+            }
+
+            if viewModel.configuration.presentationOrigin == PresentationOrigin.activities {
+                cell.moreButton.isHidden = true
+            }
+
+            return cell
         }
-
-        let cell = collectionView.dequeueReusableCell(type: cellType, for: indexPath) as! FileCollectionViewCell
-        let file = displayedFiles[indexPath.row]
-
-        cell.initStyle(inFolderSelectMode: false)
-        cell.configureWith(
-            driveFileManager: viewModel.driveFileManager,
-            file: file,
-            selectionMode: viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled == true
-        )
-        cell.delegate = self
-        if ReachabilityListener.instance.currentStatus == .offline && !file.isDirectory && !file.isAvailableOffline {
-            cell.setEnabled(false)
-        } else {
-            cell.setEnabled(true)
-        }
-
-        if viewModel.configuration.presentationOrigin == PresentationOrigin.activities {
-            cell.moreButton.isHidden = true
-        }
-
-        return cell
     }
 
     override func collectionView(
@@ -874,12 +925,13 @@ extension FileListViewController {
         _ collectionView: UICollectionView,
         shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath
     ) -> Bool {
-        return viewModel.multipleSelectionViewModel != nil
+        return viewModel.multipleSelectionViewModel != nil && indexPath.section == fileSectionIndex
     }
 
     override func collectionView(_ collectionView: UICollectionView,
                                  didBeginMultipleSelectionInteractionAt indexPath: IndexPath) {
-        guard let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else { return }
+        guard indexPath.section == fileSectionIndex,
+              let multipleSelectionViewModel = viewModel.multipleSelectionViewModel else { return }
         if !multipleSelectionViewModel.isMultipleSelectionEnabled {
             viewModel.multipleSelectionViewModel?.isMultipleSelectionEnabled = true
         }
