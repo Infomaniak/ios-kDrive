@@ -105,10 +105,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="CCZ-mR-gNe"/>
-                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" constant="8" id="b3L-GJ-LSF"/>
-                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="eo3-Nh-xzM"/>
-                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" constant="24" id="vUN-8O-pqH"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="CCZ-mR-gNe"/>
+                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" id="b3L-GJ-LSF"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="eo3-Nh-xzM"/>
+                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" id="vUN-8O-pqH"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
