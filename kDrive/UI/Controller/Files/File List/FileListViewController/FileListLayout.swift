@@ -35,10 +35,13 @@ struct DefaultFileListLayout: FileListLayout {
     func createLayoutFor(viewModel: FileListViewModel) -> UICollectionViewLayout {
         let headerEstimatedHeight = viewModel.currentDirectory.visibility == .isTeamSpace ? 100.0 : 50.0
         return UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+            #if !ISEXTENSION
             let uploadInProgress = viewModel.uploadViewModel?.uploadCount ?? 0 > 0
             if uploadInProgress && sectionIndex == 0 {
                 return createUploadLayout(environment: layoutEnvironment)
-            } else if viewModel.listStyle == .list {
+            }
+            #endif
+            if viewModel.listStyle == .list {
                 return createListLayout(environment: layoutEnvironment,
                                         viewModel: viewModel,
                                         headerEstimatedHeight: headerEstimatedHeight)
