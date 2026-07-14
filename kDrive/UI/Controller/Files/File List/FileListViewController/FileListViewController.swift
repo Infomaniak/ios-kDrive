@@ -394,9 +394,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         let newSections = makeSections(files: files)
         let changeset = StagedChangeset(source: sections, target: newSections)
 
-        collectionView.reload(using: changeset) { [weak self] sections in
-            self?.sections = sections
-        }
+        collectionView.reload(using: changeset,
+                              interrupt: { $0.changeCount > Endpoint.itemsPerPage },
+                              setData: { self.sections = $0 })
 
         if let headerView {
             setUpHeaderView(headerView, isEmptyViewHidden: viewModel.isShowingEmptyView)
