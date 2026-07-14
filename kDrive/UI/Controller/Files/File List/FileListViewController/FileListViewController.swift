@@ -421,7 +421,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
     }
 
-    private func updateListStyle(_ listStyle: ListStyle) {
+    func updateListStyle(_ listStyle: ListStyle) {
         collectionView.collectionViewLayout.invalidateLayout()
         headerView?.listOrGridButton.setImage(listStyle.icon, for: .normal)
         let newLayout = layoutHelper.createLayoutFor(viewModel: viewModel)
@@ -457,7 +457,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
     }
 
-    private func updateUploadCard(uploadCount: Int) {
+    func updateUploadCard(uploadCount: Int) {
         self.uploadCount = uploadCount
         let newSections = makeSections(files: viewModel.files)
         let changeset = StagedChangeset(source: sections, target: newSections)
