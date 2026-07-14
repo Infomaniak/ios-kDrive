@@ -39,7 +39,7 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
         hostViewController = viewController
         hostTableView = tableView
 
-        searchUserViewController = SearchUserViewController()
+        searchUserViewController = SearchUserViewController(style: .insetGrouped)
         searchUserViewController.delegate = self
 
         searchController = UISearchController(searchResultsController: searchUserViewController)

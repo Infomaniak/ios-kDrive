@@ -103,8 +103,6 @@ class ShareLinkTableViewCell: InsetTableViewCell {
                        insets: Bool = true) {
         selectionStyle = file.isDropbox ? .none : .default
         if insets {
-            leadingConstraint.constant = 24
-            trailingConstraint.constant = 24
             leadingInnerConstraint.constant = 16
             trailingInnerConstraint.constant = 16
             separatorView.isHidden = true
@@ -199,8 +197,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         initWithPositionAndShadow()
         leadingConstraint.constant = 0
         trailingConstraint.constant = 0
-        leadingInnerConstraint.constant = 24
-        trailingInnerConstraint.constant = 24
+        leadingInnerConstraint.constant = 0
+        trailingInnerConstraint.constant = 0
         separatorView.isHidden = false
         contentBackgroundColor = UIColor.systemBackground
     }

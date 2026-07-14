@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -20,26 +20,26 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vRh-ng-z3o">
-                        <rect key="frame" x="24" y="8" width="609" height="140"/>
+                        <rect key="frame" x="0.0" y="0.0" width="657" height="156"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g1U-Cr-sis">
-                                <rect key="frame" x="0.0" y="0.0" width="609" height="1"/>
+                                <rect key="frame" x="0.0" y="0.0" width="657" height="1"/>
                                 <color key="backgroundColor" name="backgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="UYP-oc-95Y"/>
                                 </constraints>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="11" translatesAutoresizingMaskIntoConstraints="NO" id="2xc-qa-IWp">
-                                <rect key="frame" x="24" y="16" width="561" height="108"/>
+                                <rect key="frame" x="24" y="16" width="609" height="124"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9G9-wN-sCa">
-                                        <rect key="frame" x="0.0" y="0.0" width="561" height="73"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="609" height="89"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="ZSx-2r-Qvo">
-                                                <rect key="frame" x="0.0" y="0.0" width="561" height="46"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="609" height="62"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="lock" translatesAutoresizingMaskIntoConstraints="NO" id="CK7-c2-fMN">
-                                                        <rect key="frame" x="0.0" y="13" width="20" height="20"/>
+                                                        <rect key="frame" x="0.0" y="21" width="20" height="20"/>
                                                         <color key="tintColor" name="iconColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="20" id="3cx-dc-xhf"/>
@@ -47,7 +47,7 @@
                                                         </constraints>
                                                     </imageView>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lien de partage" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0dO-5m-k3M" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                                        <rect key="frame" x="25" y="14.5" width="103.5" height="17"/>
+                                                        <rect key="frame" x="25" y="22.5" width="103.5" height="17"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <color key="textColor" name="titleColor"/>
                                                         <nil key="highlightedColor"/>
@@ -57,11 +57,11 @@
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tAZ-1b-ho2" userLabel="ChipContainerView">
-                                                        <rect key="frame" x="133.5" y="0.0" width="412.5" height="46"/>
+                                                        <rect key="frame" x="133.5" y="6" width="460.5" height="50"/>
                                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     </view>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="5JS-W7-FAq">
-                                                        <rect key="frame" x="551" y="18" width="10" height="10"/>
+                                                        <rect key="frame" x="599" y="26" width="10" height="10"/>
                                                         <color key="tintColor" name="secondaryTextColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="10" id="QDb-EF-Vi8"/>
@@ -72,7 +72,7 @@
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             </stackView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Activé" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mgb-o7-K8K" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                                <rect key="frame" x="0.0" y="56" width="551" height="17"/>
+                                                <rect key="frame" x="0.0" y="72" width="599" height="17"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <color key="textColor" name="primaryTextColor"/>
@@ -95,13 +95,13 @@
                                         </constraints>
                                     </view>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="dJW-Ri-FCD">
-                                        <rect key="frame" x="0.0" y="84" width="561" height="24"/>
+                                        <rect key="frame" x="0.0" y="100" width="609" height="24"/>
                                         <subviews>
                                             <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iI1-2w-83G">
-                                                <rect key="frame" x="0.0" y="0.0" width="561" height="24"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="609" height="24"/>
                                                 <subviews>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="I4m-zt-myD" customClass="IKButton" customModule="kDriveCore">
-                                                        <rect key="frame" x="0.0" y="0.0" width="537" height="24"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="585" height="24"/>
                                                         <state key="normal" title="Paramètres du lien de partage">
                                                             <color key="titleColor" name="infomaniakColor"/>
                                                         </state>
@@ -114,7 +114,7 @@
                                                         </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" pointerInteraction="YES" translatesAutoresizingMaskIntoConstraints="NO" id="v5H-Mw-FXc" customClass="ImageButton" customModule="InfomaniakCoreUIKit">
-                                                        <rect key="frame" x="537" y="0.0" width="24" height="24"/>
+                                                        <rect key="frame" x="585" y="0.0" width="24" height="24"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="24" id="8f2-if-LvG"/>
                                                             <constraint firstAttribute="height" constant="24" id="i4w-XB-f4L"/>
@@ -162,10 +162,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="vRh-ng-z3o" secondAttribute="trailing" constant="24" id="Ac8-VZ-zKs"/>
-                    <constraint firstItem="vRh-ng-z3o" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="BKx-m5-0Zy"/>
-                    <constraint firstAttribute="bottom" secondItem="vRh-ng-z3o" secondAttribute="bottom" constant="8" id="Lkc-Sh-B1y"/>
-                    <constraint firstItem="vRh-ng-z3o" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="nXN-Pn-jyW"/>
+                    <constraint firstAttribute="trailing" secondItem="vRh-ng-z3o" secondAttribute="trailing" id="Ac8-VZ-zKs"/>
+                    <constraint firstItem="vRh-ng-z3o" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="BKx-m5-0Zy"/>
+                    <constraint firstAttribute="bottom" secondItem="vRh-ng-z3o" secondAttribute="bottom" id="Lkc-Sh-B1y"/>
+                    <constraint firstItem="vRh-ng-z3o" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="nXN-Pn-jyW"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -192,11 +192,11 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-right" width="24" height="24"/>
+        <image name="chevron-right" width="16" height="16"/>
         <image name="export-ios" width="24" height="24"/>
-        <image name="lock" width="24" height="24"/>
+        <image name="lock" width="16" height="16"/>
         <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="iconColor">
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -205,7 +205,7 @@
             <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="secondaryTextColor">
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

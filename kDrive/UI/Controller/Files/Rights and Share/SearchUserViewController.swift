@@ -107,7 +107,6 @@ class SearchUserViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: UserAccountTableViewCell.self, for: indexPath)
-        cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == results.count - 1)
         cell.accessoryImageView.image = nil
         cell.logoImage.isAccessibilityElement = false
 
