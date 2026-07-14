@@ -68,10 +68,10 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
         contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         if isSelectable {
             if selected {
-                contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
-                contentInsetView.borderWidth = 2
+                borderColor = KDriveResourcesAsset.infomaniakColor.color
+                borderWidth = 2
             } else {
-                contentInsetView.borderWidth = 0
+                borderWidth = 0
             }
         }
     }

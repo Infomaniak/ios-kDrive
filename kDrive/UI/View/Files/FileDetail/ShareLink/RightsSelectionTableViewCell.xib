@@ -174,9 +174,6 @@ Ajout de commentaire</string>
                             <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
                                 <real key="value" value="0.0"/>
                             </userDefinedRuntimeAttribute>
-                            <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
-                                <real key="value" value="6"/>
-                            </userDefinedRuntimeAttribute>
                             <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
                                 <color key="value" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </userDefinedRuntimeAttribute>
@@ -185,10 +182,10 @@ Ajout de commentaire</string>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstItem="i6W-LD-aY5" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="H0a-Pb-Ia5"/>
-                    <constraint firstAttribute="trailing" secondItem="i6W-LD-aY5" secondAttribute="trailing" constant="24" id="kg7-kg-OWB"/>
-                    <constraint firstItem="i6W-LD-aY5" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="5" id="nal-ti-x0c"/>
-                    <constraint firstAttribute="bottom" secondItem="i6W-LD-aY5" secondAttribute="bottom" constant="5" id="q5q-S6-qhG"/>
+                    <constraint firstItem="i6W-LD-aY5" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="H0a-Pb-Ia5"/>
+                    <constraint firstAttribute="trailing" secondItem="i6W-LD-aY5" secondAttribute="trailing" id="kg7-kg-OWB"/>
+                    <constraint firstItem="i6W-LD-aY5" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="nal-ti-x0c"/>
+                    <constraint firstAttribute="bottom" secondItem="i6W-LD-aY5" secondAttribute="bottom" id="q5q-S6-qhG"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
