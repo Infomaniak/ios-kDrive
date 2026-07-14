@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -19,17 +19,17 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aqX-hy-10J">
-                        <rect key="frame" x="24" y="8" width="274" height="58"/>
+                        <rect key="frame" x="0.0" y="0.0" width="322" height="74"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="drive" translatesAutoresizingMaskIntoConstraints="NO" id="zUq-wj-coE">
-                                <rect key="frame" x="20" y="20.5" width="16" height="16"/>
+                                <rect key="frame" x="44" y="28.5" width="16" height="16"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="16" id="Sxh-Pq-AjU"/>
                                     <constraint firstAttribute="width" constant="16" id="dKW-4b-94B"/>
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Westworld" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AYP-i4-wwZ" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="44" y="20" width="35" height="17"/>
+                                <rect key="frame" x="68" y="20" width="35" height="33"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -38,21 +38,21 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="6Jq-rJ-qWY">
-                                <rect key="frame" x="91" y="16.5" width="7" height="24"/>
+                                <rect key="frame" x="115" y="28.5" width="7" height="16"/>
                                 <color key="tintColor" name="secondaryTextColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="7" id="xzr-i0-ikc"/>
                                 </constraints>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-common-documents" translatesAutoresizingMaskIntoConstraints="NO" id="fNM-vG-4tZ">
-                                <rect key="frame" x="110" y="20.5" width="16" height="16"/>
+                                <rect key="frame" x="134" y="28.5" width="16" height="16"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="16" id="L1t-1B-AP0"/>
                                     <constraint firstAttribute="height" constant="16" id="SeO-ER-bF8"/>
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Common documents" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tBS-ce-SFc" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="134" y="20" width="120" height="17"/>
+                                <rect key="frame" x="158" y="20" width="120" height="33"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="120" id="5Yp-pU-VlW"/>
                                 </constraints>
@@ -64,7 +64,7 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BSA-Kc-s9g">
-                                <rect key="frame" x="0.0" y="57" width="274" height="1"/>
+                                <rect key="frame" x="0.0" y="73" width="322" height="1"/>
                                 <color key="backgroundColor" name="separatorColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="APk-Ag-B28"/>
@@ -80,13 +80,13 @@
                             <constraint firstItem="fNM-vG-4tZ" firstAttribute="centerY" secondItem="6Jq-rJ-qWY" secondAttribute="centerY" id="Pwu-Ki-vAo"/>
                             <constraint firstItem="BSA-Kc-s9g" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" id="R3j-yG-BbO"/>
                             <constraint firstItem="tBS-ce-SFc" firstAttribute="leading" secondItem="fNM-vG-4tZ" secondAttribute="trailing" constant="8" id="Svc-fs-qgF"/>
-                            <constraint firstItem="zUq-wj-coE" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" constant="20" id="Zet-XJ-ObO"/>
+                            <constraint firstItem="zUq-wj-coE" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" constant="44" id="Zet-XJ-ObO"/>
                             <constraint firstAttribute="bottom" secondItem="BSA-Kc-s9g" secondAttribute="bottom" id="cOZ-0h-Q3u"/>
                             <constraint firstItem="6Jq-rJ-qWY" firstAttribute="centerY" secondItem="AYP-i4-wwZ" secondAttribute="centerY" id="dSF-Wz-HVz"/>
                             <constraint firstItem="fNM-vG-4tZ" firstAttribute="leading" secondItem="6Jq-rJ-qWY" secondAttribute="trailing" constant="12" id="fG9-hE-Dmd"/>
                             <constraint firstItem="AYP-i4-wwZ" firstAttribute="top" secondItem="aqX-hy-10J" secondAttribute="top" constant="20" id="hT6-Dh-uwa"/>
                             <constraint firstItem="BSA-Kc-s9g" firstAttribute="top" secondItem="tBS-ce-SFc" secondAttribute="bottom" constant="20" id="qVr-AY-s9x"/>
-                            <constraint firstAttribute="trailing" secondItem="tBS-ce-SFc" secondAttribute="trailing" constant="20" id="t9Z-Ft-nyc"/>
+                            <constraint firstAttribute="trailing" secondItem="tBS-ce-SFc" secondAttribute="trailing" constant="44" id="t9Z-Ft-nyc"/>
                             <constraint firstItem="AYP-i4-wwZ" firstAttribute="leading" secondItem="zUq-wj-coE" secondAttribute="trailing" constant="8" id="ub2-8S-OSO"/>
                             <constraint firstAttribute="trailing" secondItem="BSA-Kc-s9g" secondAttribute="trailing" id="uil-cy-w7O"/>
                             <constraint firstItem="tBS-ce-SFc" firstAttribute="top" secondItem="aqX-hy-10J" secondAttribute="top" constant="20" id="yCx-00-toy"/>
@@ -95,10 +95,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="CCZ-mR-gNe"/>
-                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" constant="8" id="b3L-GJ-LSF"/>
-                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="eo3-Nh-xzM"/>
-                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" constant="24" id="vUN-8O-pqH"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="CCZ-mR-gNe"/>
+                    <constraint firstAttribute="bottom" secondItem="aqX-hy-10J" secondAttribute="bottom" id="b3L-GJ-LSF"/>
+                    <constraint firstItem="aqX-hy-10J" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="eo3-Nh-xzM"/>
+                    <constraint firstAttribute="trailing" secondItem="aqX-hy-10J" secondAttribute="trailing" id="vUN-8O-pqH"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -115,7 +115,7 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-right" width="24" height="24"/>
+        <image name="chevron-right" width="16" height="16"/>
         <image name="drive" width="24" height="24"/>
         <image name="folder-common-documents" width="24" height="24"/>
         <namedColor name="backgroundCardViewColor">

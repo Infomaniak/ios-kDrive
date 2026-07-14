@@ -53,10 +53,10 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         if selected {
-            contentInsetView.borderWidth = 2
-            contentInsetView.borderColor = KDriveResourcesAsset.infomaniakColor.color
+            borderWidth = 2
+            borderColor = KDriveResourcesAsset.infomaniakColor.color
         } else {
-            contentInsetView.borderWidth = 0
+            borderWidth = 0
         }
     }
 

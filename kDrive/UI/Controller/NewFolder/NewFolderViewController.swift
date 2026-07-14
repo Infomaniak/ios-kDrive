@@ -69,11 +69,8 @@ class NewFolderViewController: UIViewController {
     }
 
     private enum Section: CaseIterable {
-        case header, permissions, options, location
-    }
-
-    private enum PermissionsRow: CaseIterable {
-        case meOnly, allUsers, someUser, parentsRights
+        case header, permissionsMeOnly, permissionsAllUsers,
+             permissionsSomeUser, permissionsParentsRights, options, location
     }
 
     private enum OptionsRow: CaseIterable {
@@ -81,7 +78,6 @@ class NewFolderViewController: UIViewController {
     }
 
     private var sections: [Section] = [.header]
-    private var permissionsRows = PermissionsRow.allCases
     private var optionsRows: [OptionsRow] = [.header]
 
     override func viewDidLoad() {
@@ -95,6 +91,7 @@ class NewFolderViewController: UIViewController {
         tableView.register(cellView: NewFolderSettingsTableViewCell.self)
         tableView.contentInset.bottom = 60
         tableView.separatorColor = .clear
+        tableView.sectionHeaderHeight = 0
         hideKeyboardWhenTappedAround()
 
         navigationItem.backButtonTitle = KDriveResourcesStrings.Localizable.createFolderTitle
@@ -147,21 +144,19 @@ class NewFolderViewController: UIViewController {
         case .folder:
             sections = [.header]
             if permissionSelection {
-                sections.append(.permissions)
-                permissionsRows = [.meOnly]
+                sections.append(.permissionsMeOnly)
                 if let fileAccess {
-                    permissionsRows.append(canInherit(fileAccess: fileAccess) ? .parentsRights : .someUser)
+                    sections.append(canInherit(fileAccess: fileAccess) ? .permissionsParentsRights : .permissionsSomeUser)
                 }
             }
         case .commonFolder:
-            sections = [.header, .permissions, .location]
-            permissionsRows = [.allUsers, .someUser]
+            sections = [.header, .permissionsAllUsers, .permissionsSomeUser, .location]
         case .dropbox:
-            sections = [.header, .permissions, .options]
-            permissionsRows = [.meOnly]
+            sections = [.header, .permissionsMeOnly]
             if let fileAccess {
-                permissionsRows.append(canInherit(fileAccess: fileAccess) ? .parentsRights : .someUser)
+                sections.append(canInherit(fileAccess: fileAccess) ? .permissionsParentsRights : .permissionsSomeUser)
             }
+            sections.append(.options)
         }
         tableView.reloadData()
     }
@@ -244,7 +239,7 @@ extension NewFolderViewController: NewFolderSettingsDelegate {
     func didUpdateSettings(index: Int, isOn: Bool) {
         let option = optionsRows[index + 1]
         settings[option] = isOn
-        tableView.reloadRows(at: [IndexPath(row: index + 1, section: 2)], with: .automatic)
+        tableView.reloadRows(at: [IndexPath(row: index + 1, section: 3)], with: .automatic)
         updateButton()
     }
 
@@ -268,12 +263,10 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch sections[section] {
-        case .header, .location:
-            return 1
-        case .permissions:
-            return permissionsRows.count
         case .options:
             return optionsRows.count
+        default:
+            return 1
         }
     }
 
@@ -292,7 +285,7 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.createFolderAccessPermissionTitle
 
             return sectionHeaderView
-        } else if section == 2 && folderType == .commonFolder {
+        } else if section == sections.count - 1 && folderType == .commonFolder {
             let sectionHeaderView = NewFolderSectionHeaderView.instantiate()
             sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.allPathTitle
             return sectionHeaderView
@@ -324,23 +317,24 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             cell.delegate = self
             cell.configureWith(folderType: folderType)
             return cell
-        case .permissions:
+        case .permissionsMeOnly:
             let cell = tableView.dequeueReusableCell(type: NewFolderShareRuleTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
-            switch permissionsRows[indexPath.row] {
-            case .meOnly:
-                cell.configureMeOnly()
-            case .allUsers:
-                cell.configureAllUsers(driveName: driveFileManager.drive.name)
-            case .someUser:
-                cell.configureSomeUser()
-            case .parentsRights:
-                cell.configureParentsRights(folderName: currentDirectory.name, fileAccess: fileAccess)
-            }
+            cell.configureMeOnly()
+            return cell
+        case .permissionsAllUsers:
+            let cell = tableView.dequeueReusableCell(type: NewFolderShareRuleTableViewCell.self, for: indexPath)
+            cell.configureAllUsers(driveName: driveFileManager.drive.name)
+            return cell
+        case .permissionsSomeUser:
+            let cell = tableView.dequeueReusableCell(type: NewFolderShareRuleTableViewCell.self, for: indexPath)
+            cell.configureSomeUser()
+            return cell
+        case .permissionsParentsRights:
+            let cell = tableView.dequeueReusableCell(type: NewFolderShareRuleTableViewCell.self, for: indexPath)
+            cell.configureParentsRights(folderName: currentDirectory.name, fileAccess: fileAccess)
             return cell
         case .location:
             let cell = tableView.dequeueReusableCell(type: NewFolderLocationTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.configure(with: driveFileManager.drive)
             return cell
         case .options:
@@ -348,7 +342,6 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
             switch option {
             case .header:
                 let cell = tableView.dequeueReusableCell(type: NewFolderSettingsTitleTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: !showSettings)
                 cell.accessoryImageView.transform = CGAffineTransform.identity
                 if showSettings {
                     cell.accessoryImageView.transform = cell.accessoryImageView.transform.rotated(by: .pi / 2)
@@ -356,7 +349,6 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
                 return cell
             default:
                 let cell = tableView.dequeueReusableCell(type: NewFolderSettingsTableViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: false, isLast: indexPath.row == optionsRows.count - 1)
                 cell.delegate = self
                 cell.configureFor(
                     index: indexPath.row - 1,
@@ -372,8 +364,6 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
         switch sections[indexPath.section] {
         case .header, .location:
             return nil
-        case .permissions:
-            return indexPath
         case .options:
             if optionsRows[indexPath.row] == .header {
                 showSettings.toggle()
@@ -390,6 +380,8 @@ extension NewFolderViewController: UITableViewDelegate, UITableViewDataSource {
                 tableView.reloadSections([indexPath.section], with: .automatic)
             }
             return nil
+        default:
+            return indexPath
         }
     }
 
@@ -410,8 +402,8 @@ extension NewFolderViewController: FooterButtonDelegate {
             let onlyForMe: Bool
             let toShare: Bool
             if let indexPath = tableView.indexPathForSelectedRow {
-                onlyForMe = sections[indexPath.section] == .permissions && permissionsRows[indexPath.row] == .meOnly
-                toShare = sections[indexPath.section] == .permissions && permissionsRows[indexPath.row] == .someUser
+                onlyForMe = sections[indexPath.section] == .permissionsMeOnly
+                toShare = sections[indexPath.section] == .permissionsSomeUser
             } else {
                 onlyForMe = false
                 toShare = false
