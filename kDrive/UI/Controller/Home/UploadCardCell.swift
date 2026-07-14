@@ -115,11 +115,9 @@ class UploadCardCell: UICollectionViewCell {
             uploadCardView.iconView.image = UIImage(systemName: "exclamationmark.arrow.triangle.2.circlepath")
             uploadCardView.iconView.isAccessibilityElement = false
             uploadCardView.iconView.isHidden = false
-            uploadCardView.iconView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                uploadCardView.iconView.widthAnchor.constraint(equalToConstant: 24),
-                uploadCardView.iconView.heightAnchor.constraint(equalToConstant: 24)
-            ])
+            uploadCardView.iconView.constraints
+                .filter { $0.firstAttribute == .width || $0.firstAttribute == .height }
+                .forEach { $0.constant = 24 }
             uploadCardView.iconView.tintColor = .gray
         } else {
             uploadCardView.titleLabel.text = KDriveResourcesStrings.Localizable.uploadInProgressTitle
