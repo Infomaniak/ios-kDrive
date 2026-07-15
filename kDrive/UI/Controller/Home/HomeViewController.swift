@@ -356,7 +356,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
         let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
         section.contentInsetsReference = .safeArea
-        section.contentInsets = NSDirectionalEdgeInsets(top: 0,
+        section.contentInsets = NSDirectionalEdgeInsets(top: 8,
                                                         leading: UIConstants.Padding.mediumSmall,
                                                         bottom: 0,
                                                         trailing: UIConstants.Padding.mediumSmall)
