@@ -197,8 +197,8 @@ class ShareLinkTableViewCell: InsetTableViewCell {
         initWithPositionAndShadow()
         leadingConstraint.constant = 0
         trailingConstraint.constant = 0
-        leadingInnerConstraint.constant = 0
-        trailingInnerConstraint.constant = 0
+        leadingInnerConstraint.constant = 24
+        trailingInnerConstraint.constant = 24
         separatorView.isHidden = false
         contentBackgroundColor = UIColor.systemBackground
     }
