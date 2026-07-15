@@ -231,7 +231,13 @@ class AppUITest: XCTestCase {
     }
 
     func openTab(_ element: TabBarElement) {
-        tabBar.buttons[getStringForElement(element)].tap()
+        if element == .add {
+            // On iOS 26+ the Add button is a floating Liquid Glass button on the tab controller's view,
+            // no longer inside the tab bar. Searching app.buttons works on both iOS 26 and legacy layouts.
+            app.buttons[getStringForElement(element)].firstMatch.tap()
+        } else {
+            tabBar.buttons[getStringForElement(element)].tap()
+        }
     }
 
     // MARK: - Structures
