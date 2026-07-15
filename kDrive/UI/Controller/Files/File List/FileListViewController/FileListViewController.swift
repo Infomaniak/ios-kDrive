@@ -815,7 +815,7 @@ extension FileListViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let item = sections[safe: indexPath.section]?.elements[indexPath.item] else {
+        guard let item = sections[safe: indexPath.section]?.elements[safe: indexPath.item] else {
             return UICollectionViewCell()
         }
 
