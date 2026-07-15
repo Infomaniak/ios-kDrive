@@ -97,7 +97,12 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
         if presentingViewController != nil && viewControllersCount < 2 {
             // Show cancel button
-            let closeButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(closeButtonPressed))
+            let closeButton = UIBarButtonItem(
+                image: UIImage(systemName: "xmark"),
+                style: .plain,
+                target: self,
+                action: #selector(closeButtonPressed)
+            )
             closeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
             navigationItem.leftBarButtonItem = closeButton
         }

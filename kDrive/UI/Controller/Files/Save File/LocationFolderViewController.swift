@@ -131,7 +131,12 @@ class LocationFolderViewController: SidebarViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let closeButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(closeButtonPressed))
+        let closeButton = UIBarButtonItem(
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
+            target: self,
+            action: #selector(closeButtonPressed)
+        )
         closeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         navigationItem.title = driveFileManager.drive.name
         navigationItem.leftBarButtonItem = closeButton

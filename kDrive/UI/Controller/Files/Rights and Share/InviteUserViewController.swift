@@ -80,7 +80,8 @@ class InviteUserViewController: UIViewController {
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .cancel,
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
             target: self,
             action: #selector(closeButtonPressed)
         )

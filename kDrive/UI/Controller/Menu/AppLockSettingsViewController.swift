@@ -27,6 +27,7 @@ import UIKit
 class AppLockSettingsViewController: UIViewController {
     @IBOutlet var tableView: UITableView!
     @IBOutlet var navigationBar: UINavigationBar!
+    @IBOutlet var closeBarButtonItem: UIBarButtonItem!
 
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService private var appLockHelper: AppLockHelping
@@ -37,6 +38,7 @@ class AppLockSettingsViewController: UIViewController {
         super.viewDidLoad()
         navigationBar.shadowImage = UIImage()
         navigationBar.setBackgroundImage(UIImage(), for: .default)
+        closeBarButtonItem.image = UIImage(systemName: "xmark")
 
         tableView.register(cellView: ParameterSwitchTableViewCell.self)
         tableView.dataSource = self

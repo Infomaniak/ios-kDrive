@@ -41,7 +41,8 @@ class NewFolderTypeTableViewController: UITableViewController {
         tableView.sectionFooterHeight = 0
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .cancel,
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
             target: self,
             action: #selector(closeButtonPressed)
         )
