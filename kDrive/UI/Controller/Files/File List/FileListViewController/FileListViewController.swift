@@ -59,7 +59,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     let viewModel: FileListViewModel
     var uploadCount = 0
-    var sections: [FileListSection] = [.init(id: .files, elements: [])]
+    var sections = [FileListSection(id: .files, elements: [])]
 
     private var fileSectionIndex: Int? {
         sections.firstIndex { $0.id == .files }
@@ -405,7 +405,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     func getDisplayedFile(at indexPath: IndexPath) -> File? {
         guard sections[safe: indexPath.section]?.id == .files,
-              case .file(let file) = sections[indexPath.section].elements[safe: indexPath.item] else {
+              case .file(let file) = sections[safe: indexPath.section]?.elements[safe: indexPath.item] else {
             return nil
         }
         return file
@@ -815,7 +815,9 @@ extension FileListViewController {
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let item = sections[indexPath.section].elements[indexPath.item]
+        guard let item = sections[safe: indexPath.section]?.elements[indexPath.item] else {
+            return UICollectionViewCell()
+        }
 
         switch item {
         case .uploadCard:

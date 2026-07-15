@@ -79,7 +79,7 @@ class RootMenuHeaderView: UICollectionReusableView {
 
     private func observeNetworkChange() {
         ReachabilityListener.instance.observeNetworkChange(self) { [weak self] status in
-            Task { [weak self] in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 offlineView.isHidden = status != .offline
                 reloadHeader()
