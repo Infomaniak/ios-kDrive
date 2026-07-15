@@ -34,11 +34,19 @@ final class EditCategoryViewController: UITableViewController {
 
     var color = "#1abc9c"
 
-    private var rows: [Row] = [.name, .color]
+    private enum Section: CaseIterable {
+        case create, update
+    }
 
     private enum Row: CaseIterable {
-        case editInfo, name, color
+        case name, color
     }
+
+    private var sections: [Section] {
+        return create ? [.create] : [.update, .create]
+    }
+
+    private var rows: [Row] = [.name, .color]
 
     private var create: Bool {
         return category == nil
@@ -79,7 +87,6 @@ final class EditCategoryViewController: UITableViewController {
     private func setRows() {
         rows = [.name, .color]
         if !create {
-            rows.insert(.editInfo, at: 0)
             // Remove name edition for predefined categories
             if category?.isPredefined == true, let index = rows.firstIndex(of: .name) {
                 rows.remove(at: index)
@@ -96,18 +103,25 @@ final class EditCategoryViewController: UITableViewController {
 
     // MARK: - Table view data source
 
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return sections.count
+    }
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return rows.count
+        return sections[section] == .create ? rows.count : 1
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch rows[indexPath.row] {
-        case .editInfo:
+        switch sections[indexPath.section] {
+        case .create:
+            switch rows[indexPath.row] {
+            case .name:
+                return nameCell(tableView, indexPath: indexPath)
+            case .color:
+                return colorCell(tableView, indexPath: indexPath)
+            }
+        case .update:
             return editInfoCell(tableView, indexPath: indexPath)
-        case .name:
-            return nameCell(tableView, indexPath: indexPath)
-        case .color:
-            return colorCell(tableView, indexPath: indexPath)
         }
     }
 
@@ -116,6 +130,7 @@ final class EditCategoryViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        guard section == sections.count - 1 else { return nil }
         let view = FooterButtonView.instantiate(title: KDriveResourcesStrings.Localizable.buttonSave)
         view.footerButton.isEnabled = saveButtonEnabled
         view.delegate = self

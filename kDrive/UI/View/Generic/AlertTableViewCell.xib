@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -20,10 +20,10 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mSf-dQ-1Z9">
-                        <rect key="frame" x="24" y="0.0" width="272" height="52"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="76"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LFq-Ry-oG8" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="32" y="16" width="230" height="20"/>
+                                <rect key="frame" x="32" y="16" width="278" height="44"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -52,9 +52,9 @@
                     </view>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="mSf-dQ-1Z9" secondAttribute="trailing" constant="24" id="66Y-DX-JFd"/>
-                    <constraint firstAttribute="bottom" secondItem="mSf-dQ-1Z9" secondAttribute="bottom" constant="24" id="Cln-SW-tsJ"/>
-                    <constraint firstItem="mSf-dQ-1Z9" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="TuD-d6-cYr"/>
+                    <constraint firstAttribute="trailing" secondItem="mSf-dQ-1Z9" secondAttribute="trailing" id="66Y-DX-JFd"/>
+                    <constraint firstAttribute="bottom" secondItem="mSf-dQ-1Z9" secondAttribute="bottom" id="Cln-SW-tsJ"/>
+                    <constraint firstItem="mSf-dQ-1Z9" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="TuD-d6-cYr"/>
                     <constraint firstItem="mSf-dQ-1Z9" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="i9o-3e-jQE"/>
                 </constraints>
             </tableViewCellContentView>
