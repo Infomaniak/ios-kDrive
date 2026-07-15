@@ -173,9 +173,20 @@ class AppUITest: XCTestCase {
         return directory
     }
 
+    /// Long-press a cell and tap the context menu "Select" action to enter multiple-selection mode.
+    ///
+    /// Since iOS 26 the long-press no longer enters multiple-selection directly: it presents a system
+    /// context menu whose "Select" action enables multiple-selection (and selects the pressed item).
+    func longPressToSelect(cellNamed name: String) {
+        collectionViewsQuery.cells.containing(.staticText, identifier: name).element.press(forDuration: 1)
+        let selectButton = app.buttons[KDriveResourcesStrings.Localizable.buttonSelect]
+        XCTAssertTrue(selectButton.waitForExistence(timeout: 3), "Select action should be displayed")
+        selectButton.tap()
+    }
+
     func removeDirectory(name: String) {
         goToMyFolders()
-        collectionViewsQuery.cells.containing(.staticText, identifier: name).element.press(forDuration: 1)
+        longPressToSelect(cellNamed: name)
         let deleteButton = collectionViewsQuery.buttons[KDriveResourcesStrings.Localizable.buttonDelete]
         XCTAssertTrue(deleteButton.waitForExistence(timeout: 3), "Delete button should be displayed")
         deleteButton.tap()
@@ -231,7 +242,13 @@ class AppUITest: XCTestCase {
     }
 
     func openTab(_ element: TabBarElement) {
-        tabBar.buttons[getStringForElement(element)].tap()
+        if element == .add {
+            // On iOS 26+ the Add button is a floating Liquid Glass button on the tab controller's view,
+            // no longer inside the tab bar. Searching app.buttons works on both iOS 26 and legacy layouts.
+            app.buttons[getStringForElement(element)].firstMatch.tap()
+        } else {
+            tabBar.buttons[getStringForElement(element)].tap()
+        }
     }
 
     // MARK: - Structures
@@ -533,8 +550,8 @@ class AppUITest: XCTestCase {
         goToMyFolders()
 
         // Add directory to favorites
-        collectionViewsQuery.cells.containing(.staticText, identifier: root).element.press(forDuration: 1)
-        collectionViewsQuery.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
+        longPressToSelect(cellNamed: root)
+        collectionViewsQuery.buttons[KDriveResourcesStrings.Localizable.buttonMenu].firstMatch.tap()
         let favoriteButton = collectionViewsQuery.staticTexts[KDriveResourcesStrings.Localizable.buttonAddFavorites]
         XCTAssertTrue(favoriteButton.waitForExistence(timeout: 3), "Favorite button should be displayed")
         favoriteButton.tap()
@@ -1049,9 +1066,9 @@ class AppUITest: XCTestCase {
             XCTFail("App shouldn't be locked")
         }
 
-        app
-            .switches["0"]
-            .firstMatch.tap()
+        app.cells
+            .containing(.staticText, identifier: KDriveCoreStrings.Localizable.buttonSettingsLockApp)
+            .switches.firstMatch.tap()
 
         unlockApp()
     }
@@ -1073,9 +1090,9 @@ class AppUITest: XCTestCase {
             XCTAssertTrue(false, "App should be locked")
         }
 
-        app
-            .switches["1"]
-            .firstMatch.tap()
+        app.cells
+            .containing(.staticText, identifier: KDriveCoreStrings.Localizable.buttonSettingsLockApp)
+            .switches.firstMatch.tap()
 
         unlockApp()
     }
