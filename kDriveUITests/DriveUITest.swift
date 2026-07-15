@@ -1055,9 +1055,9 @@ class AppUITest: XCTestCase {
             XCTFail("App shouldn't be locked")
         }
 
-        app
-            .switches["0"]
-            .firstMatch.tap()
+        app.cells
+            .containing(.staticText, identifier: KDriveCoreStrings.Localizable.buttonSettingsLockApp)
+            .switches.firstMatch.tap()
 
         unlockApp()
     }
@@ -1079,9 +1079,9 @@ class AppUITest: XCTestCase {
             XCTAssertTrue(false, "App should be locked")
         }
 
-        app
-            .switches["1"]
-            .firstMatch.tap()
+        app.cells
+            .containing(.staticText, identifier: KDriveCoreStrings.Localizable.buttonSettingsLockApp)
+            .switches.firstMatch.tap()
 
         unlockApp()
     }
