@@ -114,6 +114,7 @@ struct DefaultFileListLayout: FileListLayout {
         #endif
 
         let section = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: environment)
+        section.contentInsets.top = 0
 
         if showsHeader {
             addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
