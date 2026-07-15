@@ -355,6 +355,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
+        section.contentInsetsReference = .safeArea
         section.contentInsets = NSDirectionalEdgeInsets(top: 0,
                                                         leading: UIConstants.Padding.mediumSmall,
                                                         bottom: 0,
