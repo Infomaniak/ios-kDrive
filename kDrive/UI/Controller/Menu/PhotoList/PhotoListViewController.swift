@@ -145,10 +145,13 @@ final class PhotoListViewController: FileListViewController {
                               })
     }
 
-    override func reloadCollectionViewWith(files: [File]) {
-        displayedFiles = files
+    override func reloadCollectionViewWith(files _: [File]) {
         // We do not reload the collection view as it handles sections
     }
+
+    override func updateListStyle(_: ListStyle) {}
+
+    override func updateUploadCard(uploadCount _: Int) {}
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)

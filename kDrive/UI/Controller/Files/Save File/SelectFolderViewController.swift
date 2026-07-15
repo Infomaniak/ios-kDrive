@@ -222,7 +222,9 @@ final class SelectFolderViewController: FileListViewController {
     // MARK: - Collection view data source
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let file = displayedFiles[indexPath.row]
+        guard let file = getDisplayedFile(at: indexPath) else {
+            return UICollectionViewCell()
+        }
         let cell = super.collectionView(collectionView, cellForItemAt: indexPath) as! FileCollectionViewCell
 
         cell.setEnabled(file.isDirectory && file.id != fileToMove?.id &&
@@ -234,7 +236,9 @@ final class SelectFolderViewController: FileListViewController {
     // MARK: - Collection view delegate
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedFile = displayedFiles[indexPath.row]
+        guard let selectedFile = getDisplayedFile(at: indexPath) else {
+            return
+        }
         guard let navigationController,
               selectedFile.isDirectory else {
             return
