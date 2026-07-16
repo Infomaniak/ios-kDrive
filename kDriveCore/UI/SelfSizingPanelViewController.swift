@@ -54,6 +54,7 @@ public class SelfSizingPanelViewController: UIViewController {
         }
 
         embedContentViewController()
+        updateBackground()
     }
 
     private func setupScrollViewObservation(sheetPresentationController: UISheetPresentationController) {
