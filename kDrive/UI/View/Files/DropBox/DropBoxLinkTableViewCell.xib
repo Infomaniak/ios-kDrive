@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -20,13 +20,13 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Q5n-h4-W7e">
-                        <rect key="frame" x="24" y="8" width="452" height="95"/>
+                        <rect key="frame" x="0.0" y="0.0" width="500" height="111"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="pgJ-pg-HeK">
-                                <rect key="frame" x="16" y="16" width="420" height="63"/>
+                                <rect key="frame" x="16" y="16" width="468" height="79"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lien de la boîte de dépôt" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wGz-LN-h9i" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                        <rect key="frame" x="0.0" y="0.0" width="420" height="11"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="468" height="17"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                         <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
@@ -36,10 +36,10 @@
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                     <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="LUI-fy-N6B">
-                                        <rect key="frame" x="0.0" y="27" width="420" height="36"/>
+                                        <rect key="frame" x="0.0" y="33" width="468" height="46"/>
                                         <subviews>
                                             <textField opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="https://drive.infomaniak.com/app/…" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="GYl-Yk-631">
-                                                <rect key="frame" x="0.0" y="0.0" width="386" height="36"/>
+                                                <rect key="frame" x="0.0" y="5" width="434" height="36"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="36" id="4pa-4D-1jZ"/>
@@ -49,7 +49,7 @@
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" pointerInteraction="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KEo-B6-Qkr" customClass="ImageButton" customModule="InfomaniakCoreUIKit">
-                                                <rect key="frame" x="396" y="6" width="24" height="24"/>
+                                                <rect key="frame" x="444" y="11" width="24" height="24"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="24" id="MDI-aV-SQo"/>
                                                     <constraint firstAttribute="width" constant="24" id="gbC-g4-vxL"/>
@@ -84,10 +84,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstItem="Q5n-h4-W7e" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="4Id-Me-r8k"/>
-                    <constraint firstAttribute="bottom" secondItem="Q5n-h4-W7e" secondAttribute="bottom" constant="8" id="BGM-6l-gci"/>
-                    <constraint firstAttribute="trailing" secondItem="Q5n-h4-W7e" secondAttribute="trailing" constant="24" id="eQU-gE-FDE"/>
-                    <constraint firstItem="Q5n-h4-W7e" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="fR0-hW-myO"/>
+                    <constraint firstItem="Q5n-h4-W7e" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="4Id-Me-r8k"/>
+                    <constraint firstAttribute="bottom" secondItem="Q5n-h4-W7e" secondAttribute="bottom" id="BGM-6l-gci"/>
+                    <constraint firstAttribute="trailing" secondItem="Q5n-h4-W7e" secondAttribute="trailing" id="eQU-gE-FDE"/>
+                    <constraint firstItem="Q5n-h4-W7e" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="fR0-hW-myO"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>

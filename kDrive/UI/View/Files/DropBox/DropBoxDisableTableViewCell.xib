@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -20,10 +20,10 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="a2e-ee-Fhl">
-                        <rect key="frame" x="24" y="8" width="272" height="51"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="67"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Désactiver la boîte de dépot" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vlm-Ga-0j6" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                <rect key="frame" x="16" y="16" width="240" height="19"/>
+                                <rect key="frame" x="16" y="16" width="288" height="35"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                 <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
@@ -44,10 +44,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="a2e-ee-Fhl" secondAttribute="trailing" constant="24" id="JqB-CU-mnA"/>
-                    <constraint firstItem="a2e-ee-Fhl" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="Mlv-QF-qbz"/>
-                    <constraint firstAttribute="bottom" secondItem="a2e-ee-Fhl" secondAttribute="bottom" constant="8" id="MsG-Sm-pdc"/>
-                    <constraint firstItem="a2e-ee-Fhl" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="r13-4e-wN6"/>
+                    <constraint firstAttribute="trailing" secondItem="a2e-ee-Fhl" secondAttribute="trailing" id="JqB-CU-mnA"/>
+                    <constraint firstItem="a2e-ee-Fhl" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="Mlv-QF-qbz"/>
+                    <constraint firstAttribute="bottom" secondItem="a2e-ee-Fhl" secondAttribute="bottom" id="MsG-Sm-pdc"/>
+                    <constraint firstItem="a2e-ee-Fhl" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="r13-4e-wN6"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
