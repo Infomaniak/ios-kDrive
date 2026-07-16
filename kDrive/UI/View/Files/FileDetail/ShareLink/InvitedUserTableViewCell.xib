@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -19,10 +19,10 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sCL-PI-gFk">
-                        <rect key="frame" x="24" y="0.0" width="300" height="160"/>
+                        <rect key="frame" x="0.0" y="0.0" width="348" height="160"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="ddx-uD-n82">
-                                <rect key="frame" x="4" y="4" width="292" height="152"/>
+                                <rect key="frame" x="4" y="4" width="340" height="152"/>
                                 <color key="backgroundColor" name="backgroundCardViewColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="152" id="ehL-3t-85f"/>
@@ -49,9 +49,9 @@
                     </view>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="sCL-PI-gFk" secondAttribute="trailing" constant="24" id="2YP-Kz-VtF"/>
+                    <constraint firstAttribute="trailing" secondItem="sCL-PI-gFk" secondAttribute="trailing" id="2YP-Kz-VtF"/>
                     <constraint firstItem="sCL-PI-gFk" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="d4a-Sr-ect"/>
-                    <constraint firstItem="sCL-PI-gFk" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="gjd-BU-pO3"/>
+                    <constraint firstItem="sCL-PI-gFk" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="gjd-BU-pO3"/>
                     <constraint firstAttribute="bottom" secondItem="sCL-PI-gFk" secondAttribute="bottom" id="zE1-Fn-oTh"/>
                 </constraints>
             </tableViewCellContentView>

@@ -46,13 +46,18 @@ class InviteUserViewController: UIViewController {
         return shareables.compactMap { $0 as? Team }.map(\.id)
     }
 
-    private enum InviteUserRows: CaseIterable {
-        case invited
-        case addUser
+    private enum InviteUserSections: CaseIterable {
+        case users
         case rights
         case message
     }
 
+    private enum InviteUserRows: CaseIterable {
+        case invited
+        case addUser
+    }
+
+    private var sections = InviteUserSections.allCases
     private var rows = InviteUserRows.allCases
     private var newPermission = UserPermission.read
     private var message: String?
@@ -70,6 +75,7 @@ class InviteUserViewController: UIViewController {
 
         hideKeyboardWhenTappedAround()
         setTitle()
+        tableView.sectionHeaderHeight = 0
 
         searchControllerManager = SearchControllerManager()
         searchControllerManager.setup(in: self, tableView: tableView, file: file, driveFileManager: driveFileManager,
@@ -184,10 +190,10 @@ class InviteUserViewController: UIViewController {
         emptyInvitation = emails.isEmpty && userIds.isEmpty && teamIds.isEmpty
 
         if emptyInvitation {
-            rows = [.addUser, .rights, .message]
+            rows = [.addUser]
             searchControllerManager.addUserCellIndex = IndexPath(row: 0, section: 0)
         } else {
-            rows = [.invited, .addUser, .rights, .message]
+            rows = [.invited, .addUser]
             searchControllerManager.addUserCellIndex = IndexPath(row: 1, section: 0)
         }
 
@@ -209,14 +215,20 @@ class InviteUserViewController: UIViewController {
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
 extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return rows.count
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return sections.count
+    }
+
+    func tableView(_: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if sections[section] == .users {
+            return rows.count
+        } else {
+            return 1
+        }
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        switch rows[indexPath.row] {
-        case .invited:
-            return UITableView.automaticDimension
+        switch sections[indexPath.section] {
         case .message:
             return 180
         default:
@@ -225,23 +237,25 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch rows[indexPath.row] {
-        case .invited:
-            let cell = tableView.dequeueReusableCell(type: InvitedUserTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: false)
-            cell.configureWith(shareables: shareables, emails: emails, tableViewWidth: tableView.bounds.width)
-            cell.delegate = self
-            cell.selectionStyle = .none
-            return cell
-        case .addUser:
-            let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: emptyInvitation, isLast: true)
-            cell.delegate = searchControllerManager
-            cell.transform = .identity
-            return cell
+        switch sections[indexPath.section] {
+        case .users:
+            switch rows[indexPath.row] {
+            case .invited:
+                let cell = tableView.dequeueReusableCell(type: InvitedUserTableViewCell.self, for: indexPath)
+                cell.configureWith(shareables: shareables, emails: emails, tableViewWidth: tableView.bounds.width)
+                cell.delegate = self
+                cell.selectionStyle = .none
+                return cell
+
+            case .addUser:
+                let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
+                cell.delegate = searchControllerManager
+                cell.transform = .identity
+                return cell
+            }
+
         case .rights:
             let cell = tableView.dequeueReusableCell(type: MenuTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.logoImage.tintColor = KDriveResourcesAsset.iconColor.color
             (cell.titleLabel as? IKLabel)?.style = .header3
             cell.selectionStyle = .none
@@ -249,9 +263,9 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
             cell.logoImage?.image = newPermission.icon
             cell.logoImage.isAccessibilityElement = false
             return cell
+
         case .message:
             let cell = tableView.dequeueReusableCell(type: MessageTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             if let message, !message.isEmpty {
                 cell.messageTextView.text = message
             }
@@ -264,9 +278,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        switch rows[indexPath.row] {
-        case .addUser:
-            break
+        switch sections[indexPath.section] {
         case .rights:
             let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(
                 file: file,
@@ -279,13 +291,18 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
                 rightsSelectionVC.canDelete = false
             }
             present(rightsSelectionViewController, animated: true)
+
         default:
             break
         }
     }
 
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 124
+        if section == sections.count - 1 {
+            return 124
+        } else {
+            return UITableView.automaticDimension
+        }
     }
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -341,8 +358,8 @@ extension InviteUserViewController: SelectedUsersDelegate {
 extension InviteUserViewController: RightsSelectionDelegate {
     func didUpdateRightValue(newValue value: String) {
         newPermission = UserPermission(rawValue: value)!
-        if let index = rows.firstIndex(of: .rights) {
-            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+        if let index = sections.firstIndex(of: .rights) {
+            tableView.reloadRows(at: [IndexPath(row: 0, section: index)], with: .automatic)
         }
     }
 }
