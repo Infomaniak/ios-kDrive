@@ -357,9 +357,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
         section.contentInsetsReference = .safeArea
         section.contentInsets = NSDirectionalEdgeInsets(top: 8,
-                                                        leading: UIConstants.Padding.mediumSmall,
+                                                        leading: UIConstants.Padding.medium,
                                                         bottom: 0,
-                                                        trailing: UIConstants.Padding.mediumSmall)
+                                                        trailing: UIConstants.Padding.medium)
         return section
     }
 
@@ -371,9 +371,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
         section.contentInsetsReference = .safeArea
         section.contentInsets = NSDirectionalEdgeInsets(top: 0,
-                                                        leading: UIConstants.Padding.mediumSmall,
+                                                        leading: UIConstants.Padding.medium,
                                                         bottom: 0,
-                                                        trailing: UIConstants.Padding.mediumSmall)
+                                                        trailing: UIConstants.Padding.medium)
 
         let largeHeaderItem = Self.generateHeaderItem()
 
@@ -385,9 +385,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         )
 
         sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0,
-                                                                  leading: UIConstants.Padding.mediumSmall,
+                                                                  leading: UIConstants.Padding.medium,
                                                                   bottom: 0,
-                                                                  trailing: UIConstants.Padding.mediumSmall)
+                                                                  trailing: UIConstants.Padding.medium)
 
         section.boundarySupplementaryItems = [largeHeaderItem, sectionHeaderItem]
         return section

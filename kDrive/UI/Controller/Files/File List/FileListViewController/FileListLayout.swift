@@ -89,9 +89,9 @@ struct DefaultFileListLayout: FileListLayout {
         section.contentInsetsReference = .safeArea
         section.contentInsets = .init(
             top: 0,
-            leading: UIConstants.Padding.mediumSmall,
+            leading: UIConstants.Padding.small,
             bottom: 0,
-            trailing: UIConstants.Padding.mediumSmall
+            trailing: UIConstants.Padding.small
         )
         if showsHeader {
             addSectionHeader(section, estimatedHeight: headerEstimatedHeight)
@@ -114,7 +114,13 @@ struct DefaultFileListLayout: FileListLayout {
         #endif
 
         let section = NSCollectionLayoutSection.list(using: configuration, layoutEnvironment: environment)
-        section.contentInsets.top = 0
+        section.contentInsetsReference = .safeArea
+        section.contentInsets = .init(
+            top: 0,
+            leading: UIConstants.Padding.medium,
+            bottom: 0,
+            trailing: UIConstants.Padding.medium
+        )
 
         if showsHeader {
             addSectionHeader(section, estimatedHeight: headerEstimatedHeight)

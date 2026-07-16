@@ -168,7 +168,7 @@ class HomeRecentActivitiesController {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(100))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-        group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
+        group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: UIConstants.Padding.medium, bottom: 0, trailing: UIConstants.Padding.medium)
 
         let section = NSCollectionLayoutSection(group: group)
         section.boundarySupplementaryItems = [getHeaderLayout()]
@@ -186,7 +186,7 @@ class HomeRecentActivitiesController {
             elementKind: UICollectionView.elementKindSectionHeader,
             alignment: .top
         )
-        header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
+        header.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: UIConstants.Padding.medium, bottom: 0, trailing: UIConstants.Padding.medium)
         return header
     }
 
@@ -194,7 +194,7 @@ class HomeRecentActivitiesController {
         let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(200))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-        group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12)
+        group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: UIConstants.Padding.medium, bottom: 0, trailing: UIConstants.Padding.medium)
 
         let section = NSCollectionLayoutSection(group: group)
         section.interGroupSpacing = 16

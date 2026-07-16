@@ -45,6 +45,12 @@ final class StorageTableViewController: UITableViewController {
         tableView.register(cellView: ParameterTableViewCell.self)
         tableView.separatorStyle = .none
         tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        tableView.layoutMargins = UIEdgeInsets(
+            top: 0,
+            left: UIConstants.Padding.medium,
+            bottom: 0,
+            right: UIConstants.Padding.medium
+        )
 
         title = KDriveResourcesStrings.Localizable.manageStorageTitle
 

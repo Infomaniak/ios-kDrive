@@ -17,6 +17,7 @@
  */
 
 import kDriveResources
+import kDriveCore
 import UIKit
 
 class BaseGroupedTableViewController: UITableViewController {
@@ -27,6 +28,16 @@ class BaseGroupedTableViewController: UITableViewController {
 
         tableView.sectionHeaderHeight = UITableView.automaticDimension
         tableView.estimatedSectionHeaderHeight = 28
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        tableView.layoutMargins = UIEdgeInsets(
+            top: 0,
+            left: UIConstants.Padding.medium,
+            bottom: 0,
+            right: UIConstants.Padding.medium
+        )
     }
 
     @available(*, unavailable)

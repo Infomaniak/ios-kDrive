@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="25084" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25061"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -17,10 +17,10 @@
             <autoresizingMask key="autoresizingMask"/>
             <subviews>
                 <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="78X-Zy-20d">
-                    <rect key="frame" x="16" y="104" width="288" height="138"/>
+                    <rect key="frame" x="8" y="104" width="304" height="138"/>
                     <subviews>
                         <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="djO-ss-0Z2" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                            <rect key="frame" x="0.0" y="0.0" width="288" height="0.0"/>
+                            <rect key="frame" x="0.0" y="0.0" width="304" height="0.0"/>
                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                             <nil key="textColor"/>
                             <nil key="highlightedColor"/>
@@ -29,7 +29,7 @@
                             </userDefinedRuntimeAttributes>
                         </label>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yuD-RJ-QYe">
-                            <rect key="frame" x="0.0" y="0.0" width="288" height="98"/>
+                            <rect key="frame" x="0.0" y="0.0" width="304" height="98"/>
                             <subviews>
                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="delete" translatesAutoresizingMaskIntoConstraints="NO" id="Y85-uP-1W2">
                                     <rect key="frame" x="0.0" y="0.0" width="16" height="20"/>
@@ -40,7 +40,7 @@
                                     </constraints>
                                 </imageView>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QgE-e7-AZW" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                    <rect key="frame" x="32" y="0.0" width="256" height="20.5"/>
+                                    <rect key="frame" x="32" y="0.0" width="272" height="20.5"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                     <nil key="textColor"/>
                                     <nil key="highlightedColor"/>
@@ -77,10 +77,10 @@
                             </constraints>
                         </view>
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ycy-fJ-CPK" userLabel="Offline View">
-                            <rect key="frame" x="0.0" y="106" width="288" height="24"/>
+                            <rect key="frame" x="0.0" y="106" width="304" height="24"/>
                             <subviews>
                                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="E5v-a7-it7">
-                                    <rect key="frame" x="0.0" y="0.0" width="288" height="24"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="304" height="24"/>
                                     <subviews>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="offline" translatesAutoresizingMaskIntoConstraints="NO" id="Vyh-8R-RqM">
                                             <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
@@ -91,7 +91,7 @@
                                             </constraints>
                                         </imageView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1xA-38-wIp" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                            <rect key="frame" x="32" y="4" width="256" height="16"/>
+                                            <rect key="frame" x="32" y="4" width="272" height="16"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <color key="textColor" name="primaryTextColor"/>
                                             <nil key="highlightedColor"/>
@@ -112,10 +112,10 @@
                             </constraints>
                         </view>
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rqf-ue-Zdn" customClass="FilterView" customModule="kDrive" customModuleProvider="target">
-                            <rect key="frame" x="0.0" y="106" width="288" height="45"/>
+                            <rect key="frame" x="0.0" y="106" width="304" height="45"/>
                             <subviews>
                                 <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="t6S-yz-hdt">
-                                    <rect key="frame" x="0.0" y="0.0" width="288" height="45"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="304" height="45"/>
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <constraints>
                                         <constraint firstAttribute="height" constant="45" id="LKN-L0-YL5"/>
@@ -141,10 +141,10 @@
                             </connections>
                         </view>
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZS5-h5-V8H" userLabel="ActivityList View">
-                            <rect key="frame" x="0.0" y="106" width="288" height="24"/>
+                            <rect key="frame" x="0.0" y="106" width="304" height="24"/>
                             <subviews>
                                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="YuO-7j-ThR">
-                                    <rect key="frame" x="0.0" y="0.0" width="288" height="24"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="304" height="24"/>
                                     <subviews>
                                         <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="placeholder_avatar" translatesAutoresizingMaskIntoConstraints="NO" id="jaF-Io-w5o">
                                             <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
@@ -160,7 +160,7 @@
                                             </userDefinedRuntimeAttributes>
                                         </imageView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ATr-sQ-1YC" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                            <rect key="frame" x="32" y="4" width="256" height="16"/>
+                                            <rect key="frame" x="32" y="4" width="272" height="16"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <color key="textColor" name="primaryTextColor"/>
                                             <nil key="highlightedColor"/>
@@ -180,7 +180,7 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M4N-HE-jPw">
-                            <rect key="frame" x="0.0" y="114" width="288" height="24"/>
+                            <rect key="frame" x="0.0" y="114" width="304" height="24"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bAx-uw-yHB" customClass="IKButton" customModule="kDriveCore">
                                     <rect key="frame" x="0.0" y="0.0" width="50" height="24"/>
@@ -197,7 +197,7 @@
                                     </connections>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Mhu-wK-ohw">
-                                    <rect key="frame" x="264" y="0.0" width="24" height="24"/>
+                                    <rect key="frame" x="280" y="0.0" width="24" height="24"/>
                                     <color key="tintColor" name="primaryTextColor"/>
                                     <inset key="imageEdgeInsets" minX="4" minY="4" maxX="4" maxY="4"/>
                                     <state key="normal" image="list"/>
@@ -223,10 +223,10 @@
             <viewLayoutGuide key="safeArea" id="VXr-Tz-HHm"/>
             <color key="backgroundColor" name="backgroundColor"/>
             <constraints>
-                <constraint firstItem="78X-Zy-20d" firstAttribute="leading" secondItem="VXr-Tz-HHm" secondAttribute="leading" constant="16" id="1t6-eQ-o9Y"/>
+                <constraint firstItem="78X-Zy-20d" firstAttribute="leading" secondItem="VXr-Tz-HHm" secondAttribute="leading" constant="8" id="1t6-eQ-o9Y"/>
                 <constraint firstItem="VXr-Tz-HHm" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="78X-Zy-20d" secondAttribute="bottom" constant="16" id="GCp-kJ-qbz"/>
                 <constraint firstItem="78X-Zy-20d" firstAttribute="top" secondItem="VXr-Tz-HHm" secondAttribute="top" constant="8" id="YtW-Hs-8f0"/>
-                <constraint firstItem="VXr-Tz-HHm" firstAttribute="trailing" secondItem="78X-Zy-20d" secondAttribute="trailing" constant="16" id="ugX-4N-pEj"/>
+                <constraint firstItem="VXr-Tz-HHm" firstAttribute="trailing" secondItem="78X-Zy-20d" secondAttribute="trailing" constant="8" id="ugX-4N-pEj"/>
             </constraints>
             <connections>
                 <outlet property="activityAvatar" destination="jaF-Io-w5o" id="Lzh-Zn-774"/>
@@ -254,7 +254,7 @@
         <image name="offline" width="24" height="24"/>
         <image name="placeholder_avatar" width="512" height="512"/>
         <namedColor name="backgroundColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="iconColor">
             <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
