@@ -436,7 +436,12 @@ extension NewFolderViewController: FooterButtonDelegate {
                 footer.footerButton.setLoading(false)
             }
         case .commonFolder:
-            let forAllUser = tableView.indexPathForSelectedRow?.row == 0
+            let forAllUser: Bool
+            if let indexPath = tableView.indexPathForSelectedRow {
+                forAllUser = sections[indexPath.section] == .permissionsAllUsers
+            } else {
+                forAllUser = false
+            }
             Task {
                 do {
                     let frozenDirectory = try await driveFileManager.createCommonDirectory(
@@ -464,7 +469,12 @@ extension NewFolderViewController: FooterButtonDelegate {
                 footer.footerButton.setLoading(false)
             }
         case .dropbox:
-            let onlyForMe = tableView.indexPathForSelectedRow?.row == 0
+            let onlyForMe: Bool
+            if let indexPath = tableView.indexPathForSelectedRow {
+                onlyForMe = sections[indexPath.section] == .permissionsMeOnly
+            } else {
+                onlyForMe = false
+            }
             let password: String? = getSetting(for: .optionPassword) ? (getValue(for: .optionPassword) as? String) : nil
             let validUntil: Date? = getSetting(for: .optionDate) ? (getValue(for: .optionDate) as? Date) : nil
             let limitFileSize: BinaryDisplaySize?
