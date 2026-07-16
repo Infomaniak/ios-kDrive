@@ -340,17 +340,13 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     override func viewDidLoad() {
         super.viewDidLoad()
         addLegacyTabBarIfNeeded()
+        setupTabBar()
+        updateCenterButton()
 
         restorationIdentifier = defaultRestorationIdentifier
 
         delegate = self
         photoPickerDelegate.viewController = self
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        setupTabBar()
-        updateCenterButton()
     }
 
     override func viewWillLayoutSubviews() {
