@@ -166,7 +166,10 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
                 let section = NSCollectionLayoutSection(group: group)
                 section.interGroupSpacing = 10
-                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: UIConstants.Padding.medium, bottom: 0, trailing: UIConstants.Padding.medium)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0,
+                                                                leading: UIConstants.Padding.medium,
+                                                                bottom: 0,
+                                                                trailing: UIConstants.Padding.medium)
                 return section
             default:
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50))

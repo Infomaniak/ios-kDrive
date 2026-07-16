@@ -122,7 +122,10 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 group.interItemSpacing = .flexible(16)
                 let section = NSCollectionLayoutSection(group: group)
                 section.interGroupSpacing = 16
-                section.contentInsets = NSDirectionalEdgeInsets(top: 30, leading: UIConstants.Padding.medium, bottom: 0, trailing: UIConstants.Padding.medium)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 30,
+                                                                leading: UIConstants.Padding.medium,
+                                                                bottom: 0,
+                                                                trailing: UIConstants.Padding.medium)
                 return section
             }
         }

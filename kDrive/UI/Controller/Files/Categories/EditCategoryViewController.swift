@@ -86,11 +86,10 @@ final class EditCategoryViewController: UITableViewController {
 
     private func setRows() {
         rows = [.name, .color]
-        if !create {
-            // Remove name edition for predefined categories
-            if category?.isPredefined == true, let index = rows.firstIndex(of: .name) {
-                rows.remove(at: index)
-            }
+        // Remove name edition for predefined categories
+        if !create, category?.isPredefined == true,
+           let index = rows.firstIndex(of: .name) {
+            rows.remove(at: index)
         }
     }
 
@@ -103,7 +102,7 @@ final class EditCategoryViewController: UITableViewController {
 
     // MARK: - Table view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
+    override func numberOfSections(in _: UITableView) -> Int {
         return sections.count
     }
 

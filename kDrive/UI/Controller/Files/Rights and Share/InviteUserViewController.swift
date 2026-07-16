@@ -215,7 +215,7 @@ class InviteUserViewController: UIViewController {
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
 extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in _: UITableView) -> Int {
         return sections.count
     }
 

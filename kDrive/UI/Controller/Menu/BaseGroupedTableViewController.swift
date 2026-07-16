@@ -16,8 +16,8 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import kDriveResources
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class BaseGroupedTableViewController: UITableViewController {
