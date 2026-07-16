@@ -239,7 +239,9 @@ extension NewFolderViewController: NewFolderSettingsDelegate {
     func didUpdateSettings(index: Int, isOn: Bool) {
         let option = optionsRows[index + 1]
         settings[option] = isOn
-        tableView.reloadRows(at: [IndexPath(row: index + 1, section: 3)], with: .automatic)
+        if let optionSection = sections.firstIndex(of: .options) {
+            tableView.reloadRows(at: [IndexPath(row: index + 1, section: optionSection)], with: .automatic)
+        }
         updateButton()
     }
 
