@@ -136,7 +136,7 @@ class LocationFolderViewController: SidebarViewController {
         navigationItem.title = driveFileManager.drive.name
         navigationItem.leftBarButtonItem = closeButton
         navigationItem.rightBarButtonItem = nil
-
+        updateNavigationBarAppearance()
         dataSource = configureDataSource(for: collectionView)
         setItemsSnapshot(for: collectionView)
     }

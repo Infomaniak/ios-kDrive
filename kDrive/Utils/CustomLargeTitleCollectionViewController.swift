@@ -81,7 +81,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
         return headerItem
     }
 
-    private func updateNavigationBarAppearance() {
+    func updateNavigationBarAppearance() {
         if let title = navigationItem.title {
             originalTitle = title
         }
