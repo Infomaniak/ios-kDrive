@@ -59,7 +59,12 @@ class BaseInfoViewController: UIViewController {
     }
 
     private func setupCloseButton() {
-        let closeButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(closeButtonPressed))
+        let closeButton = UIBarButtonItem(
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
+            target: self,
+            action: #selector(closeButtonPressed)
+        )
         closeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         navigationItem.leftBarButtonItem = closeButton
     }

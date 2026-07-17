@@ -130,10 +130,12 @@ class RightsSelectionViewController: UIViewController {
 
         tableView.register(cellView: RightsSelectionTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        tableView.sectionFooterHeight = 0
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .cancel,
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
             target: self,
             action: #selector(cancelButtonPressed)
         )
@@ -212,11 +214,11 @@ class RightsSelectionViewController: UIViewController {
         guard let index = rights.firstIndex(where: { $0.key == selectedRight }) else {
             return
         }
-        tableView.selectRow(at: IndexPath(row: index, section: 0), animated: true, scrollPosition: .none)
+        tableView.selectRow(at: IndexPath(row: 0, section: index), animated: true, scrollPosition: .none)
     }
 
     @IBAction func closeButtonPressed(_ sender: Any) {
-        let rightKey = rights[tableView.indexPathForSelectedRow?.row ?? 0].key
+        let rightKey = rights[tableView.indexPathForSelectedRow?.section ?? 0].key
         delegate?.didUpdateRightValue(newValue: rightKey)
         trackRightSelection(type: rightSelectionType, selected: rightKey)
         dismiss(animated: true)
@@ -248,13 +250,17 @@ class RightsSelectionViewController: UIViewController {
 // MARK: - UITableViewDelegate, UITableViewDataSource
 
 extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func numberOfSections(in _: UITableView) -> Int {
         return rights.count
+    }
+
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        return 1
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: RightsSelectionTableViewCell.self, for: indexPath)
-        let right = rights[indexPath.row]
+        let right = rights[indexPath.section]
         var disable = false
         if right.key == UserPermission.manage.rawValue {
             if let userId = fileAccessElement?.user?.id {
@@ -286,7 +292,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if driveFileManager.drive.pack.isAnyKSuiteProOffer,
            driveFileManager.drive.sharedLinkQuotaExceeded,
-           indexPath.row == 1 {
+           indexPath.section == 1 {
             if driveFileManager.drive.pack.kSuiteProUpgradePath != nil {
                 router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
                 matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "shareLinkQuotaExceeded")
@@ -296,7 +302,7 @@ extension RightsSelectionViewController: UITableViewDelegate, UITableViewDataSou
             return
         }
 
-        let right = rights[indexPath.row]
+        let right = rights[indexPath.section]
         switch right.key {
         case UserPermission.delete.rawValue:
             let deleteUser = fileAccessElement?.name ?? ""

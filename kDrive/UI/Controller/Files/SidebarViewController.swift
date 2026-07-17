@@ -682,7 +682,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     static func createListLayout(selectMode: Bool, isCompactView: Bool) -> UICollectionViewLayout {
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
         configuration
-            .boundarySupplementaryItems = [generateHeaderItem(leading: isCompactView ? UIConstants.Padding.mediumSmall : 0)]
+            .boundarySupplementaryItems = [generateHeaderItem(leading: isCompactView ? UIConstants.Padding.medium : 0)]
 
         let sectionProvider: UICollectionViewCompositionalLayoutSectionProvider = { sectionIndex, layoutEnvironment in
             let appearance: UICollectionLayoutListConfiguration.Appearance =
@@ -701,9 +701,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             section.contentInsetsReference = .safeArea
             section.contentInsets = .init(
                 top: 0,
-                leading: UIConstants.Padding.mediumSmall,
+                leading: UIConstants.Padding.medium,
                 bottom: UIConstants.Padding.standard,
-                trailing: UIConstants.Padding.mediumSmall
+                trailing: UIConstants.Padding.medium
             )
 
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
@@ -717,9 +717,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
                 sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(
                     top: UIConstants.Padding.none,
-                    leading: UIConstants.Padding.mediumSmall,
+                    leading: UIConstants.Padding.medium,
                     bottom: UIConstants.Padding.none,
-                    trailing: UIConstants.Padding.mediumSmall
+                    trailing: UIConstants.Padding.medium
                 )
 
                 section.boundarySupplementaryItems = [sectionHeaderItem]
@@ -734,9 +734,9 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
                 sectionHeaderItem.contentInsets = .init(
                     top: UIConstants.Padding.small,
-                    leading: -UIConstants.Padding.mediumSmall,
+                    leading: -UIConstants.Padding.medium,
                     bottom: UIConstants.Padding.standard,
-                    trailing: -UIConstants.Padding.mediumSmall
+                    trailing: -UIConstants.Padding.medium
                 )
 
                 section.boundarySupplementaryItems = [sectionHeaderItem]
@@ -877,8 +877,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
 
         let menuNavigationController = UINavigationController(rootViewController: menuViewController)
         menuViewController.navigationItem.leftBarButtonItem = UIBarButtonItem(
-            systemItem: .cancel,
-            primaryAction: UIAction { _ in
+            primaryAction: UIAction(image: UIImage(systemName: "xmark")) { _ in
                 menuNavigationController.dismiss(animated: true)
             }
         )

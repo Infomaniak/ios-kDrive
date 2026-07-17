@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -19,16 +19,16 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uip-Nl-a4L">
-                        <rect key="frame" x="24" y="0.0" width="410" height="162"/>
+                        <rect key="frame" x="0.0" y="0.0" width="458" height="162"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="wdF-td-4iS">
-                                <rect key="frame" x="0.0" y="8" width="410" height="146"/>
+                                <rect key="frame" x="0.0" y="8" width="458" height="146"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5pO-Kh-gB4">
-                                        <rect key="frame" x="0.0" y="0.0" width="410" height="65"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="458" height="65"/>
                                         <subviews>
                                             <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="l7u-DC-qsi">
-                                                <rect key="frame" x="0.0" y="0.0" width="410" height="65"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="458" height="65"/>
                                                 <color key="backgroundColor" name="backgroundCardView"/>
                                             </view>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="test-image" translatesAutoresizingMaskIntoConstraints="NO" id="1RC-eR-FYK">
@@ -40,10 +40,10 @@
                                                 </constraints>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="b6c-UA-ZIN" userLabel="title Stack View">
-                                                <rect key="frame" x="57" y="4" width="313" height="22.5"/>
+                                                <rect key="frame" x="57" y="4" width="361" height="22.5"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="249" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="pit-04-5d0" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                                        <rect key="frame" x="0.0" y="0.0" width="313" height="22.5"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="361" height="22.5"/>
                                                         <string key="text">Tous les utilisateurs du kDrive
 
 </string>
@@ -58,10 +58,10 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="r9c-Fe-ia2" userLabel="details Stack View">
-                                                <rect key="frame" x="57" y="27" width="313" height="17"/>
+                                                <rect key="frame" x="57" y="27" width="361" height="17"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="09p-zH-cVq" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                                        <rect key="frame" x="0.0" y="0.0" width="313" height="17"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="361" height="17"/>
                                                         <string key="text">2 utilisateurs
 
 </string>
@@ -75,10 +75,10 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="jlU-IB-hep">
-                                                <rect key="frame" x="57" y="44" width="313" height="17"/>
+                                                <rect key="frame" x="57" y="44" width="361" height="17"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Peut consulter" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="m83-Ub-BR0" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                                        <rect key="frame" x="0.0" y="0.0" width="313" height="17"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="361" height="17"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
@@ -90,7 +90,7 @@
                                                 </subviews>
                                             </stackView>
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="SmF-5H-MJ9">
-                                                <rect key="frame" x="378" y="26.5" width="12" height="12"/>
+                                                <rect key="frame" x="426" y="26.5" width="12" height="12"/>
                                                 <subviews>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="lcb-XX-FgF">
                                                         <rect key="frame" x="0.0" y="0.0" width="12" height="12"/>
@@ -126,10 +126,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ye9-Db-pn5">
-                                        <rect key="frame" x="0.0" y="65" width="410" height="31"/>
+                                        <rect key="frame" x="0.0" y="65" width="458" height="31"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'utilisateur n'a pas encore accepté le partage et est un utilisateur externe du kDrive." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bgz-By-CxN" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                                <rect key="frame" x="12" y="0.0" width="398" height="31"/>
+                                                <rect key="frame" x="12" y="0.0" width="446" height="31"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                 <color key="textColor" name="primaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -149,10 +149,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xEX-gh-6jh">
-                                        <rect key="frame" x="0.0" y="96" width="410" height="50"/>
+                                        <rect key="frame" x="0.0" y="96" width="458" height="50"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'utilisateur n'a pas encore accepté le partage et est un utilisateur externe du kDrive." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rXs-cg-QBY" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                                                <rect key="frame" x="12" y="0.0" width="398" height="50"/>
+                                                <rect key="frame" x="12" y="0.0" width="446" height="50"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                 <color key="textColor" name="primaryTextColor"/>
                                                 <nil key="highlightedColor"/>
@@ -185,8 +185,8 @@
                 </subviews>
                 <constraints>
                     <constraint firstAttribute="bottom" secondItem="uip-Nl-a4L" secondAttribute="bottom" id="6Y9-yq-xdn"/>
-                    <constraint firstAttribute="trailing" secondItem="uip-Nl-a4L" secondAttribute="trailing" constant="24" id="7xU-z0-PtC"/>
-                    <constraint firstItem="uip-Nl-a4L" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="GFq-sY-1k5"/>
+                    <constraint firstAttribute="trailing" secondItem="uip-Nl-a4L" secondAttribute="trailing" id="7xU-z0-PtC"/>
+                    <constraint firstItem="uip-Nl-a4L" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="GFq-sY-1k5"/>
                     <constraint firstItem="uip-Nl-a4L" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="hah-GQ-TUr"/>
                 </constraints>
             </tableViewCellContentView>
@@ -209,19 +209,19 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-right" width="24" height="24"/>
+        <image name="chevron-right" width="16" height="16"/>
         <image name="test-image" width="2000" height="1333"/>
         <namedColor name="backgroundCardView">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="secondaryTextColor">
             <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20000000298023224" green="0.20000000298023224" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
     </resources>
 </document>

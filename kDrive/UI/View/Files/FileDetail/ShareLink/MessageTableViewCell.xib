@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -20,10 +20,10 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="g37-7J-XaA">
-                        <rect key="frame" x="24" y="10" width="316" height="266"/>
+                        <rect key="frame" x="0.0" y="0.0" width="364" height="284"/>
                         <subviews>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Ajouter un message aux invités (falcultatif)" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="izQ-2S-jU2">
-                                <rect key="frame" x="16" y="16" width="284" height="234"/>
+                                <rect key="frame" x="16" y="16" width="332" height="252"/>
                                 <color key="backgroundColor" name="backgroundCardViewColor"/>
                                 <color key="textColor" name="primaryTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
@@ -44,10 +44,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="g37-7J-XaA" secondAttribute="trailing" constant="24" id="J49-e2-Ep7"/>
-                    <constraint firstItem="g37-7J-XaA" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="10" id="NIa-vU-CHK"/>
-                    <constraint firstItem="g37-7J-XaA" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="VYx-2n-zPf"/>
-                    <constraint firstAttribute="bottom" secondItem="g37-7J-XaA" secondAttribute="bottom" constant="8" id="g4V-ZB-LOF"/>
+                    <constraint firstAttribute="trailing" secondItem="g37-7J-XaA" secondAttribute="trailing" id="J49-e2-Ep7"/>
+                    <constraint firstItem="g37-7J-XaA" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="NIa-vU-CHK"/>
+                    <constraint firstItem="g37-7J-XaA" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="VYx-2n-zPf"/>
+                    <constraint firstAttribute="bottom" secondItem="g37-7J-XaA" secondAttribute="bottom" id="g4V-ZB-LOF"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>

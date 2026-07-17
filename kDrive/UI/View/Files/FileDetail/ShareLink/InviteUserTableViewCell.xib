@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -20,14 +20,14 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hfV-If-K1y" userLabel="Content Inset View">
-                        <rect key="frame" x="24" y="8" width="414" height="56"/>
+                        <rect key="frame" x="0.0" y="0.0" width="462" height="56"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qnd-d8-TOm">
-                                <rect key="frame" x="0.0" y="56" width="414" height="0.0"/>
+                                <rect key="frame" x="0.0" y="56" width="462" height="0.0"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Invitez un utilisateur ou une adresse mail…" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="D2y-Vg-Ung">
-                                <rect key="frame" x="16" y="8" width="382" height="40"/>
+                                <rect key="frame" x="16" y="8" width="430" height="40"/>
                                 <color key="textColor" name="primaryTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" keyboardType="emailAddress"/>
@@ -52,10 +52,10 @@
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                 <constraints>
-                    <constraint firstAttribute="bottom" secondItem="hfV-If-K1y" secondAttribute="bottom" constant="8" id="2bt-FH-sPC"/>
-                    <constraint firstItem="hfV-If-K1y" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="Qxm-9E-z5V"/>
-                    <constraint firstAttribute="trailing" secondItem="hfV-If-K1y" secondAttribute="trailing" constant="24" id="h73-la-82e"/>
-                    <constraint firstItem="hfV-If-K1y" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="znS-mg-qNb"/>
+                    <constraint firstAttribute="bottom" secondItem="hfV-If-K1y" secondAttribute="bottom" id="2bt-FH-sPC"/>
+                    <constraint firstItem="hfV-If-K1y" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="Qxm-9E-z5V"/>
+                    <constraint firstAttribute="trailing" secondItem="hfV-If-K1y" secondAttribute="trailing" id="h73-la-82e"/>
+                    <constraint firstItem="hfV-If-K1y" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" id="znS-mg-qNb"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
@@ -71,7 +71,7 @@
     </objects>
     <resources>
         <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

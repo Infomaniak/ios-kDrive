@@ -39,7 +39,7 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
         hostViewController = viewController
         hostTableView = tableView
 
-        searchUserViewController = SearchUserViewController()
+        searchUserViewController = SearchUserViewController(style: .insetGrouped)
         searchUserViewController.delegate = self
 
         searchController = UISearchController(searchResultsController: searchUserViewController)
@@ -68,6 +68,11 @@ final class SearchControllerManager: NSObject, UISearchControllerDelegate, UISea
     private func showSearch(cell: InviteUserTableViewCell) {
         hostTableView?.layoutIfNeeded()
         hostViewController?.navigationItem.searchController = searchController
+        hostViewController?.navigationItem.preferredSearchBarPlacement = .stacked
+
+        if #available(iOS 26.0, *) {
+            hostViewController?.navigationItem.searchBarPlacementAllowsToolbarIntegration = false
+        }
 
         UIView.animate(withDuration: 0.1, animations: {
             self.hostViewController?.view.layoutIfNeeded()

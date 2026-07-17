@@ -333,7 +333,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
             guard let self else { return nil }
             switch homeSection(at: section) {
             case .top:
-                return generateTopSectionLayout()
+                return generateTopSectionLayout(layoutEnvironment: layoutEnvironment)
             case .upload:
                 return generateUploadSectionLayout(layoutEnvironment: layoutEnvironment)
             case .recentFiles:
@@ -357,25 +357,25 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
         section.contentInsetsReference = .safeArea
         section.contentInsets = NSDirectionalEdgeInsets(top: 8,
-                                                        leading: UIConstants.Padding.mediumSmall,
+                                                        leading: UIConstants.Padding.medium,
                                                         bottom: 0,
-                                                        trailing: UIConstants.Padding.mediumSmall)
+                                                        trailing: UIConstants.Padding.medium)
         return section
     }
 
-    private func generateTopSectionLayout() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(50))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.edgeSpacing = NSCollectionLayoutEdgeSpacing(
-            leading: .fixed(0),
-            top: .fixed(16),
-            trailing: .fixed(0),
-            bottom: .fixed(16)
-        )
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-        let section = NSCollectionLayoutSection(group: group)
+    private func generateTopSectionLayout(layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection {
+        var listConfig = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+        listConfig.showsSeparators = false
+        listConfig.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
-        let largeHeaderItem = Self.generateHeaderItem(leading: UIConstants.Padding.mediumSmall)
+        let section = NSCollectionLayoutSection.list(using: listConfig, layoutEnvironment: layoutEnvironment)
+        section.contentInsetsReference = .safeArea
+        section.contentInsets = NSDirectionalEdgeInsets(top: 0,
+                                                        leading: UIConstants.Padding.medium,
+                                                        bottom: 0,
+                                                        trailing: UIConstants.Padding.medium)
+
+        let largeHeaderItem = Self.generateHeaderItem()
 
         let bottomHeaderSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(1))
         let sectionHeaderItem = NSCollectionLayoutBoundarySupplementaryItem(
@@ -385,9 +385,9 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
         )
 
         sectionHeaderItem.contentInsets = NSDirectionalEdgeInsets(top: 0,
-                                                                  leading: UIConstants.Padding.mediumSmall,
+                                                                  leading: UIConstants.Padding.medium,
                                                                   bottom: 0,
-                                                                  trailing: UIConstants.Padding.mediumSmall)
+                                                                  trailing: UIConstants.Padding.medium)
 
         section.boundarySupplementaryItems = [largeHeaderItem, sectionHeaderItem]
         return section
@@ -435,7 +435,6 @@ extension HomeViewController {
             switch viewModel.topRows[indexPath.row] {
             case .insufficientStorage:
                 let cell = collectionView.dequeueReusableCell(type: InsufficientStorageCollectionViewCell.self, for: indexPath)
-                cell.initWithPositionAndShadow(isFirst: true, isLast: true)
                 cell.configureCell(with: driveFileManager)
                 cell.actionHandler = { [weak self] _ in
                     guard let self else { return }

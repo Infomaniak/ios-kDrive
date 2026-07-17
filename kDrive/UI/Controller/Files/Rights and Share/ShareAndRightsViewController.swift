@@ -194,23 +194,16 @@ extension ShareAndRightsViewController: UITableViewDelegate, UITableViewDataSour
         switch sections[indexPath.section] {
         case .invite:
             let cell = tableView.dequeueReusableCell(type: InviteUserTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.delegate = searchControllerManager
             cell.transform = .identity
             return cell
         case .link:
             let cell = tableView.dequeueReusableCell(type: ShareLinkTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
             cell.delegate = self
             cell.configureWith(file: file, currentPackId: packId, driveFileManager: driveFileManager)
             return cell
         case .access:
             let cell = tableView.dequeueReusableCell(type: UsersAccessTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(
-                isFirst: indexPath.row == 0,
-                isLast: indexPath.row == self.tableView(tableView, numberOfRowsInSection: indexPath.section) - 1,
-                radius: 6
-            )
             cell.configure(with: fileAccessElements[indexPath.row], drive: driveFileManager.drive)
             return cell
         }

@@ -22,12 +22,13 @@ import UIKit
 public class SelfSizingPanelViewController: UIViewController {
     private let contentViewController: UIViewController
     private let scrollView = UIScrollView()
+    private let backgroundColor: UIColor
 
     private var contentSizeObservation: NSKeyValueObservation?
 
     public init(contentViewController: UIViewController, backgroundColor: UIColor = .systemBackground) {
         self.contentViewController = contentViewController
-        scrollView.backgroundColor = backgroundColor
+        self.backgroundColor = backgroundColor
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -53,6 +54,7 @@ public class SelfSizingPanelViewController: UIViewController {
         }
 
         embedContentViewController()
+        updateBackground()
     }
 
     private func setupScrollViewObservation(sheetPresentationController: UISheetPresentationController) {
@@ -89,5 +91,20 @@ public class SelfSizingPanelViewController: UIViewController {
             contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
         ])
         contentViewController.didMove(toParent: self)
+    }
+
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if previousTraitCollection?
+            .hasDifferentColorAppearance(comparedTo: traitCollection) == true {
+            updateBackground()
+        }
+    }
+
+    private func updateBackground() {
+        scrollView.backgroundColor = backgroundColor.resolvedColor(
+            with: traitCollection
+        )
     }
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="23094" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="24765" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23084"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -18,7 +18,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Couleur de la catégorie" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YW2-5c-Hd2" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
-                        <rect key="frame" x="24" y="8" width="272" height="21"/>
+                        <rect key="frame" x="0.0" y="8" width="320" height="21"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
@@ -28,7 +28,7 @@
                         </userDefinedRuntimeAttributes>
                     </label>
                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="Fdf-s5-ajr">
-                        <rect key="frame" x="24" y="45" width="272" height="103"/>
+                        <rect key="frame" x="0.0" y="45" width="320" height="103"/>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="103" id="Q87-Ky-h9H"/>
@@ -44,11 +44,11 @@
                 <constraints>
                     <constraint firstItem="Fdf-s5-ajr" firstAttribute="top" secondItem="YW2-5c-Hd2" secondAttribute="bottom" constant="16" id="4re-7q-TSR"/>
                     <constraint firstAttribute="bottom" secondItem="Fdf-s5-ajr" secondAttribute="bottom" constant="8" id="ET1-g2-do9"/>
-                    <constraint firstItem="Fdf-s5-ajr" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="LzC-3Y-j0E"/>
+                    <constraint firstItem="Fdf-s5-ajr" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="LzC-3Y-j0E"/>
                     <constraint firstItem="YW2-5c-Hd2" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="8" id="MRq-QU-yqw"/>
-                    <constraint firstAttribute="trailing" secondItem="YW2-5c-Hd2" secondAttribute="trailing" constant="24" id="OJc-re-kDh"/>
-                    <constraint firstItem="YW2-5c-Hd2" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="24" id="hx2-jc-ZDz"/>
-                    <constraint firstAttribute="trailing" secondItem="Fdf-s5-ajr" secondAttribute="trailing" constant="24" id="mIe-Qc-mtN"/>
+                    <constraint firstAttribute="trailing" secondItem="YW2-5c-Hd2" secondAttribute="trailing" id="OJc-re-kDh"/>
+                    <constraint firstItem="YW2-5c-Hd2" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" id="hx2-jc-ZDz"/>
+                    <constraint firstAttribute="trailing" secondItem="Fdf-s5-ajr" secondAttribute="trailing" id="mIe-Qc-mtN"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>

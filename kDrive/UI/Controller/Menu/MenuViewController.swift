@@ -104,6 +104,12 @@ final class MenuViewController: UITableViewController, SelectSwitchDriveDelegate
         tableView.register(cellView: UploadsPausedTableViewCell.self)
         tableView.register(KSuiteGetProViewCell.self, forCellReuseIdentifier: KSuiteGetProViewCell.reuseIdentifier)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        tableView.layoutMargins = UIEdgeInsets(
+            top: 0,
+            left: UIConstants.Padding.medium,
+            bottom: 0,
+            right: UIConstants.Padding.medium
+        )
         tableView.sectionHeaderHeight = 0
 
         updateTableContent()

@@ -145,6 +145,7 @@ class SaveFileViewController: UIViewController {
 
         closeBarButtonItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
         navigationItem.backButtonTitle = KDriveResourcesStrings.Localizable.saveExternalFileTitle
+        closeBarButtonItem.image = UIImage(systemName: "xmark")
         navigationItem.hideBackButtonText()
 
         tableView.separatorColor = .clear

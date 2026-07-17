@@ -77,7 +77,10 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
             elementKind: UICollectionView.elementKindSectionHeader,
             alignment: .top
         )
-        headerItem.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: leading, bottom: 0, trailing: 24)
+        headerItem.contentInsets = NSDirectionalEdgeInsets(top: 0,
+                                                           leading: leading,
+                                                           bottom: 0,
+                                                           trailing: UIConstants.Padding.medium)
         return headerItem
     }
 

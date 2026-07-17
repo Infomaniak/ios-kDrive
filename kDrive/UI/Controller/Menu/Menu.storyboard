@@ -299,7 +299,7 @@
                                 <rect key="frame" x="0.0" y="48" width="414" height="54"/>
                                 <items>
                                     <navigationItem id="Yoo-8c-fB5">
-                                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="yGV-IZ-Ryx">
+                                        <barButtonItem key="leftBarButtonItem" id="yGV-IZ-Ryx">
                                             <connections>
                                                 <action selector="buttonCloseClicked:" destination="c0t-5c-eBh" id="sXl-If-8kb"/>
                                             </connections>
@@ -338,6 +338,7 @@
                     </view>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
+                        <outlet property="closeBarButtonItem" destination="yGV-IZ-Ryx" id="gkj-c8-39h"/>
                         <outlet property="navigationBar" destination="31R-ua-Vke" id="igV-Iq-7Hw"/>
                         <outlet property="tableView" destination="yCS-yd-ffG" id="KU1-pk-rhY"/>
                     </connections>

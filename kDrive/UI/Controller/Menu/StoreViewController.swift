@@ -97,7 +97,12 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
         let viewControllersCount = navigationController?.viewControllers.count ?? 0
         if presentingViewController != nil && viewControllersCount < 2 {
             // Show cancel button
-            let closeButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(closeButtonPressed))
+            let closeButton = UIBarButtonItem(
+                image: UIImage(systemName: "xmark"),
+                style: .plain,
+                target: self,
+                action: #selector(closeButtonPressed)
+            )
             closeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonClose
             navigationItem.leftBarButtonItem = closeButton
         }
@@ -161,7 +166,10 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
                 let section = NSCollectionLayoutSection(group: group)
                 section.interGroupSpacing = 10
-                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0,
+                                                                leading: UIConstants.Padding.medium,
+                                                                bottom: 0,
+                                                                trailing: UIConstants.Padding.medium)
                 return section
             default:
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(50))

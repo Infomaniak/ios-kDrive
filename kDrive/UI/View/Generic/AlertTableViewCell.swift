@@ -30,11 +30,6 @@ class AlertTableViewCell: UITableViewCell {
         case info, warning
     }
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        view.cornerRadius = UIConstants.cornerRadius
-    }
-
     func configure(with style: Style, message: String) {
         switch style {
         case .info:

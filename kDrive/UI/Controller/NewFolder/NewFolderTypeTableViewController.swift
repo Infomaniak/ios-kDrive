@@ -38,9 +38,11 @@ class NewFolderTypeTableViewController: UITableViewController {
         super.viewDidLoad()
         tableView.register(cellView: FolderTypeTableViewCell.self)
         tableView.separatorColor = .clear
+        tableView.sectionFooterHeight = 0
 
         navigationItem.leftBarButtonItem = UIBarButtonItem(
-            barButtonSystemItem: .cancel,
+            image: UIImage(systemName: "xmark"),
+            style: .plain,
             target: self,
             action: #selector(closeButtonPressed)
         )
@@ -80,18 +82,19 @@ class NewFolderTypeTableViewController: UITableViewController {
         dismiss(animated: true)
     }
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+    override func numberOfSections(in _: UITableView) -> Int {
+        return content.count
     }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return content.count
+    override func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: FolderTypeTableViewCell.self, for: indexPath)
-        cell.initWithPositionAndShadow(isFirst: true, isLast: true, radius: 6)
-        switch content[indexPath.row] {
+        cell.upgradeLabel.isHidden = true
+        cell.lowerConstraint.constant = 0
+        switch content[indexPath.section] {
         case .folder:
             cell.titleLabel.text = KDriveResourcesStrings.Localizable.allFolder
             cell.accessoryImageView.image = KDriveResourcesAsset.folderFilled.image
@@ -121,7 +124,7 @@ class NewFolderTypeTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if content[indexPath.row] == .dropbox {
+        if content[indexPath.section] == .dropbox {
             if packId == .myKSuite, driveFileManager.drive.dropboxQuotaExceeded {
                 router.presentUpSaleSheet()
                 matomo.track(eventWithCategory: .myKSuiteUpgradeBottomSheet, name: "dropboxQuotaExceeded")
@@ -142,19 +145,19 @@ class NewFolderTypeTableViewController: UITableViewController {
                 }
                 present(driveFloatingPanelController, animated: true)
             } else {
-                performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
+                performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.section)
             }
         } else {
-            performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.row)
+            performSegue(withIdentifier: "toNewFolderSegue", sender: indexPath.section)
         }
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let row = sender as! Int
+        let section = sender as! Int
         let newFolderViewController = segue.destination as! NewFolderViewController
         newFolderViewController.driveFileManager = driveFileManager
         newFolderViewController.currentDirectory = currentDirectory
-        newFolderViewController.folderType = content[row]
+        newFolderViewController.folderType = content[section]
     }
 
     class func instantiateInNavigationController(parentDirectory: File,

@@ -137,6 +137,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
         setupViewModel()
         setupFooterIfNeeded()
+        if #available(iOS 26.0, *) {
+            collectionView.topEdgeEffect.isHidden = true
+        }
     }
 
     open func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {

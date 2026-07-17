@@ -68,6 +68,12 @@ final class SelectAccountViewController: UIViewController {
 
         tableView.register(cellView: UserAccountTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)
+        tableView.layoutMargins = UIEdgeInsets(
+            top: 0,
+            left: UIConstants.Padding.medium,
+            bottom: 0,
+            right: UIConstants.Padding.medium
+        )
         tableView.sectionFooterHeight = 0
 
         navigationController?.setInfomaniakAppearanceNavigationBar()

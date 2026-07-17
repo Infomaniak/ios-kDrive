@@ -229,14 +229,12 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
         switch sections[indexPath.section] {
         case .shareLink:
             let cell = tableView.dequeueReusableCell(type: DropBoxLinkTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             cell.delegate = self
             cell.copyTextField.text = directory.dropbox?.url
             return cell
         case .options:
             let option = optionsRows[indexPath.row]
             let cell = tableView.dequeueReusableCell(type: NewFolderSettingsTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: indexPath.row == 0, isLast: indexPath.row == optionsRows.count - 1)
             cell.delegate = self
             cell.configureFor(
                 index: indexPath.row,
@@ -247,7 +245,6 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
             return cell
         case .disable:
             let cell = tableView.dequeueReusableCell(type: DropBoxDisableTableViewCell.self, for: indexPath)
-            cell.initWithPositionAndShadow(isFirst: true, isLast: true)
             return cell
         }
     }
