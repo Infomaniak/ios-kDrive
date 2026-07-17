@@ -306,6 +306,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }()
 
     var tabBarHeightConstraint: NSLayoutConstraint?
+    var buttonAddBottomConstraint: NSLayoutConstraint?
 
     lazy var legacyTabBar = MainTabBar()
 
@@ -353,6 +354,10 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.viewWillLayoutSubviews()
 
         willLayoutLegacyTabBarIfNeeded()
+
+        if #available(iOS 26.0, *) {
+            willLayoutButtonAddIfNeeded()
+        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -477,35 +482,37 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
         view.addSubview(button)
 
-        if parent is UISplitViewController {
-            NSLayoutConstraint.activate([
-                button.trailingAnchor.constraint(
-                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                    constant: -UIConstants.Padding.standard
-                ),
-                button.bottomAnchor.constraint(
-                    equalTo: view.bottomAnchor,
-                    constant: -tabBar.frame.height - UIConstants.Padding.medium
-                ),
-                button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
-                button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
-            ])
-        } else {
-            NSLayoutConstraint.activate([
-                button.trailingAnchor.constraint(
-                    equalTo: view.safeAreaLayoutGuide.trailingAnchor,
-                    constant: -UIConstants.Padding.standard
-                ),
-                button.bottomAnchor.constraint(
-                    equalTo: tabBar.topAnchor,
-                    constant: -UIConstants.Padding.medium
-                ),
-                button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
-                button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
-            ])
-        }
+        buttonAddBottomConstraint = button.bottomAnchor.constraint(
+            equalTo: view.safeAreaLayoutGuide.bottomAnchor
+        )
+
+        NSLayoutConstraint.activate([
+            button.trailingAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                constant: -UIConstants.Padding.standard
+            ),
+            buttonAddBottomConstraint!,
+            button.widthAnchor.constraint(equalToConstant: IKButtonHeight.large),
+            button.heightAnchor.constraint(equalToConstant: IKButtonHeight.large)
+        ])
 
         buttonAdd = button
+    }
+
+    @available(iOS 26.0, *)
+    private func willLayoutButtonAddIfNeeded() {
+        guard let buttonAdd else { return }
+
+        if traitCollection.horizontalSizeClass == .compact {
+            buttonAddBottomConstraint?.isActive = false
+
+            let newConstraint = buttonAdd.bottomAnchor.constraint(
+                equalTo: tabBar.topAnchor,
+                constant: -UIConstants.Padding.medium
+            )
+            newConstraint.isActive = true
+            buttonAddBottomConstraint = newConstraint
+        }
     }
 
     func hideButtonAdd(_ hide: Bool) {
