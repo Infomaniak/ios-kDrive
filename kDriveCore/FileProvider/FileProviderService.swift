@@ -76,15 +76,31 @@ public struct FileProviderService: FileProviderServiceable {
     public func identifier(for itemURL: URL, domain: NSFileProviderDomain?) -> NSFileProviderItemIdentifier? {
         let rootStorageURL: URL
         if let domain {
-            rootStorageURL = NSFileProviderManager(for: domain)!.documentStorageURL
-                .appendingPathComponent(domain.pathRelativeToDocumentStorage, isDirectory: true)
+            guard let manager = NSFileProviderManager(for: domain) else {
+                return nil
+            }
+
+            rootStorageURL = manager.documentStorageURL.appendingPathComponent(
+                domain.pathRelativeToDocumentStorage,
+                isDirectory: true
+            )
         } else {
             rootStorageURL = NSFileProviderManager.default.documentStorageURL
         }
-        if itemURL == rootStorageURL {
+
+        let rootComponents = rootStorageURL.standardizedFileURL.pathComponents
+        let itemComponents = itemURL.standardizedFileURL.pathComponents
+
+        guard itemComponents.starts(with: rootComponents) else {
+            return nil
+        }
+
+        let relativeComponents = itemComponents.dropFirst(rootComponents.count)
+
+        guard let identifier = relativeComponents.first else {
             return .rootContainer
         }
-        let identifier = itemURL.deletingLastPathComponent().lastPathComponent
+
         return NSFileProviderItemIdentifier(identifier)
     }
 
