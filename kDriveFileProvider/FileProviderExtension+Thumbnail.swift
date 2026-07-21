@@ -35,18 +35,10 @@ extension FileProviderExtension {
         }
 
         for identifier in itemIdentifiers {
-            guard let file = try? driveFileManager.getCachedFile(itemIdentifier: identifier) else {
-                perThumbnailCompletionHandler(identifier, nil, NSFileProviderError(.noSuchItem))
-                progress.completedUnitCount += 1
-                if progress.isFinished {
-                    completionHandler(nil)
-                }
-                continue
-            }
-
             // If we do not have `supportedBy` return nil data nil error, per documentation
             // Note: An freshly uploaded file will not have a .thumbnail before re-navigating to the parent folder
-            guard file.supportedBy.contains(.thumbnail) else {
+            guard let file = try? driveFileManager.getCachedFile(itemIdentifier: identifier),
+                  file.supportedBy.contains(.thumbnail) else {
                 perThumbnailCompletionHandler(identifier, nil, nil)
                 progress.completedUnitCount += 1
                 if progress.isFinished {
