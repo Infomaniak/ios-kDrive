@@ -417,21 +417,23 @@ final class FileProviderExtension: NSFileProviderExtension {
                     return
                 }
 
-                guard self.fileStorageIsCurrent(item: item, file: file) else {
-                    SentryDebug.capture(
-                        message: "Observed download completed but file storage is not current",
-                        context: [
+                if self.fileStorageIsCurrent(item: item, file: file) {
+                    completion(nil)
+                } else {
+                    SentryDebug.addBreadcrumb(
+                        message: "Observed download completed",
+                        category: .fileProvider,
+                        level: .info,
+                        metadata: [
                             "fileId": file.id,
-                            "itemIdentifier": item.itemIdentifier.rawValue
-                        ],
-                        contextKey: "FileProvider",
-                        level: .error
+                            "itemIdentifier": item.itemIdentifier.rawValue,
+                            "sourceExists": FileManager.default.fileExists(atPath: file.localUrl.path),
+                            "destinationExists": FileManager.default.fileExists(atPath: item.storageUrl.path)
+                        ]
                     )
-                    completion(NSFileProviderError(.noSuchItem))
-                    return
-                }
 
-                completion(nil)
+                    self.saveFreshLocalFile(file, for: item, completion: completion)
+                }
             }
 
             return
