@@ -819,7 +819,7 @@ extension FileListViewController {
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let item = sections[safe: indexPath.section]?.elements[safe: indexPath.item] else {
-            return UICollectionViewCell()
+            return collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
         }
 
         switch item {
@@ -834,7 +834,7 @@ extension FileListViewController {
             cell.configure(driveFileManager: driveFileManager, presenter: self)
             return cell
             #else
-            return UICollectionViewCell()
+            return collectionView.dequeueReusableCell(type: FileCollectionViewCell.self, for: indexPath)
             #endif
         case .file(let file):
             let cellType: UICollectionViewCell.Type
