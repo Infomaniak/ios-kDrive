@@ -561,7 +561,9 @@ final class FileProviderExtension: NSFileProviderExtension {
         var coordinationError: NSError?
         var accessorError: Error?
 
-        fileCoordinator.coordinate(writingItemAt: url, options: options, error: &coordinationError) { coordinatedURL in
+        let coordinator = NSFileCoordinator()
+        coordinator.purposeIdentifier = manager.providerIdentifier
+        coordinator.coordinate(writingItemAt: url, options: options, error: &coordinationError) { coordinatedURL in
             do {
                 try accessor(coordinatedURL)
             } catch {
