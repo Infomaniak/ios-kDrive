@@ -270,13 +270,17 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
     private func handleActions(_ actions: [FileAction], actionsFiles: [File]) -> HandledActions {
         let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
+        var alreadyHandledActionIds = Set<Int>()
 
         var deletedFiles = Set<File>()
         var movedOutFiles = Set<File>()
         var updatedFiles = Set<File>()
 
-        for fileAction in actions {
-            guard let actionFile = mappedActionsFiles[fileAction.fileId]?.first else { continue }
+        // We reverse actions to handle the most recent one first
+        for fileAction in actions.reversed() {
+            guard let actionFile = mappedActionsFiles[fileAction.fileId]?.first,
+                  !alreadyHandledActionIds.contains(fileAction.fileId) else { continue }
+            alreadyHandledActionIds.insert(fileAction.fileId)
 
             switch fileAction.action {
             case .fileDelete, .fileTrash:
