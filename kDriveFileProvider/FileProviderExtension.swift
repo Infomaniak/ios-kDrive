@@ -35,9 +35,6 @@ extension DriveFileManager {
         guard let fileId = itemIdentifier.toFileId(),
               let file = getCachedFile(id: fileId, freeze: freeze, using: realm),
               !file.isInvalidated else {
-            let context = ["itemIdentifier": itemIdentifier.rawValue] as [String: Any]
-            SentryDebug.capture(message: "getCachedFile using realm failed", context: context,
-                                contextKey: "FileProvider", level: .error)
             throw NSFileProviderError(.noSuchItem)
         }
 
@@ -48,9 +45,6 @@ extension DriveFileManager {
                        freeze: Bool = true) throws -> File {
         guard let fileId = itemIdentifier.toFileId(),
               let file = getCachedFile(id: fileId, freeze: freeze) else {
-            let context = ["itemIdentifier": itemIdentifier.rawValue] as [String: Any]
-            SentryDebug.capture(message: "getCachedFile failed", context: context,
-                                contextKey: "FileProvider", level: .error)
             throw NSFileProviderError(.noSuchItem)
         }
 
@@ -160,9 +154,6 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         // did not match anything
         Log.fileProvider("item for identifier - nsError(code: .noSuchItem)", level: .error)
-        let context = ["identifier": identifier.rawValue] as [String: Any]
-        SentryDebug.capture(message: "item for identifier failed to find item", context: context,
-                            contextKey: "FileProvider", level: .error)
         throw NSFileProviderError(.noSuchItem)
     }
 
@@ -181,10 +172,6 @@ final class FileProviderExtension: NSFileProviderExtension {
             if let remoteFileId = uploadedFile.remoteFileId {
                 guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
                     Log.fileProvider("urlForItem - Unable to bridge UploadFile to File \(remoteFileId)", level: .error)
-                    let context = ["uploadedFileId": uploadedFile.id, "remoteFileId": remoteFileId,
-                                   "identifier": identifier.rawValue] as [String: Any]
-                    SentryDebug.capture(message: "urlForItem - Unable to bridge UploadFile to File", context: context,
-                                        contextKey: "FileProvider", level: .error)
                     return nil
                 }
 
@@ -265,17 +252,58 @@ final class FileProviderExtension: NSFileProviderExtension {
             level: .info
         )
 
-        guard let fileId = fileProviderService.identifier(for: url, domain: domain)?.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId) else {
+        guard let identifier = fileProviderService.identifier(for: url, domain: domain),
+              let fileId = identifier.toFileId() else {
             if FileManager.default.fileExists(atPath: url.path) {
                 SentryDebug.addBreadcrumb(
-                    message: "file exists locally but cached file was not found",
+                    message: "file exists locally but its identifier could not be resolved",
                     category: .fileProvider,
                     level: .info
                 )
                 completionHandler(nil)
             } else {
-                SentryDebug.capture(message: "startProvidingItem failed to find file", level: .error)
+                let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+                let context = [
+                    "placeholderExists": FileManager.default.fileExists(atPath: placeholderURL.path)
+                ] as [String: Any]
+                SentryDebug.addBreadcrumb(
+                    message: "startProvidingItem failed to resolve identifier",
+                    category: .fileProvider,
+                    level: .warning,
+                    metadata: context
+                )
+                completionHandler(NSFileProviderError(.noSuchItem))
+            }
+            return
+        }
+
+        guard let file = driveFileManager.getCachedFile(id: fileId) else {
+            if FileManager.default.fileExists(atPath: url.path) {
+                SentryDebug.addBreadcrumb(
+                    message: "file exists locally but cached file was not found",
+                    category: .fileProvider,
+                    level: .info,
+                    metadata: [
+                        "fileId": fileId,
+                        "itemIdentifier": identifier.rawValue
+                    ]
+                )
+                completionHandler(nil)
+            } else {
+                let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+                let context = [
+                    "fileId": fileId,
+                    "itemIdentifier": identifier.rawValue,
+                    "contentExists": false,
+                    "placeholderExists": FileManager.default.fileExists(atPath: placeholderURL.path)
+                ] as [String: Any]
+                SentryDebug.addBreadcrumb(
+                    message: "startProvidingItem cache miss",
+                    category: .fileProvider,
+                    level: .warning,
+                    metadata: context
+                )
+
                 completionHandler(NSFileProviderError(.noSuchItem))
             }
             return
