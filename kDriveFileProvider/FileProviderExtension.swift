@@ -218,13 +218,9 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         do {
             let fileProviderItem = try item(for: identifier)
-
-            let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
-            try? FileManager.default.createDirectory(
-                at: placeholderURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: fileProviderItem)
+            try coordinateWrite(at: url, options: .forReplacing) { coordinatedURL in
+                try self.writePlaceholder(at: coordinatedURL, withMetadata: fileProviderItem)
+            }
 
             completionHandler(nil)
         } catch {
@@ -462,7 +458,9 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
 
             do {
-                try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+                try self.coordinateWrite(at: item.storageUrl, options: .forReplacing) { coordinatedURL in
+                    try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: coordinatedURL)
+                }
                 SentryDebug.addBreadcrumb(
                     message: "Copy file from local url to file provider storage url",
                     category: .fileProvider,
@@ -511,7 +509,9 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
 
         do {
-            try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+            try coordinateWrite(at: item.storageUrl, options: .forReplacing) { coordinatedURL in
+                try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: coordinatedURL)
+            }
             completion(nil)
         } catch {
             let context = [
@@ -525,18 +525,81 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
     }
 
-    private func cleanupAt(url: URL) {
-        Log.fileProvider("cleanupAt url:\(url)")
-        do {
-            try FileManager.default.removeItem(at: url)
-        } catch {
-            Log.fileProvider("cleanupAt failed to removeItem:\(error)", level: .error)
-            // Handle error
+    private func coordinateWrite(
+        at url: URL,
+        options: NSFileCoordinator.WritingOptions,
+        accessor: @escaping (URL) throws -> Void
+    ) throws {
+        var coordinationError: NSError?
+        var accessorError: Error?
+
+        fileCoordinator.coordinate(writingItemAt: url, options: options, error: &coordinationError) { coordinatedURL in
+            do {
+                try accessor(coordinatedURL)
+            } catch {
+                accessorError = error
+            }
         }
 
-        // write out a placeholder to facilitate future property lookups
-        providePlaceholder(at: url) { _ in
-            // TODO: handle any error, do any necessary cleanup
+        if let coordinationError {
+            throw coordinationError
+        }
+
+        if let accessorError {
+            throw accessorError
+        }
+    }
+
+    private func writePlaceholder(at url: URL, withMetadata item: NSFileProviderItem) throws {
+        let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+        try FileManager.default.createDirectory(
+            at: placeholderURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: item)
+    }
+
+    private func cleanupAt(url: URL) {
+        Log.fileProvider("cleanupAt url:\(url)")
+
+        guard let identifier = persistentIdentifierForItem(at: url) else {
+            Log.fileProvider("cleanupAt skipped: unable to resolve identifier", level: .warning)
+            return
+        }
+
+        let fileProviderItem: NSFileProviderItem
+        do {
+            // Resolve metadata before removing the materialized file. If the cache is
+            // temporarily unavailable, keeping the file is safer than leaving neither
+            // the file nor a valid placeholder behind.
+            fileProviderItem = try item(for: identifier)
+        } catch {
+            Log.fileProvider("cleanupAt skipped: unable to resolve item:\(error)", level: .warning)
+            return
+        }
+
+        do {
+            try coordinateWrite(at: url, options: .forReplacing) { coordinatedURL in
+                if FileManager.default.fileExists(atPath: coordinatedURL.path) {
+                    try FileManager.default.removeItem(at: coordinatedURL)
+                }
+
+                try self.writePlaceholder(at: coordinatedURL, withMetadata: fileProviderItem)
+            }
+        } catch {
+            let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+            let context = [
+                "itemIdentifier": identifier.rawValue,
+                "contentExists": FileManager.default.fileExists(atPath: url.path),
+                "placeholderExists": FileManager.default.fileExists(atPath: placeholderURL.path),
+                "error": error.localizedDescription
+            ] as [String: Any]
+            SentryDebug.capture(
+                message: "cleanupAt failed to replace content with placeholder",
+                context: context,
+                contextKey: "FileProvider",
+                level: .error
+            )
         }
     }
 
