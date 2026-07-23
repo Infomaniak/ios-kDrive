@@ -1,5 +1,5 @@
 {
-  "originHash" : "1590d93fa237d0851db565ef703b98b031bdb51a2c8b1787bfd97b3fe583fc54",
+  "originHash" : "8bffaa3fef159299d49e4440b7f0149e40d8d0daef8298b51818ded0b27bb40d",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "7086862e9622fec617d2a2d0bc1c70ab0a21fee9",
-        "version" : "26.0.0"
+        "revision" : "7309ad76dcf0427df51386cf924dfc33e77dd474",
+        "version" : "26.0.1"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-uikit",
       "state" : {
-        "revision" : "dd005b4e493c9f8c793d1d251eb54c8c315d602e",
-        "version" : "2.0.0"
+        "branch" : "chore/Bump-Snackbar",
+        "revision" : "d93cba67ec4ab719989432059806a5a6bf2c44b9"
       }
     },
     {
@@ -258,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "00a2fec32ea665b81e406419e078bb713238e23f",
-        "version" : "9.19.0"
+        "revision" : "53eb9bd5da18e208cfd80e86863d3f4c7ba21b1d",
+        "version" : "9.21.0"
       }
     },
     {
@@ -267,8 +267,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/SnackBar.swift",
       "state" : {
-        "revision" : "7d8d20af50c6b744aa9791b597f7efbd0a15add2",
-        "version" : "1.2.0"
+        "branch" : "feat/Corner-raduis",
+        "revision" : "1e98d369a6ad0a7fe600cf319cb2f3251c349840"
       }
     },
     {
@@ -357,8 +357,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/siteline/SwiftUI-Introspect",
       "state" : {
-        "revision" : "aead9358a55f635d62d885aeb9105752c0213aec",
-        "version" : "27.0.0-beta.1"
+        "revision" : "469f9e8becd1b229b9c2056a4bd80dcce3b65a69",
+        "version" : "27.0.0-beta.2"
       }
     }
   ],
