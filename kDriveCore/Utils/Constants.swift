@@ -31,7 +31,6 @@ public enum PhotoLibraryImport: Int {
 }
 
 public struct URLConstants {
-    public static let kDriveRedirection = URLConstants(urlString: "https://kdrive.infomaniak.com/app/drive")
     public static let kDriveWeb = URLConstants(urlString: "https://kdrive.infomaniak.com")
     public static let kSuiteWeb = URLConstants(urlString: "https://ksuite.infomaniak.com")
     public static let signUp = URLConstants(urlString: "https://welcome.infomaniak.com/signup/ikdrive/steps")
