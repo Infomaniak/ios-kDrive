@@ -448,10 +448,10 @@ extension FileCollectionViewCell: UICollectionViewDelegate, UICollectionViewData
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let viewModel else {
-            return UICollectionViewCell()
-        }
         let cell = collectionView.dequeueReusableCell(type: CategoryBadgeCollectionViewCell.self, for: indexPath)
+        guard let viewModel else {
+            return cell
+        }
         let category = viewModel.categories[indexPath.row]
         let more = indexPath.item == 2 && viewModel.categories.count > 3 ? viewModel.categories.count - 3 : nil
         cell.configure(with: category, more: more)
