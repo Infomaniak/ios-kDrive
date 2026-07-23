@@ -106,19 +106,20 @@ extension SaveFileViewController: FooterButtonDelegate {
         let addToQueue = !appContextService.isExtension
         try await fileImportHelper.saveForUpload(files, in: directory, drive: drive, addToQueue: addToQueue)
         #if ISEXTENSION
-        openApp()
+        await openApp()
         #endif
     }
 
     #if ISEXTENSION
-    private func openApp() {
-        Task {
-            guard let url = URL(string: "kdrive://") else {
-                return
-            }
-            let action = EnvironmentValues()
-            action.openURL(url)
+    private func openApp() async {
+        guard let url = URL(string: "kdrive://") else {
+            // Fallback on a local notification if failure to open URL
+            @InjectService var notificationHelper: NotificationsHelpable
+            notificationHelper.sendPausedUploadQueueNotification()
+            return
         }
+        let action = EnvironmentValues()
+        action.openURL(url)
     }
     #endif
 }
