@@ -22,4 +22,10 @@ import Foundation
     public let action: FileActivityType
     public let fileId: Int
     public let parentId: Int
+
+    public init(action: FileActivityType, fileId: Int, parentId: Int) {
+        self.action = action
+        self.fileId = fileId
+        self.parentId = parentId
+    }
 }

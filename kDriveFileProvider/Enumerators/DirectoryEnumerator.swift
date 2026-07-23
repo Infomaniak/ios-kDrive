@@ -22,12 +22,6 @@ import InfomaniakDI
 import kDriveCore
 
 final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
-    private struct HandledActions {
-        let updated: Set<File>
-        let deleted: Set<File>
-        let movedOut: Set<File>
-    }
-
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     let containerItemIdentifier: NSFileProviderItemIdentifier
@@ -187,8 +181,8 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 let proxyFile = ProxyFile(driveId: driveFileManager.driveId, id: fileId)
                 let response = try await fetchDroppingCursorIfNeeded(in: proxyFile, cursor: cursor)
 
-                let handledActions = handleActions(
-                    response.data.actions,
+                let handledActions = FileProviderActionsReducer().reduce(
+                    actions: response.data.actions,
                     actionsFiles: response.data.actionsFiles
                 )
 
@@ -266,40 +260,6 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
         }
-    }
-
-    private func handleActions(_ actions: [FileAction], actionsFiles: [File]) -> HandledActions {
-        let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
-        var alreadyHandledActionIds = Set<Int>()
-
-        var deletedFiles = Set<File>()
-        var movedOutFiles = Set<File>()
-        var updatedFiles = Set<File>()
-
-        // We reverse actions to handle the most recent one first
-        for fileAction in actions.reversed() {
-            guard let actionFile = mappedActionsFiles[fileAction.fileId]?.first,
-                  !alreadyHandledActionIds.contains(fileAction.fileId) else { continue }
-            alreadyHandledActionIds.insert(fileAction.fileId)
-
-            switch fileAction.action {
-            case .fileDelete, .fileTrash:
-                deletedFiles.insert(actionFile)
-            case .fileMoveOut:
-                movedOutFiles.insert(actionFile)
-            case .fileRename, .fileMoveIn, .fileRestore, .fileCreate, .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate,
-                 .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate,
-                 .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete:
-                updatedFiles.insert(actionFile)
-            default:
-                break
-            }
-        }
-        return HandledActions(
-            updated: updatedFiles,
-            deleted: deletedFiles,
-            movedOut: movedOutFiles
-        )
     }
 
     func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
