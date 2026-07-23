@@ -4,4 +4,5 @@ Post tenebras Liquid glass !
 - Amélioration de la résilience de l'app en mode maintenance
 - Amélioration de l'UI du glissé déposé
 - Correction d'une problématique de sur utilisation d'espace de cache
+- Correction relative à la navigation entre l'application et l'extension de partage
 - Améliorations de la stabilité et corrections de bugs
