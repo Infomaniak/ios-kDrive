@@ -21,6 +21,7 @@ import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import SwiftUI
 import UIKit
 
 extension SaveFileViewController: FooterButtonDelegate {
@@ -105,29 +106,18 @@ extension SaveFileViewController: FooterButtonDelegate {
         let addToQueue = !appContextService.isExtension
         try await fileImportHelper.saveForUpload(files, in: directory, drive: drive, addToQueue: addToQueue)
         #if ISEXTENSION
-        await showOpenAppToContinueNotification()
+        openApp()
         #endif
     }
 
     #if ISEXTENSION
-    //  Dynamic hook to open an URL within an extension
-    func openURL(_ url: URL) async -> Bool {
-        var responder: UIResponder? = self
-        while responder != nil {
-            if let application = responder as? UIApplication {
-                return await application.open(url)
+    private func openApp() {
+        Task {
+            guard let url = URL(string: "kdrive://") else {
+                return
             }
-            responder = responder?.next
-        }
-        return false
-    }
-
-    func showOpenAppToContinueNotification() async {
-        guard await openURL(URLConstants.kDriveRedirection.url) else {
-            // Fallback on a local notification if failure to open URL
-            @InjectService var notificationHelper: NotificationsHelpable
-            notificationHelper.sendPausedUploadQueueNotification()
-            return
+            let action = EnvironmentValues()
+            action.openURL(url)
         }
     }
     #endif
