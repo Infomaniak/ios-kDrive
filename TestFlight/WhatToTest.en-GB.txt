@@ -4,4 +4,5 @@ Post tenebras Liquid glass !
 - Improved and more resilient maintenance mode
 - Sleek drag and drop UI
 - Fix a cache space over use issue
+- Fix deep-link navigation from share extension
 - Stability improvements and bug fixes
