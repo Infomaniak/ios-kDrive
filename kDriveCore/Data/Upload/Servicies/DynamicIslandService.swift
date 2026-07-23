@@ -16,7 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import BackgroundTasks
+@preconcurrency import BackgroundTasks
 @preconcurrency import Combine
 import Foundation
 import InfomaniakCore
@@ -25,42 +25,36 @@ import kDriveResources
 import OSLog
 
 @available(iOS 26.0, *)
-public class DynamicIslandService: DynamicIslandServiceable {
-    @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
+public actor DynamicIslandService: DynamicIslandServiceable {
+    @LazyInjectService private var uploadProgressTracker: DynamicIslandUploadProgressTracker
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploadable
+    @LazyInjectService private var taskScheduler: BGTaskScheduler
 
-    private let taskIdentifier: String
+    private let taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island"
 
     private static let logger = Logger(category: "DynamicIslandService")
 
     private var currentTask: BGContinuedProcessingTask?
-    private var uploadContinuationBox: ContinuationBox?
+    private var uploadContinuation: CheckedContinuation<Void, any Error>?
     private var lastError: Error?
 
     private var taskHandlingTask: Task<Void, Never>?
     private var hasRegisteredLaunchHandler = false
-    private let registrationQueue = DispatchQueue(label: "com.infomaniak.drive.dynamic-island-service.registration")
 
     private enum DomainError: Error {
         case expiredTask
     }
 
-    init() {
-        taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island"
-    }
-
     public func registerTask() {
-        registrationQueue.sync {
-            guard !hasRegisteredLaunchHandler else { return }
+        guard !hasRegisteredLaunchHandler else { return }
 
-            BGTaskScheduler.shared.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
-                guard let self, let task = task as? BGContinuedProcessingTask else { return }
-                taskHandlingTask = Task { self.handle(task: task) }
-            }
-
-            hasRegisteredLaunchHandler = true
+        taskScheduler.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
+            guard let self, let task = task as? BGContinuedProcessingTask else { return }
+            Task { await self.handle(task: task) }
         }
+
+        hasRegisteredLaunchHandler = true
     }
 
     public func submitTask() {
@@ -77,7 +71,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
         request.strategy = .queue
 
         do {
-            try BGTaskScheduler.shared.submit(request)
+            try taskScheduler.submit(request)
             Self.logger.info("Dynamic Island task submitted")
         } catch {
             Self.logger.error("Error submitting task : \(error)")
@@ -88,19 +82,17 @@ public class DynamicIslandService: DynamicIslandServiceable {
         Self.logger.error("Uploading error in task: \(error)")
 
         lastError = error
-        uploadContinuationBox?.resume(throwing: error)
-        uploadContinuationBox = nil
+        resumeUploadContinuation(throwing: error)
     }
 
     private func handleExpiration() {
         Self.logger.error("Handling task expiration")
         uploadService.suspendAllOperations()
-        uploadContinuationBox?.resume(throwing: DomainError.expiredTask)
-        uploadContinuationBox = nil
+        resumeUploadContinuation(throwing: DomainError.expiredTask)
     }
 
     public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
-        dynamicIslandManager.updateQueueActivity(
+        uploadProgressTracker.updateQueueActivity(
             globalQueueActive: globalQueueActive,
             photoQueueActive: photoQueueActive
         )
@@ -116,83 +108,108 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
         task.expirationHandler = { [weak self] in
             guard let self else { return }
-            self.handleExpiration()
+            Task { await self.handleExpiration() }
         }
 
-        Task {
-            var cancellable: AnyCancellable?
-            defer {
-                cancellable?.cancel()
-                let isExpiredTask = (self.lastError as? DomainError) == .expiredTask
-                if !isExpiredTask {
-                    dynamicIslandManager.reset()
-                }
-                currentTask = nil
-                uploadContinuationBox = nil
-                lastError = nil
-            }
-            task.progress.totalUnitCount = 100
-
-            cancellable = dynamicIslandManager.$fractionCompleted.sink { progress in
-                task.progress.completedUnitCount = Int64(progress * 100)
-                task.updateTitle(
-                    KDriveResourcesStrings.Localizable.uploadInProgressTitle,
-                    subtitle: KDriveResourcesStrings.Localizable.uploadInProgressSubTitle(Int(progress * 100))
-                )
-            }
-
-            do {
-                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
-                    let box = ContinuationBox(continuation)
-                    self.uploadContinuationBox = box
-
-                    dynamicIslandManager.uploadService.waitForCompletionForActiveQueues {
-                        box.resume()
-                    }
-                }
-
-                let totalCount = dynamicIslandManager.totalUploadCount
-                let uploadedCount = min(dynamicIslandManager.progressUploading + 1, totalCount)
-
-                let status = ReachabilityListener.instance.currentStatus
-                let shouldBeSuspended = status != .wifi
-                let wifiSynchro = photoLibraryUploader.isWifiOnly
-
-                if uploadService.operationCount > 0 && shouldBeSuspended && wifiSynchro {
-                    task.updateTitle(
-                        KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
-                        subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessful(
-                            uploadedCount,
-                            totalCount
-                        )
-                    )
-                } else {
-                    task.updateTitle(
-                        KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                        subtitle: uploadedCount > 1 ?
-                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadedCount)
-                            : KDriveResourcesStrings.Localizable
-                            .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
-                    )
-                }
-
-                task.setTaskCompleted(success: true)
-            } catch {
-                let (title, subtitle) = errorInfo(for: error)
-                task.updateTitle(title, subtitle: subtitle)
-
-                try? await Task.sleep(for: .seconds(5))
-
-                if let domainError = error as? DomainError, domainError == .expiredTask {
-                    task.setTaskCompleted(success: true)
-                } else {
-                    task.setTaskCompleted(success: false)
-                }
-            }
+        taskHandlingTask = Task { [weak self] in
+            await self?.runTask(task)
         }
     }
 
-    private func errorInfo(for error: Error) -> (String, String) {
+    private func runTask(_ task: BGContinuedProcessingTask) async {
+        var cancellable: AnyCancellable?
+        defer {
+            cancellable?.cancel()
+            currentTask = nil
+            uploadContinuation = nil
+            lastError = nil
+        }
+
+        task.progress.totalUnitCount = 100
+
+        cancellable = uploadProgressTracker.$fractionCompleted.sink { progress in
+            task.progress.completedUnitCount = Int64(progress * 100)
+            task.updateTitle(
+                KDriveResourcesStrings.Localizable.uploadInProgressTitle,
+                subtitle: KDriveResourcesStrings.Localizable.uploadInProgressSubTitle(Int(progress * 100))
+            )
+        }
+
+        do {
+            try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+                uploadContinuation = continuation
+
+                uploadService.waitForCompletionForActiveQueues { [weak self] in
+                    Task { await self?.resumeUploadContinuation() }
+                }
+            }
+
+            let progressSnapshot = await uploadProgressTracker.progressSnapshot()
+            let totalCount = progressSnapshot.totalUploadCount
+            let uploadedCount = min(progressSnapshot.progressUploading + 1, totalCount)
+
+            let status = ReachabilityListener.instance.currentStatus
+            let shouldBeSuspended = status != .wifi
+            let wifiSynchro = photoLibraryUploader.isWifiOnly
+
+            if uploadService.operationCount > 0 && shouldBeSuspended && wifiSynchro {
+                task.updateTitle(
+                    KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
+                    subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessful(
+                        uploadedCount,
+                        totalCount
+                    )
+                )
+            } else {
+                task.updateTitle(
+                    KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
+                    subtitle: uploadedCount > 1 ?
+                        KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadedCount)
+                        : KDriveResourcesStrings.Localizable
+                        .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
+                )
+            }
+
+            task.setTaskCompleted(success: true)
+        } catch {
+            let (title, subtitle) = errorInfo(for: error)
+            task.updateTitle(title, subtitle: subtitle)
+
+            try? await Task.sleep(for: .seconds(5))
+
+            if let domainError = error as? DomainError, domainError == .expiredTask {
+                task.setTaskCompleted(success: true)
+            } else {
+                task.setTaskCompleted(success: false)
+            }
+        }
+
+        cancellable?.cancel()
+        cancellable = nil
+
+        let isExpiredTask = (lastError as? DomainError) == .expiredTask
+        if !isExpiredTask {
+            await uploadProgressTracker.reset()
+        }
+    }
+
+    private func resumeUploadContinuation() {
+        guard let continuation = uploadContinuation else {
+            return
+        }
+        uploadContinuation = nil
+        continuation.resume()
+    }
+
+    private func resumeUploadContinuation(throwing error: Error) {
+        guard let continuation = uploadContinuation else {
+            return
+        }
+        uploadContinuation = nil
+        continuation.resume(throwing: error)
+    }
+
+    private nonisolated func errorInfo(for error: Error) -> (String, String) {
         if let driveError = error as? DriveError {
             switch driveError {
             case .quotaExceeded:
@@ -224,32 +241,12 @@ public class DynamicIslandService: DynamicIslandServiceable {
     }
 }
 
-private final class ContinuationBox: @unchecked Sendable {
-    private var continuation: CheckedContinuation<Void, any Error>?
+public final class UnavailableDynamicIslandService: DynamicIslandServiceable {
+    public func registerTask() async {}
 
-    init(_ continuation: CheckedContinuation<Void, any Error>) {
-        self.continuation = continuation
-    }
+    public func submitTask() async {}
 
-    func resume() {
-        guard let c = continuation else { return }
-        continuation = nil
-        c.resume()
-    }
+    public func cancelTaskError(_ error: Error) async {}
 
-    func resume(throwing error: Error) {
-        guard let c = continuation else { return }
-        continuation = nil
-        c.resume(throwing: error)
-    }
-}
-
-public class UnavailableDynamicIslandService: DynamicIslandServiceable {
-    public func registerTask() {}
-
-    public func submitTask() {}
-
-    public func cancelTaskError(_ error: Error) {}
-
-    public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {}
+    public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) async {}
 }
