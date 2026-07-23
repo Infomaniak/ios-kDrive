@@ -3,8 +3,8 @@
  * Project: kDrive
  * Locale: el, Greek
  * Tagged: ios
- * Exported by: Killian Mathias
- * Exported at: Wed, 08 Jul 2026 16:13:25 +0200
+ * Exported by: Kylian Grandy
+ * Exported at: Fri, 12 Jun 2026 15:40:33 +0200
  */
 
 /* loco:6049df4d5c2c3a04bc397901 */
@@ -775,6 +775,12 @@
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Σύνδεσμος κοινής χρήσης Dropbox";
 
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Προετοιμασία…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessful" = "Η μεταφόρτωση ολοκληρώθηκε με επιτυχία: %d/%d";
+
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "Η τροποποίηση θα είναι ορατή σε όλους τους χρήστες kDrive που έχουν πρόσβαση στις κατηγορίες.";
 
@@ -903,6 +909,9 @@
 
 /* loco:6569aef523dcf4dc2a0f5c92 */
 "errorWrongPassword" = "Λάθος κωδικός πρόσβασης";
+
+/* loco:6a2a79154feaf554c0020962 */
+"exceedQuotaTitle" = "Υπέρβαση ορίου";
 
 /* loco:6049df4d5c2c3a04bc3979a9 */
 "favoritesNoFile" = "Κανένα αγαπημένο αυτή τη στιγμή";
@@ -1303,6 +1312,12 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Ώρα λήξης";
 
+/* loco:6a2a7acf5a2fec6b940785b2 */
+"insufficientSpaceDescription" = "Απελευθερώστε λίγο χώρο";
+
+/* loco:6a2a7a5f1dc6dc2d210f4ea4 */
+"insufficientSpaceTitle" = "Ανεπαρκής χώρος";
+
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Πιο πρόσφατες αλλαγές";
 
@@ -1323,6 +1338,9 @@
 
 /* loco:67f509c180ba041c690a8e02 */
 "maintenanceAsleepTitle" = "Το kDrive %@ σας πήρε έναν μικρό υπνάκο!";
+
+/* loco:6a2a79b7bdb4d0e90a02bfc4 */
+"maintenanceTitle" = "Συντήρηση";
 
 /* loco:67f50e36f46a2825af088213 */
 "maintenanceWakeUpButton" = "Επανεκκίνηση του kDrive μου";
@@ -1581,6 +1599,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Αποθηκεύστε τις αναμνήσεις σας με ασφάλεια";
+
+/* loco:6a2a78ccb80096108403dcd2 */
+"openAppToContinue" = "Άνοιξε την εφαρμογή για να συνεχίσεις";
 
 /* loco:6660083917d29585d5010582 */
 "openInPlaceDirectory" = "Άνοιγμα στη θέση του";
@@ -2161,6 +2182,9 @@
 /* loco:69bcfe53aed2af87a302d467 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
 
+/* loco:6a2a7a248dcf552aa702ad43 */
+"tryAgainLater" = "Παρακαλώ δοκιμάστε ξανά αργότερα";
+
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Άγνωστος καλλιτέχνης";
 
@@ -2221,6 +2245,9 @@
 /* loco:6049df4d5c2c3a04bc397a86 */
 "uploadInProgressRestartUploadTitle" = "Επανεκκίνηση των μεταφορτώσεων";
 
+/* loco:6a2a7751b7cc09a6da053fc2 */
+"uploadInProgressSubTitle" = "Πρόοδος %d%%";
+
 /* loco:6049df4d5c2c3a04bc397a87 */
 "uploadInProgressTitle" = "Μεταφόρτωση σε εξέλιξη";
 
@@ -2247,6 +2274,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Η μεταφόρτωση ανεστάλη";
+
+/* loco:6a2a73b3d69b30963b02d5b2 */
+"uploadingTitle" = "Μεταφόρτωση";
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";

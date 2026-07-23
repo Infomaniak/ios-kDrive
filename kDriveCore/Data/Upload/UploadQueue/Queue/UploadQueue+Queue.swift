@@ -47,6 +47,16 @@ extension UploadQueue: UploadQueueable {
         }
     }
 
+    public func waitForCompletionIsActive(_ completionHandler: @escaping () -> Void) {
+        Task { [weak self] in
+            guard let self else { completionHandler(); return }
+            while self.isActive {
+                try? await Task.sleep(for: .milliseconds(200))
+            }
+            completionHandler()
+        }
+    }
+
     public func getOperation(forUploadFileId uploadFileId: String) -> UploadOperationable? {
         Log.uploadQueue("\(self) getOperation ufid:\(uploadFileId)")
         guard appContextService.context != .shareExtension else {

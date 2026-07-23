@@ -34,7 +34,7 @@ extension UploadOperation {
             throw ErrorDomain.operationFinished
         }
 
-        try uploadsDatabase.writeTransaction { writableRealm in
+        try uploadsDatabase.writeTransaction(withExpiringActivity: false) { writableRealm in
             guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
                 throw ErrorDomain.databaseUploadFileNotFound
             }
@@ -119,7 +119,7 @@ extension UploadOperation {
 
     /// Delete the UploadFile entity from database from forPrimaryKey of the current UploadOperation
     func deleteUploadFile() async throws {
-        try uploadsDatabase.writeTransaction { writableRealm in
+        try uploadsDatabase.writeTransaction(withExpiringActivity: false) { writableRealm in
             guard let uploadFile = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
                 return
             }
