@@ -1,12 +1,3 @@
-/*
- * Loco ios export: Xcode Strings (legacy)
- * Project: kDrive
- * Locale: pt, Portuguese
- * Tagged: ios
- * Exported by: Killian Mathias
- * Exported at: Wed, 08 Jul 2026 16:13:26 +0200
- */
-
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "Aplicação kDrive";
 
@@ -1481,7 +1472,7 @@
 "notEnoughStorageUsed" = "utilizado";
 
 /* loco:607947d62b29a7483d1c61a2 */
-"notSupportedExtensionDescription" = "Pretende criar uma cópia do seu ficheiro com uma extensão compatível para edição online? O ficheiro %@ original permanecerá inalterado.\n";
+"notSupportedExtensionDescription" = "Pretende criar uma cópia do seu ficheiro com uma extensão compatível para edição online? O ficheiro %@ original permanecerá inalterado.";
 
 /* loco:60794789c3a8a86f4e611e42 */
 "notSupportedExtensionTitle" = "A extensão %@ não é suportada para edição online";
@@ -1592,7 +1583,7 @@
 "photoFormatTitle" = "Opções";
 
 /* loco:638469dc5d9b75142a430ac2 */
-"photoLibraryAccessLimitedDescription" = "O acesso à sua biblioteca de fotos é necessário para guardar as suas fotos e vídeos.       ";
+"photoLibraryAccessLimitedDescription" = "O acesso à sua biblioteca de fotos é necessário para guardar as suas fotos e vídeos.";
 
 /* loco:63846ac1f8786f515b61f752 */
 "photoLibraryAccessLimitedTitle" = "Acesso limitado ou recusado";

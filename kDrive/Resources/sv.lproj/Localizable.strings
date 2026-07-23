@@ -1,12 +1,3 @@
-/*
- * Loco ios export: Xcode Strings (legacy)
- * Project: kDrive
- * Locale: sv, Swedish
- * Tagged: ios
- * Exported by: Killian Mathias
- * Exported at: Wed, 08 Jul 2026 16:13:26 +0200
- */
-
 /* loco:6049df4d5c2c3a04bc397901 */
 "aboutAppVersionTitle" = "kDrive-applikation";
 
@@ -1481,7 +1472,7 @@
 "notEnoughStorageUsed" = "använt";
 
 /* loco:607947d62b29a7483d1c61a2 */
-"notSupportedExtensionDescription" = "Vill du skapa en kopia av din fil med ett kompatibelt filtillägg för redigering online? Den ursprungliga %@ filen kommer att förbli oförändrad.\n";
+"notSupportedExtensionDescription" = "Vill du skapa en kopia av din fil med ett kompatibelt filtillägg för redigering online? Den ursprungliga %@ filen kommer att förbli oförändrad.";
 
 /* loco:60794789c3a8a86f4e611e42 */
 "notSupportedExtensionTitle" = "Filtillägget %@ stöds inte för redigering online";
