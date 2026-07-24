@@ -84,7 +84,7 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 let files = Array(parentDirectory.children) + [parentDirectory]
                 let filesItems = files.map { item in
                     autoreleasepool {
-                        return item.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
+                        return item.toFileProviderItem(parent: nil, drive: self.driveFileManager.drive, domain: self.domain)
                     }
                 }
 
@@ -181,20 +181,23 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 let proxyFile = ProxyFile(driveId: driveFileManager.driveId, id: fileId)
                 let response = try await fetchDroppingCursorIfNeeded(in: proxyFile, cursor: cursor)
 
-                let (updatedFiles, deletedFiles) = handleActions(response.data.actions, actionsFiles: response.data.actionsFiles)
+                let handledActions = FileProviderActionsReducer().reduce(
+                    actions: response.data.actions,
+                    actionsFiles: response.data.actionsFiles
+                )
 
                 var updatedItems = [File]()
                 var deletedItems = [NSFileProviderItemIdentifier]()
 
                 try driveFileManager.database.writeTransaction { writableRealm in
-                    let parentDirectory = try driveFileManager.getCachedFile(
-                        itemIdentifier: containerItemIdentifier,
+                    let parentDirectory = try self.driveFileManager.getCachedFile(
+                        itemIdentifier: self.containerItemIdentifier,
                         freeze: false,
                         using: writableRealm
                     )
 
-                    for updatedChild in updatedFiles {
-                        driveFileManager.keepCacheAttributesForFile(
+                    for updatedChild in handledActions.updated {
+                        self.driveFileManager.keepCacheAttributesForFile(
                             newFile: updatedChild,
                             keepProperties: [.standard],
                             writableRealm: writableRealm
@@ -206,7 +209,16 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                         updatedItems.append(updatedChild)
                     }
 
-                    for deletedChild in deletedFiles {
+                    for movedOutChild in handledActions.movedOut {
+                        guard let existingMovedFile: File = writableRealm.getObject(id: movedOutChild.uid) else {
+                            continue
+                        }
+
+                        deletedItems.append(NSFileProviderItemIdentifier(movedOutChild.id))
+                        parentDirectory.children.remove(existingMovedFile)
+                    }
+
+                    for deletedChild in handledActions.deleted {
                         guard let existingDeletedFile: File = writableRealm.getObject(id: deletedChild.uid) else {
                             continue
                         }
@@ -225,8 +237,8 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 observer.didUpdate(updatedItems.map {
                     $0.toFileProviderItem(
                         parent: nil,
-                        drive: driveFileManager.drive,
-                        domain: domain
+                        drive: self.driveFileManager.drive,
+                        domain: self.domain
                     )
                 })
                 observer.didDeleteItems(withIdentifiers: deletedItems)
@@ -248,30 +260,6 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
         }
-    }
-
-    func handleActions(_ actions: [FileAction], actionsFiles: [File])
-        -> (updated: Set<File>, deleted: Set<File>) {
-        let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
-
-        var deletedFiles = Set<File>()
-        var updatedFiles = Set<File>()
-
-        for fileAction in actions {
-            guard let actionFile = mappedActionsFiles[fileAction.fileId]?.first else { continue }
-
-            switch fileAction.action {
-            case .fileDelete, .fileTrash, .fileMoveOut:
-                deletedFiles.insert(actionFile)
-            case .fileRename, .fileMoveIn, .fileRestore, .fileCreate, .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate,
-                 .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate,
-                 .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete:
-                updatedFiles.insert(actionFile)
-            default:
-                break
-            }
-        }
-        return (updatedFiles, deletedFiles)
     }
 
     func currentSyncAnchor() async -> NSFileProviderSyncAnchor? {
