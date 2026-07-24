@@ -193,18 +193,19 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func addAction() {
-        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
         let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager,
                                                                                    folder: frozenFile,
                                                                                    presentedFromPlusButton: false)
         (presentingParent as? FileListViewController)?.mediaHelper = fileInformationsViewController.mediaHelper
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = fileInformationsViewController
 
-        floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-        floatingPanelViewController.track(scrollView: fileInformationsViewController.tableView)
+        if let sheet = fileInformationsViewController.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+            sheet.prefersGrabberVisible = true
+        }
         dismiss(animated: true) {
-            self.presentingParent?.present(floatingPanelViewController, animated: true)
+            self.presentingParent?.present(fileInformationsViewController, animated: true)
         }
     }
 
