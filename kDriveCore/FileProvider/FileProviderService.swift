@@ -88,8 +88,8 @@ public struct FileProviderService: FileProviderServiceable {
             rootStorageURL = NSFileProviderManager.default.documentStorageURL
         }
 
-        let rootComponents = rootStorageURL.standardizedFileURL.pathComponents
-        let itemComponents = itemURL.standardizedFileURL.pathComponents
+        let rootComponents = rootStorageURL.pathComponents
+        let itemComponents = itemURL.pathComponents
 
         guard itemComponents.starts(with: rootComponents) else {
             return nil
