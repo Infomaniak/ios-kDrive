@@ -327,7 +327,7 @@ extension MenuViewController {
 
     @objc func switchDriveButtonPressed(_ button: UIButton) {
         let drives = accountManager.drives
-        let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(options: drives,
+        let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiateSheet(options: drives,
                                                                                                           selectedOption: driveFileManager
                                                                                                               .drive,
                                                                                                           headerTitle: KDriveResourcesStrings

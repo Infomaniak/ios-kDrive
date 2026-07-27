@@ -28,8 +28,13 @@ protocol Selectable {
 }
 
 extension Selectable {
-    var image: UIImage? { return nil }
-    var tintColor: UIColor? { return nil }
+    var image: UIImage? {
+        return nil
+    }
+
+    var tintColor: UIColor? {
+        return nil
+    }
 }
 
 @MainActor
@@ -60,23 +65,6 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
            let selectedIndex = options.firstIndex(of: selectedOption) {
             tableView.selectRow(at: IndexPath(row: selectedIndex + 1, section: 0), animated: false, scrollPosition: .none)
         }
-    }
-
-    static func instantiatePanel(options: [T], selectedOption: T? = nil, headerTitle: String,
-                                 delegate: SelectDelegate? = nil) -> DriveFloatingPanelController {
-        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-        let viewController = FloatingPanelSelectOptionViewController<T>()
-
-        viewController.headerTitle = headerTitle
-        viewController.options = options
-        viewController.selectedOption = selectedOption
-        viewController.delegate = delegate
-
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-
-        floatingPanelViewController.set(contentViewController: viewController)
-        floatingPanelViewController.trackAndObserve(scrollView: viewController.tableView)
-        return floatingPanelViewController
     }
 
     override func viewDidLayoutSubviews() {
