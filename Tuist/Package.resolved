@@ -1,5 +1,5 @@
 {
-  "originHash" : "e8503940eacfddf7e63acd50a0cba066258b1d7d2345b8fc1d765f4e9f8d303e",
+  "originHash" : "1f39eeec97dfdfcdc8a74a12e3fdee1d77309f2d88b193962b7c9ea539fc7bcf",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-bug-tracker",
       "state" : {
-        "revision" : "9949016c59db6b6ca39b87f3c986a77a61d0b5c6",
-        "version" : "18.0.0"
+        "revision" : "352d747a603f464b76d1f5d9ef830e60dfe88500",
+        "version" : "19.0.0"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "da017d3a8f2a44c2602e5880d3edca552b4a8e96",
-        "version" : "18.12.0"
+        "revision" : "c0bb8aec024f40da9d5f8698ce9d2b463d8c7b4f",
+        "version" : "19.1.1"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "ff55c791878a52b776b59d0de0412ff5543b6cb5",
-        "version" : "25.1.0"
+        "revision" : "7309ad76dcf0427df51386cf924dfc33e77dd474",
+        "version" : "26.0.1"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-uikit",
       "state" : {
-        "revision" : "d21644dc42c74a83caff299376ddc1c9a5fb80f8",
-        "version" : "1.0.0"
+        "revision" : "dd005b4e493c9f8c793d1d251eb54c8c315d602e",
+        "version" : "2.0.0"
       }
     },
     {
@@ -123,8 +123,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-features",
       "state" : {
-        "revision" : "3873f2dea3a35baf95e2ba9af3315fd2df3e0d9a",
-        "version" : "9.0.2"
+        "revision" : "08b0a7d9a6b8debff6ab8f2f6f525cfb1f0d1caa",
+        "version" : "10.1.2"
       }
     },
     {
@@ -141,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-notifications",
       "state" : {
-        "revision" : "bf0722c1392a783ac3e1fe2a69b10ae3e45350ff",
-        "version" : "15.1.0"
+        "revision" : "54eb1428395f01c2745b64a728a9083a1c8c6e12",
+        "version" : "16.0.0"
       }
     },
     {
@@ -159,8 +159,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-version-checker",
       "state" : {
-        "revision" : "b286eabfcf1a832fd801bfc7b8e1960c380ed3cb",
-        "version" : "17.0.0"
+        "revision" : "d4d0aac42a3c00b58c80c29f4d244578330935bc",
+        "version" : "18.0.0"
       }
     },
     {
@@ -236,6 +236,15 @@
       }
     },
     {
+      "identity" : "qrcode",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dagronf/QRCode",
+      "state" : {
+        "revision" : "a8b8a5166e072156baf66ec2fff0850aa14b5297",
+        "version" : "28.1.0"
+      }
+    },
+    {
       "identity" : "realm-core",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-core.git",
@@ -258,8 +267,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "00a2fec32ea665b81e406419e078bb713238e23f",
-        "version" : "9.19.0"
+        "revision" : "afa7510e05b99f35c1febe47566bfd868fa53fb9",
+        "version" : "9.23.0"
       }
     },
     {
@@ -344,6 +353,24 @@
       }
     },
     {
+      "identity" : "swift-qrcode-generator",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dagronf/swift-qrcode-generator",
+      "state" : {
+        "revision" : "2b1980b825f08a81ccc762b0c4d17fcde9d5e953",
+        "version" : "2.0.2"
+      }
+    },
+    {
+      "identity" : "swiftimagereadwrite",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dagronf/SwiftImageReadWrite",
+      "state" : {
+        "revision" : "42ace2412279f18bc264bc306e96b51c36e12a33",
+        "version" : "1.9.2"
+      }
+    },
+    {
       "identity" : "swiftregex",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/flowbe/SwiftRegex",
@@ -357,8 +384,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/siteline/SwiftUI-Introspect",
       "state" : {
-        "revision" : "aead9358a55f635d62d885aeb9105752c0213aec",
-        "version" : "27.0.0-beta.1"
+        "revision" : "469f9e8becd1b229b9c2056a4bd80dcce3b65a69",
+        "version" : "27.0.0-beta.2"
       }
     }
   ],
