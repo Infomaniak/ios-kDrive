@@ -35,7 +35,7 @@ class ShareFloatingPanelViewController: InformationFloatingPanelViewController {
     }
 
     override func rightButtonPressed(_ sender: UIButton) {
-        floatingPanelViewController.dismiss(animated: true)
+        dismiss(animated: true)
         if let newFolderViewController = (presentingViewController as? UINavigationController)?.viewControllers
             .last as? NewFolderViewController {
             newFolderViewController.dismissAndRefreshDataSource()

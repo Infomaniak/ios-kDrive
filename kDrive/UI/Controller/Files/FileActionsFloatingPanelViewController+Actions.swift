@@ -312,9 +312,9 @@ extension FileActionsFloatingPanelViewController {
 
         @InjectService var matomo: MatomoUtils
         guard frozenFile.capabilities.canBecomeDropbox else {
-            let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
+            let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiateSheet()
             let floatingPanelViewController = driveFloatingPanelController
-                .contentViewController as? DropBoxFloatingPanelViewController
+                as? DropBoxFloatingPanelViewController
             floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
             floatingPanelViewController?.actionHandler = { [weak self] _ in
                 driveFloatingPanelController.dismiss(animated: true) {

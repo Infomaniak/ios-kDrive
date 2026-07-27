@@ -36,7 +36,7 @@ class NoAccessFloatingPanelViewController: InformationFloatingPanelViewControlle
     }
 
     override func rightButtonPressed(_ sender: UIButton) {
-        floatingPanelViewController.dismiss(animated: true)
+        dismiss(animated: true)
     }
 
     override class func instantiate() -> InformationFloatingPanelViewController {

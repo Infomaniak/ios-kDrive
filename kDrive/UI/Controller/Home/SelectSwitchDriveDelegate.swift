@@ -28,7 +28,7 @@ extension SelectSwitchDriveDelegate {
     func didSelect(option: Selectable) {
         guard let drive = option as? Drive else { return }
         if drive.inMaintenance {
-            let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiatePanel(drive: drive)
+            let driveFloatingPanelController = DriveMaintenanceFloatingPanelViewController.instantiateSheet(drive: drive)
             present(driveFloatingPanelController, animated: true)
         } else {
             @InjectService var matomo: MatomoUtils

@@ -132,9 +132,9 @@ class NewFolderTypeTableViewController: UITableViewController {
                 router.presentKDriveProUpSaleSheet(driveFileManager: driveFileManager)
                 matomo.track(eventWithCategory: .kSuiteProUpgradeBottomSheet, name: "dropboxQuotaExceeded")
             } else if !driveFileManager.drive.pack.capabilities.useDropbox {
-                let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
+                let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiateSheet()
                 let floatingPanelViewController = driveFloatingPanelController
-                    .contentViewController as? DropBoxFloatingPanelViewController
+                    as? DropBoxFloatingPanelViewController
                 floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
                 floatingPanelViewController?.actionHandler = { _ in
                     driveFloatingPanelController.dismiss(animated: true) { [weak self] in

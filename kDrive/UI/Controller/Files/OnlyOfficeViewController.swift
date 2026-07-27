@@ -40,14 +40,14 @@ final class OnlyOfficeViewController: UIViewController {
         guard file.isOfficeFile else { return }
 
         if let newExtension = file.conversion?.onlyofficeExtension {
-            let driveFloatingPanelController = UnsupportedExtensionFloatingPanelViewController.instantiatePanel()
+            let driveFloatingPanelController = UnsupportedExtensionFloatingPanelViewController.instantiateSheet()
             let attrString = NSMutableAttributedString(
                 string: KDriveResourcesStrings.Localizable.notSupportedExtensionDescription(file.name),
                 boldText: file.name,
                 color: KDriveResourcesAsset.titleColor.color
             )
             guard let floatingPanelViewController = driveFloatingPanelController
-                .contentViewController as? UnsupportedExtensionFloatingPanelViewController else { return }
+                as? UnsupportedExtensionFloatingPanelViewController else { return }
             floatingPanelViewController.titleLabel.text = KDriveResourcesStrings.Localizable
                 .notSupportedExtensionTitle(file.extension)
             floatingPanelViewController.descriptionLabel.attributedText = attrString
