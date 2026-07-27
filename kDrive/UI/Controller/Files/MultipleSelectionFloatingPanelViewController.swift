@@ -56,6 +56,15 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
     var actions = FloatingPanelAction.listActions
 
+    private let rowHeight: CGFloat = 60
+    var contentHeight: CGFloat {
+        CGFloat(actions.count) * rowHeight + UIConstants.Padding.standard
+    }
+
+    var containsOnlyDownloadAction: Bool {
+        return actions.count == 1 && actions.first == .download
+    }
+
     lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
     private var filesAreAllMedia: Bool {
@@ -97,8 +106,15 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
         collectionView.register(cellView: FloatingPanelActionCollectionViewCell.self)
         collectionView.alwaysBounceVertical = false
+        collectionView.isScrollEnabled = false
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         setupContent()
+        collectionView.contentInset = UIEdgeInsets(
+            top: UIConstants.Padding.mediumSmall,
+            left: 0,
+            bottom: UIConstants.Padding.mediumSmall,
+            right: 0
+        )
     }
 
     func setupContent() {
@@ -265,7 +281,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
     private static func createLayout() -> UICollectionViewLayout {
         return UICollectionViewCompositionalLayout { _, _ in
-            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .estimated(53))
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(60))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
             return NSCollectionLayoutSection(group: group)

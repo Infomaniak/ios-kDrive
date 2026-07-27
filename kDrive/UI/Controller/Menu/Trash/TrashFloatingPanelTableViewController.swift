@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FloatingPanel
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -50,18 +49,31 @@ enum TrashOption: CaseIterable {
     }
 }
 
-class TrashFloatingPanelTableViewController: UITableViewController, FloatingPanelControllerDelegate {
+class TrashFloatingPanelTableViewController: UITableViewController {
     weak var delegate: TrashOptionsDelegate?
     var trashedFiles: [File]!
 
     let tableContent = TrashOption.allCases
 
+    private let rowHeight = 60.0
+    var contentHeight: CGFloat {
+        CGFloat(tableContent.count) * rowHeight + UIConstants.Padding.standard
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
+        tableView.isScrollEnabled = false
         tableView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         tableView.register(cellView: FloatingPanelTableViewCell.self)
+
+        tableView.contentInset = UIEdgeInsets(
+            top: UIConstants.Padding.mediumSmall,
+            left: 0,
+            bottom: UIConstants.Padding.mediumSmall,
+            right: 0
+        )
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

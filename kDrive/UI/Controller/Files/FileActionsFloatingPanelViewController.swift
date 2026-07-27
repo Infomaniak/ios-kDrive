@@ -150,10 +150,10 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             case .header:
                 let itemSize = NSCollectionLayoutSize(
                     widthDimension: .fractionalWidth(1),
-                    heightDimension: .absolute(UIConstants.FileList.cellHeight)
+                    heightDimension: .absolute(UIConstants.FloatingPanel.headerHeight)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                item.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10)
+                item.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10)
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
                 return NSCollectionLayoutSection(group: group)
             case .quickActions:
