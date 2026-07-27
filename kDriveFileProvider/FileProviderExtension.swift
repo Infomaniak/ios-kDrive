@@ -35,9 +35,6 @@ extension DriveFileManager {
         guard let fileId = itemIdentifier.toFileId(),
               let file = getCachedFile(id: fileId, freeze: freeze, using: realm),
               !file.isInvalidated else {
-            let context = ["itemIdentifier": itemIdentifier.rawValue] as [String: Any]
-            SentryDebug.capture(message: "getCachedFile using realm failed", context: context,
-                                contextKey: "FileProvider", level: .error)
             throw NSFileProviderError(.noSuchItem)
         }
 
@@ -48,9 +45,6 @@ extension DriveFileManager {
                        freeze: Bool = true) throws -> File {
         guard let fileId = itemIdentifier.toFileId(),
               let file = getCachedFile(id: fileId, freeze: freeze) else {
-            let context = ["itemIdentifier": itemIdentifier.rawValue] as [String: Any]
-            SentryDebug.capture(message: "getCachedFile failed", context: context,
-                                contextKey: "FileProvider", level: .error)
             throw NSFileProviderError(.noSuchItem)
         }
 
@@ -160,9 +154,6 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         // did not match anything
         Log.fileProvider("item for identifier - nsError(code: .noSuchItem)", level: .error)
-        let context = ["identifier": identifier.rawValue] as [String: Any]
-        SentryDebug.capture(message: "item for identifier failed to find item", context: context,
-                            contextKey: "FileProvider", level: .error)
         throw NSFileProviderError(.noSuchItem)
     }
 
@@ -181,10 +172,6 @@ final class FileProviderExtension: NSFileProviderExtension {
             if let remoteFileId = uploadedFile.remoteFileId {
                 guard let file = driveFileManager.getCachedFile(id: remoteFileId) else {
                     Log.fileProvider("urlForItem - Unable to bridge UploadFile to File \(remoteFileId)", level: .error)
-                    let context = ["uploadedFileId": uploadedFile.id, "remoteFileId": remoteFileId,
-                                   "identifier": identifier.rawValue] as [String: Any]
-                    SentryDebug.capture(message: "urlForItem - Unable to bridge UploadFile to File", context: context,
-                                        contextKey: "FileProvider", level: .error)
                     return nil
                 }
 
@@ -218,13 +205,9 @@ final class FileProviderExtension: NSFileProviderExtension {
 
         do {
             let fileProviderItem = try item(for: identifier)
-
-            let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
-            try? FileManager.default.createDirectory(
-                at: placeholderURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: fileProviderItem)
+            try coordinateWrite(at: url, options: .forReplacing) { coordinatedURL in
+                try self.writePlaceholder(at: coordinatedURL, withMetadata: fileProviderItem)
+            }
 
             completionHandler(nil)
         } catch {
@@ -269,17 +252,58 @@ final class FileProviderExtension: NSFileProviderExtension {
             level: .info
         )
 
-        guard let fileId = fileProviderService.identifier(for: url, domain: domain)?.toFileId(),
-              let file = driveFileManager.getCachedFile(id: fileId) else {
+        guard let identifier = fileProviderService.identifier(for: url, domain: domain),
+              let fileId = identifier.toFileId() else {
             if FileManager.default.fileExists(atPath: url.path) {
                 SentryDebug.addBreadcrumb(
-                    message: "file exists locally but cached file was not found",
+                    message: "file exists locally but its identifier could not be resolved",
                     category: .fileProvider,
                     level: .info
                 )
                 completionHandler(nil)
             } else {
-                SentryDebug.capture(message: "startProvidingItem failed to find file", level: .error)
+                let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+                let context = [
+                    "placeholderExists": FileManager.default.fileExists(atPath: placeholderURL.path)
+                ] as [String: Any]
+                SentryDebug.addBreadcrumb(
+                    message: "startProvidingItem failed to resolve identifier",
+                    category: .fileProvider,
+                    level: .warning,
+                    metadata: context
+                )
+                completionHandler(NSFileProviderError(.noSuchItem))
+            }
+            return
+        }
+
+        guard let file = driveFileManager.getCachedFile(id: fileId) else {
+            if FileManager.default.fileExists(atPath: url.path) {
+                SentryDebug.addBreadcrumb(
+                    message: "file exists locally but cached file was not found",
+                    category: .fileProvider,
+                    level: .info,
+                    metadata: [
+                        "fileId": fileId,
+                        "itemIdentifier": identifier.rawValue
+                    ]
+                )
+                completionHandler(nil)
+            } else {
+                let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+                let context = [
+                    "fileId": fileId,
+                    "itemIdentifier": identifier.rawValue,
+                    "contentExists": false,
+                    "placeholderExists": FileManager.default.fileExists(atPath: placeholderURL.path)
+                ] as [String: Any]
+                SentryDebug.addBreadcrumb(
+                    message: "startProvidingItem cache miss",
+                    category: .fileProvider,
+                    level: .warning,
+                    metadata: context
+                )
+
                 completionHandler(NSFileProviderError(.noSuchItem))
             }
             return
@@ -417,21 +441,23 @@ final class FileProviderExtension: NSFileProviderExtension {
                     return
                 }
 
-                guard self.fileStorageIsCurrent(item: item, file: file) else {
-                    SentryDebug.capture(
-                        message: "Observed download completed but file storage is not current",
-                        context: [
+                if self.fileStorageIsCurrent(item: item, file: file) {
+                    completion(nil)
+                } else {
+                    SentryDebug.addBreadcrumb(
+                        message: "Observed download completed",
+                        category: .fileProvider,
+                        level: .info,
+                        metadata: [
                             "fileId": file.id,
-                            "itemIdentifier": item.itemIdentifier.rawValue
-                        ],
-                        contextKey: "FileProvider",
-                        level: .error
+                            "itemIdentifier": item.itemIdentifier.rawValue,
+                            "sourceExists": FileManager.default.fileExists(atPath: file.localUrl.path),
+                            "destinationExists": FileManager.default.fileExists(atPath: item.storageUrl.path)
+                        ]
                     )
-                    completion(NSFileProviderError(.noSuchItem))
-                    return
-                }
 
-                completion(nil)
+                    self.saveFreshLocalFile(file, for: item, completion: completion)
+                }
             }
 
             return
@@ -460,7 +486,9 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
 
             do {
-                try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+                try self.coordinateWrite(at: item.storageUrl, options: .forReplacing) { coordinatedURL in
+                    try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: coordinatedURL)
+                }
                 SentryDebug.addBreadcrumb(
                     message: "Copy file from local url to file provider storage url",
                     category: .fileProvider,
@@ -509,7 +537,9 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
 
         do {
-            try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
+            try coordinateWrite(at: item.storageUrl, options: .forReplacing) { coordinatedURL in
+                try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: coordinatedURL)
+            }
             completion(nil)
         } catch {
             let context = [
@@ -523,18 +553,83 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
     }
 
-    private func cleanupAt(url: URL) {
-        Log.fileProvider("cleanupAt url:\(url)")
-        do {
-            try FileManager.default.removeItem(at: url)
-        } catch {
-            Log.fileProvider("cleanupAt failed to removeItem:\(error)", level: .error)
-            // Handle error
+    private func coordinateWrite(
+        at url: URL,
+        options: NSFileCoordinator.WritingOptions,
+        accessor: @escaping (URL) throws -> Void
+    ) throws {
+        var coordinationError: NSError?
+        var accessorError: Error?
+
+        let coordinator = NSFileCoordinator()
+        coordinator.purposeIdentifier = manager.providerIdentifier
+        coordinator.coordinate(writingItemAt: url, options: options, error: &coordinationError) { coordinatedURL in
+            do {
+                try accessor(coordinatedURL)
+            } catch {
+                accessorError = error
+            }
         }
 
-        // write out a placeholder to facilitate future property lookups
-        providePlaceholder(at: url) { _ in
-            // TODO: handle any error, do any necessary cleanup
+        if let coordinationError {
+            throw coordinationError
+        }
+
+        if let accessorError {
+            throw accessorError
+        }
+    }
+
+    private func writePlaceholder(at url: URL, withMetadata item: NSFileProviderItem) throws {
+        let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+        try FileManager.default.createDirectory(
+            at: placeholderURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try NSFileProviderManager.writePlaceholder(at: placeholderURL, withMetadata: item)
+    }
+
+    private func cleanupAt(url: URL) {
+        Log.fileProvider("cleanupAt url:\(url)")
+
+        guard let identifier = persistentIdentifierForItem(at: url) else {
+            Log.fileProvider("cleanupAt skipped: unable to resolve identifier", level: .warning)
+            return
+        }
+
+        let fileProviderItem: NSFileProviderItem
+        do {
+            // Resolve metadata before removing the materialized file. If the cache is
+            // temporarily unavailable, keeping the file is safer than leaving neither
+            // the file nor a valid placeholder behind.
+            fileProviderItem = try item(for: identifier)
+        } catch {
+            Log.fileProvider("cleanupAt skipped: unable to resolve item:\(error)", level: .warning)
+            return
+        }
+
+        do {
+            try coordinateWrite(at: url, options: .forReplacing) { coordinatedURL in
+                if FileManager.default.fileExists(atPath: coordinatedURL.path) {
+                    try FileManager.default.removeItem(at: coordinatedURL)
+                }
+
+                try self.writePlaceholder(at: coordinatedURL, withMetadata: fileProviderItem)
+            }
+        } catch {
+            let placeholderURL = NSFileProviderManager.placeholderURL(for: url)
+            let context = [
+                "itemIdentifier": identifier.rawValue,
+                "contentExists": FileManager.default.fileExists(atPath: url.path),
+                "placeholderExists": FileManager.default.fileExists(atPath: placeholderURL.path),
+                "error": error.localizedDescription
+            ] as [String: Any]
+            SentryDebug.capture(
+                message: "cleanupAt failed to replace content with placeholder",
+                context: context,
+                contextKey: "FileProvider",
+                level: .error
+            )
         }
     }
 
