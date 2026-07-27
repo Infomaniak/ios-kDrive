@@ -901,6 +901,9 @@
 /* loco:6569aef523dcf4dc2a0f5c92 */
 "errorWrongPassword" = "Nieprawidłowe hasło";
 
+/* loco:6a2a79154feaf554c0020962 */
+"exceedQuotaTitle" = "Przekroczono limit";
+
 /* loco:6049df4d5c2c3a04bc3979a9 */
 "favoritesNoFile" = "Brak ulubionych w tej chwili";
 
@@ -1300,6 +1303,12 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Godzina wygaśnięcia";
 
+/* loco:6a2a7acf5a2fec6b940785b2 */
+"insufficientSpaceDescription" = "Zrób trochę miejsca";
+
+/* loco:6a2a7a5f1dc6dc2d210f4ea4 */
+"insufficientSpaceTitle" = "Za mało miejsca";
+
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Najnowsze zmiany";
 
@@ -1320,6 +1329,9 @@
 
 /* loco:67f509c180ba041c690a8e02 */
 "maintenanceAsleepTitle" = "Twój kDrive %@ zrobił sobie krótką drzemkę!";
+
+/* loco:6a2a79b7bdb4d0e90a02bfc4 */
+"maintenanceTitle" = "Konserwacja";
 
 /* loco:67f50e36f46a2825af088213 */
 "maintenanceWakeUpButton" = "Uruchom ponownie mój kDrive";
@@ -1578,6 +1590,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Zapisuj swoje wspomnienia bezpiecznie";
+
+/* loco:6a2a78ccb80096108403dcd2 */
+"openAppToContinue" = "Otwórz aplikację, aby kontynuować";
 
 /* loco:6660083917d29585d5010582 */
 "openInPlaceDirectory" = "Otwórz na miejscu";
@@ -2158,6 +2173,9 @@
 /* loco:69bcfe53aed2af87a302d467 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "Przywrócono %d elementów do ich pierwotnej lokalizacji";
 
+/* loco:6a2a7a248dcf552aa702ad43 */
+"tryAgainLater" = "Spróbuj ponownie później";
+
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Nieznany artysta";
 
@@ -2218,6 +2236,9 @@
 /* loco:6049df4d5c2c3a04bc397a86 */
 "uploadInProgressRestartUploadTitle" = "Uruchom ponownie przesyłanie";
 
+/* loco:6a2a7751b7cc09a6da053fc2 */
+"uploadInProgressSubTitle" = "Postęp %d%%";
+
 /* loco:6049df4d5c2c3a04bc397a87 */
 "uploadInProgressTitle" = "Przesyłanie w trakcie";
 
@@ -2244,6 +2265,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Przesyłanie wstrzymane";
+
+/* loco:6a2a73b3d69b30963b02d5b2 */
+"uploadingTitle" = "Przesyłanie";
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";
