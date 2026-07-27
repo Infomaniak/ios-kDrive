@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FloatingPanel
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
@@ -80,6 +79,7 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         collectionView.register(cellView: FloatingPanelQuickActionCollectionViewCell.self)
         collectionView.alwaysBounceVertical = false
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        collectionView.isScrollEnabled = false
 
         setupContent()
     }
@@ -216,11 +216,5 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
             let action = actions[indexPath.item]
             handleAction(action, at: indexPath)
         }
-    }
-}
-
-extension ManageCategoryFloatingPanelViewController: FloatingPanelControllerDelegate {
-    func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
-        return PlusButtonFloatingPanelLayout(height: min(180, UIScreen.main.bounds.size.height - 48))
     }
 }

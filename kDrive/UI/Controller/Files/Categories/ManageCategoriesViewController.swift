@@ -377,18 +377,26 @@ extension ManageCategoriesViewController: CategoryCellDelegate {
             return
         }
 
-        let floatingPanelViewController = DriveFloatingPanelController()
         let manageCategoryViewController = ManageCategoryFloatingPanelViewController()
         manageCategoryViewController.presentingParent = self
         manageCategoryViewController.driveFileManager = driveFileManager
         manageCategoryViewController.category = category(at: indexPath)
 
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = manageCategoryViewController
+        let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
+        let customDetent = UISheetPresentationController.Detent.custom(
+            identifier: .init("manageCategoriesHeight")
+        ) { _ in
+            min(180, UIScreen.main.bounds.size.height - 48) - bottomSafeArea
+        }
 
-        floatingPanelViewController.set(contentViewController: manageCategoryViewController)
-        floatingPanelViewController.track(scrollView: manageCategoryViewController.collectionView)
-        present(floatingPanelViewController, animated: true)
+        if let sheet = manageCategoryViewController.sheetPresentationController {
+            sheet.detents = [customDetent]
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+            sheet.prefersGrabberVisible = true
+        }
+
+        present(manageCategoryViewController, animated: true)
     }
 }
 
