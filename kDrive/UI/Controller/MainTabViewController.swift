@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FloatingPanel
 import InfomaniakBugTracker
 import InfomaniakCore
 import InfomaniakCoreCommonUI
@@ -288,8 +287,8 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     let driveFileManager: DriveFileManager
     let photoPickerDelegate = PhotoPickerDelegate()
 
-    private var floatingPanelViewController: AdaptiveDriveFloatingPanelController?
     private var buttonAdd: UIButton?
+    private var mediaHelper: OpenMediaHelper?
 
     lazy var legacyTabBarActive: Bool = {
         if #available(iOS 26.0, *),
@@ -591,8 +590,6 @@ extension MainTabViewController: MainTabBarDelegate {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
         guard let currentDirectory else { return }
 
-        floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-
         let fromFileList = (selectedViewController as? UINavigationController)?.topViewController is FileListViewController
         let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
             driveFileManager: currentDriveFileManager,
@@ -600,14 +597,16 @@ extension MainTabViewController: MainTabBarDelegate {
             presentedAboveFileList: fromFileList
         )
 
-        guard let floatingPanelViewController else { return }
+        mediaHelper = plusButtonFloatingPanel.mediaHelper
 
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = plusButtonFloatingPanel
+        if let sheet = plusButtonFloatingPanel.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+            sheet.prefersGrabberVisible = true
+        }
 
-        floatingPanelViewController.set(contentViewController: plusButtonFloatingPanel)
-        floatingPanelViewController.trackAndObserve(scrollView: plusButtonFloatingPanel.tableView)
-        present(floatingPanelViewController, animated: true)
+        present(plusButtonFloatingPanel, animated: true)
     }
 
     func avatarLongTouch() {
