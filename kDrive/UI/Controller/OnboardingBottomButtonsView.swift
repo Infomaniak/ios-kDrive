@@ -29,7 +29,7 @@ struct OnboardingBottomButtonsView: View {
 
     @ObservedObject var loginDelegateHandler: LoginDelegateHandler
 
-    private var shouldUseWithAccounts: Bool {
+    private var shouldDisplayInterAppLogin: Bool {
         #if DEBUG
         if ApiEnvironment.current == .prod {
             return false
@@ -42,7 +42,7 @@ struct OnboardingBottomButtonsView: View {
         ContinueWithAccountView(
             isLoading: loginDelegateHandler.isLoading,
             excludingUserIds: accountManager.accountIds,
-            shouldUseWithAccounts: shouldUseWithAccounts
+            shouldDisplayInterAppLogin: shouldDisplayInterAppLogin
         ) {
             appNavigable.showLogin(delegate: loginDelegateHandler)
         } onLoginWithAccountsPressed: { accounts in
