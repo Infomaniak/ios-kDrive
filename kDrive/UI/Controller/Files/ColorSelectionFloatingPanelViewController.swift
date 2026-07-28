@@ -126,7 +126,8 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         let colorWidthAndHeight = 40.0
         let colorSpacing = 16.0
         let leadingTrailingPading = 40.0
-        let numberOfColorInARow = ((view.frame.width - leadingTrailingPading) / (colorWidthAndHeight + colorSpacing)).rounded(.down)
+        let numberOfColorInARow = ((view.frame.width - leadingTrailingPading)
+            / (colorWidthAndHeight + colorSpacing)).rounded(.down)
         let numberOfRow = (CGFloat(folderColors.count) / numberOfColorInARow).rounded(.up)
         return numberOfRow * (colorWidthAndHeight + colorSpacing) + headerCellHeight + topInset
     }

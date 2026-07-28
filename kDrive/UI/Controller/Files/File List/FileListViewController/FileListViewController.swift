@@ -552,7 +552,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 selectViewController.setupContent()
             }
 
-            let bottomSafeArea = self.view.window?.safeAreaInsets.bottom ?? 0
+            let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
             let isPad = traitCollection.userInterfaceIdiom == .pad
 
             let safeAreaCompensation = selectViewController.containsOnlyDownloadAction ? 0 : bottomSafeArea

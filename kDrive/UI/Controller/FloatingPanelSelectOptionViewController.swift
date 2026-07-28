@@ -27,13 +27,9 @@ protocol Selectable {
 }
 
 extension Selectable {
-    var image: UIImage? {
-        return nil
-    }
+    var image: UIImage? { return nil }
 
-    var tintColor: UIColor? {
-        return nil
-    }
+    var tintColor: UIColor? { return nil }
 }
 
 @MainActor
