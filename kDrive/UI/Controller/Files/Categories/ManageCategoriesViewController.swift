@@ -391,6 +391,7 @@ extension ManageCategoriesViewController: CategoryCellDelegate {
             isPad ? contentHeight : (contentHeight - bottomSafeArea)
         }
 
+        manageCategoryViewController.modalPresentationStyle = .pageSheet
         if let sheet = manageCategoryViewController.sheetPresentationController {
             sheet.detents = [customDetent]
             sheet.prefersEdgeAttachedInCompactHeight = true

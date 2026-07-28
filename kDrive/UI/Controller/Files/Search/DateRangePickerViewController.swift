@@ -145,8 +145,8 @@ class DateRangePickerViewController: UIViewController {
         calendarView.daySelectionHandler = { [weak self] day in
             self?.didSelectDay(day)
         }
-        view.backgroundColor = .white
-        calendarView.backgroundColor = .white
+        view.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        calendarView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 
     static func instantiatePanel(visibleDateRange: ClosedRange<Date>,

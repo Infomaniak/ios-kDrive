@@ -483,6 +483,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
+            fileInformationsViewController.modalPresentationStyle = .pageSheet
             if let sheet = fileInformationsViewController.sheetPresentationController {
                 sheet.detents = [.medium(), .large()]
                 sheet.prefersEdgeAttachedInCompactHeight = true
@@ -504,6 +505,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 isPad ? detentHeight : (detentHeight - bottomSafeArea)
             }
 
+            trashFloatingPanelTableViewController.modalPresentationStyle = .pageSheet
             if let sheet = trashFloatingPanelTableViewController.sheetPresentationController {
                 sheet.detents = [customDetent]
                 sheet.prefersEdgeAttachedInCompactHeight = true
@@ -564,6 +566,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 isPad ? detentHeight : (detentHeight - safeAreaCompensation)
             }
 
+            selectViewController.modalPresentationStyle = .pageSheet
             if let sheet = selectViewController.sheetPresentationController {
                 sheet.detents = [customDetent]
                 sheet.prefersEdgeAttachedInCompactHeight = true

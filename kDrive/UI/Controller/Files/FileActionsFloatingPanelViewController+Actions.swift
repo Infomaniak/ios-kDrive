@@ -198,6 +198,7 @@ extension FileActionsFloatingPanelViewController {
                                                                                    presentedFromPlusButton: false)
         (presentingParent as? FileListViewController)?.mediaHelper = fileInformationsViewController.mediaHelper
 
+        fileInformationsViewController.modalPresentationStyle = .pageSheet
         if let sheet = fileInformationsViewController.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.prefersEdgeAttachedInCompactHeight = true
