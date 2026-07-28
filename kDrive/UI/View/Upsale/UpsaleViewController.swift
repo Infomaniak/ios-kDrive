@@ -70,6 +70,24 @@ public class UpsaleViewController: UIViewController {
         trackUpsalePresented()
     }
 
+    override public func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateSheetDetent()
+    }
+
+    private func updateSheetDetent() {
+        let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
+        let customDetent = UISheetPresentationController.Detent.custom(
+            identifier: .init("upsaleHeight")
+        ) { context in
+            return max(0, context.maximumDetentValue - bottomSafeArea)
+        }
+
+        if let sheet = sheetPresentationController {
+            sheet.detents = [customDetent]
+        }
+    }
+
     func configureHeader() {
         titleImageView.contentMode = .scaleAspectFit
         titleImageView.image = KDriveResourcesAsset.upsaleHeader.image
@@ -124,7 +142,7 @@ public class UpsaleViewController: UIViewController {
         containerView.addSubview(dismissButton)
 
         let verticalConstraints = [
-            titleImageView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            titleImageView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: UIConstants.Padding.standard),
             titleLabel.topAnchor.constraint(equalTo: titleImageView.bottomAnchor, constant: UIConstants.Padding.standard),
             descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: UIConstants.Padding.standard),
             bulletPointsView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: UIConstants.Padding.standard),
@@ -258,7 +276,6 @@ public class UpsaleViewController: UIViewController {
 
         upsaleViewController.modalPresentationStyle = .pageSheet
         if let sheet = upsaleViewController.sheetPresentationController {
-            sheet.detents = [.large()]
             sheet.prefersGrabberVisible = false
         }
 
