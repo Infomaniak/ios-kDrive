@@ -196,6 +196,13 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
             Log.uploadOperation("Processing empty file ufid:\(uploadFileId)")
             fileData = Data()
         } else {
+            @InjectService var appContext: AppContextServiceable
+            // Extensions have tight memory
+            // Use session upload to stream from disk instead of loading the whole file into memory.
+            guard !appContext.isExtension else {
+                return false // Continue with standard chunked upload operation
+            }
+
             guard uploadFile.error == nil, uploadFile.maxRetryCount == UploadFile.defaultMaxRetryCount else {
                 return false // On retry we disable direct uploads. Session upload is more stable.
             }
