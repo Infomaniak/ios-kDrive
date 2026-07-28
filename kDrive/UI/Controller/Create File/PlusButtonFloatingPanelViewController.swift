@@ -17,7 +17,6 @@
  */
 
 import AVFoundation
-import FloatingPanel
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
@@ -29,7 +28,7 @@ import UIKit
 import Vision
 import VisionKit
 
-public class PlusButtonFloatingPanelViewController: UITableViewController, FloatingPanelControllerDelegate {
+public class PlusButtonFloatingPanelViewController: UITableViewController {
     @LazyInjectService private var matomo: MatomoUtils
 
     let currentDirectory: File
@@ -237,11 +236,6 @@ public class PlusButtonFloatingPanelViewController: UITableViewController, Float
     override open func accessibilityPerformEscape() -> Bool {
         dismiss(animated: true)
         return true
-    }
-
-    public func floatingPanel(_ fpc: FloatingPanelController, shouldRemoveAt location: CGPoint, with velocity: CGVector) -> Bool {
-        // Remove the panel when it's pushed one third down
-        return location.y > fpc.backdropView.frame.height * 1 / 3
     }
 
     // MARK: Actions

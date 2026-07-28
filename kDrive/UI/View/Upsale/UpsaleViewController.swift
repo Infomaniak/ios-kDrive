@@ -256,6 +256,12 @@ public class UpsaleViewController: UIViewController {
             }
         }
 
-        return UpsaleFloatingPanelController(upsaleViewController: upsaleViewController)
+        upsaleViewController.modalPresentationStyle = .pageSheet
+        if let sheet = upsaleViewController.sheetPresentationController {
+            sheet.detents = [.large()]
+            sheet.prefersGrabberVisible = false
+        }
+
+        return upsaleViewController
     }
 }

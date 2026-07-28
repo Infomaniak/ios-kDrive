@@ -526,21 +526,26 @@ public final class FileActionsHelper {
             return
         }
 
-        let colorSelectionFloatingPanelViewController = ColorSelectionFloatingPanelViewController(
+        let colorSelectionViewController = ColorSelectionFloatingPanelViewController(
             files: files,
             driveFileManager: driveFileManager
         )
-        let floatingPanelViewController = DriveFloatingPanelController()
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.set(contentViewController: colorSelectionFloatingPanelViewController)
-        floatingPanelViewController.track(scrollView: colorSelectionFloatingPanelViewController.collectionView)
-        colorSelectionFloatingPanelViewController.floatingPanelController = floatingPanelViewController
-        colorSelectionFloatingPanelViewController.completionHandler = { isSuccess in
+        colorSelectionViewController.completionHandler = { isSuccess in
             completion(isSuccess)
             group?.leave()
         }
+        let customDetent = UISheetPresentationController.Detent.custom(
+            identifier: .init("folderColorHeight")
+        ) { _ in
+            colorSelectionViewController.getHeight()
+        }
         viewController.dismiss(animated: true) {
-            presentingParent?.present(floatingPanelViewController, animated: true)
+            colorSelectionViewController.modalPresentationStyle = .pageSheet
+            if let sheet = colorSelectionViewController.sheetPresentationController {
+                sheet.detents = [customDetent]
+                sheet.prefersGrabberVisible = true
+            }
+            presentingParent?.present(colorSelectionViewController, animated: true)
         }
     }
 

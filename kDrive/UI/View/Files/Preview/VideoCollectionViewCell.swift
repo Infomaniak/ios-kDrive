@@ -17,7 +17,6 @@
  */
 
 import AVKit
-import FloatingPanel
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
@@ -44,7 +43,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
 
     var driveFileManager: DriveFileManager!
     weak var parentViewController: UIViewController?
-    weak var floatingPanelController: FloatingPanelController?
 
     private var previewDownloadTask: ImageTask?
     private var file: File?
