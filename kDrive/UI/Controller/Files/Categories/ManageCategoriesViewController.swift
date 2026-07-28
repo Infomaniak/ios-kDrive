@@ -382,11 +382,13 @@ extension ManageCategoriesViewController: CategoryCellDelegate {
         manageCategoryViewController.driveFileManager = driveFileManager
         manageCategoryViewController.category = category(at: indexPath)
 
+        let isPad = traitCollection.userInterfaceIdiom == .pad
+        let contentHeight = min(180, UIScreen.main.bounds.size.height - 48)
         let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
         let customDetent = UISheetPresentationController.Detent.custom(
             identifier: .init("manageCategoriesHeight")
         ) { _ in
-            min(180, UIScreen.main.bounds.size.height - 48) - bottomSafeArea
+            isPad ? contentHeight : (contentHeight - bottomSafeArea)
         }
 
         if let sheet = manageCategoryViewController.sheetPresentationController {

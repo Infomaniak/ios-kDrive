@@ -495,15 +495,13 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             trashFloatingPanelTableViewController.delegate = (viewModel as? TrashListViewModel)
 
             let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
-            let detentHeight = max(
-                trashFloatingPanelTableViewController.contentHeight - bottomSafeArea,
-                0
-            )
+            let isPad = traitCollection.userInterfaceIdiom == .pad
+            let detentHeight = trashFloatingPanelTableViewController.contentHeight
 
             let customDetent = UISheetPresentationController.Detent.custom(
                 identifier: .init("trashHeight")
             ) { _ in
-                detentHeight
+                isPad ? detentHeight : (detentHeight - bottomSafeArea)
             }
 
             if let sheet = trashFloatingPanelTableViewController.sheetPresentationController {
@@ -555,17 +553,15 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             }
 
             let bottomSafeArea = self.view.window?.safeAreaInsets.bottom ?? 0
+            let isPad = traitCollection.userInterfaceIdiom == .pad
 
             let safeAreaCompensation = selectViewController.containsOnlyDownloadAction ? 0 : bottomSafeArea
-            let detentHeight = max(
-                selectViewController.contentHeight - safeAreaCompensation,
-                0
-            )
+            let detentHeight = selectViewController.contentHeight
 
             let customDetent = UISheetPresentationController.Detent.custom(
                 identifier: .init("multipleSelectionHeight")
             ) { _ in
-                detentHeight
+                isPad ? detentHeight : (detentHeight - safeAreaCompensation)
             }
 
             if let sheet = selectViewController.sheetPresentationController {

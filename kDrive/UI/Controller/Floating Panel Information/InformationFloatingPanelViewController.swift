@@ -62,10 +62,13 @@ class InformationFloatingPanelViewController: UIViewController {
         ).height
 
         let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
+        let isPad = traitCollection.userInterfaceIdiom == .pad
+
         let customDetent = UISheetPresentationController.Detent.custom(
             identifier: .init("informationDetentHeight")
         ) { _ in
-            contentHeight - bottomSafeArea
+            isPad ? (contentHeight + UIConstants.Padding.mediumSmall) :
+                (contentHeight - bottomSafeArea)
         }
         if let sheet = sheetPresentationController {
             sheet.detents = [customDetent]
