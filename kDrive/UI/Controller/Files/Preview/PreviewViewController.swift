@@ -611,6 +611,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
         if let sheet = fileInformationsViewController.sheetPresentationController {
             let canExpand = presentationOrigin != .activities
+            sheet.sourceView = collectionView
             sheet.detents = canExpand ? [smallDetent, .medium(), .large()] : [.medium()]
             sheet.largestUndimmedDetentIdentifier = canExpand ? .large : .medium
             sheet.prefersGrabberVisible = canExpand
