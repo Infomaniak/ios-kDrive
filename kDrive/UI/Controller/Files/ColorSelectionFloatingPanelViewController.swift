@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import FloatingPanel
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
 import InfomaniakDI
@@ -65,8 +64,6 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
 
     var driveFileManager: DriveFileManager!
     var files = [File]()
-    weak var floatingPanelController: FloatingPanelController?
-    var width = 0.0
 
     var completionHandler: ((Bool) -> Void)?
 
@@ -88,20 +85,10 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
 
         collectionView.register(cellView: ColorSelectionCollectionViewCell.self)
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
+        collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        collectionView.isScrollEnabled = false
 
         setSelectedColor()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        width = Double(floatingPanelController?.view.frame.width ?? 0)
-        setUpHeight()
-    }
-
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        width = size.width
-        setUpHeight()
     }
 
     // MARK: - Private methods
@@ -113,7 +100,9 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(58))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-                return NSCollectionLayoutSection(group: group)
+                let section = NSCollectionLayoutSection(group: group)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 0, bottom: 0, trailing: 0)
+                return section
             case .colorSelection:
                 let itemSize = NSCollectionLayoutSize(widthDimension: .absolute(40), heightDimension: .absolute(40))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -122,7 +111,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 group.interItemSpacing = .flexible(16)
                 let section = NSCollectionLayoutSection(group: group)
                 section.interGroupSpacing = 16
-                section.contentInsets = NSDirectionalEdgeInsets(top: 30,
+                section.contentInsets = NSDirectionalEdgeInsets(top: 20,
                                                                 leading: UIConstants.Padding.medium,
                                                                 bottom: 0,
                                                                 trailing: UIConstants.Padding.medium)
@@ -131,17 +120,16 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         }
     }
 
-    func setUpHeight() {
+    func getHeight() -> CGFloat {
         let headerCellHeight = 80.0
-        let topInset = 30.0
+        let topInset = 20.0
         let colorWidthAndHeight = 40.0
         let colorSpacing = 16.0
         let leadingTrailingPading = 40.0
-        let numberOfColorInARow = ((width - leadingTrailingPading) / (colorWidthAndHeight + colorSpacing)).rounded(.down)
+        let numberOfColorInARow = ((view.frame.width - leadingTrailingPading)
+            / (colorWidthAndHeight + colorSpacing)).rounded(.down)
         let numberOfRow = (CGFloat(folderColors.count) / numberOfColorInARow).rounded(.up)
-        let height = numberOfRow * (colorWidthAndHeight + colorSpacing) + headerCellHeight + topInset
-        floatingPanelController?.layout = PlusButtonFloatingPanelLayout(height: height)
-        floatingPanelController?.invalidateLayout()
+        return numberOfRow * (colorWidthAndHeight + colorSpacing) + headerCellHeight + topInset
     }
 
     func setSelectedColor() {

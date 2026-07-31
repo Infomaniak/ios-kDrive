@@ -135,8 +135,6 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     var driveFileManager: DriveFileManager
 
-    private var floatingPanelViewController: DriveFloatingPanelController?
-    private var fileInformationsViewController: FileActionsFloatingPanelViewController!
     private lazy var filePresenter = FilePresenter(viewController: self)
 
     private var recentActivitiesController: HomeRecentActivitiesController?

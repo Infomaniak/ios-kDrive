@@ -21,7 +21,7 @@ import kDriveCore
 import UIKit
 
 struct LaunchPanel: Comparable {
-    let makePanelController: () -> DriveFloatingPanelController
+    let makePanelController: () -> UIViewController
     let displayCondition: () -> Bool
     let onDisplay: (() -> Void)?
     let priority: Int
@@ -35,7 +35,7 @@ struct LaunchPanel: Comparable {
     }
 
     init(
-        makePanelController: @escaping () -> DriveFloatingPanelController,
+        makePanelController: @escaping () -> UIViewController,
         displayCondition: @autoclosure @escaping () -> Bool,
         onDisplay: (() -> Void)? = nil,
         priority: Int
@@ -51,9 +51,9 @@ class LaunchPanelsController {
     private var panels: [LaunchPanel] = {
         let betaInvite = LaunchPanel(
             makePanelController: {
-                let driveFloatingPanelController = BetaInviteFloatingPanelViewController.instantiatePanel()
+                let driveFloatingPanelController = BetaInviteFloatingPanelViewController.instantiateSheet()
                 let floatingPanelViewController = driveFloatingPanelController
-                    .contentViewController as? BetaInviteFloatingPanelViewController
+                    as? BetaInviteFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { _ in
                     UIApplication.shared.open(URLConstants.testFlight.url)
                     driveFloatingPanelController.dismiss(animated: true)
@@ -75,9 +75,9 @@ class LaunchPanelsController {
         let photoSyncActivation = LaunchPanel(
             makePanelController: {
                 let driveFloatingPanelController = SavePhotosFloatingPanelViewController
-                    .instantiatePanel(drive: currentDriveFileManager.drive)
+                    .instantiateSheet(drive: currentDriveFileManager.drive)
                 let floatingPanelViewController = driveFloatingPanelController
-                    .contentViewController as? SavePhotosFloatingPanelViewController
+                    as? SavePhotosFloatingPanelViewController
                 floatingPanelViewController?.actionHandler = { @MainActor _ in
                     @InjectService var appNavigable: AppNavigable
                     appNavigable.showPhotoSyncSettings()

@@ -17,7 +17,6 @@
  */
 
 import AVFoundation
-import FloatingPanel
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
@@ -69,7 +68,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
 
-    private var floatingPanelViewController: FloatingPanelController!
     private var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
     private var currentFile: File {
@@ -149,8 +147,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.indexBeforeBoundsChange = self.currentIndex
         }
 
-        floatingPanelViewController = DriveFloatingPanelController()
-        floatingPanelViewController.isRemovalInteractionEnabled = false
         fileInformationsViewController = FileActionsFloatingPanelViewController(
             frozenFile: currentFile,
             driveFileManager: driveFileManager
@@ -159,22 +155,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         fileInformationsViewController.presentingParent = self
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
         fileInformationsViewController.presentationOrigin = presentationOrigin
-
-        floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-        floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
-        floatingPanelViewController.delegate = self
-
-        if presentationOrigin == .activities {
-            floatingPanelViewController.surfaceView.grabberHandle.isHidden = true
-        }
-
-        if #available(iOS 26.0, *),
-           !traitCollection.horizontalSizeClass.iskDriveCompactSize {
-            floatingPanelViewController.surfaceView.containerMargins = UIEdgeInsets(top: 0,
-                                                                                    left: UIConstants.Padding.medium,
-                                                                                    bottom: 0, right:
-                                                                                    UIConstants.Padding.medium)
-        }
+        fileInformationsViewController.modalPresentationStyle = .pageSheet
+        fileInformationsViewController.isModalInPresentation = presentationOrigin == .activities
 
         pdfPageLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)
         pdfPageLabel.textColor = .white
@@ -393,7 +375,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        floatingPanelViewController?.dismiss(animated: false)
+        dismissFileActionsPanel(animated: false)
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -430,7 +412,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
             collectionView.isPagingEnabled = wasPagingEnabled
         }
-        floatingPanelViewController.layout = FileFloatingPanelLayout(safeAreaInset: min(view.safeAreaInsets.bottom, 5))
     }
 
     deinit {
@@ -557,8 +538,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         guard !driveFileManager.isPublicShare else { return }
         matomo.track(eventWithCategory: .mediaPlayer, name: "edit")
-        floatingPanelViewController.dismiss(animated: true)
-        appRouter.presentOnlyOfficeViewController(driveFileManager: driveFileManager, file: currentFile, viewController: self)
+        dismissFileActionsPanel(animated: true) { [weak self] in
+            guard let self else { return }
+            appRouter.presentOnlyOfficeViewController(driveFileManager: driveFileManager,
+                                                      file: currentFile, viewController: self)
+        }
     }
 
     @objc private func openFile() {
@@ -566,15 +550,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        floatingPanelViewController.dismiss(animated: false)
-        FilePresenter(viewController: self).present(
-            for: currentFile,
-            files: [],
-            driveFileManager: driveFileManager,
-            normalFolderHierarchy: true
-        ) { success in
-            if !success {
-                self.present(self.floatingPanelViewController, animated: false)
+        dismissFileActionsPanel(animated: false) { [weak self] in
+            guard let self else { return }
+            FilePresenter(viewController: self).present(
+                for: currentFile,
+                files: [],
+                driveFileManager: driveFileManager,
+                normalFolderHierarchy: true
+            ) { success in
+                if !success {
+                    self.presentFileActionsPanel(animated: false)
+                }
             }
         }
     }
@@ -605,21 +591,42 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         additionalSafeAreaInsets.top = targetTopInset
         view.layoutIfNeeded()
         if hide {
-            if floatingPanelViewController.presentingViewController != nil {
-                floatingPanelViewController.dismiss(animated: true)
-            } else if floatingPanelViewController.parent != nil {
-                floatingPanelViewController.removePanelFromParent(animated: true)
-            }
-            floatingPanelViewController.dismiss(animated: true)
+            dismissFileActionsPanel(animated: !isViewDisappearing)
         } else {
-            if traitCollection.horizontalSizeClass.iskDriveCompactSize {
-                guard floatingPanelViewController.presentingViewController == nil else { return }
-                present(floatingPanelViewController, animated: true)
-            } else {
-                guard floatingPanelViewController.parent == nil else { return }
-                floatingPanelViewController.addPanel(toParent: self, animated: true)
-            }
+            presentFileActionsPanel(animated: true)
         }
+    }
+
+    private func presentFileActionsPanel(animated: Bool) {
+        guard viewIfLoaded?.window != nil, presentedViewController == nil else {
+            return
+        }
+
+        guard fileInformationsViewController.presentingViewController == nil else { return }
+
+        let smallDetent = UISheetPresentationController.Detent.custom(
+            identifier: .init("smallDetent")
+        ) { _ in
+            75
+        }
+        if let sheet = fileInformationsViewController.sheetPresentationController {
+            let canExpand = presentationOrigin != .activities
+            sheet.sourceView = collectionView
+            sheet.detents = canExpand ? [smallDetent, .medium(), .large()] : [.medium()]
+            sheet.largestUndimmedDetentIdentifier = canExpand ? .large : .medium
+            sheet.prefersGrabberVisible = canExpand
+        }
+
+        present(fileInformationsViewController, animated: animated)
+    }
+
+    private func dismissFileActionsPanel(animated: Bool, completion: (() -> Void)? = nil) {
+        guard fileInformationsViewController.presentingViewController != nil else {
+            completion?()
+            return
+        }
+
+        fileInformationsViewController.dismiss(animated: animated, completion: completion)
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -709,13 +716,15 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     func openWith(from: UIView) {
         let frame = from.convert(from.bounds, to: view)
-        floatingPanelViewController.dismiss(animated: true)
-        if currentFile.isMostRecentDownloaded {
-            FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: view, delegate: self)
-        } else {
-            downloadToOpenWith { [weak self] in
-                guard let self else { return }
+        dismissFileActionsPanel(animated: true) { [weak self] in
+            guard let self else { return }
+            if currentFile.isMostRecentDownloaded {
                 FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: view, delegate: self)
+            } else {
+                downloadToOpenWith { [weak self] in
+                    guard let self else { return }
+                    FileActionsHelper.instance.openWith(file: currentFile, from: frame, in: view, delegate: self)
+                }
             }
         }
     }
@@ -998,14 +1007,6 @@ extension PreviewViewController: UICollectionViewDataSource {
 // MARK: - Collection view delegate
 
 extension PreviewViewController: UICollectionViewDelegate {}
-
-// MARK: - Floating Panel Controller Delegate
-
-extension PreviewViewController: FloatingPanelControllerDelegate {
-    func floatingPanelShouldBeginDragging(_ vc: FloatingPanelController) -> Bool {
-        return presentationOrigin != .activities
-    }
-}
 
 // MARK: - Document interaction controller delegate
 

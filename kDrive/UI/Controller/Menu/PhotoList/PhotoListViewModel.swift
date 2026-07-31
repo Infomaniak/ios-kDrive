@@ -152,7 +152,7 @@ class PhotoListViewModel: FileListViewModel {
             onPresentViewController?(.modal, searchViewController, true)
         } else if type == .photoSort {
             let floatingPanelViewController = FloatingPanelSelectOptionViewController<PhotoSortMode>
-                .instantiatePanel(options: PhotoSortMode.allCases, selectedOption: sortMode,
+                .instantiateSheet(options: PhotoSortMode.allCases, selectedOption: sortMode,
                                   headerTitle: KDriveResourcesStrings.Localizable.sortTitle,
                                   delegate: self)
             onPresentViewController?(.modal, floatingPanelViewController, true)

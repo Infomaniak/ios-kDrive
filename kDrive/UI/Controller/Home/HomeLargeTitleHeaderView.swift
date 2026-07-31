@@ -66,7 +66,7 @@ class HomeLargeTitleHeaderView: UICollectionReusableView {
             let drives = accountManager.drives
             let selectedDrive = accountManager.drives.first { $0.id == driveFileManager.drive.id }
 
-            let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiatePanel(
+            let floatingPanelViewController = FloatingPanelSelectOptionViewController<Drive>.instantiateSheet(
                 options: drives,
                 selectedOption: selectedDrive,
                 headerTitle: KDriveResourcesStrings.Localizable.buttonSwitchDrive,

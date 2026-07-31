@@ -322,7 +322,7 @@ class FileListViewModel: SelectDelegate {
 
     func sortButtonPressed() {
         let floatingPanelViewController = FloatingPanelSelectOptionViewController<SortType>
-            .instantiatePanel(options: configuration.sortingOptions,
+            .instantiateSheet(options: configuration.sortingOptions,
                               selectedOption: sortType,
                               headerTitle: KDriveResourcesStrings.Localizable.sortTitle,
                               delegate: self)

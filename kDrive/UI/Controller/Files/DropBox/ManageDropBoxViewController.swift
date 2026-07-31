@@ -359,9 +359,9 @@ extension ManageDropBoxViewController: FooterButtonDelegate {
                         directory: proxyDirectory,
                         settings: settings
                     )
-                    let driveFloatingPanelController = ShareFloatingPanelViewController.instantiatePanel()
+                    let driveFloatingPanelController = ShareFloatingPanelViewController.instantiateSheet()
                     let floatingPanelViewController = driveFloatingPanelController
-                        .contentViewController as? ShareFloatingPanelViewController
+                        as? ShareFloatingPanelViewController
                     floatingPanelViewController?.copyTextField.text = dropBox.url
                     floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable
                         .dropBoxResultTitle(self.directory.name)

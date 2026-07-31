@@ -193,18 +193,20 @@ extension FileActionsFloatingPanelViewController {
     }
 
     private func addAction() {
-        let floatingPanelViewController = AdaptiveDriveFloatingPanelController()
         let fileInformationsViewController = PlusButtonFloatingPanelViewController(driveFileManager: driveFileManager,
                                                                                    folder: frozenFile,
                                                                                    presentedFromPlusButton: false)
         (presentingParent as? FileListViewController)?.mediaHelper = fileInformationsViewController.mediaHelper
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        floatingPanelViewController.delegate = fileInformationsViewController
 
-        floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-        floatingPanelViewController.track(scrollView: fileInformationsViewController.tableView)
+        fileInformationsViewController.modalPresentationStyle = .pageSheet
+        if let sheet = fileInformationsViewController.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+            sheet.prefersGrabberVisible = true
+        }
         dismiss(animated: true) {
-            self.presentingParent?.present(floatingPanelViewController, animated: true)
+            self.presentingParent?.present(fileInformationsViewController, animated: true)
         }
     }
 
@@ -311,9 +313,9 @@ extension FileActionsFloatingPanelViewController {
 
         @InjectService var matomo: MatomoUtils
         guard frozenFile.capabilities.canBecomeDropbox else {
-            let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiatePanel()
+            let driveFloatingPanelController = DropBoxFloatingPanelViewController.instantiateSheet()
             let floatingPanelViewController = driveFloatingPanelController
-                .contentViewController as? DropBoxFloatingPanelViewController
+                as? DropBoxFloatingPanelViewController
             floatingPanelViewController?.rightButton.isEnabled = driveFileManager.drive.accountAdmin
             floatingPanelViewController?.actionHandler = { [weak self] _ in
                 driveFloatingPanelController.dismiss(animated: true) {

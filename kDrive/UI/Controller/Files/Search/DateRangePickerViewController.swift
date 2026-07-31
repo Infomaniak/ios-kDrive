@@ -145,17 +145,20 @@ class DateRangePickerViewController: UIViewController {
         calendarView.daySelectionHandler = { [weak self] day in
             self?.didSelectDay(day)
         }
+        view.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        calendarView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }
 
     static func instantiatePanel(visibleDateRange: ClosedRange<Date>,
-                                 didSelectRange: DateRangeHandler?) -> DriveFloatingPanelController {
+                                 didSelectRange: DateRangeHandler?) -> UIViewController {
         let dateRangePickerViewController = DateRangePickerViewController(visibleDateRange: visibleDateRange)
         dateRangePickerViewController.didSelectRange = didSelectRange
-        let floatingPanelController = DriveFloatingPanelController()
-        floatingPanelController.isRemovalInteractionEnabled = true
-        floatingPanelController.layout = PlusButtonFloatingPanelLayout(height: 500)
-        floatingPanelController.set(contentViewController: dateRangePickerViewController)
-        return floatingPanelController
+        dateRangePickerViewController.modalPresentationStyle = .pageSheet
+        if let sheet = dateRangePickerViewController.sheetPresentationController {
+            sheet.detents = [.medium()]
+            sheet.prefersGrabberVisible = true
+        }
+        return dateRangePickerViewController
     }
 
     @objc func saveButtonPressed() {

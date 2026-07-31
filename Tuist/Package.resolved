@@ -38,15 +38,6 @@
       }
     },
     {
-      "identity" : "floatingpanel",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SCENEE/FloatingPanel",
-      "state" : {
-        "revision" : "7efcc769e0ffe62f530e9276ab26309f758b7cc3",
-        "version" : "3.2.2"
-      }
-    },
-    {
       "identity" : "highlightswift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/appstefan/HighlightSwift",

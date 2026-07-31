@@ -18,7 +18,6 @@
 
 import Combine
 import DifferenceKit
-import FloatingPanel
 import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
@@ -470,67 +469,52 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
     }
 
-    private func fileFloatingPanelLayout(files: [File]) -> FloatingPanelLayout {
-        guard driveFileManager.isPublicShare else {
-            return FileFloatingPanelLayout(
-                initialState: .half,
-                hideTip: true,
-                backdropAlpha: 0.2
-            )
-        }
-
-        if let publicShareMetadata = driveFileManager.publicShareMetadata,
-           !publicShareMetadata.capabilities.canDownload {
-            return FileFloatingPanelLayout(
-                initialState: .tip,
-                hideTip: false,
-                backdropAlpha: 0.2
-            )
-        } else if files.first?.isDirectory == true {
-            return PublicShareFolderFloatingPanelLayout(
-                initialState: .half,
-                hideTip: true,
-                backdropAlpha: 0.2
-            )
-        } else {
-            return PublicShareFileFloatingPanelLayout(
-                initialState: .half,
-                hideTip: true,
-                backdropAlpha: 0.2
-            )
-        }
-    }
-
     private func showQuickActionsPanel(files: [File], actionType: FileListQuickActionType) {
         #if !ISEXTENSION
-        var floatingPanelViewController: DriveFloatingPanelController
         switch actionType {
         case .file:
             guard let file = files.first else {
                 Self.logger.error("Unable to show quick actions panel without a file")
                 return
             }
-
-            floatingPanelViewController = DriveFloatingPanelController()
             let fileInformationsViewController = FileActionsFloatingPanelViewController(frozenFile: file,
                                                                                         driveFileManager: driveFileManager)
 
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
 
-            floatingPanelViewController.layout = fileFloatingPanelLayout(files: files)
-            floatingPanelViewController.set(contentViewController: fileInformationsViewController)
-            floatingPanelViewController.track(scrollView: fileInformationsViewController.collectionView)
+            fileInformationsViewController.modalPresentationStyle = .pageSheet
+            if let sheet = fileInformationsViewController.sheetPresentationController {
+                sheet.detents = [.medium(), .large()]
+                sheet.prefersEdgeAttachedInCompactHeight = true
+                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+                sheet.prefersGrabberVisible = true
+            }
+            present(fileInformationsViewController, animated: true)
         case .trash:
-            floatingPanelViewController = AdaptiveDriveFloatingPanelController()
             let trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
             trashFloatingPanelTableViewController.delegate = (viewModel as? TrashListViewModel)
 
-            trashFloatingPanelTableViewController.trashedFiles = files
+            let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
+            let isPad = traitCollection.userInterfaceIdiom == .pad
+            let detentHeight = trashFloatingPanelTableViewController.contentHeight
 
-            floatingPanelViewController.set(contentViewController: trashFloatingPanelTableViewController)
-            (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?
-                .trackAndObserve(scrollView: trashFloatingPanelTableViewController.tableView)
+            let customDetent = UISheetPresentationController.Detent.custom(
+                identifier: .init("trashHeight")
+            ) { _ in
+                isPad ? detentHeight : (detentHeight - bottomSafeArea)
+            }
+
+            trashFloatingPanelTableViewController.modalPresentationStyle = .pageSheet
+            if let sheet = trashFloatingPanelTableViewController.sheetPresentationController {
+                sheet.detents = [customDetent]
+                sheet.prefersEdgeAttachedInCompactHeight = true
+                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+                sheet.prefersGrabberVisible = true
+            }
+            present(trashFloatingPanelTableViewController, animated: true)
+
+            trashFloatingPanelTableViewController.trashedFiles = files
         case .multipleSelection(let downloadOnly):
             let allItemsSelected: Bool
             let forceMoveDistinctFiles: Bool
@@ -566,15 +550,31 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
             if downloadOnly {
                 selectViewController.actions = [.download]
+            } else {
+                selectViewController.setupContent()
             }
 
-            floatingPanelViewController = AdaptiveDriveFloatingPanelController()
-            floatingPanelViewController.set(contentViewController: selectViewController)
-            (floatingPanelViewController as? AdaptiveDriveFloatingPanelController)?
-                .trackAndObserve(scrollView: selectViewController.collectionView)
+            let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
+            let isPad = traitCollection.userInterfaceIdiom == .pad
+
+            let safeAreaCompensation = selectViewController.containsOnlyDownloadAction ? 0 : bottomSafeArea
+            let detentHeight = selectViewController.contentHeight
+
+            let customDetent = UISheetPresentationController.Detent.custom(
+                identifier: .init("multipleSelectionHeight")
+            ) { _ in
+                isPad ? detentHeight : (detentHeight - safeAreaCompensation)
+            }
+
+            selectViewController.modalPresentationStyle = .pageSheet
+            if let sheet = selectViewController.sheetPresentationController {
+                sheet.detents = [customDetent]
+                sheet.prefersEdgeAttachedInCompactHeight = true
+                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+                sheet.prefersGrabberVisible = true
+            }
+            present(selectViewController, animated: true)
         }
-        floatingPanelViewController.isRemovalInteractionEnabled = true
-        present(floatingPanelViewController, animated: true)
         #endif
     }
 

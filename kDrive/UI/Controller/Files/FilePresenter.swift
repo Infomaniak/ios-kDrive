@@ -222,16 +222,16 @@ final class FilePresenter {
                 accessingFileViewController: accessingFileViewController
             )
         } else {
-            viewController?.present(NoAccessFloatingPanelViewController.instantiatePanel(), animated: true)
+            viewController?.present(NoAccessFloatingPanelViewController.instantiateSheet(), animated: true)
         }
     }
 
     private func presentForceAccessPanel(for file: File,
                                          driveFileManager: DriveFileManager,
                                          accessingFileViewController: FileListViewController) {
-        let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiatePanel()
+        let accessFileDriveFloatingPanelController = AccessFileFloatingPanelViewController.instantiateSheet()
         let floatingPanelViewController = accessFileDriveFloatingPanelController
-            .contentViewController as? AccessFileFloatingPanelViewController
+            as? AccessFileFloatingPanelViewController
         floatingPanelViewController?.actionHandler = { [weak self] _ in
             guard let self else { return }
             floatingPanelViewController?.rightButton.setLoading(true)
