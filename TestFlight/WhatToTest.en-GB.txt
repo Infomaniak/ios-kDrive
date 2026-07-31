@@ -1,8 +1,3 @@
-Post tenebras Liquid glass !
-
-- Fresh Liquid glass native UI 🎉
-- Improved and more resilient maintenance mode
-- Sleek drag and drop UI
-- Fix a cache space over use issue
-- Fix deep-link navigation from share extension
+- Improvements related to kDrive in the Files app
+- Fresh new floating panels across the app
 - Stability improvements and bug fixes
