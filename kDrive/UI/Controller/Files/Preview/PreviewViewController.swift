@@ -615,6 +615,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             sheet.detents = canExpand ? [smallDetent, .medium(), .large()] : [.medium()]
             sheet.largestUndimmedDetentIdentifier = canExpand ? .large : .medium
             sheet.prefersGrabberVisible = canExpand
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         }
 
         present(fileInformationsViewController, animated: animated)

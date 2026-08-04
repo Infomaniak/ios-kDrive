@@ -72,7 +72,6 @@ class InformationFloatingPanelViewController: UIViewController {
         }
         if let sheet = sheetPresentationController {
             sheet.detents = [customDetent]
-            sheet.prefersGrabberVisible = true
         }
     }
 
@@ -117,6 +116,9 @@ class InformationFloatingPanelViewController: UIViewController {
         contentVC.drive = drive
         contentVC.modalPresentationStyle = .pageSheet
         contentVC.loadViewIfNeeded()
+        contentVC.sheetPresentationController?.prefersEdgeAttachedInCompactHeight = true
+        contentVC.sheetPresentationController?
+            .widthFollowsPreferredContentSizeWhenEdgeAttached = true
 
         if let sheet = contentVC.sheetPresentationController {
             sheet.prefersGrabberVisible = true

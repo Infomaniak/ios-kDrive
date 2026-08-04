@@ -84,6 +84,8 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
 
         sheetViewController.modalPresentationStyle = .pageSheet
         sheetViewController.sheetPresentationController?.prefersGrabberVisible = true
+        sheetViewController.sheetPresentationController?.prefersEdgeAttachedInCompactHeight = true
+        sheetViewController.sheetPresentationController?.widthFollowsPreferredContentSizeWhenEdgeAttached = true
 
         return sheetViewController
     }

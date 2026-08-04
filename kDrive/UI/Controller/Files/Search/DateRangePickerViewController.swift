@@ -157,6 +157,8 @@ class DateRangePickerViewController: UIViewController {
         if let sheet = dateRangePickerViewController.sheetPresentationController {
             sheet.detents = [.medium()]
             sheet.prefersGrabberVisible = true
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         }
         return dateRangePickerViewController
     }

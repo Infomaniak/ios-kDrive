@@ -275,6 +275,10 @@ public class UpsaleViewController: UIViewController {
         }
 
         upsaleViewController.modalPresentationStyle = .pageSheet
+        upsaleViewController.sheetPresentationController?.prefersEdgeAttachedInCompactHeight = true
+        upsaleViewController.sheetPresentationController?
+            .widthFollowsPreferredContentSizeWhenEdgeAttached = true
+
         if let sheet = upsaleViewController.sheetPresentationController {
             sheet.prefersGrabberVisible = false
         }
