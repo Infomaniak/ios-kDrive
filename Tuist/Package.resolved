@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-uikit",
       "state" : {
-        "revision" : "dd005b4e493c9f8c793d1d251eb54c8c315d602e",
-        "version" : "2.0.0"
+        "revision" : "10d7a7a4bcdef924d250a2d93e69d0bd233be9e8",
+        "version" : "2.0.1"
       }
     },
     {
@@ -267,8 +267,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/SnackBar.swift",
       "state" : {
-        "revision" : "7d8d20af50c6b744aa9791b597f7efbd0a15add2",
-        "version" : "1.2.0"
+        "revision" : "4c0d4fc65e8ef17477d6f0750ebbec066cde8cb0",
+        "version" : "1.2.1"
       }
     },
     {

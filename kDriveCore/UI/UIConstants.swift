@@ -69,6 +69,7 @@ public enum UIConstants {
         var style = SnackBarStyle.infomaniakStyle
         style.anchor = 20.0
         style.maxWidth = 600.0
+        if #available(iOS 26.0, *) { style.cornerStyle = 26.0 }
         return style
     }()
 
