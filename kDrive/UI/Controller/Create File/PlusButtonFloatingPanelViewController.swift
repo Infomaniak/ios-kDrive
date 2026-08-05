@@ -38,6 +38,8 @@ public class PlusButtonFloatingPanelViewController: UITableViewController {
     let presentedAboveFileList: Bool
     let mediaHelper: OpenMediaHelper
 
+    private var selfSizingSheetHelper: SelfSizingSheetHelper?
+
     private struct PlusButtonMenuAction: Equatable {
         let name: String
         let image: UIImage
@@ -135,6 +137,8 @@ public class PlusButtonFloatingPanelViewController: UITableViewController {
         tableView.alwaysBounceVertical = false
         tableView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         tableView.register(cellView: FloatingPanelTableViewCell.self)
+
+        selfSizingSheetHelper = SelfSizingSheetHelper(viewController: self, scrollView: tableView)
 
         // Hide unavailable actions
         #if !DEBUG

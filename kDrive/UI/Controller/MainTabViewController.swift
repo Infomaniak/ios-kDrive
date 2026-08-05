@@ -599,14 +599,6 @@ extension MainTabViewController: MainTabBarDelegate {
 
         mediaHelper = plusButtonFloatingPanel.mediaHelper
 
-        plusButtonFloatingPanel.modalPresentationStyle = .pageSheet
-        if let sheet = plusButtonFloatingPanel.sheetPresentationController {
-            sheet.detents = [.medium(), .large()]
-            sheet.prefersEdgeAttachedInCompactHeight = true
-            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
-            sheet.prefersGrabberVisible = true
-        }
-
         present(plusButtonFloatingPanel, animated: true)
     }
 

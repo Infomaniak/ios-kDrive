@@ -49,17 +49,13 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     weak var presentingParent: UIViewController?
+    private var selfSizingSheetHelper: SelfSizingSheetHelper?
 
     var sharedWithMe: Bool {
         return currentDirectory.visibility == .isInSharedSpace || currentDirectory.visibility == .isSharedSpace
     }
 
     var actions = FloatingPanelAction.listActions
-
-    private let rowHeight: CGFloat = 60
-    var contentHeight: CGFloat {
-        CGFloat(actions.count) * rowHeight + UIConstants.Padding.standard
-    }
 
     var containsOnlyDownloadAction: Bool {
         return actions.count == 1 && actions.first == .download
@@ -106,15 +102,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
         collectionView.register(cellView: FloatingPanelActionCollectionViewCell.self)
         collectionView.alwaysBounceVertical = false
-        collectionView.isScrollEnabled = false
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         setupContent()
-        collectionView.contentInset = UIEdgeInsets(
-            top: UIConstants.Padding.mediumSmall,
-            left: 0,
-            bottom: UIConstants.Padding.mediumSmall,
-            right: 0
-        )
+
+        selfSizingSheetHelper = SelfSizingSheetHelper(viewController: self, scrollView: collectionView)
     }
 
     func setupContent() {

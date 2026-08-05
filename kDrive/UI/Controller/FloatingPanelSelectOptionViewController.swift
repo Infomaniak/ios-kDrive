@@ -43,6 +43,7 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
     var options = [T]()
 
     weak var delegate: SelectDelegate?
+    private var selfSizingSheetHelper: SelfSizingSheetHelper?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,6 +52,7 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         tableView.separatorColor = .clear
         tableView.alwaysBounceVertical = false
         tableView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        selfSizingSheetHelper = SelfSizingSheetHelper(viewController: self, scrollView: tableView)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -62,17 +64,6 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         }
     }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-
-        if let sheet = sheetPresentationController,
-           sheet.detents == [.large()] {
-            let contentHeight = tableView.contentSize.height
-
-            sheet.detents = [.custom { _ in contentHeight }]
-        }
-    }
-
     static func instantiateSheet(options: [T], selectedOption: T? = nil, headerTitle: String,
                                  delegate: SelectDelegate? = nil) -> FloatingPanelSelectOptionViewController<T> {
         let sheetViewController = FloatingPanelSelectOptionViewController<T>()
@@ -81,11 +72,6 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
         sheetViewController.selectedOption = selectedOption
         sheetViewController.headerTitle = headerTitle
         sheetViewController.delegate = delegate
-
-        sheetViewController.modalPresentationStyle = .pageSheet
-        sheetViewController.sheetPresentationController?.prefersGrabberVisible = true
-        sheetViewController.sheetPresentationController?.prefersEdgeAttachedInCompactHeight = true
-        sheetViewController.sheetPresentationController?.widthFollowsPreferredContentSizeWhenEdgeAttached = true
 
         return sheetViewController
     }

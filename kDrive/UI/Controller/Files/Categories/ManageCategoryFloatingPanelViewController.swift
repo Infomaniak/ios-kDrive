@@ -56,6 +56,7 @@ class CategoryFloatingPanelAction: Equatable {
 
 class ManageCategoryFloatingPanelViewController: UICollectionViewController {
     weak var presentingParent: UIViewController?
+    private var selfSizingSheetHelper: SelfSizingSheetHelper?
 
     var driveFileManager: DriveFileManager!
     var category: kDriveCore.Category!
@@ -79,9 +80,9 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
         collectionView.register(cellView: FloatingPanelQuickActionCollectionViewCell.self)
         collectionView.alwaysBounceVertical = false
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
-        collectionView.isScrollEnabled = false
 
         setupContent()
+        selfSizingSheetHelper = SelfSizingSheetHelper(viewController: self, scrollView: collectionView)
     }
 
     // MARK: - Private methods

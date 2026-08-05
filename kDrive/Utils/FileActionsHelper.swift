@@ -534,17 +534,8 @@ public final class FileActionsHelper {
             completion(isSuccess)
             group?.leave()
         }
-        let customDetent = UISheetPresentationController.Detent.custom(
-            identifier: .init("folderColorHeight")
-        ) { _ in
-            colorSelectionViewController.getHeight()
-        }
+
         viewController.dismiss(animated: true) {
-            colorSelectionViewController.modalPresentationStyle = .pageSheet
-            if let sheet = colorSelectionViewController.sheetPresentationController {
-                sheet.detents = [customDetent]
-                sheet.prefersGrabberVisible = true
-            }
             presentingParent?.present(colorSelectionViewController, animated: true)
         }
     }

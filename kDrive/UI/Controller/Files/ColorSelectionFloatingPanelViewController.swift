@@ -24,6 +24,8 @@ import kDriveResources
 import UIKit
 
 class ColorSelectionFloatingPanelViewController: UICollectionViewController {
+    private var selfSizingSheetHelper: SelfSizingSheetHelper?
+
     enum Section: CaseIterable {
         case header, colorSelection
     }
@@ -86,9 +88,9 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
         collectionView.register(cellView: ColorSelectionCollectionViewCell.self)
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
-        collectionView.isScrollEnabled = false
 
         setSelectedColor()
+        selfSizingSheetHelper = SelfSizingSheetHelper(viewController: self, scrollView: collectionView)
     }
 
     // MARK: - Private methods
@@ -100,9 +102,7 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(58))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-                let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 0, bottom: 0, trailing: 0)
-                return section
+                return NSCollectionLayoutSection(group: group)
             case .colorSelection:
                 let itemSize = NSCollectionLayoutSize(widthDimension: .absolute(40), heightDimension: .absolute(40))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -118,18 +118,6 @@ class ColorSelectionFloatingPanelViewController: UICollectionViewController {
                 return section
             }
         }
-    }
-
-    func getHeight() -> CGFloat {
-        let headerCellHeight = 80.0
-        let topInset = 20.0
-        let colorWidthAndHeight = 40.0
-        let colorSpacing = 16.0
-        let leadingTrailingPading = 40.0
-        let numberOfColorInARow = ((view.frame.width - leadingTrailingPading)
-            / (colorWidthAndHeight + colorSpacing)).rounded(.down)
-        let numberOfRow = (CGFloat(folderColors.count) / numberOfColorInARow).rounded(.up)
-        return numberOfRow * (colorWidthAndHeight + colorSpacing) + headerCellHeight + topInset
     }
 
     func setSelectedColor() {
