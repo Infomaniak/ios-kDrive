@@ -32,29 +32,31 @@ public class SelfSizingSheetHelper {
         self.viewController = viewController
         self.scrollView = scrollView
 
+        viewController.modalPresentationStyle = .pageSheet
         guard let sheet = viewController.sheetPresentationController else {
             return
         }
 
-        viewController.modalPresentationStyle = .pageSheet
         sheet.prefersScrollingExpandsWhenScrolledToEdge = false
         sheet.prefersEdgeAttachedInCompactHeight = true
         sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         sheet.prefersGrabberVisible = showsGrabber
 
-        contentSizeObservation = scrollView.observe(\.contentSize, options: [.new, .old]) { _, _ in
-            let totalPanelContentHeight = scrollView.contentSize.height
+        contentSizeObservation = scrollView.observe(\.contentSize, options: [.new, .old]) { [weak scrollView,
+                                                                                             weak sheet] _, _ in
+                guard let scrollView, let sheet else { return }
+                let totalPanelContentHeight = scrollView.contentSize.height
 
-            let newHeightDetent = UISheetPresentationController.Detent
-                .custom(identifier: .init("h-\(totalPanelContentHeight)")) { _ in
-                    totalPanelContentHeight
-                }
+                let newHeightDetent = UISheetPresentationController.Detent
+                    .custom(identifier: .init("h-\(totalPanelContentHeight)")) { _ in
+                        totalPanelContentHeight
+                    }
 
-            guard sheet.selectedDetentIdentifier != newHeightDetent.identifier else { return }
+                guard sheet.selectedDetentIdentifier != newHeightDetent.identifier else { return }
 
-            scrollView.isScrollEnabled = totalPanelContentHeight > (scrollView.window?.bounds.height ?? 0)
-            sheet.detents = [newHeightDetent]
-            sheet.selectedDetentIdentifier = newHeightDetent.identifier
+                scrollView.isScrollEnabled = true
+                sheet.detents = [newHeightDetent]
+                sheet.selectedDetentIdentifier = newHeightDetent.identifier
         }
     }
 }
