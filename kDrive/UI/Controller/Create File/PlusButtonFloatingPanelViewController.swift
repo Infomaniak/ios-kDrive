@@ -154,12 +154,8 @@ public class PlusButtonFloatingPanelViewController: UITableViewController {
         #endif
     }
 
-    override public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.row == 0 && indexPath.section == 0 {
-            return UIConstants.FloatingPanel.headerHeight
-        } else {
-            return UITableView.automaticDimension
-        }
+    override public func tableView(_: UITableView, heightForRowAt _: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
     }
 
     override public func numberOfSections(in tableView: UITableView) -> Int {

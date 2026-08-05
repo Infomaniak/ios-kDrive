@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import DesignSystem
 import UIKit
 
 public class SelfSizingSheetHelper {
@@ -45,7 +46,12 @@ public class SelfSizingSheetHelper {
         contentSizeObservation = scrollView.observe(\.contentSize, options: [.new, .old]) { [weak scrollView,
                                                                                              weak sheet] _, _ in
                 guard let scrollView, let sheet else { return }
-                let totalPanelContentHeight = scrollView.contentSize.height
+
+                var totalPanelContentHeight = scrollView.contentSize.height
+                if UIDevice.current.userInterfaceIdiom != .pad && totalPanelContentHeight > 80 {
+                    scrollView.contentInset.top = IKPadding.medium
+                    totalPanelContentHeight += scrollView.contentInset.top
+                }
 
                 let newHeightDetent = UISheetPresentationController.Detent
                     .custom(identifier: .init("h-\(totalPanelContentHeight)")) { _ in
