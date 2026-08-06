@@ -38,6 +38,7 @@ public struct DeeplinkParser: DeeplinkParsable {
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
+    @LazyInjectService private var fileSharingImporter: FileSharingImportable
 
     public init() {
         // META: keep SonarCloud happy
@@ -93,8 +94,23 @@ public struct DeeplinkParser: DeeplinkParsable {
     }
 
     public func parse(url: URL) async -> Bool {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true),
-              let params = components.queryItems else {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+            return await handleDeeplink(url: url)
+        }
+
+        if components.scheme == FileSharingImporter.scheme || components.host == DeeplinkPath.file.rawValue {
+            do {
+                let files = try await fileSharingImporter.importFiles(from: url)
+                await router.navigate(to: .saveFiles(files: files))
+                matomo.track(eventWithCategory: .deeplink, name: DeeplinkPath.file.rawValue)
+                return true
+            } catch {
+                Log.sceneDelegate("Failed to import files: Invalid request", level: .error)
+                return false
+            }
+        }
+
+        guard let params = components.queryItems else {
             return await handleDeeplink(url: url)
         }
 
@@ -109,21 +125,6 @@ public struct DeeplinkParser: DeeplinkParsable {
                   let driveIdInt = Int(driveId), let userIdInt = Int(userId) {
             await router.navigate(to: .store(driveId: driveIdInt, userId: userIdInt))
             matomo.track(eventWithCategory: .deeplink, name: DeeplinkPath.store.rawValue)
-            return true
-
-        } else if components.host == DeeplinkPath.file.rawValue {
-            let files: [ImportedFile] = params.compactMap { param in
-                guard param.name == "url", let filePath = param.value else { return nil }
-                let fileUrl = URL(fileURLWithPath: filePath)
-
-                return ImportedFile(name: fileUrl.lastPathComponent, path: fileUrl, uti: fileUrl.uti ?? .data)
-            }
-            guard !files.isEmpty else {
-                Log.sceneDelegate("Failed to import files: No files found", level: .error)
-                return false
-            }
-            await router.navigate(to: .saveFiles(files: files))
-            matomo.track(eventWithCategory: .deeplink, name: DeeplinkPath.file.rawValue)
             return true
         }
 
