@@ -26,6 +26,7 @@ import UIKit
 /// A NOOP implementation of AppNavigable
 public final class MCKRouter: AppNavigable {
     public var rootViewController: UIViewController?
+    public private(set) var navigatedRoutes = [NavigationRoutes]()
 
     public init(topMostViewController: UIViewController? = nil) {
         self.topMostViewController = topMostViewController
@@ -39,8 +40,8 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
-    public func navigate(to route: NavigationRoutes) {
-        logNoop()
+    @MainActor public func navigate(to route: NavigationRoutes) {
+        navigatedRoutes.append(route)
     }
 
     public func askForReview() async {
