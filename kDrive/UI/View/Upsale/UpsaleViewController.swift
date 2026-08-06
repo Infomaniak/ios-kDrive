@@ -26,6 +26,7 @@ import UIKit
 public class UpsaleViewController: UIViewController {
     var onLoginCompleted: (() -> Void)?
     var onFreeTrialCompleted: (() -> Void)?
+    private var selfSizingSheetHelper: SelfSizingSheetHelper?
 
     let titleImageView = UIImageView()
 
@@ -68,24 +69,9 @@ public class UpsaleViewController: UIViewController {
         layoutStackView()
 
         trackUpsalePresented()
-    }
-
-    override public func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        updateSheetDetent()
-    }
-
-    private func updateSheetDetent() {
-        let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
-        let customDetent = UISheetPresentationController.Detent.custom(
-            identifier: .init("upsaleHeight")
-        ) { context in
-            return max(0, context.maximumDetentValue - bottomSafeArea)
-        }
-
-        if let sheet = sheetPresentationController {
-            sheet.detents = [customDetent]
-        }
+        selfSizingSheetHelper = SelfSizingSheetHelper(viewController: self,
+                                                      scrollView: scrollView,
+                                                      showsGrabber: false)
     }
 
     func configureHeader() {
@@ -272,11 +258,6 @@ public class UpsaleViewController: UIViewController {
                 @InjectService var router: AppNavigable
                 router.showLogin(delegate: loginDelegateHandler)
             }
-        }
-
-        upsaleViewController.modalPresentationStyle = .pageSheet
-        if let sheet = upsaleViewController.sheetPresentationController {
-            sheet.prefersGrabberVisible = false
         }
 
         return upsaleViewController

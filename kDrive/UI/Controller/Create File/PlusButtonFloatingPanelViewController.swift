@@ -38,6 +38,8 @@ public class PlusButtonFloatingPanelViewController: UITableViewController {
     let presentedAboveFileList: Bool
     let mediaHelper: OpenMediaHelper
 
+    private var selfSizingSheetHelper: SelfSizingSheetHelper?
+
     private struct PlusButtonMenuAction: Equatable {
         let name: String
         let image: UIImage
@@ -136,6 +138,8 @@ public class PlusButtonFloatingPanelViewController: UITableViewController {
         tableView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         tableView.register(cellView: FloatingPanelTableViewCell.self)
 
+        selfSizingSheetHelper = SelfSizingSheetHelper(viewController: self, scrollView: tableView)
+
         // Hide unavailable actions
         #if !DEBUG
         if !VNDocumentCameraViewController.isSupported {
@@ -150,12 +154,8 @@ public class PlusButtonFloatingPanelViewController: UITableViewController {
         #endif
     }
 
-    override public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        if indexPath.row == 0 && indexPath.section == 0 {
-            return UIConstants.FloatingPanel.headerHeight
-        } else {
-            return UITableView.automaticDimension
-        }
+    override public func tableView(_: UITableView, heightForRowAt _: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
     }
 
     override public func numberOfSections(in tableView: UITableView) -> Int {

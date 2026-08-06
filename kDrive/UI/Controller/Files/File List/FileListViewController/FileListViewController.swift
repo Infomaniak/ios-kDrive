@@ -495,23 +495,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             let trashFloatingPanelTableViewController = TrashFloatingPanelTableViewController()
             trashFloatingPanelTableViewController.delegate = (viewModel as? TrashListViewModel)
 
-            let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
-            let isPad = traitCollection.userInterfaceIdiom == .pad
-            let detentHeight = trashFloatingPanelTableViewController.contentHeight
-
-            let customDetent = UISheetPresentationController.Detent.custom(
-                identifier: .init("trashHeight")
-            ) { _ in
-                isPad ? detentHeight : (detentHeight - bottomSafeArea)
-            }
-
-            trashFloatingPanelTableViewController.modalPresentationStyle = .pageSheet
-            if let sheet = trashFloatingPanelTableViewController.sheetPresentationController {
-                sheet.detents = [customDetent]
-                sheet.prefersEdgeAttachedInCompactHeight = true
-                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
-                sheet.prefersGrabberVisible = true
-            }
             present(trashFloatingPanelTableViewController, animated: true)
 
             trashFloatingPanelTableViewController.trashedFiles = files
@@ -554,25 +537,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 selectViewController.setupContent()
             }
 
-            let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
-            let isPad = traitCollection.userInterfaceIdiom == .pad
-
-            let safeAreaCompensation = selectViewController.containsOnlyDownloadAction ? 0 : bottomSafeArea
-            let detentHeight = selectViewController.contentHeight
-
-            let customDetent = UISheetPresentationController.Detent.custom(
-                identifier: .init("multipleSelectionHeight")
-            ) { _ in
-                isPad ? detentHeight : (detentHeight - safeAreaCompensation)
-            }
-
-            selectViewController.modalPresentationStyle = .pageSheet
-            if let sheet = selectViewController.sheetPresentationController {
-                sheet.detents = [customDetent]
-                sheet.prefersEdgeAttachedInCompactHeight = true
-                sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
-                sheet.prefersGrabberVisible = true
-            }
             present(selectViewController, animated: true)
         }
         #endif

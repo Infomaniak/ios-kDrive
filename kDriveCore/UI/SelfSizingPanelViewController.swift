@@ -70,7 +70,7 @@ public class SelfSizingPanelViewController: UIViewController {
 
             guard sheetPresentationController.selectedDetentIdentifier != newHeightDetent.identifier else { return }
 
-            scrollView.isScrollEnabled = totalPanelContentHeight > (scrollView.window?.bounds.height ?? 0)
+            scrollView.isScrollEnabled = false
             sheetPresentationController.detents = [newHeightDetent]
             sheetPresentationController.selectedDetentIdentifier = newHeightDetent.identifier
         }

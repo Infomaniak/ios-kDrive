@@ -156,7 +156,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         fileInformationsViewController.normalFolderHierarchy = normalFolderHierarchy
         fileInformationsViewController.presentationOrigin = presentationOrigin
         fileInformationsViewController.modalPresentationStyle = .pageSheet
-        fileInformationsViewController.isModalInPresentation = presentationOrigin == .activities
+        fileInformationsViewController.isModalInPresentation = true
 
         pdfPageLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)
         pdfPageLabel.textColor = .white
@@ -615,6 +615,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             sheet.detents = canExpand ? [smallDetent, .medium(), .large()] : [.medium()]
             sheet.largestUndimmedDetentIdentifier = canExpand ? .large : .medium
             sheet.prefersGrabberVisible = canExpand
+            sheet.prefersEdgeAttachedInCompactHeight = true
+            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         }
 
         present(fileInformationsViewController, animated: animated)

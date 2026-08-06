@@ -44,41 +44,6 @@ class InformationFloatingPanelViewController: UIViewController {
         leftButton.titleLabel?.textAlignment = .center
         rightButton.titleLabel?.numberOfLines = 2
         rightButton.titleLabel?.textAlignment = .center
-
-        additionalSafeAreaInsets.top = UIConstants.Padding.standard
-    }
-
-    private func updateSheetDetent() {
-        view.layoutIfNeeded()
-
-        let targetSize = CGSize(
-            width: view.bounds.width,
-            height: UIView.layoutFittingCompressedSize.height
-        )
-        let contentHeight = view.systemLayoutSizeFitting(
-            targetSize,
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        ).height
-
-        let bottomSafeArea = view.window?.safeAreaInsets.bottom ?? 0
-        let isPad = traitCollection.userInterfaceIdiom == .pad
-
-        let customDetent = UISheetPresentationController.Detent.custom(
-            identifier: .init("informationDetentHeight")
-        ) { _ in
-            isPad ? (contentHeight + UIConstants.Padding.mediumSmall) :
-                (contentHeight - bottomSafeArea)
-        }
-        if let sheet = sheetPresentationController {
-            sheet.detents = [customDetent]
-            sheet.prefersGrabberVisible = true
-        }
-    }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        updateSheetDetent()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -115,12 +80,6 @@ class InformationFloatingPanelViewController: UIViewController {
     class func instantiateSheet(drive: Drive? = nil) -> UIViewController {
         let contentVC = instantiate()
         contentVC.drive = drive
-        contentVC.modalPresentationStyle = .pageSheet
-        contentVC.loadViewIfNeeded()
-
-        if let sheet = contentVC.sheetPresentationController {
-            sheet.prefersGrabberVisible = true
-        }
-        return contentVC
+        return SelfSizingPanelViewController(contentViewController: contentVC)
     }
 }
