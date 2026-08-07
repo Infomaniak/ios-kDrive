@@ -123,8 +123,8 @@
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <constraints>
                 <constraint firstItem="JwS-de-Pn7" firstAttribute="centerY" secondItem="gTV-IL-0wX" secondAttribute="centerY" id="JOi-fO-DFL"/>
-                <constraint firstItem="JwS-de-Pn7" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="24" id="drl-nf-cul"/>
-                <constraint firstAttribute="trailing" secondItem="JwS-de-Pn7" secondAttribute="trailing" constant="24" id="jO7-Ed-CBs"/>
+                <constraint firstItem="JwS-de-Pn7" firstAttribute="leading" secondItem="ZTg-uK-7eu" secondAttribute="leading" constant="24" id="drl-nf-cul"/>
+                <constraint firstItem="ZTg-uK-7eu" firstAttribute="trailing" secondItem="JwS-de-Pn7" secondAttribute="trailing" constant="24" id="jO7-Ed-CBs"/>
             </constraints>
             <size key="customSize" width="506" height="827"/>
             <connections>
