@@ -1,3 +1,4 @@
-- De nouveaux panneaux flottants inédits dans toute l'application
 - Améliorations relatives à kDrive dans l'app Fichiers
+- De nouveaux panneaux flottants inédits dans toute l'application
+- Refonte de l'interface des alertes
 - Améliorations de la stabilité et corrections de bugs
