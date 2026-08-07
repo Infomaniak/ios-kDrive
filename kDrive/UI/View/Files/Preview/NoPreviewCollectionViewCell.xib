@@ -114,9 +114,9 @@
             </view>
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <constraints>
-                <constraint firstItem="Xzn-rl-KOk" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="KnF-Jg-cos"/>
+                <constraint firstItem="Xzn-rl-KOk" firstAttribute="leading" secondItem="ZTg-uK-7eu" secondAttribute="leading" id="KnF-Jg-cos"/>
                 <constraint firstItem="Xzn-rl-KOk" firstAttribute="centerY" secondItem="gTV-IL-0wX" secondAttribute="centerY" id="RPm-47-V8p"/>
-                <constraint firstAttribute="trailing" secondItem="Xzn-rl-KOk" secondAttribute="trailing" id="UJ6-4S-3sA"/>
+                <constraint firstItem="ZTg-uK-7eu" firstAttribute="trailing" secondItem="Xzn-rl-KOk" secondAttribute="trailing" id="UJ6-4S-3sA"/>
             </constraints>
             <size key="customSize" width="277" height="522"/>
             <connections>

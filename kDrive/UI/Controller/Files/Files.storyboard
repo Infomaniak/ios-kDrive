@@ -293,8 +293,20 @@
                             <constraint firstItem="qIU-Hu-Zbx" firstAttribute="trailing" secondItem="XG8-QT-Clg" secondAttribute="trailing" id="PnR-Dn-Nv4"/>
                             <constraint firstAttribute="bottom" secondItem="qIU-Hu-Zbx" secondAttribute="bottom" id="Qud-97-aQc"/>
                             <constraint firstItem="Hjz-3J-y1V" firstAttribute="top" secondItem="XG8-QT-Clg" secondAttribute="top" id="mhr-ad-BHy"/>
+                            <constraint firstItem="qIU-Hu-Zbx" firstAttribute="leading" secondItem="XG8-QT-Clg" secondAttribute="leading" id="oTK-pc-7zm"/>
                             <constraint firstItem="hzs-gF-i3p" firstAttribute="top" secondItem="Hjz-3J-y1V" secondAttribute="bottom" id="s4g-Ag-twL"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="oTK-pc-7zm"/>
+                            </mask>
+                        </variation>
+                        <variation key="widthClass=compact">
+                            <mask key="constraints">
+                                <exclude reference="MED-X6-zXf"/>
+                                <include reference="oTK-pc-7zm"/>
+                            </mask>
+                        </variation>
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="0f8-nc-6CP"/>
                     <connections>

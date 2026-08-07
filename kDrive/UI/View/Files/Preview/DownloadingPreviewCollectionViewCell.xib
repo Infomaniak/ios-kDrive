@@ -47,14 +47,14 @@
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <constraints>
                 <constraint firstAttribute="trailing" secondItem="coL-0t-9Td" secondAttribute="trailing" id="9cR-gm-j1L"/>
-                <constraint firstAttribute="trailing" secondItem="ZTd-o0-FJA" secondAttribute="trailing" constant="64" id="CKE-6g-vlj"/>
+                <constraint firstItem="ZTg-uK-7eu" firstAttribute="trailing" secondItem="ZTd-o0-FJA" secondAttribute="trailing" constant="64" id="CKE-6g-vlj"/>
                 <constraint firstAttribute="bottom" secondItem="coL-0t-9Td" secondAttribute="bottom" id="JPJ-Es-YHE"/>
                 <constraint firstItem="ZTd-o0-FJA" firstAttribute="top" secondItem="ZTg-uK-7eu" secondAttribute="top" constant="32" id="MA6-zw-if5"/>
                 <constraint firstItem="3KV-hE-9hu" firstAttribute="height" secondItem="gTV-IL-0wX" secondAttribute="height" id="f2b-po-GUX"/>
                 <constraint firstItem="coL-0t-9Td" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" id="jry-hJ-bIZ"/>
                 <constraint firstItem="coL-0t-9Td" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" id="nbA-TH-7ut"/>
                 <constraint firstItem="3KV-hE-9hu" firstAttribute="width" secondItem="gTV-IL-0wX" secondAttribute="width" id="r8H-W5-Uh7"/>
-                <constraint firstItem="ZTd-o0-FJA" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="64" id="w9U-5B-Hgc"/>
+                <constraint firstItem="ZTd-o0-FJA" firstAttribute="leading" secondItem="ZTg-uK-7eu" secondAttribute="leading" constant="64" id="w9U-5B-Hgc"/>
             </constraints>
             <size key="customSize" width="252" height="338"/>
             <connections>
