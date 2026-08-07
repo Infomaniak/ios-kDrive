@@ -981,8 +981,8 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(secondNextButton.waitForExistence(timeout: defaultTimeOut), "Second next button should be displayed")
         secondNextButton.tap()
 
-        let loginButton = app.buttons.element(boundBy: 0)
-        _ = loginButton.waitForExistence(timeout: defaultTimeOut)
+        let loginButton = app.buttons["Login"]
+        XCTAssertTrue(loginButton.waitForExistence(timeout: defaultTimeOut), "Login button should be displayed")
         loginButton.tap()
         let loginWebView = app.webViews.firstMatch
 
