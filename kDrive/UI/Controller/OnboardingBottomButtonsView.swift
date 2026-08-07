@@ -17,6 +17,7 @@
  */
 
 import DesignSystem
+import InfomaniakCore
 import InfomaniakDI
 import InterAppLogin
 import kDriveCore
@@ -28,8 +29,21 @@ struct OnboardingBottomButtonsView: View {
 
     @ObservedObject var loginDelegateHandler: LoginDelegateHandler
 
+    private var shouldDisplayInterAppLogin: Bool {
+        #if DEBUG
+        if ApiEnvironment.current == .prod {
+            return false
+        }
+        #endif
+        return true
+    }
+
     var body: some View {
-        ContinueWithAccountView(isLoading: loginDelegateHandler.isLoading, excludingUserIds: accountManager.accountIds) {
+        ContinueWithAccountView(
+            isLoading: loginDelegateHandler.isLoading,
+            excludingUserIds: accountManager.accountIds,
+            shouldDisplayInterAppLogin: shouldDisplayInterAppLogin
+        ) {
             appNavigable.showLogin(delegate: loginDelegateHandler)
         } onLoginWithAccountsPressed: { accounts in
             loginDelegateHandler.login(with: accounts)
