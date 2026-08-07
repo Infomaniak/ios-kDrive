@@ -182,9 +182,9 @@ class ManageCategoryFloatingPanelViewController: UICollectionViewController {
                 for: indexPath
             ) as! WrapperCollectionViewCell
             let tableCell = cell.reuse(withCellType: CategoryTableViewCell.self)
-            tableCell.initWithPositionAndShadow()
             tableCell.configure(with: category, showMoreButton: false)
             tableCell.leadingConstraint.constant = 0
+            tableCell.contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
             return cell
         case .actions:
             let cell = collectionView.dequeueReusableCell(type: FloatingPanelQuickActionCollectionViewCell.self, for: indexPath)
