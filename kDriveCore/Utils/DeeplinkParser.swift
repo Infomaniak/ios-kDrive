@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import MatomoTracker
@@ -28,6 +29,11 @@ public protocol DeeplinkParsable {
 }
 
 public struct DeeplinkParser: DeeplinkParsable {
+    private static let fileSharingScheme = "kdrive-file-sharing"
+    private static let fileSharingHost = "file"
+    private static let fileSharingPath = "Library/Caches/file-sharing"
+    private static let maximumSharedFileCount = 100
+
     private enum DeeplinkPath: String {
         case store
         case file
@@ -38,10 +44,15 @@ public struct DeeplinkParser: DeeplinkParsable {
     @LazyInjectService private var matomo: MatomoUtils
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
-    @LazyInjectService private var fileSharingImporter: FileSharingImportable
+
+    private let sharedContainerURL: URL?
 
     public init() {
-        // META: keep SonarCloud happy
+        sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.infomaniak")
+    }
+
+    init(sharedContainerURL: URL?) {
+        self.sharedContainerURL = sharedContainerURL
     }
 
     private func handleDeeplink(url: URL) async -> Bool {
@@ -98,16 +109,14 @@ public struct DeeplinkParser: DeeplinkParsable {
             return await handleDeeplink(url: url)
         }
 
-        if components.scheme == FileSharingImporter.scheme || components.host == DeeplinkPath.file.rawValue {
-            do {
-                let files = try await fileSharingImporter.importFiles(from: url)
-                await router.navigate(to: .saveFiles(files: files))
-                matomo.track(eventWithCategory: .deeplink, name: DeeplinkPath.file.rawValue)
-                return true
-            } catch {
+        if components.scheme == Self.fileSharingScheme, components.host == Self.fileSharingHost {
+            guard let files = filesForSharingDeeplink(url) else {
                 Log.sceneDelegate("Failed to import files: Invalid request", level: .error)
                 return false
             }
+            await router.navigate(to: .saveFiles(files: files))
+            matomo.track(eventWithCategory: .deeplink, name: DeeplinkPath.file.rawValue)
+            return true
         }
 
         guard let params = components.queryItems else {
@@ -130,5 +139,79 @@ public struct DeeplinkParser: DeeplinkParsable {
 
         Log.sceneDelegate("unable to parse deeplink URL: \(url)", level: .error)
         return false
+    }
+
+    func filesForSharingDeeplink(_ url: URL) -> [ImportedFile]? {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              components.scheme == Self.fileSharingScheme,
+              components.host == Self.fileSharingHost,
+              components.path.isEmpty,
+              components.user == nil,
+              components.password == nil,
+              components.port == nil,
+              components.fragment == nil,
+              let queryItems = components.queryItems,
+              !queryItems.isEmpty,
+              queryItems.count <= Self.maximumSharedFileCount,
+              queryItems.allSatisfy({ $0.name == "url" && !($0.value?.isEmpty ?? true) }),
+              let sharedContainerURL else {
+            return nil
+        }
+
+        let handoffRootURL = sharedContainerURL
+            .appendingPathComponent(Self.fileSharingPath, isDirectory: true)
+            .standardizedFileURL
+        let resolvedSharedContainerURL = sharedContainerURL.resolvingSymlinksInPath().standardizedFileURL
+        let resolvedHandoffRootURL = handoffRootURL.resolvingSymlinksInPath().standardizedFileURL
+        let expectedHandoffRootURL = resolvedSharedContainerURL
+            .appendingPathComponent(Self.fileSharingPath, isDirectory: true)
+            .standardizedFileURL
+        guard resolvedHandoffRootURL == expectedHandoffRootURL else {
+            return nil
+        }
+
+        var files = [ImportedFile]()
+        for queryItem in queryItems {
+            guard let path = queryItem.value,
+                  NSString(string: path).isAbsolutePath,
+                  let fileName = path.safeLastPathComponent else {
+                return nil
+            }
+
+            let sourceURL = URL(fileURLWithPath: path).standardizedFileURL
+            guard sourceURL.isSharedFile(in: handoffRootURL) else {
+                return nil
+            }
+
+            let resolvedSourceURL = sourceURL.resolvingSymlinksInPath().standardizedFileURL
+            let expectedSourceURL = sourceURL.pathComponents
+                .suffix(2)
+                .reduce(resolvedHandoffRootURL) { $0.appendingPathComponent($1) }
+                .standardizedFileURL
+            guard resolvedSourceURL == expectedSourceURL,
+                  let values = try? resolvedSourceURL.resourceValues(forKeys: [.isRegularFileKey]),
+                  values.isRegularFile == true else {
+                return nil
+            }
+
+            files.append(ImportedFile(
+                name: fileName,
+                path: resolvedSourceURL,
+                uti: resolvedSourceURL.uti ?? .data
+            ))
+        }
+        return files
+    }
+}
+
+private extension URL {
+    func isSharedFile(in rootURL: URL) -> Bool {
+        let rootComponents = rootURL.pathComponents
+        let sourceComponents = pathComponents
+        guard sourceComponents.count == rootComponents.count + 2,
+              Array(sourceComponents.prefix(rootComponents.count)) == rootComponents else {
+            return false
+        }
+        return UUID(uuidString: sourceComponents[rootComponents.count]) != nil
     }
 }

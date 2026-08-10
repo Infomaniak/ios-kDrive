@@ -110,9 +110,6 @@ open class CoreTargetAssembly: TargetAssembly {
             Factory(type: DeeplinkParsable.self) { _, _ in
                 DeeplinkParser()
             },
-            Factory(type: FileSharingImportable.self) { _, _ in
-                FileSharingImporter()
-            },
             Factory(type: PublicShareApiFetcher.self) { _, _ in
                 PublicShareApiFetcher()
             }
