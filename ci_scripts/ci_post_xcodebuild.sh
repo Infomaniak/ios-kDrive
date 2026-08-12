@@ -14,7 +14,7 @@ eval "$(mise activate bash --shims)"
 if [[ -n $CI_ARCHIVE_PATH ]]; then
     if ! sentry-cli build upload "$CI_ARCHIVE_PATH" \
         --org sentry \
-        --project kdrive-ios \
+        --project "$SENTRY_PROJECT" \
         --build-configuration Release; then
         echo "Sentry build archive upload failed. Continuing the release."
     fi
