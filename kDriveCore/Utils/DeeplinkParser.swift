@@ -42,12 +42,6 @@ public struct DeeplinkParser: DeeplinkParsable {
 
     private let sharedContainerURL: URL?
 
-    public init() {
-        sharedContainerURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: KDriveFileSharing.appGroupIdentifier
-        )
-    }
-
     init(sharedContainerURL: URL?) {
         self.sharedContainerURL = sharedContainerURL
     }
