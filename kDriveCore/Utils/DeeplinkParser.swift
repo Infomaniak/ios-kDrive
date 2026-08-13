@@ -29,11 +29,6 @@ public protocol DeeplinkParsable {
 }
 
 public struct DeeplinkParser: DeeplinkParsable {
-    private static let fileSharingScheme = "kdrive-file-sharing"
-    private static let fileSharingHost = "file"
-    private static let fileSharingPath = "Library/Caches/file-sharing"
-    private static let maximumSharedFileCount = 100
-
     private enum DeeplinkPath: String {
         case store
         case file
@@ -48,7 +43,9 @@ public struct DeeplinkParser: DeeplinkParsable {
     private let sharedContainerURL: URL?
 
     public init() {
-        sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.infomaniak")
+        sharedContainerURL = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: KDriveFileSharing.appGroupIdentifier
+        )
     }
 
     init(sharedContainerURL: URL?) {
@@ -109,7 +106,7 @@ public struct DeeplinkParser: DeeplinkParsable {
             return await handleDeeplink(url: url)
         }
 
-        if components.scheme == Self.fileSharingScheme, components.host == Self.fileSharingHost {
+        if components.scheme == KDriveFileSharing.scheme, components.host == KDriveFileSharing.host {
             guard let files = filesForSharingDeeplink(url) else {
                 Log.sceneDelegate("Failed to import files: Invalid request", level: .error)
                 return false
@@ -143,8 +140,8 @@ public struct DeeplinkParser: DeeplinkParsable {
 
     func filesForSharingDeeplink(_ url: URL) -> [ImportedFile]? {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.scheme == Self.fileSharingScheme,
-              components.host == Self.fileSharingHost,
+              components.scheme == KDriveFileSharing.scheme,
+              components.host == KDriveFileSharing.host,
               components.path.isEmpty,
               components.user == nil,
               components.password == nil,
@@ -152,19 +149,19 @@ public struct DeeplinkParser: DeeplinkParsable {
               components.fragment == nil,
               let queryItems = components.queryItems,
               !queryItems.isEmpty,
-              queryItems.count <= Self.maximumSharedFileCount,
-              queryItems.allSatisfy({ $0.name == "url" && !($0.value?.isEmpty ?? true) }),
+              queryItems.count <= KDriveFileSharing.maximumFileCount,
+              queryItems.allSatisfy({
+                  $0.name == KDriveFileSharing.urlQueryItemName && !($0.value?.isEmpty ?? true)
+              }),
               let sharedContainerURL else {
             return nil
         }
 
-        let handoffRootURL = sharedContainerURL
-            .appendingPathComponent(Self.fileSharingPath, isDirectory: true)
-            .standardizedFileURL
+        let handoffRootURL = KDriveFileSharing.handoffDirectoryURL(in: sharedContainerURL).standardizedFileURL
         let resolvedSharedContainerURL = sharedContainerURL.resolvingSymlinksInPath().standardizedFileURL
         let resolvedHandoffRootURL = handoffRootURL.resolvingSymlinksInPath().standardizedFileURL
-        let expectedHandoffRootURL = resolvedSharedContainerURL
-            .appendingPathComponent(Self.fileSharingPath, isDirectory: true)
+        let expectedHandoffRootURL = KDriveFileSharing
+            .handoffDirectoryURL(in: resolvedSharedContainerURL)
             .standardizedFileURL
         guard resolvedHandoffRootURL == expectedHandoffRootURL else {
             return nil
