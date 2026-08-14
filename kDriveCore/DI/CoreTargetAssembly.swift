@@ -108,7 +108,11 @@ open class CoreTargetAssembly: TargetAssembly {
                 DeeplinkService()
             },
             Factory(type: DeeplinkParsable.self) { _, _ in
-                DeeplinkParser()
+                DeeplinkParser(
+                    sharedContainerURL: FileManager.default.containerURL(
+                        forSecurityApplicationGroupIdentifier: KDriveFileSharingConstants.appGroupIdentifier
+                    )
+                )
             },
             Factory(type: PublicShareApiFetcher.self) { _, _ in
                 PublicShareApiFetcher()
