@@ -31,7 +31,7 @@ final class UTFileSharingDeeplink: XCTestCase {
         try super.setUpWithError()
         testRootURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         sharedContainerURL = testRootURL.appendingPathComponent("shared", isDirectory: true)
-        handoffRootURL = KDriveFileSharing.handoffDirectoryURL(in: sharedContainerURL)
+        handoffRootURL = KDriveFileSharingConstants.handoffDirectoryURL(in: sharedContainerURL)
         try fileManager.createDirectory(at: handoffRootURL, withIntermediateDirectories: true)
     }
 
@@ -108,13 +108,13 @@ final class UTFileSharingDeeplink: XCTestCase {
 
     private func makeURL(
         for sourceURL: URL,
-        scheme: String = KDriveFileSharing.scheme,
-        host: String = KDriveFileSharing.host
+        scheme: String = KDriveFileSharingConstants.scheme,
+        host: String = KDriveFileSharingConstants.host
     ) throws -> URL {
         var components = URLComponents()
         components.scheme = scheme
         components.host = host
-        components.queryItems = [URLQueryItem(name: KDriveFileSharing.urlQueryItemName, value: sourceURL.path)]
+        components.queryItems = [URLQueryItem(name: KDriveFileSharingConstants.urlQueryItemName, value: sourceURL.path)]
         return try XCTUnwrap(components.url)
     }
 }

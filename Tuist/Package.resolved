@@ -1,5 +1,5 @@
 {
-  "originHash" : "3e2210947538647688beeb1541a86665d43e6ad647625f514bbee9ba9ef3ca64",
+  "originHash" : "7048349745621ad4c418040ff7c14724e324bfc04f8177c50576b2b87d9b9b54",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -69,8 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "branch" : "feat/shared-writing-hardenning",
-        "revision" : "9a1c55575a605eba2773efe333d4e8597455cf8b"
+        "revision" : "e667ed34941d4e06f0107d9633e2cc9438685fef",
+        "version" : "19.1.4"
       }
     },
     {

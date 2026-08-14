@@ -110,7 +110,7 @@ open class CoreTargetAssembly: TargetAssembly {
             Factory(type: DeeplinkParsable.self) { _, _ in
                 DeeplinkParser(
                     sharedContainerURL: FileManager.default.containerURL(
-                        forSecurityApplicationGroupIdentifier: KDriveFileSharing.appGroupIdentifier
+                        forSecurityApplicationGroupIdentifier: KDriveFileSharingConstants.appGroupIdentifier
                     )
                 )
             },

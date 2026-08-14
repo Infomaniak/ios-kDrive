@@ -100,7 +100,7 @@ public struct DeeplinkParser: DeeplinkParsable {
             return await handleDeeplink(url: url)
         }
 
-        if components.scheme == KDriveFileSharing.scheme, components.host == KDriveFileSharing.host {
+        if components.scheme == KDriveFileSharingConstants.scheme, components.host == KDriveFileSharingConstants.host {
             guard let files = filesForSharingDeeplink(url) else {
                 Log.sceneDelegate("Failed to import files: Invalid request", level: .error)
                 return false
@@ -134,8 +134,8 @@ public struct DeeplinkParser: DeeplinkParsable {
 
     func filesForSharingDeeplink(_ url: URL) -> [ImportedFile]? {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.scheme == KDriveFileSharing.scheme,
-              components.host == KDriveFileSharing.host,
+              components.scheme == KDriveFileSharingConstants.scheme,
+              components.host == KDriveFileSharingConstants.host,
               components.path.isEmpty,
               components.user == nil,
               components.password == nil,
@@ -143,18 +143,18 @@ public struct DeeplinkParser: DeeplinkParsable {
               components.fragment == nil,
               let queryItems = components.queryItems,
               !queryItems.isEmpty,
-              queryItems.count <= KDriveFileSharing.maximumFileCount,
+              queryItems.count <= KDriveFileSharingConstants.maximumFileCount,
               queryItems.allSatisfy({
-                  $0.name == KDriveFileSharing.urlQueryItemName && !($0.value?.isEmpty ?? true)
+                  $0.name == KDriveFileSharingConstants.urlQueryItemName && !($0.value?.isEmpty ?? true)
               }),
               let sharedContainerURL else {
             return nil
         }
 
-        let handoffRootURL = KDriveFileSharing.handoffDirectoryURL(in: sharedContainerURL).standardizedFileURL
+        let handoffRootURL = KDriveFileSharingConstants.handoffDirectoryURL(in: sharedContainerURL).standardizedFileURL
         let resolvedSharedContainerURL = sharedContainerURL.resolvingSymlinksInPath().standardizedFileURL
         let resolvedHandoffRootURL = handoffRootURL.resolvingSymlinksInPath().standardizedFileURL
-        let expectedHandoffRootURL = KDriveFileSharing
+        let expectedHandoffRootURL = KDriveFileSharingConstants
             .handoffDirectoryURL(in: resolvedSharedContainerURL)
             .standardizedFileURL
         guard resolvedHandoffRootURL == expectedHandoffRootURL else {
