@@ -79,12 +79,25 @@ public protocol AccountManageable: AnyObject {
     func switchToNextAvailableAccount()
     func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int)
     func addAccount(token: ApiToken) async throws
-    func removeAccountFor(userId: Int)
-    func removeTokenAndAccountFor(userId: Int)
+    func removeAccountFor(userId: Int, isInvoluntary: Bool)
+    func removeTokenAndAccountFor(userId: Int, isInvoluntary: Bool)
     func removeCachedProperties()
     func account(for token: ApiToken) -> ApiToken?
     func account(for userId: Int) -> ApiToken?
-    func logoutCurrentAccountAndSwitchToNextIfPossible()
+    func logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: Bool)
+}
+
+public extension AccountManageable {
+    func removeAccountFor(userId: Int) {
+        removeAccountFor(userId: userId, isInvoluntary: false)
+    }
+    func removeTokenAndAccountFor(userId: Int) {
+        removeTokenAndAccountFor(userId: userId, isInvoluntary: false)
+    }
+    
+    func logoutCurrentAccountAndSwitchToNextIfPossible() {
+        logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: false)
+    }
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
@@ -407,7 +420,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             Logger.general
                 .info("Failed token matches current account \(tokenUserId), logging out and switching account if possible")
             notificationHelper.sendDisconnectedNotification()
-            logoutCurrentAccountAndSwitchToNextIfPossible()
+            logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: true)
         } else {
             Logger.general
                 .info("Failed token belongs to non-current account \(tokenUserId), removing token and local account data")
@@ -610,7 +623,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         tokenStore.addToken(newToken: token, associatedDeviceId: deviceId)
     }
 
-    public func removeAccountFor(userId: Int) {
+    public func removeAccountFor(userId: Int, isInvoluntary: Bool) {
         UserDefaults.shared.lastSelectedTab = nil
 
         if currentAccount?.userId == userId {
@@ -618,7 +631,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             currentDriveId = 0
             currentUserId = 0
         }
-        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == userId {
+        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == userId && !isInvoluntary {
             photoLibrarySync.disableSync()
         }
         driveInfosManager.deleteFileProviderDomains(for: userId)
@@ -628,9 +641,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         apiFetchers.removeAll()
     }
 
-    public func removeTokenAndAccountFor(userId: Int) {
+    public func removeTokenAndAccountFor(userId: Int, isInvoluntary: Bool) {
         let removedToken = tokenStore.removeTokenFor(userId: userId)
-        removeAccountFor(userId: userId)
+        removeAccountFor(userId: userId, isInvoluntary: isInvoluntary)
 
         Task {
             await notificationService.removeStoredTokenFor(userId: userId)
@@ -652,13 +665,13 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return tokenStore.tokenFor(userId: userId)?.apiToken
     }
 
-    public func logoutCurrentAccountAndSwitchToNextIfPossible() {
+    public func logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: Bool) {
         Task { @MainActor in
             deeplinkService.clearLastDeeplink()
 
             if let currentAccount {
                 deviceManager.forgetLocalDeviceHash(forUserId: currentAccount.userId)
-                removeTokenAndAccountFor(userId: currentAccount.userId)
+                removeTokenAndAccountFor(userId: currentAccount.userId, isInvoluntary: isInvoluntary)
             }
 
             if let nextAccount = accounts.first {
