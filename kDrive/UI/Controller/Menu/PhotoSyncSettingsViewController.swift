@@ -335,10 +335,19 @@ extension PhotoSyncSettingsViewController {
                 cell.configure(with: driveFileManager?.drive)
                 return cell
             case .folderSelection:
-                let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
-                cell.configure(with: selectedDirectory, drive: driveFileManager!.drive)
-
-                return cell
+                if let drive = driveFileManager?.drive {
+                    let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
+                    cell.configure(with: selectedDirectory, drive: drive)
+                    return cell
+                } else {
+                    let cell = tableView.dequeueReusableCell(type: LocationTableViewCell.self, for: indexPath)
+                    cell.titleLabel.text = KDriveResourcesStrings.Localizable.selectFolderTitle
+                    cell.titleLabel.textColor = .secondaryLabel
+                    cell.logoImage.tintColor = .secondaryLabel
+                    cell.isUserInteractionEnabled = false
+                    cell.backgroundColor = .darkGray
+                    return cell
+                }
             }
         case .syncSettings:
             switch settingsRows[indexPath.row] {

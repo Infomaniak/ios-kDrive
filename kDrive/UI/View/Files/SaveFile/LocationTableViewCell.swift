@@ -36,15 +36,20 @@ class LocationTableViewCell: InsetTableViewCell {
         }
     }
 
-    func configure(with folder: File?, drive: Drive) {
+    func configure(with folder: File?, drive: Drive?) {
         if let folder {
-            if folder.isRoot {
-                configure(with: drive)
-                titleLabel.text = KDriveResourcesStrings.Localizable.allRootName(drive.name)
+            if let drive {
+                if folder.isRoot {
+                    configure(with: drive)
+                    titleLabel.text = KDriveResourcesStrings.Localizable.allRootName(drive.name)
+                } else {
+                    titleLabel.text = folder.formattedLocalizedName
+                    logoImage.image = folder.icon
+                    logoImage.tintColor = folder.tintColor
+                }
             } else {
-                titleLabel.text = folder.formattedLocalizedName
-                logoImage.image = folder.icon
-                logoImage.tintColor = folder.tintColor
+                titleLabel.text = KDriveResourcesStrings.Localizable.selectDriveTitle
+                logoImage.image = KDriveResourcesAsset.drive.image
             }
         } else {
             titleLabel.text = KDriveResourcesStrings.Localizable.selectFolderTitle

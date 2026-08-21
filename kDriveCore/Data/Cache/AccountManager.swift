@@ -91,10 +91,11 @@ public extension AccountManageable {
     func removeAccountFor(userId: Int) {
         removeAccountFor(userId: userId, isInvoluntary: false)
     }
+
     func removeTokenAndAccountFor(userId: Int) {
         removeTokenAndAccountFor(userId: userId, isInvoluntary: false)
     }
-    
+
     func logoutCurrentAccountAndSwitchToNextIfPossible() {
         logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: false)
     }
@@ -631,9 +632,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             currentDriveId = 0
             currentUserId = 0
         }
-        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == userId && !isInvoluntary {
-            photoLibrarySync.disableSync()
+
+        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == userId {
+            photoLibrarySync.disableSync(withSettings: !isInvoluntary, for: userId)
         }
+
         driveInfosManager.deleteFileProviderDomains(for: userId)
         DriveFileManager.deleteUserDriveFiles(userId: userId)
         driveInfosManager.removeDrivesFor(userId: userId)
@@ -676,7 +679,9 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
             if let nextAccount = accounts.first {
                 switchAccount(newAccount: nextAccount)
-                await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                Task {
+                    await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                }
             } else {
                 SentrySDK.setUser(nil)
             }
