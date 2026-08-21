@@ -274,6 +274,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 y: -navBarHeight
             )
             statusBarView.transform = hideStatusBar
+
+            navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
         } else {
             statusBarView.isHidden = true
         }
@@ -282,8 +284,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         navigationItem.compactAppearance = navbarAppearance
         navigationItem.scrollEdgeAppearance = navbarAppearance
         navigationItem.title = nil
-
-        navigationController?.navigationBar.transform = CGAffineTransform(translationX: 0, y: UIConstants.Padding.medium)
 
         if initialLoading {
             matomo.trackPreview(file: currentFile)
