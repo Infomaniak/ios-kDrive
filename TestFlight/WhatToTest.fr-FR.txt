@@ -1,5 +1,5 @@
-- Améliorations relatives à kDrive dans l'app Fichiers
 - De nouveaux panneaux flottants inédits dans toute l'application
 - Refonte de l'interface des alertes
+- Améliorations relatives à kDrive dans l'app Fichiers
 - Durcissement du partage de fichiers entre Mail et Drive
 - Améliorations de la stabilité et corrections de bugs
