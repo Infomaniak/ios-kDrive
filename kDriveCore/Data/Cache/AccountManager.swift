@@ -634,7 +634,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         }
 
         if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == userId {
-            photoLibrarySync.disableSync(withSettings: !isInvoluntary, for: userId)
+            photoLibrarySync.disableSync(withSettings: !isInvoluntary)
         }
 
         driveInfosManager.deleteFileProviderDomains(for: userId)

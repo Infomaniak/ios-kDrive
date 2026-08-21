@@ -22,12 +22,12 @@ import RealmSwift
 
 public protocol PhotoLibrarySyncable {
     @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings)
-    func disableSync(withSettings: Bool, for userId: Int?)
+    func disableSync(withSettings: Bool)
 }
 
 public extension PhotoLibrarySyncable {
     func disableSync() {
-        disableSync(withSettings: true, for: nil)
+        disableSync(withSettings: true)
     }
 }
 
@@ -116,7 +116,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         }
     }
 
-    public func disableSync(withSettings: Bool, for userId: Int? = nil) {
+    public func disableSync(withSettings: Bool) {
         Task {
             @InjectService var photoLibraryScan: PhotoLibraryScanable
             @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
@@ -130,10 +130,6 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
             photoUploadQueue.cancelAllOperations()
 
             do {
-                if !withSettings {
-                    await forgetUploadingPhotos(userId: userId)
-                }
-
                 try await uploadService.cancelAnyPhotoSync()
                 await forgetUploadedPhotos()
             } catch {
@@ -148,26 +144,6 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         let uploadedObjectsIdsToDelete = uploadDataSource
             .getUploadedFilesIDs(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
         let chunks = uploadedObjectsIdsToDelete.chunks(ofCount: 50)
-
-        try? chunks.forEach { chunk in
-            try self.uploadsDatabase.writeTransaction { writableRealm in
-                for uploadFileId in chunk {
-                    guard let objectToRemove = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
-                        continue
-                    }
-                    writableRealm.delete(objectToRemove)
-                }
-            }
-        }
-    }
-
-    public func forgetUploadingPhotos(userId: Int?) async {
-        guard let userId else { return }
-        @InjectService var uploadDataSource: UploadServiceDataSourceable
-
-        let uploadingObjectsIdsToDelete = uploadDataSource
-            .getAllUploadingFiles(userId: userId)
-        let chunks = uploadingObjectsIdsToDelete.chunks(ofCount: 50)
 
         try? chunks.forEach { chunk in
             try self.uploadsDatabase.writeTransaction { writableRealm in
