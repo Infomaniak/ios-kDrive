@@ -537,6 +537,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 selectViewController.setupContent()
             }
 
+            guard !selectViewController.actions.isEmpty else { return }
+
             present(selectViewController, animated: true)
         }
         #endif

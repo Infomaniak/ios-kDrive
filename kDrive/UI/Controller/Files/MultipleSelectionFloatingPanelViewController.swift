@@ -131,8 +131,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     private var currentActions: [FloatingPanelAction] {
-        if driveFileManager.isPublicShare {
-            return FloatingPanelAction.multipleSelectionPublicShareActions
+        if case .publicShare(_, let metadata) = driveFileManager.context {
+            return metadata.capabilities.canDownload ? FloatingPanelAction.multipleSelectionPublicShareActions : []
         } else if sharedWithMe {
             return FloatingPanelAction.multipleSelectionSharedWithMeActions
         } else if currentDirectory.id == DriveFileManager.offlineRoot.id {
