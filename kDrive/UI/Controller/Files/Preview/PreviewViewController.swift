@@ -413,9 +413,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
             collectionView.isPagingEnabled = wasPagingEnabled
         }
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            updateSheetContainerFrame()
-        }
+
+        updateSheetContainerFrameIfNeeded()
     }
 
     deinit {
@@ -587,12 +586,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         hideFloatingPanel(fullScreenPreview)
     }
 
-    private func updateSheetContainerFrame() {
+    private func updateSheetContainerFrameIfNeeded() {
         guard !isUpdatingSheetContainer,
               let sheet = fileInformationsViewController?
               .presentationController as? UISheetPresentationController,
               let containerView = sheet.containerView,
-              let containerSuperview = containerView.superview else {
+              let containerSuperview = containerView.superview,
+              !traitCollection.horizontalSizeClass.iskDriveCompactSize else {
             return
         }
 
@@ -655,7 +655,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         present(fileInformationsViewController, animated: animated)
 
         DispatchQueue.main.async { [weak self] in
-            self?.updateSheetContainerFrame()
+            self?.updateSheetContainerFrameIfNeeded()
         }
     }
 
