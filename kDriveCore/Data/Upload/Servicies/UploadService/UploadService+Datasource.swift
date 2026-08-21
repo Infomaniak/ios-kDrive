@@ -41,8 +41,6 @@ public protocol UploadServiceDataSourceable {
 
     func getUploadedFilesIDs(optionalPredicate: NSPredicate?) -> [String]
 
-    func getAllUploadingFiles(userId: Int) -> [String]
-
     @discardableResult
     func saveToRealm(_ uploadFile: UploadFile,
                      itemIdentifier: NSFileProviderItemIdentifier?,
@@ -118,17 +116,6 @@ extension UploadService: UploadServiceDataSourceable {
             lazyCollection
                 .filter("uploadDate == nil")
                 .filter("rawType = %@", UploadFileType.phAsset.rawValue)
-        }.map { $0.id }
-    }
-
-    public func getAllUploadingFiles(userId: Int) -> [String] {
-        let ownedByFileProvider = appContextService.context == .fileProviderExtension
-        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
-            lazyCollection
-                .filter("uploadDate == nil AND userId == %d AND rawType == %@ AND ownedByFileProvider == %@",
-                        userId,
-                        UploadFileType.phAsset.rawValue,
-                        NSNumber(value: ownedByFileProvider))
         }.map { $0.id }
     }
 
