@@ -125,6 +125,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var networkObserver: ObservationToken?
     private var indexBeforeBoundsChange: IndexPath?
     private var boundsObserver: NSKeyValueObservation?
+    private var isUpdatingSheetContainer = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -412,6 +413,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
             collectionView.isPagingEnabled = wasPagingEnabled
         }
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            updateSheetContainerFrame()
+        }
     }
 
     deinit {
@@ -583,6 +587,35 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         hideFloatingPanel(fullScreenPreview)
     }
 
+    private func updateSheetContainerFrame() {
+        guard !isUpdatingSheetContainer,
+              let sheet = fileInformationsViewController?
+              .presentationController as? UISheetPresentationController,
+              let containerView = sheet.containerView,
+              let containerSuperview = containerView.superview else {
+            return
+        }
+
+        let targetFrame = collectionView.convert(
+            collectionView.bounds,
+            to: containerSuperview
+        )
+
+        guard !targetFrame.isEmpty,
+              containerView.frame != targetFrame else {
+            return
+        }
+
+        isUpdatingSheetContainer = true
+        defer { isUpdatingSheetContainer = false }
+
+        UIView.performWithoutAnimation {
+            containerView.frame = targetFrame
+            containerView.setNeedsLayout()
+            containerView.layoutIfNeeded()
+        }
+    }
+
     func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false) {
         if !isViewDisappearing {
             navigationController?.setNavigationBarHidden(hide, animated: true)
@@ -598,11 +631,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func presentFileActionsPanel(animated: Bool) {
-        guard viewIfLoaded?.window != nil, presentedViewController == nil else {
+        guard viewIfLoaded?.window != nil, presentedViewController == nil,
+              fileInformationsViewController.presentingViewController == nil else {
             return
         }
 
-        guard fileInformationsViewController.presentingViewController == nil else { return }
+        view.layoutIfNeeded()
 
         let smallDetent = UISheetPresentationController.Detent.custom(
             identifier: .init("smallDetent")
@@ -611,7 +645,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
         if let sheet = fileInformationsViewController.sheetPresentationController {
             let canExpand = presentationOrigin != .activities
-            sheet.sourceView = collectionView
             sheet.detents = canExpand ? [smallDetent, .medium(), .large()] : [.medium()]
             sheet.largestUndimmedDetentIdentifier = canExpand ? .large : .medium
             sheet.prefersGrabberVisible = canExpand
@@ -620,6 +653,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         present(fileInformationsViewController, animated: animated)
+
+        DispatchQueue.main.async { [weak self] in
+            self?.updateSheetContainerFrame()
+        }
     }
 
     private func dismissFileActionsPanel(animated: Bool, completion: (() -> Void)? = nil) {
