@@ -47,9 +47,6 @@ class LocationTableViewCell: InsetTableViewCell {
                     logoImage.image = folder.icon
                     logoImage.tintColor = folder.tintColor
                 }
-            } else {
-                titleLabel.text = KDriveResourcesStrings.Localizable.selectDriveTitle
-                logoImage.image = KDriveResourcesAsset.drive.image
             }
         } else {
             titleLabel.text = KDriveResourcesStrings.Localizable.selectFolderTitle
