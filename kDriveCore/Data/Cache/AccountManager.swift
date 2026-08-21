@@ -425,7 +425,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         } else {
             Logger.general
                 .info("Failed token belongs to non-current account \(tokenUserId), removing token and local account data")
-            removeTokenAndAccountFor(userId: tokenUserId)
+            removeTokenAndAccountFor(userId: tokenUserId, isInvoluntary: true)
         }
     }
 
