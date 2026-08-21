@@ -60,6 +60,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         return Section.allCases
     }
 
+    var onPresentationWillAppear: (() -> Void)?
     var quickActions = FloatingPanelAction.quickActions
     var actions = FloatingPanelAction.listActions
     lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
@@ -86,6 +87,12 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        onPresentationWillAppear?()
     }
 
     override func viewDidLoad() {

@@ -158,6 +158,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         fileInformationsViewController.presentationOrigin = presentationOrigin
         fileInformationsViewController.modalPresentationStyle = .pageSheet
         fileInformationsViewController.isModalInPresentation = true
+        fileInformationsViewController.onPresentationWillAppear = { [weak self] in
+            UIView.performWithoutAnimation {
+                self?.updateSheetContainerFrameIfNeeded()
+            }
+        }
 
         pdfPageLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)
         pdfPageLabel.textColor = .white
@@ -652,10 +657,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         }
 
-        present(fileInformationsViewController, animated: animated)
-
-        DispatchQueue.main.async { [weak self] in
-            self?.updateSheetContainerFrameIfNeeded()
+        present(fileInformationsViewController, animated: animated) { [weak self] in
+            DispatchQueue.main.async { [weak self] in
+                self?.updateSheetContainerFrameIfNeeded()
+            }
         }
     }
 
