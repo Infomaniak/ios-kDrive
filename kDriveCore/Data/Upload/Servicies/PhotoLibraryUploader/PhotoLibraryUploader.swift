@@ -36,6 +36,7 @@ public final class PhotoLibraryUploader: PhotoLibraryUploadable {
     @LazyInjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDatasource: UploadServiceDataSourceable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10
