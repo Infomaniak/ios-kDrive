@@ -77,6 +77,7 @@ class ShareAndRightsViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setInfomaniakAppearanceNavigationBar()
         (tabBarController as? PlusButtonObserver)?.hideButtonAdd(true)
     }
 
