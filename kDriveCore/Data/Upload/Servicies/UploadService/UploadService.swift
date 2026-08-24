@@ -513,6 +513,10 @@ extension UploadService: UploadServiceable {
             var cursor: FileCursor?
 
             repeat {
+                if uploadFile.parentDirectoryId == 1 {
+                    SentryDebug.capture(message: "Attempts to upload files to the root directory")
+                }
+
                 let response = try await driveFileManager.apiFetcher.files(
                     in: parentProxyFile,
                     advancedListingCursor: cursor,

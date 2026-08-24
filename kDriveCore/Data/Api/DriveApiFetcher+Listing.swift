@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import Sentry
 
 public extension DriveApiFetcher {
     func files(in directory: ProxyFile,
@@ -42,6 +43,10 @@ public extension DriveApiFetcher {
     func files(in directory: ProxyFile,
                advancedListingCursor: FileCursor?,
                sortType: SortType = .nameAZ) async throws -> ValidServerResponse<ListingResult> {
+        if directory.id == 1 {
+            SentryDebug.capture(message: "fileListing called with root file (id=1), caller should use rootFiles instead")
+        }
+
         if let advancedListingCursor {
             return try await files(in: directory, advancedListingCursor: advancedListingCursor, sortType: sortType)
         } else {
