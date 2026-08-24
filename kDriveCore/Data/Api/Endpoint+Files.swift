@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import OSLog
 import RealmSwift
 
 // MARK: - Files
@@ -303,6 +304,7 @@ public extension Endpoint {
 
     static func fileListing(file: AbstractFile) -> Endpoint {
         guard file.id != 1 else {
+            Logger.general.warning("fileListing called with root file (id=1), caller should use rootFiles instead")
             return .rootFiles(drive: ProxyDrive(id: file.driveId))
         }
 
