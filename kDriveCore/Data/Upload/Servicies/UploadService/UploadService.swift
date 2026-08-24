@@ -513,20 +513,39 @@ extension UploadService: UploadServiceable {
             var cursor: FileCursor?
 
             repeat {
-                if uploadFile.parentDirectoryId == 1 {
+                let files: [File]
+                let hasMore: Bool
+                let nextCursor: FileCursor?
+
+                if parentProxyFile.isRoot {
                     SentryDebug.capture(message: "Attempts to upload files to the root directory")
+
+                    let response = try await driveFileManager.apiFetcher.rootFiles(
+                        drive: ProxyDrive(id: uploadFile.driveId),
+                        cursor: cursor,
+                        sortType: .newer
+                    )
+
+                    files = response.validApiResponse.data
+                    hasMore = response.validApiResponse.hasMore
+                    nextCursor = response.validApiResponse.cursor
+                } else {
+                    let response = try await driveFileManager.apiFetcher.files(
+                        in: parentProxyFile,
+                        advancedListingCursor: cursor,
+                        sortType: .newer
+                    )
+
+                    files = response.validApiResponse.data.files
+                    hasMore = response.validApiResponse.hasMore
+                    nextCursor = response.validApiResponse.cursor
                 }
 
-                let response = try await driveFileManager.apiFetcher.files(
-                    in: parentProxyFile,
-                    advancedListingCursor: cursor,
-                    sortType: .newer
-                )
-                if response.validApiResponse.data.files.contains(where: { $0.name == uploadFile.name }) {
+                if files.contains(where: { $0.name == uploadFile.name }) {
                     return true
                 }
 
-                cursor = response.validApiResponse.hasMore ? response.validApiResponse.cursor : nil
+                cursor = hasMore ? nextCursor : nil
             } while cursor != nil
 
             return false
