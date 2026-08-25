@@ -137,9 +137,15 @@ class AppUITest: XCTestCase {
         folderCell.tap()
 
         let folderTextField = tablesQuery.textFields[KDriveResourcesStrings.Localizable.hintInputDirName]
+        XCTAssertTrue(folderTextField.waitForExistence(timeout: 5), "Folder name text field should be displayed")
+
         folderTextField.tap()
-        folderTextField.tap()
+        if !app.keyboards.firstMatch.exists {
+            folderTextField.tap()
+        }
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 2), "Keyboard should be visible before typing")
         folderTextField.typeText(name)
+
         tablesQuery.buttons[KDriveResourcesStrings.Localizable.buttonCreateFolder].tap()
         openTab(.files)
 
