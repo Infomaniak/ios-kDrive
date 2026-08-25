@@ -401,9 +401,6 @@ class AppUITest: XCTestCase {
         tablesQuery.buttons[KDriveResourcesStrings.Localizable.fileDetailsInfosTitle].tap()
         app.swipeUp()
         tablesQuery.buttons[KDriveResourcesStrings.Localizable.allPathTitle].tap()
-        navigationBars.buttons.element(boundBy: 0).tap()
-        navigationBars.buttons.element(boundBy: 0).tap()
-        navigationBars.buttons.element(boundBy: 0).tap()
     }
 
     func testCreateSharedDirectory() {
