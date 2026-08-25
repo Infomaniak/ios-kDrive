@@ -700,7 +700,8 @@ class AppUITest: XCTestCase {
 
         app.staticTexts["Test"].firstMatch.tap()
 
-        let selectFolderButton = app.buttons.matching(identifier: KDriveCoreStrings.Localizable.buttonSelectTheFolder).firstMatch
+        let selectFolderButton = app.buttons.matching(identifier: KDriveCoreStrings.Localizable.buttonSelectTheFolder)
+            .element(boundBy: 1)
         XCTAssertTrue(selectFolderButton.waitForExistence(timeout: 8), "Select folder button should be displayed")
 
         let hittablePredicateSelectFolderButton = NSPredicate(format: "isHittable == true")
