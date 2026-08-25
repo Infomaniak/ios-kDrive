@@ -491,9 +491,7 @@ class AppUITest: XCTestCase {
         XCTAssertTrue(switchOffline.waitForExistence(timeout: 3), "Switch should be displayed")
         switchOffline.tap()
         wait(delay: 2)
-        app.swipeDown()
-        wait(delay: 1)
-        app.tap()
+        closeFileMenu()
 
         // Go to offline files
         openTab(.files)
