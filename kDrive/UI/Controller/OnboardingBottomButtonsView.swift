@@ -44,7 +44,7 @@ struct OnboardingBottomButtonsView: View {
             excludingUserIds: accountManager.accountIds,
             shouldDisplayInterAppLogin: shouldDisplayInterAppLogin
         ) {
-            appNavigable.showLogin(delegate: loginDelegateHandler)
+            loginDelegateHandler.showLogin()
         } onLoginWithAccountsPressed: { accounts in
             loginDelegateHandler.login(with: accounts)
         } onCreateAccountPressed: {

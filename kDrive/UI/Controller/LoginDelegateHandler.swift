@@ -81,6 +81,11 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
         }
     }
 
+    @MainActor public func showLogin() {
+        setLoading(true)
+        router.showLogin(delegate: self)
+    }
+
     private func deviceAttestationAndLogin(with accounts: [ConnectedAccount]) async {
         let previousAccount = accountManager.currentAccount
 
