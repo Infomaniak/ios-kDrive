@@ -417,6 +417,7 @@ class AppUITest: XCTestCase {
         folderCell.tap()
         folderCell.tap()
         let folderTextField = tablesQuery.textFields[KDriveResourcesStrings.Localizable.hintInputDirName]
+        XCTAssertTrue(folderTextField.waitForExistence(timeout: 5), "Folder name field should be displayed")
         folderTextField.tap()
         folderTextField.typeText(root)
         app.buttons[KDriveResourcesStrings.Localizable.buttonCreateFolder].tap()
