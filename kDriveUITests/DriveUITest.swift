@@ -462,7 +462,7 @@ class AppUITest: XCTestCase {
         app.buttons[KDriveResourcesStrings.Localizable.buttonCreate].tap()
 
         // Leave office edition page
-        let officeBackButton = app.images.element(boundBy: 5)
+        let officeBackButton = app.images.element(boundBy: 2)
         XCTAssertTrue(officeBackButton.waitForExistence(timeout: 10), "back button should be displayed")
         sleep(6)
         officeBackButton.tap()
