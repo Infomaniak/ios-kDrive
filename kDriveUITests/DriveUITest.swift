@@ -218,7 +218,7 @@ class AppUITest: XCTestCase {
 
     func closeFileMenu() {
         app.swipeDown()
-        app.tap()
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1)).tap()
     }
 
     func enterInDirectory(named name: String) {
@@ -973,11 +973,11 @@ class AppUITest: XCTestCase {
     }
 
     func login() {
-        let firstNextButton = app.buttons[KDriveResourcesStrings.Localizable.buttonNext].firstMatch
+        let firstNextButton = app.buttons[KDriveResourcesStrings.Localizable.buttonPlayerNext].firstMatch
         XCTAssertTrue(firstNextButton.waitForExistence(timeout: defaultTimeOut), "First next button should be displayed")
         firstNextButton.tap()
 
-        let secondNextButton = app.buttons[KDriveResourcesStrings.Localizable.buttonNext].firstMatch
+        let secondNextButton = app.buttons[KDriveResourcesStrings.Localizable.buttonPlayerNext].firstMatch
         XCTAssertTrue(secondNextButton.waitForExistence(timeout: defaultTimeOut), "Second next button should be displayed")
         secondNextButton.tap()
 
