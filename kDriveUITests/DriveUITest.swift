@@ -960,7 +960,10 @@ class AppUITest: XCTestCase {
             )
         }
 
-        app.swipeUp()
+        let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.95))
+        let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15))
+        start.press(forDuration: 0.05, thenDragTo: end)
+
         app.cells[KDriveCoreStrings.Localizable.fileDetailsInfosTitle].firstMatch.tap()
 
         XCTAssertTrue(app.staticTexts[fileName].waitForExistence(timeout: 5), "File should be displayed")
