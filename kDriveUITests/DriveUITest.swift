@@ -692,9 +692,6 @@ class AppUITest: XCTestCase {
         app
             .textFields[KDriveResourcesStrings.Localizable.hintInputDirName]
             .firstMatch.typeText("Test")
-        app
-            .buttons[KDriveCoreStrings.Localizable.buttonCreateFolder]
-            .firstMatch.tap()
 
         app.windows
             .firstMatch
@@ -706,13 +703,32 @@ class AppUITest: XCTestCase {
         createFolderButton.tap()
 
         app.staticTexts["Test"].firstMatch.tap()
-        app
-            .buttons[KDriveCoreStrings.Localizable.buttonSelectTheFolder]
-            .firstMatch.tap()
 
-        let rename = app.cells/*@START_MENU_TOKEN@*/ .containing(.image, identifier: "edit")
-            .firstMatch
+        let selectFolderButton = app.buttons.matching(identifier: KDriveCoreStrings.Localizable.buttonSelectTheFolder).firstMatch
+        XCTAssertTrue(selectFolderButton.waitForExistence(timeout: 8), "Select folder button should be displayed")
+
+        let hittablePredicateSelectFolderButton = NSPredicate(format: "isHittable == true")
+        let hittableExpectationSelectFolderButton = XCTNSPredicateExpectation(
+            predicate: hittablePredicateSelectFolderButton,
+            object: selectFolderButton
+        )
+        let hittableResultSelectFolderButton = XCTWaiter().wait(for: [hittableExpectationSelectFolderButton], timeout: 5)
+
+        XCTAssertEqual(hittableResultSelectFolderButton, .completed, "Select folder button should become tappable")
+
+        selectFolderButton.tap()
+
+        let rename = cellsQuery.staticTexts[KDriveResourcesStrings.Localizable.buttonRename]
         XCTAssertTrue(rename.waitForExistence(timeout: 4), "Rename text should be displayed")
+
+        let hittablePredicateRename = NSPredicate(format: "isHittable == true")
+        let hittableExpectationRename = XCTNSPredicateExpectation(
+            predicate: hittablePredicateRename,
+            object: rename
+        )
+        let hittableResultRename = XCTWaiter().wait(for: [hittableExpectationRename], timeout: 5)
+
+        XCTAssertEqual(hittableResultRename, .completed, "Rename button should become tappable")
 
         rename.tap()
         app.textFields[KDriveResourcesStrings.Localizable.hintInputFileName].firstMatch.tap()
