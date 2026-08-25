@@ -21,10 +21,9 @@ import Foundation
 import InfomaniakDI
 import RealmSwift
 
-final class DynamicIslandManager: ObservableObject {
+final class DynamicIslandUploadProgressTracker: ObservableObject {
     @Published var fractionCompleted: Double = 0
 
-    @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     private var realmObservationToken: NotificationToken?
@@ -114,8 +113,8 @@ final class DynamicIslandManager: ObservableObject {
     private func uploadingFilesObserverOption(global: Bool, photo: Bool) -> NSPredicate? {
         switch (global, photo) {
         case (true, true): return nil
-        case (true, false): return DynamicIslandManager.globalAssetPredicate
-        case (false, true): return DynamicIslandManager.photoAssetPredicate
+        case (true, false): return Self.globalAssetPredicate
+        case (false, true): return Self.photoAssetPredicate
         default: return nil
         }
     }
@@ -133,9 +132,17 @@ final class DynamicIslandManager: ObservableObject {
         overallProgress.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
     }
 
-    func reset() {
-        totalUploadCount = 0
-        progressUploading = 0
-        fractionCompleted = 0
+    func progressSnapshot() async -> (totalUploadCount: Int, progressUploading: Int) {
+        await MainActor.run {
+            (totalUploadCount: totalUploadCount, progressUploading: progressUploading)
+        }
+    }
+
+    func reset() async {
+        await MainActor.run {
+            totalUploadCount = 0
+            progressUploading = 0
+            fractionCompleted = 0
+        }
     }
 }
