@@ -218,15 +218,21 @@ extension UploadService: UploadServiceable {
                             return
                         }
 
-                        if exists {
+                        switch exists {
+                        case .found:
                             Log.uploadQueue("retry ufid:\(uploadFileId) file exists on server, marking as uploaded")
                             file.uploadDate = Date()
                             file.progress = nil
                             file.error = nil
                             file.cleanSourceFileIfNeeded()
-                        } else {
+
+                        case .notFound:
                             file.clearErrorsForRetry()
                             fileToRetry = file.freeze()
+
+                        case .unknown:
+                            Log.uploadQueue("retry ufid:\(uploadFileId) unknown error, marking as failed")
+                            file.error = .fileExistsUnknownError
                         }
                     }
 
