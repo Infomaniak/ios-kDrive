@@ -161,6 +161,15 @@ public extension Endpoint {
         return .fileInfo(directory).appending(path: "/files", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }
 
+    static func searchFile(name: String, in directory: AbstractFile) -> Endpoint {
+        return .fileInfo(directory).appending(
+            path: "/name",
+            queryItems: [
+                URLQueryItem(name: "name", value: name)
+            ]
+        )
+    }
+
     static func createDirectory(in file: AbstractFile) -> Endpoint {
         return .fileInfo(file).appending(path: "/directory", queryItems: [FileWith.fileMinimal.toQueryItem()])
     }

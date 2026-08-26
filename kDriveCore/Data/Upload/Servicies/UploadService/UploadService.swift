@@ -516,45 +516,20 @@ extension UploadService: UploadServiceable {
 
         do {
             let parentProxyFile = ProxyFile(driveId: uploadFile.driveId, id: uploadFile.parentDirectoryId)
-            var cursor: FileCursor?
 
-            repeat {
-                let files: [File]
-                let hasMore: Bool
-                let nextCursor: FileCursor?
-
-                if parentProxyFile.isRoot {
-                    SentryDebug.capture(message: "Attempts to upload files to the root directory")
-
-                    let response = try await driveFileManager.apiFetcher.rootFiles(
-                        drive: ProxyDrive(id: uploadFile.driveId),
-                        cursor: cursor,
-                        sortType: .newer
-                    )
-
-                    files = response.validApiResponse.data
-                    hasMore = response.validApiResponse.hasMore
-                    nextCursor = response.validApiResponse.cursor
-                } else {
-                    let response = try await driveFileManager.apiFetcher.files(
-                        in: parentProxyFile,
-                        advancedListingCursor: cursor,
-                        sortType: .newer
-                    )
-
-                    files = response.validApiResponse.data.files
-                    hasMore = response.validApiResponse.hasMore
-                    nextCursor = response.validApiResponse.cursor
-                }
-
-                if files.contains(where: { $0.name == uploadFile.name }) {
-                    return .found
-                }
-
-                cursor = hasMore ? nextCursor : nil
-            } while cursor != nil
-
-            return .notFound
+            _ = try await driveFileManager.apiFetcher.searchFilesInParent(
+                in: parentProxyFile,
+                fileName: uploadFile.name,
+                sortType: .newer
+            )
+            return .found
+        } catch let error as DriveError {
+            if error.code == "object_not_found" {
+                return .notFound
+            } else {
+                Log.uploadQueue("DriveError checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
+                return .unknown
+            }
         } catch {
             Log.uploadQueue("Error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
             return .unknown

@@ -145,6 +145,16 @@ public class DriveApiFetcher: ApiFetcher {
         ))
     }
 
+    func searchFilesInParent(in directory: ProxyFile,
+                             fileName: String,
+                             sortType: SortType = .nameAZ) async throws -> ValidServerResponse<File> {
+        try await perform(request: authenticatedRequest(
+            .searchFile(name: fileName, in: directory)
+                .sorted(by: [.type, sortType]),
+            method: .get
+        ))
+    }
+
     public func fileInfo(_ file: ProxyFile) async throws -> ValidServerResponse<File> {
         try await perform(request: authenticatedRequest(.fileInfo(file)))
     }
