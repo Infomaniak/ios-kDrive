@@ -501,11 +501,11 @@ extension UploadService: UploadServiceable {
         allQueues.forEach { $0.updateQueueSuspension() }
     }
 
-    private func fileExistsOnServer(for uploadFile: UploadFile) async -> Bool {
+    private func fileExistsOnServer(for uploadFile: UploadFile) async -> FileExistsResult {
         guard let driveFileManager = accountManager.getDriveFileManager(for: uploadFile.driveId,
                                                                         userId: uploadFile.userId) else {
             Log.uploadQueue("Unable to get DriveFileManager for ufid:\(uploadFile.id)", level: .error)
-            return false
+            return .unknown
         }
 
         do {
@@ -542,16 +542,16 @@ extension UploadService: UploadServiceable {
                 }
 
                 if files.contains(where: { $0.name == uploadFile.name }) {
-                    return true
+                    return .found
                 }
 
                 cursor = hasMore ? nextCursor : nil
             } while cursor != nil
 
-            return false
+            return .notFound
         } catch {
             Log.uploadQueue("Error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
-            return false
+            return .unknown
         }
     }
 
