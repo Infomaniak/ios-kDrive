@@ -563,3 +563,9 @@ extension UploadService: UploadServiceable {
         }
     }
 }
+
+public enum FileExistsResult: Sendable {
+    case found
+    case notFound
+    case unknown
+}
