@@ -195,7 +195,6 @@ extension UploadOperation {
 
             case .fileExistsUnknownError:
                 file.error = error
-                self.uploadService.suspendAllOperations()
 
             case .lock, .notAuthorized:
                 // simple retry

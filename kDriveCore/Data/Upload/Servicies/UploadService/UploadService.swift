@@ -233,6 +233,7 @@ extension UploadService: UploadServiceable {
                         case .unknown:
                             Log.uploadQueue("retry ufid:\(uploadFileId) unknown error, marking as failed")
                             file.error = .fileExistsUnknownError
+                            self.suspendAllOperations()
                         }
                     }
 
@@ -519,12 +520,11 @@ extension UploadService: UploadServiceable {
 
             _ = try await driveFileManager.apiFetcher.searchFilesInParent(
                 in: parentProxyFile,
-                fileName: uploadFile.name,
-                sortType: .newer
+                fileName: uploadFile.name
             )
             return .found
         } catch let error as DriveError {
-            if error.code == "object_not_found" {
+            if error == .objectNotFound {
                 return .notFound
             } else {
                 Log.uploadQueue("DriveError checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
