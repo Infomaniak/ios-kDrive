@@ -22,7 +22,7 @@ import XCTest
 
 class AppUITest: XCTestCase {
     var app: XCUIApplication!
-    let defaultTimeOut: TimeInterval = 30.0
+    let defaultTimeOut: TimeInterval = 10.0
 
     var tabBar: XCUIElementQuery {
         return app.tabBars
@@ -91,15 +91,14 @@ class AppUITest: XCTestCase {
         wait(for: [delayExpectation], timeout: delay)
     }
 
-    func goToMyFolders() {
+    func goToMyFolders(withSpecificTimout: TimeInterval = 5) {
         openTab(.files)
 
         let privateTeamSpace = collectionViewsQuery.cells.containing(
             .staticText,
             identifier: KDriveResourcesStrings.Localizable.localizedFilenamePrivateTeamSpace
         ).element
-        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: 30), "Private Team Space should exist")
-
+        XCTAssertTrue(privateTeamSpace.waitForExistence(timeout: withSpecificTimout), "Private Team Space should exist")
         privateTeamSpace.tap()
         sortByLatest()
     }
@@ -121,12 +120,7 @@ class AppUITest: XCTestCase {
 
     func setUpTest(testName: String) -> String {
         let name = createDirectory(name: testName)
-
-        addTeardownBlock { [weak self] in
-            guard let self else { return }
-            removeDirectoryIfExists(name: name)
-        }
-
+        currentName = name
         return name
     }
 
@@ -138,7 +132,7 @@ class AppUITest: XCTestCase {
         goToMyFolders()
 
         let cell = collectionViewsQuery.cells.containing(.staticText, identifier: name).element
-        guard cell.waitForExistence(timeout: 3) else { return }
+        guard cell.waitForExistence(timeout: 2) else { return }
 
         longPressToSelect(cellNamed: name)
         let deleteButton = collectionViewsQuery.buttons[KDriveResourcesStrings.Localizable.buttonDelete]
@@ -158,7 +152,7 @@ class AppUITest: XCTestCase {
         folderCell.tap()
 
         let folderTextField = tablesQuery.textFields[KDriveResourcesStrings.Localizable.hintInputDirName]
-        XCTAssertTrue(folderTextField.waitForExistence(timeout: 5), "Folder name text field should be displayed")
+        XCTAssertTrue(folderTextField.waitForExistence(timeout: 3), "Folder name text field should be displayed")
 
         folderTextField.tap()
         if !app.keyboards.firstMatch.exists {
@@ -170,7 +164,7 @@ class AppUITest: XCTestCase {
         tablesQuery.buttons[KDriveResourcesStrings.Localizable.buttonCreateFolder].tap()
         openTab(.files)
 
-        XCTAssertTrue(tabBar.buttons[getStringForElement(.files)].waitForExistence(timeout: 5), "Waiting for folder creation")
+        XCTAssertTrue(tabBar.buttons[getStringForElement(.files)].waitForExistence(timeout: 3), "Waiting for folder creation")
 
         return name
     }
@@ -184,18 +178,14 @@ class AppUITest: XCTestCase {
         tablesQuery.staticTexts[KDriveResourcesStrings.Localizable.buttonUploadPhotoOrVideo].tap()
         acceptPhotosPermissions()
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
-        let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
-        if acceptAllPhotosButton.waitForExistence(timeout: 5) {
-            acceptAllPhotosButton.tap()
-        }
         let photoElement = photospickerApp.images.element(boundBy: 1)
-        XCTAssertTrue(photoElement.waitForExistence(timeout: 5), "No photos in photo library")
+        XCTAssertTrue(photoElement.waitForExistence(timeout: 3), "No photos in photo library")
         photoElement.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
 
         photospickerApp.buttons[KDriveResourcesStrings.Localizable.buttonAdd].firstMatch.tap()
 
         let buttonSave = app.buttons[KDriveResourcesStrings.Localizable.buttonSave]
-        XCTAssertTrue(buttonSave.waitForExistence(timeout: 4), "Save button should be displayed")
+        XCTAssertTrue(buttonSave.waitForExistence(timeout: 3), "Save button should be displayed")
         buttonSave.tap()
         return directory
     }
@@ -223,7 +213,7 @@ class AppUITest: XCTestCase {
     func openFileMenu(named name: String, fullSize: Bool = false) {
         goToMyFolders()
         let file = collectionViewsQuery.cells.containing(.staticText, identifier: name)
-        XCTAssertTrue(file.element.waitForExistence(timeout: 5), "File should be displayed")
+        XCTAssertTrue(file.element.waitForExistence(timeout: 3), "File should be displayed")
         file.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
         if fullSize {
             app.swipeUp()
@@ -231,14 +221,16 @@ class AppUITest: XCTestCase {
     }
 
     func sortByLatest() {
-        wait(delay: 0.5)
-        if app.buttons[KDriveResourcesStrings.Localizable.sortNameAZ].firstMatch.waitForExistence(timeout: 5) {
+        if app.staticTexts[KDriveResourcesStrings.Localizable.sortRecent].firstMatch.exists {
+            return
+        }
+
+        if app.buttons[KDriveResourcesStrings.Localizable.sortNameAZ].firstMatch.waitForExistence(timeout: 2) {
             app.buttons[KDriveResourcesStrings.Localizable.sortNameAZ].firstMatch.tap()
-            wait(delay: 1)
             app.staticTexts[KDriveResourcesStrings.Localizable.sortRecent].firstMatch.tap()
         }
         XCTAssertTrue(
-            app.staticTexts[KDriveResourcesStrings.Localizable.sortRecent].firstMatch.waitForExistence(timeout: 5),
+            app.staticTexts[KDriveResourcesStrings.Localizable.sortRecent].firstMatch.waitForExistence(timeout: 3),
             "Should be sorted by most recent"
         )
     }
@@ -292,7 +284,7 @@ class AppUITest: XCTestCase {
         launchAppFromScratch()
 
         let laterButton = app.buttons[KDriveResourcesStrings.Localizable.buttonLater]
-        if laterButton.waitForExistence(timeout: 5) {
+        if laterButton.waitForExistence(timeout: 2) {
             laterButton.tap()
         }
         let root = setUpTest(testName: testName)
@@ -308,18 +300,16 @@ class AppUITest: XCTestCase {
         rename.tap()
         let fileNameTextField = app.textFields[KDriveResourcesStrings.Localizable.hintInputDirName]
         XCTAssertTrue(fileNameTextField.waitForExistence(timeout: 3), "Filename textfield should be displayed")
-        var deleteString = String()
-        for _ in newTestName {
-            deleteString += XCUIKeyboardKey.delete.rawValue
-        }
+        let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: newTestName.count)
+
         fileNameTextField.typeText(deleteString)
         fileNameTextField.typeText(newTestName)
         app.buttons[KDriveResourcesStrings.Localizable.buttonSave].tap()
-        XCTAssertTrue(rename.waitForExistence(timeout: 4), "Rename should be visible after closing the dialog box")
+        XCTAssertTrue(rename.waitForExistence(timeout: 3), "Rename should be visible after closing the dialog box")
 
         // Check new name
         closeFileMenu()
-        XCTAssertTrue(app.staticTexts[newTestName].waitForExistence(timeout: 5), "File must be renamed")
+        XCTAssertTrue(app.staticTexts[newTestName].waitForExistence(timeout: 3), "File must be renamed")
     }
 
     func testDuplicateFile() {
@@ -342,10 +332,10 @@ class AppUITest: XCTestCase {
         let selectButton = app.buttons[KDriveResourcesStrings.Localizable.buttonSelectTheFolder]
         XCTAssertTrue(selectButton.waitForExistence(timeout: 2), "Select Folder button should be displayed")
         selectButton.tap()
-        wait(delay: 2)
-        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 5), "File should exist")
+        wait(delay: 1)
+        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "File should exist")
         let duplicatedFile = "\(root) (1)"
-        XCTAssertTrue(app.staticTexts[duplicatedFile].waitForExistence(timeout: 30), "Duplicated file should exist")
+        XCTAssertTrue(app.staticTexts[duplicatedFile].waitForExistence(timeout: defaultTimeOut), "Duplicated file should exist")
 
         removeDirectory(name: duplicatedFile)
         XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 3), "Dialog box should be dismissed")
@@ -378,7 +368,7 @@ class AppUITest: XCTestCase {
 
         // Remove user
         let canAccessButton = tablesQuery.staticTexts[KDriveResourcesStrings.Localizable.userPermissionRead]
-        XCTAssertTrue(canAccessButton.waitForExistence(timeout: 10), "Sharing choices should be displayed")
+        XCTAssertTrue(canAccessButton.waitForExistence(timeout: 5), "Sharing choices should be displayed")
         canAccessButton.tap()
         app.staticTexts[KDriveResourcesStrings.Localizable.buttonRemoveUserFromShare].tap()
         app.buttons[KDriveResourcesStrings.Localizable.buttonDelete].tap()
@@ -397,7 +387,6 @@ class AppUITest: XCTestCase {
     func testComments() {
         let testName = "UITest - Comment - \(Date())"
         launchAppFromScratch()
-        goToMyFolders()
         let root = createDirectoryWithPhoto(name: testName)
         currentName = root
 
@@ -437,8 +426,8 @@ class AppUITest: XCTestCase {
         let root = "\(testName)-\(Date())"
         currentName = root
 
-        openTab(.files)
         openTab(.add)
+
         let folderCell = tablesQuery.cells.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.allFolder)
             .element
         folderCell.tap()
@@ -477,7 +466,6 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Create office file - \(Date())"
         launchAppFromScratch()
         let root = setUpTest(testName: testName)
-        currentName = root
 
         // Enter in root directory
         enterInDirectory(named: root)
@@ -490,8 +478,8 @@ class AppUITest: XCTestCase {
 
         // Leave office edition page
         let officeBackButton = app.images.element(boundBy: 5)
-        XCTAssertTrue(officeBackButton.waitForExistence(timeout: 10), "back button should be displayed")
-        sleep(6)
+        XCTAssertTrue(officeBackButton.waitForExistence(timeout: defaultTimeOut), "back button should be displayed")
+        wait(delay: 3)
         officeBackButton.tap()
 
         openTab(.files)
@@ -504,8 +492,6 @@ class AppUITest: XCTestCase {
         // Get number of offline files
         goToMyFolders()
 
-        openTab(.files)
-
         let root = createDirectoryWithPhoto(name: testName)
         currentName = root
 
@@ -515,7 +501,7 @@ class AppUITest: XCTestCase {
         let switchOffline = collectionViewsQuery.switches["0"]
         XCTAssertTrue(switchOffline.waitForExistence(timeout: 3), "Switch should be displayed")
         switchOffline.tap()
-        wait(delay: 2)
+        wait(delay: 1)
         closeFileMenu()
 
         // Go to offline files
@@ -539,8 +525,6 @@ class AppUITest: XCTestCase {
         let root = createDirectoryWithPhoto(name: testName)
         currentName = root
 
-        wait(delay: 1)
-
         let file = collectionViewsQuery.cells.containing(.staticText, identifier: AppUITest.imageFileName).firstMatch
         XCTAssertTrue(file.waitForExistence(timeout: 3), "Image should display")
         file.buttons[KDriveResourcesStrings.Localizable.buttonMenu].tap()
@@ -548,14 +532,13 @@ class AppUITest: XCTestCase {
         app.swipeUp()
 
         let delete = app.staticTexts[KDriveResourcesStrings.Localizable.modalMoveTrashTitle].firstMatch
-        XCTAssertTrue(delete.waitForExistence(timeout: 4), "Move to trash action should be displayed")
+        XCTAssertTrue(delete.waitForExistence(timeout: 3), "Move to trash action should be displayed")
         delete.tap()
         app.buttons[KDriveResourcesStrings.Localizable.buttonMove].firstMatch.tap()
         let cancelButton = app.buttons[KDriveResourcesStrings.Localizable.buttonCancel].firstMatch
-        XCTAssertTrue(cancelButton.waitForExistence(timeout: 5), "cancel button should be displayed")
+        XCTAssertTrue(cancelButton.waitForExistence(timeout: 3), "cancel button should be displayed")
         cancelButton.tap()
 
-        sortByLatest()
         goToMyFolders()
         app.staticTexts[testName].firstMatch.tap()
         XCTAssertTrue(
@@ -568,7 +551,6 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Add file to favorites - \(Date())"
         launchAppFromScratch()
         let root = setUpTest(testName: testName)
-        currentName = root
 
         goToMyFolders()
 
@@ -588,7 +570,6 @@ class AppUITest: XCTestCase {
         let testName = "UITest - Search file - \(Date())"
         launchAppFromScratch()
         let root = setUpTest(testName: testName)
-        currentName = root
 
         openTab(.home)
         searchFileOrFolder(name: "UITest - Search file", realName: testName)
@@ -602,7 +583,6 @@ class AppUITest: XCTestCase {
         launchAppFromScratch()
 
         let root = setUpTest(testName: testName)
-        currentName = root
 
         // Add category
         openFileMenu(named: root, fullSize: true)
@@ -616,13 +596,15 @@ class AppUITest: XCTestCase {
         // Search file with filter category
         navigationBars.buttons[KDriveResourcesStrings.Localizable.searchTitle].tap()
         navigationBars.buttons.element(boundBy: 1).tap()
-        wait(delay: 0.5)
         tablesQuery.staticTexts[KDriveResourcesStrings.Localizable.addCategoriesTitle].tap()
         tablesQuery.cells.firstMatch.tap()
         let value = KDriveResourcesStrings.Localizable.buttonBack != "Back" ? KDriveResourcesStrings.Localizable.buttonBack : "BackButton"
         app.buttons[value].firstMatch.tap()
         app.staticTexts[KDriveResourcesStrings.Localizable.buttonApplyFilters].firstMatch.tap()
-        XCTAssertTrue(app.staticTexts[root].waitForExistence(timeout: 30), "Directory with category should be in result")
+        XCTAssertTrue(
+            app.staticTexts[root].waitForExistence(timeout: defaultTimeOut),
+            "Directory with category should be in result"
+        )
         navigationBars.buttons[KDriveResourcesStrings.Localizable.buttonClose].tap()
     }
 
@@ -668,7 +650,6 @@ class AppUITest: XCTestCase {
         let root = createDirectoryWithPhoto(name: testName)
         currentName = root
 
-        goToMyFolders()
         let folder = app.staticTexts[testName]
         XCTAssertTrue(folder.waitForExistence(timeout: 3), "Folder should display")
         folder.tap()
@@ -754,6 +735,7 @@ class AppUITest: XCTestCase {
         XCTAssertEqual(hittableResultRename, .completed, "Rename button should become tappable")
 
         rename.tap()
+
         app.textFields[KDriveResourcesStrings.Localizable.hintInputFileName].firstMatch.tap()
         app.textFields[KDriveResourcesStrings.Localizable.hintInputFileName].firstMatch.typeText("Test")
 
@@ -819,7 +801,7 @@ class AppUITest: XCTestCase {
 
         enableAppLock()
 
-        wait(delay: 1)
+        wait(delay: 0.5)
 
         app.terminate()
 
@@ -830,7 +812,7 @@ class AppUITest: XCTestCase {
         dismissBottomSheet()
         XCTAssertTrue(app
             .staticTexts[KDriveResourcesStrings.Localizable.lastEditsTitle]
-            .firstMatch.waitForExistence(timeout: 10), "App should be unlocked")
+            .firstMatch.waitForExistence(timeout: 5), "App should be unlocked")
         app
             .buttons[KDriveResourcesStrings.Localizable
                 .buttonMenu]
@@ -848,14 +830,14 @@ class AppUITest: XCTestCase {
 
         goToMyFolders()
 
-        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10), "Folders for second drive should exists")
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 5), "Folders for second drive should exists")
 
         openTab(.menu)
         app.buttons[KDriveResourcesStrings.Localizable.buttonSwitchDrive].firstMatch.tap()
         app.staticTexts[firstDrive].firstMatch.tap()
 
         goToMyFolders()
-        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10), "Folders for first drive should exists")
+        XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 5), "Folders for first drive should exists")
     }
 
     func playVideo(offline: Bool) {
@@ -882,7 +864,7 @@ class AppUITest: XCTestCase {
         app.tap()
         wait(delay: 1)
         app.tap()
-        wait(delay: 3)
+        wait(delay: 1)
         app.tap()
 
         let back10seconds = app.buttons["Skip Backward"].firstMatch
@@ -900,7 +882,7 @@ class AppUITest: XCTestCase {
             playPauseButton = app.buttons["play"]
         }
         playPauseButton.tap()
-        wait(delay: 3)
+        wait(delay: 1)
         if !playPauseButton.waitForExistence(timeout: 5) {
             playPauseButton = app.buttons["pause"]
         }
@@ -943,7 +925,7 @@ class AppUITest: XCTestCase {
             playPauseButton = app.buttons["play"]
         }
         playPauseButton.tap()
-        wait(delay: 3)
+        wait(delay: 2)
         if !playPauseButton.waitForExistence(timeout: 5) {
             playPauseButton = app.buttons["pause"]
         }
@@ -976,7 +958,6 @@ class AppUITest: XCTestCase {
         let fileName = "sample.\(filetype)"
         let folderName = "Test Preview - Ne pas supprimer"
         launchAppFromScratch()
-        goToMyFolders()
         searchFileOrFolder(name: folderName)
 
         let folder = app.staticTexts[folderName]
@@ -1039,7 +1020,6 @@ class AppUITest: XCTestCase {
         passwordField.typeText(Env.testAccountPassword)
         passwordField.typeText("\n")
 
-        wait(delay: 5)
         XCTAssertTrue(
             app.buttons[KDriveResourcesStrings.Localizable.fileListTitle].waitForExistence(timeout: 10),
             "Last modification text should display"
@@ -1071,22 +1051,28 @@ class AppUITest: XCTestCase {
         app.typeText(name)
         app.typeText("\n")
         if let text = realName {
-            XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 30), "Directory should be listed in results")
+            XCTAssertTrue(
+                app.staticTexts[text].waitForExistence(timeout: defaultTimeOut),
+                "Directory should be listed in results"
+            )
         } else {
-            XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 30), "Directory should be listed in results")
+            XCTAssertTrue(
+                app.staticTexts[name].waitForExistence(timeout: defaultTimeOut),
+                "Directory should be listed in results"
+            )
         }
     }
 
     func acceptPhotosPermissions() {
         let springboardApp = XCUIApplication(bundleIdentifier: "com.apple.springboard")
         let acceptAllButton = springboardApp.buttons.element(boundBy: 1).firstMatch
-        if acceptAllButton.waitForExistence(timeout: 5) {
+        if acceptAllButton.waitForExistence(timeout: 3) {
             acceptAllButton.tap()
         }
         let photospickerApp = XCUIApplication(bundleIdentifier: "com.apple.mobileslideshow.photospicker")
 
         let acceptAllPhotosButton = photospickerApp.buttons.element(boundBy: 1).firstMatch
-        if acceptAllPhotosButton.waitForExistence(timeout: 5) {
+        if acceptAllPhotosButton.waitForExistence(timeout: 3) {
             acceptAllPhotosButton.tap()
         }
     }
