@@ -120,11 +120,32 @@ class AppUITest: XCTestCase {
     }
 
     func setUpTest(testName: String) -> String {
-        return createDirectory(name: testName)
+        let name = createDirectory(name: testName)
+
+        addTeardownBlock { [weak self] in
+            guard let self else { return }
+            removeDirectoryIfExists(name: name)
+        }
+
+        return name
     }
 
     func tearDownTest(directoryName: String) {
-        removeDirectory(name: directoryName)
+        removeDirectoryIfExists(name: directoryName)
+    }
+
+    func removeDirectoryIfExists(name: String) {
+        goToMyFolders()
+
+        let cell = collectionViewsQuery.cells.containing(.staticText, identifier: name).element
+        guard cell.waitForExistence(timeout: 3) else { return }
+
+        longPressToSelect(cellNamed: name)
+        let deleteButton = collectionViewsQuery.buttons[KDriveResourcesStrings.Localizable.buttonDelete]
+        guard deleteButton.waitForExistence(timeout: 3) else { return }
+        deleteButton.tap()
+
+        app.buttons.containing(.staticText, identifier: KDriveResourcesStrings.Localizable.buttonMove).element.tap()
     }
 
     // MARK: - Helping methods
