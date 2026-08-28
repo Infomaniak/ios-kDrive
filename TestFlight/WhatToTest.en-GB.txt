@@ -1,5 +1,3 @@
-- Fresh new floating panels across the app
-- Fresh new Toast UI
-- Improvements related to kDrive in the Files app
-- File sharing hardening between Mail and Drive
+- Fix Dropbox link sharing
+- Optimized upload retries
 - Stability improvements and bug fixes
