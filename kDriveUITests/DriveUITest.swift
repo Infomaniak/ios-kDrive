@@ -652,7 +652,6 @@ class AppUITest: XCTestCase {
         let root = createDirectoryWithPhoto(name: testName)
         currentName = root
 
-//        goToMyFolders()
         let folder = app.staticTexts[testName]
         XCTAssertTrue(folder.waitForExistence(timeout: 3), "Folder should display")
         folder.tap()
