@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import Algorithms
 import Foundation
 import InfomaniakCore
@@ -230,6 +231,12 @@ extension UploadService: UploadServiceable {
                             Log.uploadQueue("retry ufid:\(uploadFileId) file not found on server, retrying")
                             file.clearErrorsForRetry()
                             fileToRetry = file.freeze()
+
+                        case .networkError:
+                            Log.uploadQueue("retry ufid:\(uploadFileId) network error looking remotely for file")
+                            file.progress = nil
+                            file.error = .networkError
+                            self.suspendAllOperations()
 
                         case .unknown:
                             Log.uploadQueue("retry ufid:\(uploadFileId) error looking remotely for file, marking as failed")
@@ -526,6 +533,12 @@ extension UploadService: UploadServiceable {
                 fileName: uploadFile.name
             )
             return .found
+        } catch let error as AFError where error.isSessionTaskError {
+            Log.uploadQueue("Network error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
+            return .networkError
+        } catch let error where (error as NSError).domain == NSURLErrorDomain {
+            Log.uploadQueue("Network error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
+            return .networkError
         } catch let error as DriveError {
             if error == .objectNotFound {
                 return .notFound
@@ -551,5 +564,6 @@ extension UploadService: UploadServiceable {
 public enum FileExistsResult: Sendable {
     case found
     case notFound
+    case networkError
     case unknown
 }
