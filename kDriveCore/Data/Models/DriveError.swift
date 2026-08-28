@@ -200,7 +200,9 @@ public struct DriveError: Error, Equatable, ErrorWithCode {
 
     public static let fileAlreadyExistsError = DriveError(type: .serverError, code: "file_already_exists_error")
 
-    public static let fileExistsUnknownError = DriveError(type: .serverError, code: "file_exists_unknown_error")
+    public static let fileExistsUnknownError = DriveError(type: .serverError,
+                                                          code: "file_exists_unknown_error",
+                                                          localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
 
     public static let notAuthorized = DriveError(type: .serverError, code: "not_authorized")
 

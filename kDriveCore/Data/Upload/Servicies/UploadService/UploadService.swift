@@ -227,11 +227,14 @@ extension UploadService: UploadServiceable {
                             file.cleanSourceFileIfNeeded()
 
                         case .notFound:
+                            Log.uploadQueue("retry ufid:\(uploadFileId) file not found on server, retrying")
                             file.clearErrorsForRetry()
                             fileToRetry = file.freeze()
 
                         case .unknown:
-                            Log.uploadQueue("retry ufid:\(uploadFileId) unknown error, marking as failed")
+                            Log.uploadQueue("retry ufid:\(uploadFileId) error looking remotely for file, marking as failed")
+                            file.maxRetryCount = 0
+                            file.progress = nil
                             file.error = .fileExistsUnknownError
                             self.suspendAllOperations()
                         }
