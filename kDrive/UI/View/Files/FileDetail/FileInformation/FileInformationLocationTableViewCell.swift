@@ -34,6 +34,7 @@ class FileInformationLocationTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         locationButton.accessibilityLabel = KDriveResourcesStrings.Localizable.allPathTitle
+        locationButton.accessibilityIdentifier = KDriveResourcesStrings.Localizable.allPathTitle
     }
 
     @IBAction func locationButtonTapped(_ sender: Any) {
