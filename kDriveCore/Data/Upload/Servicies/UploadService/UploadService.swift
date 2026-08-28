@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Alamofire
 import Algorithms
 import Foundation
 import InfomaniakCore
@@ -218,15 +219,31 @@ extension UploadService: UploadServiceable {
                             return
                         }
 
-                        if exists {
+                        switch exists {
+                        case .found:
                             Log.uploadQueue("retry ufid:\(uploadFileId) file exists on server, marking as uploaded")
                             file.uploadDate = Date()
                             file.progress = nil
                             file.error = nil
                             file.cleanSourceFileIfNeeded()
-                        } else {
+
+                        case .notFound:
+                            Log.uploadQueue("retry ufid:\(uploadFileId) file not found on server, retrying")
                             file.clearErrorsForRetry()
                             fileToRetry = file.freeze()
+
+                        case .networkError:
+                            Log.uploadQueue("retry ufid:\(uploadFileId) network error looking remotely for file")
+                            file.progress = nil
+                            file.error = .networkError
+                            self.suspendAllOperations()
+
+                        case .unknown:
+                            Log.uploadQueue("retry ufid:\(uploadFileId) error looking remotely for file, marking as failed")
+                            file.maxRetryCount = 0
+                            file.progress = nil
+                            file.error = .fileExistsUnknownError
+                            self.suspendAllOperations()
                         }
                     }
 
@@ -501,57 +518,37 @@ extension UploadService: UploadServiceable {
         allQueues.forEach { $0.updateQueueSuspension() }
     }
 
-    private func fileExistsOnServer(for uploadFile: UploadFile) async -> Bool {
+    private func fileExistsOnServer(for uploadFile: UploadFile) async -> FileExistsResult {
         guard let driveFileManager = accountManager.getDriveFileManager(for: uploadFile.driveId,
                                                                         userId: uploadFile.userId) else {
             Log.uploadQueue("Unable to get DriveFileManager for ufid:\(uploadFile.id)", level: .error)
-            return false
+            return .unknown
         }
 
         do {
             let parentProxyFile = ProxyFile(driveId: uploadFile.driveId, id: uploadFile.parentDirectoryId)
-            var cursor: FileCursor?
 
-            repeat {
-                let files: [File]
-                let hasMore: Bool
-                let nextCursor: FileCursor?
-
-                if parentProxyFile.isRoot {
-                    SentryDebug.capture(message: "Attempts to upload files to the root directory")
-
-                    let response = try await driveFileManager.apiFetcher.rootFiles(
-                        drive: ProxyDrive(id: uploadFile.driveId),
-                        cursor: cursor,
-                        sortType: .newer
-                    )
-
-                    files = response.validApiResponse.data
-                    hasMore = response.validApiResponse.hasMore
-                    nextCursor = response.validApiResponse.cursor
-                } else {
-                    let response = try await driveFileManager.apiFetcher.files(
-                        in: parentProxyFile,
-                        advancedListingCursor: cursor,
-                        sortType: .newer
-                    )
-
-                    files = response.validApiResponse.data.files
-                    hasMore = response.validApiResponse.hasMore
-                    nextCursor = response.validApiResponse.cursor
-                }
-
-                if files.contains(where: { $0.name == uploadFile.name }) {
-                    return true
-                }
-
-                cursor = hasMore ? nextCursor : nil
-            } while cursor != nil
-
-            return false
+            _ = try await driveFileManager.apiFetcher.searchFilesInParent(
+                in: parentProxyFile,
+                fileName: uploadFile.name
+            )
+            return .found
+        } catch let error as AFError where error.isSessionTaskError {
+            Log.uploadQueue("Network error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
+            return .networkError
+        } catch let error where (error as NSError).domain == NSURLErrorDomain {
+            Log.uploadQueue("Network error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
+            return .networkError
+        } catch let error as DriveError {
+            if error == .objectNotFound {
+                return .notFound
+            } else {
+                Log.uploadQueue("DriveError checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
+                return .unknown
+            }
         } catch {
             Log.uploadQueue("Error checking file existence ufid:\(uploadFile.id): \(error)", level: .error)
-            return false
+            return .unknown
         }
     }
 
@@ -562,4 +559,11 @@ extension UploadService: UploadServiceable {
             return globalUploadQueue
         }
     }
+}
+
+public enum FileExistsResult: Sendable {
+    case found
+    case notFound
+    case networkError
+    case unknown
 }

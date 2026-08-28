@@ -193,6 +193,12 @@ extension UploadOperation {
                 file.progress = nil
                 file.error = error
 
+            case .fileExistsUnknownError:
+                file.maxRetryCount = 0
+                file.progress = nil
+                file.error = error
+                self.uploadService.suspendAllOperations()
+
             case .lock, .notAuthorized:
                 // simple retry
                 file.error = error

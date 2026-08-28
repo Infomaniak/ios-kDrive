@@ -200,6 +200,10 @@ public struct DriveError: Error, Equatable, ErrorWithCode {
 
     public static let fileAlreadyExistsError = DriveError(type: .serverError, code: "file_already_exists_error")
 
+    public static let fileExistsUnknownError = DriveError(type: .serverError,
+                                                          code: "file_exists_unknown_error",
+                                                          localizedString: KDriveResourcesStrings.Localizable.errorNetwork)
+
     public static let notAuthorized = DriveError(type: .serverError, code: "not_authorized")
 
     public static let uploadDestinationNotFoundError = DriveError(type: .serverError, code: "upload_destination_not_found_error")
@@ -270,6 +274,7 @@ public struct DriveError: Error, Equatable, ErrorWithCode {
                                                   uploadFailedError,
                                                   uploadTokenIsNotValid,
                                                   fileAlreadyExistsError,
+                                                  fileExistsUnknownError,
                                                   errorDeviceStorage,
                                                   limitExceededError,
                                                   uploadOverDataRestrictedError,
