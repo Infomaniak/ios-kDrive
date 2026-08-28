@@ -20,7 +20,7 @@ import Foundation
 import UIKit
 
 public class SelfSizingPanelViewController: UIViewController {
-    private let contentViewController: UIViewController
+    public let contentViewController: UIViewController
     private let scrollView = UIScrollView()
     private let backgroundColor: UIColor
 

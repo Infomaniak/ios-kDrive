@@ -184,12 +184,15 @@ class NewFolderViewController: UIViewController {
 
     func showDropBoxLink(url: String, fileName: String) {
         let driveFloatingPanelController = ShareFloatingPanelViewController.instantiateSheet()
-        let floatingPanelViewController = driveFloatingPanelController as? ShareFloatingPanelViewController
-        floatingPanelViewController?.copyTextField.text = url
-        floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(fileName)
+        let floatingPanelViewController = (driveFloatingPanelController as? SelfSizingPanelViewController)?
+            .contentViewController as? ShareFloatingPanelViewController
+
         let viewController = presentingViewController
         dismiss(animated: true) {
-            viewController?.present(driveFloatingPanelController, animated: true)
+            viewController?.present(driveFloatingPanelController, animated: true) {
+                floatingPanelViewController?.copyTextField.text = url
+                floatingPanelViewController?.titleLabel.text = KDriveResourcesStrings.Localizable.dropBoxResultTitle(fileName)
+            }
         }
     }
 
