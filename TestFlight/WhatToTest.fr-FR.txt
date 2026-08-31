@@ -1,5 +1,3 @@
-- De nouveaux panneaux flottants inédits dans toute l'application
-- Refonte de l'interface des alertes
-- Améliorations relatives à kDrive dans l'app Fichiers
-- Durcissement du partage de fichiers entre Mail et Drive
+- Correction du partage de liens Dropbox
+- Optimisation des nouvelles tentatives de téléversement
 - Améliorations de la stabilité et corrections de bugs
