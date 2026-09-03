@@ -2092,20 +2092,8 @@
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Temporary files";
 
-/* loco:60a65b76f8bf9002e9594852 */
-"themeSettingsDarkLabel" = "Dark";
-
-/* loco:60a65b617652427d20367cc4 */
-"themeSettingsLightLabel" = "Light";
-
 /* loco:60a65ba139d35536f858f4f2 */
 "themeSettingsSystemDefaultLabel" = "System default";
-
-/* loco:60a65bbd7652427d20367cc6 */
-"themeSettingsSystemLabel" = "System";
-
-/* loco:60a65b3df229b924e419f452 */
-"themeSettingsTitle" = "Theme";
 
 /* loco:614c8841083c4c6d41454f55 */
 "totalStorageUsedTitle" = "Total storage used";
