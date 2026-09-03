@@ -20,6 +20,46 @@ import AppIntents
 import InfomaniakDI
 import kDriveResources
 
+@available(iOS 18.0, *)
+@AppIntent(schema: .files.openFile)
+struct OpenFileIntent: OpenIntent {
+    var target: KDriveFileEntity
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        @InjectService var accountManager: AccountManageable
+        @InjectService var appNavigable: AppNavigable
+
+        guard let driveFileManager = accountManager.getDriveFileManager(
+            for: target.driveId,
+            userId: target.userId
+        ) else {
+            throw DriveError.fileNotFound
+        }
+
+        if accountManager.currentUserId != target.userId {
+            guard let account = accountManager.account(for: target.userId) else {
+                throw DriveError.fileNotFound
+            }
+
+            accountManager.switchAccount(newAccount: account)
+        }
+
+        if accountManager.currentUserId != target.userId ||
+            accountManager.currentDriveId != target.driveId {
+            try await driveFileManager.switchDriveAndReloadUI()
+        }
+
+        let file = try await driveFileManager.file(
+            ProxyFile(driveId: target.driveId, id: target.fileId)
+        )
+
+        appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: 1)
+        appNavigable.present(file: file, driveFileManager: driveFileManager, office: false)
+
+        return .result()
+    }
+}
 
 @available(iOS 18.0, *)
 @AppIntent(schema: .files.moveFiles)
