@@ -18,4 +18,4 @@
 
 import AppIntents
 
-public struct KDriveCoreIntentsPackage: AppIntentsPackage { }
+public struct KDriveCoreIntentsPackage: AppIntentsPackage {}

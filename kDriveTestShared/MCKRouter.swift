@@ -43,6 +43,10 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func openFile(_ target: kDriveCore.FileNavigationTarget) async {
+        logNoop()
+    }
+
     public func askForReview() async {
         logNoop()
     }
