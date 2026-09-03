@@ -34,7 +34,9 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
     }
 
     @objc private func pageChanged() {
-        previewDelegate?.updateNavigationBar()
+        Task { @MainActor [weak self] in
+            self?.previewDelegate?.updateNavigationBar()
+        }
     }
 
     override func configureWith(file: File) {
