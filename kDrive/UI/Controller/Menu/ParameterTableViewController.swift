@@ -92,7 +92,7 @@ class ParameterTableViewController: BaseGroupedTableViewController {
             case .photos:
                 return KDriveResourcesStrings.Localizable.syncSettingsTitle
             case .theme:
-                return KDriveResourcesStrings.Localizable.themeSettingsTitle
+                return InfomaniakCoreUIResources.CoreUILocalizable.themeTitle
             case .notifications:
                 return KDriveResourcesStrings.Localizable.notificationTitle
             case .security:

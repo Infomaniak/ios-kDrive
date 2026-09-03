@@ -1,5 +1,5 @@
 {
-  "originHash" : "7048349745621ad4c418040ff7c14724e324bfc04f8177c50576b2b87d9b9b54",
+  "originHash" : "83dfc541277963e31bc9d900e7381810f33a6c152b4178293189c01eb17441b8",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "1574465c97bd4d915dd3dc497c22d01c3b289ed5",
-        "version" : "26.1.0"
+        "revision" : "ac51e2248f1f655ec45606a98556013d6a9d90cd",
+        "version" : "26.1.2"
       }
     },
     {

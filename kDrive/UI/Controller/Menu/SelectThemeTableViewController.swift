@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import InfomaniakCoreCommonUI
+import InfomaniakCoreUIResources
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -31,7 +32,7 @@ class SelectThemeTableViewController: BaseGroupedTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = KDriveResourcesStrings.Localizable.themeSettingsTitle
+        title = InfomaniakCoreUIResources.CoreUILocalizable.themeTitle
 
         tableView.register(cellView: SelectionTableViewCell.self)
         tableView.allowsMultipleSelection = false

@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import InfomaniakCoreUIResources
 import kDriveResources
 import UIKit
 
@@ -36,11 +37,11 @@ public enum Theme: String, CaseIterable {
     public var title: String {
         switch self {
         case .light:
-            return KDriveResourcesStrings.Localizable.themeSettingsLightLabel
+            return InfomaniakCoreUIResources.CoreUILocalizable.themeLight
         case .dark:
-            return KDriveResourcesStrings.Localizable.themeSettingsDarkLabel
+            return InfomaniakCoreUIResources.CoreUILocalizable.themeDark
         case .system:
-            return KDriveResourcesStrings.Localizable.themeSettingsSystemLabel
+            return InfomaniakCoreUIResources.CoreUILocalizable.themeSystem
         }
     }
 
