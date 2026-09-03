@@ -89,7 +89,8 @@ struct MoveFilesIntent {
                 throw DriveError.forbidden
             }
 
-            guard source.file.parentId != destination.file.id else {
+            guard source.file.driveId != destination.file.driveId ||
+                source.file.parentId != destination.file.id else {
                 continue
             }
 
@@ -173,7 +174,7 @@ struct CreateFolderIntent {
         let createdFolder = try await resolved.driveFileManager.createDirectory(
             in: resolved.file.proxify(),
             name: folderName,
-            onlyForMe: true
+            onlyForMe: false
         )
 
         let createdEntity = await KDriveFileEntity.makeEntity(
