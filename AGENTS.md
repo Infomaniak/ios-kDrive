@@ -18,6 +18,8 @@ Infomaniak kDrive — a production iOS cloud storage client supporting iPhone, i
 
 ```
 ios-kDrive/
+├── .agents/                     # Agent workflows and project skills
+│   └── skills/kdrive-sentry-rca/  # iOS Sentry root-cause analysis
 ├── kDrive/                      # Main app target — UIKit controllers, views, app lifecycle
 │   ├── AppDelegate.swift        #   App lifecycle, background tasks, root initialization
 │   ├── AppDelegate+Scene.swift  #   Scene lifecycle configuration
@@ -187,7 +189,8 @@ tuist test # Or via Xcode Test Navigator
 
 ### Learned Preferences
 
-_None yet. Add user-corrected preferences here as they arise._
+- For iOS production RCA, use the self-hosted mobile Sentry at `https://sentry-mobile.infomaniak.com`, organization `sentry`, project `kdrive-ios`, as the primary runtime evidence source.
+- Do not assume production app logs are available for iOS RCA; use Sentry events, threads, breadcrumbs, contexts, and release metadata.
 
 ## Self-correction
 
