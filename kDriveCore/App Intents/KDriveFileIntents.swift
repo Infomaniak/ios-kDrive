@@ -64,6 +64,10 @@ struct OpenFileIntent: OpenIntent {
 @available(iOS 18.0, *)
 @AppIntent(schema: .files.moveFiles)
 struct MoveFilesIntent {
+    static var authenticationPolicy: IntentAuthenticationPolicy {
+        .requiresLocalDeviceAuthentication
+    }
+
     var entities: [KDriveFileEntity]
 
     @Parameter(supportedContentTypes: [.folder])
@@ -109,6 +113,10 @@ struct MoveFilesIntent {
 @available(iOS 18.0, *)
 @AppIntent(schema: .files.renameFile)
 struct RenameFileIntent {
+    static var authenticationPolicy: IntentAuthenticationPolicy {
+        .requiresLocalDeviceAuthentication
+    }
+
     var target: KDriveFileEntity
     var newName: String
 
@@ -127,6 +135,10 @@ struct RenameFileIntent {
 @available(iOS 18.0, *)
 @AppIntent(schema: .files.deleteFiles)
 struct DeleteFilesIntent: DeleteIntent {
+    static var authenticationPolicy: IntentAuthenticationPolicy {
+        .requiresLocalDeviceAuthentication
+    }
+
     var entities: [KDriveFileEntity]
 
     func perform() async throws -> some IntentResult {
@@ -146,6 +158,10 @@ struct DeleteFilesIntent: DeleteIntent {
 @available(iOS 18.0, *)
 @AppIntent(schema: .files.createFolder)
 struct CreateFolderIntent {
+    static var authenticationPolicy: IntentAuthenticationPolicy {
+        .requiresLocalDeviceAuthentication
+    }
+
     var fileName: String?
 
     @Parameter(supportedContentTypes: [.folder])
