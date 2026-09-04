@@ -37,6 +37,10 @@ struct OpenFileIntent: OpenIntent {
             throw DriveError.fileNotFound
         }
 
+        let file = try await driveFileManager.file(
+            ProxyFile(driveId: target.driveId, id: target.fileId)
+        )
+
         if accountManager.currentUserId != target.userId {
             guard let account = accountManager.account(for: target.userId) else {
                 throw DriveError.fileNotFound
@@ -49,10 +53,6 @@ struct OpenFileIntent: OpenIntent {
             accountManager.currentDriveId != target.driveId {
             try await driveFileManager.switchDriveAndReloadUI()
         }
-
-        let file = try await driveFileManager.file(
-            ProxyFile(driveId: target.driveId, id: target.fileId)
-        )
 
         appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: 1)
         appNavigable.present(file: file, driveFileManager: driveFileManager, office: false)
