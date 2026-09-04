@@ -17,6 +17,7 @@
  */
 
 import AppIntents
+import CoreSpotlight
 import FileProvider
 import Foundation
 import InfomaniakDI
@@ -24,7 +25,7 @@ import UniformTypeIdentifiers
 
 @available(iOS 18.0, *)
 @AppEntity(schema: .files.file)
-struct KDriveFileEntity: FileEntity {
+struct KDriveFileEntity: IndexedEntity {
     private static let maximumResultCount = 25
 
     static let defaultQuery = KDriveEntityQuery()
@@ -41,6 +42,8 @@ struct KDriveFileEntity: FileEntity {
 
     var creationDate: Date?
     var fileModificationDate: Date?
+    var contentTypeIdentifier: String
+    var categoryNames: [String]
 
     var objectId: String
     var userId: Int
@@ -52,6 +55,18 @@ struct KDriveFileEntity: FileEntity {
         DisplayRepresentation(
             title: "\(name)"
         )
+    }
+
+    var attributeSet: CSSearchableItemAttributeSet {
+        let set = CSSearchableItemAttributeSet(contentType: .item)
+
+        set.displayName = name
+        set.keywords = categoryNames
+        set.contentType = contentTypeIdentifier
+        set.contentCreationDate = creationDate
+        set.contentModificationDate = fileModificationDate
+
+        return set
     }
 
     init(file: File, userId: Int, fileProviderURL: URL) throws {
@@ -110,6 +125,12 @@ struct KDriveFileEntity: FileEntity {
         driveId = file.driveId
         fileId = file.id
         name = file.name
+        contentTypeIdentifier = file.typeIdentifier
+
+        @InjectService var accountManager: AccountManageable
+        let driveFileManager = accountManager.getDriveFileManager(for: fileId, userId: userId)
+        categoryNames = driveFileManager?.drive.categories(for: file).map { $0.name } ?? []
+
         creationDate = file.createdAt
         fileModificationDate = file.lastModifiedAt
     }
