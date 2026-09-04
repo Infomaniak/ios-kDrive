@@ -1,3 +1,2 @@
-- Fix Dropbox link sharing
-- Optimized upload retries
+- Fix specific to the iPad when reading a PDF file
 - Stability improvements and bug fixes

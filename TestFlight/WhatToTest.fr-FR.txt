@@ -1,3 +1,2 @@
-- Correction du partage de liens Dropbox
-- Optimisation des nouvelles tentatives de téléversement
+- Correction spécifique a l'iPad sur la lecture d'un fichier PDF
 - Améliorations de la stabilité et corrections de bugs
