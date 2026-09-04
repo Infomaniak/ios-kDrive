@@ -139,6 +139,7 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
             if let photoSyncDirectory = driveFileManager?.getCachedFile(id: liveNewSyncSettings.parentDirectoryId) {
                 selectedDirectory = photoSyncDirectory
                 updateSaveButtonState()
+                reloadLocationFolderRow()
             } else {
                 Task {
                     guard let driveFileManager else { return }
@@ -230,6 +231,16 @@ final class PhotoSyncSettingsViewController: BaseGroupedTableViewController {
         } else {
             footer?.footerButton.isEnabled = isEdited
         }
+    }
+
+    private func reloadLocationFolderRow() {
+        guard let locationSection = sections.firstIndex(of: .syncLocation) else { return }
+        let indexPath = IndexPath(row: PhotoSyncLocationRows.folderSelection.rawValue, section: locationSection)
+
+        guard tableView.numberOfSections > locationSection,
+              tableView.numberOfRows(inSection: locationSection) > PhotoSyncLocationRows.folderSelection.rawValue else { return }
+
+        tableView.reloadRows(at: [indexPath], with: .none)
     }
 
     func saveSettings() {
