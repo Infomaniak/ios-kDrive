@@ -62,14 +62,28 @@ struct KDriveFileEntity: FileEntity {
         for file: File,
         driveFileManager: DriveFileManager
     ) async -> KDriveFileEntity {
+        let domains = (try? await NSFileProviderManager.domains()) ?? []
+
+        let manager = domains
+            .first { $0.identifier.rawValue == driveFileManager.drive.objectId }
+            .flatMap { NSFileProviderManager(for: $0) }
+
+        return await makeEntity(
+            for: file,
+            driveFileManager: driveFileManager,
+            fileProviderManager: manager
+        )
+    }
+
+    static func makeEntity(
+        for file: File,
+        driveFileManager: DriveFileManager,
+        fileProviderManager: NSFileProviderManager?
+    ) async -> KDriveFileEntity {
         let userId = driveFileManager.drive.userId
 
-        if let domains = try? await NSFileProviderManager.domains(),
-           let domain = domains.first(where: {
-               $0.identifier.rawValue == driveFileManager.drive.objectId
-           }),
-           let manager = NSFileProviderManager(for: domain),
-           let fileProviderURL = try? await manager.getUserVisibleURL(
+        if let fileProviderManager,
+           let fileProviderURL = try? await fileProviderManager.getUserVisibleURL(
                for: NSFileProviderItemIdentifier(file.id)
            ),
            let entity = try? KDriveFileEntity(
@@ -101,9 +115,7 @@ struct KDriveFileEntity: FileEntity {
     }
 
     struct KDriveEntityQuery: EntityStringQuery {
-        func entities(
-            for identifiers: [KDriveFileEntity.ID]
-        ) async throws -> [KDriveFileEntity] {
+        func entities(for identifiers: [KDriveFileEntity.ID]) async throws -> [KDriveFileEntity] {
             @InjectService var accountManager: AccountManageable
             @InjectService var driveInfosManager: DriveInfosManager
 
@@ -145,9 +157,7 @@ struct KDriveFileEntity: FileEntity {
             return entities
         }
 
-        func entities(
-            matching string: String
-        ) async throws -> [KDriveFileEntity] {
+        func entities(matching string: String) async throws -> [KDriveFileEntity] {
             let searchTerm = string.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !searchTerm.isEmpty else {
                 return []
@@ -187,11 +197,30 @@ struct KDriveFileEntity: FileEntity {
                 .sorted { return $0.file.sortedName < $1.file.sortedName }
                 .prefix(KDriveFileEntity.maximumResultCount)
 
+            let domains = (try? await NSFileProviderManager.domains()) ?? []
+
+            var fileProviderManagers = [String: NSFileProviderManager]()
+
+            for domain in domains {
+                guard let manager = NSFileProviderManager(for: domain) else {
+                    continue
+                }
+
+                fileProviderManagers[domain.identifier.rawValue] = manager
+            }
+
             var entities = [KDriveFileEntity]()
             entities.reserveCapacity(selectedMatches.count)
 
             for match in selectedMatches {
-                let entity = await makeEntity(for: match.file, driveFileManager: match.driveFileManager)
+                let driveObjectId = match.driveFileManager.drive.objectId
+                let fileProviderManager = fileProviderManagers[driveObjectId]
+
+                let entity = await makeEntity(
+                    for: match.file,
+                    driveFileManager: match.driveFileManager,
+                    fileProviderManager: fileProviderManager
+                )
 
                 entities.append(entity)
             }
