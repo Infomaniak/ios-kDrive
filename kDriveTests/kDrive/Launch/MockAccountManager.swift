@@ -40,7 +40,9 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     var userProfileStore = UserProfileStore()
 
-    var mqService: MQService { fatalError("Not implemented") }
+    var mqService: MQService {
+        fatalError("Not implemented")
+    }
 
     var refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
 
@@ -71,19 +73,29 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
         return currentDriveFileManager
     }
 
-    func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher { fatalError("Not implemented") }
+    func getApiFetcher(for userId: Int, token: ApiToken) -> DriveApiFetcher {
+        fatalError("Not implemented")
+    }
 
-    func getTokenForUserId(_ id: Int) -> ApiToken? { return nil }
+    func getTokenForUserId(_ id: Int) -> ApiToken? {
+        return nil
+    }
 
     func didUpdateToken(newToken: ApiToken, oldToken: ApiToken) {}
 
     func didFailRefreshToken(_ token: ApiToken) {}
 
-    func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> ApiToken { fatalError("Not implemented") }
+    func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> ApiToken {
+        fatalError("Not implemented")
+    }
 
-    func createAndSetCurrentAccount(token: ApiToken) async throws -> ApiToken { fatalError("Not implemented") }
+    func createAndSetCurrentAccount(token: ApiToken) async throws -> ApiToken {
+        fatalError("Not implemented")
+    }
 
-    func updateUser(for account: ApiToken, registerToken: Bool) async throws -> ApiToken { fatalError("Not implemented") }
+    func updateUser(for account: ApiToken, registerToken: Bool) async throws -> ApiToken {
+        fatalError("Not implemented")
+    }
 
     func switchAccount(newAccount: ApiToken) {}
 
@@ -93,15 +105,19 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func addAccount(token: ApiToken) async throws {}
 
-    func removeAccountFor(userId: Int) {}
+    func removeAccountFor(userId: Int, isInvoluntary: Bool) {}
 
-    func removeTokenAndAccountFor(userId: Int) {}
+    func removeTokenAndAccountFor(userId: Int, isInvoluntary: Bool) {}
 
     func removeCachedProperties() {}
 
-    func account(for token: ApiToken) -> ApiToken? { return nil }
+    func account(for token: ApiToken) -> ApiToken? {
+        return nil
+    }
 
-    func account(for userId: Int) -> ApiToken? { return nil }
+    func account(for userId: Int) -> ApiToken? {
+        return nil
+    }
 
-    func logoutCurrentAccountAndSwitchToNextIfPossible() {}
+    func logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: Bool) {}
 }
