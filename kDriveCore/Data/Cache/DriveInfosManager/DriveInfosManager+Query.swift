@@ -157,6 +157,9 @@ public extension DriveInfosManager {
     func removeDrivesFor(userId: Int) {
         try? driveInfoDatabase.writeTransaction { writableRealm in
             let userDrives = writableRealm.objects(Drive.self).where { $0.userId == userId }
+            for drive in userDrives {
+                SpotlightIndexer.shared.deindexItemsForDrive(userId: userId, driveId: drive.id)
+            }
             writableRealm.delete(userDrives)
         }
     }

@@ -322,6 +322,7 @@ extension SceneDelegate {
                 await appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             }
             uploadEditedFiles()
+            SpotlightIndexer.shared.indexAllItems()
         case .splashScreen, .onboarding, .updateRequired, .preloading: break
         }
 

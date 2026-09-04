@@ -23,9 +23,16 @@ import Foundation
 import InfomaniakDI
 import UniformTypeIdentifiers
 
-@available(iOS 18.0, *)
+@available(iOS 18.4, *)
 @AppEntity(schema: .files.file)
 struct KDriveFileEntity: IndexedEntity {
+    static func spotlightDomainIdentifier(
+        userId: Int,
+        driveId: Int
+    ) -> String {
+        "kdrive-user-\(userId)-drive-\(driveId)"
+    }
+
     private static let maximumResultCount = 25
 
     static let defaultQuery = KDriveEntityQuery()
@@ -40,16 +47,25 @@ struct KDriveFileEntity: IndexedEntity {
 
     var id: FileEntityIdentifier
 
+    @Property(indexingKey: \.contentCreationDate)
     var creationDate: Date?
+
+    @Property(indexingKey: \.contentModificationDate)
     var fileModificationDate: Date?
+
+    @Property(indexingKey: \.contentType)
     var contentTypeIdentifier: String
+
+    @Property(indexingKey: \.keywords)
     var categoryNames: [String]
+
+    @Property(indexingKey: \.displayName)
+    var name: String
 
     var objectId: String
     var userId: Int
     var driveId: Int
     var fileId: Int
-    var name: String
 
     var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(
@@ -60,11 +76,14 @@ struct KDriveFileEntity: IndexedEntity {
     var attributeSet: CSSearchableItemAttributeSet {
         let set = CSSearchableItemAttributeSet(contentType: .item)
 
+        set.title = name
         set.displayName = name
         set.keywords = categoryNames
         set.contentType = contentTypeIdentifier
         set.contentCreationDate = creationDate
         set.contentModificationDate = fileModificationDate
+
+        set.domainIdentifier = Self.spotlightDomainIdentifier(userId: userId, driveId: driveId)
 
         return set
     }
@@ -128,8 +147,8 @@ struct KDriveFileEntity: IndexedEntity {
         contentTypeIdentifier = file.typeIdentifier
 
         @InjectService var accountManager: AccountManageable
-        let driveFileManager = accountManager.getDriveFileManager(for: fileId, userId: userId)
-        categoryNames = driveFileManager?.drive.categories(for: file).map { $0.name } ?? []
+        let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId)
+        categoryNames = driveFileManager?.drive.categories(for: file).map { $0.localizedName } ?? []
 
         creationDate = file.createdAt
         fileModificationDate = file.lastModifiedAt
