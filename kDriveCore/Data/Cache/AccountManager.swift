@@ -665,6 +665,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 switchAccount(newAccount: nextAccount)
                 await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
             } else {
+                SpotlightIndexer.shared.deindexAllItems()
                 SentrySDK.setUser(nil)
             }
             appNavigable.prepareRootViewController(

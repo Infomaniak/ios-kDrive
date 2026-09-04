@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Algorithms
 import CoreSpotlight
 import FileProvider
 import InfomaniakDI
@@ -33,7 +34,7 @@ public final class SpotlightIndexer {
     public init() {}
 
     public func indexAllItems() {
-        guard #available(iOS 18.0, *) else {
+        guard #available(iOS 18.4, *) else {
             return
         }
 
@@ -59,10 +60,15 @@ public final class SpotlightIndexer {
                         return
                     }
 
-                    let files = Array(driveFileManager.database
-                        .fetchResults(ofType: File.self) { $0 }
-                        .sorted(by: \.lastModifiedAt, ascending: false)
-                        .prefix(Self.maxIndexedItems))
+                    let files = Array(
+                        driveFileManager.database
+                            .fetchResults(ofType: File.self) { $0 }
+                            .sorted(by: \.lastModifiedAt, ascending: false)
+                            .filter("id > 0")
+                            .prefix(Self.maxIndexedItems)
+                            .filter { !$0.isTrashed }
+                            .map { $0.freeze() }
+                    )
 
                     var entities = [KDriveFileEntity]()
                     entities.reserveCapacity(files.count)
@@ -73,7 +79,6 @@ public final class SpotlightIndexer {
                             driveFileManager: driveFileManager,
                             fileProviderManager: fileProviderManager
                         )
-
                         entities.append(entity)
                     }
 
@@ -87,15 +92,16 @@ public final class SpotlightIndexer {
         }
     }
 
-    public func deindexItemsForDrive(_ driveIds: [String]) {
+    public func deindexItemsForDrive(userId: Int, driveId: Int) {
         guard #available(iOS 18.4, *) else {
             return
         }
 
         Task {
             await operationQueue.perform {
+                let domainIdentifier = KDriveFileEntity.spotlightDomainIdentifier(userId: userId, driveId: driveId)
                 do {
-                    try await CSSearchableIndex(name: Self.spotlightIndexName).deleteSearchableItems(withIdentifiers: driveIds)
+                    try await CSSearchableIndex(name: Self.spotlightIndexName).deleteSearchableItems(withDomainIdentifiers: [domainIdentifier])
                 } catch {
                     Self.logger.error("Failed to remove a drive from Spotlight: \(error)")
                 }
