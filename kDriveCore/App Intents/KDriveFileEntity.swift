@@ -29,6 +29,12 @@ struct KDriveFileEntity: FileEntity {
 
     static let defaultQuery = KDriveEntityQuery()
 
+    static var typeDisplayRepresentation: TypeDisplayRepresentation {
+        TypeDisplayRepresentation(
+            name: LocalizedStringResource("itemLabel", table: "Localizable")
+        )
+    }
+
     static let supportedContentTypes: [UTType] = [.item, .folder]
 
     var id: FileEntityIdentifier
