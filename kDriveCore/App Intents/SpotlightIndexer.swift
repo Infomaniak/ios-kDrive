@@ -69,13 +69,14 @@ public final class SpotlightIndexer {
                         }
 
                         let files = Array(
-                            driveFileManager.database
-                                .fetchResults(ofType: File.self) { $0 }
-                                .filter("id > 0")
-                                .sorted(by: \.lastModifiedAt, ascending: false)
-                                .filter { !$0.isTrashed }
-                                .prefix(Self.maxIndexedItems)
-                                .map { $0.freeze() }
+                            driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
+                                lazyCollection
+                                    .filter("id > %@", DriveFileManager.constants.rootID)
+                                    .filter("rawStatus != 'trashed' AND rawStatus != 'trash_inherited'")
+                                    .sorted(byKeyPath: "lastModifiedAt", ascending: false)
+                                    .freeze()
+                            }
+                            .prefix(Self.maxIndexedItems)
                         )
 
                         var entities = [KDriveFileEntity]()
