@@ -63,9 +63,8 @@ public final class SpotlightIndexer {
 
                 await drivesToIndex.filter { !$0.inMaintenance }
                     .concurrentForEach { drive in
-                        guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
-                              let domain = domains.first(where: { $0.identifier.rawValue == drive.objectId }),
-                              let fileProviderManager = NSFileProviderManager(for: domain) else {
+                        guard let driveFileManager = accountManager
+                            .getDriveFileManager(for: drive.id, userId: drive.userId) else {
                             return
                         }
 
@@ -81,6 +80,10 @@ public final class SpotlightIndexer {
 
                         var entities = [KDriveFileEntity]()
                         entities.reserveCapacity(files.count)
+
+                        let fileProviderManager = domains
+                            .first { $0.identifier.rawValue == drive.objectId }
+                            .flatMap { NSFileProviderManager(for: $0) }
 
                         for file in files {
                             let entity = await KDriveFileEntity.makeEntity(
