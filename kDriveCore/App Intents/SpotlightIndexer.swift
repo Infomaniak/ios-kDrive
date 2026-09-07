@@ -27,6 +27,9 @@ public final class SpotlightIndexer {
 
     public static let spotlightIndexName = "kDrive"
     public static let maxIndexedItems = 500
+    private static let maxDeindexAttempts = 3
+    private static let deindexRetryDelay: UInt64 = 500_000_000
+
     public static let shared = SpotlightIndexer()
 
     private let operationQueue = SpotlightIndexOperationQueue()
@@ -100,11 +103,23 @@ public final class SpotlightIndexer {
         Task {
             await operationQueue.perform {
                 let domainIdentifier = KDriveFileEntity.spotlightDomainIdentifier(userId: userId, driveId: driveId)
-                do {
-                    try await CSSearchableIndex(name: Self.spotlightIndexName)
-                        .deleteSearchableItems(withDomainIdentifiers: [domainIdentifier])
-                } catch {
-                    Self.logger.error("Failed to remove a drive from Spotlight: \(error)")
+
+                for attempt in 1 ... Self.maxDeindexAttempts {
+                    do {
+                        try await CSSearchableIndex(name: Self.spotlightIndexName)
+                            .deleteSearchableItems(withDomainIdentifiers: [domainIdentifier])
+                        return
+                    } catch {
+                        Self.logger.error(
+                            "Failed to remove a drive from Spotlight (attempt \(attempt)/\(Self.maxDeindexAttempts)): \(error)"
+                        )
+
+                        guard attempt < Self.maxDeindexAttempts else {
+                            return
+                        }
+
+                        try? await Task.sleep(nanoseconds: Self.deindexRetryDelay)
+                    }
                 }
             }
         }
@@ -117,10 +132,21 @@ public final class SpotlightIndexer {
 
         Task {
             await operationQueue.perform {
-                do {
-                    try await CSSearchableIndex(name: Self.spotlightIndexName).deleteAllSearchableItems()
-                } catch {
-                    Self.logger.error("Failed to clear the Spotlight index: \(error)")
+                for attempt in 1 ... Self.maxDeindexAttempts {
+                    do {
+                        try await CSSearchableIndex(name: Self.spotlightIndexName).deleteAllSearchableItems()
+                        return
+                    } catch {
+                        Self.logger.error(
+                            "Failed to clear the Spotlight index (attempt \(attempt)/\(Self.maxDeindexAttempts)): \(error)"
+                        )
+
+                        guard attempt < Self.maxDeindexAttempts else {
+                            return
+                        }
+
+                        try? await Task.sleep(nanoseconds: Self.deindexRetryDelay)
+                    }
                 }
             }
         }
