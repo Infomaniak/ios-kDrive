@@ -25,7 +25,7 @@ import UniformTypeIdentifiers
 
 @available(iOS 18.4, *)
 @AppEntity(schema: .files.file)
-struct KDriveFileEntity: IndexedEntity {
+struct KDriveFileEntity: FileEntity, IndexedEntity {
     static func spotlightDomainIdentifier(
         userId: Int,
         driveId: Int
