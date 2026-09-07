@@ -54,9 +54,14 @@ public final class SpotlightIndexer {
                     return
                 }
 
-                let drives = accountManager.drives.map { $0.freeze() }
+                var drivesToIndex = [Drive]()
+                for userId in accountManager.accountIds {
+                    @InjectService var driveInfoManager: DriveInfosManager
+                    let drives = driveInfoManager.getDrives(for: userId)
+                    drivesToIndex.append(contentsOf: drives.map { $0.freeze() })
+                }
 
-                await drives.concurrentForEach { drive in
+                await drivesToIndex.concurrentForEach { drive in
                     guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
                           let domain = domains.first(where: { $0.identifier.rawValue == drive.objectId }),
                           let fileProviderManager = NSFileProviderManager(for: domain) else {
