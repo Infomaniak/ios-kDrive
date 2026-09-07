@@ -53,6 +53,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     @LazyInjectService var downloadQueue: DownloadQueueable
     @LazyInjectService var tokenStore: TokenStore
     @LazyInjectService var notificationService: InfomaniakNotifications
+    @LazyInjectService var dynamicIslandService: DynamicIslandServiceable
 
     // MARK: - UIApplicationDelegate
 
@@ -119,6 +120,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
         UNUserNotificationCenter.current().delegate = self
         application.registerForRemoteNotifications()
+
+        dynamicIslandService.registerTask()
 
         return true
     }

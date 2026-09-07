@@ -24,6 +24,7 @@ public final class UploadParallelismOrchestrator {
     @LazyInjectService(customTypeIdentifier: UploadQueueID.global) private var globalUploadQueue: UploadQueueable
     @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable
     @LazyInjectService private var appContextService: AppContextServiceable
+    @LazyInjectService private var dynamicIslandService: DynamicIslandServiceable
 
     private let serialEventQueue = DispatchQueue(
         label: "com.infomaniak.drive.upload-parallelism-orchestrator.event",
@@ -88,6 +89,14 @@ public final class UploadParallelismOrchestrator {
 
     private func computeUploadParallelismPerQueueAndApply() {
         serialEventQueue.async {
+            let globalQueueActiveForDynamicIsland = self.globalUploadQueue.isActive
+            let photoQueueActiveForDynamicIsland = self.photoUploadQueue.isActive
+
+            self.dynamicIslandService.updateQueueActivity(
+                globalQueueActive: globalQueueActiveForDynamicIsland,
+                photoQueueActive: photoQueueActiveForDynamicIsland
+            )
+
             let currentAvailableParallelism = self.availableParallelism
             Log.uploadQueue("Current total available upload parallelism :\(currentAvailableParallelism)")
 
