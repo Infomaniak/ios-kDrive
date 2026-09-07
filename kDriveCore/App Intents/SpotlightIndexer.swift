@@ -63,10 +63,10 @@ public final class SpotlightIndexer {
                     let files = Array(
                         driveFileManager.database
                             .fetchResults(ofType: File.self) { $0 }
-                            .sorted(by: \.lastModifiedAt, ascending: false)
                             .filter("id > 0")
-                            .prefix(Self.maxIndexedItems)
+                            .sorted(by: \.lastModifiedAt, ascending: false)
                             .filter { !$0.isTrashed }
+                            .prefix(Self.maxIndexedItems)
                             .map { $0.freeze() }
                     )
 
@@ -101,7 +101,8 @@ public final class SpotlightIndexer {
             await operationQueue.perform {
                 let domainIdentifier = KDriveFileEntity.spotlightDomainIdentifier(userId: userId, driveId: driveId)
                 do {
-                    try await CSSearchableIndex(name: Self.spotlightIndexName).deleteSearchableItems(withDomainIdentifiers: [domainIdentifier])
+                    try await CSSearchableIndex(name: Self.spotlightIndexName)
+                        .deleteSearchableItems(withDomainIdentifiers: [domainIdentifier])
                 } catch {
                     Self.logger.error("Failed to remove a drive from Spotlight: \(error)")
                 }
