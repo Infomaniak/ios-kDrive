@@ -61,39 +61,40 @@ public final class SpotlightIndexer {
                     drivesToIndex.append(contentsOf: drives.map { $0.freeze() })
                 }
 
-                await drivesToIndex.concurrentForEach { drive in
-                    guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
-                          let domain = domains.first(where: { $0.identifier.rawValue == drive.objectId }),
-                          let fileProviderManager = NSFileProviderManager(for: domain) else {
-                        return
-                    }
+                await drivesToIndex.filter { !$0.inMaintenance }
+                    .concurrentForEach { drive in
+                        guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
+                              let domain = domains.first(where: { $0.identifier.rawValue == drive.objectId }),
+                              let fileProviderManager = NSFileProviderManager(for: domain) else {
+                            return
+                        }
 
-                    let files = Array(
-                        driveFileManager.database
-                            .fetchResults(ofType: File.self) { $0 }
-                            .filter("id > 0")
-                            .sorted(by: \.lastModifiedAt, ascending: false)
-                            .filter { !$0.isTrashed }
-                            .prefix(Self.maxIndexedItems)
-                            .map { $0.freeze() }
-                    )
-
-                    var entities = [KDriveFileEntity]()
-                    entities.reserveCapacity(files.count)
-
-                    for file in files {
-                        let entity = await KDriveFileEntity.makeEntity(
-                            for: file,
-                            driveFileManager: driveFileManager,
-                            fileProviderManager: fileProviderManager
+                        let files = Array(
+                            driveFileManager.database
+                                .fetchResults(ofType: File.self) { $0 }
+                                .filter("id > 0")
+                                .sorted(by: \.lastModifiedAt, ascending: false)
+                                .filter { !$0.isTrashed }
+                                .prefix(Self.maxIndexedItems)
+                                .map { $0.freeze() }
                         )
-                        entities.append(entity)
+
+                        var entities = [KDriveFileEntity]()
+                        entities.reserveCapacity(files.count)
+
+                        for file in files {
+                            let entity = await KDriveFileEntity.makeEntity(
+                                for: file,
+                                driveFileManager: driveFileManager,
+                                fileProviderManager: fileProviderManager
+                            )
+                            entities.append(entity)
+                        }
+
+                        guard !entities.isEmpty else { return }
+
+                        try? await searchableIndex.indexAppEntities(entities)
                     }
-
-                    guard !entities.isEmpty else { return }
-
-                    try? await searchableIndex.indexAppEntities(entities)
-                }
 
                 Self.logger.info("Spotlight updated in \(Date().timeIntervalSince(date)) seconds")
             }
