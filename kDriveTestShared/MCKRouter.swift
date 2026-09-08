@@ -77,6 +77,10 @@ public final class MCKRouter: AppNavigable {
         return nil
     }
 
+    public func showSearch(query: String?) {
+        logNoop()
+    }
+
     public func showPreloading(currentAccount: ApiToken) {
         logNoop()
     }
