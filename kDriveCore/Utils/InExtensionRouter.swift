@@ -45,6 +45,8 @@ public struct InExtensionRouter: AppNavigable {
         return nil
     }
 
+    public func showSearch(query: String?) {}
+
     public func showPreloading(currentAccount: ApiToken) {}
 
     public func showOnboarding() {}
