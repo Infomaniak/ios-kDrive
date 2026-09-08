@@ -33,6 +33,10 @@ struct KDriveFileEntity: FileEntity, IndexedEntity {
         "kdrive-user-\(userId)-drive-\(driveId)"
     }
 
+    static func draftIdentifier(userId: Int, driveId: Int, fileId: Int) -> String {
+        "\(userId):\(driveId):\(fileId)"
+    }
+
     private static let maximumResultCount = 25
 
     static let defaultQuery = KDriveEntityQuery()
@@ -132,7 +136,7 @@ struct KDriveFileEntity: FileEntity, IndexedEntity {
             file: file,
             userId: userId,
             id: .draft(
-                identifier: "\(userId):\(file.driveId):\(file.id)"
+                identifier: draftIdentifier(userId: userId, driveId: file.driveId, fileId: file.id)
             )
         )
     }
@@ -283,5 +287,19 @@ struct KDriveFileEntity: FileEntity, IndexedEntity {
                 }
             }
         }
+    }
+}
+
+@available(iOS 18.4, *)
+public enum KDriveSpotlightEntity {
+    public static func fileEntityIdentifier(for file: File, userId: Int) -> EntityIdentifier {
+        EntityIdentifier(
+            for: KDriveFileEntity.self,
+            identifier: .draft(identifier: KDriveFileEntity.draftIdentifier(
+                userId: userId,
+                driveId: file.driveId,
+                fileId: file.id
+            ))
+        )
     }
 }
