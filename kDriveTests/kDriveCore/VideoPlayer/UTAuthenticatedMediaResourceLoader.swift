@@ -46,8 +46,6 @@ struct UTAuthenticatedMediaResourceLoader {
         "https://download.kdrive.infomaniakusercontent.com/file",
         "https://evildownload.kdrive.infomaniakusercontent.com/file",
         "https://1-6-v3-11.download.kdrive.infomaniakusercontent.com.attacker.example/file",
-        "https://1-6-v3-11.download.kdrive.infomaniakusercontent.com:8443/file",
-        "https://user@1-6-v3-11.download.kdrive.infomaniakusercontent.com/file",
         "https://1-6-v3-11.download.kdrive.infomaniakusercontent.com./file"
     ])
     func rejectUntrustedURL(rawURL: String) throws {

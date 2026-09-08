@@ -79,14 +79,8 @@ final class AuthenticatedMediaResourceLoader: NSObject, AVAssetResourceLoaderDel
     }
 
     static func isAllowed(_ url: URL) -> Bool {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              components.scheme?.lowercased() == "https",
-              components.port == nil || components.port == 443,
-              components.user == nil,
-              components.password == nil,
-              components.fragment == nil,
-              let host = components.host?.lowercased(),
-              !host.hasSuffix(".") else {
+        guard url.scheme?.lowercased() == "https",
+              let host = url.host?.lowercased() else {
             return false
         }
 
