@@ -940,7 +940,7 @@ extension FileListViewController: TopScrollable {
 extension FileListViewController: UICollectionViewAppIntentsDataSource {
     func collectionView(_ collectionView: UICollectionView,
                         appEntityIdentifierForItemAt indexPath: IndexPath) -> EntityIdentifier? {
-        guard let file = getDisplayedFile(at: indexPath) else {
+        guard let file = getDisplayedFile(at: indexPath), !driveFileManager.isPublicShare else {
             return nil
         }
 
