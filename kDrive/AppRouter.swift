@@ -174,6 +174,7 @@ public struct AppRouter: AppNavigable {
             viewModel.filters.belongToAllCategories = searchLink.categoryOperator == nil
             viewModel.filters.fileType = searchLink.type
         }
+        matomo.track(eventWithCategory: .deeplink, name: "internal")
     }
 
     @MainActor private func presentSearchScreen(driveFileManager: DriveFileManager,
@@ -186,7 +187,6 @@ public struct AppRouter: AppNavigable {
         viewModel.currentSearchText = query
 
         let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
-        matomo.track(eventWithCategory: .deeplink, name: "internal")
         rootViewController?.present(searchViewController, animated: true)
     }
 
