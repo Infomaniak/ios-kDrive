@@ -112,10 +112,12 @@ public final class SingleTrackPlayer: Pausable {
             ).url
             let asset = AVURLAsset(url: url)
             await setupStreamingAsset(asset, fileName: playableFile.name)
-        } else if let token = driveFileManager.apiFetcher.currentToken {
+        } else if driveFileManager.apiFetcher.currentToken != nil {
             let url = Endpoint.download(file: playableFile).url
-            let headers = ["Authorization": "Bearer \(token.accessToken)"]
-            let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
+            guard let asset = AuthenticatedMediaAsset(url: url, apiFetcher: driveFileManager.apiFetcher) else {
+                onPlaybackError.send(.previewLoadErrorNoToken)
+                return
+            }
             await setupStreamingAsset(asset, fileName: playableFile.name)
         } else {
             onPlaybackError.send(.previewLoadErrorNoToken)

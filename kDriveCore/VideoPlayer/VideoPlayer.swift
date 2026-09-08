@@ -121,15 +121,12 @@ public final class VideoPlayer: Pausable {
             let remoteAsset = AVURLAsset(url: url, options: nil)
             setupStreamingAsset(remoteAsset, fileName: file.name)
 
-        } else if let token = driveFileManager.apiFetcher.currentToken {
+        } else if driveFileManager.apiFetcher.currentToken != nil {
             let url = Endpoint.download(file: file).url
-            let fileName = file.name
-            driveFileManager.apiFetcher.performAuthenticatedRequest(token: token) { token, _ in
-                guard let token else { return }
-                let headers = ["Authorization": "Bearer \(token.accessToken)"]
-                let remoteAsset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
-                self.setupStreamingAsset(remoteAsset, fileName: fileName)
+            guard let remoteAsset = AuthenticatedMediaAsset(url: url, apiFetcher: driveFileManager.apiFetcher) else {
+                return
             }
+            setupStreamingAsset(remoteAsset, fileName: file.name)
         }
     }
 
