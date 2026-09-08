@@ -30,6 +30,6 @@ extension KDriveFileEntity.KDriveEntityQuery: IndexedEntityQuery {
     }
 
     func reindexAllEntities(indexDescription: CSSearchableIndexDescription) async throws {
-        SpotlightIndexer.shared.indexAllItems()
+        try await SpotlightIndexer.shared.indexAllItems()
     }
 }
