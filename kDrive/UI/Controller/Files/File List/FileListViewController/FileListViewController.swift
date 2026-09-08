@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppIntents
 import Combine
 import DifferenceKit
 import InfomaniakCore
@@ -138,6 +139,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         setupFooterIfNeeded()
         if #available(iOS 26.0, *) {
             collectionView.topEdgeEffect.isHidden = true
+        }
+
+        if #available(iOS 18.4, *) {
+            collectionView.appIntentsDataSource = self
         }
     }
 
@@ -928,5 +933,17 @@ extension FileListViewController: TopScrollable {
         if isViewLoaded {
             collectionView.scrollToTop(animated: true, navigationController: navigationController)
         }
+    }
+}
+
+@available(iOS 18.4, *)
+extension FileListViewController: UICollectionViewAppIntentsDataSource {
+    func collectionView(_ collectionView: UICollectionView,
+                        appEntityIdentifierForItemAt indexPath: IndexPath) -> EntityIdentifier? {
+        guard let file = getDisplayedFile(at: indexPath) else {
+            return nil
+        }
+
+        return KDriveSpotlightEntity.fileEntityIdentifier(for: file, userId: driveFileManager.drive.userId)
     }
 }
