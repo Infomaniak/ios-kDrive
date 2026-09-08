@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import AppIntents
 import AVFoundation
 import InfomaniakCore
 import InfomaniakCoreCommonUI
@@ -173,6 +174,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         observeNetwork()
         observeFileUpdated()
         setupBackgroundExtensionView()
+        updateFileEntityIdentifier()
     }
 
     func createFullscreenLayout() -> UICollectionViewLayout {
@@ -345,6 +347,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func updateFileForCurrentIndex() {
         fileInformationsViewController.updateAndObserveFile(withFileUid: currentFile.uid, driveFileManager: driveFileManager)
+    }
+
+    private func updateFileEntityIdentifier() {
+        guard #available(iOS 18.4, *) else { return }
+        view.appEntityIdentifier = KDriveSpotlightEntity.fileEntityIdentifier(
+            for: currentFile,
+            userId: accountManager.currentUserId
+        )
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -690,6 +700,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         updateNavigationBar()
         downloadFileIfNeeded(at: currentIndex)
         updateBackgroundExtensionForCurrentFile()
+        updateFileEntityIdentifier()
     }
 
     func errorWhilePreviewing(fileId: Int, error: Error) {
