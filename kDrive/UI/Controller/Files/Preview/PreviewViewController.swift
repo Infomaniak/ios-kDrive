@@ -350,7 +350,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func updateFileEntityIdentifier() {
-        guard #available(iOS 18.4, *) else { return }
+        guard #available(iOS 18.4, *), !driveFileManager.isPublicShare else { return }
         view.appEntityIdentifier = KDriveSpotlightEntity.fileEntityIdentifier(
             for: currentFile,
             userId: accountManager.currentUserId
