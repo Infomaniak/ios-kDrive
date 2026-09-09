@@ -1303,6 +1303,9 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Verfallszeit";
 
+/* loco:6a9a68f38cdf25fae40adb63 */
+"itemLabel" = "Element";
+
 /* loco:6049df4d5c2c3a04bc3979fc */
 "lastEditsTitle" = "Letzte Änderungen";
 
