@@ -20,7 +20,7 @@ import AppIntents
 import InfomaniakDI
 import kDriveResources
 
-@available(iOS 18.0, *)
+@available(iOS 18.4, *)
 @AppIntent(schema: .files.openFile)
 struct OpenFileIntent: OpenIntent {
     var target: KDriveFileEntity
@@ -61,7 +61,7 @@ struct OpenFileIntent: OpenIntent {
     }
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.4, *)
 @AppIntent(schema: .files.moveFiles)
 struct MoveFilesIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy {
@@ -110,7 +110,7 @@ struct MoveFilesIntent {
     }
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.4, *)
 @AppIntent(schema: .files.renameFile)
 struct RenameFileIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy {
@@ -132,7 +132,7 @@ struct RenameFileIntent {
     }
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.4, *)
 @AppIntent(schema: .files.deleteFiles)
 struct DeleteFilesIntent: DeleteIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy {
@@ -155,7 +155,7 @@ struct DeleteFilesIntent: DeleteIntent {
     }
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.4, *)
 @AppIntent(schema: .files.createFolder)
 struct CreateFolderIntent {
     static var authenticationPolicy: IntentAuthenticationPolicy {
@@ -202,13 +202,13 @@ struct CreateFolderIntent {
     }
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.4, *)
 struct ResolvedKDriveFile {
     let file: File
     let driveFileManager: DriveFileManager
 }
 
-@available(iOS 18.0, *)
+@available(iOS 18.4, *)
 extension KDriveFileEntity {
     func resolveCache() throws -> ResolvedKDriveFile {
         @InjectService var accountManager: AccountManageable

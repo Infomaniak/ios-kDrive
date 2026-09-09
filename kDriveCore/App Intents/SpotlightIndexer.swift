@@ -1,0 +1,178 @@
+/*
+ Infomaniak kDrive - iOS App
+ Copyright (C) 2025 Infomaniak Network SA
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import Algorithms
+import CoreSpotlight
+import FileProvider
+import InfomaniakDI
+import OSLog
+
+public final class SpotlightIndexer {
+    private static let logger = Logger(category: "SpotlightIndexer")
+
+    public static let spotlightIndexName = "kDrive"
+    public static let maxIndexedItems = 500
+    private static let maxDeindexAttempts = 3
+    private static let deindexRetryDelay: UInt64 = 500_000_000
+
+    public static let shared = SpotlightIndexer()
+
+    private let operationQueue = SpotlightIndexOperationQueue()
+
+    public init() {}
+
+    public func indexAllItems() {
+        guard #available(iOS 18.4, *) else {
+            return
+        }
+
+        Task {
+            await operationQueue.perform {
+                @InjectService var accountManager: AccountManageable
+
+                let date = Date()
+
+                let searchableIndex = CSSearchableIndex(name: Self.spotlightIndexName)
+                try? await searchableIndex.deleteAppEntities(ofType: KDriveFileEntity.self)
+
+                guard let domains = try? await NSFileProviderManager.domains() else {
+                    return
+                }
+
+                var drivesToIndex = [Drive]()
+                for userId in accountManager.accountIds {
+                    @InjectService var driveInfoManager: DriveInfosManager
+                    let drives = driveInfoManager.getDrives(for: userId)
+                    drivesToIndex.append(contentsOf: drives.map { $0.freeze() })
+                }
+
+                await drivesToIndex.filter { !$0.inMaintenance }
+                    .concurrentForEach { drive in
+                        guard let driveFileManager = accountManager
+                            .getDriveFileManager(for: drive.id, userId: drive.userId) else {
+                            return
+                        }
+
+                        let files = Array(
+                            driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
+                                lazyCollection
+                                    .filter("id > %@", DriveFileManager.constants.rootID)
+                                    .filter("rawStatus != 'trashed' AND rawStatus != 'trash_inherited'")
+                                    .sorted(byKeyPath: "lastModifiedAt", ascending: false)
+                                    .freeze()
+                            }
+                            .prefix(Self.maxIndexedItems)
+                        )
+
+                        var entities = [KDriveFileEntity]()
+                        entities.reserveCapacity(files.count)
+
+                        let fileProviderManager = domains
+                            .first { $0.identifier.rawValue == drive.objectId }
+                            .flatMap { NSFileProviderManager(for: $0) }
+
+                        for file in files {
+                            let entity = await KDriveFileEntity.makeEntity(
+                                for: file,
+                                driveFileManager: driveFileManager,
+                                fileProviderManager: fileProviderManager
+                            )
+                            entities.append(entity)
+                        }
+
+                        guard !entities.isEmpty else { return }
+
+                        try? await searchableIndex.indexAppEntities(entities)
+                    }
+
+                Self.logger.info("Spotlight updated in \(Date().timeIntervalSince(date)) seconds")
+            }
+        }
+    }
+
+    public func deindexItemsForDrive(userId: Int, driveId: Int) {
+        guard #available(iOS 18.4, *) else {
+            return
+        }
+
+        Task {
+            await operationQueue.perform {
+                let domainIdentifier = KDriveFileEntity.spotlightDomainIdentifier(userId: userId, driveId: driveId)
+
+                for attempt in 1 ... Self.maxDeindexAttempts {
+                    do {
+                        try await CSSearchableIndex(name: Self.spotlightIndexName)
+                            .deleteSearchableItems(withDomainIdentifiers: [domainIdentifier])
+                        return
+                    } catch {
+                        Self.logger.error(
+                            "Failed to remove a drive from Spotlight (attempt \(attempt)/\(Self.maxDeindexAttempts)): \(error)"
+                        )
+
+                        guard attempt < Self.maxDeindexAttempts else {
+                            return
+                        }
+
+                        try? await Task.sleep(nanoseconds: Self.deindexRetryDelay)
+                    }
+                }
+            }
+        }
+    }
+
+    public func deindexAllItems() {
+        guard #available(iOS 18.4, *) else {
+            return
+        }
+
+        Task {
+            await operationQueue.perform {
+                for attempt in 1 ... Self.maxDeindexAttempts {
+                    do {
+                        try await CSSearchableIndex(name: Self.spotlightIndexName).deleteAllSearchableItems()
+                        return
+                    } catch {
+                        Self.logger.error(
+                            "Failed to clear the Spotlight index (attempt \(attempt)/\(Self.maxDeindexAttempts)): \(error)"
+                        )
+
+                        guard attempt < Self.maxDeindexAttempts else {
+                            return
+                        }
+
+                        try? await Task.sleep(nanoseconds: Self.deindexRetryDelay)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private actor SpotlightIndexOperationQueue {
+    private var pendingOperation: Task<Void, Never>?
+
+    func perform(_ operation: @escaping @Sendable () async -> Void) async {
+        let previousOperation = pendingOperation
+        let operationTask = Task {
+            await previousOperation?.value
+            await operation()
+        }
+        pendingOperation = operationTask
+        await operationTask.value
+    }
+}
