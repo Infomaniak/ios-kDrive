@@ -1,3 +1,3 @@
-- Fix related to media CDN validation
-- Fix specific to the iPad when reading a PDF file
+- Spotlight indexing of the most recent files
+- New kDrive actions in the Shortcuts app
 - Stability improvements and bug fixes
