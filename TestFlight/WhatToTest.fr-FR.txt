@@ -1,3 +1,3 @@
-- Correction relative a la vérification du CDN média
-- Correction spécifique a l'iPad sur la lecture d'un fichier PDF
+- Indexation Spotlight des fichiers les plus récents
+- Nouvelles actions kDrive dans l'application Raccourcis
 - Améliorations de la stabilité et corrections de bugs
