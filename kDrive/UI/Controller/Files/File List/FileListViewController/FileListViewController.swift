@@ -141,7 +141,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             collectionView.topEdgeEffect.isHidden = true
         }
 
-        if #available(iOS 18.4, *) {
+        if #available(iOS 18.4, *), !driveFileManager.isPublicShare {
             collectionView.appIntentsDataSource = self
         }
     }
@@ -940,7 +940,7 @@ extension FileListViewController: TopScrollable {
 extension FileListViewController: UICollectionViewAppIntentsDataSource {
     func collectionView(_ collectionView: UICollectionView,
                         appEntityIdentifierForItemAt indexPath: IndexPath) -> EntityIdentifier? {
-        guard let file = getDisplayedFile(at: indexPath), !driveFileManager.isPublicShare else {
+        guard let file = getDisplayedFile(at: indexPath) else {
             return nil
         }
 
