@@ -98,7 +98,8 @@ extension AppUITest {
 
         enterInDirectory(named: rootName)
         XCTAssertTrue(app.staticTexts[destinationName].waitForExistence(timeout: 5), "Destination folder should remain visible")
-        XCTAssertFalse(app.staticTexts[sourceName].waitForExistence(timeout: 3), "Moved source should not stay in source directory")
+        XCTAssertFalse(app.staticTexts[sourceName].waitForExistence(timeout: 3),
+                       "Moved source should not stay in source directory")
 
         app.staticTexts[destinationName].tap()
         XCTAssertTrue(app.staticTexts[sourceName].waitForExistence(timeout: 5), "Moved folder should be visible in destination")
