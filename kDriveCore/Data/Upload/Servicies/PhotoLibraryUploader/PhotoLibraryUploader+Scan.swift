@@ -37,6 +37,13 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
             return
         }
 
+        guard driveInfosManager.getDrive(id: frozenSettings.driveId, userId: frozenSettings.userId) != nil else {
+            Log.photoLibraryUploader(
+                "scheduleNewPicturesForUpload: missing drive \(frozenSettings.driveId) for user \(frozenSettings.userId), skipping"
+            )
+            return
+        }
+
         await cancelScan()
 
         let worker = Task {
