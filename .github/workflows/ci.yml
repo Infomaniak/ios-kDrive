@@ -59,7 +59,7 @@ jobs:
       - name: Generate
         run: tuist install && tuist generate
       - name: Test Local
-        run: tuist test kDriveTests --no-selective-testing
+        run: tuist test kDriveTests --clean --no-selective-testing
 
   api_tests:
     name: API Tests
@@ -86,7 +86,7 @@ jobs:
       - name: Generate
         run: tuist install && tuist generate
       - name: Test API
-        run: tuist test kDriveAPITests --test-targets kDriveAPITests/DriveApiTests --no-selective-testing
+        run: tuist test kDriveAPITests --clean --test-targets kDriveAPITests/DriveApiTests --no-selective-testing
   ui_tests:
     name: UI Tests
     runs-on: [ self-hosted, iOS ]
@@ -118,6 +118,7 @@ jobs:
           TEST_RUNNER_LAUNCH_ARGS: "-AppleLanguages (en-GB) -AppleLocale en_GB"
         run: |
           tuist test kDrive-Workspace \
+            --clean \
             --device "$DEVICE_NAME" \
             --test-targets "kDriveUITests/AppUITest" \
             --no-selective-testing
