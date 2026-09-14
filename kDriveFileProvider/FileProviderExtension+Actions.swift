@@ -102,7 +102,9 @@ extension FileProviderExtension {
             .map { $0.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain) }
         let newItemFileName = fileURL.lastPathComponent.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
-           !(collidingItem.isTrashed ?? false) {
+           !(collidingItem.isTrashed ?? false),
+           !replacementConfirmed || collidingItem.itemIdentifier != pendingReplacementIdentifier {
+            pendingReplacementIdentifier = collidingItem.itemIdentifier
             completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
             return
         }
@@ -144,6 +146,8 @@ extension FileProviderExtension {
                                                 conflictOption: .version,
                                                 driveError: nil)
         backgroundUpload(importItem) {
+            self.replacementConfirmed = false
+            self.pendingReplacementIdentifier = nil
             completionHandler(importItem, nil)
         }
     }
@@ -292,6 +296,12 @@ extension FileProviderExtension {
             let deletedFile = file.detached()
             let item = deletedFile.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain)
             item.trashModifier(newValue: true)
+
+            if pendingReplacementIdentifier == itemIdentifier {
+                replacementConfirmed = true
+                completionHandler(item, nil)
+                return
+            }
 
             let proxyFile = file.proxify()
 
