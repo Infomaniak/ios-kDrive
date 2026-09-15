@@ -42,7 +42,7 @@ public final class SpotlightIndexer {
     func reindexItems(for identifiers: [FileEntityIdentifier]) async throws {
         try await operationQueue.performThrowing {
             let entities = try await KDriveFileEntity.defaultQuery.entities(for: identifiers)
-            try await CSSearchableIndex(name: Self.spotlightIndexName).indexAppEntities(entities)
+            try await CSSearchableIndex(name: Self.spotlightIndexName).indexAppEntities(entities.filter { !$0.isExternal })
         }
     }
 
