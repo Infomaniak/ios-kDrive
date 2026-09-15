@@ -155,31 +155,38 @@ public struct AppRouter: AppNavigable {
             return
         }
 
+        presentSearchScreen(driveFileManager: driveFileManager, query: searchLink.searchQuery) { viewModel in
+            if let startTimestamp = searchLink.modifiedAfter, let endTimeStamp = searchLink.modifiedBefore {
+                let startDate = Date(timeIntervalSince1970: TimeInterval(startTimestamp))
+                let endDate = Date(timeIntervalSince1970: TimeInterval(endTimeStamp))
+                let dateInterval = DateInterval(start: startDate, end: endDate)
+                viewModel.filters.date = DateOption.custom(dateInterval)
+            }
+
+            var searchCategories = Set<kDriveCore.Category>()
+            let allCategories = Array(driveFileManager.drive.categories)
+            for categoryId in searchLink.categoryIds {
+                if let category = allCategories.first(where: { $0.id == categoryId }) {
+                    searchCategories.insert(category)
+                }
+            }
+            viewModel.filters.categories = searchCategories
+            viewModel.filters.belongToAllCategories = searchLink.categoryOperator == nil
+            viewModel.filters.fileType = searchLink.type
+        }
+        matomo.track(eventWithCategory: .deeplink, name: "internal")
+    }
+
+    @MainActor private func presentSearchScreen(driveFileManager: DriveFileManager,
+                                                query: String?,
+                                                configure: ((SearchFilesViewModel) -> Void)? = nil) {
         showMainViewController(driveFileManager: driveFileManager, selectedIndex: MainTabBarIndex.files.rawValue)
 
         let viewModel = SearchFilesViewModel(driveFileManager: driveFileManager)
-
-        if let startTimestamp = searchLink.modifiedAfter, let endTimeStamp = searchLink.modifiedBefore {
-            let startDate = Date(timeIntervalSince1970: TimeInterval(startTimestamp))
-            let endDate = Date(timeIntervalSince1970: TimeInterval(endTimeStamp))
-            let dateInterval = DateInterval(start: startDate, end: endDate)
-            viewModel.filters.date = DateOption.custom(dateInterval)
-        }
-
-        var searchCategories = Set<kDriveCore.Category>()
-        let allCategories = Array(driveFileManager.drive.categories)
-        for categoryId in searchLink.categoryIds {
-            if let category = allCategories.first(where: { $0.id == categoryId }) {
-                searchCategories.insert(category)
-            }
-        }
-        viewModel.filters.categories = searchCategories
-        viewModel.currentSearchText = searchLink.searchQuery
-        viewModel.filters.belongToAllCategories = searchLink.categoryOperator == nil
-        viewModel.filters.fileType = searchLink.type
+        configure?(viewModel)
+        viewModel.currentSearchText = query
 
         let searchViewController = SearchViewController.instantiateInNavigationController(viewModel: viewModel)
-        matomo.track(eventWithCategory: .deeplink, name: "internal")
         rootViewController?.present(searchViewController, animated: true)
     }
 
@@ -501,6 +508,15 @@ public struct AppRouter: AppNavigable {
             window.makeKeyAndVisible()
             return nil
         }
+    }
+
+    @MainActor public func showSearch(query: String?) {
+        guard let driveFileManager = accountManager.currentDriveFileManager else {
+            Log.sceneDelegate("NavigationManager: Unable to show search without a DriveFileManager", level: .error)
+            return
+        }
+
+        presentSearchScreen(driveFileManager: driveFileManager, query: query)
     }
 
     @MainActor public func showPreloading(currentAccount: ApiToken) {

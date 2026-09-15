@@ -17,6 +17,7 @@
  */
 
 import Algorithms
+import AppIntents
 import CoreSpotlight
 import FileProvider
 import InfomaniakDI
@@ -36,73 +37,83 @@ public final class SpotlightIndexer {
 
     public init() {}
 
-    public func indexAllItems() {
+    @available(iOS 18.4, *)
+    func reindexItems(for identifiers: [FileEntityIdentifier]) async throws {
+        try await operationQueue.performThrowing {
+            let entities = try await KDriveFileEntity.defaultQuery.entities(for: identifiers)
+            try await CSSearchableIndex(name: Self.spotlightIndexName).indexAppEntities(entities)
+        }
+    }
+
+    public func indexAllItems() async throws {
         guard #available(iOS 18.4, *) else {
             return
         }
 
-        Task {
-            await operationQueue.perform {
-                @InjectService var accountManager: AccountManageable
+        await operationQueue.perform {
+            @InjectService var accountManager: AccountManageable
 
-                let date = Date()
+            let date = Date()
 
-                let searchableIndex = CSSearchableIndex(name: Self.spotlightIndexName)
-                try? await searchableIndex.deleteAppEntities(ofType: KDriveFileEntity.self)
+            let searchableIndex = CSSearchableIndex(name: Self.spotlightIndexName)
+            try? await searchableIndex.deleteAppEntities(ofType: KDriveFileEntity.self)
 
-                guard let domains = try? await NSFileProviderManager.domains() else {
-                    return
-                }
+            guard let domains = try? await NSFileProviderManager.domains() else {
+                return
+            }
 
-                var drivesToIndex = [Drive]()
-                for userId in accountManager.accountIds {
-                    @InjectService var driveInfoManager: DriveInfosManager
-                    let drives = driveInfoManager.getDrives(for: userId)
-                    drivesToIndex.append(contentsOf: drives.map { $0.freeze() })
-                }
+            var drivesToIndex = [Drive]()
+            for userId in accountManager.accountIds {
+                @InjectService var driveInfoManager: DriveInfosManager
+                let drives = driveInfoManager.getDrives(for: userId)
+                drivesToIndex.append(contentsOf: drives.map { $0.freeze() })
+            }
 
-                await drivesToIndex.filter { !$0.inMaintenance }
-                    .concurrentForEach { drive in
-                        guard let driveFileManager = accountManager
-                            .getDriveFileManager(for: drive.id, userId: drive.userId) else {
-                            return
-                        }
-
-                        let files = Array(
-                            driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
-                                lazyCollection
-                                    .filter("id > %@", DriveFileManager.constants.rootID)
-                                    .filter("rawStatus != 'trashed' AND rawStatus != 'trash_inherited'")
-                                    .sorted(byKeyPath: "lastModifiedAt", ascending: false)
-                                    .freeze()
-                            }
-                            .prefix(Self.maxIndexedItems)
-                        )
-
-                        var entities = [KDriveFileEntity]()
-                        entities.reserveCapacity(files.count)
-
-                        let fileProviderManager = domains
-                            .first { $0.identifier.rawValue == drive.objectId }
-                            .flatMap { NSFileProviderManager(for: $0) }
-
-                        for file in files {
-                            let entity = await KDriveFileEntity.makeEntity(
-                                for: file,
-                                driveFileManager: driveFileManager,
-                                fileProviderManager: fileProviderManager
-                            )
-                            entities.append(entity)
-                        }
-
-                        guard !entities.isEmpty else { return }
-
-                        try? await searchableIndex.indexAppEntities(entities)
+            await drivesToIndex.filter { !$0.inMaintenance }
+                .concurrentForEach { drive in
+                    guard let driveFileManager = accountManager
+                        .getDriveFileManager(for: drive.id, userId: drive.userId) else {
+                        return
                     }
 
-                Self.logger.info("Spotlight updated in \(Date().timeIntervalSince(date)) seconds")
-            }
+                    let files = Array(
+                        driveFileManager.database.fetchResults(ofType: File.self) { lazyCollection in
+                            lazyCollection
+                                .filter("id > %@", DriveFileManager.constants.rootID)
+                                .filter("rawStatus != 'trashed' AND rawStatus != 'trash_inherited'")
+                                .sorted(byKeyPath: "lastModifiedAt", ascending: false)
+                                .freeze()
+                        }
+                        .prefix(Self.maxIndexedItems)
+                    )
+
+                    var entities = [KDriveFileEntity]()
+                    entities.reserveCapacity(files.count)
+
+                    let fileProviderManager = domains
+                        .first { $0.identifier.rawValue == drive.objectId }
+                        .flatMap { NSFileProviderManager(for: $0) }
+
+                    for file in files {
+                        let entity = await KDriveFileEntity.makeEntity(
+                            for: file,
+                            driveFileManager: driveFileManager,
+                            fileProviderManager: fileProviderManager
+                        )
+                        entities.append(entity)
+                    }
+
+                    guard !entities.isEmpty else { return }
+
+                    try? await searchableIndex.indexAppEntities(entities)
+                }
+
+            Self.logger.info("Spotlight updated in \(Date().timeIntervalSince(date)) seconds")
         }
+    }
+
+    public func indexAllItemsInBackground() {
+        Task { try? await indexAllItems() }
     }
 
     public func deindexItemsForDrive(userId: Int, driveId: Int) {
@@ -174,5 +185,15 @@ private actor SpotlightIndexOperationQueue {
         }
         pendingOperation = operationTask
         await operationTask.value
+    }
+
+    func performThrowing(_ operation: @escaping @Sendable () async throws -> Void) async throws {
+        let previousOperation = pendingOperation
+        let operationTask = Task {
+            await previousOperation?.value
+            try await operation()
+        }
+        pendingOperation = Task { _ = try? await operationTask.value }
+        try await operationTask.value
     }
 }
