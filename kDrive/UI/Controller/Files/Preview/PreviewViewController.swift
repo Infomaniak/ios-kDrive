@@ -800,7 +800,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 }
             }
         }
-        downloadQueue.addToQueue(file: currentFile, userId: accountManager.currentUserId, itemIdentifier: nil)
+
+        if let publicShareProxy = driveFileManager.publicShareProxy {
+            downloadQueue.addPublicShareToQueue(file: currentFile,
+                                                driveFileManager: driveFileManager,
+                                                publicShareProxy: publicShareProxy,
+                                                itemIdentifier: nil,
+                                                onOperationCreated: nil,
+                                                completion: nil)
+        } else {
+            downloadQueue.addToQueue(file: currentFile, userId: accountManager.currentUserId, itemIdentifier: nil)
+        }
+
         currentCell.observeProgress(true, file: currentFile)
     }
 
