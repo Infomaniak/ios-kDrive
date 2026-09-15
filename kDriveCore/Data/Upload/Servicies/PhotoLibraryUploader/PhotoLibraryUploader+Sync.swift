@@ -22,7 +22,13 @@ import RealmSwift
 
 public protocol PhotoLibrarySyncable {
     @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings)
-    func disableSync()
+    func disableSync(withSettings: Bool)
+}
+
+public extension PhotoLibrarySyncable {
+    func disableSync() {
+        disableSync(withSettings: true)
+    }
 }
 
 extension PhotoLibraryUploader: PhotoLibrarySyncable {
@@ -104,14 +110,24 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         uploadService.rebuildUploadQueue()
     }
 
-    public func disableSync() {
+    private func deleteSyncSettings() async {
         try? uploadsDatabase.writeTransaction { writableRealm in
             writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         }
+    }
 
+    public func disableSync(withSettings: Bool) {
         Task {
             @InjectService var photoLibraryScan: PhotoLibraryScanable
+            @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
+
+            if withSettings {
+                await deleteSyncSettings()
+            }
+
             await photoLibraryScan.cancelScan()
+
+            photoUploadQueue.cancelAllOperations()
 
             do {
                 try await uploadService.cancelAnyPhotoSync()
@@ -125,9 +141,9 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
     public func forgetUploadedPhotos() async {
         @InjectService var uploadDataSource: UploadServiceDataSourceable
 
-        let objectsIdsToDelete = uploadDataSource
+        let uploadedObjectsIdsToDelete = uploadDataSource
             .getUploadedFilesIDs(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
-        let chunks = objectsIdsToDelete.chunks(ofCount: 50)
+        let chunks = uploadedObjectsIdsToDelete.chunks(ofCount: 50)
 
         try? chunks.forEach { chunk in
             try self.uploadsDatabase.writeTransaction { writableRealm in
