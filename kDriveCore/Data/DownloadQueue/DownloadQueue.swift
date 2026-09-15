@@ -101,6 +101,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
         didDownloadArchive: [UUID: (DownloadedArchiveId, URL?, DriveError?) -> Void](),
         didChangeArchiveProgress: [UUID: (DownloadedArchiveId, Double) -> Void]()
     )
+    private let observationsQueue = DispatchQueue(label: "com.infomaniak.drive.download-observations")
 
     private var bestSession: FileDownloadSession {
         if appContextService.isExtension {
@@ -362,26 +363,30 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
         }
     }
 
-    private func publishFileDownloaded(fileId: Int, error: DriveError?) {
-        for closure in observations.didDownloadFile.values {
+    func publishFileDownloaded(fileId: Int, error: DriveError?) {
+        let closures = observationsQueue.sync { Array(observations.didDownloadFile.values) }
+        for closure in closures {
             closure(fileId, error)
         }
     }
 
     public func publishProgress(_ progress: Double, for fileId: Int) {
-        for closure in observations.didChangeProgress.values {
+        let closures = observationsQueue.sync { Array(observations.didChangeProgress.values) }
+        for closure in closures {
             closure(fileId, progress)
         }
     }
 
     private func publishArchiveDownloaded(archiveId: String, archiveUrl: URL?, error: DriveError?) {
-        for closure in observations.didDownloadArchive.values {
+        let closures = observationsQueue.sync { Array(observations.didDownloadArchive.values) }
+        for closure in closures {
             closure(archiveId, archiveUrl, error)
         }
     }
 
     public func publishProgress(_ progress: Double, for archiveId: String) {
-        for closure in observations.didChangeArchiveProgress.values {
+        let closures = observationsQueue.sync { Array(observations.didChangeArchiveProgress.values) }
+        for closure in closures {
             closure(archiveId, progress)
         }
     }
@@ -396,21 +401,27 @@ public extension DownloadQueue {
                                              using closure: @escaping (DownloadedFileId, DriveError?) -> Void)
         -> ObservationToken {
         let key = UUID()
-        observations.didDownloadFile[key] = { [weak self, weak observer] downloadedFileId, error in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.observations.didDownloadFile.removeValue(forKey: key)
-                return
-            }
+        observationsQueue.sync {
+            observations.didDownloadFile[key] = { [weak self, weak observer] downloadedFileId, error in
+                // If the observer has been deallocated, we can
+                // automatically remove the observation closure.
+                guard observer != nil else {
+                    self?.observationsQueue.sync { [weak self] in
+                        self?.observations.didDownloadFile[key] = nil
+                    }
+                    return
+                }
 
-            if fileId == nil || downloadedFileId == fileId {
-                closure(downloadedFileId, error)
+                if fileId == nil || downloadedFileId == fileId {
+                    closure(downloadedFileId, error)
+                }
             }
         }
 
         return ObservationToken { [weak self] in
-            self?.observations.didDownloadFile.removeValue(forKey: key)
+            self?.observationsQueue.sync { [weak self] in
+                self?.observations.didDownloadFile[key] = nil
+            }
         }
     }
 
@@ -420,21 +431,27 @@ public extension DownloadQueue {
                                                    using closure: @escaping (DownloadedFileId, Double) -> Void)
         -> ObservationToken {
         let key = UUID()
-        observations.didChangeProgress[key] = { [weak self, weak observer] downloadedFileId, progress in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.observations.didChangeProgress.removeValue(forKey: key)
-                return
-            }
+        observationsQueue.sync {
+            observations.didChangeProgress[key] = { [weak self, weak observer] downloadedFileId, progress in
+                // If the observer has been deallocated, we can
+                // automatically remove the observation closure.
+                guard observer != nil else {
+                    self?.observationsQueue.sync { [weak self] in
+                        self?.observations.didChangeProgress[key] = nil
+                    }
+                    return
+                }
 
-            if fileId == nil || downloadedFileId == fileId {
-                closure(downloadedFileId, progress)
+                if fileId == nil || downloadedFileId == fileId {
+                    closure(downloadedFileId, progress)
+                }
             }
         }
 
         return ObservationToken { [weak self] in
-            self?.observations.didChangeProgress.removeValue(forKey: key)
+            self?.observationsQueue.sync { [weak self] in
+                self?.observations.didChangeProgress[key] = nil
+            }
         }
     }
 
@@ -444,21 +461,27 @@ public extension DownloadQueue {
                                                 using closure: @escaping (DownloadedArchiveId, URL?, DriveError?) -> Void)
         -> ObservationToken {
         let key = UUID()
-        observations.didDownloadArchive[key] = { [weak self, weak observer] downloadedArchiveId, archiveUrl, error in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.observations.didDownloadArchive.removeValue(forKey: key)
-                return
-            }
+        observationsQueue.sync {
+            observations.didDownloadArchive[key] = { [weak self, weak observer] downloadedArchiveId, archiveUrl, error in
+                // If the observer has been deallocated, we can
+                // automatically remove the observation closure.
+                guard observer != nil else {
+                    self?.observationsQueue.sync { [weak self] in
+                        self?.observations.didDownloadArchive[key] = nil
+                    }
+                    return
+                }
 
-            if archiveId == nil || downloadedArchiveId == archiveId {
-                closure(downloadedArchiveId, archiveUrl, error)
+                if archiveId == nil || downloadedArchiveId == archiveId {
+                    closure(downloadedArchiveId, archiveUrl, error)
+                }
             }
         }
 
         return ObservationToken { [weak self] in
-            self?.observations.didDownloadArchive.removeValue(forKey: key)
+            self?.observationsQueue.sync { [weak self] in
+                self?.observations.didDownloadArchive[key] = nil
+            }
         }
     }
 
@@ -470,21 +493,27 @@ public extension DownloadQueue {
     )
         -> ObservationToken {
         let key = UUID()
-        observations.didChangeArchiveProgress[key] = { [weak self, weak observer] downloadedArchiveId, progress in
-            // If the observer has been deallocated, we can
-            // automatically remove the observation closure.
-            guard observer != nil else {
-                self?.observations.didChangeArchiveProgress.removeValue(forKey: key)
-                return
-            }
+        observationsQueue.sync {
+            observations.didChangeArchiveProgress[key] = { [weak self, weak observer] downloadedArchiveId, progress in
+                // If the observer has been deallocated, we can
+                // automatically remove the observation closure.
+                guard observer != nil else {
+                    self?.observationsQueue.sync { [weak self] in
+                        self?.observations.didChangeArchiveProgress[key] = nil
+                    }
+                    return
+                }
 
-            if archiveId == nil || downloadedArchiveId == archiveId {
-                closure(downloadedArchiveId, progress)
+                if archiveId == nil || downloadedArchiveId == archiveId {
+                    closure(downloadedArchiveId, progress)
+                }
             }
         }
 
         return ObservationToken { [weak self] in
-            self?.observations.didChangeArchiveProgress.removeValue(forKey: key)
+            self?.observationsQueue.sync { [weak self] in
+                self?.observations.didChangeArchiveProgress[key] = nil
+            }
         }
     }
 
