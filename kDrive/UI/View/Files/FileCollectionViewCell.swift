@@ -165,23 +165,9 @@ protocol FileCellDelegate: AnyObject {
         imageView.layer.masksToBounds = true
         imageView.backgroundColor = KDriveResourcesAsset.loaderDefaultColor.color
 
-        if let publicShareProxy {
-            // Fetch public share thumbnail
-            thumbnailDownloadTask = file.getPublicShareThumbnail(publicShareId: publicShareProxy.shareLinkUid,
-                                                                 publicDriveId: publicShareProxy.driveId,
-                                                                 publicFileId: file.id,
-                                                                 token: publicShareProxy.token) { [
-                requestFileId = file.id,
-                weak self
-            ] image, _ in
-                self?.setImage(image, on: imageView, requestFileId: requestFileId)
-            }
-
-        } else {
-            // Fetch thumbnail
-            thumbnailDownloadTask = file.getThumbnail { [requestFileId = file.id, weak self] image, _ in
-                self?.setImage(image, on: imageView, requestFileId: requestFileId)
-            }
+        thumbnailDownloadTask = file.getThumbnail(publicShareProxy: publicShareProxy) {
+            [requestFileId = file.id, weak self] image, _ in
+            self?.setImage(image, on: imageView, requestFileId: requestFileId)
         }
     }
 
