@@ -67,7 +67,7 @@ class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
         previewImage.image = nil
         previewImage.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         let fileId = file.id
-        file.getThumbnail { [weak self] image, _ in
+        file.getThumbnail(publicShareProxy: nil) { [weak self] image, _ in
             if fileId == file.id {
                 self?.previewImage.image = image
                 self?.previewImage.backgroundColor = nil

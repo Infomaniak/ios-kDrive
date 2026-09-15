@@ -102,17 +102,12 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
 
     func progressiveLoadingForPublicShareFile(_ file: File, publicShareProxy: PublicShareProxy) {
         self.file = file
-        file.getPublicShareThumbnail(publicShareId: publicShareProxy.shareLinkUid,
-                                     publicDriveId: publicShareProxy.driveId,
-                                     publicFileId: file.id,
-                                     token: publicShareProxy.token) { thumbnail, _ in
+        file.getThumbnail(publicShareProxy: publicShareProxy) { thumbnail, _ in
             self.previewImageView.image = thumbnail
         }
 
-        previewDownloadTask = file.getPublicSharePreview(publicShareId: publicShareProxy.shareLinkUid,
-                                                         publicDriveId: publicShareProxy.driveId,
-                                                         publicFileId: file.id,
-                                                         token: publicShareProxy.token) { [weak previewImageView] preview in
+        previewDownloadTask = file.getPreview(publicShareProxy: publicShareProxy) {
+            [weak previewImageView] preview in
             guard let previewImageView else {
                 return
             }
@@ -124,11 +119,11 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
 
     func progressiveLoadingForFile(_ file: File) {
         self.file = file
-        file.getThumbnail { thumbnail, _ in
+        file.getThumbnail(publicShareProxy: nil) { thumbnail, _ in
             self.previewImageView.image = thumbnail
         }
 
-        previewDownloadTask = file.getPreview { [weak previewImageView] preview in
+        previewDownloadTask = file.getPreview(publicShareProxy: nil) { [weak previewImageView] preview in
             guard let previewImageView else {
                 return
             }

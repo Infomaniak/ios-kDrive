@@ -188,7 +188,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             artworkImageView.image = artwork
         } else {
             artworkImageView.image = KDriveResourcesAsset.music.image
-            thumbnailDownloadTask = file.getThumbnail { thumbnail, isThumbnailAvailable in
+            thumbnailDownloadTask = file.getThumbnail(publicShareProxy: driveFileManager.publicShareProxy) {
+                thumbnail, isThumbnailAvailable in
                 guard isThumbnailAvailable else { return }
                 self.artworkImageView.image = thumbnail
             }

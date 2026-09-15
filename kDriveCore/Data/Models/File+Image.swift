@@ -23,11 +23,11 @@ import UIKit
 public extension File {
     /// Get a Thumbnail for a file from a public share
     @discardableResult
-    func getPublicShareThumbnail(publicShareId: String,
-                                 publicDriveId: Int,
-                                 publicFileId: Int,
-                                 token: String? = nil,
-                                 completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
+    private func getPublicShareThumbnail(publicShareId: String,
+                                         publicDriveId: Int,
+                                         publicFileId: Int,
+                                         token: String? = nil,
+                                         completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
         guard supportedBy.contains(.thumbnail) else {
             completion(icon, false)
             return nil
@@ -51,7 +51,7 @@ public extension File {
 
     /// Get a Thumbnail for a file for the current DriveFileManager
     @discardableResult
-    func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
+    private func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
         guard supportedBy.contains(.thumbnail),
               let authenticatedRequest = ImageRequest.authenticatedImageRequest(
                   url: thumbnailURL,
@@ -72,11 +72,28 @@ public extension File {
     }
 
     @discardableResult
-    func getPublicSharePreview(publicShareId: String,
-                               publicDriveId: Int,
-                               publicFileId: Int,
-                               token: String? = nil,
-                               completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
+    func getThumbnail(publicShareProxy: PublicShareProxy?, completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
+        guard supportedBy.contains(.thumbnail) else {
+            completion(icon, false)
+            return nil
+        }
+
+        if let publicShareProxy {
+            return getPublicShareThumbnail(publicShareId: publicShareProxy.shareLinkUid,
+                                           publicDriveId: publicShareProxy.driveId,
+                                           publicFileId: id,
+                                           token: publicShareProxy.token,
+                                           completion: completion)
+        }
+        return getThumbnail(completion: completion)
+    }
+
+    @discardableResult
+    private func getPublicSharePreview(publicShareId: String,
+                                       publicDriveId: Int,
+                                       publicFileId: Int,
+                                       token: String? = nil,
+                                       completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
         let previewURL = Endpoint.shareLinkFilePreview(driveId: publicDriveId,
                                                        linkUuid: publicShareId,
                                                        fileId: publicFileId,
@@ -93,7 +110,7 @@ public extension File {
     }
 
     @discardableResult
-    func getPreview(completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
+    private func getPreview(completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
         guard let authenticatedRequest = ImageRequest.authenticatedImageRequest(
             url: imagePreviewUrl,
             driveFileManager: accountManager.currentDriveFileManager
@@ -108,5 +125,17 @@ public extension File {
                 completion(nil)
             }
         }
+    }
+
+    @discardableResult
+    func getPreview(publicShareProxy: PublicShareProxy?, completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
+        if let publicShareProxy {
+            return getPublicSharePreview(publicShareId: publicShareProxy.shareLinkUid,
+                                         publicDriveId: publicShareProxy.driveId,
+                                         publicFileId: id,
+                                         token: publicShareProxy.token,
+                                         completion: completion)
+        }
+        return getPreview(completion: completion)
     }
 }
