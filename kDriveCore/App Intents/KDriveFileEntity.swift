@@ -70,6 +70,7 @@ struct KDriveFileEntity: FileEntity, IndexedEntity {
     var userId: Int
     var driveId: Int
     var fileId: Int
+    var isExternal = false
 
     var displayRepresentation: DisplayRepresentation {
         DisplayRepresentation(
@@ -94,6 +95,20 @@ struct KDriveFileEntity: FileEntity, IndexedEntity {
 
     init(file: File, userId: Int, fileProviderURL: URL) throws {
         try self.init(file: file, userId: userId, id: .file(url: fileProviderURL))
+    }
+
+    private init(externalFileURL: URL, id: FileEntityIdentifier) {
+        self.id = id
+        isExternal = true
+        objectId = externalFileURL.absoluteString
+        userId = 0
+        driveId = 0
+        fileId = 0
+        name = externalFileURL.lastPathComponent
+        contentTypeIdentifier = UTType(filenameExtension: externalFileURL.pathExtension)?.identifier ?? UTType.item.identifier
+        categoryNames = []
+        creationDate = nil
+        fileModificationDate = nil
     }
 
     static func makeEntity(
@@ -185,10 +200,24 @@ struct KDriveFileEntity: FileEntity, IndexedEntity {
                     }
                 }
 
-                guard let fileURL = try? await identifier.fileURL,
-                      let providerIdentifiers = try? await Self.providerIdentifiers(for: fileURL),
-                      let drive = driveInfosManager.getDrive(primaryKey: providerIdentifiers.domain.rawValue),
-                      let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
+                guard let fileURL = try? await identifier.fileURL else {
+                    continue
+                }
+
+                let accessing = fileURL.startAccessingSecurityScopedResource()
+                defer {
+                    if accessing {
+                        fileURL.stopAccessingSecurityScopedResource()
+                    }
+                }
+
+                guard let providerIdentifiers = try? await Self.providerIdentifiers(for: fileURL),
+                      let drive = driveInfosManager.getDrive(primaryKey: providerIdentifiers.domain.rawValue) else {
+                    entities.append(KDriveFileEntity(externalFileURL: fileURL, id: identifier))
+                    continue
+                }
+
+                guard let driveFileManager = accountManager.getDriveFileManager(for: drive.id, userId: drive.userId),
                       let fileId = providerIdentifiers.item.toFileId(),
                       let file = driveFileManager.getCachedFile(id: fileId),
                       !file.isTrashed else {
