@@ -28,11 +28,6 @@ public extension File {
                                          publicFileId: Int,
                                          token: String? = nil,
                                          completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
-        guard supportedBy.contains(.thumbnail) else {
-            completion(icon, false)
-            return nil
-        }
-
         let thumbnailURL = Endpoint.shareLinkFileThumbnail(driveId: publicDriveId,
                                                            linkUuid: publicShareId,
                                                            fileId: publicFileId,
@@ -52,11 +47,10 @@ public extension File {
     /// Get a Thumbnail for a file for the current DriveFileManager
     @discardableResult
     private func getThumbnail(completion: @escaping ((UIImage, Bool) -> Void)) -> ImageTask? {
-        guard supportedBy.contains(.thumbnail),
-              let authenticatedRequest = ImageRequest.authenticatedImageRequest(
-                  url: thumbnailURL,
-                  driveFileManager: accountManager.currentDriveFileManager
-              ) else {
+        guard let authenticatedRequest = ImageRequest.authenticatedImageRequest(
+            url: thumbnailURL,
+            driveFileManager: accountManager.currentDriveFileManager
+        ) else {
             completion(icon, false)
             return nil
         }

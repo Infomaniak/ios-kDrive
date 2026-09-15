@@ -100,30 +100,13 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
         return previewImageView
     }
 
-    func progressiveLoadingForPublicShareFile(_ file: File, publicShareProxy: PublicShareProxy) {
+    func progressiveLoadingForFile(_ file: File, publicShareProxy: PublicShareProxy?) {
         self.file = file
         file.getThumbnail(publicShareProxy: publicShareProxy) { thumbnail, _ in
             self.previewImageView.image = thumbnail
         }
 
-        previewDownloadTask = file.getPreview(publicShareProxy: publicShareProxy) {
-            [weak previewImageView] preview in
-            guard let previewImageView else {
-                return
-            }
-            if let preview {
-                previewImageView.image = preview
-            }
-        }
-    }
-
-    func progressiveLoadingForFile(_ file: File) {
-        self.file = file
-        file.getThumbnail(publicShareProxy: nil) { thumbnail, _ in
-            self.previewImageView.image = thumbnail
-        }
-
-        previewDownloadTask = file.getPreview(publicShareProxy: nil) { [weak previewImageView] preview in
+        previewDownloadTask = file.getPreview(publicShareProxy: publicShareProxy) { [weak previewImageView] preview in
             guard let previewImageView else {
                 return
             }
