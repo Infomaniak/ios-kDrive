@@ -17,6 +17,7 @@
  */
 
 import Algorithms
+import AppIntents
 import CoreSpotlight
 import FileProvider
 import InfomaniakDI
@@ -35,6 +36,14 @@ public final class SpotlightIndexer {
     private let operationQueue = SpotlightIndexOperationQueue()
 
     public init() {}
+
+    @available(iOS 18.4, *)
+    func reindexItems(for identifiers: [FileEntityIdentifier]) async throws {
+        try await operationQueue.performThrowing {
+            let entities = try await KDriveFileEntity.defaultQuery.entities(for: identifiers)
+            try await CSSearchableIndex(name: Self.spotlightIndexName).indexAppEntities(entities)
+        }
+    }
 
     public func indexAllItems() async throws {
         guard #available(iOS 18.4, *) else {
@@ -176,5 +185,15 @@ private actor SpotlightIndexOperationQueue {
         }
         pendingOperation = operationTask
         await operationTask.value
+    }
+
+    func performThrowing(_ operation: @escaping @Sendable () async throws -> Void) async throws {
+        let previousOperation = pendingOperation
+        let operationTask = Task {
+            await previousOperation?.value
+            try await operation()
+        }
+        pendingOperation = Task { _ = try? await operationTask.value }
+        try await operationTask.value
     }
 }

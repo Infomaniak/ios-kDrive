@@ -24,9 +24,7 @@ import InfomaniakDI
 @available(iOS 27.0, *)
 extension KDriveFileEntity.KDriveEntityQuery: IndexedEntityQuery {
     func reindexEntities(for identifiers: [FileEntityIdentifier], indexDescription: CSSearchableIndexDescription) async throws {
-        let entities = try await entities(for: identifiers)
-
-        try await CSSearchableIndex(name: SpotlightIndexer.spotlightIndexName).indexAppEntities(entities)
+        try await SpotlightIndexer.shared.reindexItems(for: identifiers)
     }
 
     func reindexAllEntities(indexDescription: CSSearchableIndexDescription) async throws {
