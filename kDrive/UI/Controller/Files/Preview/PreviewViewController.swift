@@ -200,12 +200,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         let currentFileId = currentFile.id
 
-        currentFile.getThumbnail { [weak self] thumbnail, _ in
+        currentFile.getThumbnail(publicShareProxy: driveFileManager?.publicShareProxy) {
+            [weak self] thumbnail, _ in
             guard let self, self.currentFile.id == currentFileId else { return }
             self.backgroundExtensionImageView?.image = thumbnail
         }
 
-        currentFile.getPreview { [weak self] image in
+        currentFile.getPreview(publicShareProxy: driveFileManager?.publicShareProxy) {
+            [weak self] image in
             guard let self, self.currentFile.id == currentFileId else { return }
             if let image {
                 self.backgroundExtensionImageView?.image = image
@@ -798,7 +800,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 }
             }
         }
-        downloadQueue.addToQueue(file: currentFile, userId: accountManager.currentUserId, itemIdentifier: nil)
+
+        if let publicShareProxy = driveFileManager.publicShareProxy {
+            downloadQueue.addPublicShareToQueue(file: currentFile,
+                                                driveFileManager: driveFileManager,
+                                                publicShareProxy: publicShareProxy,
+                                                itemIdentifier: nil,
+                                                onOperationCreated: nil,
+                                                completion: nil)
+        } else {
+            downloadQueue.addToQueue(file: currentFile, userId: accountManager.currentUserId, itemIdentifier: nil)
+        }
+
         currentCell.observeProgress(true, file: currentFile)
     }
 
@@ -938,11 +951,7 @@ extension PreviewViewController: UICollectionViewDataSource {
     ) {
         let file = previewFiles[indexPath.row]
         if let cell = cell as? DownloadingPreviewCollectionViewCell {
-            if let publicShareProxy = driveFileManager.publicShareProxy {
-                cell.progressiveLoadingForPublicShareFile(file, publicShareProxy: publicShareProxy)
-            } else {
-                cell.progressiveLoadingForFile(file)
-            }
+            cell.progressiveLoadingForFile(file, publicShareProxy: driveFileManager?.publicShareProxy)
         }
     }
 

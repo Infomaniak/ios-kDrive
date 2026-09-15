@@ -64,7 +64,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         assert(file.realm == nil || file.isFrozen, "File must be thread safe at this point")
 
         self.file = file
-        file.getThumbnail { preview, hasThumbnail in
+        file.getThumbnail(publicShareProxy: driveFileManager?.publicShareProxy) { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
         playButton.isEnabled = false

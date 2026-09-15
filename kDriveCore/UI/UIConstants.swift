@@ -191,7 +191,7 @@ public extension UIConstants {
         if ConvertedType.ignoreThumbnailTypes.contains(file.convertedType) || !file.supportedBy.contains(.thumbnail) {
             completion(createLinkMetadata(file: file, url: link, thumbnail: file.icon))
         } else {
-            file.getThumbnail { thumbnail, _ in
+            file.getThumbnail(publicShareProxy: nil) { thumbnail, _ in
                 completion(createLinkMetadata(file: file, url: link, thumbnail: thumbnail))
             }
         }
