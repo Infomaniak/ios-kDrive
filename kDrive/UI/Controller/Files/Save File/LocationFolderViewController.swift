@@ -172,7 +172,7 @@ class LocationFolderViewController: SidebarViewController {
             destinationViewModel = ConcreteFileListViewModel(
                 driveFileManager: driveFileManager,
                 currentDirectory: selectedRootFile,
-                rightBarButtons: viewModel.currentRightBarButtons
+                rightBarButtons: selectedRootFile.capabilities.canCreateDirectory ? [.addFolder] : nil
             )
         }
 
