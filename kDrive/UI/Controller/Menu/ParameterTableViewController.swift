@@ -363,8 +363,14 @@ class ParameterTableViewController: BaseGroupedTableViewController {
 
 extension ParameterTableViewController: DeleteAccountDelegate {
     func didCompleteDeleteAccount() {
+        Task { @MainActor in
+            await finishDeletingAccount()
+        }
+    }
+
+    @MainActor private func finishDeletingAccount() async {
         if let currentAccount = accountManager.currentAccount {
-            accountManager.removeTokenAndAccountFor(userId: currentAccount.userId)
+            await accountManager.removeTokenAndAccountFor(userId: currentAccount.userId)
         }
 
         if let nextAccount = accountManager.accounts.first {

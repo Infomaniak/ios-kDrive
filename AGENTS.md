@@ -72,6 +72,7 @@ ios-kDrive/
 │   │   ├── DownloadQueue/       #   Download management
 │   │   │   └── BackgroundDownloadSessionManager.swift
 │   │   ├── Upload/              #   Upload management
+│   │   │   ├── Servicies/        #     Upload service, photo scanning/sync, storage cleanup
 │   │   │   └── Services/
 │   │   │       └── BackgroundUploadSessionManager.swift
 │   │   └── MQService/           #   MQTT real-time sync
@@ -187,7 +188,8 @@ tuist test # Or via Xcode Test Navigator
 
 ### Learned Preferences
 
-_None yet. Add user-corrected preferences here as they arise._
+- Write new tests with Swift Testing (`import Testing`, `@Suite`, `@Test`, `#expect`, and `#require`) rather than XCTest.
+- Resetting previous upload errors on reauthentication is acceptable, consistent with background-upload behavior.
 
 ## Self-correction
 

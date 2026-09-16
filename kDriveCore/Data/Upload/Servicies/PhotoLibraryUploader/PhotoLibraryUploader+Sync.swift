@@ -23,9 +23,15 @@ import RealmSwift
 public protocol PhotoLibrarySyncable {
     @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings)
     func disableSync()
+    func pauseSync(userId: Int) async
 }
 
 extension PhotoLibraryUploader: PhotoLibrarySyncable {
+    public func pauseSync(userId: Int) async {
+        guard frozenSettings?.userId == userId else { return }
+        await cancelScan()
+    }
+
     @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
         let currentSyncSettings = frozenSettings
         let shouldReset = (currentSyncSettings?.driveId != liveNewSyncSettings.driveId)
@@ -104,17 +110,26 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         uploadService.rebuildUploadQueue()
     }
 
-    public func disableSync() {
+    private func deleteSyncSettings() async {
         try? uploadsDatabase.writeTransaction { writableRealm in
             writableRealm.delete(writableRealm.objects(PhotoSyncSettings.self))
         }
+    }
 
+    public func disableSync() {
+        let userId = frozenSettings?.userId
         Task {
             @InjectService var photoLibraryScan: PhotoLibraryScanable
+            @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
+
+            await deleteSyncSettings()
+
             await photoLibraryScan.cancelScan()
 
+            photoUploadQueue.cancelAllOperations()
+
             do {
-                try await uploadService.cancelAnyPhotoSync()
+                try await uploadService.cancelAnyPhotoSync(includingBlockedUploadsForUserId: userId)
                 await forgetUploadedPhotos()
             } catch {
                 Log.photoLibraryUploader("Failed to clear photo sync queue: \(error)", level: .error)
@@ -125,9 +140,9 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
     public func forgetUploadedPhotos() async {
         @InjectService var uploadDataSource: UploadServiceDataSourceable
 
-        let objectsIdsToDelete = uploadDataSource
+        let uploadedObjectsIdsToDelete = uploadDataSource
             .getUploadedFilesIDs(optionalPredicate: PhotoLibraryCleanerService.photoAssetPredicate)
-        let chunks = objectsIdsToDelete.chunks(ofCount: 50)
+        let chunks = uploadedObjectsIdsToDelete.chunks(ofCount: 50)
 
         try? chunks.forEach { chunk in
             try self.uploadsDatabase.writeTransaction { writableRealm in

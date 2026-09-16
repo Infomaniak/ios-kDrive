@@ -44,7 +44,11 @@ public protocol UploadServiceable {
 
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
-    func cancelAnyPhotoSync() async throws
+    func cancelAnyPhotoSync(includingBlockedUploadsForUserId userId: Int?) async throws
+
+    func blockUploadsForAuthentication(userId: Int) throws
+
+    func resumeUploadsAfterAuthentication(userId: Int) async
 
     func rescheduleRunningOperations()
 
@@ -53,4 +57,10 @@ public protocol UploadServiceable {
     func cleanNetworkAndLocalErrorsForAllOperations()
 
     func updateQueueSuspension()
+}
+
+public extension UploadServiceable {
+    func cancelAnyPhotoSync() async throws {
+        try await cancelAnyPhotoSync(includingBlockedUploadsForUserId: nil)
+    }
 }

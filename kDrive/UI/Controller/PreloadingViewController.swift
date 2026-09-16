@@ -127,7 +127,7 @@ class PreloadingViewController: UIViewController {
                 present(driveErrorNavigationViewController, animated: true)
             } catch {
                 SentryDebug.logPreloadingAccountError(error: error, origin: "PreloadingViewController")
-                accountManager.removeTokenAndAccountFor(userId: account.userId)
+                await accountManager.removeTokenAndAccountFor(userId: account.userId, isInvoluntary: true)
                 self.appNavigable.prepareRootViewController(currentState: .onboarding, restoration: false)
             }
         }

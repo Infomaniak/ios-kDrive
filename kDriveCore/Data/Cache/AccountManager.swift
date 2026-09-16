@@ -79,12 +79,26 @@ public protocol AccountManageable: AnyObject {
     func switchToNextAvailableAccount()
     func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int)
     func addAccount(token: ApiToken) async throws
-    func removeAccountFor(userId: Int)
-    func removeTokenAndAccountFor(userId: Int)
+    func removeAccountFor(userId: Int, isInvoluntary: Bool) async
+    func removeTokenAndAccountFor(userId: Int, isInvoluntary: Bool) async
     func removeCachedProperties()
     func account(for token: ApiToken) -> ApiToken?
     func account(for userId: Int) -> ApiToken?
-    func logoutCurrentAccountAndSwitchToNextIfPossible()
+    func logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: Bool)
+}
+
+public extension AccountManageable {
+    func removeAccountFor(userId: Int) async {
+        await removeAccountFor(userId: userId, isInvoluntary: false)
+    }
+
+    func removeTokenAndAccountFor(userId: Int) async {
+        await removeTokenAndAccountFor(userId: userId, isInvoluntary: false)
+    }
+
+    func logoutCurrentAccountAndSwitchToNextIfPossible() {
+        logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: false)
+    }
 }
 
 public class AccountManager: RefreshTokenDelegate, AccountManageable {
@@ -92,6 +106,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @LazyInjectService var driveInfosManager: DriveInfosManager
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
     @LazyInjectService var photoLibrarySync: PhotoLibrarySyncable
+    @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var tokenStore: TokenStore
     @LazyInjectService var bugTracker: BugTracker
     @LazyInjectService var notificationHelper: NotificationsHelpable
@@ -108,6 +123,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
     @SendableProperty public var currentAccount: ApiToken?
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
+    private let accountLifecycleQueue = TaskQueue()
     public weak var delegate: AccountManagerDelegate?
 
     public var currentUserId: Int {
@@ -397,6 +413,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func didFailRefreshToken(_ token: ApiToken) {
+        guard tokenStore.tokenFor(userId: token.userId)?.apiToken.accessToken == token.accessToken else { return }
         let context = ["User id": token.userId,
                        "Expiration date": token.expirationDate?.timeIntervalSince1970 ?? "Infinite"] as [String: Any]
         SentryDebug.capture(message: "Failed refreshing token", context: context, contextKey: "Token Infos")
@@ -407,11 +424,14 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             Logger.general
                 .info("Failed token matches current account \(tokenUserId), logging out and switching account if possible")
             notificationHelper.sendDisconnectedNotification()
-            logoutCurrentAccountAndSwitchToNextIfPossible()
+            logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: true)
         } else {
             Logger.general
                 .info("Failed token belongs to non-current account \(tokenUserId), removing token and local account data")
-            removeTokenAndAccountFor(userId: tokenUserId)
+            Task {
+                guard tokenStore.tokenFor(userId: tokenUserId)?.apiToken.accessToken == token.accessToken else { return }
+                await removeTokenAndAccountFor(userId: tokenUserId, isInvoluntary: true)
+            }
         }
     }
 
@@ -439,7 +459,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         setCurrentAccount(account: token)
 
         guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
-            removeAccountFor(userId: token.userId)
+            await removeAccountFor(userId: token.userId, isInvoluntary: true)
             if let drive = driveResponse.drives.first, drive.isInTechnicalMaintenance {
                 throw driveResponse.drives.count > 1 ? DriveError.productMaintenance : DriveError.NoDriveError
                     .maintenance(drive: drive)
@@ -455,6 +475,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         mqService.registerForNotifications(with: driveResponse.ips)
 
+        await resumeUploads(for: token)
         return token
     }
 
@@ -475,7 +496,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             if token.userId == currentAccount?.userId {
                 logoutCurrentAccountAndSwitchToNextIfPossible()
             } else {
-                removeAccountFor(userId: token.userId)
+                await removeAccountFor(userId: token.userId)
             }
             throw DriveError.NoDriveError.noDrive
         }
@@ -504,7 +525,14 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             mqService.registerForNotifications(with: driveResponse.ips)
         }
 
+        await resumeUploads(for: account)
         return account
+    }
+
+    private func resumeUploads(for token: ApiToken) async {
+        try? await accountLifecycleQueue.enqueue {
+            await self.uploadService.resumeUploadsAfterAuthentication(userId: token.userId)
+        }
     }
 
     private func attachDeviceToApiToken(_ token: ApiToken, apiFetcher: ApiFetcher) {
@@ -600,17 +628,23 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func addAccount(token: ApiToken) async throws {
-        UserDefaults.shared.lastSelectedTab = nil
-
-        if accounts.contains(where: { $0.userId == token.userId }) {
-            removeAccountFor(userId: token.userId)
-        }
-
         let deviceId = try await deviceManager.getOrCreateCurrentDevice().uid
-        tokenStore.addToken(newToken: token, associatedDeviceId: deviceId)
+        try await accountLifecycleQueue.enqueue {
+            UserDefaults.shared.lastSelectedTab = nil
+            if self.accounts.contains(where: { $0.userId == token.userId }) {
+                await self.removeAccountData(userId: token.userId, isInvoluntary: true)
+            }
+            self.tokenStore.addToken(newToken: token, associatedDeviceId: deviceId)
+        }
     }
 
-    public func removeAccountFor(userId: Int) {
+    public func removeAccountFor(userId: Int, isInvoluntary: Bool) async {
+        try? await accountLifecycleQueue.enqueue {
+            await self.removeAccountData(userId: userId, isInvoluntary: isInvoluntary)
+        }
+    }
+
+    private func removeAccountData(userId: Int, isInvoluntary: Bool) async {
         UserDefaults.shared.lastSelectedTab = nil
 
         if currentAccount?.userId == userId {
@@ -618,9 +652,20 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             currentDriveId = 0
             currentUserId = 0
         }
-        if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == userId {
+
+        if isInvoluntary {
+            do {
+                try uploadService.blockUploadsForAuthentication(userId: userId)
+                await photoLibrarySync.pauseSync(userId: userId)
+                // A scan already in progress can insert records before acknowledging cancellation.
+                try uploadService.blockUploadsForAuthentication(userId: userId)
+            } catch {
+                Logger.general.error("Failed to block disconnected uploads: \(error)")
+            }
+        } else if photoLibraryUploader.isSyncEnabled && photoLibraryUploader.frozenSettings?.userId == userId {
             photoLibrarySync.disableSync()
         }
+
         driveInfosManager.deleteFileProviderDomains(for: userId)
         DriveFileManager.deleteUserDriveFiles(userId: userId)
         driveInfosManager.removeDrivesFor(userId: userId)
@@ -628,9 +673,17 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         apiFetchers.removeAll()
     }
 
-    public func removeTokenAndAccountFor(userId: Int) {
+    public func removeTokenAndAccountFor(userId: Int, isInvoluntary: Bool) async {
+        let tokenToRemove = tokenStore.tokenFor(userId: userId)?.apiToken.accessToken
+        try? await accountLifecycleQueue.enqueue {
+            guard self.tokenStore.tokenFor(userId: userId)?.apiToken.accessToken == tokenToRemove else { return }
+            await self.removeTokenAndAccountData(userId: userId, isInvoluntary: isInvoluntary)
+        }
+    }
+
+    private func removeTokenAndAccountData(userId: Int, isInvoluntary: Bool) async {
         let removedToken = tokenStore.removeTokenFor(userId: userId)
-        removeAccountFor(userId: userId)
+        await removeAccountData(userId: userId, isInvoluntary: isInvoluntary)
 
         Task {
             await notificationService.removeStoredTokenFor(userId: userId)
@@ -652,18 +705,24 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         return tokenStore.tokenFor(userId: userId)?.apiToken
     }
 
-    public func logoutCurrentAccountAndSwitchToNextIfPossible() {
+    public func logoutCurrentAccountAndSwitchToNextIfPossible(isInvoluntary: Bool) {
+        let accountToRemove = currentAccount
+        let tokenToRemove = accountToRemove.flatMap { tokenStore.tokenFor(userId: $0.userId)?.apiToken.accessToken }
         Task { @MainActor in
+            guard let accountToRemove,
+                  tokenStore.tokenFor(userId: accountToRemove.userId)?.apiToken.accessToken == tokenToRemove else {
+                return
+            }
             deeplinkService.clearLastDeeplink()
 
-            if let currentAccount {
-                deviceManager.forgetLocalDeviceHash(forUserId: currentAccount.userId)
-                removeTokenAndAccountFor(userId: currentAccount.userId)
-            }
+            deviceManager.forgetLocalDeviceHash(forUserId: accountToRemove.userId)
+            await removeTokenAndAccountFor(userId: accountToRemove.userId, isInvoluntary: isInvoluntary)
 
             if let nextAccount = accounts.first {
                 switchAccount(newAccount: nextAccount)
-                await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                Task {
+                    await appNavigable.refreshCacheScanLibraryAndUpload(preload: true, isSwitching: true)
+                }
             } else {
                 SpotlightIndexer.shared.deindexAllItems()
                 SentrySDK.setUser(nil)

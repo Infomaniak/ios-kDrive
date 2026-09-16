@@ -134,6 +134,9 @@ extension UploadOperation {
     // MARK: Misc
 
     func getDriveFileManager(for driveId: Int, userId: Int) throws -> DriveFileManager {
+        guard accountManager.getTokenForUserId(userId) != nil else {
+            throw DriveError.uploadAuthenticationRequired
+        }
         guard let driveFileManager = accountManager.getDriveFileManager(for: driveId,
                                                                         userId: userId) else {
             Log.uploadOperation("getDriveFileManager failed \(uploadFileId)", level: .error)

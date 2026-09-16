@@ -20,6 +20,7 @@ import Algorithms
 import FileProvider
 import Foundation
 import InfomaniakCore
+import InfomaniakCoreDB
 import InfomaniakDI
 import RealmSwift
 
@@ -135,6 +136,9 @@ extension UploadQueue: UploadQueueable {
                     // Cancel operation if any
                     if let operation = self.keyedUploadOperations.getObject(forKey: id) {
                         operation.cancel()
+                        if operation.isExecuting {
+                            operation.end()
+                        }
                     }
                     self.keyedUploadOperations.removeObject(forKey: id)
                 }
@@ -191,9 +195,19 @@ extension UploadQueue: UploadQueueable {
         }
 
         guard !uploadFile.isInvalidated,
+              !uploadFile.isAuthenticationBlocked,
               uploadFile.maxRetryCount > 0,
               keyedUploadOperations.getObject(forKey: uploadFile.id) == nil else {
             Log.uploadQueue("\(self) invalid file in \(#function)", level: .error)
+            return nil
+        }
+
+        @InjectService var accountManager: AccountManageable
+        guard accountManager.getTokenForUserId(uploadFile.userId) != nil else {
+            @InjectService(customTypeIdentifier: kDriveDBID.uploads) var uploadsDatabase: Transactionable
+            try? uploadsDatabase.writeTransaction { writableRealm in
+                writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFile.id)?.blockForAuthentication()
+            }
             return nil
         }
 

@@ -198,7 +198,7 @@ extension UploadService: UploadServiceable {
 
         serialTransactionQueue.async {
             guard let frozenFile = self.uploadsDatabase.fetchObject(ofType: UploadFile.self, forPrimaryKey: uploadFileId)?
-                .freeze() else {
+                .freeze(), !frozenFile.isAuthenticationBlocked else {
                 return
             }
 
@@ -214,7 +214,7 @@ extension UploadService: UploadServiceable {
                     var fileToRetry: UploadFile?
                     try? self.uploadsDatabase.writeTransaction { writableRealm in
                         guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                              !file.isInvalidated else {
+                              !file.isInvalidated, !file.isAuthenticationBlocked else {
                             Log.uploadQueue("file invalidated in\(#function) line:\(#line) ufid:\(uploadFileId)")
                             return
                         }
@@ -302,7 +302,7 @@ extension UploadService: UploadServiceable {
         try? uploadsDatabase.writeTransaction { writableRealm in
             for uploadFileId in batch {
                 guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId),
-                      !file.isInvalidated else {
+                      !file.isInvalidated, !file.isAuthenticationBlocked else {
                     Log.uploadQueue("file invalidated ufid:\(uploadFileId) at\(#line)")
                     continue
                 }
@@ -367,6 +367,7 @@ extension UploadService: UploadServiceable {
                 // Delete all the linked UploadFiles from Realm. This is fast.
                 Log.uploadQueue("delete all matching files count:\(uploadingFiles.count) parentId:\(parentId)")
                 let objectsToDelete = writableRealm.objects(UploadFile.self).filter("id IN %@", allUploadingFilesIds)
+                    .filter { !$0.isAuthenticationBlocked }
 
                 filesToClean = objectsToDelete.map { $0.freeze() }
 
@@ -385,7 +386,7 @@ extension UploadService: UploadServiceable {
         }
     }
 
-    public func cancelAnyPhotoSync() async throws {
+    public func cancelAnyPhotoSync(includingBlockedUploadsForUserId userId: Int?) async throws {
         suspendAllOperations()
         defer {
             resumeAllOperations()
@@ -400,12 +401,58 @@ extension UploadService: UploadServiceable {
                     guard let objectToRemove = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
                         continue
                     }
+                    // Explicit disablement cancels this account's blocked photos, but preserves other accounts' queues.
+                    guard !objectToRemove.isAuthenticationBlocked || objectToRemove.userId == userId else { continue }
                     writableRealm.delete(objectToRemove)
                 }
             }
         }
 
         Log.uploadQueue("Done deleting all uploads from photo sync")
+    }
+
+    /// Retain the pending records and source data, including uploads outside photo sync.
+    public func blockUploadsForAuthentication(userId: Int) throws {
+        var photoIds: [String] = []
+        var globalIds: [String] = []
+        try uploadsDatabase.writeTransaction { writableRealm in
+            let files = writableRealm.objects(UploadFile.self).filter("uploadDate == nil AND userId == %@", userId)
+            for file in files {
+                file.blockForAuthentication()
+                if file.isPhotoSyncUpload {
+                    photoIds.append(file.id)
+                } else {
+                    globalIds.append(file.id)
+                }
+            }
+        }
+        photoUploadQueue.cancelAllOperations(uploadingFilesIds: photoIds)
+        globalUploadQueue.cancelAllOperations(uploadingFilesIds: globalIds)
+    }
+
+    public func resumeUploadsAfterAuthentication(userId: Int) async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            serialTransactionQueue.async {
+                defer { continuation.resume() }
+                guard self.accountManager.getTokenForUserId(userId) != nil else { return }
+
+                @InjectService var driveInfosManager: DriveInfosManager
+                let driveIds = Array(driveInfosManager.getDrives(for: userId, sharedWithMe: nil)
+                    .filter { !$0.inMaintenance }.map(\.id))
+                do {
+                    try self.uploadsDatabase.writeTransaction { writableRealm in
+                        let files = writableRealm.objects(UploadFile.self)
+                            .filter("uploadDate == nil AND userId == %@ AND driveId IN %@", userId, driveIds)
+                        for file in files {
+                            file.clearAuthenticationBlock()
+                        }
+                    }
+                    self.rebuildUploadQueueFromObjectsInRealm()
+                } catch {
+                    Log.uploadQueue("Failed to resume authenticated uploads: \(error)", level: .error)
+                }
+            }
+        }
     }
 
     public func rescheduleRunningOperations() {
@@ -471,7 +518,7 @@ extension UploadService: UploadServiceable {
                         return false
                     }
 
-                    return error.type != .serverError
+                    return error.type != .serverError && !file.isAuthenticationBlocked
                 }
             Log.uploadQueue("will clean errors for uploads:\(failedUploadFiles.count)")
             for file in failedUploadFiles {
@@ -482,7 +529,7 @@ extension UploadService: UploadServiceable {
         }
     }
 
-    private func cleanWifiLimitationsErrorForAllOperationsAndRetry() {
+    func cleanWifiLimitationsErrorForAllOperationsAndRetry() {
         Log.uploadQueue("cleanWifiLimitationsErrorForAllOperations")
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(#function) disabled in ShareExtension", level: .error)
@@ -502,7 +549,7 @@ extension UploadService: UploadServiceable {
                     ownedByFileProvider
                 )
 
-            fileIdsToRetry = failedUploadFiles.map { $0.id }
+            fileIdsToRetry = failedUploadFiles.filter { !$0.isAuthenticationBlocked }.map { $0.id }
 
             for file in failedUploadFiles {
                 file.clearErrorsForRetry()

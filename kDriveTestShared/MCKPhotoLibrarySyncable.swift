@@ -23,4 +23,5 @@ struct MCKPhotoLibrarySyncable: PhotoLibrarySyncable {
     @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {}
 
     func disableSync() {}
+    func pauseSync(userId: Int) async {}
 }
