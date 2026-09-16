@@ -91,7 +91,8 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
         self.file = file
         checkmarkImage.isHidden = !selectionMode
         highlightView.isHidden = false
-        thumbnailDownloadTask = file.getThumbnail { [weak self, fileId = file.id] image, isThumbnail in
+        thumbnailDownloadTask = file.getThumbnail(publicShareProxy: nil) {
+            [weak self, fileId = file.id] image, isThumbnail in
             if fileId == self?.file?.id {
                 self?.highlightView.isHidden = true
                 self?.fileImage.image = isThumbnail ? image : KDriveResourcesAsset.fileImageSmall.image
