@@ -213,6 +213,11 @@ struct KDriveFileEntity: FileEntity, IndexedEntity {
 
                 guard let providerIdentifiers = try? await Self.providerIdentifiers(for: fileURL),
                       let drive = driveInfosManager.getDrive(primaryKey: providerIdentifiers.domain.rawValue) else {
+                    // External imports support regular files; folder operations require native kDrive entities.
+                    guard let resourceValues = try? fileURL.resourceValues(forKeys: [.isRegularFileKey]),
+                          resourceValues.isRegularFile == true else {
+                        continue
+                    }
                     entities.append(KDriveFileEntity(externalFileURL: fileURL, id: identifier))
                     continue
                 }
