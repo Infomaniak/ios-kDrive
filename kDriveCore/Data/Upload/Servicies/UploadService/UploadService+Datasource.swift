@@ -41,10 +41,12 @@ public protocol UploadServiceDataSourceable {
 
     func getUploadedFilesIDs(optionalPredicate: NSPredicate?) -> [String]
 
+    /// Persists the upload before enqueueing it. Throws if persistence fails.
+    /// A nil operation can still represent a saved upload waiting for authentication or already queued.
     @discardableResult
     func saveToRealm(_ uploadFile: UploadFile,
                      itemIdentifier: NSFileProviderItemIdentifier?,
-                     addToQueue: Bool) -> UploadOperationable?
+                     addToQueue: Bool) throws -> UploadOperationable?
 }
 
 extension UploadService: UploadServiceDataSourceable {
@@ -142,7 +144,7 @@ extension UploadService: UploadServiceDataSourceable {
     @discardableResult
     public func saveToRealm(_ uploadFile: UploadFile,
                             itemIdentifier: NSFileProviderItemIdentifier? = nil,
-                            addToQueue: Bool = true) -> UploadOperationable? {
+                            addToQueue: Bool = true) throws -> UploadOperationable? {
         let expiringActivity = ExpiringActivity()
         expiringActivity.start()
         defer {
@@ -164,7 +166,7 @@ extension UploadService: UploadServiceDataSourceable {
         }
 
         let detachedFile = uploadFile.detached()
-        try? uploadsDatabase.writeTransaction { writableRealm in
+        try uploadsDatabase.writeTransaction { writableRealm in
             Log.uploadQueue("save ufid:\(uploadFile.id)")
             writableRealm.add(uploadFile, update: .modified)
             Log.uploadQueue("did save ufid:\(uploadFile.id)")

@@ -33,12 +33,13 @@ public extension FileImportHelper {
 
         let expiringActivity = ExpiringActivity()
         expiringActivity.start()
+        defer { expiringActivity.endAll() }
 
         let parentDirectoryId = directory.id
         let parentDirectoryDriveId = directory.driveId
         let userId = drive.userId
 
-        await files.concurrentForEach { file in
+        try await files.concurrentForEach { file in
             let uploadFile = UploadFile(
                 parentDirectoryId: parentDirectoryId,
                 userId: userId,
@@ -47,10 +48,8 @@ public extension FileImportHelper {
                 name: file.name
             )
 
-            self.uploadDataSource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: addToQueue)
+            try self.uploadDataSource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: addToQueue)
         }
-
-        expiringActivity.endAll()
     }
 
     func upload(
@@ -131,7 +130,7 @@ public extension FileImportHelper {
             url: targetURL,
             name: name
         )
-        uploadDataSource.saveToRealm(newFile, itemIdentifier: nil, addToQueue: true)
+        try uploadDataSource.saveToRealm(newFile, itemIdentifier: nil, addToQueue: true)
     }
 }
 
