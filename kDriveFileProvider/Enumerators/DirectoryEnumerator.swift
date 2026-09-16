@@ -63,38 +63,40 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                 return
             }
 
-            let parentDirectory = try driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier)
-
-            // Add uploading files within the first page
-            var uploadFilesItems = [NSFileProviderItem]()
-            if page.isInitialPage {
-                let uploadingFiles = uploadDataSource.getUploadingFiles(withParent: parentDirectory.id,
-                                                                        userId: driveFileManager.drive.userId,
-                                                                        driveId: driveFileManager.driveId)
-                for uploadFile in uploadingFiles {
-                    let uploadFileItem = uploadFile.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
-                    uploadFilesItems.append(uploadFileItem)
-                }
-                Log.fileProvider("files uploading in progress: \(uploadFilesItems.count) INITIAL")
-            } else {
-                Log.fileProvider("skip upload queue, not first page")
-            }
-
-            guard !parentDirectory.fullyDownloaded else {
-                let files = Array(parentDirectory.children) + [parentDirectory]
-                let filesItems = files.map { item in
-                    autoreleasepool {
-                        return item.toFileProviderItem(parent: nil, drive: self.driveFileManager.drive, domain: self.domain)
-                    }
-                }
-
-                let objectsToEnumerate: [NSFileProviderItemProtocol] = uploadFilesItems + filesItems
-                observer.didEnumerate(objectsToEnumerate)
-                observer.finishEnumerating(upTo: nil)
-                return
-            }
-
             do {
+                let parentDirectory = try driveFileManager.getCachedFile(itemIdentifier: containerItemIdentifier)
+
+                // Add uploading files within the first page
+                var uploadFilesItems = [NSFileProviderItem]()
+                if page.isInitialPage {
+                    let uploadingFiles = uploadDataSource.getUploadingFiles(withParent: parentDirectory.id,
+                                                                            userId: driveFileManager.drive.userId,
+                                                                            driveId: driveFileManager.driveId)
+                    for uploadFile in uploadingFiles {
+                        let uploadFileItem = uploadFile.toFileProviderItem(parent: nil,
+                                                                           drive: driveFileManager.drive,
+                                                                           domain: domain)
+                        uploadFilesItems.append(uploadFileItem)
+                    }
+                    Log.fileProvider("files uploading in progress: \(uploadFilesItems.count) INITIAL")
+                } else {
+                    Log.fileProvider("skip upload queue, not first page")
+                }
+
+                guard !parentDirectory.fullyDownloaded else {
+                    let files = Array(parentDirectory.children) + [parentDirectory]
+                    let filesItems = files.map { item in
+                        autoreleasepool {
+                            return item.toFileProviderItem(parent: nil, drive: self.driveFileManager.drive, domain: self.domain)
+                        }
+                    }
+
+                    let objectsToEnumerate: [NSFileProviderItemProtocol] = uploadFilesItems + filesItems
+                    observer.didEnumerate(objectsToEnumerate)
+                    observer.finishEnumerating(upTo: nil)
+                    return
+                }
+
                 let currentPageCursor = page.isInitialPage ? nil : page.toCursor
 
                 let response = try await fetchDroppingCursorIfNeeded(in: parentDirectory.proxify(), cursor: currentPageCursor)
