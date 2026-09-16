@@ -37,6 +37,7 @@ public final class PhotoLibraryUploader: PhotoLibraryUploadable {
     @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDatasource: UploadServiceDataSourceable
     @LazyInjectService var driveInfosManager: DriveInfosManager
+    @LazyInjectService var accountManager: AccountManageable
 
     /// Threshold value to trigger cleaning of photo roll if enabled
     static let removeAssetsCountThreshold = 10

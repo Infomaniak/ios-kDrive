@@ -37,7 +37,8 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
             return
         }
 
-        guard driveInfosManager.getDrive(id: frozenSettings.driveId, userId: frozenSettings.userId) != nil else {
+        guard accountManager.getTokenForUserId(frozenSettings.userId) != nil,
+              driveInfosManager.getDrive(id: frozenSettings.driveId, userId: frozenSettings.userId) != nil else {
             Log.photoLibraryUploader(
                 "scheduleNewPicturesForUpload: missing drive \(frozenSettings.driveId) for user \(frozenSettings.userId), skipping"
             )
@@ -71,6 +72,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
                 }
 
                 try uploadsDatabase.writeTransaction { writableRealm in
+                    guard accountManager.getTokenForUserId(frozenSettings.userId) != nil else { return }
                     updateLastSyncDate(syncDate, writableRealm: writableRealm)
                 }
 
@@ -242,6 +244,10 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         stop: UnsafeMutablePointer<ObjCBool>
     ) {
         try? uploadsDatabase.writeTransaction { writableRealm in
+            guard accountManager.getTokenForUserId(frozenSettings.userId) != nil else {
+                stop.pointee = true
+                return
+            }
             // Check if picture uploaded before
             guard !assetAlreadyUploaded(assetName: finalName,
                                         localIdentifier: asset.localIdentifier,

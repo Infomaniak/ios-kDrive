@@ -72,6 +72,7 @@ ios-kDrive/
 │   │   ├── DownloadQueue/       #   Download management
 │   │   │   └── BackgroundDownloadSessionManager.swift
 │   │   ├── Upload/              #   Upload management
+│   │   │   ├── Servicies/        #     Upload service, photo scanning/sync, storage cleanup
 │   │   │   └── Services/
 │   │   │       └── BackgroundUploadSessionManager.swift
 │   │   └── MQService/           #   MQTT real-time sync

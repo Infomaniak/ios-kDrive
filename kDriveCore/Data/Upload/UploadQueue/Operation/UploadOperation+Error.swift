@@ -61,6 +61,17 @@ extension UploadOperation {
 
     @discardableResult
     func handleLocalErrors(error: Error) -> Bool {
+        if let file = try? readOnlyFile(), file.isAuthenticationBlocked {
+            return true
+        }
+
+        if let error = error as? DriveError, error == .uploadAuthenticationRequired || error == .unknownToken {
+            try? transactionWithFile { file in
+                file.blockForAuthentication()
+            }
+            return true
+        }
+
         if let error = error as? UploadOperation.ErrorDomain {
             switch error {
             case .operationFinished, .operationCanceled:

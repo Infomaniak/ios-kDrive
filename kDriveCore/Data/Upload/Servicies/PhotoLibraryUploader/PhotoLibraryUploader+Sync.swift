@@ -22,16 +22,16 @@ import RealmSwift
 
 public protocol PhotoLibrarySyncable {
     @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings)
-    func disableSync(withSettings: Bool)
-}
-
-public extension PhotoLibrarySyncable {
-    func disableSync() {
-        disableSync(withSettings: true)
-    }
+    func disableSync()
+    func pauseSync(userId: Int) async
 }
 
 extension PhotoLibraryUploader: PhotoLibrarySyncable {
+    public func pauseSync(userId: Int) async {
+        guard frozenSettings?.userId == userId else { return }
+        await cancelScan()
+    }
+
     @MainActor public func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {
         let currentSyncSettings = frozenSettings
         let shouldReset = (currentSyncSettings?.driveId != liveNewSyncSettings.driveId)
@@ -116,14 +116,12 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
         }
     }
 
-    public func disableSync(withSettings: Bool) {
+    public func disableSync() {
         Task {
             @InjectService var photoLibraryScan: PhotoLibraryScanable
             @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
 
-            if withSettings {
-                await deleteSyncSettings()
-            }
+            await deleteSyncSettings()
 
             await photoLibraryScan.cancelScan()
 

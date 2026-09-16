@@ -122,6 +122,11 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
 
         await catching {
             try self.checkCancelation()
+            let file = try self.readOnlyFile()
+            guard !file.isAuthenticationBlocked,
+                  self.accountManager.getTokenForUserId(file.userId) != nil else {
+                throw DriveError.uploadAuthenticationRequired
+            }
             try self.freeSpaceService.checkEnoughAvailableSpaceForChunkUpload()
 
             // Fetch a background task identifier
@@ -292,7 +297,7 @@ public final class UploadOperation: AsynchronousOperation, UploadOperationable, 
         SentryDebug.uploadOperationEndBreadcrumb(uploadFileId, readOnlyFile?.error)
 
         var shouldCleanUploadFile = false
-        try? transactionWithFile { file in
+        try? transactionWithFile(allowCancelled: true) { file in
             if let error = file.error {
                 Log.uploadOperation("end file ufid:\(self.uploadFileId) errorCode: \(error.code) error:\(error)", level: .error)
             } else {

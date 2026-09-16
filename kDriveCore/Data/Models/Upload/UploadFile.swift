@@ -334,8 +334,27 @@ public extension UploadFile {
 
 /// Cleaning
 public extension UploadFile {
+    var isAuthenticationBlocked: Bool {
+        error == .uploadAuthenticationRequired
+    }
+
+    func blockForAuthentication() {
+        guard uploadDate == nil else { return }
+        error = .uploadAuthenticationRequired
+        maxRetryCount = 0
+        progress = nil
+    }
+
+    /// Only call once the owning account and destination drive are available again.
+    func clearAuthenticationBlock() {
+        guard isAuthenticationBlocked else { return }
+        error = nil
+        clearErrorsForRetry()
+    }
+
     /// Centralise error cleaning
     func clearErrorsForRetry() {
+        guard !isAuthenticationBlocked else { return }
         // Clear any stored error
         error = nil
         // Reset retry count to default

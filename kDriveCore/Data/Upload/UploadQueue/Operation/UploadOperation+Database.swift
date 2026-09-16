@@ -28,8 +28,10 @@ extension UploadOperation {
     /// - Parameters:
     ///   - function: The name of the function performing the transaction
     ///   - task: A closure to mutate the current `UploadFile`
-    func transactionWithFile(function: StaticString = #function, _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
-        /// A cancelled operation can access database for cleanup, _not_ a finished one.
+    func transactionWithFile(function: StaticString = #function,
+                             allowCancelled: Bool = false,
+                             _ task: @escaping (_ file: UploadFile) throws -> Void) throws {
+        /// Only end-of-operation cleanup may access a cancelled operation's record.
         guard !isFinished else {
             throw ErrorDomain.operationFinished
         }
@@ -37,6 +39,14 @@ extension UploadOperation {
         try uploadsDatabase.writeTransaction { writableRealm in
             guard let file = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: self.uploadFileId) else {
                 throw ErrorDomain.databaseUploadFileNotFound
+            }
+
+            // Late callbacks must not overwrite a block, or mutate a newly resumed upload.
+            guard !self.isCancelled || allowCancelled else {
+                throw ErrorDomain.operationCanceled
+            }
+            guard !file.isAuthenticationBlocked else {
+                throw DriveError.uploadAuthenticationRequired
             }
 
             try task(file)
@@ -124,6 +134,7 @@ extension UploadOperation {
                 return
             }
 
+            guard uploadFile.error == .taskCancelled else { return }
             writableRealm.delete(uploadFile)
         }
     }

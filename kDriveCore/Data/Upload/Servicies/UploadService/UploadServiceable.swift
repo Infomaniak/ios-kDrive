@@ -46,6 +46,10 @@ public protocol UploadServiceable {
 
     func cancelAnyPhotoSync() async throws
 
+    func blockUploadsForAuthentication(userId: Int) throws
+
+    func resumeUploadsAfterAuthentication(userId: Int) async
+
     func rescheduleRunningOperations()
 
     @discardableResult func cancel(uploadFileId: String) -> Bool

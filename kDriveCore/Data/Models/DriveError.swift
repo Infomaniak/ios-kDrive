@@ -119,6 +119,7 @@ public struct DriveError: Error, Equatable, ErrorWithCode {
     public static let fileNotFound = DriveError(type: .localError, code: "fileNotFound")
     public static let photoAssetNoLongerExists = DriveError(type: .localError, code: "photoAssetNoLongerExists")
     public static let unknownToken = DriveError(type: .localError, code: "unknownToken")
+    public static let uploadAuthenticationRequired = DriveError(type: .localError, code: "uploadAuthenticationRequired")
     public static let localError = DriveError(type: .localError, code: "localError")
     public static let errorDeviceStorage = DriveError(type: .localError,
                                                       localCode: .errorDeviceStorage,

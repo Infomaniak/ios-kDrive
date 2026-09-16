@@ -130,7 +130,9 @@ class SwitchUserViewController: UIViewController {
         } catch {
             SentryDebug.logPreloadingAccountError(error: error, origin: "SwitchUserViewController")
             // Unknown error, remove the user
-            accountManager.removeTokenAndAccountFor(userId: userId)
+            Task {
+                await accountManager.removeTokenAndAccountFor(userId: userId, isInvoluntary: true)
+            }
         }
     }
 
