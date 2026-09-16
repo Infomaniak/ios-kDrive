@@ -23,27 +23,51 @@ import kDriveCore
 final class WorkingSetEnumerator: NSObject, NSFileProviderEnumerator {
     let driveFileManager: DriveFileManager
     let domain: NSFileProviderDomain?
+    private var enumerationTask: Task<Void, Never>?
 
     init(driveFileManager: DriveFileManager, domain: NSFileProviderDomain?) {
         self.driveFileManager = driveFileManager
         self.domain = domain
     }
 
-    func invalidate() {}
+    func invalidate() {
+        enumerationTask?.cancel()
+        enumerationTask = nil
+    }
 
     func enumerateItems(for observer: NSFileProviderEnumerationObserver, startingAt page: NSFileProviderPage) {
-        let workingSetFiles = driveFileManager.getWorkingSet()
-        var containerItems = [NSFileProviderItem]()
-        for file in workingSetFiles {
-            autoreleasepool {
-                containerItems.append(file.toFileProviderItem(
-                    parent: .workingSet,
-                    drive: driveFileManager.drive,
-                    domain: self.domain
-                ))
+        enumerationTask?.cancel()
+        let driveFileManager = self.driveFileManager
+        let domain = self.domain
+        enumerationTask = Task { [weak self] in
+            guard let self, !Task.isCancelled else {
+                observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
+                return
+            }
+
+            let workingSetFiles = driveFileManager.getWorkingSet()
+            var containerItems = [NSFileProviderItem]()
+            for file in workingSetFiles {
+                guard !Task.isCancelled else {
+                    observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
+                    return
+                }
+
+                autoreleasepool {
+                    containerItems.append(file.toFileProviderItem(
+                        parent: .workingSet,
+                        drive: driveFileManager.drive,
+                        domain: domain
+                    ))
+                }
+            }
+
+            observer.didEnumerate(containerItems)
+            observer.finishEnumerating(upTo: nil)
+
+            if self.enumerationTask?.isCancelled == false {
+                self.enumerationTask = nil
             }
         }
-        observer.didEnumerate(containerItems)
-        observer.finishEnumerating(upTo: nil)
     }
 }
