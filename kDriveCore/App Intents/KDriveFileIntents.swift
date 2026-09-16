@@ -128,8 +128,10 @@ struct MoveFilesIntent {
             }
         }
 
-        let importFolder = try URL.appGroupImportUniqueFolderURL()
-        let importURL = importFolder.appendingPathComponent(sourceURL.lastPathComponent)
+        let importHelper = FileImportHelper()
+        let contentType = UTI(filenameExtension: sourceURL.pathExtension) ?? .data
+        // Keep queued sources directly in the import directory so the cache audit can match them.
+        let importURL = importHelper.generateImportURL(for: contentType)
         do {
             var coordinationError: NSError?
             var copyError: Error?
@@ -153,17 +155,17 @@ struct MoveFilesIntent {
             let importedFile = ImportedFile(
                 name: sourceURL.lastPathComponent,
                 path: importURL,
-                uti: UTI(filenameExtension: sourceURL.pathExtension) ?? .data
+                uti: contentType
             )
             // The upload queue needs a durable copy after Shortcuts releases access to the source.
-            try await FileImportHelper().saveForUpload(
+            try await importHelper.saveForUpload(
                 [importedFile],
                 in: destination.file,
                 drive: destination.driveFileManager.drive,
                 addToQueue: true
             )
         } catch {
-            try? FileManager.default.removeItem(at: importFolder)
+            try? FileManager.default.removeItem(at: importURL)
             throw error
         }
     }
