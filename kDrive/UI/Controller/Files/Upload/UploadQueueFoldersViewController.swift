@@ -27,7 +27,34 @@ import UIKit
 
 typealias FileDisplayed = CornerCellContainer<File>
 
+@MainActor
+protocol UploadFolderResolving {
+    func cachedFolder(_ file: ProxyFile) -> File?
+    func loadFolder(_ file: ProxyFile) async throws
+}
+
+private struct UploadFolderResolver: UploadFolderResolving {
+    let accountManager: AccountManageable
+    let userId: Int
+
+    func cachedFolder(_ file: ProxyFile) -> File? {
+        accountManager.getDriveFileManager(for: file.driveId, userId: userId)?.getCachedFile(id: file.id)
+    }
+
+    func loadFolder(_ file: ProxyFile) async throws {
+        guard let manager = accountManager.getDriveFileManager(for: file.driveId, userId: userId) else {
+            throw DriveError.NoDriveError.noDriveFileManager
+        }
+        _ = try await manager.file(file)
+    }
+}
+
 final class UploadQueueFoldersViewController: UITableViewController {
+    private struct FolderIdentifier: Hashable {
+        let driveId: Int
+        let parentId: Int
+    }
+
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var uploadDataSource: UploadServiceDataSourceable
@@ -36,6 +63,10 @@ final class UploadQueueFoldersViewController: UITableViewController {
     private var frozenUploadingFolders = [FileDisplayed]()
     private var notificationToken: NotificationToken?
     private var driveFileManager: DriveFileManager!
+    private var uploadingFiles: Results<UploadFile>?
+    private var requestedFolders = Set<FolderIdentifier>()
+    private var folderLoadingTasks: [FolderIdentifier: Task<Void, Never>] = [:]
+    private var folderResolver: UploadFolderResolving?
 
     private var userId: Int {
         return driveFileManager.drive.userId
@@ -58,6 +89,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     deinit {
         notificationToken?.invalidate()
+        folderLoadingTasks.values.forEach { $0.cancel() }
     }
 
     private func setUpObserver() {
@@ -65,7 +97,14 @@ final class UploadQueueFoldersViewController: UITableViewController {
         let driveIds = [driveFileManager.driveId] + driveInfosManager.getDrives(for: userId, sharedWithMe: true)
             .map(\.id)
         let uploadingFiles = uploadDataSource.getUploadingFiles(userId: userId, driveIds: driveIds)
-            .distinct(by: [\.parentDirectoryId])
+            .distinct(by: [\.driveId, \.parentDirectoryId])
+        observeUploads(uploadingFiles, folderResolver: UploadFolderResolver(accountManager: accountManager, userId: userId))
+    }
+
+    func observeUploads(_ uploadingFiles: Results<UploadFile>, folderResolver: UploadFolderResolving) {
+        notificationToken?.invalidate()
+        self.folderResolver = folderResolver
+        self.uploadingFiles = uploadingFiles
 
         notificationToken = uploadingFiles.observe(keyPaths: UploadFile.observedProperties, on: .main) { [weak self] change in
             guard let self else {
@@ -84,27 +123,21 @@ final class UploadQueueFoldersViewController: UITableViewController {
     }
 
     private func updateFolders(from results: Results<UploadFile>) {
-        let files = results.map { (driveId: $0.driveId, parentId: $0.parentDirectoryId) }
-        let filesCount = files.count
-        let folders: [FileDisplayed] = files.enumerated().compactMap { index, tuple in
+        let files = results.map { FolderIdentifier(driveId: $0.driveId, parentId: $0.parentDirectoryId) }
+        let cachedFolders: [File] = files.compactMap { tuple in
             let parentId = tuple.parentId
             let driveId = tuple.driveId
 
-            guard let driveFileManager = accountManager.getDriveFileManager(for: driveId, userId: userId) else {
-                let metadata = ["parentId": "\(parentId)", "driveId": "\(driveId)", "userId": "\(userId)"]
-                Log.fileList("Unable to fetch a driveFileManager to display a file", metadata: metadata, level: .error)
+            guard let folder = folderResolver?.cachedFolder(ProxyFile(driveId: driveId, id: parentId)) else {
+                loadFolderIfNeeded(tuple)
                 return nil
             }
 
-            // FIXME: orphan files not displayed
-            guard let folder = driveFileManager.getCachedFile(id: parentId) else {
-                let metadata = ["parentId": "\(parentId)", "driveId": "\(driveId)"]
-                Log.fileList("Unable to fetch parent folder to display file", metadata: metadata, level: .error)
-                return nil
-            }
-
+            return folder
+        }
+        let folders = cachedFolders.enumerated().map { index, folder in
             return FileDisplayed(isFirstInList: index == 0,
-                                 isLastInList: index == filesCount - 1,
+                                 isLastInList: index == cachedFolders.count - 1,
                                  content: folder)
         }
 
@@ -114,8 +147,26 @@ final class UploadQueueFoldersViewController: UITableViewController {
                          interrupt: { $0.changeCount > Endpoint.itemsPerPage },
                          setData: { self.frozenUploadingFolders = $0 })
 
-        if folders.isEmpty {
+        if results.isEmpty, navigationController?.topViewController === self {
             navigationController?.popViewController(animated: true)
+        }
+    }
+
+    private func loadFolderIfNeeded(_ identifier: FolderIdentifier) {
+        guard let folderResolver, requestedFolders.insert(identifier).inserted else { return }
+
+        folderLoadingTasks[identifier] = Task { @MainActor [weak self] in
+            defer { self?.folderLoadingTasks[identifier] = nil }
+            do {
+                try await folderResolver.loadFolder(ProxyFile(driveId: identifier.driveId, id: identifier.parentId))
+                guard !Task.isCancelled, let self, let uploadingFiles = self.uploadingFiles else { return }
+                // Use the current queue: uploads may have completed while the folder was loading.
+                updateFolders(from: uploadingFiles)
+            } catch {
+                guard !Task.isCancelled else { return }
+                let metadata = ["parentId": "\(identifier.parentId)", "driveId": "\(identifier.driveId)"]
+                Log.fileList("Unable to load upload destination: \(error)", metadata: metadata, level: .error)
+            }
         }
     }
 
