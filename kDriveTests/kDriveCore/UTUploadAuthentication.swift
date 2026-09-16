@@ -29,6 +29,7 @@ import Testing
 @MainActor
 final class UTUploadAuthentication {
     private var database: TransactionExecutor!
+    private var uploadDatabase: FailingUploadDatabase!
     private var retainedRealm: Realm!
     private var service: UploadService!
     private var accountManager: UploadAccountManager!
@@ -50,9 +51,10 @@ final class UTUploadAuthentication {
         database = TransactionExecutor(realmAccessible: RealmAccessor(
             realmURL: nil, realmConfiguration: configuration, excludeFromBackup: false
         ))
+        uploadDatabase = FailingUploadDatabase(database: database)
         for identifier in [kDriveDBID.uploads, kDriveDBID.driveInfo] {
-            SimpleResolver.sharedResolver.store(factory: Factory(type: Transactionable.self) { [database] _, _ in
-                database!
+            SimpleResolver.sharedResolver.store(factory: Factory(type: Transactionable.self) { [uploadDatabase] _, _ in
+                uploadDatabase!
             }, forCustomTypeIdentifier: identifier)
         }
         accountManager = UploadAccountManager()
@@ -122,6 +124,36 @@ final class UTUploadAuthentication {
         #expect(settings.lastSync == checkpoint)
         #expect(try #require(photo.creationDate) < checkpoint)
         #expect(photo.assetLocalIdentifier == "retained-asset")
+    }
+
+    @Test func persistenceFailureThrowsBeforeAttemptingToEnqueue() throws {
+        try setUp()
+        defer { tearDown() }
+        let file = makeUpload(userId: 1)
+        accountManager.authenticatedUserIds = [1]
+        let persistenceError = CocoaError(.fileWriteOutOfSpace)
+        uploadDatabase.writeError = persistenceError
+        defer { uploadDatabase.writeError = nil }
+
+        #expect(throws: persistenceError) {
+            try service.saveToRealm(file, itemIdentifier: nil, addToQueue: true)
+        }
+
+        #expect(database.fetchObject(ofType: UploadFile.self, forPrimaryKey: file.id) == nil)
+        #expect(globalQueue.operationCount == 0)
+    }
+
+    @Test func savedUploadWaitingForAuthenticationDoesNotThrow() throws {
+        try setUp()
+        defer { tearDown() }
+        let file = makeUpload(userId: 1)
+
+        let operation = try service.saveToRealm(file, itemIdentifier: nil, addToQueue: true)
+
+        #expect(operation == nil)
+        let savedFile = try #require(database.fetchObject(ofType: UploadFile.self, forPrimaryKey: file.id))
+        #expect(savedFile.isAuthenticationBlocked)
+        #expect(savedFile.uploadDate == nil)
     }
 
     @Test func blockSurvivesDatabaseReopenAndAllRetryPaths() throws {
@@ -335,6 +367,42 @@ final class UTUploadAuthentication {
 
 private final class SuspendedUploadQueue: UploadQueue {
     override var shouldSuspendQueue: Bool { true }
+}
+
+private final class FailingUploadDatabase: Transactionable {
+    let database: TransactionExecutor
+    var writeError: CocoaError?
+
+    init(database: TransactionExecutor) {
+        self.database = database
+    }
+
+    func fetchObject<Element: Object, KeyType>(ofType type: Element.Type, forPrimaryKey key: KeyType) -> Element? {
+        database.fetchObject(ofType: type, forPrimaryKey: key)
+    }
+
+    func fetchObject<Element: RealmFetchable>(
+        ofType type: Element.Type,
+        filtering: (Results<Element>) -> Element?
+    ) -> Element? {
+        database.fetchObject(ofType: type, filtering: filtering)
+    }
+
+    func fetchResults<Element: RealmFetchable>(
+        ofType type: Element.Type,
+        filtering: (Results<Element>) -> Results<Element>
+    ) -> Results<Element> {
+        database.fetchResults(ofType: type, filtering: filtering)
+    }
+
+    func writeTransaction(withRealm realmClosure: (Realm) throws -> Void) throws {
+        try writeTransaction(withExpiringActivity: true, withRealm: realmClosure)
+    }
+
+    func writeTransaction(withExpiringActivity expiration: Bool, withRealm realmClosure: (Realm) throws -> Void) throws {
+        if let writeError { throw writeError }
+        try database.writeTransaction(withExpiringActivity: expiration, withRealm: realmClosure)
+    }
 }
 
 private struct SilentUploadPublisher: UploadPublishable {

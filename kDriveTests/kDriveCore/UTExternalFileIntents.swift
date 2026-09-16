@@ -75,6 +75,36 @@ struct UTExternalFileIntents {
     }
 
     @available(iOS 18.4, *)
+    @Test func persistenceFailureIsReportedAndOnlyTheImportCopyIsRemoved() async throws {
+        let fixture = try ExternalIntentFixture()
+        defer { fixture.tearDown() }
+        let contents = Data("Keep the original file".utf8)
+        let sourceURL = fixture.paths.groupDirectoryURL.appendingPathComponent("Original.txt")
+        try contents.write(to: sourceURL)
+        let identifier = try FileEntityIdentifier.file(url: sourceURL)
+        let entities = try await KDriveFileEntity.defaultQuery.entities(for: [identifier])
+        let entity = try #require(entities.first)
+        let intent = MoveFilesIntent()
+        intent.entities = [entity]
+        intent.destinationFolder = try await fixture.destinationEntity()
+        let persistenceError = CocoaError(.fileWriteOutOfSpace)
+        fixture.uploads.persistenceError = persistenceError
+
+        await #expect(throws: persistenceError) {
+            _ = try await intent.perform()
+        }
+
+        #expect(fixture.uploads.saveAttempts == 1)
+        #expect(fixture.uploads.queuedUploadIds.isEmpty)
+        #expect(fixture.uploads.getAllUploadingFilesFrozen().isEmpty)
+        let remainingImports = try FileManager.default.contentsOfDirectory(
+            at: fixture.paths.importDirectoryURL, includingPropertiesForKeys: nil
+        )
+        #expect(remainingImports.isEmpty)
+        #expect(try Data(contentsOf: sourceURL) == contents)
+    }
+
+    @available(iOS 18.4, *)
     @Test func externalFoldersAreExcludedWithoutDroppingRegularFilesOrNativeFolders() async throws {
         let fixture = try ExternalIntentFixture()
         defer { fixture.tearDown() }
@@ -184,6 +214,8 @@ private final class IntentUploadDataSource: UploadServiceDataSourceable {
     let configuration: Realm.Configuration
     let database: TransactionExecutor
     private(set) var queuedUploadIds = [String]()
+    private(set) var saveAttempts = 0
+    var persistenceError: CocoaError?
 
     init(configuration: Realm.Configuration) {
         self.configuration = configuration
@@ -193,14 +225,12 @@ private final class IntentUploadDataSource: UploadServiceDataSourceable {
     }
 
     func saveToRealm(_ uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?,
-                     addToQueue: Bool) -> UploadOperationable? {
+                     addToQueue: Bool) throws -> UploadOperationable? {
+        saveAttempts += 1
+        if let persistenceError { throw persistenceError }
         let id = uploadFile.id
-        do {
-            try database.writeTransaction { $0.add(uploadFile) }
-            if addToQueue { queuedUploadIds.append(id) }
-        } catch {
-            Issue.record(error)
-        }
+        try database.writeTransaction { $0.add(uploadFile) }
+        if addToQueue { queuedUploadIds.append(id) }
         return nil
     }
 

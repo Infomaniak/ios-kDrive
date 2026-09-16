@@ -411,7 +411,14 @@ extension SceneDelegate {
                         }
                         group.leave()
                     }
-                uploadDataSource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
+                do {
+                    try uploadDataSource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
+                } catch {
+                    observationToken?.cancel()
+                    shouldCleanFolder = false
+                    group.leave()
+                    Log.sceneDelegate("[OPEN-IN-PLACE UPLOAD] Error while saving upload: \(error)", level: .error)
+                }
             }
         }
 

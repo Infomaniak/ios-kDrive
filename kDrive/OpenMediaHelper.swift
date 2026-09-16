@@ -142,7 +142,7 @@ extension OpenMediaHelper: UIDocumentPickerDelegate {
                     url: targetURL,
                     name: url.lastPathComponent
                 )
-                uploadDatasource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
+                try uploadDatasource.saveToRealm(uploadFile, itemIdentifier: nil, addToQueue: true)
             } catch {
                 UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
             }
