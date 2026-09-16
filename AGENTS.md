@@ -188,7 +188,7 @@ tuist test # Or via Xcode Test Navigator
 
 ### Learned Preferences
 
-_None yet. Add user-corrected preferences here as they arise._
+- Write new tests with Swift Testing (`import Testing`, `@Suite`, `@Test`, `#expect`, and `#require`) rather than XCTest.
 
 ## Self-correction
 

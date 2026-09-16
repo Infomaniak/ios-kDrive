@@ -105,9 +105,9 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     func addAccount(token: ApiToken) async throws {}
 
-    func removeAccountFor(userId: Int, isInvoluntary: Bool) {}
+    func removeAccountFor(userId: Int, isInvoluntary: Bool) async {}
 
-    func removeTokenAndAccountFor(userId: Int, isInvoluntary: Bool) {}
+    func removeTokenAndAccountFor(userId: Int, isInvoluntary: Bool) async {}
 
     func removeCachedProperties() {}
 

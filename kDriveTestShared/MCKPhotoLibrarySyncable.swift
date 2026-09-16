@@ -22,5 +22,6 @@ import kDriveCore
 struct MCKPhotoLibrarySyncable: PhotoLibrarySyncable {
     @MainActor func enableSync(_ liveNewSyncSettings: PhotoSyncSettings) {}
 
-    func disableSync(withSettings: Bool) {}
+    func disableSync() {}
+    func pauseSync(userId: Int) async {}
 }
