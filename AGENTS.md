@@ -189,6 +189,7 @@ tuist test # Or via Xcode Test Navigator
 ### Learned Preferences
 
 - Write new tests with Swift Testing (`import Testing`, `@Suite`, `@Test`, `#expect`, and `#require`) rather than XCTest.
+- Resetting previous upload errors on reauthentication is acceptable, consistent with background-upload behavior.
 
 ## Self-correction
 

@@ -386,7 +386,7 @@ extension UploadService: UploadServiceable {
         }
     }
 
-    public func cancelAnyPhotoSync() async throws {
+    public func cancelAnyPhotoSync(includingBlockedUploadsForUserId userId: Int?) async throws {
         suspendAllOperations()
         defer {
             resumeAllOperations()
@@ -401,8 +401,8 @@ extension UploadService: UploadServiceable {
                     guard let objectToRemove = writableRealm.object(ofType: UploadFile.self, forPrimaryKey: uploadFileId) else {
                         continue
                     }
-                    // Changing another account's sync configuration must not discard retained uploads.
-                    guard !objectToRemove.isAuthenticationBlocked else { continue }
+                    // Explicit disablement cancels this account's blocked photos, but preserves other accounts' queues.
+                    guard !objectToRemove.isAuthenticationBlocked || objectToRemove.userId == userId else { continue }
                     writableRealm.delete(objectToRemove)
                 }
             }

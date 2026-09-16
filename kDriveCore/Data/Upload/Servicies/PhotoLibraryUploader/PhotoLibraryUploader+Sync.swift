@@ -117,6 +117,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
     }
 
     public func disableSync() {
+        let userId = frozenSettings?.userId
         Task {
             @InjectService var photoLibraryScan: PhotoLibraryScanable
             @InjectService(customTypeIdentifier: UploadQueueID.photo) var photoUploadQueue: UploadQueueable
@@ -128,7 +129,7 @@ extension PhotoLibraryUploader: PhotoLibrarySyncable {
             photoUploadQueue.cancelAllOperations()
 
             do {
-                try await uploadService.cancelAnyPhotoSync()
+                try await uploadService.cancelAnyPhotoSync(includingBlockedUploadsForUserId: userId)
                 await forgetUploadedPhotos()
             } catch {
                 Log.photoLibraryUploader("Failed to clear photo sync queue: \(error)", level: .error)

@@ -277,6 +277,49 @@ final class UTUploadAuthentication {
         #expect(database.fetchObject(ofType: UploadFile.self, forPrimaryKey: ids[3])?.error == .quotaExceeded)
     }
 
+    @Test func disablingSyncCancelsBlockedPhotosOnlyForItsAccount() async throws {
+        try setUp()
+        defer { tearDown() }
+        let photo = makeUpload(userId: 1, photo: true)
+        let otherAccountPhoto = makeUpload(userId: 2, photo: true)
+        let manualUpload = makeUpload(userId: 1)
+        let photoId = photo.id
+        let otherPhotoId = otherAccountPhoto.id
+        let manualId = manualUpload.id
+        let settings = PhotoSyncSettings()
+        settings.userId = 1
+        try database.writeTransaction { realm in
+            for file in [photo, otherAccountPhoto, manualUpload] {
+                file.blockForAuthentication()
+                realm.add(file)
+            }
+            realm.add(settings)
+        }
+
+        let uploader = PhotoLibraryUploader()
+        uploader.disableSync()
+
+        let deadline = ContinuousClock.now.advanced(by: .seconds(3))
+        while database.fetchObject(ofType: UploadFile.self, forPrimaryKey: photoId) != nil,
+              ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(uploader.frozenSettings == nil)
+        #expect(database.fetchObject(ofType: UploadFile.self, forPrimaryKey: photoId) == nil)
+        let retainedPhoto = try #require(database.fetchObject(ofType: UploadFile.self, forPrimaryKey: otherPhotoId))
+        #expect(retainedPhoto.isAuthenticationBlocked)
+        let retainedManual = try #require(database.fetchObject(ofType: UploadFile.self, forPrimaryKey: manualId))
+        #expect(retainedManual.isAuthenticationBlocked)
+
+        let drive = Drive()
+        drive.id = 1
+        drive.userId = 1
+        try database.writeTransaction { $0.add(drive) }
+        accountManager.authenticatedUserIds = [1]
+        await service.resumeUploadsAfterAuthentication(userId: 1)
+        #expect(database.fetchObject(ofType: UploadFile.self, forPrimaryKey: photoId) == nil)
+    }
+
     private func makeUpload(userId: Int, photo: Bool = false) -> UploadFile {
         let file = UploadFile()
         file.userId = userId
