@@ -22,6 +22,7 @@ import CoreSpotlight
 import FileProvider
 import InfomaniakDI
 import OSLog
+import RealmSwift
 
 public final class SpotlightIndexer {
     private static let logger = Logger(category: "SpotlightIndexer")
@@ -41,7 +42,7 @@ public final class SpotlightIndexer {
     func reindexItems(for identifiers: [FileEntityIdentifier]) async throws {
         try await operationQueue.performThrowing {
             let entities = try await KDriveFileEntity.defaultQuery.entities(for: identifiers)
-            try await CSSearchableIndex(name: Self.spotlightIndexName).indexAppEntities(entities)
+            try await CSSearchableIndex(name: Self.spotlightIndexName).indexAppEntities(entities.filter { !$0.isExternal })
         }
     }
 
@@ -81,7 +82,12 @@ public final class SpotlightIndexer {
                             lazyCollection
                                 .filter("id > %@", DriveFileManager.constants.rootID)
                                 .filter("rawStatus != 'trashed' AND rawStatus != 'trash_inherited'")
-                                .sorted(byKeyPath: "lastModifiedAt", ascending: false)
+                                .sorted(by: [
+                                    SortDescriptor(keyPath: "isFavorite", ascending: false),
+                                    SortDescriptor(keyPath: "isAvailableOffline", ascending: false),
+                                    SortDescriptor(keyPath: "lastModifiedAt", ascending: false),
+                                    SortDescriptor(keyPath: "id", ascending: true)
+                                ])
                                 .freeze()
                         }
                         .prefix(Self.maxIndexedItems)

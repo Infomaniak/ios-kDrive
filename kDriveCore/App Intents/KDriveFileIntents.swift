@@ -17,6 +17,8 @@
  */
 
 import AppIntents
+import Foundation
+import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
 
@@ -30,10 +32,11 @@ struct OpenFileIntent: OpenIntent {
         @InjectService var accountManager: AccountManageable
         @InjectService var appNavigable: AppNavigable
 
-        guard let driveFileManager = accountManager.getDriveFileManager(
-            for: target.driveId,
-            userId: target.userId
-        ) else {
+        guard !target.isExternal,
+              let driveFileManager = accountManager.getDriveFileManager(
+                  for: target.driveId,
+                  userId: target.userId
+              ) else {
             throw DriveError.fileNotFound
         }
 
@@ -80,16 +83,17 @@ struct MoveFilesIntent {
             throw DriveError.fileNotFound
         }
 
-        guard destination.file.capabilities.canMoveInto else {
-            throw DriveError.forbidden
-        }
-
         let moveCoordinator = MoveCoordinator()
 
         for entity in entities {
+            if entity.isExternal {
+                try await importExternalFile(entity, to: destination)
+                continue
+            }
+
             let source = try entity.resolveCache()
 
-            guard source.file.capabilities.canMove else {
+            guard source.file.capabilities.canMove, destination.file.capabilities.canMoveInto else {
                 throw DriveError.forbidden
             }
 
@@ -107,6 +111,63 @@ struct MoveFilesIntent {
         }
 
         return .result()
+    }
+
+    private func importExternalFile(_ entity: KDriveFileEntity, to destination: ResolvedKDriveFile) async throws {
+        guard destination.file.capabilities.canUpload else {
+            throw DriveError.forbidden
+        }
+
+        guard let sourceURL = try await entity.id.fileURL else {
+            throw DriveError.fileNotFound
+        }
+        let accessing = sourceURL.startAccessingSecurityScopedResource()
+        defer {
+            if accessing {
+                sourceURL.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        let importHelper = FileImportHelper()
+        let contentType = UTI(filenameExtension: sourceURL.pathExtension) ?? .data
+        // Keep queued sources directly in the import directory so the cache audit can match them.
+        let importURL = importHelper.generateImportURL(for: contentType)
+        do {
+            var coordinationError: NSError?
+            var copyError: Error?
+            NSFileCoordinator().coordinate(readingItemAt: sourceURL, options: [], error: &coordinationError) { readURL in
+                do {
+                    guard try readURL.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else {
+                        throw FileImportHelper.ErrorDomain.unsupportedUnderlyingType
+                    }
+                    try FileManager.default.copyItem(at: readURL, to: importURL)
+                } catch {
+                    copyError = error
+                }
+            }
+            if let coordinationError {
+                throw coordinationError
+            }
+            if let copyError {
+                throw copyError
+            }
+
+            let importedFile = ImportedFile(
+                name: sourceURL.lastPathComponent,
+                path: importURL,
+                uti: contentType
+            )
+            // The upload queue needs a durable copy after Shortcuts releases access to the source.
+            try await importHelper.saveForUpload(
+                [importedFile],
+                in: destination.file,
+                drive: destination.driveFileManager.drive,
+                addToQueue: true
+            )
+        } catch {
+            try? FileManager.default.removeItem(at: importURL)
+            throw error
+        }
     }
 }
 
@@ -213,11 +274,12 @@ extension KDriveFileEntity {
     func resolveCache() throws -> ResolvedKDriveFile {
         @InjectService var accountManager: AccountManageable
 
-        guard let driveFileManager = accountManager.getDriveFileManager(
-            for: driveId,
-            userId: userId
-        ),
-            let file = driveFileManager.getCachedFile(id: fileId) else {
+        guard !isExternal,
+              let driveFileManager = accountManager.getDriveFileManager(
+                  for: driveId,
+                  userId: userId
+              ),
+              let file = driveFileManager.getCachedFile(id: fileId) else {
             throw DriveError.fileNotFound
         }
 

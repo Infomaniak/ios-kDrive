@@ -46,6 +46,7 @@ ios-kDrive/
 │   └── IAP/                     #   In-App Purchase handling
 │
 ├── kDriveCore/                  # Business logic framework
+│   ├── App Intents/             # App entities, intents and bounded Spotlight indexing
 │   ├── Data/
 │   │   ├── Api/                 #   REST API layer
 │   │   │   ├── DriveApiFetcher.swift      #   Main API fetcher

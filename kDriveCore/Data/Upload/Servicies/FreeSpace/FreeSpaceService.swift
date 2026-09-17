@@ -162,8 +162,7 @@ public struct FreeSpaceService {
     }
 
     /// Check for orphan files in the import folder, clean if file is not tracked in DB.
-    private func cleanOrphanImportFolderFiles() {
-        let importDirectory = DriveFileManager.constants.importDirectoryURL
+    func cleanOrphanImportFolderFiles(in importDirectory: URL = DriveFileManager.constants.importDirectoryURL) {
         do {
             // Read content of import folder
             let cachedFiles = try fileManager.contentsOfDirectory(at: importDirectory, includingPropertiesForKeys: nil)
