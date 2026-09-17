@@ -104,7 +104,8 @@ ios-kDrive/
 │   └── *.entitlements
 ├── kDriveShareExtension/        # Share sheet extension
 ├── kDriveActionExtension/       # Action sheet extension
-├── kDriveTests/                 # Unit tests (XCTest)
+├── kDriveTests/                 # Unit tests (XCTest and Swift Testing)
+│   └── kDriveCore/UTExternalFileIntents.swift  # External imports, cache retention, folder resolution
 ├── kDriveAPITests/              # API integration tests
 ├── kDriveUITests/               # UI automation tests
 ├── kDriveTestShared/            # Shared test utilities
