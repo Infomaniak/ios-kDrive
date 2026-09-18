@@ -99,7 +99,8 @@ let project = Project(name: "kDrive",
                                   deploymentTargets: Constants.deploymentTarget, infoPlist: .default,
                                   sources: [
                                       "kDriveTests/**",
-                                      "kDriveTestShared/**"
+                                      "kDriveTestShared/**",
+                                      "kDriveFileProvider/Enumerators/WorkingSetEnumerator.swift"
                                   ],
                                   resources: [
                                       "kDriveTests/**/*.jpg",

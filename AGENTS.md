@@ -91,6 +91,7 @@ ios-kDrive/
 │   │   └── Sentry/              #     Error tracking
 │   ├── AudioPlayer/             #   Audio playback
 │   ├── VideoPlayer/             #   Video playback
+│   ├── FileProvider/            #   File Provider metadata, services, and action reduction
 │   └── DI/                      #   Dependency Injection
 │       └── FactoryService.swift
 │
@@ -104,7 +105,7 @@ ios-kDrive/
 │   └── *.entitlements
 ├── kDriveShareExtension/        # Share sheet extension
 ├── kDriveActionExtension/       # Action sheet extension
-├── kDriveTests/                 # Unit tests (XCTest)
+├── kDriveTests/                 # Unit tests (Swift Testing; legacy XCTest)
 ├── kDriveAPITests/              # API integration tests
 ├── kDriveUITests/               # UI automation tests
 ├── kDriveTestShared/            # Shared test utilities
@@ -162,7 +163,8 @@ tuist test # Or via Xcode Test Navigator
 - **DI:** Use `@InjectService` from InfomaniakDI for dependency injection; register via `FactoryService` in kDriveCore.
 - **API layer:** Extend `DriveApiFetcher` for API operations. Create focused extensions (`+Upload`, `+Listing`, `+Share`).
 - **Endpoint definitions:** Define API endpoints in `Endpoint.swift` and extend with `Endpoint+Files.swift`, `Endpoint+Share.swift`, etc.
-- **Concurrency:** Use `async/await` and structured concurrency.
+- **Concurrency:** Prefer native Swift `async/await`, structured concurrency, and actor isolation for shared mutable state. Avoid explicit locks and DispatchQueue-based synchronization when native concurrency mechanisms can express the solution. When bridging synchronous framework callbacks to actors, preserve required ordering and lifecycle semantics explicitly.
+- **Off-actor work:** Prefer `@concurrent` async functions called from `Task { ... }` over `Task.detached` when the goal is to run work off the caller's actor.
 - **Data persistence:** Realm models must be thread-safe; use `RealmAccessor` for background writes.
 - **Realm migrations:** Any schema-affecting change to a Realm `Object` or `EmbeddedObject` must increment the matching `RealmSchemaVersion` (`drive` or `upload`) in `kDriveCore/Data/Cache/DriveFileManager/DriveFileManagerConstants.swift`. Update the corresponding migration block when existing data needs migration.
 - **Manager pattern:** Core data managers follow the *Manager naming (AccountManager, DriveFileManager, DriveInfosManager, AvailableOfflineManager).
