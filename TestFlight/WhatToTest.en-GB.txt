@@ -1,3 +1,5 @@
+- Added a missing new folder button
+- Hardening against unintentional disconnections
 - Spotlight indexing of the most recent files
 - New kDrive actions in the Shortcuts app
 - Stability improvements and bug fixes
