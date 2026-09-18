@@ -67,9 +67,6 @@ final class FileProviderExtension: NSFileProviderExtension {
     @LazyInjectService var fileProviderService: FileProviderServiceable
     @LazyInjectService var downloadQueue: DownloadQueueable
 
-    var pendingReplacementIdentifier: NSFileProviderItemIdentifier?
-    var replacementConfirmed = false
-
     lazy var fileCoordinator: NSFileCoordinator = {
         let fileCoordinator = NSFileCoordinator()
         fileCoordinator.purposeIdentifier = manager.providerIdentifier

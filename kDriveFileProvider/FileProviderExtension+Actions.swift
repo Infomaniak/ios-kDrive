@@ -103,15 +103,8 @@ extension FileProviderExtension {
         let newItemFileName = fileURL.lastPathComponent.lowercased()
         if let collidingItem = itemsWithSameParent.first(where: { $0.filename.lowercased() == newItemFileName }),
            !(collidingItem.isTrashed ?? false) {
-            if replacementConfirmed, collidingItem.itemIdentifier == pendingReplacementIdentifier {
-                replacementConfirmed = false
-                pendingReplacementIdentifier = nil
-            } else {
-                replacementConfirmed = false
-                pendingReplacementIdentifier = collidingItem.itemIdentifier
-                completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
-                return
-            }
+            completionHandler(nil, NSError.fileProviderErrorForCollision(with: collidingItem))
+            return
         }
 
         let importedFileUUID = UUID().uuidString
@@ -300,12 +293,6 @@ extension FileProviderExtension {
             let item = deletedFile.toFileProviderItem(parent: nil, drive: self.drive, domain: self.domain)
             item.trashModifier(newValue: true)
 
-            if pendingReplacementIdentifier == itemIdentifier {
-                replacementConfirmed = true
-                completionHandler(item, nil)
-                return
-            }
-
             let proxyFile = file.proxify()
 
             do {
@@ -314,7 +301,6 @@ extension FileProviderExtension {
                 }
 
                 _ = try await self.driveFileManager.delete(file: proxyFile)
-                replacementConfirmed = false
                 completionHandler(item, nil)
             } catch {
                 completionHandler(nil, error)

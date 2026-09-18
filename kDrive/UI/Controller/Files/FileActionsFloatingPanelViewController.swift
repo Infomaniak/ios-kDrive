@@ -204,9 +204,24 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     func presentShareSheet(from indexPath: IndexPath, isFromMenu: Bool) {
         let localSourceView = sourceView ?? collectionView.cellForItem(at: indexPath) ?? collectionView
         guard let localSourceView else { return }
-        let activityViewController = UIActivityViewController(activityItems: [frozenFile.localUrl], applicationActivities: nil)
-        activityViewController.popoverPresentationController?.sourceView = localSourceView
-        (isFromMenu ? presentingParent : self)?.present(activityViewController, animated: true)
+
+        do {
+            let shareURL = try makeShareCopy(from: frozenFile.localUrl)
+            let activityViewController = UIActivityViewController(activityItems: [shareURL], applicationActivities: nil)
+
+            activityViewController.completionWithItemsHandler = { _, _, _, _ in
+                do {
+                    try FileManager.default.removeItem(at: shareURL.deletingLastPathComponent())
+                } catch {
+                    Logger.general.error("Error removing temporary share copy: \(error)")
+                }
+            }
+
+            activityViewController.popoverPresentationController?.sourceView = localSourceView
+            (isFromMenu ? presentingParent : self)?.present(activityViewController, animated: true)
+        } catch {
+            Logger.general.error("Error copying file for sharing: \(error)")
+        }
     }
 
     func downloadFile(action: FloatingPanelAction,
@@ -338,6 +353,31 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
 
         trackFileAction(action: action, file: frozenFile, category: eventCategory)
         handleAction(action, at: indexPath)
+    }
+
+    private func makeShareCopy(from sourceURL: URL) throws -> URL {
+        let fileManager = FileManager.default
+
+        let directory = fileManager.temporaryDirectory
+            .appendingPathComponent("ShareExports", isDirectory: true)
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+
+        try fileManager.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+
+        let shareURL = directory.appendingPathComponent(
+            sourceURL.lastPathComponent
+        )
+
+        do {
+            try fileManager.copyItem(at: sourceURL, to: shareURL)
+            return shareURL
+        } catch {
+            try? fileManager.removeItem(at: directory)
+            throw error
+        }
     }
 }
 
