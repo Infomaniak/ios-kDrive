@@ -69,6 +69,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     private var fileObserver: ObservationToken?
     private var downloadObserver: ObservationToken?
     private var interactionController: UIDocumentInteractionController!
+    private var shareCopyTask: Task<Void, Never>?
 
     // MARK: - Public methods
 
@@ -87,6 +88,10 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        shareCopyTask?.cancel()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -205,22 +210,26 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         let localSourceView = sourceView ?? collectionView.cellForItem(at: indexPath) ?? collectionView
         guard let localSourceView else { return }
 
-        do {
-            let shareURL = try makeShareCopy(from: frozenFile.localUrl)
-            let activityViewController = UIActivityViewController(activityItems: [shareURL], applicationActivities: nil)
+        shareCopyTask?.cancel()
+        shareCopyTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let shareURL = try await makeShareCopy(from: frozenFile.localUrl)
+                let activityViewController = UIActivityViewController(activityItems: [shareURL], applicationActivities: nil)
 
-            activityViewController.completionWithItemsHandler = { _, _, _, _ in
-                do {
-                    try FileManager.default.removeItem(at: shareURL.deletingLastPathComponent())
-                } catch {
-                    Logger.general.error("Error removing temporary share copy: \(error)")
+                activityViewController.completionWithItemsHandler = { _, _, _, _ in
+                    do {
+                        try FileManager.default.removeItem(at: shareURL.deletingLastPathComponent())
+                    } catch {
+                        Logger.general.error("Error removing temporary share copy: \(error)")
+                    }
                 }
-            }
 
-            activityViewController.popoverPresentationController?.sourceView = localSourceView
-            (isFromMenu ? presentingParent : self)?.present(activityViewController, animated: true)
-        } catch {
-            UIConstants.showSnackBarIfNeeded(error: error)
+                activityViewController.popoverPresentationController?.sourceView = localSourceView
+                (isFromMenu ? presentingParent : self)?.present(activityViewController, animated: true)
+            } catch {
+                UIConstants.showSnackBarIfNeeded(error: error)
+            }
         }
     }
 
@@ -355,7 +364,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         handleAction(action, at: indexPath)
     }
 
-    private func makeShareCopy(from sourceURL: URL) throws -> URL {
+    private func makeShareCopy(from sourceURL: URL) async throws -> URL {
         let fileManager = FileManager.default
 
         let directory = fileManager.temporaryDirectory
@@ -372,7 +381,9 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
         )
 
         do {
+            try Task.checkCancellation()
             try fileManager.copyItem(at: sourceURL, to: shareURL)
+            try Task.checkCancellation()
             return shareURL
         } catch {
             try? fileManager.removeItem(at: directory)
