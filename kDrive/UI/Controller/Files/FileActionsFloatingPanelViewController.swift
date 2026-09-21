@@ -220,7 +220,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
             activityViewController.popoverPresentationController?.sourceView = localSourceView
             (isFromMenu ? presentingParent : self)?.present(activityViewController, animated: true)
         } catch {
-            Logger.general.error("Error copying file for sharing: \(error)")
+            UIConstants.showSnackBarIfNeeded(error: error)
         }
     }
 
