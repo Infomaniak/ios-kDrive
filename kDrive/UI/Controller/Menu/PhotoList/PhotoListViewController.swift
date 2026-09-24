@@ -158,9 +158,6 @@ final class PhotoListViewController: FileListViewController {
 
         setPhotosNavigationBar()
         navigationItem.title = viewModel.title
-        Task {
-            try await viewModel.loadFiles()
-        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -230,10 +227,7 @@ final class PhotoListViewController: FileListViewController {
             viewModel.endRefreshing()
             return
         }
-        Task {
-            driveFileManager.removeLocalFiles(root: DriveFileManager.lastPicturesRootFile)
-            super.forceRefresh()
-        }
+        super.forceRefresh()
     }
 
     override func onFilePresented(_ file: File) {

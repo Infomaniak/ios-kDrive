@@ -604,17 +604,17 @@ public final class DriveFileManager {
                 keepCacheAttributesForFile(newFile: file, keepProperties: [.standard], writableRealm: writableRealm)
             }
 
+            if deleteOrphans {
+                deleteOrphanFiles(root: root, newFiles: files, writableRealm: writableRealm)
+            }
+
             try writeChildrenToParent(
                 files,
                 liveParent: liveRoot,
                 responseAt: nil,
-                isInitialCursor: false,
+                isInitialCursor: deleteOrphans,
                 writableRealm: writableRealm
             )
-
-            if deleteOrphans {
-                deleteOrphanFiles(root: root, newFiles: files, writableRealm: writableRealm)
-            }
         }
     }
 
@@ -1221,11 +1221,12 @@ public final class DriveFileManager {
             return
         }
 
+        let incomingFileUids = Set((newFiles ?? []).map(\.uid))
         var orphanFiles = [File]()
 
         for maybeOrphanFile in maybeOrphanFiles {
             let localContainerUrl = maybeOrphanFile.localContainerUrl
-            if newFiles == nil || !(newFiles ?? []).contains(maybeOrphanFile) {
+            if !incomingFileUids.contains(maybeOrphanFile.uid) {
                 if fileManager.fileExists(atPath: localContainerUrl.path) {
                     try? fileManager.removeItem(at: localContainerUrl) // Check that it was correctly removed?
                 }
