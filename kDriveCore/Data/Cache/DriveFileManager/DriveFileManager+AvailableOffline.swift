@@ -66,7 +66,7 @@ public extension DriveFileManager {
 
     private func updateFile(updatedFile: File, lastActionAt: Int?, writableRealm: Realm) {
         let oldFile = writableRealm.object(ofType: File.self, forPrimaryKey: updatedFile.uid)?.freeze()
-        keepCacheAttributesForFile(newFile: updatedFile, keepProperties: [.all], writableRealm: writableRealm)
+        keepCacheAttributesForFile(newFile: updatedFile, keepProperties: [.all, .supportedBy], writableRealm: writableRealm)
         if let lastActionAt {
             updatedFile.lastActionAt = lastActionAt
         }

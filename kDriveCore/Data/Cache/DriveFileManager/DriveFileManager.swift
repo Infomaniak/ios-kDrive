@@ -1274,6 +1274,7 @@ public final class DriveFileManager {
         public static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
         public static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
         public static let lastActionAt = FilePropertiesOptions(rawValue: 1 << 8)
+        public static let supportedBy = FilePropertiesOptions(rawValue: 1 << 9)
 
         public static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastActionAt, .lastCursor]
         public static let extras: FilePropertiesOptions = [.path, .users, .version]
@@ -1334,6 +1335,9 @@ public final class DriveFileManager {
         }
         if keepProperties.contains(.capabilities) {
             newFile.capabilities = Rights(value: savedChild.capabilities)
+        }
+        if keepProperties.contains(.supportedBy) {
+            newFile.supportedBy = savedChild.supportedBy
         }
     }
 
