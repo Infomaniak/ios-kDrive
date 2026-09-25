@@ -618,29 +618,6 @@ public final class DriveFileManager {
         }
     }
 
-    /// Remove all children of to a root File with a transaction
-    public func removeLocalFiles(root: File) {
-        try? database.writeTransaction { writableRealm in
-            guard let lastPicturesRootInContext = writableRealm
-                .objects(File.self)
-                .filter("id == %@", DriveFileManager.lastPicturesRootFile.id)
-                .first else {
-                return
-            }
-
-            let childrenToProcess = Array(lastPicturesRootInContext.children)
-            for child in childrenToProcess {
-                if child.parentLink.count == 1 {
-                    removeFileInDatabase(fileUid: child.uid, cascade: false, writableRealm: writableRealm)
-                } else {
-                    // The file has multiple parents, we only remove the link with the root
-                    lastPicturesRootInContext.children.remove(child)
-                }
-            }
-            writableRealm.add(lastPicturesRootInContext, update: .modified)
-        }
-    }
-
     public func lastModifiedFiles(cursor: String? = nil) async throws -> (files: [File], nextCursor: String?) {
         do {
             let lastModifiedFilesResponse = try await apiFetcher.lastModifiedFiles(drive: drive, cursor: cursor)
@@ -1205,6 +1182,7 @@ public final class DriveFileManager {
                 }
                 fileUidsToProcess.append(contentsOf: liveChildren.map { $0.uid })
                 liveFilesToDelete.append(contentsOf: liveChildren)
+                liveFilesToDelete.append(contentsOf: rootLiveFile.children)
             }
         }
 
