@@ -93,6 +93,16 @@ class PhotoListViewModel: FileListViewModel {
         }
     }
 
+    override func forceRefresh() {
+        Task {
+            do {
+                try await loadFiles(forceRefresh: true)
+            } catch {
+                UIConstants.showSnackBarIfNeeded(error: error)
+            }
+        }
+    }
+
     override func getFile(at indexPath: IndexPath) -> File? {
         guard indexPath.section < sections.count else {
             return nil
@@ -134,7 +144,7 @@ class PhotoListViewModel: FileListViewModel {
     }
 
     override func loadFiles(cursor: String? = nil, forceRefresh: Bool = false) async throws {
-        guard !isLoading || cursor != nil else { return }
+        guard !isLoading else { return }
 
         startRefreshing(cursor: cursor)
         defer {
