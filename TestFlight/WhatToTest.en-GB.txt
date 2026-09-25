@@ -1,4 +1,5 @@
 - Added a missing new folder button
+- Fix related to editing a file through the Files app
 - Hardening against unintentional disconnections
 - Spotlight indexing of the most recent files
 - New kDrive actions in the Shortcuts app

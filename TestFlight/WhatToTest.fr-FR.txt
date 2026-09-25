@@ -1,4 +1,5 @@
 - Ajout bouton nouveau dossier manquant
+- Correction d'un problème lié à la modification d'un fichier via l'application Fichiers
 - Durcissement relatif a des déconnexion involontaires
 - Indexation Spotlight des fichiers les plus récents
 - Nouvelles actions kDrive dans l'application Raccourcis
