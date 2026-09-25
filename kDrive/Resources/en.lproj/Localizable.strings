@@ -901,6 +901,9 @@
 /* loco:6569aef523dcf4dc2a0f5c92 */
 "errorWrongPassword" = "Wrong password";
 
+/* loco:6a2a79154feaf554c0020962 */
+"exceedQuotaTitle" = "Quota exceeded";
+
 /* loco:6049df4d5c2c3a04bc3979a9 */
 "favoritesNoFile" = "No favorites at this time";
 
@@ -1300,6 +1303,12 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Expiration time";
 
+/* loco:6a2a7acf5a2fec6b940785b2 */
+"insufficientSpaceDescription" = "Free up some space";
+
+/* loco:6a2a7a5f1dc6dc2d210f4ea4 */
+"insufficientSpaceTitle" = "Insufficient space";
+
 /* loco:6a9a68f38cdf25fae40adb63 */
 "itemLabel" = "Item";
 
@@ -1323,6 +1332,9 @@
 
 /* loco:67f509c180ba041c690a8e02 */
 "maintenanceAsleepTitle" = "Your kDrive %@ has taken a little nap!";
+
+/* loco:6a2a79b7bdb4d0e90a02bfc4 */
+"maintenanceTitle" = "Maintenance";
 
 /* loco:67f50e36f46a2825af088213 */
 "maintenanceWakeUpButton" = "Restart my kDrive";
@@ -1581,6 +1593,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Save your memories securely";
+
+/* loco:6a2a78ccb80096108403dcd2 */
+"openAppToContinue" = "Open the app to continue";
 
 /* loco:6660083917d29585d5010582 */
 "openInPlaceDirectory" = "Open in place";
@@ -2101,8 +2116,20 @@
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "Temporary files";
 
+/* loco:60a65b76f8bf9002e9594852 */
+"themeSettingsDarkLabel" = "Dark";
+
+/* loco:60a65b617652427d20367cc4 */
+"themeSettingsLightLabel" = "Light";
+
 /* loco:60a65ba139d35536f858f4f2 */
 "themeSettingsSystemDefaultLabel" = "System default";
+
+/* loco:60a65bbd7652427d20367cc6 */
+"themeSettingsSystemLabel" = "System";
+
+/* loco:60a65b3df229b924e419f452 */
+"themeSettingsTitle" = "Theme";
 
 /* loco:614c8841083c4c6d41454f55 */
 "totalStorageUsedTitle" = "Total storage used";
@@ -2148,6 +2175,9 @@
 
 /* loco:69bcfe53aed2af87a302d467 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
+
+/* loco:6a2a7a248dcf552aa702ad43 */
+"tryAgainLater" = "Please try again later";
 
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Unknown Artist";
@@ -2209,6 +2239,9 @@
 /* loco:6049df4d5c2c3a04bc397a86 */
 "uploadInProgressRestartUploadTitle" = "Restart the uploads";
 
+/* loco:6a2a7751b7cc09a6da053fc2 */
+"uploadInProgressSubTitle" = "Progress %d%%";
+
 /* loco:6049df4d5c2c3a04bc397a87 */
 "uploadInProgressTitle" = "Upload in progress";
 
@@ -2235,6 +2268,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Upload suspended";
+
+/* loco:6a2a73b3d69b30963b02d5b2 */
+"uploadingTitle" = "Uploading";
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/8095da03-4efe-469e-9aef-c7745ef85f6a/";
