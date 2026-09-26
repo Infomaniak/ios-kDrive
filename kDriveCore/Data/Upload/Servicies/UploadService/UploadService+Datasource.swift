@@ -33,6 +33,8 @@ public protocol UploadServiceDataSourceable {
     func getUploadingFiles(userId: Int,
                            driveIds: [Int]) -> Results<UploadFile>
 
+    func getUploadingFiles(optionalPredicate: NSPredicate?) -> Results<UploadFile>
+
     func getAllUploadingFilesFrozen() -> Results<UploadFile>
 
     func getUploadedFiles(optionalPredicate: NSPredicate?) -> Results<UploadFile>
@@ -40,6 +42,12 @@ public protocol UploadServiceDataSourceable {
     func getUploadedFiles(writableRealm: Realm, optionalPredicate: NSPredicate?) -> Results<UploadFile>
 
     func getUploadedFilesIDs(optionalPredicate: NSPredicate?) -> [String]
+
+    @discardableResult
+    func saveToRealm(_ uploadFile: UploadFile,
+                     itemIdentifier: NSFileProviderItemIdentifier?,
+                     addToQueue: Bool,
+                     writeExpiringActivity: Bool) -> UploadOperationable?
 
     @discardableResult
     func saveToRealm(_ uploadFile: UploadFile,
@@ -104,6 +112,18 @@ extension UploadService: UploadServiceDataSourceable {
         }
     }
 
+    public func getUploadingFiles(optionalPredicate: NSPredicate? = nil) -> Results<UploadFile> {
+        let ownedByFileProvider = appContextService.context == .fileProviderExtension
+        return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
+            lazyCollection.filter(
+                "uploadDate = nil AND ownedByFileProvider == %@",
+                NSNumber(value: ownedByFileProvider)
+            )
+            .filter(optionalPredicate: optionalPredicate)
+            .sorted(byKeyPath: "taskCreationDate")
+        }
+    }
+
     public func getAllUploadingFilesFrozen() -> Results<UploadFile> {
         return uploadsDatabase.fetchResults(ofType: UploadFile.self) { lazyCollection in
             lazyCollection.filter("uploadDate = nil")
@@ -143,11 +163,17 @@ extension UploadService: UploadServiceDataSourceable {
     public func saveToRealm(_ uploadFile: UploadFile,
                             itemIdentifier: NSFileProviderItemIdentifier? = nil,
                             addToQueue: Bool = true) -> UploadOperationable? {
-        let expiringActivity = ExpiringActivity()
-        expiringActivity.start()
-        defer {
-            expiringActivity.endAll()
-        }
+        saveToRealm(uploadFile, itemIdentifier: itemIdentifier, addToQueue: addToQueue, writeExpiringActivity: true)
+    }
+
+    @discardableResult
+    public func saveToRealm(_ uploadFile: UploadFile,
+                            itemIdentifier: NSFileProviderItemIdentifier? = nil,
+                            addToQueue: Bool = true,
+                            writeExpiringActivity: Bool = true) -> UploadOperationable? {
+        let expiringActivity: ExpiringActivity? = writeExpiringActivity ? ExpiringActivity() : nil
+        expiringActivity?.start()
+        defer { expiringActivity?.endAll() }
 
         Log.uploadQueue("saveToRealm addToQueue:\(addToQueue) ufid:\(uploadFile.id)")
 
@@ -164,7 +190,7 @@ extension UploadService: UploadServiceDataSourceable {
         }
 
         let detachedFile = uploadFile.detached()
-        try? uploadsDatabase.writeTransaction { writableRealm in
+        try? uploadsDatabase.writeTransaction(withExpiringActivity: false) { writableRealm in
             Log.uploadQueue("save ufid:\(uploadFile.id)")
             writableRealm.add(uploadFile, update: .modified)
             Log.uploadQueue("did save ufid:\(uploadFile.id)")

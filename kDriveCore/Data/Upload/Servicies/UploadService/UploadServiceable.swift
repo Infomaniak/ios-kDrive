@@ -38,6 +38,8 @@ public protocol UploadServiceable {
 
     func waitForCompletion(_ completionHandler: @escaping () -> Void)
 
+    func waitForCompletionForActiveQueues(_ completionHandler: @escaping () -> Void)
+
     func retry(_ uploadFileId: String)
 
     func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
