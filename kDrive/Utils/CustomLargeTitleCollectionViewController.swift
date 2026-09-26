@@ -35,8 +35,7 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
     private var lastAppliedTitleAlpha: CGFloat?
 
     var isCompactView: Bool {
-        guard let rootViewController = appRouter.rootViewController else { return false }
-        return rootViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
+        return (viewIfLoaded?.window?.traitCollection ?? traitCollection).iskDriveCompactSize
     }
 
     override func viewDidLoad() {

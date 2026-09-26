@@ -131,7 +131,7 @@ final class SelectFolderViewController: FileListViewController {
         var viewControllers = [UIViewController]()
         var isCompactView: Bool {
             guard let rootViewController = appRouter.rootViewController else { return false }
-            return rootViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
+            return rootViewController.traitCollection.iskDriveCompactSize
         }
 
         let locationFolderViewController = LocationFolderViewController(

@@ -255,26 +255,15 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func getCurrentController() -> UIViewController? {
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            guard let rootSplitViewController = window?.rootViewController as? RootSplitViewController else {
-                return nil
+        if let rootSplitViewController = window?.rootViewController as? RootSplitViewController {
+            if rootSplitViewController.isCollapsed {
+                let mainTabViewController = rootSplitViewController.viewController(for: .compact) as? MainTabViewController
+                return mainTabViewController?.selectedViewController
             }
-            if let mainTabViewController = rootSplitViewController.viewControllers.first as? MainTabViewController {
-                let selectedIndex = mainTabViewController.selectedIndex
-                let viewControllers = mainTabViewController.viewControllers
-                return viewControllers?[safe: selectedIndex]
-            } else {
-                return rootSplitViewController.viewControllers.last
-            }
-        } else {
-            guard let mainTabViewController = window?.rootViewController as? MainTabViewController else {
-                Log.sceneDelegate("unable to access mainTabViewController", level: .error)
-                return nil
-            }
-            let selectedIndex = mainTabViewController.selectedIndex
-            let viewControllers = mainTabViewController.viewControllers
-            return viewControllers?[safe: selectedIndex]
+            return rootSplitViewController.viewController(for: .secondary)
         }
+
+        return (window?.rootViewController as? MainTabViewController)?.selectedViewController
     }
 
     /// Entry point for scene restoration
@@ -494,20 +483,22 @@ public struct AppRouter: AppNavigable {
             return nil
         }
 
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            let rootSplitViewController = RootSplitViewController(
-                driveFileManager: driveFileManager,
-                selectedIndex: selectedIndex
-            )
-            window.rootViewController = rootSplitViewController
-            window.makeKeyAndVisible()
-            return rootSplitViewController
-        } else {
+        // Older iPhones cannot override the split controller's traits to keep landscape compact.
+        if #unavailable(iOS 17.0), window.traitCollection.userInterfaceIdiom == .phone {
             let mainTabViewController = MainTabViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
             window.rootViewController = mainTabViewController
             window.makeKeyAndVisible()
             return nil
         }
+
+        let rootSplitViewController = RootSplitViewController(
+            driveFileManager: driveFileManager,
+            selectedIndex: selectedIndex
+        )
+        rootSplitViewController.updateLayoutTraits(from: window.traitCollection)
+        window.rootViewController = rootSplitViewController
+        window.makeKeyAndVisible()
+        return rootSplitViewController
     }
 
     @MainActor public func showSearch(query: String?) {
@@ -606,7 +597,7 @@ public struct AppRouter: AppNavigable {
 
         let photoSyncSettingsViewController = PhotoSyncSettingsViewController()
 
-        if rootViewController.traitCollection.horizontalSizeClass == .compact {
+        if window?.rootViewController?.traitCollection.iskDriveCompactSize == true {
             rootViewController.dismiss(animated: false) {
                 navController.popToRootViewController(animated: false)
                 navController.pushViewController(photoSyncSettingsViewController, animated: true)
