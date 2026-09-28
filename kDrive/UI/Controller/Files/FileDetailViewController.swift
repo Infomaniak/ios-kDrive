@@ -46,6 +46,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private var isDirectorySizeLoading = false
 
     private var fetchActivityTask: Task<Void, Error>?
+    private var fileInformationTask: Task<Void, Never>?
 
     lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
@@ -179,6 +180,10 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.navigationBar.tintColor = nil
+
+        if isMovingFromParent || isBeingDismissed {
+            fileInformationTask?.cancel()
+        }
     }
 
     override func viewDidLoad() {
@@ -250,7 +255,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     }
 
     private func loadFileInformation() {
-        Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
+        fileInformationTask = Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
                 let currentFile = try await driveFileManager.file(proxyFile, forceRefresh: true)
 
@@ -989,4 +994,3 @@ extension FileDetailViewController: UIPopoverPresentationControllerDelegate {
         return .none
     }
 }
-
