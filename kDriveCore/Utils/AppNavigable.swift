@@ -197,12 +197,20 @@ public protocol RouterRootNavigable {
 
     /// Setup the root of the view stack
     /// - Parameters:
+    ///   - scene: the scene owning the window to prepare; when `nil`, the window is resolved dynamically
     ///   - currentState: the state to present
     ///   - restoration: try to restore scene or not
-    @MainActor func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool)
+    @MainActor func prepareRootViewController(for scene: UIScene?, currentState: RootViewControllerState, restoration: Bool)
 
     /// Set the main theme color
     @MainActor func updateTheme()
+}
+
+public extension RouterRootNavigable {
+    /// Setup the root of the dynamically resolved window
+    @MainActor func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {
+        prepareRootViewController(for: nil, currentState: currentState, restoration: restoration)
+    }
 }
 
 public protocol TopmostViewControllerFetchable {

@@ -47,8 +47,24 @@ public struct AppRouter: AppNavigable {
     @LazyInjectService var backgroundDownloadSessionManager: BackgroundDownloadSessionManager
     @LazyInjectService var backgroundUploadSessionManager: BackgroundUploadSessionManager
 
+    /// Resolve the window owned by a scene's `SceneDelegate`
+    @MainActor func window(for scene: UIScene) -> UIWindow? {
+        guard let sceneDelegate = scene.delegate as? SceneDelegate,
+              let window = sceneDelegate.window
+        else {
+            return nil
+        }
+
+        return window
+    }
+
     /// Get the current window from the app scene
     @MainActor var window: UIWindow? {
+        if let foregroundScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }),
+           let foregroundWindow = self.window(for: foregroundScene) {
+            return foregroundWindow
+        }
+
         let scene = UIApplication.shared.connectedScenes.first { scene in
             guard let delegate = scene.delegate,
                   delegate is SceneDelegate else {
@@ -58,20 +74,7 @@ public struct AppRouter: AppNavigable {
             return true
         }
 
-        guard let sceneDelegate = scene?.delegate as? SceneDelegate,
-              let window = sceneDelegate.window else {
-            return nil
-        }
-
-        return window
-    }
-
-    @MainActor var sceneRestorationUserInfo: [AnyHashable: Any]? {
-        guard let scene = window?.windowScene else { return nil }
-
-        let userInfo = scene.session.stateRestorationActivity?.userInfo
-
-        return userInfo
+        return scene.flatMap { self.window(for: $0) }
     }
 
     // MARK: Routable
@@ -230,14 +233,16 @@ public struct AppRouter: AppNavigable {
                           completion: nil)
     }
 
-    @MainActor public func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {
+    @MainActor public func prepareRootViewController(for scene: UIScene?, currentState: RootViewControllerState, restoration: Bool) {
+        let targetWindow = scene.flatMap { self.window(for: $0) } ?? self.window
+
         switch currentState {
         case .splashScreen:
-            showSplashScreen()
+            showSplashScreen(in: targetWindow)
         case .mainViewController(let driveFileManager):
-            restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration)
+            restoreMainUIStackIfPossible(driveFileManager: driveFileManager, restoration: restoration, in: targetWindow)
 
-            showLaunchFloatingPanel()
+            showLaunchFloatingPanel(in: targetWindow)
 
             Task {
                 await askForNotificationPermission()
@@ -246,15 +251,19 @@ public struct AppRouter: AppNavigable {
                 deeplinkService.processDeeplinksPostAuthentication()
             }
         case .onboarding:
-            showOnboarding()
+            showOnboarding(in: targetWindow)
         case .updateRequired:
-            showUpdateRequired()
+            showUpdateRequired(in: targetWindow)
         case .preloading(let currentAccount):
-            showPreloading(currentAccount: currentAccount)
+            showPreloading(currentAccount: currentAccount, in: targetWindow)
         }
     }
 
     @MainActor public func getCurrentController() -> UIViewController? {
+        getCurrentController(in: window)
+    }
+
+    @MainActor private func getCurrentController(in window: UIWindow?) -> UIViewController? {
         if UIDevice.current.userInterfaceIdiom == .pad {
             guard let rootSplitViewController = window?.rootViewController as? RootSplitViewController else {
                 return nil
@@ -278,7 +287,8 @@ public struct AppRouter: AppNavigable {
     }
 
     /// Entry point for scene restoration
-    @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool) {
+    @MainActor func restoreMainUIStackIfPossible(driveFileManager: DriveFileManager, restoration: Bool, in window: UIWindow?) {
+        let sceneRestorationUserInfo = window?.windowScene?.session.stateRestorationActivity?.userInfo
         let shouldRestoreApplicationState = appRestorationService.shouldRestoreApplicationState
         var indexToUse: Int?
         if shouldRestoreApplicationState,
@@ -287,7 +297,7 @@ public struct AppRouter: AppNavigable {
             indexToUse = index
         }
 
-        showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse)
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: indexToUse, in: window)
 
         guard shouldRestoreApplicationState else {
             Log.sceneDelegate("Restoration disabled", level: .error)
@@ -312,7 +322,7 @@ public struct AppRouter: AppNavigable {
                 return
             }
 
-            guard let viewController = getCurrentController() else {
+            guard let viewController = getCurrentController(in: window) else {
                 Log.sceneDelegate("unable to access viewControllers", level: .error)
                 return
             }
@@ -488,7 +498,16 @@ public struct AppRouter: AppNavigable {
 
     @discardableResult
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
-                                                  selectedIndex: Int?) -> UISplitViewController? {
+                                                  selectedIndex: Int?) -> UISplitViewController?
+    {
+        showMainViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex, in: window)
+    }
+
+    @discardableResult
+    @MainActor private func showMainViewController(driveFileManager: DriveFileManager,
+                                                   selectedIndex: Int?,
+                                                   in window: UIWindow?) -> UISplitViewController?
+    {
         guard let window else {
             SentryDebug.captureNoWindow()
             return nil
@@ -520,6 +539,10 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showPreloading(currentAccount: ApiToken) {
+        showPreloading(currentAccount: currentAccount, in: window)
+    }
+
+    @MainActor private func showPreloading(currentAccount: ApiToken, in window: UIWindow?) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -530,6 +553,10 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showOnboarding() {
+        showOnboarding(in: window)
+    }
+
+    @MainActor private func showOnboarding(in window: UIWindow?) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -550,7 +577,7 @@ public struct AppRouter: AppNavigable {
         window.makeKeyAndVisible()
     }
 
-    @MainActor func showSplashScreen() {
+    @MainActor func showSplashScreen(in window: UIWindow?) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -561,6 +588,10 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showLaunchFloatingPanel() {
+        showLaunchFloatingPanel(in: window)
+    }
+
+    @MainActor private func showLaunchFloatingPanel(in window: UIWindow?) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return
@@ -583,6 +614,10 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor public func showUpdateRequired() {
+        showUpdateRequired(in: window)
+    }
+
+    @MainActor private func showUpdateRequired(in window: UIWindow?) {
         guard let window else {
             SentryDebug.captureNoWindow()
             return

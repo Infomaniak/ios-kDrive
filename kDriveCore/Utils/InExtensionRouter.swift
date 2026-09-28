@@ -137,7 +137,7 @@ public struct InExtensionRouter: AppNavigable {
 
     public func setRootViewController(_ viewController: UIViewController, animated: Bool) {}
 
-    public func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {}
+    public func prepareRootViewController(for scene: UIScene?, currentState: RootViewControllerState, restoration: Bool) {}
 
     public func updateTheme() {}
 
