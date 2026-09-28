@@ -42,6 +42,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private var activitiesInfo: ActivitiesInfo = (cursor: nil, hasNextPage: true, isLoading: true)
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
+    private var directorySize: Int?
 
     private var fetchActivityTask: Task<Void, Error>?
 
@@ -116,7 +117,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
             if contentCount != nil {
                 rows.append(.content)
             }
-            if file.size != nil {
+            if file.isDirectory || file.size != nil {
                 rows.append(.size)
             }
             if file.version != nil {
@@ -254,6 +255,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
                 let currentFileAccess = isWithinSameDrive ? try await driveFileManager.apiFetcher.access(for: proxyFile) : nil
 
                 let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
+
+                self.directorySize = isDirectory ? try? await driveFileManager.directorySize(of: proxyFile) : nil
 
                 self.fileInformationRows = FileInformationRow.getRows(for: currentFile,
                                                                       fileAccess: currentFileAccess,
@@ -625,7 +628,11 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .size:
                     let cell = tableView.dequeueReusableCell(type: FileInformationSizeTableViewCell.self, for: indexPath)
                     cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosOriginalSize
-                    cell.sizeLabel.text = file.getFileSize()
+                    if file.isDirectory {
+                        cell.sizeLabel.text = directorySize.map { Constants.formatFileSize(Int64($0)) }
+                    } else {
+                        cell.sizeLabel.text = file.getFileSize()
+                    }
                     return cell
                 }
             case .activity:
