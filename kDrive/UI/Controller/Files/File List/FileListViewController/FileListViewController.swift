@@ -418,7 +418,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         return file
     }
 
-    private func toggleRefreshing(_ refreshing: Bool) {
+    func toggleRefreshing(_ refreshing: Bool) {
         if refreshing {
             refreshControl.beginRefreshing()
         } else {

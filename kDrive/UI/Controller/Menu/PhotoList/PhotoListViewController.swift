@@ -264,6 +264,14 @@ final class PhotoListViewController: FileListViewController {
         collectionView.reloadSections(IndexSet(integersIn: 0 ..< numberOfSections(in: collectionView)))
     }
 
+    override func toggleRefreshing(_ refreshing: Bool) {
+        if refreshing {
+            refreshControl.beginRefreshing()
+        } else {
+            refreshControl.endRefreshing()
+        }
+    }
+
     func updateTitle(_ count: Int) {
         headerTitleLabel.text = KDriveResourcesStrings.Localizable.fileListMultiSelectedTitle(count)
     }
