@@ -1166,6 +1166,10 @@ public final class DriveFileManager {
         var fileUidsToProcess: [String] = rootLiveFile.children.map(\.uid)
         var liveFilesToDelete: [File] = [rootLiveFile]
 
+        if cascade {
+            liveFilesToDelete.append(contentsOf: rootLiveFile.children)
+        }
+
         while !fileUidsToProcess.isEmpty {
             let currentFileUid = fileUidsToProcess.removeLast()
             guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: currentFileUid), !file.isInvalidated else {
@@ -1182,7 +1186,6 @@ public final class DriveFileManager {
                 }
                 fileUidsToProcess.append(contentsOf: liveChildren.map { $0.uid })
                 liveFilesToDelete.append(contentsOf: liveChildren)
-                liveFilesToDelete.append(contentsOf: rootLiveFile.children)
             }
         }
 
