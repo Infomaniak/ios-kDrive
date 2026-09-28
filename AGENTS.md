@@ -11,7 +11,7 @@ Infomaniak kDrive — a production iOS cloud storage client supporting iPhone, i
 - **Networking:** Alamofire
 - **Linting:** SwiftLint, SwiftFormat
 - **CI/CD:** GitHub Actions + Xcode Cloud
-- **Commit style:** Conventional Commits
+- **Commit style:** Conventional Commits (message must begin with an uppercase letter, e.g. `fix: Prevent direct children duplication during deletion`)
 - **Tool version manager:** Mise (https://mise.jdx.dev/)
 
 ## Context Map
@@ -182,7 +182,7 @@ tuist test # Or via Xcode Test Navigator
 ### PR Checklist
 
 - Run `scripts/lint.sh` — no lint errors.
-- Use Conventional Commits for commit messages.
+- Use Conventional Commits for commit messages (must begin with an uppercase letter).
 - Localize all user-facing strings via resource files.
 - Ensure Realm models define proper primary keys for thread safety.
 - When modifying Realm models, verify the matching `RealmSchemaVersion` was incremented and the migration block handles existing data when needed.

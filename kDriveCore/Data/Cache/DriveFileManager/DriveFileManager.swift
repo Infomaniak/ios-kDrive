@@ -604,40 +604,17 @@ public final class DriveFileManager {
                 keepCacheAttributesForFile(newFile: file, keepProperties: [.standard], writableRealm: writableRealm)
             }
 
+            if deleteOrphans {
+                deleteOrphanFiles(root: root, newFiles: files, writableRealm: writableRealm)
+            }
+
             try writeChildrenToParent(
                 files,
                 liveParent: liveRoot,
                 responseAt: nil,
-                isInitialCursor: false,
+                isInitialCursor: deleteOrphans,
                 writableRealm: writableRealm
             )
-
-            if deleteOrphans {
-                deleteOrphanFiles(root: root, newFiles: files, writableRealm: writableRealm)
-            }
-        }
-    }
-
-    /// Remove all children of to a root File with a transaction
-    public func removeLocalFiles(root: File) {
-        try? database.writeTransaction { writableRealm in
-            guard let lastPicturesRootInContext = writableRealm
-                .objects(File.self)
-                .filter("id == %@", DriveFileManager.lastPicturesRootFile.id)
-                .first else {
-                return
-            }
-
-            let childrenToProcess = Array(lastPicturesRootInContext.children)
-            for child in childrenToProcess {
-                if child.parentLink.count == 1 {
-                    removeFileInDatabase(fileUid: child.uid, cascade: false, writableRealm: writableRealm)
-                } else {
-                    // The file has multiple parents, we only remove the link with the root
-                    lastPicturesRootInContext.children.remove(child)
-                }
-            }
-            writableRealm.add(lastPicturesRootInContext, update: .modified)
         }
     }
 
@@ -1189,6 +1166,10 @@ public final class DriveFileManager {
         var fileUidsToProcess: [String] = rootLiveFile.children.map(\.uid)
         var liveFilesToDelete: [File] = [rootLiveFile]
 
+        if cascade {
+            liveFilesToDelete.append(contentsOf: rootLiveFile.children)
+        }
+
         while !fileUidsToProcess.isEmpty {
             let currentFileUid = fileUidsToProcess.removeLast()
             guard let file = writableRealm.object(ofType: File.self, forPrimaryKey: currentFileUid), !file.isInvalidated else {
@@ -1221,11 +1202,12 @@ public final class DriveFileManager {
             return
         }
 
+        let incomingFileUids = Set((newFiles ?? []).map(\.uid))
         var orphanFiles = [File]()
 
         for maybeOrphanFile in maybeOrphanFiles {
             let localContainerUrl = maybeOrphanFile.localContainerUrl
-            if newFiles == nil || !(newFiles ?? []).contains(maybeOrphanFile) {
+            if !incomingFileUids.contains(maybeOrphanFile.uid) {
                 if fileManager.fileExists(atPath: localContainerUrl.path) {
                     try? fileManager.removeItem(at: localContainerUrl) // Check that it was correctly removed?
                 }
@@ -1295,6 +1277,7 @@ public final class DriveFileManager {
         public static let capabilities = FilePropertiesOptions(rawValue: 1 << 6)
         public static let lastCursor = FilePropertiesOptions(rawValue: 1 << 7)
         public static let lastActionAt = FilePropertiesOptions(rawValue: 1 << 8)
+        public static let supportedBy = FilePropertiesOptions(rawValue: 1 << 9)
 
         public static let standard: FilePropertiesOptions = [.fullyDownloaded, .children, .responseAt, .lastActionAt, .lastCursor]
         public static let extras: FilePropertiesOptions = [.path, .users, .version]
@@ -1307,7 +1290,8 @@ public final class DriveFileManager {
             .path,
             .users,
             .version,
-            .capabilities
+            .capabilities,
+            .supportedBy
         ]
 
         public init(rawValue: Int) {
@@ -1355,6 +1339,9 @@ public final class DriveFileManager {
         }
         if keepProperties.contains(.capabilities) {
             newFile.capabilities = Rights(value: savedChild.capabilities)
+        }
+        if keepProperties.contains(.supportedBy) {
+            newFile.supportedBy = savedChild.supportedBy
         }
     }
 
