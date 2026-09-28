@@ -119,8 +119,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
             if contentCount != nil {
                 rows.append(.content)
             }
-            if file.isDirectory || file.size != nil, let fileAccess,
-               !fileAccess.users.isEmpty || !fileAccess.teams.isEmpty {
+            if (file.isDirectory || file.size != nil) && file.capabilities.canRead {
                 rows.append(.size)
             }
             if file.version != nil {
