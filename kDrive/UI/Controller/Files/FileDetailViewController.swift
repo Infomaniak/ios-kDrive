@@ -43,6 +43,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
     private var directorySize: Int?
+    private var isDirectorySizeLoading = false
 
     private var fetchActivityTask: Task<Void, Error>?
 
@@ -222,6 +223,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
         tableView.separatorColor = .clear
 
+        isDirectorySizeLoading = file.isDirectory
+
         fileInformationRows = FileInformationRow.getRows(for: file,
                                                          fileAccess: fileAccess,
                                                          contentCount: contentCount,
@@ -256,7 +259,10 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
                 let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
 
-                self.directorySize = isDirectory ? try? await driveFileManager.directorySize(of: proxyFile) : nil
+                if isDirectory {
+                    self.directorySize = try? await driveFileManager.directorySize(of: proxyFile)
+                    self.isDirectorySizeLoading = false
+                }
 
                 self.fileInformationRows = FileInformationRow.getRows(for: currentFile,
                                                                       fileAccess: currentFileAccess,
@@ -629,8 +635,16 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                     let cell = tableView.dequeueReusableCell(type: FileInformationSizeTableViewCell.self, for: indexPath)
                     cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosOriginalSize
                     if file.isDirectory {
-                        cell.sizeLabel.text = directorySize.map { Constants.formatFileSize(Int64($0)) }
+                        if isDirectorySizeLoading {
+                            cell.setLoading(true)
+                        } else if let directorySize {
+                            cell.setLoading(false)
+                            cell.sizeLabel.text = Constants.formatFileSize(Int64(directorySize))
+                        } else {
+                            cell.setLoading(false)
+                        }
                     } else {
+                        cell.setLoading(false)
                         cell.sizeLabel.text = file.getFileSize()
                     }
                     return cell
@@ -975,3 +989,4 @@ extension FileDetailViewController: UIPopoverPresentationControllerDelegate {
         return .none
     }
 }
+
