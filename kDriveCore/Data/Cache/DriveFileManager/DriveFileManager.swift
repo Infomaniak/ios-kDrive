@@ -1290,7 +1290,8 @@ public final class DriveFileManager {
             .path,
             .users,
             .version,
-            .capabilities
+            .capabilities,
+            .supportedBy
         ]
 
         public init(rawValue: Int) {
