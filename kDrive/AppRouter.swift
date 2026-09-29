@@ -270,6 +270,8 @@ public struct AppRouter: AppNavigable {
     @MainActor public func prepareRootViewControllerForAllScenes(currentState: RootViewControllerState, restoration: Bool) {
         for scene in UIApplication.shared.connectedScenes
             where scene.activationState == .foregroundActive || scene.activationState == .foregroundInactive {
+            guard let sceneDelegate = scene.delegate as? SceneDelegate else { continue }
+            sceneDelegate.currentRootViewControllerState = currentState
             prepareRootViewController(for: scene, currentState: currentState, restoration: restoration)
         }
     }
