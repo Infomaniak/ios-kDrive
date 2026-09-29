@@ -111,7 +111,10 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
     @MainActor private func goToMainScreen(with driveFileManager: DriveFileManager) {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
-        _ = router.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
+        router.prepareRootViewControllerForAllScenes(
+            currentState: .mainViewController(driveFileManager: driveFileManager),
+            restoration: false
+        )
         deeplinkService.processDeeplinksPostAuthentication()
         Task {
             await router.askForNotificationPermission()
