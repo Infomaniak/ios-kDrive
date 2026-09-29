@@ -103,7 +103,7 @@ class SwitchUserViewController: UIViewController {
                 return
             }
 
-            let _ = try accountManager.getFirstAvailableDriveFileManager(for: existingAccount.userId)
+            _ = try accountManager.getFirstAvailableDriveFileManager(for: existingAccount.userId)
             matomo.track(eventWithCategory: .account, name: "switch")
             matomo.connectUser(userId: userId.description)
 

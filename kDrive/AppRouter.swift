@@ -61,7 +61,7 @@ public struct AppRouter: AppNavigable {
     /// Get the current window from the app scene
     @MainActor var window: UIWindow? {
         if let foregroundScene = UIApplication.shared.connectedScenes.first(where: { $0.activationState == .foregroundActive }),
-           let foregroundWindow = self.window(for: foregroundScene) {
+           let foregroundWindow = window(for: foregroundScene) {
             return foregroundWindow
         }
 
@@ -233,8 +233,10 @@ public struct AppRouter: AppNavigable {
                           completion: nil)
     }
 
-    @MainActor public func prepareRootViewController(for scene: UIScene?, currentState: RootViewControllerState, restoration: Bool) {
-        let targetWindow = scene.flatMap { self.window(for: $0) } ?? self.window
+    @MainActor public func prepareRootViewController(for scene: UIScene?,
+                                                     currentState: RootViewControllerState,
+                                                     restoration: Bool) {
+        let targetWindow = scene.flatMap { window(for: $0) } ?? window
 
         switch currentState {
         case .splashScreen:
@@ -261,7 +263,7 @@ public struct AppRouter: AppNavigable {
 
     @MainActor public func prepareRootViewControllerForAllScenes(currentState: RootViewControllerState, restoration: Bool) {
         for scene in UIApplication.shared.connectedScenes
-                where scene.activationState == .foregroundActive || scene.activationState == .foregroundInactive {
+            where scene.activationState == .foregroundActive || scene.activationState == .foregroundInactive {
             prepareRootViewController(for: scene, currentState: currentState, restoration: restoration)
         }
     }
@@ -505,16 +507,14 @@ public struct AppRouter: AppNavigable {
 
     @discardableResult
     @MainActor public func showMainViewController(driveFileManager: DriveFileManager,
-                                                  selectedIndex: Int?) -> UISplitViewController?
-    {
+                                                  selectedIndex: Int?) -> UISplitViewController? {
         showMainViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex, in: window)
     }
 
     @discardableResult
     @MainActor private func showMainViewController(driveFileManager: DriveFileManager,
                                                    selectedIndex: Int?,
-                                                   in window: UIWindow?) -> UISplitViewController?
-    {
+                                                   in window: UIWindow?) -> UISplitViewController? {
         guard let window else {
             SentryDebug.captureNoWindow()
             return nil
