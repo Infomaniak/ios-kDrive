@@ -103,12 +103,11 @@ class SwitchUserViewController: UIViewController {
                 return
             }
 
-            let driveFileManager = try accountManager.getFirstAvailableDriveFileManager(for: existingAccount.userId)
+            let _ = try accountManager.getFirstAvailableDriveFileManager(for: existingAccount.userId)
             matomo.track(eventWithCategory: .account, name: "switch")
             matomo.connectUser(userId: userId.description)
 
             accountManager.switchAccount(newAccount: existingAccount)
-            appNavigable.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
         } catch DriveError.NoDriveError.noDrive {
             let driveErrorNavigationViewController = DriveErrorViewController.instantiateInNavigationController(
                 errorType: .noDrive,

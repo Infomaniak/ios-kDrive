@@ -178,6 +178,10 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
+    public func prepareRootViewControllerForAllScenes(currentState: RootViewControllerState, restoration: Bool) {
+        logNoop()
+    }
+
     public func updateTheme() {
         logNoop()
     }

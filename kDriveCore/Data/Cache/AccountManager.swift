@@ -281,10 +281,6 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             Task {
                 await appNavigable.refreshCacheScanLibraryAndUpload(preload: false, isSwitching: false)
             }
-            appNavigable.prepareRootViewController(
-                currentState: RootViewControllerState.getCurrentState(),
-                restoration: false
-            )
             return nil
         }
 
@@ -573,6 +569,12 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         if let drive = drives.first {
             setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
         }
+        Task { @MainActor in
+            appNavigable.prepareRootViewControllerForAllScenes(
+                currentState: RootViewControllerState.getCurrentState(),
+                restoration: false
+            )
+        }
     }
 
     public func switchToNextAvailableAccount() {
@@ -725,12 +727,12 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
                 }
             } else {
                 SpotlightIndexer.shared.deindexAllItems()
+                appNavigable.prepareRootViewControllerForAllScenes(
+                    currentState: .onboarding,
+                    restoration: false
+                )
                 SentrySDK.setUser(nil)
             }
-            appNavigable.prepareRootViewController(
-                currentState: RootViewControllerState.getCurrentState(),
-                restoration: false
-            )
         }
     }
 

@@ -259,6 +259,13 @@ public struct AppRouter: AppNavigable {
         }
     }
 
+    @MainActor public func prepareRootViewControllerForAllScenes(currentState: RootViewControllerState, restoration: Bool) {
+        for scene in UIApplication.shared.connectedScenes
+                where scene.activationState == .foregroundActive || scene.activationState == .foregroundInactive {
+            prepareRootViewController(for: scene, currentState: currentState, restoration: restoration)
+        }
+    }
+
     @MainActor public func getCurrentController() -> UIViewController? {
         getCurrentController(in: window)
     }

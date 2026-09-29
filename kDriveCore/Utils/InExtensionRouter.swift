@@ -139,6 +139,8 @@ public struct InExtensionRouter: AppNavigable {
 
     public func prepareRootViewController(for scene: UIScene?, currentState: RootViewControllerState, restoration: Bool) {}
 
+    public func prepareRootViewControllerForAllScenes(currentState: RootViewControllerState, restoration: Bool) {}
+
     public func updateTheme() {}
 
     public var topMostViewController: UIViewController?

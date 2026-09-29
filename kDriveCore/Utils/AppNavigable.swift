@@ -202,6 +202,8 @@ public protocol RouterRootNavigable {
     ///   - restoration: try to restore scene or not
     @MainActor func prepareRootViewController(for scene: UIScene?, currentState: RootViewControllerState, restoration: Bool)
 
+    @MainActor func prepareRootViewControllerForAllScenes(currentState: RootViewControllerState, restoration: Bool)
+
     /// Set the main theme color
     @MainActor func updateTheme()
 }
