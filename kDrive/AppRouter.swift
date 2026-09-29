@@ -246,6 +246,12 @@ public struct AppRouter: AppNavigable {
 
             showLaunchFloatingPanel(in: targetWindow)
 
+            guard accountManager.lastAuthProcessedUserId != accountManager.currentUserId else {
+                return
+            }
+
+            accountManager.lastAuthProcessedUserId = accountManager.currentUserId
+
             Task {
                 await askForNotificationPermission()
                 await askForReview()

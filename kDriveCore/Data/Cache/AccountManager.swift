@@ -57,6 +57,7 @@ public protocol AccountManageable: AnyObject {
     var refreshTokenLockedQueue: DispatchQueue { get }
     var userProfileStore: UserProfileStore { get }
     var delegate: AccountManagerDelegate? { get set }
+    var lastAuthProcessedUserId: Int? { get set }
 
     func getCurrentUser() async -> InfomaniakCore.UserProfile?
     func getDriveFileManager(for driveId: Int, userId: Int) -> DriveFileManager?
@@ -75,8 +76,8 @@ public protocol AccountManageable: AnyObject {
     func createAndSetCurrentAccount(code: String, codeVerifier: String) async throws -> ApiToken
     func createAndSetCurrentAccount(token: ApiToken) async throws -> ApiToken
     func updateUser(for account: ApiToken, registerToken: Bool) async throws -> ApiToken
-    func switchAccount(newAccount: ApiToken)
-    func switchToNextAvailableAccount()
+    @MainActor func switchAccount(newAccount: ApiToken)
+    @MainActor func switchToNextAvailableAccount()
     func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int)
     func addAccount(token: ApiToken) async throws
     func removeAccountFor(userId: Int, isInvoluntary: Bool) async
@@ -125,6 +126,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     public let refreshTokenLockedQueue = DispatchQueue(label: "com.infomaniak.drive.refreshtoken")
     private let accountLifecycleQueue = TaskQueue()
     public weak var delegate: AccountManagerDelegate?
+    public var lastAuthProcessedUserId: Int?
 
     public var currentUserId: Int {
         didSet {
@@ -563,21 +565,19 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         setCurrentDriveForCurrentAccount(for: availableDriveFileManager.driveId, userId: currentUserId)
     }
 
-    public func switchAccount(newAccount: ApiToken) {
+    @MainActor public func switchAccount(newAccount: ApiToken) {
         setCurrentAccount(account: newAccount)
         UserDefaults.shared.lastSelectedTab = nil
         if let drive = drives.first {
             setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
         }
-        Task { @MainActor in
-            appNavigable.prepareRootViewControllerForAllScenes(
-                currentState: RootViewControllerState.getCurrentState(),
-                restoration: false
-            )
-        }
+        appNavigable.prepareRootViewControllerForAllScenes(
+            currentState: RootViewControllerState.getCurrentState(),
+            restoration: false
+        )
     }
 
-    public func switchToNextAvailableAccount() {
+    @MainActor public func switchToNextAvailableAccount() {
         guard let nextAccount = nextAvailableAccount else {
             return
         }

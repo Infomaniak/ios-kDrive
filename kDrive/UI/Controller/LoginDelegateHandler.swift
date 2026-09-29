@@ -121,11 +121,11 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
     @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: ApiToken?) {
         Logger.general.error("Error on didCompleteLoginWith: \(error)")
 
-        guard let topMostViewController = router.topMostViewController else { return }
-
         if let previousAccount {
             accountManager.switchAccount(newAccount: previousAccount)
         }
+
+        guard let topMostViewController = router.topMostViewController else { return }
 
         if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
             let driveErrorVC = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)
