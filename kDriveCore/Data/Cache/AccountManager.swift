@@ -568,7 +568,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     @MainActor public func switchAccount(newAccount: ApiToken) {
         setCurrentAccount(account: newAccount)
         UserDefaults.shared.lastSelectedTab = nil
-        if let drive = drives.first {
+        if let drive = drives.first(where: { !$0.inMaintenance }) ?? drives.first {
             setCurrentDriveForCurrentAccount(for: drive.id, userId: drive.userId)
         }
         appNavigable.prepareRootViewControllerForAllScenes(
