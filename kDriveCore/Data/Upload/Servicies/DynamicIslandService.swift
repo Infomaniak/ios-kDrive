@@ -26,7 +26,7 @@ import OSLog
 
 @available(iOS 26.0, *)
 public class DynamicIslandService: DynamicIslandServiceable {
-    @LazyInjectService private var dynamicIslandManager: DynamicIslandManager
+    @LazyInjectService private var uploadProgressTracker: DynamicIslandUploadProgressTracker
     @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var photoLibraryUploader: PhotoLibraryUploadable
     @LazyInjectService private var taskScheduler: BGTaskScheduler
@@ -96,7 +96,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
     }
 
     public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
-        dynamicIslandManager.updateQueueActivity(
+        uploadProgressTracker.updateQueueActivity(
             globalQueueActive: globalQueueActive,
             photoQueueActive: photoQueueActive
         )
@@ -121,7 +121,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
                 cancellable?.cancel()
                 let isExpiredTask = (self.lastError as? DomainError) == .expiredTask
                 if !isExpiredTask {
-                    dynamicIslandManager.reset()
+                    uploadProgressTracker.reset()
                 }
                 currentTask = nil
                 uploadContinuationBox = nil
@@ -129,7 +129,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
             }
             task.progress.totalUnitCount = 100
 
-            cancellable = dynamicIslandManager.$fractionCompleted.sink { progress in
+            cancellable = uploadProgressTracker.$fractionCompleted.sink { progress in
                 task.progress.completedUnitCount = Int64(progress * 100)
                 task.updateTitle(
                     KDriveResourcesStrings.Localizable.uploadInProgressTitle,
@@ -142,13 +142,13 @@ public class DynamicIslandService: DynamicIslandServiceable {
                     let box = ContinuationBox(continuation)
                     self.uploadContinuationBox = box
 
-                    dynamicIslandManager.uploadService.waitForCompletionForActiveQueues {
+                    uploadProgressTracker.uploadService.waitForCompletionForActiveQueues {
                         box.resume()
                     }
                 }
 
-                let totalCount = dynamicIslandManager.totalUploadCount
-                let uploadedCount = min(dynamicIslandManager.progressUploading + 1, totalCount)
+                let totalCount = uploadProgressTracker.totalUploadCount
+                let uploadedCount = min(uploadProgressTracker.progressUploading + 1, totalCount)
 
                 let status = ReachabilityListener.instance.currentStatus
                 let shouldBeSuspended = status != .wifi
