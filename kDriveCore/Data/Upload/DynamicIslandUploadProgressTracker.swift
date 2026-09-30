@@ -24,7 +24,6 @@ import RealmSwift
 final class DynamicIslandUploadProgressTracker: ObservableObject {
     @Published var fractionCompleted: Double = 0
 
-    @LazyInjectService var uploadService: UploadServiceable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
 
     private var realmObservationToken: NotificationToken?
