@@ -89,8 +89,9 @@ public final class UploadParallelismOrchestrator {
 
     private func computeUploadParallelismPerQueueAndApply() {
         serialEventQueue.async {
+            // The Dynamic Island currently watches the global (non-photo sync) queue only.
             let globalQueueActiveForDynamicIsland = self.globalUploadQueue.isActive
-            let photoQueueActiveForDynamicIsland = self.photoUploadQueue.isActive
+            let photoQueueActiveForDynamicIsland = false
 
             self.dynamicIslandService.updateQueueActivity(
                 globalQueueActive: globalQueueActiveForDynamicIsland,

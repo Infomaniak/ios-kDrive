@@ -59,6 +59,9 @@ public final class UploadService {
 
     lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
+    /// Queues watched by the Dynamic Island. Photo sync is intentionally excluded for now
+    lazy var dynamicIslandWatchedQueues = [globalUploadQueue]
+
     var suspendedQueueNames: [String] = []
 
     var observations = (
@@ -200,7 +203,7 @@ extension UploadService: UploadServiceable {
                 let group = DispatchGroup()
                 var hasActiveQueue = false
 
-                for queue in self.allQueues {
+                for queue in self.dynamicIslandWatchedQueues {
                     guard queue.isActive else { continue }
                     hasActiveQueue = true
                     group.enter()
