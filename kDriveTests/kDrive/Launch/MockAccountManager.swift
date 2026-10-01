@@ -40,6 +40,8 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
 
     var userProfileStore = UserProfileStore()
 
+    var lastAuthProcessedUserId: Int?
+
     var mqService: MQService {
         fatalError("Not implemented")
     }
@@ -97,9 +99,9 @@ class MockAccountManager: AccountManageable, RefreshTokenDelegate {
         fatalError("Not implemented")
     }
 
-    func switchAccount(newAccount: ApiToken) {}
+    @MainActor func switchAccount(newAccount: ApiToken) {}
 
-    func switchToNextAvailableAccount() {}
+    @MainActor func switchToNextAvailableAccount() {}
 
     func setCurrentDriveForCurrentAccount(for driveId: Int, userId: Int) {}
 

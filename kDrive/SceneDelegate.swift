@@ -131,7 +131,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         let newState = RootViewControllerState.getCurrentState()
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
         if window?.rootViewController == nil {
-            appNavigable.prepareRootViewController(currentState: .splashScreen, restoration: false)
+            appNavigable.prepareRootViewController(for: scene, currentState: .splashScreen, restoration: false)
 
             Task {
                 await TokenMigrator().migrateTokensIfNeeded()
@@ -141,7 +141,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
             }
         } else if currentRootViewControllerState != newState {
             currentRootViewControllerState = newState
-            appNavigable.prepareRootViewController(currentState: newState, restoration: false)
+            appNavigable.prepareRootViewController(for: scene, currentState: newState, restoration: false)
         } else {
             finishSceneSetup(scene, skipRestoration: true)
         }
@@ -250,7 +250,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         }
 
         lockHelper.setTime()
-        appNavigable.prepareRootViewController(currentState: RootViewControllerState.getCurrentState(), restoration: false)
+        appNavigable.prepareRootViewController(for: scene,
+                                               currentState: RootViewControllerState.getCurrentState(),
+                                               restoration: false)
 
         return await deeplinkParser.parse(url: incomingURL)
     }
@@ -309,7 +311,7 @@ extension SceneDelegate {
         Log.sceneDelegate("user activity isRestoration:\(isRestoration) \(String(describing: session.stateRestorationActivity))")
         if !skipRestoration {
             currentRootViewControllerState = currentState
-            appNavigable.prepareRootViewController(currentState: currentState, restoration: isRestoration)
+            appNavigable.prepareRootViewController(for: scene, currentState: currentState, restoration: isRestoration)
         }
 
         switch currentState {
@@ -335,7 +337,7 @@ extension SceneDelegate {
         Task {
             if try await VersionChecker.standard.checkAppVersionStatus() == .updateIsRequired {
                 currentRootViewControllerState = .updateRequired
-                appNavigable.prepareRootViewController(currentState: .updateRequired, restoration: false)
+                appNavigable.prepareRootViewController(for: scene, currentState: .updateRequired, restoration: false)
             }
         }
     }

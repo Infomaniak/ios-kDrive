@@ -35,6 +35,10 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
     private var lastAppliedTitleAlpha: CGFloat?
 
     var isCompactView: Bool {
+        if let splitViewController {
+            return splitViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
+        }
+
         guard let rootViewController = appRouter.rootViewController else { return false }
         return rootViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
     }

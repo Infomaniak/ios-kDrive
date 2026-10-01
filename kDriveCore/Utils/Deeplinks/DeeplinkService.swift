@@ -39,12 +39,14 @@ public class DeeplinkService: DeeplinkServiceable {
     }
 
     public func processDeeplinksPostAuthentication() {
-        guard let lastDeeplink else {
+        guard let pendingDeeplink = lastDeeplink else {
             return
         }
 
+        clearLastDeeplink()
+
         Task { @MainActor in
-            switch lastDeeplink {
+            switch pendingDeeplink {
             case let lastDeeplink as PublicShareLink:
                 await router.navigate(to: .publicShare(publicShareLink: lastDeeplink))
             case let lastDeeplink as SharedWithMeLink:
@@ -66,8 +68,6 @@ public class DeeplinkService: DeeplinkServiceable {
             default:
                 break
             }
-
-            clearLastDeeplink()
         }
     }
 }

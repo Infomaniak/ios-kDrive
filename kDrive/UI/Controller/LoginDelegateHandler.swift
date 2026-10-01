@@ -111,7 +111,10 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
     @MainActor private func goToMainScreen(with driveFileManager: DriveFileManager) {
         UserDefaults.shared.legacyIsFirstLaunch = false
         UserDefaults.shared.numberOfConnections = 1
-        _ = router.showMainViewController(driveFileManager: driveFileManager, selectedIndex: nil)
+        router.prepareRootViewControllerForAllScenes(
+            currentState: .mainViewController(driveFileManager: driveFileManager),
+            restoration: false
+        )
         deeplinkService.processDeeplinksPostAuthentication()
         Task {
             await router.askForNotificationPermission()
@@ -121,11 +124,11 @@ public final class LoginDelegateHandler: ObservableObject, @preconcurrency Infom
     @MainActor private func didCompleteLoginWithError(_ error: Error, previousAccount: ApiToken?) {
         Logger.general.error("Error on didCompleteLoginWith: \(error)")
 
-        guard let topMostViewController = router.topMostViewController else { return }
-
         if let previousAccount {
             accountManager.switchAccount(newAccount: previousAccount)
         }
+
+        guard let topMostViewController = router.topMostViewController else { return }
 
         if let noDriveError = error as? InfomaniakCore.ApiError, noDriveError.code == DriveError.noDrive.code {
             let driveErrorVC = DriveErrorViewController.instantiate(errorType: .noDrive, drive: nil)

@@ -297,10 +297,6 @@ extension MenuViewController {
                                                 action: KDriveResourcesStrings.Localizable.buttonConfirm,
                                                 destructive: true) {
                 self.accountManager.logoutCurrentAccountAndSwitchToNextIfPossible()
-                self.appNavigable.prepareRootViewController(
-                    currentState: RootViewControllerState.getCurrentState(),
-                    restoration: false
-                )
             }
             present(alert, animated: true)
         case .help:

@@ -174,7 +174,11 @@ public final class MCKRouter: AppNavigable {
         logNoop()
     }
 
-    public func prepareRootViewController(currentState: RootViewControllerState, restoration: Bool) {
+    public func prepareRootViewController(for scene: UIScene?, currentState: RootViewControllerState, restoration: Bool) {
+        logNoop()
+    }
+
+    public func prepareRootViewControllerForAllScenes(currentState: RootViewControllerState, restoration: Bool) {
         logNoop()
     }
 
