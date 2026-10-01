@@ -609,7 +609,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
               .presentationController as? UISheetPresentationController,
               let containerView = sheet.containerView,
               let containerSuperview = containerView.superview,
-              !traitCollection.horizontalSizeClass.iskDriveCompactSize else {
+              !traitCollection.iskDriveCompactSize else {
             return
         }
 

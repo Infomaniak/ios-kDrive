@@ -219,6 +219,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
                      interfaceOrientation previousInterfaceOrientation: UIInterfaceOrientation,
                      traitCollection previousTraitCollection: UITraitCollection) {
         Log.sceneDelegate("windowScene didUpdate")
+        (window?.rootViewController as? RootSplitViewController)?.updateLayoutTraits(from: windowScene.traitCollection)
     }
 
     func windowScene(_ windowScene: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem) async -> Bool {

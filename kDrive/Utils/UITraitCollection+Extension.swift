@@ -18,9 +18,9 @@
 
 import UIKit
 
-public extension UIUserInterfaceSizeClass {
-    // Disable iPad size class on iPhoneProMax
+public extension UITraitCollection {
+    /// Use the available space, including height, rather than treating every phone as compact.
     var iskDriveCompactSize: Bool {
-        return self == .compact || UIDevice.current.userInterfaceIdiom == .phone
+        return horizontalSizeClass != .regular || (userInterfaceIdiom == .phone && verticalSizeClass == .compact)
     }
 }

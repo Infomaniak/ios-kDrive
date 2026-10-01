@@ -30,6 +30,7 @@ ios-kDrive/
 │   ├── AppRestorationService.swift     # State restoration
 │   ├── UI/                      #   User Interface
 │   │   ├── Controller/          #     ViewControllers (UIKit)
+│   │   │   ├── MainTabViewController.swift # Adaptive split/sidebar and compact tab navigation
 │   │   │   ├── Files/           #       File management (FileList, Preview, Search, etc.)
 │   │   │   ├── Menu/            #       Navigation menu (PhotoList, Trash, Share)
 │   │   │   ├── Home/            #       Home screen
@@ -41,6 +42,7 @@ ios-kDrive/
 │   │   ├── Assets.xcassets      #     Images, colors, icons
 │   │   └── Info.plist           #     App configuration
 │   ├── Utils/                   #   Utility functions, helpers
+│   │   ├── UITraitCollection+Extension.swift # Compact/regular layout policy for each window
 │   │   └── KSuitePro/           #     KSuite Pro integration utilities
 │   ├── Data/                    #   App-level data handling
 │   └── IAP/                     #   In-App Purchase handling
@@ -106,6 +108,7 @@ ios-kDrive/
 ├── kDriveShareExtension/        # Share sheet extension
 ├── kDriveActionExtension/       # Action sheet extension
 ├── kDriveTests/                 # Unit tests (Swift Testing; legacy XCTest)
+│   ├── kDrive/UTAdaptiveLayout.swift # Adaptive layout and navigation continuity tests
 ├── kDriveAPITests/              # API integration tests
 ├── kDriveUITests/               # UI automation tests
 ├── kDriveTestShared/            # Shared test utilities
@@ -191,6 +194,7 @@ tuist test # Or via Xcode Test Navigator
 
 ### Learned Preferences
 
+- On iPhone Duo, preserve the existing iPhone appearance when folded or using one screen; use the iPad layout only in the expanded, wide window.
 - Write new tests with Swift Testing (`import Testing`, `@Suite`, `@Test`, `#expect`, and `#require`) rather than XCTest.
 - Resetting previous upload errors on reauthentication is acceptable, consistent with background-upload behavior.
 

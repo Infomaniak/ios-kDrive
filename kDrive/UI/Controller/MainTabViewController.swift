@@ -55,8 +55,10 @@ public enum MainTabBarIndex {
     }
 }
 
-class RootSplitViewController: UISplitViewController, SidebarViewControllerDelegate {
+class RootSplitViewController: UISplitViewController, SidebarViewControllerDelegate, UISplitViewControllerDelegate {
     let driveFileManager: DriveFileManager
+    private weak var expandedNavigationController: UINavigationController?
+    private var compactFilesRoot: UIViewController?
     var lastSelectedDestination: SidebarDestination? {
         didSet {
             let destination = lastSelectedDestination
@@ -92,6 +94,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             for: .compact
         )
         preferredDisplayMode = .oneBesideSecondary
+        delegate = self
     }
 
     @available(*, unavailable)
@@ -99,167 +102,95 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        @InjectService var appRouter: AppNavigable
-        super.traitCollectionDidChange(previousTraitCollection)
+    func updateLayoutTraits(from windowTraits: UITraitCollection) {
+        if #available(iOS 17.0, *) {
+            // A large iPhone in landscape still has only enough height for the phone UI.
+            // Remove the override when space returns so UIKit can expand the same container.
+            if windowTraits.userInterfaceIdiom == .phone && windowTraits.iskDriveCompactSize {
+                traitOverrides.horizontalSizeClass = .compact
+            } else {
+                traitOverrides.remove(UITraitHorizontalSizeClass.self)
+            }
+        }
+    }
 
-        guard let previousTraitCollection else { return }
-        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
-            || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
+    func splitViewController(_ svc: UISplitViewController,
+                             topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column)
+        -> UISplitViewController.Column {
+        switchToCompactRestoration()
+        return .compact
+    }
 
-        guard let rootViewController = appRouter.rootViewController as? RootSplitViewController else { return }
-        if rootViewController.traitCollection.horizontalSizeClass == .regular {
+    func splitViewController(_ svc: UISplitViewController,
+                             displayModeForExpandingToProposedDisplayMode proposedDisplayMode: UISplitViewController.DisplayMode)
+        -> UISplitViewController.DisplayMode {
+        switchToRegularRestoration()
+        return .oneBesideSecondary
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if !isCollapsed {
             switchToRegularRestoration()
-        } else {
-            switchToCompactRestoration()
         }
     }
 
     private func switchToRegularRestoration() {
-        @InjectService var appRouter: AppNavigable
-        guard let detailNavigationController = viewController(for: .secondary) as? UINavigationController,
-              let mainTabViewController = viewController(for: .compact) as? MainTabViewController else { return }
-        guard let filesNavigationController = mainTabViewController
-            .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
-
-        detailNavigationController.popToRootViewController(animated: false)
-
-        if let previewViewController = filesNavigationController.topViewController as? PreviewViewController {
-            let fileId = previewViewController.currentPreviewedFileId
-            let database = driveFileManager.database
-            let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
-                lazyCollection.filter("id == %@ ", fileId)
-                    .first?
-                    .freezeIfNeeded()
-            }
-
-            guard let frozenFile else { return }
-
-            if let parent = frozenFile.parent {
-                presentPathToFileList(frozenFolder: parent, navigationController: detailNavigationController, toRoot: false)
-            }
-
-            appRouter.presentPreviewViewController(
-                frozenFiles: [frozenFile],
-                index: 0,
-                driveFileManager: driveFileManager,
-                normalFolderHierarchy: true,
-                presentationOrigin: .fileList,
-                navigationController: detailNavigationController,
-                animated: false
-            )
-
-        } else if let fileListViewController = filesNavigationController.topViewController as? FileListViewController {
-            let currentDirectory = fileListViewController.viewModel.currentDirectory
-            if currentDirectory.id > DriveFileManager.constants.rootID {
-                if currentDirectory.parent == nil {
-                    presentPathToFileList(
-                        frozenFolder: currentDirectory,
-                        navigationController: detailNavigationController
-                    )
-                } else {
-                    presentPathToFileList(
-                        frozenFolder: currentDirectory,
-                        navigationController: detailNavigationController,
-                        toRoot: false
-                    )
-                }
-            } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
-        } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
-    }
-
-    private func switchToCompactRestoration() {
-        @InjectService var appRouter: AppNavigable
-        guard let detailNavigationController = viewController(for: .secondary) as? UINavigationController,
+        guard expandedNavigationController == nil,
+              let detailNavigationController = viewController(for: .secondary) as? UINavigationController,
               let mainTabViewController = viewController(for: .compact) as? MainTabViewController,
-              let filesNavigationController = mainTabViewController
-              .viewControllers?[mainTabViewController.selectedIndex] as? UINavigationController else { return }
-
-        filesNavigationController.popToRootViewController(animated: false)
-
-        if let previewViewController = detailNavigationController.topViewController as? PreviewViewController {
-            let fileId = previewViewController.currentPreviewedFileId
-            let database = driveFileManager.database
-            let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
-                lazyCollection.filter("id == %@ ", fileId)
-                    .first?
-                    .freezeIfNeeded()
-            }
-
-            guard let frozenFile else { return }
-
-            if let parent = frozenFile.parent {
-                presentPathToFileList(frozenFolder: parent, navigationController: filesNavigationController)
-            }
-
-            appRouter.presentPreviewViewController(
-                frozenFiles: [frozenFile],
-                index: 0,
-                driveFileManager: driveFileManager,
-                normalFolderHierarchy: true,
-                presentationOrigin: .fileList,
-                navigationController: filesNavigationController,
-                animated: false
-            )
-        } else if let fileListViewController = detailNavigationController.topViewController as? FileListViewController {
-            let currentDirectory = fileListViewController.viewModel.currentDirectory
-            if currentDirectory.id > DriveFileManager.constants.rootID {
-                presentPathToFileList(frozenFolder: currentDirectory, navigationController: filesNavigationController)
-            } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
-        } else if let lastSelectedDestination { didSelectItem(destination: lastSelectedDestination) }
-    }
-
-    private func presentPathToFileList(frozenFolder: File, navigationController: UINavigationController, toRoot: Bool = true) {
-        guard let topViewController = navigationController.topViewController else {
-            Log.sceneDelegate("unable to presentFileList, no topViewController", level: .error)
+              let selectedNavigationController = mainTabViewController.selectedViewController as? UINavigationController else {
             return
         }
 
-        var currentFolder = frozenFolder
-        var filePath = [currentFolder]
-        while currentFolder.parentId > DriveFileManager.constants.rootID {
-            guard let parentFolder = currentFolder.parent else { break }
+        // Move the existing stack, preserving previews, scroll positions and in-progress edits.
+        // Detach it first: a view controller cannot belong to two navigation controllers.
+        expandedNavigationController = selectedNavigationController
+        var stack = selectedNavigationController.viewControllers
+        // The wide layout already has a sidebar; keep the compact location picker for the return trip.
+        if stack.count > 1, stack.first is SidebarViewController {
+            compactFilesRoot = stack.removeFirst()
+        }
+        detailNavigationController.navigationBar.prefersLargeTitles = selectedNavigationController.navigationBar
+            .prefersLargeTitles
+        detailNavigationController.setNavigationBarHidden(selectedNavigationController.isNavigationBarHidden, animated: false)
+        selectedNavigationController.setViewControllers([UIViewController()], animated: false)
+        detailNavigationController.setViewControllers(stack, animated: false)
+    }
 
-            filePath.append(parentFolder)
-            currentFolder = parentFolder
+    private func switchToCompactRestoration() {
+        guard let detailNavigationController = viewController(for: .secondary) as? UINavigationController,
+              let expandedNavigationController else {
+            return
         }
 
-        if !toRoot {
-            filePath.removeLast()
+        var stack = detailNavigationController.viewControllers
+        if let compactFilesRoot {
+            stack.insert(compactFilesRoot, at: 0)
         }
-        for folder in filePath.reversed() {
-            FilePresenter(viewController: topViewController)
-                .presentDirectory(for: folder,
-                                  driveFileManager: driveFileManager,
-                                  animated: false,
-                                  completion: nil)
-        }
+        expandedNavigationController.setNavigationBarHidden(detailNavigationController.isNavigationBarHidden, animated: false)
+        detailNavigationController.setViewControllers([UIViewController()], animated: false)
+        expandedNavigationController.setViewControllers(stack, animated: false)
+        self.expandedNavigationController = nil
+        compactFilesRoot = nil
     }
 
     // MARK: - SidebarViewControllerDelegate
 
     func didSelectItem(destination: SidebarDestination) {
-        guard let detailNavigationController = viewController(for: .secondary) as? UINavigationController,
-              let mainTabBarViewController = viewController(for: .compact) as? MainTabViewController else { return }
-        detailNavigationController.setNavigationBarHidden(false, animated: true)
+        guard let mainTabBarViewController = viewController(for: .compact) as? MainTabViewController else { return }
+        let wasExpanded = expandedNavigationController != nil || !isCollapsed
+        switchToCompactRestoration()
 
         switch destination {
         case .home:
-            let homeViewController = HomeViewController(driveFileManager: driveFileManager)
             mainTabBarViewController.selectedIndex = MainTabBarIndex.home.rawValue
-            detailNavigationController.setViewControllers([homeViewController], animated: false)
         case .photoList:
-            let photoListViewModel = PhotoListViewModel(driveFileManager: driveFileManager)
-            let photoListViewController = PhotoListViewController(viewModel: photoListViewModel, listLayout: PhotoListLayout())
             mainTabBarViewController.selectedIndex = MainTabBarIndex.gallery.rawValue
-            detailNavigationController.setViewControllers([photoListViewController], animated: false)
         case .menu:
-            let menuViewController = MenuViewController(driveFileManager: driveFileManager)
-            detailNavigationController.setViewControllers([menuViewController], animated: false)
+            mainTabBarViewController.selectedIndex = MainTabBarIndex.profile.rawValue
         case .file(let fileListViewModel):
-            let regularDetailViewController = FileListViewController(viewModel: fileListViewModel)
             mainTabBarViewController.selectedIndex = MainTabBarIndex.files.rawValue
-            detailNavigationController.setViewControllers([regularDetailViewController], animated: false)
             if let filesNav = mainTabBarViewController
                 .viewControllers?[safe: mainTabBarViewController.selectedIndex] as? UINavigationController {
                 let compactViewController = FileListViewController(viewModel: fileListViewModel)
@@ -268,6 +199,20 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             }
         }
         lastSelectedDestination = destination
+        UserDefaults.shared.lastSelectedTab = mainTabBarViewController.selectedIndex
+        if wasExpanded {
+            switchToRegularRestoration()
+        }
+    }
+}
+
+extension RootSplitViewController: UpdateAccountDelegate {
+    func didUpdateCurrentUserProfile(_ currentUser: UserProfile) {
+        (viewController(for: .compact) as? MainTabViewController)?.didUpdateCurrentUserProfile(currentUser)
+        for column in [UISplitViewController.Column.primary, .secondary] {
+            let navigationController = viewController(for: column) as? UINavigationController
+            (navigationController?.viewControllers.first as? UpdateAccountDelegate)?.didUpdateCurrentUserProfile(currentUser)
+        }
     }
 }
 
@@ -684,10 +629,18 @@ extension MainTabViewController: UITabBarControllerDelegate {
         saveSelectedTabUserActivity(selectedIndex)
         updateCenterButton()
 
-        guard let rootViewController = tabBarController.parent as? RootSplitViewController else { return }
+        guard let rootViewController = tabBarController.splitViewController as? RootSplitViewController else { return }
         switch selectedIndex {
         case MainTabBarIndex.gallery.rawValue:
             rootViewController.lastSelectedDestination = .photoList
+        case MainTabBarIndex.profile.rawValue:
+            rootViewController.lastSelectedDestination = .menu
+        case MainTabBarIndex.files.rawValue:
+            if let fileList = (viewController as? UINavigationController)?.topViewController as? FileListViewController {
+                rootViewController.lastSelectedDestination = .file(fileList.viewModel)
+            } else {
+                rootViewController.lastSelectedDestination = nil
+            }
         default:
             rootViewController.lastSelectedDestination = .home
         }
@@ -720,7 +673,7 @@ extension MainTabViewController: UpdateAccountDelegate {
 
 extension MainTabViewController: MainTabViewControllerDelegate {
     func setLastSelectedDestination(_ destination: SidebarDestination?) {
-        guard let rootSplitViewController = parent as? RootSplitViewController else { return }
+        guard let rootSplitViewController = splitViewController as? RootSplitViewController else { return }
         rootSplitViewController.lastSelectedDestination = destination
     }
 }
