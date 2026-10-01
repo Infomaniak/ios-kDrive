@@ -35,6 +35,7 @@ final class OnlyOfficeViewController: UIViewController {
     let progressView = UIProgressView()
 
     private var progressObserver: NSKeyValueObservation?
+    private var didRetryAfterContentProcessTermination = false
 
     static func open(driveFileManager: DriveFileManager, file: File, viewController: UIViewController) {
         guard file.isOfficeFile else { return }
@@ -331,6 +332,13 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
             message: "Office web content process terminated",
             level: .warning
         )
+
+        guard !didRetryAfterContentProcessTermination else {
+            showErrorMessage(context: ["stage": "web_content_process_termination"])
+            return
+        }
+
+        didRetryAfterContentProcessTermination = true
         webView.reload()
     }
 
