@@ -35,6 +35,7 @@ final class OnlyOfficeViewController: UIViewController {
     let progressView = UIProgressView()
 
     private var progressObserver: NSKeyValueObservation?
+    private var didRetryAfterContentProcessTermination = false
 
     static func open(driveFileManager: DriveFileManager, file: File, viewController: UIViewController) {
         guard file.isOfficeFile else { return }
@@ -209,6 +210,19 @@ final class OnlyOfficeViewController: UIViewController {
         }
     }
 
+    private func handleNavigationError(_ error: Error, stage: String) {
+        let nsError = error as NSError
+        switch (nsError.domain, nsError.code) {
+        case ("WebKitErrorDomain", 105):
+            showContentBlockerError()
+        default:
+            showErrorMessage(context: [
+                "stage": stage,
+                "Error": error.localizedDescription
+            ])
+        }
+    }
+
     private func dismiss() {
         dismiss(animated: true)
     }
@@ -306,13 +320,26 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        let nsError = error as NSError
-        switch (nsError.domain, nsError.code) {
-        case ("WebKitErrorDomain", 105):
-            showContentBlockerError()
-        default:
-            showErrorMessage(context: ["Error": error.localizedDescription])
+        handleNavigationError(error, stage: "provisional_navigation")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        handleNavigationError(error, stage: "navigation")
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        SentryDebug.capture(
+            message: "Office web content process terminated",
+            level: .warning
+        )
+
+        guard !didRetryAfterContentProcessTermination else {
+            showErrorMessage(context: ["stage": "web_content_process_termination"])
+            return
         }
+
+        didRetryAfterContentProcessTermination = true
+        webView.reload()
     }
 
     func showContentBlockerError() {
