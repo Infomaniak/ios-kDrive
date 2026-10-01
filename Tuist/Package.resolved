@@ -1,5 +1,5 @@
 {
-  "originHash" : "83dfc541277963e31bc9d900e7381810f33a6c152b4178293189c01eb17441b8",
+  "originHash" : "c9b605c7875338c9da380df294c0a11fbb96f95a6b59473c85f4c440229878ed",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -26,6 +26,15 @@
       "state" : {
         "revision" : "073b9671ce2b9b5b96398611427a1f929927e428",
         "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "dotlottie-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LottieFiles/dotlottie-ios",
+      "state" : {
+        "revision" : "ddc69d0ae3a90894b15b5a925c73232ff1d94307",
+        "version" : "0.16.9"
       }
     },
     {
@@ -141,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-onboarding",
       "state" : {
-        "revision" : "ca793dc5613ae4fd67b209e3f5f0222e00a6da4d",
-        "version" : "1.4.4"
+        "branch" : "fix/onboarding-display-on-iphone-duo",
+        "revision" : "e7ddca4f3bba3e879f95a547cb655960aeb7d02a"
       }
     },
     {
