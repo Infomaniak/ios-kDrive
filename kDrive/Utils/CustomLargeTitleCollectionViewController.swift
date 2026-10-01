@@ -36,11 +36,11 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
 
     var isCompactView: Bool {
         if let splitViewController {
-            return splitViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
+            return splitViewController.traitCollection.horizontalSizeClass == .compact
         }
 
         guard let rootViewController = appRouter.rootViewController else { return false }
-        return rootViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
+        return rootViewController.traitCollection.horizontalSizeClass == .compact
     }
 
     override func viewDidLoad() {
