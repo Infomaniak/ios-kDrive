@@ -209,6 +209,19 @@ final class OnlyOfficeViewController: UIViewController {
         }
     }
 
+    private func handleNavigationError(_ error: Error, stage: String) {
+        let nsError = error as NSError
+        switch (nsError.domain, nsError.code) {
+        case ("WebKitErrorDomain", 105):
+            showContentBlockerError()
+        default:
+            showErrorMessage(context: [
+                "stage": stage,
+                "Error": error.localizedDescription
+            ])
+        }
+    }
+
     private func dismiss() {
         dismiss(animated: true)
     }
@@ -306,13 +319,19 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        let nsError = error as NSError
-        switch (nsError.domain, nsError.code) {
-        case ("WebKitErrorDomain", 105):
-            showContentBlockerError()
-        default:
-            showErrorMessage(context: ["Error": error.localizedDescription])
-        }
+        handleNavigationError(error, stage: "provisional_navigation")
+    }
+
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        handleNavigationError(error, stage: "navigation")
+    }
+
+    func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        SentryDebug.capture(
+            message: "Office web content process terminated",
+            level: .warning
+        )
+        webView.reload()
     }
 
     func showContentBlockerError() {
