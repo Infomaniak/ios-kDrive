@@ -290,19 +290,15 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     private var buttonAdd: UIButton?
     private var mediaHelper: OpenMediaHelper?
 
-    lazy var legacyTabBarActive: Bool = {
-        if #available(iOS 26.0, *),
-           UIDevice.current.userInterfaceIdiom == .pad {
-            self.isTabBarHidden = false
+    var legacyTabBarActive: Bool {
+        if #available(iOS 26.0, *) {
             return false
         }
-        if #available(iOS 18.0, *),
-           UIDevice.current.userInterfaceIdiom == .pad {
-            self.isTabBarHidden = true
-            return true
+        if #available(iOS 18.0, *) {
+            return traitCollection.horizontalSizeClass == .regular
         }
         return false
-    }()
+    }
 
     var tabBarHeightConstraint: NSLayoutConstraint?
     var buttonAddBottomConstraint: NSLayoutConstraint?
@@ -339,7 +335,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        addLegacyTabBarIfNeeded()
+        updateLegacyTabBarIfNeeded()
         setupTabBar()
         updateCenterButton()
 
@@ -369,6 +365,13 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.viewWillAppear(animated)
         configureTabBar()
         updateTabBarProfilePicture()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard let previousTraitCollection,
+              traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass else { return }
+        updateLegacyTabBarIfNeeded()
     }
 
     private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {

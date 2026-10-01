@@ -281,25 +281,15 @@ public struct AppRouter: AppNavigable {
     }
 
     @MainActor private func getCurrentController(in window: UIWindow?) -> UIViewController? {
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            guard let rootSplitViewController = window?.rootViewController as? RootSplitViewController else {
-                return nil
-            }
-            if let mainTabViewController = rootSplitViewController.viewControllers.first as? MainTabViewController {
-                let selectedIndex = mainTabViewController.selectedIndex
-                let viewControllers = mainTabViewController.viewControllers
-                return viewControllers?[safe: selectedIndex]
-            } else {
-                return rootSplitViewController.viewControllers.last
-            }
-        } else {
-            guard let mainTabViewController = window?.rootViewController as? MainTabViewController else {
-                Log.sceneDelegate("unable to access mainTabViewController", level: .error)
-                return nil
-            }
+        guard let rootSplitViewController = window?.rootViewController as? RootSplitViewController else {
+            return nil
+        }
+        if let mainTabViewController = rootSplitViewController.viewControllers.first as? MainTabViewController {
             let selectedIndex = mainTabViewController.selectedIndex
             let viewControllers = mainTabViewController.viewControllers
             return viewControllers?[safe: selectedIndex]
+        } else {
+            return rootSplitViewController.viewControllers.last
         }
     }
 
@@ -528,20 +518,13 @@ public struct AppRouter: AppNavigable {
             return nil
         }
 
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            let rootSplitViewController = RootSplitViewController(
-                driveFileManager: driveFileManager,
-                selectedIndex: selectedIndex
-            )
-            window.rootViewController = rootSplitViewController
-            window.makeKeyAndVisible()
-            return rootSplitViewController
-        } else {
-            let mainTabViewController = MainTabViewController(driveFileManager: driveFileManager, selectedIndex: selectedIndex)
-            window.rootViewController = mainTabViewController
-            window.makeKeyAndVisible()
-            return nil
-        }
+        let rootSplitViewController = RootSplitViewController(
+            driveFileManager: driveFileManager,
+            selectedIndex: selectedIndex
+        )
+        window.rootViewController = rootSplitViewController
+        window.makeKeyAndVisible()
+        return rootSplitViewController
     }
 
     @MainActor public func showSearch(query: String?) {
