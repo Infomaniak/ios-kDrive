@@ -43,7 +43,7 @@ extension UINavigationController {
         let shouldApplyCustomMargins: Bool
 
         if #available(iOS 26.0, *) {
-            shouldApplyCustomMargins = UIDevice.current.userInterfaceIdiom != .pad
+            shouldApplyCustomMargins = traitCollection.horizontalSizeClass == .compact
         } else {
             shouldApplyCustomMargins = true
         }

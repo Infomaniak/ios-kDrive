@@ -43,12 +43,15 @@ public class SelfSizingSheetHelper {
         sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         sheet.prefersGrabberVisible = showsGrabber
 
-        contentSizeObservation = scrollView.observe(\.contentSize, options: [.new, .old]) { [weak scrollView,
+        contentSizeObservation = scrollView.observe(\.contentSize, options: [.new, .old]) { [weak self,
+                                                                                             weak scrollView,
                                                                                              weak sheet] _, _ in
                 guard let scrollView, let sheet else { return }
 
                 var totalPanelContentHeight = scrollView.contentSize.height
-                if UIDevice.current.userInterfaceIdiom != .pad && totalPanelContentHeight > 80 {
+                if self?.viewController?.traitCollection.horizontalSizeClass == .compact,
+                   totalPanelContentHeight > 80
+                {
                     scrollView.contentInset.top = IKPadding.medium
                     totalPanelContentHeight += scrollView.contentInset.top
                 }
