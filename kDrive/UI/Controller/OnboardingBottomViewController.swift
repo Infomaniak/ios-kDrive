@@ -44,6 +44,13 @@ class OnboardingBottomViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        view.directionalLayoutMargins = NSDirectionalEdgeInsets(
+            top: 0,
+            leading: UIConstants.Padding.medium,
+            bottom: 0,
+            trailing: UIConstants.Padding.medium
+        )
+
         let onboardingView = OnboardingTextView(
             title: titleText,
             description: descriptionText
@@ -52,10 +59,10 @@ class OnboardingBottomViewController: UIViewController {
 
         onboardingView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            onboardingView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            onboardingView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            onboardingView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            onboardingView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            onboardingView.topAnchor.constraint(equalTo: view.topAnchor),
+            onboardingView.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor),
+            onboardingView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            onboardingView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor)
         ])
     }
 }
