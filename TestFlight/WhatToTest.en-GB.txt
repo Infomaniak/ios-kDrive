@@ -1,6 +1,3 @@
-- Added a missing new folder button
-- Fix related to editing a file through the Files app
-- Hardening against unintentional disconnections
-- Spotlight indexing of the most recent files
-- New kDrive actions in the Shortcuts app
+- Added multi-window support on iPad, open and work on several kDrive windows side by side
+- Improved photo gallery, more reliable photo loading
 - Stability improvements and bug fixes
