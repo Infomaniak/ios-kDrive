@@ -729,6 +729,22 @@ final class DriveApiTests: XCTestCase {
         await tearDownTest(directory: testDirectory)
     }
 
+    func testGetFileSizes() async throws {
+        let testDirectory = try await setUpTest(testName: "Get file sizes")
+        let nestedDirectory = try await createTestDirectory(name: "directory-\(Date())", parentDirectory: testDirectory)
+        let file1 = try await currentApiFetcher.createFile(in: testDirectory, name: "firstFile-\(Date())", type: "docx")
+        let file2 = try await currentApiFetcher.createFile(in: nestedDirectory, name: "secondFile-\(Date())", type: "docx")
+
+        let file1Size = try await currentApiFetcher.fileInfo(file1.proxify()).validApiResponse.data.size ?? 0
+        let file2Size = try await currentApiFetcher.fileInfo(file2.proxify()).validApiResponse.data.size ?? 0
+        let sizes = try await currentApiFetcher.sizes(of: testDirectory).validApiResponse.data
+
+        XCTAssertGreaterThan(sizes.size, 0, "Folder size should be greater than zero")
+        XCTAssertEqual(sizes.size, file1Size + file2Size, "Folder size should include nested content")
+        XCTAssertGreaterThanOrEqual(sizes.storageSize, sizes.size, "Storage size should be at least folder size")
+        await tearDownTest(directory: testDirectory)
+    }
+
     // MARK: - Complementary tests
 
     func testCategory() async throws {

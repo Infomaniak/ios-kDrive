@@ -21,4 +21,25 @@ import UIKit
 class FileInformationSizeTableViewCell: UITableViewCell {
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var sizeLabel: UILabel!
+
+    private lazy var loadingIndicator = UIActivityIndicatorView(style: .medium)
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(loadingIndicator)
+        NSLayoutConstraint.activate([
+            loadingIndicator.leadingAnchor.constraint(equalTo: sizeLabel.leadingAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: sizeLabel.centerYAnchor)
+        ])
+    }
+
+    func setLoading(_ isLoading: Bool) {
+        sizeLabel.isHidden = isLoading
+        if isLoading {
+            loadingIndicator.startAnimating()
+        } else {
+            loadingIndicator.stopAnimating()
+        }
+    }
 }

@@ -152,6 +152,10 @@ public class DriveApiFetcher: ApiFetcher {
         ))
     }
 
+    public func sizes(of file: ProxyFile) async throws -> ValidServerResponse<FileSizes> {
+        try await perform(request: authenticatedRequest(.sizes(file: file)))
+    }
+
     public func fileInfo(_ file: ProxyFile) async throws -> ValidServerResponse<File> {
         try await perform(request: authenticatedRequest(.fileInfo(file)))
     }

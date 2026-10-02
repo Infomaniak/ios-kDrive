@@ -42,8 +42,11 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private var activitiesInfo: ActivitiesInfo = (cursor: nil, hasNextPage: true, isLoading: true)
     private var comments = [Comment]()
     private var commentsInfo = (page: 1, hasNextPage: true, isLoading: true)
+    private var directorySize: Int?
+    private var isDirectorySizeLoading = false
 
     private var fetchActivityTask: Task<Void, Error>?
+    private var fileInformationTask: Task<Void, Never>?
 
     lazy var packId = DrivePackId(rawValue: driveFileManager.drive.pack.name)
 
@@ -116,7 +119,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
             if contentCount != nil {
                 rows.append(.content)
             }
-            if file.size != nil {
+            if file.isDirectory ? file.capabilities.canRead : file.size != nil {
                 rows.append(.size)
             }
             if file.version != nil {
@@ -177,6 +180,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.navigationBar.tintColor = nil
+
+        fileInformationTask?.cancel()
     }
 
     override func viewDidLoad() {
@@ -246,7 +251,9 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     }
 
     private func loadFileInformation() {
-        Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
+        isDirectorySizeLoading = file.isDirectory
+
+        fileInformationTask = Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
                 let currentFile = try await driveFileManager.file(proxyFile, forceRefresh: true)
 
@@ -254,6 +261,11 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
                 let currentFileAccess = isWithinSameDrive ? try await driveFileManager.apiFetcher.access(for: proxyFile) : nil
 
                 let folderContentCount = isDirectory ? try await driveFileManager.apiFetcher.count(of: proxyFile) : nil
+
+                if isDirectory {
+                    self.directorySize = try? await driveFileManager.directorySize(of: proxyFile)
+                    self.isDirectorySizeLoading = false
+                }
 
                 self.fileInformationRows = FileInformationRow.getRows(for: currentFile,
                                                                       fileAccess: currentFileAccess,
@@ -625,7 +637,19 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 case .size:
                     let cell = tableView.dequeueReusableCell(type: FileInformationSizeTableViewCell.self, for: indexPath)
                     cell.titleLabel.text = KDriveResourcesStrings.Localizable.fileDetailsInfosOriginalSize
-                    cell.sizeLabel.text = file.getFileSize()
+                    if file.isDirectory {
+                        if isDirectorySizeLoading {
+                            cell.setLoading(true)
+                        } else if let directorySize {
+                            cell.setLoading(false)
+                            cell.sizeLabel.text = Constants.formatFileSize(Int64(directorySize))
+                        } else {
+                            cell.setLoading(false)
+                        }
+                    } else {
+                        cell.setLoading(false)
+                        cell.sizeLabel.text = file.getFileSize()
+                    }
                     return cell
                 }
             case .activity:

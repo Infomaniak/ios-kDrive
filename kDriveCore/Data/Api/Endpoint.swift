@@ -346,6 +346,10 @@ public extension Endpoint {
         return .driveInfo(drive: drive).appending(path: "/settings")
     }
 
+    static func sizes(file: AbstractFile) -> Endpoint {
+        return .driveInfoV2(drive: ProxyDrive(id: file.driveId)).appending(path: "/files/\(file.id)/sizes")
+    }
+
     // MARK: - Import
 
     static func cancelImport(drive: AbstractDrive, id: Int) -> Endpoint {
