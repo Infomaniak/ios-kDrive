@@ -653,7 +653,13 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
 
         uploadService.resumeAllOperations()
-        _ = uploadDataSource.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
+        do {
+            try uploadDataSource.saveToRealm(uploadFile, itemIdentifier: uploadFileProviderItem.itemIdentifier, addToQueue: true)
+        } catch {
+            observationToken?.cancel()
+            observationToken = nil
+            Log.fileProvider("backgroundUploadItem failed to save upload: \(error)", level: .error)
+        }
     }
 
     // MARK: - Enumeration
