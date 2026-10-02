@@ -59,6 +59,9 @@ public final class UploadService {
 
     lazy var allQueues = [globalUploadQueue, photoUploadQueue]
 
+    /// Queues watched by the Dynamic Island. Photo sync is intentionally excluded for now
+    lazy var dynamicIslandWatchedQueues = [globalUploadQueue]
+
     var suspendedQueueNames: [String] = []
 
     var observations = (
@@ -185,6 +188,42 @@ extension UploadService: UploadServiceable {
         globalUploadQueue.waitForCompletion {
             self.photoUploadQueue.waitForCompletion {
                 completionHandler()
+            }
+        }
+    }
+
+    public func waitForCompletionForActiveQueues(_ completionHandler: @escaping () -> Void) {
+        DispatchQueue.global(qos: .default).async { [weak self] in
+            guard let self else { completionHandler(); return }
+
+            var emptyLoops = 0
+            let requiredEmptyLoops = 3
+
+            while true {
+                let group = DispatchGroup()
+                var hasActiveQueue = false
+
+                for queue in self.dynamicIslandWatchedQueues {
+                    guard queue.isActive else { continue }
+                    hasActiveQueue = true
+                    group.enter()
+                    queue.waitForCompletionIsActive {
+                        group.leave()
+                    }
+                }
+
+                if !hasActiveQueue {
+                    emptyLoops += 1
+                    if emptyLoops >= requiredEmptyLoops {
+                        completionHandler()
+                        return
+                    }
+                    Thread.sleep(forTimeInterval: 0.2)
+                    continue
+                }
+
+                group.wait()
+                emptyLoops = 0
             }
         }
     }
