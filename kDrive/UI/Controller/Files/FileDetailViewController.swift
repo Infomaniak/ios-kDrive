@@ -181,9 +181,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
         super.viewWillDisappear(animated)
         navigationController?.navigationBar.tintColor = nil
 
-        if isMovingFromParent || isBeingDismissed {
-            fileInformationTask?.cancel()
-        }
+        fileInformationTask?.cancel()
     }
 
     override func viewDidLoad() {
@@ -228,8 +226,6 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
 
         tableView.separatorColor = .clear
 
-        isDirectorySizeLoading = file.isDirectory
-
         fileInformationRows = FileInformationRow.getRows(for: file,
                                                          fileAccess: fileAccess,
                                                          contentCount: contentCount,
@@ -255,6 +251,8 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     }
 
     private func loadFileInformation() {
+        isDirectorySizeLoading = file.isDirectory
+
         fileInformationTask = Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
                 let currentFile = try await driveFileManager.file(proxyFile, forceRefresh: true)

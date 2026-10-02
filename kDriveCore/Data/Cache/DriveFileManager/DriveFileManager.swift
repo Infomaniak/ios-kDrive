@@ -839,12 +839,7 @@ public final class DriveFileManager {
     }
 
     public func directorySize(of directory: ProxyFile) async throws -> Int {
-        do {
-            return try await apiFetcher.sizes(of: directory).validApiResponse.data.size
-        } catch {
-            print("sizes error:", error)
-            throw error
-        }
+        try await apiFetcher.sizes(of: directory).validApiResponse.data.size
     }
 
     @discardableResult
