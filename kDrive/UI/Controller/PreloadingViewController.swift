@@ -92,7 +92,7 @@ class PreloadingViewController: UIViewController {
         NSLayoutConstraint.activate([
             splashscreenInfomaniakImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             splashscreenInfomaniakImageView.bottomAnchor
-                .constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+                .constraint(equalTo: view.bottomAnchor, constant: -16)
         ])
     }
 
