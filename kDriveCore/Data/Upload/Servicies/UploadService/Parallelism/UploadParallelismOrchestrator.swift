@@ -119,7 +119,7 @@ public final class UploadParallelismOrchestrator {
     }
 }
 
-extension UploadParallelismOrchestrator: UploadQueueDelegate {
+extension UploadParallelismOrchestrator: UploadQueueStateDelegate {
     public func operationQueueBecameEmpty() {
         computeUploadParallelismPerQueueAndApply()
     }

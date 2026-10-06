@@ -27,11 +27,11 @@ public final class UploadQueueObserver {
     )
 
     var uploadQueue: UploadQueue
-    weak var delegate: UploadQueueDelegate?
+    weak var queueStateDelegate: UploadQueueStateDelegate?
 
-    init(uploadQueue: UploadQueue, delegate: UploadQueueDelegate?) {
+    init(uploadQueue: UploadQueue, queueStateDelegate: UploadQueueStateDelegate?) {
         self.uploadQueue = uploadQueue
-        self.delegate = delegate
+        self.queueStateDelegate = queueStateDelegate
 
         setupObservation()
     }
@@ -50,19 +50,19 @@ public final class UploadQueueObserver {
 
     private func operationCountDidChange(previousCount: Int?, newCount: Int?) {
         guard let newCount else {
-            delegate?.operationQueueBecameEmpty()
+            queueStateDelegate?.operationQueueBecameEmpty()
             return
         }
 
         guard let previousCount else {
-            delegate?.operationQueueNoLongerEmpty()
+            queueStateDelegate?.operationQueueNoLongerEmpty()
             return
         }
 
         if newCount == 0 && previousCount > 0 {
-            delegate?.operationQueueBecameEmpty()
+            queueStateDelegate?.operationQueueBecameEmpty()
         } else if previousCount == 0 && newCount > 0 {
-            delegate?.operationQueueNoLongerEmpty()
+            queueStateDelegate?.operationQueueNoLongerEmpty()
         }
     }
 }

@@ -23,7 +23,8 @@ import InfomaniakDI
 import RealmSwift
 import Sentry
 
-public protocol UploadQueueDelegate: AnyObject {
+/// Receives notifications about upload queue emptiness and suspension.
+public protocol UploadQueueStateDelegate: AnyObject {
     func operationQueueBecameEmpty()
     func operationQueueNoLongerEmpty()
     func operationQueueBecameSuspended()
@@ -56,8 +57,8 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     static let silentErrors: [DriveError] =
         [.taskRescheduled, .taskCancelled, .uploadOverDataRestrictedError, .uploadNotTerminatedError, .uploadNotTerminated]
 
-    weak var delegate: UploadQueueDelegate?
-    private weak var externalDelegate: UploadQueueDelegate?
+    weak var queueLifecycleDelegate: UploadQueueStateDelegate?
+    private weak var queueCoordinationDelegate: UploadQueueStateDelegate?
 
     public var name: String {
         "kDrive base upload queue"
@@ -102,17 +103,17 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     /// Should suspend operation queue based on explicit `suspendAllOperations()` call
     var forceSuspendQueue = false
 
-    public init(delegate: UploadQueueDelegate?) {
+    public init(queueCoordinationDelegate: UploadQueueStateDelegate?) {
         guard appContextService.context != .shareExtension else {
             Log.uploadQueue("\(self) disabled in ShareExtension", level: .error)
             return
         }
 
-        externalDelegate = delegate
-        self.delegate = self
+        self.queueCoordinationDelegate = queueCoordinationDelegate
+        queueLifecycleDelegate = self
 
-        queueObserver = UploadQueueObserver(uploadQueue: self, delegate: delegate)
-        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, delegate: delegate)
+        queueObserver = UploadQueueObserver(uploadQueue: self, queueStateDelegate: queueCoordinationDelegate)
+        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, queueStateDelegate: queueCoordinationDelegate)
     }
 
     // MARK: - ParallelismHeuristicDelegate
@@ -123,29 +124,29 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     }
 }
 
-extension UploadQueue: UploadQueueDelegate {
+extension UploadQueue: UploadQueueStateDelegate {
     public func operationQueueBecameEmpty() {
         expiringActivity?.endAll()
         expiringActivity = nil
-        externalDelegate?.operationQueueBecameEmpty()
+        queueCoordinationDelegate?.operationQueueBecameEmpty()
     }
 
     public func operationQueueNoLongerEmpty() {
         guard expiringActivity == nil else {
-            externalDelegate?.operationQueueNoLongerEmpty()
+            queueCoordinationDelegate?.operationQueueNoLongerEmpty()
             return
         }
         expiringActivity = ExpiringActivity(id: "UploadQueue-\(name)", delegate: self)
         expiringActivity?.start()
-        externalDelegate?.operationQueueNoLongerEmpty()
+        queueCoordinationDelegate?.operationQueueNoLongerEmpty()
     }
 
     public func operationQueueBecameSuspended() {
-        externalDelegate?.operationQueueBecameSuspended()
+        queueCoordinationDelegate?.operationQueueBecameSuspended()
     }
 
     public func operationQueueNoLongerSuspended() {
-        externalDelegate?.operationQueueNoLongerSuspended()
+        queueCoordinationDelegate?.operationQueueNoLongerSuspended()
     }
 }
 
@@ -160,6 +161,6 @@ extension UploadQueue: ExpiringActivityDelegate {
         let wasSuspended = operationQueue.isSuspended
         operationQueue.isSuspended = true
         forceSuspendQueue = true
-        if wasSuspended { externalDelegate?.operationQueueBecameSuspended() }
+        if wasSuspended { queueCoordinationDelegate?.operationQueueBecameSuspended() }
     }
 }
