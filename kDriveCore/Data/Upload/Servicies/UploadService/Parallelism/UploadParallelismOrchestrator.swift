@@ -34,6 +34,24 @@ public final class UploadParallelismOrchestrator {
     private var uploadParallelismHeuristic: WorkloadParallelismHeuristic?
     private var memoryPressureObserver: DispatchSourceMemoryPressure?
 
+    @MainActor private lazy var backgroundActivity = UploadBackgroundActivity { [weak self] in
+        guard let self else { return }
+        let queues = self.allQueues
+        let hadUploads = queues.contains { $0.operationCount > 0 }
+        queues.forEach { $0.suspendAllOperations() }
+        let operations = queues.flatMap(\.runningUploadOperations)
+        await withTaskGroup(of: Void.self) { group in
+            for operation in operations {
+                group.addTask { await operation.rescheduleForBackgroundExpiration() }
+            }
+        }
+        if hadUploads {
+            @InjectService var uploadNotifiable: UploadNotifiable
+            uploadNotifiable.sendPausedNotificationIfNeeded()
+        }
+        self.computeUploadParallelismPerQueueAndApply()
+    }
+
     private var availableParallelism: Int {
         guard let uploadParallelismHeuristic else {
             return ParallelismDefaults.reduced
@@ -89,6 +107,10 @@ public final class UploadParallelismOrchestrator {
 
     private func computeUploadParallelismPerQueueAndApply() {
         serialEventQueue.async {
+            Task { @MainActor in
+                let hasWork = self.allQueues.contains { $0.isActive || !$0.runningUploadOperations.isEmpty }
+                self.backgroundActivity.update(hasWork: hasWork)
+            }
             // The Dynamic Island currently watches the global (non-photo sync) queue only.
             let globalQueueActiveForDynamicIsland = self.globalUploadQueue.isActive
             let photoQueueActiveForDynamicIsland = false

@@ -60,6 +60,8 @@ public protocol UploadQueueable {
 
     var isActive: Bool { get }
 
+    var runningUploadOperations: [UploadOperation] { get }
+
     var fileUploadedCount: Int { get set }
 
     var fileUploadFailedCount: Int { get set }

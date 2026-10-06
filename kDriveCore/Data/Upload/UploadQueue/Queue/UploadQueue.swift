@@ -24,6 +24,9 @@ import RealmSwift
 import Sentry
 
 /// Receives notifications about upload queue emptiness and suspension.
+///
+/// Queue observers notify `UploadQueue`, which forwards each notification to its `queueCoordinationDelegate`.
+/// The coordination delegate uses these notifications to redistribute upload parallelism and update Dynamic Island activity.
 public protocol UploadQueueStateDelegate: AnyObject {
     func operationQueueBecameEmpty()
     func operationQueueNoLongerEmpty()
@@ -41,8 +44,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     public var fileUploadedCount = 0
     public var fileUploadFailedCount = 0
 
-    private var expiringActivity: ExpiringActivity?
-
     let serialEventQueue: DispatchQueue = {
         @InjectService var appContextService: AppContextServiceable
         let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency = appContextService.isExtension ? .workItem : .inherit
@@ -57,7 +58,6 @@ public class UploadQueue: ParallelismHeuristicDelegate {
     static let silentErrors: [DriveError] =
         [.taskRescheduled, .taskCancelled, .uploadOverDataRestrictedError, .uploadNotTerminatedError, .uploadNotTerminated]
 
-    weak var queueLifecycleDelegate: UploadQueueStateDelegate?
     private weak var queueCoordinationDelegate: UploadQueueStateDelegate?
 
     public var name: String {
@@ -110,10 +110,9 @@ public class UploadQueue: ParallelismHeuristicDelegate {
         }
 
         self.queueCoordinationDelegate = queueCoordinationDelegate
-        queueLifecycleDelegate = self
 
-        queueObserver = UploadQueueObserver(uploadQueue: self, queueStateDelegate: queueCoordinationDelegate)
-        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, queueStateDelegate: queueCoordinationDelegate)
+        queueObserver = UploadQueueObserver(uploadQueue: self, queueStateDelegate: self)
+        queueSuspensionObserver = UploadQueueSuspensionObserver(uploadQueue: self, queueStateDelegate: self)
     }
 
     // MARK: - ParallelismHeuristicDelegate
@@ -126,18 +125,10 @@ public class UploadQueue: ParallelismHeuristicDelegate {
 
 extension UploadQueue: UploadQueueStateDelegate {
     public func operationQueueBecameEmpty() {
-        expiringActivity?.endAll()
-        expiringActivity = nil
         queueCoordinationDelegate?.operationQueueBecameEmpty()
     }
 
     public func operationQueueNoLongerEmpty() {
-        guard expiringActivity == nil else {
-            queueCoordinationDelegate?.operationQueueNoLongerEmpty()
-            return
-        }
-        expiringActivity = ExpiringActivity(id: "UploadQueue-\(name)", delegate: self)
-        expiringActivity?.start()
         queueCoordinationDelegate?.operationQueueNoLongerEmpty()
     }
 
@@ -147,20 +138,5 @@ extension UploadQueue: UploadQueueStateDelegate {
 
     public func operationQueueNoLongerSuspended() {
         queueCoordinationDelegate?.operationQueueNoLongerSuspended()
-    }
-}
-
-extension UploadQueue: ExpiringActivityDelegate {
-    public func backgroundActivityExpiring() {
-        let operations = operationQueue.operations.compactMap { $0 as? UploadOperation }
-
-        for operation in operations {
-            operation.backgroundActivityExpiring()
-        }
-
-        let wasSuspended = operationQueue.isSuspended
-        operationQueue.isSuspended = true
-        forceSuspendQueue = true
-        if wasSuspended { queueCoordinationDelegate?.operationQueueBecameSuspended() }
     }
 }
