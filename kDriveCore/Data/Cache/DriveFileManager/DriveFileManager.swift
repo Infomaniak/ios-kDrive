@@ -838,6 +838,10 @@ public final class DriveFileManager {
         return response
     }
 
+    public func directorySize(of directory: ProxyFile) async throws -> Int {
+        try await apiFetcher.sizes(of: directory).validApiResponse.data.size
+    }
+
     @discardableResult
     public func move(file: ProxyFile, to destination: ProxyFile) async throws -> (CancelableResponse, File) {
         let response = try await apiFetcher.move(file: file, to: destination)
