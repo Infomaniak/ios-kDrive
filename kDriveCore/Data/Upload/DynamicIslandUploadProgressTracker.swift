@@ -21,6 +21,7 @@ import Foundation
 import InfomaniakDI
 import RealmSwift
 
+@MainActor
 final class DynamicIslandUploadProgressTracker: ObservableObject {
     @Published var fractionCompleted: Double = 0
 
@@ -43,8 +44,10 @@ final class DynamicIslandUploadProgressTracker: ObservableObject {
     static let photoAssetPredicate = NSPredicate(format: "rawType = %@", argumentArray: [UploadFileType.phAsset.rawValue])
     static let globalAssetPredicate = NSPredicate(format: "rawType != %@", argumentArray: [UploadFileType.phAsset.rawValue])
 
-    init() {
-        setupQueueActivityObservation()
+    nonisolated init() {
+        DispatchQueue.main.async {
+            self.setupQueueActivityObservation()
+        }
     }
 
     private func setupQueueActivityObservation() {

@@ -34,11 +34,10 @@ public class DynamicIslandService: DynamicIslandServiceable {
     private let taskIdentifier = "com.infomaniak.drive.background-upload-dynamic-island"
     private static let logger = Logger(category: "DynamicIslandService")
 
-    private var currentTask: BGContinuedProcessingTask?
-    private var uploadContinuationBox: ContinuationBox?
-    private var lastError: Error?
+    @MainActor private var currentTask: BGContinuedProcessingTask?
+    @MainActor private var uploadContinuationBox: DynamicIslandTaskCompletion?
 
-    private var taskHandlingTask: Task<Void, Never>?
+    @MainActor private var taskHandlingTask: Task<Void, Never>?
     private var hasRegisteredLaunchHandler = false
     private let registrationQueue = DispatchQueue(label: "com.infomaniak.drive.dynamic-island-service.registration")
 
@@ -52,7 +51,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
             taskScheduler.register(forTaskWithIdentifier: taskIdentifier, using: nil) { [weak self] task in
                 guard let self, let task = task as? BGContinuedProcessingTask else { return }
-                taskHandlingTask = Task { self.handle(task: task) }
+                DispatchQueue.main.async {
+                    self.handle(task: task)
+                }
             }
 
             hasRegisteredLaunchHandler = true
@@ -60,6 +61,12 @@ public class DynamicIslandService: DynamicIslandServiceable {
     }
 
     public func submitTask() {
+        DispatchQueue.main.async {
+            self.submitTaskOnMain()
+        }
+    }
+
+    @MainActor private func submitTaskOnMain() {
         guard currentTask == nil else {
             Self.logger.info("Task already in progress, skipping submit")
             return
@@ -83,49 +90,63 @@ public class DynamicIslandService: DynamicIslandServiceable {
     public func cancelTaskError(_ error: Error) {
         Self.logger.error("Uploading error in task: \(error)")
 
-        lastError = error
-        uploadContinuationBox?.resume(throwing: error)
-        uploadContinuationBox = nil
+        DispatchQueue.main.async {
+            self.uploadContinuationBox?.complete(with: .failure(error))
+        }
     }
 
-    private func handleExpiration() {
+    @MainActor private func handleExpiration(completion: DynamicIslandTaskCompletion) {
+        guard uploadContinuationBox === completion, completion.result == nil else { return }
         Self.logger.error("Handling task expiration")
         uploadService.suspendAllOperations()
-        uploadContinuationBox?.resume(throwing: DomainError.expiredTask)
-        uploadContinuationBox = nil
+        completion.complete(with: .failure(DomainError.expiredTask))
     }
 
     public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
-        uploadProgressTracker.updateQueueActivity(
-            globalQueueActive: globalQueueActive,
-            photoQueueActive: photoQueueActive
-        )
+        DispatchQueue.main.async {
+            self.uploadProgressTracker.updateQueueActivity(
+                globalQueueActive: globalQueueActive,
+                photoQueueActive: photoQueueActive
+            )
 
-        if globalQueueActive || photoQueueActive {
-            submitTask()
+            if globalQueueActive || photoQueueActive {
+                self.submitTaskOnMain()
+            }
         }
     }
 
-    private func handle(task: BGContinuedProcessingTask) {
-        lastError = nil
+    @MainActor private func handle(task: BGContinuedProcessingTask) {
+        guard currentTask == nil else {
+            task.setTaskCompleted(success: false)
+            return
+        }
+        let completion = DynamicIslandTaskCompletion()
+        uploadContinuationBox = completion
         currentTask = task
 
         task.expirationHandler = { [weak self] in
-            guard let self else { return }
-            self.handleExpiration()
+            DispatchQueue.main.async {
+                self?.handleExpiration(completion: completion)
+            }
         }
 
-        Task {
+        taskHandlingTask = Task { @MainActor in
             var cancellable: AnyCancellable?
             defer {
                 cancellable?.cancel()
-                let isExpiredTask = (self.lastError as? DomainError) == .expiredTask
+                let isExpiredTask: Bool
+                if case .failure(let error) = completion.result {
+                    isExpiredTask = (error as? DomainError) == .expiredTask
+                } else {
+                    isExpiredTask = false
+                }
                 if !isExpiredTask {
                     uploadProgressTracker.reset()
                 }
                 currentTask = nil
                 uploadContinuationBox = nil
-                lastError = nil
+                task.expirationHandler = nil
+                taskHandlingTask = nil
             }
             task.progress.totalUnitCount = 100
 
@@ -139,11 +160,13 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
             do {
                 try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
-                    let box = ContinuationBox(continuation)
-                    self.uploadContinuationBox = box
+                    completion.install(continuation)
+                    guard completion.result == nil else { return }
 
                     uploadService.waitForCompletionForActiveQueues {
-                        box.resume()
+                        DispatchQueue.main.async {
+                            completion.complete(with: .success(()))
+                        }
                     }
                 }
 
@@ -217,26 +240,6 @@ public class DynamicIslandService: DynamicIslandServiceable {
             KDriveResourcesStrings.Localizable.errorTitle,
             KDriveResourcesStrings.Localizable.openAppToContinue
         )
-    }
-}
-
-private final class ContinuationBox: @unchecked Sendable {
-    private var continuation: CheckedContinuation<Void, any Error>?
-
-    init(_ continuation: CheckedContinuation<Void, any Error>) {
-        self.continuation = continuation
-    }
-
-    func resume() {
-        guard let c = continuation else { return }
-        continuation = nil
-        c.resume()
-    }
-
-    func resume(throwing error: Error) {
-        guard let c = continuation else { return }
-        continuation = nil
-        c.resume(throwing: error)
     }
 }
 
