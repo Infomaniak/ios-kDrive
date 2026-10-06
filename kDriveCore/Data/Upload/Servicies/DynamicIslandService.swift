@@ -142,7 +142,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
                     let box = ContinuationBox(continuation)
                     self.uploadContinuationBox = box
 
-                    uploadProgressTracker.uploadService.waitForCompletionForActiveQueues {
+                    uploadService.waitForCompletionForActiveQueues {
                         box.resume()
                     }
                 }
