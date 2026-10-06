@@ -92,18 +92,18 @@ public struct FileProviderService: FileProviderServiceable {
             .resolvingSymlinksInPath()
             .pathComponents
 
-        var currentURL = itemURL
+        var currentURL = itemURL.resolvingSymlinksInPath()
         var identifier: String?
 
-        while currentURL.resolvingSymlinksInPath().pathComponents != rootComponents {
-            let parentURL = currentURL.deletingLastPathComponent()
+        while currentURL.pathComponents != rootComponents {
+            let parentURL = currentURL.deletingLastPathComponent().resolvingSymlinksInPath()
 
             guard parentURL.pathComponents != currentURL.pathComponents else {
                 return nil
             }
 
             identifier = currentURL.lastPathComponent
-            currentURL = parentURL
+            currentURL = parentURL.resolvingSymlinksInPath()
         }
 
         guard let identifier else { return .rootContainer }

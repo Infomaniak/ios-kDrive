@@ -110,4 +110,64 @@ final class UTFileProviderServiceIdentifier: XCTestCase {
         // THEN standardization collapses `subfolder/..`, keeping the top-level identifier
         XCTAssertEqual(identifier, NSFileProviderItemIdentifier("42"))
     }
+
+    func testURLTraversingSymlinkOutsideStorageReturnsNil() throws {
+        // GIVEN an item directory inside storage and a sibling directory outside it
+        let fileManager = FileManager.default
+        let itemIdentifier = UUID().uuidString
+
+        let itemDirectoryURL = rootStorageURL
+            .appendingPathComponent(itemIdentifier, isDirectory: true)
+
+        let outsideDirectoryURL = rootStorageURL
+            .deletingLastPathComponent()
+            .appendingPathComponent(
+                "outside-\(UUID().uuidString)",
+                isDirectory: true
+            )
+
+        defer {
+            try? fileManager.removeItem(at: itemDirectoryURL)
+            try? fileManager.removeItem(at: outsideDirectoryURL)
+        }
+
+        try fileManager.createDirectory(
+            at: itemDirectoryURL,
+            withIntermediateDirectories: true
+        )
+        try fileManager.createDirectory(
+            at: outsideDirectoryURL,
+            withIntermediateDirectories: true
+        )
+
+        let outsideFileURL = outsideDirectoryURL
+            .appendingPathComponent("private-file.txt", isDirectory: false)
+
+        let outsideContent = Data("Content outside provider storage".utf8)
+        try outsideContent.write(to: outsideFileURL)
+
+        // A symbolic link inside the item directory pointing outside storage
+        let linkURL = itemDirectoryURL
+            .appendingPathComponent("link", isDirectory: false)
+
+        try fileManager.createSymbolicLink(
+            at: linkURL,
+            withDestinationURL: outsideDirectoryURL
+        )
+
+        let itemURL = linkURL
+            .appendingPathComponent("private-file.txt", isDirectory: false)
+
+        // Verify that reading through the link reaches the external file
+        XCTAssertEqual(try Data(contentsOf: itemURL), outsideContent)
+
+        // WHEN
+        let identifier = fileProviderService.identifier(
+            for: itemURL,
+            domain: nil
+        )
+
+        // THEN a path targeting content outside storage must be rejected
+        XCTAssertNil(identifier)
+    }
 }
