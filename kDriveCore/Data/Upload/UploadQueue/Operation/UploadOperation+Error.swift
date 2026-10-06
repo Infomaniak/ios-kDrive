@@ -130,6 +130,7 @@ extension UploadOperation {
             // Not enough space
             else if case .notEnoughSpace = error as? FreeSpaceService.StorageIssues {
                 self.uploadService.suspendAllOperations()
+                self.dynamicIslandService.cancelTaskError(error)
                 file.maxRetryCount = 0
                 file.progress = nil
                 file.error = .errorDeviceStorage.wrapping(error)
@@ -218,12 +219,14 @@ extension UploadOperation {
                 // We stop and hope the maintenance is finished at next execution
                 file.error = error
                 self.uploadService.suspendAllOperations()
+                self.dynamicIslandService.cancelTaskError(error)
 
             case .quotaExceeded:
                 file.error = .quotaExceeded.wrapping(error)
                 file.maxRetryCount = 0
                 file.progress = nil
                 self.uploadService.suspendAllOperations()
+                self.dynamicIslandService.cancelTaskError(error)
 
             case .uploadNotTerminatedError,
                  .uploadNotTerminated:
@@ -399,5 +402,7 @@ extension UploadOperation {
 
 /// Provide a useable debug output of `ApiError`
 extension ApiError: CustomDebugStringConvertible {
-    public var debugDescription: String { "<ApiError: code:\(code) description:\(description)>" }
+    public var debugDescription: String {
+        "<ApiError: code:\(code) description:\(description)>"
+    }
 }

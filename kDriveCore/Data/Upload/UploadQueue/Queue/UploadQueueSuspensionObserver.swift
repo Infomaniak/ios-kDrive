@@ -27,11 +27,11 @@ public final class UploadQueueSuspensionObserver {
     )
 
     var uploadQueue: UploadQueue
-    weak var delegate: UploadQueueDelegate?
+    weak var queueStateDelegate: UploadQueueStateDelegate?
 
-    init(uploadQueue: UploadQueue, delegate: UploadQueueDelegate?) {
+    init(uploadQueue: UploadQueue, queueStateDelegate: UploadQueueStateDelegate?) {
         self.uploadQueue = uploadQueue
-        self.delegate = delegate
+        self.queueStateDelegate = queueStateDelegate
 
         setupObservation()
     }
@@ -51,19 +51,19 @@ public final class UploadQueueSuspensionObserver {
         }
 
         guard let previousIsSuspend else {
-            delegate?.operationQueueNoLongerSuspended()
+            queueStateDelegate?.operationQueueNoLongerSuspended()
             if currentIsSuspend {
-                delegate?.operationQueueBecameSuspended()
+                queueStateDelegate?.operationQueueBecameSuspended()
             } else {
-                delegate?.operationQueueNoLongerSuspended()
+                queueStateDelegate?.operationQueueNoLongerSuspended()
             }
             return
         }
 
         if currentIsSuspend {
-            delegate?.operationQueueBecameSuspended()
+            queueStateDelegate?.operationQueueBecameSuspended()
         } else if previousIsSuspend && !currentIsSuspend {
-            delegate?.operationQueueNoLongerSuspended()
+            queueStateDelegate?.operationQueueNoLongerSuspended()
         }
     }
 }

@@ -204,6 +204,11 @@ private final class IntentUploadDataSource: UploadServiceDataSourceable {
         return nil
     }
 
+    func saveToRealm(_ uploadFile: UploadFile, itemIdentifier: NSFileProviderItemIdentifier?,
+                     addToQueue: Bool, writeExpiringActivity: Bool) -> UploadOperationable? {
+        saveToRealm(uploadFile, itemIdentifier: itemIdentifier, addToQueue: addToQueue)
+    }
+
     func getAllUploadingFilesFrozen() -> Results<UploadFile> {
         database.fetchResults(ofType: UploadFile.self) { $0.filter("uploadDate == nil").freeze() }
     }
@@ -222,6 +227,12 @@ private final class IntentUploadDataSource: UploadServiceDataSourceable {
 
     func getUploadingFiles(userId: Int, driveIds: [Int]) -> Results<UploadFile> {
         getAllUploadingFilesFrozen().filter("userId == %d AND driveId IN %@", userId, driveIds)
+    }
+
+    func getUploadingFiles(optionalPredicate: NSPredicate?) -> Results<UploadFile> {
+        database.fetchResults(ofType: UploadFile.self) {
+            $0.filter("uploadDate == nil").filter(optionalPredicate: optionalPredicate)
+        }
     }
 
     func getUploadedFiles(optionalPredicate: NSPredicate?) -> Results<UploadFile> {

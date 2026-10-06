@@ -34,6 +34,8 @@ public protocol UploadQueueable {
 
     func waitForCompletion(_ completionHandler: @escaping () -> Void)
 
+    func waitForCompletionIsActive(_ completionHandler: @escaping () -> Void)
+
     func cancelAllOperations(uploadingFilesIds: [String])
 
     func cancelAllOperations()
@@ -57,6 +59,8 @@ public protocol UploadQueueable {
     var isSuspended: Bool { get }
 
     var isActive: Bool { get }
+
+    var runningUploadOperations: [UploadOperation] { get }
 
     var fileUploadedCount: Int { get set }
 

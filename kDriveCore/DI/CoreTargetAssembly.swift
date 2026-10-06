@@ -138,6 +138,16 @@ open class CoreTargetAssembly: TargetAssembly {
             Factory(type: UploadServiceable.self) { _, _ in
                 UploadService()
             },
+            Factory(type: DynamicIslandServiceable.self) { _, _ in
+                if #available(iOS 26.0, *) {
+                    DynamicIslandService()
+                } else {
+                    UnavailableDynamicIslandService()
+                }
+            },
+            Factory(type: DynamicIslandUploadProgressTracker.self) { _, _ in
+                DynamicIslandUploadProgressTracker()
+            },
             Factory(type: UploadServiceDataSourceable.self) { _, resolver in
                 try resolver.resolve(type: UploadServiceable.self,
                                      forCustomTypeIdentifier: nil,
@@ -162,7 +172,7 @@ open class CoreTargetAssembly: TargetAssembly {
                                      factoryParameters: nil,
                                      resolver: resolver)
             },
-            Factory(type: UploadQueueDelegate.self) { _, _ in
+            Factory(type: UploadQueueStateDelegate.self) { _, _ in
                 UploadParallelismOrchestrator()
             },
             Factory(type: BGTaskScheduler.self) { _, _ in
@@ -298,21 +308,21 @@ open class CoreTargetAssembly: TargetAssembly {
 
     static var uploadQueues: [FactoryWithIdentifier] {
         let globalUploadQueue = Factory(type: UploadQueueable.self) { _, resolver in
-            let uploadQueueDelegate = try resolver.resolve(type: UploadQueueDelegate.self,
-                                                           forCustomTypeIdentifier: nil,
-                                                           factoryParameters: nil,
-                                                           resolver: resolver)
+            let queueCoordinationDelegate = try resolver.resolve(type: UploadQueueStateDelegate.self,
+                                                                 forCustomTypeIdentifier: nil,
+                                                                 factoryParameters: nil,
+                                                                 resolver: resolver)
 
-            return UploadQueue(delegate: uploadQueueDelegate)
+            return UploadQueue(queueCoordinationDelegate: queueCoordinationDelegate)
         }
 
         let photoUploadQueue = Factory(type: UploadQueueable.self) { _, resolver in
-            let uploadQueueDelegate = try resolver.resolve(type: UploadQueueDelegate.self,
-                                                           forCustomTypeIdentifier: nil,
-                                                           factoryParameters: nil,
-                                                           resolver: resolver)
+            let queueCoordinationDelegate = try resolver.resolve(type: UploadQueueStateDelegate.self,
+                                                                 forCustomTypeIdentifier: nil,
+                                                                 factoryParameters: nil,
+                                                                 resolver: resolver)
 
-            return PhotoUploadQueue(delegate: uploadQueueDelegate)
+            return PhotoUploadQueue(queueCoordinationDelegate: queueCoordinationDelegate)
         }
 
         return [

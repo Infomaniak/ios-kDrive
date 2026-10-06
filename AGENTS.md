@@ -73,6 +73,9 @@ ios-kDrive/
 │   │   ├── DownloadQueue/       #   Download management
 │   │   │   └── BackgroundDownloadSessionManager.swift
 │   │   ├── Upload/              #   Upload management
+│   │   │   ├── UploadBackgroundActivity.swift  # Shared upload background protection and expiration cleanup
+│   │   │   ├── DynamicIslandTaskCompletion.swift  # Main-owned, exactly-once background task completion
+│   │   │   ├── DynamicIslandUploadProgressTracker.swift  # Main-isolated upload progress observation
 │   │   │   ├── Servicies/        #     Upload service, photo scanning/sync, storage cleanup
 │   │   │   └── Services/
 │   │   │       └── BackgroundUploadSessionManager.swift
@@ -158,6 +161,7 @@ tuist test # Or via Xcode Test Navigator
 - **Max line width:** 130 characters.
 - **Indentation:** 4 spaces, LF line endings.
 - **Imports:** Alphabetical grouping, blank line after imports.
+- **Documentation:** Prefer `///` documentation above protocol declarations to explain their contract and delegate roles. Document stable responsibilities and guarantees, not "current behavior" or temporary implementation details that may quickly change. Keep comments inside implementations sparse; avoid repeating those explanations on stored properties or obvious code.
 - **SwiftUI (when used):** Property wrappers must be private (`@State`, `@StateObject`, etc.).
 - **Localized strings:** Use localized string keys from `kDriveResources` — never raw string literals.
 - **DI:** Use `@InjectService` from InfomaniakDI for dependency injection; register via `FactoryService` in kDriveCore.

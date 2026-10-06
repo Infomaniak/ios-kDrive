@@ -21,6 +21,18 @@ import InfomaniakCore
 
 extension UploadOperation: ExpiringActivityDelegate {
     public func backgroundActivityExpiring() {
+        rescheduleForBackgroundExpiration(notifyPaused: true) {}
+    }
+
+    func rescheduleForBackgroundExpiration() async {
+        await withCheckedContinuation { continuation in
+            rescheduleForBackgroundExpiration(notifyPaused: false) {
+                continuation.resume()
+            }
+        }
+    }
+
+    private func rescheduleForBackgroundExpiration(notifyPaused: Bool, completion: @escaping () -> Void) {
         Log.uploadOperation("backgroundActivityExpiring ufid:\(uploadFileId)")
         SentryDebug.uploadOperationBackgroundExpiringBreadcrumb(uploadFileId)
 
@@ -29,51 +41,56 @@ extension UploadOperation: ExpiringActivityDelegate {
         var cancelIterator = uploadTasks.makeIterator()
 
         // Schedule a db transaction to set .taskRescheduled error on chunks
-        enqueueCatching {
-            try self.transactionWithFile { file in
-                file.error = .taskRescheduled
-                Log
-                    .uploadOperation(
-                        "Rescheduling didReschedule .taskRescheduled uploadTasks:\(self.uploadTasks) ufid:\(self.uploadFileId)"
-                    )
-
-                // Make sure the main app can continue the upload next retry.
-                file.ownedByFileProvider = false
-
-                // Mark all chunks in base with a .taskRescheduled error
-                var iterator = self.uploadTasks.makeIterator()
-                try self.cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
-
-                while let (taskIdentifier, _) = rescheduleIterator.next() {
-                    // Match chunk in base and set error to .taskRescheduled
-                    let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(
-                        format: "taskIdentifier = %@",
-                        taskIdentifier
-                    )).first
-
-                    if let chunkTasksToClean {
-                        chunkTasksToClean.error = .taskRescheduled
-                    } else {
-                        Log.uploadOperation(
-                            "Unable to match chunk to reschedule for identifier:\(taskIdentifier) ufid:\(self.uploadFileId)",
-                            level: .error
+        enqueue {
+            await self.catching {
+                try self.transactionWithFile { file in
+                    file.error = .taskRescheduled
+                    Log
+                        .uploadOperation(
+                            "Rescheduling didReschedule .taskRescheduled uploadTasks:\(self.uploadTasks) ufid:\(self.uploadFileId)"
                         )
+
+                    // Make sure the main app can continue the upload next retry.
+                    file.ownedByFileProvider = false
+
+                    // Mark all chunks in base with a .taskRescheduled error
+                    var iterator = self.uploadTasks.makeIterator()
+                    try self.cleanUploadSessionUploadTaskNotUploading(iterator: &iterator)
+
+                    while let (taskIdentifier, _) = rescheduleIterator.next() {
+                        // Match chunk in base and set error to .taskRescheduled
+                        let chunkTasksToClean = file.uploadingSession?.chunkTasks.filter(NSPredicate(
+                            format: "taskIdentifier = %@",
+                            taskIdentifier
+                        )).first
+
+                        if let chunkTasksToClean {
+                            chunkTasksToClean.error = .taskRescheduled
+                        } else {
+                            Log.uploadOperation(
+                                "Unable to match chunk to reschedule for identifier:\(taskIdentifier) ufid:\(self.uploadFileId)",
+                                level: .error
+                            )
+                        }
                     }
+
+                    // Sentry
+                    let metadata = ["File id": self.uploadFileId,
+                                    "File size": file.size,
+                                    "File type": file.type.rawValue]
+                    SentryDebug.uploadOperationRescheduledBreadcrumb(self.uploadFileId, metadata)
                 }
 
-                // Sentry
-                let metadata = ["File id": self.uploadFileId,
-                                "File size": file.size,
-                                "File type": file.type.rawValue]
-                SentryDebug.uploadOperationRescheduledBreadcrumb(self.uploadFileId, metadata)
+                if notifyPaused {
+                    self.uploadNotifiable.sendPausedNotificationIfNeeded()
+                }
+
+                // each and all operations should be given the chance to call backgroundActivityExpiring
+                self.end()
+
+                Log.uploadOperation("Rescheduling end ufid:\(self.uploadFileId)")
             }
-
-            self.uploadNotifiable.sendPausedNotificationIfNeeded()
-
-            // each and all operations should be given the chance to call backgroundActivityExpiring
-            self.end()
-
-            Log.uploadOperation("Rescheduling end ufid:\(self.uploadFileId)")
+            completion()
         }
 
         // Cancel all chunk network requests ASAP

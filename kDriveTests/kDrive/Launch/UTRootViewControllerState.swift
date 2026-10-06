@@ -62,6 +62,9 @@ final class UTRootViewControllerState: XCTestCase {
             Factory(type: UploadServiceable.self) { _, _ in
                 UploadService()
             },
+            Factory(type: DynamicIslandUploadProgressTracker.self) { _, _ in
+                DynamicIslandUploadProgressTracker()
+            },
             Factory(type: DownloadQueueable.self) { _, _ in
                 DownloadQueue()
             },

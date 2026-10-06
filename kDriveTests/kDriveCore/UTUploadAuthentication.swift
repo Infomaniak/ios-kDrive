@@ -62,8 +62,8 @@ final class UTUploadAuthentication {
         SimpleResolver.sharedResolver.store(factory: Factory(type: UploadPublishable.self) { _, _ in
             SilentUploadPublisher()
         })
-        globalQueue = SuspendedUploadQueue(delegate: nil)
-        photoQueue = SuspendedUploadQueue(delegate: nil)
+        globalQueue = SuspendedUploadQueue(queueCoordinationDelegate: nil)
+        photoQueue = SuspendedUploadQueue(queueCoordinationDelegate: nil)
         SimpleResolver.sharedResolver.store(factory: Factory(type: UploadQueueable.self) { [globalQueue] _, _ in
             globalQueue!
         }, forCustomTypeIdentifier: UploadQueueID.global)

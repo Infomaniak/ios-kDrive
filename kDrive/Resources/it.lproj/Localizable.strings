@@ -775,6 +775,12 @@
 /* loco:618b829ad715f5111e3632c2 */
 "dropboxSharedLinkTitle" = "Link di condivisione Dropbox";
 
+/* loco:6a2a765d0994de2f3f095e92 */
+"dynamicIslandPreparationTitle" = "Preparazione…";
+
+/* loco:6a2a782cb5186cdd19002bd2 */
+"dynamicIslandUploadSuccessful" = "Caricamento completato con successo: %d/%d";
+
 /* loco:61695f6e3f0ee123d2250692 */
 "editCategoryInfoDescription" = "La modifica sarà visibile a tutti gli utenti del kDrive che hanno accesso alle categorie.";
 
@@ -903,6 +909,9 @@
 
 /* loco:6569aef523dcf4dc2a0f5c92 */
 "errorWrongPassword" = "Password errata";
+
+/* loco:6a2a79154feaf554c0020962 */
+"exceedQuotaTitle" = "Quota superata";
 
 /* loco:6049df4d5c2c3a04bc3979a9 */
 "favoritesNoFile" = "Al momento non sono disponibili preferiti";
@@ -1303,6 +1312,12 @@
 /* loco:617b99510ec1ee7d7e2accd2 */
 "inputExpirationTime" = "Tempo di scadenza";
 
+/* loco:6a2a7acf5a2fec6b940785b2 */
+"insufficientSpaceDescription" = "Fai un po’ di spazio";
+
+/* loco:6a2a7a5f1dc6dc2d210f4ea4 */
+"insufficientSpaceTitle" = "Spazio insufficiente";
+
 /* loco:6a9a68f38cdf25fae40adb63 */
 "itemLabel" = "Elemento";
 
@@ -1326,6 +1341,9 @@
 
 /* loco:67f509c180ba041c690a8e02 */
 "maintenanceAsleepTitle" = "Il tuo kDrive %@ ha fatto un riposino!";
+
+/* loco:6a2a79b7bdb4d0e90a02bfc4 */
+"maintenanceTitle" = "Manutenzione";
 
 /* loco:67f50e36f46a2825af088213 */
 "maintenanceWakeUpButton" = "Riavvia il mio kDrive";
@@ -1584,6 +1602,9 @@
 
 /* loco:6049df4d5c2c3a04bc397a21 */
 "onBoardingTitle3" = "Salva i tuoi ricordi in modo sicuro";
+
+/* loco:6a2a78ccb80096108403dcd2 */
+"openAppToContinue" = "Apri l’app per continuare";
 
 /* loco:6660083917d29585d5010582 */
 "openInPlaceDirectory" = "Aprire in posizione";
@@ -2104,8 +2125,20 @@
 /* loco:614c87dd3af1ff4501490ec5 */
 "tempDirectory" = "File temporanei";
 
+/* loco:60a65b76f8bf9002e9594852 */
+"themeSettingsDarkLabel" = "Scuro";
+
+/* loco:60a65b617652427d20367cc4 */
+"themeSettingsLightLabel" = "Chiaro";
+
 /* loco:60a65ba139d35536f858f4f2 */
 "themeSettingsSystemDefaultLabel" = "Impostazione predefinita del sistema";
+
+/* loco:60a65bbd7652427d20367cc6 */
+"themeSettingsSystemLabel" = "Sistema";
+
+/* loco:60a65b3df229b924e419f452 */
+"themeSettingsTitle" = "Tema";
 
 /* loco:614c8841083c4c6d41454f55 */
 "totalStorageUsedTitle" = "Memoria totale utilizzata";
@@ -2151,6 +2184,9 @@
 
 /* loco:69bcfe53aed2af87a302d467 */
 "trashedFileRestoreFileToOriginalPlaceSuccess-plural-3" = "";
+
+/* loco:6a2a7a248dcf552aa702ad43 */
+"tryAgainLater" = "Prova più tardi";
 
 /* loco:66fe3560501931dbfb04f0c8 */
 "unknownArtist" = "Artista sconosciuto";
@@ -2212,6 +2248,9 @@
 /* loco:6049df4d5c2c3a04bc397a86 */
 "uploadInProgressRestartUploadTitle" = "Rilancia le importazioni";
 
+/* loco:6a2a7751b7cc09a6da053fc2 */
+"uploadInProgressSubTitle" = "Progresso %d%%";
+
 /* loco:6049df4d5c2c3a04bc397a87 */
 "uploadInProgressTitle" = "Importazione in corso";
 
@@ -2238,6 +2277,9 @@
 
 /* loco:60928fb3063e352b1e028476 */
 "uploadPausedTitle" = "Pausa importazione";
+
+/* loco:6a2a73b3d69b30963b02d5b2 */
+"uploadingTitle" = "Caricamento";
 
 /* loco:65df0b66eb1209e60f0ff4b5 */
 "urlUserReportiOS" = "https://feedback.userreport.com/b1992919-c53a-4935-bb15-22f8c57c1446/";
