@@ -184,6 +184,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private lazy var dataSource: MenuDataSource = configureDataSource(for: collectionView)
     private let refreshControl = UIRefreshControl()
 
+    #if !ISEXTENSION
+    private var mediaHelper: OpenMediaHelper?
+    #endif
+
     private lazy var addButton: UIButton = {
         var imageButtonConfiguration = UIButton.Configuration.filled()
         imageButtonConfiguration.image = UIImage(
@@ -424,6 +428,17 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 }
             }
         }
+
+        if #available(iOS 27.1, *) {
+            #if !ISEXTENSION
+            installHingePinnedPlusButton(
+                driveFileManager: driveFileManager,
+                currentFolder: driveFileManager.getCachedMyFilesRoot()
+            ) { [weak self] panel in
+                self?.mediaHelper = panel.mediaHelper
+            }
+            #endif
+        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -492,11 +507,10 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
     private static func generateProfileTabImages(image: UIImage) -> (UIImage) {
         let iconSize = UIConstants.Button.profileImageSize
 
-        let image = image
+        return image
             .resize(size: CGSize(width: iconSize, height: iconSize))
             .maskImageWithRoundedRect(cornerRadius: CGFloat(iconSize / 2), borderWidth: 0, borderColor: nil)
             .withRenderingMode(.alwaysOriginal)
-        return image
     }
 
     func setItemsSnapshot(for: UICollectionView) {
@@ -553,7 +567,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                 cell.contentConfiguration = content
                 cell.accessories = item.isHeader ? [
                     .outlineDisclosure(
-                        options: .init(style: .header),
+                        options: .init(style: .header)
                     )
                 ] : []
                 cell.indentationLevel = 0
@@ -745,8 +759,7 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
             return section
         }
 
-        let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
-        return layout
+        return UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: configuration)
     }
 
     @objc func presentSearch() {

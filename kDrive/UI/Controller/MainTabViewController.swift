@@ -289,6 +289,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     private var buttonAdd: UIButton?
     private var mediaHelper: OpenMediaHelper?
+    private(set) var isHingeClosed = false
 
     var legacyTabBarActive: Bool {
         if #available(iOS 26.0, *) {
@@ -343,6 +344,18 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
         delegate = self
         photoPickerDelegate.viewController = self
+
+        if #available(iOS 27.1, *) {
+            view.addInteraction(UIHingeInteraction { [weak self] _, update in
+                guard let self,
+                      let hinge = update.hinge,
+                      hinge.status != .unknown
+                else {
+                    return
+                }
+                isHingeClosed = hinge.status == .closed
+            })
+        }
     }
 
     override func viewWillLayoutSubviews() {
@@ -594,7 +607,8 @@ extension MainTabViewController: MainTabBarDelegate {
         guard let currentDirectory else { return }
 
         let fromFileList = (selectedViewController as? UINavigationController)?.topViewController is FileListViewController
-        let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
+
+        let plusButtonFloatingPanel = presentPlusButtonPanel(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectory,
             presentedAboveFileList: fromFileList
@@ -602,7 +616,6 @@ extension MainTabViewController: MainTabBarDelegate {
 
         mediaHelper = plusButtonFloatingPanel.mediaHelper
 
-        present(plusButtonFloatingPanel, animated: true)
     }
 
     func avatarLongTouch() {
