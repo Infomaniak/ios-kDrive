@@ -144,6 +144,29 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         if #available(iOS 18.4, *), !driveFileManager.isPublicShare {
             collectionView.appIntentsDataSource = self
         }
+
+        if #available(iOS 27.1, *) {
+            let isInsideSearchNavigationStack: Bool = {
+                self.navigationController?.viewControllers.contains { $0 is SearchViewController } == true
+            }()
+            guard viewModel.currentDirectory.id >= DriveFileManager.constants.rootID,
+                  !viewModel.currentDirectory.isTrashed,
+                  viewModel.currentDirectory.capabilities.canCreateFile,
+                  !isInsideSearchNavigationStack
+            else {
+                return
+            }
+
+            #if !ISEXTENSION
+            installHingePinnedPlusButton(
+                driveFileManager: driveFileManager,
+                currentFolder: viewModel.currentDirectory,
+                presentedAboveFileList: true
+            ) { [weak self] panel in
+                self?.mediaHelper = panel.mediaHelper
+            }
+            #endif
+        }
     }
 
     open func setUpHeaderView(_ headerView: FilesHeaderView, isEmptyViewHidden: Bool) {
@@ -606,7 +629,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             UIAction(
                 title: action.name,
                 image: action.image,
-                attributes: action.isEnabled ? [] : .disabled,
+                attributes: action.isEnabled ? [] : .disabled
             ) { _ in
                 fileInformationsViewController.handleAction(action, at: indexPath, isFromMenu: true)
             }

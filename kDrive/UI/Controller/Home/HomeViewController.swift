@@ -154,6 +154,8 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
     private var uploadCount = 0
     private var isNetworkOffline = false
 
+    private var mediaHelper: OpenMediaHelper?
+
     init(driveFileManager: DriveFileManager) {
         self.driveFileManager = driveFileManager
         super.init(collectionViewLayout: .init())
@@ -197,6 +199,15 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
         initRecentActivitiesController()
         observeUploadCount()
+
+        if #available(iOS 27.1, *) {
+            installHingePinnedPlusButton(
+                driveFileManager: driveFileManager,
+                currentFolder: driveFileManager.getCachedMyFilesRoot()
+            ) { [weak self] panel in
+                self?.mediaHelper = panel.mediaHelper
+            }
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
