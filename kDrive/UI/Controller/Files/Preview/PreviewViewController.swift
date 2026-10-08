@@ -80,7 +80,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private var backgroundExtensionView: UIView?
     private var backgroundExtensionImageView: UIImageView?
+
+    private var isSidebarVisible: Bool {
+        guard let splitViewController = splitViewController else { return false }
+        switch splitViewController.displayMode {
+        case .oneBesideSecondary, .oneOverSecondary, .twoBesideSecondary, .twoOverSecondary, .twoDisplaceSecondary:
+            return true
+        default:
+            return false
+        }
+    }
 
     private func setupBackgroundExtensionView() {
         guard #available(iOS 26.0, *) else { return }
@@ -111,6 +122,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             imageView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
         ])
 
+        backgroundExtensionView = extensionView
         backgroundExtensionImageView = imageView
         updateBackgroundExtensionForCurrentFile()
     }
@@ -146,7 +158,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             guard let self,
                   let oldSize = change.oldValue?.size,
                   oldSize != collectionView.bounds.size else { return }
-            self.indexBeforeBoundsChange = self.currentIndex
+            self.indexBeforeBoundsChange = self.indexBeforeBoundsChange ?? self.currentIndex
         }
 
         fileInformationsViewController = FileActionsFloatingPanelViewController(
@@ -191,8 +203,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
         configuration.scrollDirection = .horizontal
         configuration.contentInsetsReference = .none
-        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
-        return layout
+        return UICollectionViewCompositionalLayout(section: section, configuration: configuration)
     }
 
     private func updateBackgroundExtensionForCurrentFile() {
@@ -399,6 +410,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         let centerIndexPathBeforeRotate = currentIndex
+        indexBeforeBoundsChange = indexBeforeBoundsChange ?? centerIndexPathBeforeRotate
         coordinator.animate { _ in
             self.collectionView.scrollToItem(at: centerIndexPathBeforeRotate, at: .centeredVertically, animated: false)
         }
@@ -418,17 +430,50 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        backgroundExtensionView?.alpha = isSidebarVisible ? 1 : 0
+        if #available(iOS 27.1, *) {
+            updatePreviewViewPort()
+        }
+    }
+
+    @available(iOS 27.1, *)
+    private func updatePreviewViewPort() {
+        let respectsLeadingSafeArea = traitCollection.horizontalSizeClass == .regular
+        let collectionViewLeadingConstraint = view.constraints.first {
+            $0.firstItem === collectionView && $0.firstAttribute == .leading
+        }
+
+        var leftConstraint = view.safeAreaInsets.left
+
+        let referenceView: UIView = splitViewController?.view ?? view
+        let division = referenceView.reservedRegions(kind: .division).first { region in
+            let frame = region.frame
+            return region.isActive && frame.width > 0 && frame.height > 0
+        }
+
+        if let division {
+            let frame = referenceView.convert(division.frame, to: view)
+
+            leftConstraint = frame.midX - view.bounds.minX
+        }
+
+        collectionViewLeadingConstraint?.constant = respectsLeadingSafeArea ? leftConstraint : 0
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if shouldScrollToCurrentIndex {
             collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
+            indexBeforeBoundsChange = nil
             shouldScrollToCurrentIndex = false
         } else if let indexPath = indexBeforeBoundsChange {
-            indexBeforeBoundsChange = nil
             let wasPagingEnabled = collectionView.isPagingEnabled
             collectionView.isPagingEnabled = false
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
             collectionView.isPagingEnabled = wasPagingEnabled
+            indexBeforeBoundsChange = nil
         }
 
         updateSheetContainerFrameIfNeeded()
@@ -686,7 +731,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard let centerCellIndexPath = collectionView.indexPathForItem(at: view.convert(view.center, to: collectionView)),
+        let center = CGPoint(x: collectionView.bounds.midX, y: collectionView.bounds.midY)
+        guard !shouldScrollToCurrentIndex, indexBeforeBoundsChange == nil,
+              let centerCellIndexPath = collectionView.indexPathForItem(at: center),
               currentIndex != centerCellIndexPath else {
             return
         }
