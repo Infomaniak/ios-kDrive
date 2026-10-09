@@ -80,6 +80,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private let smallDetent = UISheetPresentationController.Detent.custom(
+        identifier: .init("smallDetent")
+    ) { _ in
+        75
+    }
+
     private var backgroundExtensionView: UIView?
     private var backgroundExtensionImageView: UIImageView?
     private var isBookPreviewLayout = false
@@ -275,8 +281,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        navigationController?.navigationBar.isHidden = true
-
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
         backButtonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.clear]
         backButtonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.clear]
@@ -379,7 +383,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         setFullscreen(false)
-        navigationController?.navigationBar.isHidden = false
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
@@ -673,7 +676,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func setFullscreen(_ fullscreen: Bool? = nil) {
-        if let value = fullscreen {
+        if isBookPreviewLayout {
+            fullScreenPreview = false
+            let hideBackButton = fullscreen ?? !navigationItem.hidesBackButton
+            navigationItem.setHidesBackButton(hideBackButton, animated: true)
+        } else if let value = fullscreen {
             fullScreenPreview = value
         } else {
             fullScreenPreview.toggle()
@@ -718,8 +725,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             let placement: UISheetPresentationController.Placement
             if isBookPreviewLayout {
                 placement = view.effectiveUserInterfaceLayoutDirection == .rightToLeft ? .trailing : .leading
+                sheet.detents = [.medium(), .large()]
             } else {
                 placement = .automatic
+                sheet.detents = [smallDetent, .medium(), .large()]
             }
             if sheet.preferredPlacement != placement {
                 updatePlacement = { sheet.preferredPlacement = placement }
@@ -768,11 +777,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         view.layoutIfNeeded()
 
-        let smallDetent = UISheetPresentationController.Detent.custom(
-            identifier: .init("smallDetent")
-        ) { _ in
-            75
-        }
         if let sheet = fileInformationsViewController.sheetPresentationController {
             let canExpand = presentationOrigin != .activities
             sheet.detents = canExpand ? [smallDetent, .medium(), .large()] : [.medium()]
