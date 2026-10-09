@@ -69,7 +69,7 @@ let package = Package(
         .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "10.2.0")),
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
         .package(url: "https://github.com/Infomaniak/ios-notifications", .upToNextMajor(from: "16.0.0")),
-        .package(url: "https://github.com/Infomaniak/ios-onboarding", branch: "fix/onboarding-display-on-iphone-duo"),
+        .package(url: "https://github.com/Infomaniak/ios-onboarding", .upToNextMajor(from: "1.5.0")),
         .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "18.0.0")),
         .package(url: "https://github.com/Infomaniak/LocalizeKit", .upToNextMajor(from: "1.0.2")),
         .package(url: "https://github.com/Infomaniak/swift-concurrency", .upToNextMajor(from: "1.0.0")),
