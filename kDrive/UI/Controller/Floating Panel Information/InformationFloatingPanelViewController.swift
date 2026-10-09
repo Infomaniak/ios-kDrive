@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import Lottie
 import UIKit
 
@@ -80,6 +81,7 @@ class InformationFloatingPanelViewController: UIViewController {
     class func instantiateSheet(drive: Drive? = nil) -> UIViewController {
         let contentVC = instantiate()
         contentVC.drive = drive
-        return SelfSizingPanelViewController(contentViewController: contentVC)
+        return SelfSizingPanelViewController(contentViewController: contentVC,
+                                             backgroundColor: KDriveResourcesAsset.backgroundCardViewColor.color)
     }
 }
