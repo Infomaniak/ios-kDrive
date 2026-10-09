@@ -101,16 +101,25 @@ class WaveViewController: UIViewController {
         }, for: .touchUpInside)
 
         containerView.addSubview(nextButton)
+        let safeArea = containerView.safeAreaLayoutGuide
+
         NSLayoutConstraint.activate([
             nextButton.widthAnchor.constraint(equalToConstant: nextButtonHeight),
             nextButton.heightAnchor.constraint(equalToConstant: nextButtonHeight),
-            nextButton.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
-            nextButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            nextButton.leadingAnchor.constraint(greaterThanOrEqualTo: containerView.leadingAnchor, constant: 0),
-            nextButton.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor, constant: 0),
-            nextButton.topAnchor.constraint(greaterThanOrEqualTo: containerView.topAnchor, constant: 0),
-            nextButton.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor, constant: 0)
+            nextButton.centerXAnchor.constraint(equalTo: safeArea.centerXAnchor),
+            nextButton.leadingAnchor.constraint(greaterThanOrEqualTo: safeArea.leadingAnchor, constant: IKPadding.large),
+            nextButton.trailingAnchor.constraint(lessThanOrEqualTo: safeArea.trailingAnchor, constant: -IKPadding.large)
+
         ])
+
+        NSLayoutConstraint.activate([
+            nextButton.topAnchor.constraint(greaterThanOrEqualTo: containerView.topAnchor),
+            nextButton.bottomAnchor.constraint(lessThanOrEqualTo: containerView.bottomAnchor)
+        ])
+
+        let centerOnSafeArea = nextButton.centerYAnchor.constraint(equalTo: safeArea.centerYAnchor)
+        centerOnSafeArea.priority = .defaultHigh
+        centerOnSafeArea.isActive = true
     }
 }
 
