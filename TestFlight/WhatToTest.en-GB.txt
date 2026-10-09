@@ -1,3 +1,5 @@
-- Added multi-window support on iPad, open and work on several kDrive windows side by side
-- Improved photo gallery, more reliable photo loading
-- Stability improvements and bug fixes
+- Follow file upload progress in Dynamic Island on supported devices running iOS 26 or later
+- View folder sizes in the file information screen
+- Preview PDF thumbnails in Recent Activity
+- Improved background upload reliability
+- Fixed information sheet background colors and improved close button accessibility
