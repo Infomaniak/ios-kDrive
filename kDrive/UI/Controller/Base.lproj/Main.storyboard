@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="25098" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="25073"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -280,7 +280,10 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Title" id="CKI-tp-qJ6">
-                        <barButtonItem key="leftBarButtonItem" systemItem="stop" id="mfY-fC-cEf">
+                        <barButtonItem key="leftBarButtonItem" image="xmark" catalog="system" id="mfY-fC-cEf">
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonClose"/>
+                            </userDefinedRuntimeAttributes>
                             <connections>
                                 <action selector="dismissButtonPressed:" destination="mYP-vt-7Yc" id="Eqc-NR-Mwc"/>
                             </connections>
@@ -300,6 +303,7 @@
         <image name="lock_infomaniak" width="187" height="187"/>
         <image name="logo" width="209" height="56"/>
         <image name="no-drive" width="89" height="86"/>
+        <image name="xmark" catalog="system" width="128" height="118"/>
         <namedColor name="backgroundCardViewColor">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
