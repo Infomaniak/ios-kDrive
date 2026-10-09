@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Alamofire/Alamofire",
       "state" : {
-        "revision" : "7595cbcf59809f9977c5f6378500de2ad73b7ddb",
-        "version" : "5.12.0"
+        "revision" : "bda9ed57d72988a3a2ada33d824583541f86eac6",
+        "version" : "5.12.2"
       }
     },
     {
@@ -29,9 +29,18 @@
       }
     },
     {
+      "identity" : "dotlottie-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LottieFiles/dotlottie-ios",
+      "state" : {
+        "revision" : "ddc69d0ae3a90894b15b5a925c73232ff1d94307",
+        "version" : "0.16.9"
+      }
+    },
+    {
       "identity" : "dtfoundation",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Cocoanetics/DTFoundation.git",
+      "location" : "https://github.com/Cocoanetics/DTFoundation",
       "state" : {
         "revision" : "a61be65dd7d5b2cde3acabd13bf320b71f2907a5",
         "version" : "1.7.19"
@@ -123,8 +132,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-login",
       "state" : {
-        "revision" : "b53d08cd0830cfed227ce1b79dbaccd29827b81d",
-        "version" : "7.8.1"
+        "revision" : "8296f4575d7568bb3c30c8acb4672b45a16bf481",
+        "version" : "7.9.0"
       }
     },
     {
@@ -141,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-onboarding",
       "state" : {
-        "revision" : "ca793dc5613ae4fd67b209e3f5f0222e00a6da4d",
-        "version" : "1.4.4"
+        "revision" : "73057f3484a081f322a720a11b1c32741d26b63c",
+        "version" : "1.5.0"
       }
     },
     {
@@ -175,7 +184,7 @@
     {
       "identity" : "lottie-spm",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/airbnb/lottie-spm.git",
+      "location" : "https://github.com/airbnb/lottie-spm",
       "state" : {
         "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
         "version" : "4.5.2"
@@ -220,7 +229,7 @@
     {
       "identity" : "osinfo",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/MarcoEidinger/OSInfo.git",
+      "location" : "https://github.com/MarcoEidinger/OSInfo",
       "state" : {
         "revision" : "fa5164afc8ef56c3069728629647f140c03933f5",
         "version" : "1.0.2"
@@ -238,7 +247,7 @@
     {
       "identity" : "realm-core",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/realm/realm-core.git",
+      "location" : "https://github.com/realm/realm-core",
       "state" : {
         "revision" : "b4192c46305570577c4d08df790fddec5ab3aa04",
         "version" : "20.1.5"
@@ -249,8 +258,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/realm/realm-swift",
       "state" : {
-        "revision" : "ca03df491ec5e4bb8af0bca1e9957d08c10ec2da",
-        "version" : "20.0.5"
+        "revision" : "a40ced79265b644a896e393b0f3a37e7916e7de3",
+        "version" : "20.0.6"
       }
     },
     {
@@ -258,8 +267,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "d27a0ddf0cd1bc90ab038f5781fddc39b894430e",
-        "version" : "9.25.0"
+        "revision" : "4f135c52afeeb1d6937eb93824c7ec1cddcaa372",
+        "version" : "9.30.1"
       }
     },
     {
@@ -274,7 +283,7 @@
     {
       "identity" : "snapkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SnapKit/SnapKit.git",
+      "location" : "https://github.com/SnapKit/SnapKit",
       "state" : {
         "revision" : "2842e6e84e82eb9a8dac0100ca90d9444b0307f4",
         "version" : "5.7.1"
@@ -319,7 +328,7 @@
     {
       "identity" : "swift-numerics",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-numerics.git",
+      "location" : "https://github.com/apple/swift-numerics",
       "state" : {
         "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
         "version" : "1.1.1"
@@ -330,8 +339,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/FelixHerrmann/swift-package-list",
       "state" : {
-        "revision" : "14f7e7de03182873d8c23cab4c8bbf0d9d46cad4",
-        "version" : "4.10.0"
+        "revision" : "a3e1d4d09a37bc1df1ad0c1c9b02cb192eaa857c",
+        "version" : "4.11.0"
       }
     },
     {
@@ -375,8 +384,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/siteline/SwiftUI-Introspect",
       "state" : {
-        "revision" : "469f9e8becd1b229b9c2056a4bd80dcce3b65a69",
-        "version" : "27.0.0-beta.2"
+        "revision" : "7f76fe19415a60ce28493c5ec67b8da629f27a44",
+        "version" : "27.1.0"
       }
     }
   ],
