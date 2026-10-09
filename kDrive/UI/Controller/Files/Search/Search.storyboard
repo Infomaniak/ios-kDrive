@@ -23,6 +23,9 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Filtres" id="CHQ-vg-ClB">
                         <barButtonItem key="leftBarButtonItem" image="xmark" catalog="system" style="done" id="N3C-dt-S4u">
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonClose"/>
+                            </userDefinedRuntimeAttributes>
                             <connections>
                                 <action selector="closeButtonPressed:" destination="J5q-yn-jYo" id="g40-7e-LFr"/>
                             </connections>

@@ -281,6 +281,9 @@
                     </view>
                     <navigationItem key="navigationItem" title="Title" id="CKI-tp-qJ6">
                         <barButtonItem key="leftBarButtonItem" image="xmark" catalog="system" id="mfY-fC-cEf">
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonClose"/>
+                            </userDefinedRuntimeAttributes>
                             <connections>
                                 <action selector="dismissButtonPressed:" destination="mYP-vt-7Yc" id="Eqc-NR-Mwc"/>
                             </connections>
