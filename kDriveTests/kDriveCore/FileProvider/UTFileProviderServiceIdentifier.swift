@@ -17,15 +17,17 @@
  */
 
 import FileProvider
+import Foundation
 import kDriveCore
-import XCTest
+import Testing
 
 /// Unit tests for `FileProviderService.identifier(for:domain:)`.
 ///
 /// The storage layout served by the File Provider is `<root>/<itemIdentifier>/<filename>`, so the
 /// item identifier is always the first path component right after the storage root, whatever the
 /// depth of the requested URL (packages, bundles, nested resources…).
-final class UTFileProviderServiceIdentifier: XCTestCase {
+@Suite(.serialized)
+struct UTFileProviderServiceIdentifier {
     private let fileProviderService = FileProviderService()
 
     /// The root used by the implementation when no domain is provided.
@@ -33,81 +35,124 @@ final class UTFileProviderServiceIdentifier: XCTestCase {
         NSFileProviderManager.default.documentStorageURL
     }
 
-    func testRootStorageURLResolvesToRootContainer() {
-        // GIVEN
-        let itemURL = rootStorageURL
+    @Test("Root storage URL resolves to the root container identifier")
+    func rootStorageURLResolvesToRootContainer() {
+        let identifier = fileProviderService.identifier(
+            for: rootStorageURL,
+            domain: nil
+        )
 
-        // WHEN
-        let identifier = fileProviderService.identifier(for: itemURL, domain: nil)
-
-        // THEN
-        XCTAssertEqual(identifier, .rootContainer)
+        #expect(identifier == .rootContainer)
     }
 
-    func testDirectChildFileResolvesToItemIdentifier() {
-        // GIVEN
+    @Test("Direct child file resolves to the top-level item identifier")
+    func directChildFileResolvesToItemIdentifier() {
         let itemURL = rootStorageURL
             .appendingPathComponent("42", isDirectory: true)
             .appendingPathComponent("document.pdf", isDirectory: false)
-
-        // WHEN
         let identifier = fileProviderService.identifier(for: itemURL, domain: nil)
 
-        // THEN
-        XCTAssertEqual(identifier, NSFileProviderItemIdentifier("42"))
+        #expect(identifier == NSFileProviderItemIdentifier("42"))
     }
 
-    func testItemFolderItselfResolvesToItemIdentifier() {
-        // GIVEN the URL points to the item folder itself, without a trailing filename
+    @Test("Direct child folder resolves to the top-level item identifier")
+    func itemFolderItselfResolvesToItemIdentifier() {
         let itemURL = rootStorageURL.appendingPathComponent("42", isDirectory: true)
-
-        // WHEN
         let identifier = fileProviderService.identifier(for: itemURL, domain: nil)
 
-        // THEN
-        XCTAssertEqual(identifier, NSFileProviderItemIdentifier("42"))
+        #expect(identifier == NSFileProviderItemIdentifier("42"))
     }
 
-    func testNestedItemURLResolvesToTopLevelItemIdentifier() {
-        // GIVEN a URL nested inside a materialized package/bundle
+    @Test("Nested file inside a package resolves to the top-level item identifier")
+    func nestedItemURLResolvesToTopLevelItemIdentifier() {
         let itemURL = rootStorageURL
             .appendingPathComponent("42", isDirectory: true)
             .appendingPathComponent("Keynote.key", isDirectory: true)
             .appendingPathComponent("Index")
             .appendingPathComponent("slide.iwa", isDirectory: false)
-
-        // WHEN
         let identifier = fileProviderService.identifier(for: itemURL, domain: nil)
 
-        // THEN the top-level identifier is returned, not one of the inner components
-        XCTAssertEqual(identifier, NSFileProviderItemIdentifier("42"))
+        #expect(identifier == NSFileProviderItemIdentifier("42"))
     }
 
-    func testURLOutsideStorageRootResolvesToNil() {
-        // GIVEN a URL that is not contained in the storage root
+    @Test("URL outside the storage root resolves to nil")
+    func uRLOutsideStorageRootResolvesToNil() {
         let itemURL = URL(fileURLWithPath: NSTemporaryDirectory())
             .appendingPathComponent("not-in-storage", isDirectory: true)
             .appendingPathComponent("file.txt", isDirectory: false)
-
-        // WHEN
         let identifier = fileProviderService.identifier(for: itemURL, domain: nil)
 
-        // THEN
-        XCTAssertNil(identifier)
+        #expect(identifier == nil)
     }
 
-    func testUnnormalizedURLResolvesToItemIdentifier() {
-        // GIVEN a URL containing relative components that resolve back inside the storage root
+    @Test("Unnormalized URL with relative components resolves to the top-level item identifier")
+    func unnormalizedURLResolvesToItemIdentifier() {
         let itemURL = rootStorageURL
             .appendingPathComponent("42", isDirectory: true)
             .appendingPathComponent("subfolder", isDirectory: true)
             .appendingPathComponent("..", isDirectory: true)
             .appendingPathComponent("document.pdf", isDirectory: false)
-
-        // WHEN
         let identifier = fileProviderService.identifier(for: itemURL, domain: nil)
 
-        // THEN standardization collapses `subfolder/..`, keeping the top-level identifier
-        XCTAssertEqual(identifier, NSFileProviderItemIdentifier("42"))
+        #expect(identifier == NSFileProviderItemIdentifier("42"))
+    }
+
+    @Test("URL traversing a symbolic link pointing outside the storage root resolves to nil")
+    func uRLTraversingSymlinkOutsideStorageReturnsNil() throws {
+        let fileManager = FileManager.default
+        let itemIdentifier = UUID().uuidString
+
+        let itemDirectoryURL = rootStorageURL
+            .appendingPathComponent(itemIdentifier, isDirectory: true)
+
+        let outsideDirectoryURL = rootStorageURL
+            .deletingLastPathComponent()
+            .appendingPathComponent(
+                "outside-\(UUID().uuidString)",
+                isDirectory: true
+            )
+
+        defer {
+            try? fileManager.removeItem(at: itemDirectoryURL)
+            try? fileManager.removeItem(at: outsideDirectoryURL)
+        }
+
+        try fileManager.createDirectory(
+            at: itemDirectoryURL,
+            withIntermediateDirectories: true
+        )
+        try fileManager.createDirectory(
+            at: outsideDirectoryURL,
+            withIntermediateDirectories: true
+        )
+
+        let outsideFileURL = outsideDirectoryURL
+            .appendingPathComponent("private-file.txt", isDirectory: false)
+
+        let outsideContent = Data("Content outside provider storage".utf8)
+        try outsideContent.write(to: outsideFileURL)
+
+        // A symbolic link inside the item directory pointing outside storage
+        let linkURL = itemDirectoryURL
+            .appendingPathComponent("link", isDirectory: false)
+
+        try fileManager.createSymbolicLink(
+            at: linkURL,
+            withDestinationURL: outsideDirectoryURL
+        )
+
+        let itemURL = linkURL
+            .appendingPathComponent("private-file.txt", isDirectory: false)
+
+        // Verify that reading through the link reaches the external file
+        let linkedContent = try Data(contentsOf: itemURL)
+        #expect(linkedContent == outsideContent)
+
+        let identifier = fileProviderService.identifier(
+            for: itemURL,
+            domain: nil
+        )
+
+        #expect(identifier == nil)
     }
 }

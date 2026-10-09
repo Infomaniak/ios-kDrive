@@ -88,19 +88,25 @@ public struct FileProviderService: FileProviderServiceable {
             rootStorageURL = NSFileProviderManager.default.documentStorageURL
         }
 
-        let rootComponents = rootStorageURL.pathComponents
-        let itemComponents = itemURL.pathComponents
+        let rootComponents = rootStorageURL
+            .resolvingSymlinksInPath()
+            .pathComponents
 
-        guard itemComponents.starts(with: rootComponents) else {
-            return nil
+        var currentURL = itemURL.resolvingSymlinksInPath()
+        var identifier: String?
+
+        while currentURL.pathComponents != rootComponents {
+            let parentURL = currentURL.deletingLastPathComponent().resolvingSymlinksInPath()
+
+            guard parentURL.pathComponents != currentURL.pathComponents else {
+                return nil
+            }
+
+            identifier = currentURL.lastPathComponent
+            currentURL = parentURL.resolvingSymlinksInPath()
         }
 
-        let relativeComponents = itemComponents.dropFirst(rootComponents.count)
-
-        guard let identifier = relativeComponents.first else {
-            return .rootContainer
-        }
-
+        guard let identifier else { return .rootContainer }
         return NSFileProviderItemIdentifier(identifier)
     }
 
