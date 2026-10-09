@@ -2,4 +2,5 @@
 - Consultez la taille des dossiers dans l’écran d’informations
 - Affichez les vignettes des PDF dans l’activité récente
 - Fiabilité améliorée des envois en arrière-plan
+- Correction de l’enregistrement des modifications des fichiers kDrive édités dans l’app Fichiers
 - Correction des couleurs de fond des panneaux d’information et amélioration de l’accessibilité des boutons de fermeture
