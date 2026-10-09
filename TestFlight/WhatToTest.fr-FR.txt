@@ -1,3 +1,6 @@
-- Ajout de la prise en charge du mode multi-fenêtre sur iPad: ouvrez et travaillez sur plusieurs fenêtres kDrive côte à côte
-- Galerie photo améliorée et chargement des photos plus fiable
-- Améliorations de la stabilité et corrections de bugs
+- Suivez la progression de l’envoi de fichiers dans la Dynamic Island sur les appareils compatibles sous iOS 26 ou ultérieur
+- Consultez la taille des dossiers dans l’écran d’informations
+- Affichez les vignettes des PDF dans l’activité récente
+- Fiabilité améliorée des envois en arrière-plan
+- Correction de l’enregistrement des modifications des fichiers kDrive édités dans l’app Fichiers
+- Correction des couleurs de fond des panneaux d’information et amélioration de l’accessibilité des boutons de fermeture

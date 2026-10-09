@@ -164,6 +164,7 @@ tuist test # Or via Xcode Test Navigator
 - **Documentation:** Prefer `///` documentation above protocol declarations to explain their contract and delegate roles. Document stable responsibilities and guarantees, not "current behavior" or temporary implementation details that may quickly change. Keep comments inside implementations sparse; avoid repeating those explanations on stored properties or obvious code.
 - **SwiftUI (when used):** Property wrappers must be private (`@State`, `@StateObject`, etc.).
 - **Localized strings:** Use localized string keys from `kDriveResources` — never raw string literals.
+- **Icons:** Reuse icons from `kDrive/Resources/Assets.xcassets` via the generated `KDriveResourcesAsset` accessors (e.g. `KDriveResourcesAsset.close.image`) before falling back to SF Symbols. Use SF Symbols only when no suitable existing icon is available in that catalog.
 - **DI:** Use `@InjectService` from InfomaniakDI for dependency injection; register via `FactoryService` in kDriveCore.
 - **API layer:** Extend `DriveApiFetcher` for API operations. Create focused extensions (`+Upload`, `+Listing`, `+Share`).
 - **Endpoint definitions:** Define API endpoints in `Endpoint.swift` and extend with `Endpoint+Files.swift`, `Endpoint+Share.swift`, etc.
