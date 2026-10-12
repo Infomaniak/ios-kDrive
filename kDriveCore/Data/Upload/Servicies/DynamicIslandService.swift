@@ -216,7 +216,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
         // Refresh independently of Realm notifications without inventing upload progress.
         while !Task.isCancelled && completion.result == nil {
             do {
-                try await Task.sleep(for: .milliseconds(50))
+                try await Task.sleep(for: .seconds(1))
             } catch {
                 return
             }
