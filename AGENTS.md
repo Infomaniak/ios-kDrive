@@ -166,6 +166,7 @@ tuist test # Or via Xcode Test Navigator
 - **Localized strings:** Use localized string keys from `kDriveResources` — never raw string literals.
 - **Icons:** Reuse icons from `kDrive/Resources/Assets.xcassets` via the generated `KDriveResourcesAsset` accessors (e.g. `KDriveResourcesAsset.close.image`) before falling back to SF Symbols. Use SF Symbols only when no suitable existing icon is available in that catalog.
 - **DI:** Use `@InjectService` from InfomaniakDI for dependency injection; register via `FactoryService` in kDriveCore.
+- **Early-start DI:** Prefer `@LazyInjectService` during early app startup to prevent DI resolution deadlocks.
 - **API layer:** Extend `DriveApiFetcher` for API operations. Create focused extensions (`+Upload`, `+Listing`, `+Share`).
 - **Endpoint definitions:** Define API endpoints in `Endpoint.swift` and extend with `Endpoint+Files.swift`, `Endpoint+Share.swift`, etc.
 - **Concurrency:** Prefer native Swift `async/await`, structured concurrency, and actor isolation for shared mutable state. Avoid explicit locks and DispatchQueue-based synchronization when native concurrency mechanisms can express the solution. When bridging synchronous framework callbacks to actors, preserve required ordering and lifecycle semantics explicitly.

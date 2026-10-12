@@ -107,8 +107,14 @@ public enum Logging {
     }
 
     private static func initSentry() {
+        @LazyInjectService var appContextService: AppContextServiceable
+
         SentrySDK.start { options in
             options.dsn = "https://ba647a8cc6fc437baf797d2eb33dfafb@sentry-mobile.infomaniak.com/6"
+            // Extension lifecycles do not reliably reflect UI frame progress or application termination.
+            if appContextService.isExtension {
+                options.enableAppHangTracking = false
+            }
             options.sessionReplay.sessionSampleRate = 0
             options.sessionReplay.onErrorSampleRate = 0
             options.beforeSend = { event in
