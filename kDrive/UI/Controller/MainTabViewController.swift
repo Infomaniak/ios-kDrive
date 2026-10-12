@@ -140,8 +140,8 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             }
 
             appRouter.presentPreviewViewController(
-                frozenFiles: [frozenFile],
-                index: 0,
+                frozenFiles: previewViewController.filesForRestoration,
+                index: previewViewController.indexForRestoration,
                 driveFileManager: driveFileManager,
                 normalFolderHierarchy: true,
                 presentationOrigin: .fileList,
@@ -193,8 +193,8 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
             }
 
             appRouter.presentPreviewViewController(
-                frozenFiles: [frozenFile],
-                index: 0,
+                frozenFiles: previewViewController.filesForRestoration,
+                index: previewViewController.indexForRestoration,
                 driveFileManager: driveFileManager,
                 normalFolderHierarchy: true,
                 presentationOrigin: .fileList,
