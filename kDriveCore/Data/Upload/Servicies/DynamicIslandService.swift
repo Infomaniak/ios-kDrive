@@ -23,6 +23,9 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
 import OSLog
+#if DEBUG
+import UserNotifications
+#endif
 
 @available(iOS 26.0, *)
 public class DynamicIslandService: DynamicIslandServiceable {
@@ -48,6 +51,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
     private enum DomainError: Error {
         case expiredTask
+        #if DEBUG
+        case taskAlreadyRunning
+        #endif
     }
 
     public func registerTask() {
@@ -89,6 +95,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
             Self.logger.info("Dynamic Island task submitted")
         } catch {
             Self.logger.error("Error submitting task : \(error)")
+            #if DEBUG
+            reportFailure(stage: "Submission", error: error)
+            #endif
         }
     }
 
@@ -103,6 +112,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
     @MainActor private func handleExpiration(completion: DynamicIslandTaskCompletion) {
         guard uploadContinuationBox === completion, completion.result == nil else { return }
         Self.logger.error("Handling task expiration")
+        #if DEBUG
+        reportFailure(stage: "Expiration handler (iOS does not provide the expiration reason)", error: DomainError.expiredTask)
+        #endif
         uploadService.suspendAllOperations()
         completion.complete(with: .failure(DomainError.expiredTask))
     }
@@ -122,6 +134,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
     @MainActor private func handle(task: BGContinuedProcessingTask) {
         guard currentTask == nil else {
+            #if DEBUG
+            reportFailure(stage: "Launch rejected: another task is running", error: DomainError.taskAlreadyRunning)
+            #endif
             task.setTaskCompleted(success: false)
             return
         }
@@ -202,6 +217,11 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
                 task.setTaskCompleted(success: true)
             } catch {
+                #if DEBUG
+                if (error as? DomainError) != .expiredTask {
+                    reportFailure(stage: "Upload task", error: error)
+                }
+                #endif
                 let (title, subtitle) = errorInfo(for: error)
                 task.updateTitle(title, subtitle: subtitle)
 
@@ -215,6 +235,54 @@ public class DynamicIslandService: DynamicIslandServiceable {
             }
         }
     }
+
+    #if DEBUG
+    @MainActor private func reportFailure(stage: String, error: Error) {
+        let nsError = error as NSError
+        var details = """
+        DynamicIslandService: \(stage)
+        Error: \(String(reflecting: error))
+        NSError: domain=\(nsError.domain), code=\(nsError.code), description=\(nsError.localizedDescription)
+        userInfo: \(String(reflecting: nsError.userInfo))
+        """
+        if let driveError = error as? DriveError {
+            details += "\nDriveError: type=\(driveError.type), code=\(driveError.code)"
+            if let underlyingError = driveError.underlyingError {
+                let underlyingNSError = underlyingError as NSError
+                details += """
+
+                Underlying error: \(String(reflecting: underlyingError))
+                domain=\(underlyingNSError.domain), code=\(underlyingNSError.code)
+                userInfo: \(String(reflecting: underlyingNSError.userInfo))
+                """
+            }
+        }
+        details += """
+
+        Operations: total=\(uploadService.operationCount), suspended=\(uploadService.isSuspended)
+        Progress: \(currentTask?.progress.completedUnitCount ?? 0)/\(currentTask?.progress.totalUnitCount ?? 0)
+        Uploads: completed=\(uploadProgressTracker.progressUploading), total=\(uploadProgressTracker.totalUploadCount)
+        Network: \(ReachabilityListener.instance.currentStatus)
+        """
+        Self.logger.error("\(details, privacy: .public)")
+
+        let content = UNMutableNotificationContent()
+        content.title = KDriveResourcesStrings.Localizable.errorUpload
+        content.subtitle = "DynamicIslandService"
+        content.body = details
+        content.sound = .default
+        let request = UNNotificationRequest(
+            identifier: "\(taskIdentifier).diagnostic.\(UUID().uuidString)",
+            content: content,
+            trigger: nil
+        )
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                Self.logger.error("Unable to deliver Dynamic Island diagnostic: \(String(reflecting: error), privacy: .public)")
+            }
+        }
+    }
+    #endif
 
     private func errorInfo(for error: Error) -> (String, String) {
         if let driveError = error as? DriveError {
