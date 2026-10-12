@@ -28,6 +28,7 @@ final class UploadBackgroundActivity {
     }
 
     private let makeActivity: (ExpiringActivityDelegate) -> any ExpiringActivityable
+    private let shouldPauseUploads: @MainActor () -> Bool
     private let pauseUploads: @MainActor () async -> Void
     private var activity: Activity?
     private var isExpiring = false
@@ -36,9 +37,11 @@ final class UploadBackgroundActivity {
         makeActivity: @escaping (ExpiringActivityDelegate) -> any ExpiringActivityable = {
             ExpiringActivity(id: "UploadQueues", delegate: $0)
         },
+        shouldPauseUploads: @escaping @MainActor () -> Bool = { true },
         pauseUploads: @escaping @MainActor () async -> Void
     ) {
         self.makeActivity = makeActivity
+        self.shouldPauseUploads = shouldPauseUploads
         self.pauseUploads = pauseUploads
     }
 
@@ -67,7 +70,9 @@ final class UploadBackgroundActivity {
     private func expire(id: UUID) async {
         guard let activity, activity.id == id, !isExpiring else { return }
         isExpiring = true
-        await pauseUploads()
+        if shouldPauseUploads() {
+            await pauseUploads()
+        }
         activity.value.endAll()
         self.activity = nil
         isExpiring = false

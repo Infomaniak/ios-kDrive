@@ -37,6 +37,11 @@ public class DynamicIslandService: DynamicIslandServiceable {
     @MainActor private var currentTask: BGContinuedProcessingTask?
     @MainActor private var uploadContinuationBox: DynamicIslandTaskCompletion?
 
+    @MainActor public var isProtectingUploads: Bool {
+        guard currentTask != nil, let uploadContinuationBox else { return false }
+        return uploadContinuationBox.result == nil
+    }
+
     @MainActor private var taskHandlingTask: Task<Void, Never>?
     private var hasRegisteredLaunchHandler = false
     private let registrationQueue = DispatchQueue(label: "com.infomaniak.drive.dynamic-island-service.registration")
@@ -244,6 +249,8 @@ public class DynamicIslandService: DynamicIslandServiceable {
 }
 
 public class UnavailableDynamicIslandService: DynamicIslandServiceable {
+    @MainActor public var isProtectingUploads: Bool { false }
+
     public func registerTask() {}
 
     public func submitTask() {}

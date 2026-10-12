@@ -16,7 +16,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/// Manages continued-processing protection and progress reporting for uploads.
 public protocol DynamicIslandServiceable {
+    /// True only while a launched continued-processing task has not completed or expired.
+    @MainActor var isProtectingUploads: Bool { get }
+
     func registerTask()
 
     func submitTask()

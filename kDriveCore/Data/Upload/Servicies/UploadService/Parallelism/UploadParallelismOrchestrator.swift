@@ -34,7 +34,10 @@ public final class UploadParallelismOrchestrator {
     private var uploadParallelismHeuristic: WorkloadParallelismHeuristic?
     private var memoryPressureObserver: DispatchSourceMemoryPressure?
 
-    @MainActor private lazy var backgroundActivity = UploadBackgroundActivity { [weak self] in
+    @MainActor private lazy var backgroundActivity = UploadBackgroundActivity(shouldPauseUploads: { [weak self] in
+        // Legacy expiration must not interrupt uploads protected by a running continued-processing task.
+        self?.dynamicIslandService.isProtectingUploads != true
+    }, pauseUploads: { [weak self] in
         guard let self else { return }
         let queues = self.allQueues
         let hadUploads = queues.contains { $0.operationCount > 0 }
@@ -50,7 +53,7 @@ public final class UploadParallelismOrchestrator {
             uploadNotifiable.sendPausedNotificationIfNeeded()
         }
         self.computeUploadParallelismPerQueueAndApply()
-    }
+    })
 
     private var availableParallelism: Int {
         guard let uploadParallelismHeuristic else {

@@ -81,6 +81,39 @@ struct UTUploadBackgroundActivity {
         owner.update(hasWork: false)
     }
 
+    @Test(arguments: [false, true])
+    func expirationChecksCurrentProtection(isProtectedAtExpiration: Bool) async {
+        var activities: [TestActivity] = []
+        var isProtected = !isProtectedAtExpiration
+        var cleanupCount = 0
+        let owner = UploadBackgroundActivity(makeActivity: { delegate in
+            let activity = TestActivity(delegate: delegate)
+            activities.append(activity)
+            return activity
+        }, shouldPauseUploads: {
+            !isProtected
+        }, pauseUploads: {
+            cleanupCount += 1
+        })
+
+        owner.update(hasWork: true)
+        isProtected = isProtectedAtExpiration
+        activities[0].delegate?.backgroundActivityExpiring()
+        await drainCallbacks()
+
+        #expect(cleanupCount == (isProtectedAtExpiration ? 0 : 1))
+        #expect(activities[0].ends == 1)
+
+        activities[0].delegate?.backgroundActivityExpiring()
+        await drainCallbacks()
+        #expect(cleanupCount == (isProtectedAtExpiration ? 0 : 1))
+        #expect(activities[0].ends == 1)
+
+        owner.update(hasWork: true)
+        #expect(activities.count == 2)
+        owner.update(hasWork: false)
+    }
+
     private func drainCallbacks() async {
         await withCheckedContinuation { continuation in
             DispatchQueue.main.async { continuation.resume() }
