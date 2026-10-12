@@ -34,12 +34,10 @@ final class DynamicIslandUploadProgressTracker: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     private var observationCancellables: Set<AnyCancellable> = []
     private var overallProgress: Progress?
-    private var lastUpdateTime: ContinuousClock.Instant?
-    private var clock = ContinuousClock()
 
     private let queueActivitySubject = CurrentValueSubject<(global: Bool, photo: Bool), Never>((false, false))
 
-    private let scale = 100.0
+    private let scale = 1_000_000.0
 
     static let photoAssetPredicate = NSPredicate(format: "rawType = %@", argumentArray: [UploadFileType.phAsset.rawValue])
     static let globalAssetPredicate = NSPredicate(format: "rawType != %@", argumentArray: [UploadFileType.phAsset.rawValue])
@@ -72,7 +70,6 @@ final class DynamicIslandUploadProgressTracker: ObservableObject {
         observationCancellables.removeAll()
 
         totalUploadCount = uploadDataSource.getUploadingFiles(optionalPredicate: optionalPredicate).count
-        lastUpdateTime = clock.now
 
         overallProgress = Progress(totalUnitCount: Int64(totalUploadCount))
         overallProgress?
@@ -80,15 +77,12 @@ final class DynamicIslandUploadProgressTracker: ObservableObject {
             .throttle(for: .milliseconds(50), scheduler: RunLoop.main, latest: true)
             .sink { [weak self] fractionCompleted in
                 self?.fractionCompleted = fractionCompleted
-                self?.keepAlive()
             }
             .store(in: &observationCancellables)
 
         realmObservationToken = uploadDataSource.getUploadingFiles(optionalPredicate: optionalPredicate)
             .observe(on: .main) { [weak self] change in
                 guard let self else { return }
-
-                self.lastUpdateTime = clock.now
 
                 switch change {
                 case .initial(let results), .update(let results, deletions: _, insertions: _, modifications: _):
@@ -124,15 +118,6 @@ final class DynamicIslandUploadProgressTracker: ObservableObject {
 
     func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
         queueActivitySubject.send((global: globalQueueActive, photo: photoQueueActive))
-    }
-
-    func keepAlive() {
-        guard let lastUpdateTime,
-              let overallProgress,
-              (clock.now - lastUpdateTime) > .milliseconds(50)
-        else { return }
-        overallProgress.totalUnitCount = Int64(Double(totalUploadCount) * scale)
-        overallProgress.completedUnitCount = Int64((progressChunkUploading + Double(progressUploading)) * scale)
     }
 
     func reset() {

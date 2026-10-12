@@ -152,7 +152,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
         taskHandlingTask = Task { @MainActor in
             var cancellable: AnyCancellable?
+            var progressRefreshTask: Task<Void, Never>?
             defer {
+                progressRefreshTask?.cancel()
                 cancellable?.cancel()
                 let isExpiredTask: Bool
                 if case .failure(let error) = completion.result {
@@ -168,14 +170,36 @@ public class DynamicIslandService: DynamicIslandServiceable {
                 task.expirationHandler = nil
                 taskHandlingTask = nil
             }
-            task.progress.totalUnitCount = 100
+            var lastDisplayedPercentage: Int?
+            let refreshProgress: @MainActor (Double) -> Void = { progress in
+                guard completion.result == nil else { return }
+                let fraction = min(max(progress, 0), 1)
+                task.progress.totalUnitCount = Int64(max(self.uploadProgressTracker.totalUploadCount, 1)) * 1_000_000
+                task.progress.completedUnitCount = Int64(fraction * Double(task.progress.totalUnitCount))
 
+                let percentage = Int(fraction * 100)
+                if percentage != lastDisplayedPercentage {
+                    lastDisplayedPercentage = percentage
+                    task.updateTitle(
+                        KDriveResourcesStrings.Localizable.uploadInProgressTitle,
+                        subtitle: KDriveResourcesStrings.Localizable.uploadInProgressSubTitle(percentage)
+                    )
+                }
+            }
             cancellable = uploadProgressTracker.$fractionCompleted.sink { progress in
-                task.progress.completedUnitCount = Int64(progress * 100)
-                task.updateTitle(
-                    KDriveResourcesStrings.Localizable.uploadInProgressTitle,
-                    subtitle: KDriveResourcesStrings.Localizable.uploadInProgressSubTitle(Int(progress * 100))
-                )
+                refreshProgress(progress)
+            }
+            // Refresh independently of Realm notifications without inventing upload progress.
+            progressRefreshTask = Task { @MainActor in
+                while !Task.isCancelled && completion.result == nil {
+                    do {
+                        try await Task.sleep(for: .milliseconds(50))
+                    } catch {
+                        return
+                    }
+                    guard !Task.isCancelled else { return }
+                    refreshProgress(uploadProgressTracker.fractionCompleted)
+                }
             }
 
             do {
@@ -190,6 +214,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
                     }
                 }
 
+                progressRefreshTask?.cancel()
                 let totalCount = uploadProgressTracker.totalUploadCount
                 let uploadedCount = min(uploadProgressTracker.progressUploading + 1, totalCount)
 
@@ -217,6 +242,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
                 task.setTaskCompleted(success: true)
             } catch {
+                progressRefreshTask?.cancel()
                 #if DEBUG
                 if (error as? DomainError) != .expiredTask {
                     reportFailure(stage: "Upload task", error: error)
