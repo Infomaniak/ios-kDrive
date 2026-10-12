@@ -27,6 +27,11 @@ let project = Project(name: "kDrive",
                           ),
                           developmentRegion: "en"
                       ),
+                      settings: .settings(release: [
+                          "COPY_PHASE_STRIP": "YES",
+                          "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym",
+                          "STRIP_INSTALLED_PRODUCT": "YES"
+                      ]),
                       targets: [
                           .target(name: "kDrive",
                                   destinations: Constants.destinations,
@@ -170,7 +175,10 @@ let project = Project(name: "kDrive",
                                       "kDrive/**/*.xcassets",
                                       "kDrive/**/*.strings",
                                       "kDrive/**/*.stringsdict"
-                                  ]),
+                                  ],
+                                  settings: .settings(release: [
+                                      "STRIP_STYLE": "non-global"
+                                  ])),
                           .target(name: "kDriveCore",
                                   destinations: Constants.destinations,
                                   product: .framework,
@@ -218,7 +226,10 @@ let project = Project(name: "kDrive",
                                       .external(name: "SwiftRegex"),
                                       .external(name: "VersionChecker"),
                                       .external(name: "AppLock")
-                                  ]),
+                                  ],
+                                  settings: .settings(release: [
+                                      "STRIP_STYLE": "non-global"
+                                  ])),
                           .target(name: "kDriveFileProvider",
                                   destinations: Constants.destinations,
                                   product: .appExtension,
