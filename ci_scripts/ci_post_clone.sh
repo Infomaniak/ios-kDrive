@@ -12,4 +12,4 @@ mise install
 eval "$(mise activate bash --shims)"
 
 tuist install
-tuist generate --no-open
+TUIST_XCODE_CLOUD_BUILD_NUMBER="${CI_BUILD_NUMBER:?CI_BUILD_NUMBER must be set}" tuist generate --no-open

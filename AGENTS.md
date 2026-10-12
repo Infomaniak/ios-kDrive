@@ -175,6 +175,8 @@ tuist test # Or via Xcode Test Navigator
 - **Manager pattern:** Core data managers follow the *Manager naming (AccountManager, DriveFileManager, DriveInfosManager, AvailableOfflineManager).
 - **File Provider:** `BackgroundUploadSessionManager` and `BackgroundDownloadSessionManager` handle background upload/download.
 
+- **Sentry Build Details (app size):** Use Preprod `/api/0/organizations/sentry/preprodartifacts/<buildId>/{build-details,size-analysis}/`.
+
 ### Testing
 
 - **Unit tests:** `kDriveTests/` — XCTest-based, fast tests.
