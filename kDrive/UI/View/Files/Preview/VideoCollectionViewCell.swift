@@ -30,8 +30,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private class VideoPlayerNavigationController: UINavigationController {
         var disappearCallback: (() -> Void)?
 
-        override func viewWillDisappear(_ animated: Bool) {
-            super.viewWillDisappear(animated)
+        override func viewDidDisappear(_ animated: Bool) {
+            super.viewDidDisappear(animated)
             disappearCallback?()
         }
     }
@@ -83,7 +83,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
 
         let playerViewController = AVPlayerViewController()
         playerViewController.player = player
-        guard let playerViewController = videoPlayer?.playerViewController else { return }
         playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
 
         let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
@@ -96,8 +95,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         navController.modalPresentationStyle = .overFullScreen
         navController.modalTransitionStyle = .crossDissolve
 
-        previewDelegate?.setFullscreen(true)
-        parentViewController?.present(navController, animated: true) {
+        previewDelegate?.presentVideoPlayer(navController) {
             playerViewController.player?.play()
         }
     }

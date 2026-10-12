@@ -33,6 +33,7 @@ import UIKit
     func setFullscreen(_ fullscreen: Bool?)
     func errorWhilePreviewing(fileId: Int, error: Error)
     func openWith(from: UIView)
+    func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
 }
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
@@ -1045,6 +1046,20 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 self.reloadItemsAfterOneLoop(at: indexPath)
                 updateNavigationBar()
             }
+        }
+    }
+
+    func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?) {
+        guard !fileInformationsViewController.isBeingDismissed else { return }
+
+        dismissFileActionsPanel(animated: true) { [weak self] in
+            guard let self, self.viewIfLoaded?.window != nil,
+                  self.presentedViewController == nil else {
+                return
+            }
+
+            self.present(controller, animated: true, completion: completion)
+
         }
     }
 
