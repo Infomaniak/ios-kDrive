@@ -109,6 +109,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private var fileActionsDetents: [UISheetPresentationController.Detent] {
+        if isBookPreviewLayout {
+            return [.medium(), .large()]
+        }
+
+        return presentationOrigin == .activities ? [.medium()] : [smallDetent, .medium(), .large()]
+    }
+
     private func setupBackgroundExtensionView() {
         guard #available(iOS 26.0, *) else { return }
 
@@ -750,13 +758,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             let placement: UISheetPresentationController.Placement
             if isBookPreviewLayout {
                 placement = view.effectiveUserInterfaceLayoutDirection == .rightToLeft ? .trailing : .leading
-                sheet.detents = [.medium(), .large()]
             } else {
                 placement = .automatic
-                sheet.detents = [smallDetent, .medium(), .large()]
             }
             if sheet.preferredPlacement != placement {
-                updatePlacement = { sheet.preferredPlacement = placement }
+                updatePlacement = {
+                    sheet.preferredPlacement = placement
+                    sheet.detents = self.fileActionsDetents
+                }
             }
         }
 
@@ -804,7 +813,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         if let sheet = fileInformationsViewController.sheetPresentationController {
             let canExpand = presentationOrigin != .activities
-            sheet.detents = canExpand ? [smallDetent, .medium(), .large()] : [.medium()]
+            sheet.detents = fileActionsDetents
             sheet.largestUndimmedDetentIdentifier = canExpand ? .large : .medium
             sheet.prefersGrabberVisible = canExpand
             sheet.prefersEdgeAttachedInCompactHeight = true
