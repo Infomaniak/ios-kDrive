@@ -97,6 +97,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var backgroundExtensionView: UIView?
     private var backgroundExtensionImageView: UIImageView?
     private var isBookPreviewLayout = false
+    private var lastAppliedBookPreviewLayout: Bool?
 
     private var isSidebarVisible: Bool {
         guard let splitViewController = splitViewController else { return false }
@@ -501,16 +502,32 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func scheduleFileActionsLayoutUpdate() {
         guard !isFileActionsLayoutUpdateScheduled else { return }
-
         isFileActionsLayoutUpdateScheduled = true
+
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.isFileActionsLayoutUpdateScheduled = false
+            defer { self.isFileActionsLayoutUpdateScheduled = false }
+
             guard self.viewIfLoaded?.window != nil,
-                  self.fileInformationsViewController.presentingViewController != nil,
-                  !self.fileInformationsViewController.isBeingDismissed else { return }
+                  let panel = self.fileInformationsViewController,
+                  !panel.isBeingDismissed else { return }
 
             self.view.layoutIfNeeded()
+
+            let enteredBookLayout =
+                self.lastAppliedBookPreviewLayout == false && self.isBookPreviewLayout
+
+            self.lastAppliedBookPreviewLayout = self.isBookPreviewLayout
+
+            if !self.isBookPreviewLayout, self.navigationItem.hidesBackButton {
+                self.navigationItem.setHidesBackButton(false, animated: true)
+            }
+
+            if enteredBookLayout {
+                self.setFullscreen(false)
+            }
+
+            guard panel.presentingViewController != nil else { return }
             self.updateSheetContainerFrameIfNeeded(animated: true)
         }
     }
