@@ -119,7 +119,9 @@ ios-kDrive/
 ├── scripts/                     # Development scripts
 │   └── lint.sh                  #   SwiftLint runner
 ├── ci_scripts/                  # Xcode Cloud CI — DO NOT run locally
-├── .github/workflows/           # GitHub Actions
+├── .github/
+│   ├── github-app.yml           # GitHub app session setup and build/run commands
+│   └── workflows/              # GitHub Actions
 ├── .swiftlint.yml               # SwiftLint rules
 ├── .swiftformat                 # SwiftFormat config
 ├── .mise.toml                   # Tool versions
