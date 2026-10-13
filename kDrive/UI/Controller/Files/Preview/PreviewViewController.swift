@@ -47,7 +47,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var driveFileManager: DriveFileManager!
     private var normalFolderHierarchy = true
     private var initialLoading = true
-    private var presentationOrigin = PresentationOrigin.fileList
+    var presentationOrigin = PresentationOrigin.fileList
     private var shouldScrollToCurrentIndex = true
     var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
@@ -98,7 +98,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var backgroundExtensionView: UIView?
     private var backgroundExtensionImageView: UIImageView?
     var lastAppliedBookPreviewLayout: Bool?
-    var isBookPreviewLayout = false
+
+    enum PreviewLayout {
+        case standard
+        case sideBySide
+        case stacked
+    }
+
+    var previewLayout = PreviewLayout.standard
+    var isBookPreviewLayout: Bool {
+        previewLayout != .standard
+    }
 
     var isSidebarVisible: Bool {
         guard let splitViewController = splitViewController else { return false }
@@ -111,8 +121,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     var fileActionsDetents: [UISheetPresentationController.Detent] {
-        if isBookPreviewLayout {
+        if previewLayout == .sideBySide {
             return [.medium(), .large()]
+        }
+
+        if previewLayout == .stacked {
+            return [.medium()]
         }
 
         return presentationOrigin == .activities ? [.medium()] : [smallDetent, .medium(), .large()]
@@ -678,7 +692,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         if let sheet = fileInformationsViewController.sheetPresentationController {
             let canExpand = presentationOrigin != .activities
             sheet.detents = fileActionsDetents
-            sheet.largestUndimmedDetentIdentifier = canExpand ? .large : .medium
+            sheet.largestUndimmedDetentIdentifier = canExpand && previewLayout != .stacked ? .large : .medium
             sheet.prefersGrabberVisible = canExpand
             sheet.prefersEdgeAttachedInCompactHeight = true
             sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true

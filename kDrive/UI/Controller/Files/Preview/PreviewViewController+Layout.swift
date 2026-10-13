@@ -20,49 +20,89 @@ import UIKit
 
 extension PreviewViewController {
     func updatePreviewViewPort() {
-        let respectsLeadingSafeArea = traitCollection.horizontalSizeClass == .regular
-        let collectionViewLeadingConstraint = view.constraints.first {
-            $0.firstItem === collectionView && $0.firstAttribute == .leading
-        }
+        previewLayout = .standard
 
-        var leftConstraint = view.safeAreaInsets.left
-        let availableBounds = view.bounds.inset(by: UIEdgeInsets(
-            top: 0,
-            left: leftConstraint,
-            bottom: 0,
-            right: 0
-        ))
+        guard let leadingConstraint = view.constraints.first(where: {
+            $0.isActive
+                && $0.firstItem === collectionView
+                && ($0.firstAttribute == .leading || $0.firstAttribute == .left)
+        }),
+            let bottomConstraint = view.constraints.first(where: {
+                $0.isActive
+                    && $0.firstItem === view
+                    && $0.firstAttribute == .bottom
+                    && $0.secondItem === collectionView
+                    && $0.secondAttribute == .bottom
+            }) else { return }
 
-        isBookPreviewLayout = false
-
-        let referenceView: UIView = splitViewController?.view ?? view
+        let respectsSafeArea = traitCollection.horizontalSizeClass == .regular
+        var leadingInset = respectsSafeArea ? view.safeAreaInsets.left : 0
+        var bottomInset = 0.0
 
         if #available(iOS 27.1, *) {
-            let division = referenceView.reservedRegions(kind: .division).first { region in
-                let frame = region.frame
-                return region.isActive && frame.width > 0 && frame.height > frame.width
-            }
+            let referenceView: UIView = splitViewController?.view ?? view
+            let availableBounds = view.bounds.inset(by: view.safeAreaInsets)
 
-            if let division {
-                let frame = referenceView.convert(division.frame, to: view)
-                let spansDivision = frame.intersects(availableBounds)
-                && frame.minX > availableBounds.minX
-                && frame.maxX < availableBounds.maxX
+            _ = referenceView.reservedRegions(kind: .division).first { region in
+                guard region.isActive else { return false }
+                let frame = referenceView.convert(region.frame, to: view)
 
-                isBookPreviewLayout = spansDivision && !isSidebarVisible
+                guard !frame.isEmpty else { return false }
 
-                leftConstraint = frame.midX - view.bounds.minX
+                if let inset = landscapePreviewInset(for: frame, in: availableBounds) {
+                    leadingInset = inset
+                } else if let inset = portraitPreviewInset(for: frame, in: availableBounds) {
+                    bottomInset = inset
+                } else {
+                    return false
+                }
+
+                return true
             }
         }
 
-        guard let collectionViewLeadingConstraint else { return }
+        updatePreviewConstraint(leadingConstraint, constant: leadingInset)
+        updatePreviewConstraint(bottomConstraint, constant: bottomInset)
+    }
 
-        let targetInset = respectsLeadingSafeArea ? leftConstraint : 0
+    private func updatePreviewConstraint(
+        _ constraint: NSLayoutConstraint,
+        constant: CGFloat
+    ) {
+        guard constraint.constant != constant else { return }
 
-        if collectionViewLeadingConstraint.constant != targetInset {
-            indexBeforeBoundsChange = indexBeforeBoundsChange ?? currentIndex
-            collectionViewLeadingConstraint.constant = targetInset
-        }
+        indexBeforeBoundsChange = indexBeforeBoundsChange ?? currentIndex
+        constraint.constant = constant
+    }
+
+    private func landscapePreviewInset(
+        for divisionFrame: CGRect,
+        in availableBounds: CGRect
+    ) -> CGFloat? {
+        guard divisionFrame.height > divisionFrame.width else { return nil }
+
+        let spansDivision = divisionFrame.intersects(availableBounds)
+            && divisionFrame.minX > availableBounds.minX
+            && divisionFrame.maxX < availableBounds.maxX
+
+        previewLayout = spansDivision && !isSidebarVisible ? .sideBySide : .standard
+
+        return divisionFrame.midX - view.bounds.minX
+    }
+
+    private func portraitPreviewInset(
+        for divisionFrame: CGRect,
+        in availableBounds: CGRect
+    ) -> CGFloat? {
+        guard divisionFrame.width > divisionFrame.height else { return nil }
+
+        let spansDivision = divisionFrame.intersects(availableBounds)
+            && divisionFrame.minY > availableBounds.minY
+            && divisionFrame.maxY < availableBounds.maxY
+
+        previewLayout = spansDivision && !isSidebarVisible ? .stacked : .standard
+
+        return divisionFrame.midY - view.bounds.minY
     }
 
     func scheduleFileActionsLayoutUpdate() {
@@ -132,12 +172,13 @@ extension PreviewViewController {
                 updatePlacement = {
                     sheet.preferredPlacement = placement
                     sheet.detents = self.fileActionsDetents
+                    let canExpand = self.presentationOrigin != .activities
+                    sheet.largestUndimmedDetentIdentifier = canExpand && self.previewLayout != .stacked ? .large : .medium
                 }
             }
         }
 
         guard targetFrame != nil || updatePlacement != nil else { return }
-
 
         let changes: () -> Void = {
             if let targetFrame {
