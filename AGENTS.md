@@ -146,7 +146,7 @@ tuist install
 tuist generate --no-open
 
 # Build
-xcodebuild -scheme "kDrive"
+rtk xcodebuild -workspace kDrive.xcworkspace -scheme "kDrive"
 
 # Lint (run before every PR)
 scripts/lint.sh
@@ -186,6 +186,12 @@ tuist test # Or via Xcode Test Navigator
 - **Setup:** Duplicate `kDriveTests/Env.sample.swift` → `kDriveTests/Env.swift` and fill credentials.
 - **Run:** `tuist test` or Xcode Test Navigator.
 - **CI:** GitHub Actions run tests on PRs.
+
+### Agent Xcode Commands
+
+- Explicitly use `rtk xcodebuild` for shell-based builds and tests on this machine; do not rely on OpenCode's automatic command rewriting.
+- RTK's Xcode preview can truncate diagnostics and final summaries. Use the printed `rtk recall <id>` command to inspect hidden output before reporting results, and retain `.xcresult` bundles for test verification.
+- For machine-readable Xcode output such as `-showBuildSettings -json`, use `rtk proxy xcodebuild` to preserve valid JSON.
 
 ### PR Checklist
 
