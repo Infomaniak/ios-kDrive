@@ -157,6 +157,8 @@ scripts/lint.sh
 tuist test # Or via Xcode Test Navigator
 ```
 
+Keep UI tests pinned to an explicit simulator device available in the CI runner's selected Xcode.
+
 ### Code Style
 
 - **Naming:** Swift standard — `camelCase` for variables/functions, `PascalCase` for types.
