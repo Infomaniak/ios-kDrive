@@ -1,0 +1,19 @@
+instructions: |
+  Requires Xcode 27+ and mise on PATH.
+  Use mise exec for repository tools and tuist run kDrive to build and run.
+
+scripts:
+  - name: Setup
+    command: |
+      set -eu
+      xcodebuild -version
+      mise trust
+      mise install
+      mise exec -- tuist install
+      mise exec -- tuist generate --no-open
+    triggers:
+      - session.create
+  - name: Build and Run
+    command: mise exec -- tuist run kDrive
+
+auto_open_in_browser: false
