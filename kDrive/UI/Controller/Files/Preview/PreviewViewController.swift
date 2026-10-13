@@ -49,7 +49,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var initialLoading = true
     private var presentationOrigin = PresentationOrigin.fileList
     private var shouldScrollToCurrentIndex = true
-    private var currentIndex = IndexPath(row: 0, section: 0) {
+    var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
             saveSceneState()
         }
@@ -78,7 +78,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
 
-    private var fileInformationsViewController: FileActionsFloatingPanelViewController!
+    var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
     private var currentFile: File {
         get {
@@ -97,10 +97,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private var backgroundExtensionView: UIView?
     private var backgroundExtensionImageView: UIImageView?
-    private var isBookPreviewLayout = false
-    private var lastAppliedBookPreviewLayout: Bool?
+    var lastAppliedBookPreviewLayout: Bool?
+    var isBookPreviewLayout = false
 
-    private var isSidebarVisible: Bool {
+    var isSidebarVisible: Bool {
         guard let splitViewController = splitViewController else { return false }
         switch splitViewController.displayMode {
         case .oneBesideSecondary, .oneOverSecondary, .twoBesideSecondary, .twoOverSecondary, .twoDisplaceSecondary:
@@ -110,7 +110,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
-    private var fileActionsDetents: [UISheetPresentationController.Detent] {
+    var fileActionsDetents: [UISheetPresentationController.Detent] {
         if isBookPreviewLayout {
             return [.medium(), .large()]
         }
@@ -161,10 +161,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private var networkObserver: ObservationToken?
-    private var indexBeforeBoundsChange: IndexPath?
+    var indexBeforeBoundsChange: IndexPath?
     private var boundsObserver: NSKeyValueObservation?
-    private var isUpdatingSheetContainer = false
-    private var isFileActionsLayoutUpdateScheduled = false
+    var isUpdatingSheetContainer = false
+    var isFileActionsLayoutUpdateScheduled = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -460,85 +460,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         backgroundExtensionView?.alpha = isSidebarVisible ? 1 : 0
-        if #available(iOS 27.1, *) {
-            updatePreviewViewPort()
-        }
-    }
-
-    @available(iOS 27.1, *)
-    private func updatePreviewViewPort() {
-        let respectsLeadingSafeArea = traitCollection.horizontalSizeClass == .regular
-        let collectionViewLeadingConstraint = view.constraints.first {
-            $0.firstItem === collectionView && $0.firstAttribute == .leading
-        }
-
-        var leftConstraint = view.safeAreaInsets.left
-        let availableBounds = view.bounds.inset(by: UIEdgeInsets(
-            top: 0,
-            left: leftConstraint,
-            bottom: 0,
-            right: 0
-        ))
-
-        isBookPreviewLayout = false
-
-        let referenceView: UIView = splitViewController?.view ?? view
-        let division = referenceView.reservedRegions(kind: .division).first { region in
-            let frame = region.frame
-            return region.isActive && frame.width > 0 && frame.height > frame.width
-        }
-
-        if let division {
-            let frame = referenceView.convert(division.frame, to: view)
-            let spansDivision = frame.intersects(availableBounds)
-                && frame.minX > availableBounds.minX
-                && frame.maxX < availableBounds.maxX
-
-            isBookPreviewLayout = spansDivision && !isSidebarVisible
-
-            leftConstraint = frame.midX - view.bounds.minX
-        }
-
-        guard let collectionViewLeadingConstraint else { return }
-
-        let targetInset = respectsLeadingSafeArea ? leftConstraint : 0
-
-        if collectionViewLeadingConstraint.constant != targetInset {
-            indexBeforeBoundsChange = indexBeforeBoundsChange ?? currentIndex
-            collectionViewLeadingConstraint.constant = targetInset
-        }
-    }
-
-    private func scheduleFileActionsLayoutUpdate() {
-        guard !isFileActionsLayoutUpdateScheduled else { return }
-        isFileActionsLayoutUpdateScheduled = true
-
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            defer { self.isFileActionsLayoutUpdateScheduled = false }
-
-            guard self.viewIfLoaded?.window != nil,
-                  let panel = self.fileInformationsViewController,
-                  !panel.isBeingDismissed else { return }
-
-            self.view.layoutIfNeeded()
-
-            let enteredBookLayout =
-                self.lastAppliedBookPreviewLayout == false && self.isBookPreviewLayout
-
-            self.lastAppliedBookPreviewLayout = self.isBookPreviewLayout
-
-            if !self.isBookPreviewLayout, self.navigationItem.hidesBackButton {
-                self.navigationItem.setHidesBackButton(false, animated: true)
-            }
-
-            if enteredBookLayout {
-                self.setFullscreen(false)
-            }
-
-            guard panel.presentingViewController != nil else { return }
-            self.updateSheetContainerFrameIfNeeded(animated: true)
-        }
+        updatePreviewViewPort()
     }
 
     override func viewDidLayoutSubviews() {
@@ -729,65 +651,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         hideFloatingPanel(fullScreenPreview)
-    }
-
-    private func updateSheetContainerFrameIfNeeded(animated: Bool = false) {
-        guard !isUpdatingSheetContainer,
-              let sheet = fileInformationsViewController?.sheetPresentationController
-        else { return }
-
-        isUpdatingSheetContainer = true
-        defer { isUpdatingSheetContainer = false }
-
-        var targetFrame: CGRect?
-        if traitCollection.horizontalSizeClass == .regular,
-           let containerView = sheet.containerView,
-           let containerSuperview = containerView.superview {
-            let layoutView: UIView = isBookPreviewLayout ? view : collectionView
-            let frame = layoutView.convert(
-                layoutView.bounds,
-                to: containerSuperview
-            )
-
-            if !frame.isEmpty, containerView.frame != frame {
-                targetFrame = frame
-            }
-        }
-
-        var updatePlacement: (() -> Void)?
-        if #available(iOS 27.1, *) {
-            let placement: UISheetPresentationController.Placement
-            if isBookPreviewLayout {
-                placement = view.effectiveUserInterfaceLayoutDirection == .rightToLeft ? .trailing : .leading
-            } else {
-                placement = .automatic
-            }
-            if sheet.preferredPlacement != placement {
-                updatePlacement = {
-                    sheet.preferredPlacement = placement
-                    sheet.detents = self.fileActionsDetents
-                }
-            }
-        }
-
-        guard targetFrame != nil || updatePlacement != nil else { return }
-
-        let changes: () -> Void = {
-            if let targetFrame {
-                sheet.containerView?.frame = targetFrame
-            }
-            updatePlacement?()
-            sheet.containerView?.setNeedsLayout()
-            sheet.containerView?.layoutIfNeeded()
-        }
-
-        if animated,
-           fileInformationsViewController.presentingViewController != nil,
-           !fileInformationsViewController.isBeingPresented {
-            sheet.animateChanges(changes)
-        } else {
-            UIView.performWithoutAnimation(changes)
-        }
     }
 
     func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false) {
@@ -1059,7 +922,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             }
 
             self.present(controller, animated: true, completion: completion)
-
         }
     }
 
