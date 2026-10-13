@@ -7,7 +7,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DEVELOPER_DIR: /Applications/Xcode-27.app/Contents/Developer
+  DEVELOPER_DIR: /Applications/Xcode-Latest.app/Contents/Developer
 
 jobs:
   build:
@@ -94,7 +94,7 @@ jobs:
     name: UI Tests
     runs-on: [ self-hosted, iOS ]
     env:
-      DEVICE_NAME: "iPhone 17 Pro"
+      DEVICE_NAME: "iPhone 18 Pro"
     steps:
       - name: Checkout
         uses: actions/checkout@v6

@@ -119,7 +119,9 @@ ios-kDrive/
 ├── scripts/                     # Development scripts
 │   └── lint.sh                  #   SwiftLint runner
 ├── ci_scripts/                  # Xcode Cloud CI — DO NOT run locally
-├── .github/workflows/           # GitHub Actions
+├── .github/
+│   ├── github-app.yml           # GitHub app session setup and build/run commands
+│   └── workflows/              # GitHub Actions
 ├── .swiftlint.yml               # SwiftLint rules
 ├── .swiftformat                 # SwiftFormat config
 ├── .mise.toml                   # Tool versions
@@ -154,6 +156,8 @@ scripts/lint.sh
 # Run tests
 tuist test # Or via Xcode Test Navigator
 ```
+
+Keep UI tests pinned to an explicit simulator device available in the CI runner's selected Xcode.
 
 ### Code Style
 
