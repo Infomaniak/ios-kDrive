@@ -85,10 +85,22 @@ public extension UIConstants {
     @MainActor
     static func showSnackBar(message: String,
                              duration: SnackBar.Duration = .lengthLong,
-                             action: IKSnackBar.Action? = nil) -> IKSnackBar? {
-        let snackbar = IKSnackBar.make(message: message,
-                                       duration: duration,
-                                       style: style)
+                             action: IKSnackBar.Action? = nil,
+                             contextView: UIView? = nil) -> IKSnackBar? {
+        @InjectService var appRouter: AppNavigable
+
+        let snackbar: IKSnackBar?
+        if let contextView = contextView ?? appRouter.rootViewController?.viewIfLoaded {
+            snackbar = IKSnackBar.make(in: contextView,
+                                           message: message,
+                                           duration: duration,
+                                           style: style)
+        } else {
+            snackbar = IKSnackBar.make(message: message,
+                                           duration: duration,
+                                           style: style)
+        }
+
         if let action {
             snackbar?.setAction(action).show()
         } else {
