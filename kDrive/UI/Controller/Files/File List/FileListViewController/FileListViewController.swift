@@ -53,7 +53,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     #if !ISEXTENSION
     lazy var filePresenter = FilePresenter(viewController: self)
     var mediaHelper: OpenMediaHelper?
+    private var plusBarButtonItem: UIBarButtonItem?
     #endif
+
+    private var hasHinge = false
 
     private var networkObserver: ObservationToken?
 
@@ -158,13 +161,18 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             }
 
             #if !ISEXTENSION
-            installHingePinnedPlusButton(
+            plusBarButtonItem = makePlusBarButtonItem(
                 driveFileManager: driveFileManager,
                 currentFolder: viewModel.currentDirectory,
                 presentedAboveFileList: true
             ) { [weak self] panel in
                 self?.mediaHelper = panel.mediaHelper
             }
+            view.addInteraction(UIHingeInteraction { [weak self] _, _ in
+                guard let self else { return }
+                hasHinge = true
+                updateRightBarButtons(viewModel.currentRightBarButtons.map(makeBarButtons) ?? [])
+            })
             #endif
         }
     }
@@ -237,6 +245,26 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         tryLoadingFilesOrDisplayError()
     }
 
+    private func makeBarButtons(_ buttons: [FileListBarButtonType]) -> [UIBarButtonItem] {
+        buttons.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+    }
+
+    private func updateRightBarButtons(_ barButtons: [UIBarButtonItem]) {
+        #if !ISEXTENSION
+        var items = barButtons.filter { $0 != plusBarButtonItem }
+
+        if hasHinge,
+            splitViewController?.traitCollection.horizontalSizeClass == .compact,
+           let plusBarButtonItem {
+            items.insert(plusBarButtonItem, at: 0)
+        }
+
+        guard items != (navigationItem.rightBarButtonItems ?? []) else { return }
+
+        navigationItem.rightBarButtonItems = items
+        #endif
+    }
+
     private func setupViewModel() {
         bindViewModels()
         if viewModel.configuration.isRefreshControlEnabled {
@@ -278,12 +306,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
 
-        navigationItem.rightBarButtonItems = viewModel.currentRightBarButtons?
-            .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+        updateRightBarButtons(viewModel.currentRightBarButtons.map(makeBarButtons) ?? [])
         viewModel.$currentRightBarButtons.receiveOnMain(store: &bindStore) { [weak self] rightBarButtons in
             guard let self else { return }
-            navigationItem.rightBarButtonItems = rightBarButtons?
-                .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+            updateRightBarButtons(rightBarButtons.map(makeBarButtons) ?? [])
         }
 
         viewModel.onPresentViewController = { [weak self] presentationType, viewController, animated in

@@ -22,12 +22,12 @@ import UIKit
 
 extension UIViewController {
     @available(iOS 27.1, *)
-    func installHingePinnedPlusButton(
+    func makePlusBarButtonItem(
         driveFileManager: DriveFileManager,
         currentFolder: File?,
         presentedAboveFileList: Bool = false,
         onPresent: @escaping (PlusButtonFloatingPanelViewController) -> Void
-    ) {
+    ) -> UIBarButtonItem {
         let addItem = UIBarButtonItem(
             title: KDriveResourcesStrings.Localizable.buttonAdd,
             image: KDriveResourcesAsset.plus.image,
@@ -45,26 +45,43 @@ extension UIViewController {
         )
         addItem.style = .prominent
         addItem.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonAdd
-        addItem.axisBehavior = .verticalPreferred
+        return addItem
+    }
 
-        let group = UIBarButtonItemGroup(barButtonItems: [addItem], representativeItem: nil)
+    @available(iOS 27.1, *)
+    func installHingePinnedPlusButton(
+        driveFileManager: DriveFileManager,
+        currentFolder: File?,
+        presentedAboveFileList: Bool = false,
+        onPresent: @escaping (PlusButtonFloatingPanelViewController) -> Void
+    ) {
+        let addItem = makePlusBarButtonItem(
+            driveFileManager: driveFileManager,
+            currentFolder: currentFolder,
+            presentedAboveFileList: presentedAboveFileList,
+            onPresent: onPresent
+        )
 
         #if !ISEXTENSION
         if (tabBarController as? MainTabViewController)?.isHingeClosed == true {
-            navigationItem.pinnedTrailingGroup = group
+            setPlusVisible(addItem: addItem, visible: true)
         }
         #endif
 
-        view.addInteraction(UIHingeInteraction { [weak self] _, update in
+        view.addInteraction(UIHingeInteraction { [weak self] _, _ in
             guard let self else { return }
-            if update.hinge?.status == .closed {
-                if navigationItem.pinnedTrailingGroup != group {
-                    navigationItem.pinnedTrailingGroup = group
-                }
-            } else {
-                navigationItem.pinnedTrailingGroup = nil
-            }
+            setPlusVisible(
+                addItem: addItem,
+                visible: splitViewController?.traitCollection.horizontalSizeClass == .compact
+            )
         })
+    }
+
+    private func setPlusVisible(addItem: UIBarButtonItem, visible: Bool) {
+        var items = (navigationItem.rightBarButtonItems ?? []).filter { $0 != addItem }
+        if visible { items.insert(addItem, at: 0) }
+        guard items != (navigationItem.rightBarButtonItems ?? []) else { return }
+        navigationItem.rightBarButtonItems = items
     }
 
     func presentPlusButtonPanel(
