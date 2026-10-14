@@ -116,7 +116,7 @@ class ShareAndRightsViewController: UIViewController {
     private func showRightsSelection(userAccess: Bool) {
         let rightsSelectionViewController = RightsSelectionViewController.instantiateInNavigationController(file: file,
                                                                                                             driveFileManager: driveFileManager)
-        rightsSelectionViewController.modalPresentationStyle = .fullScreen
+        rightsSelectionViewController.modalPresentationStyle = .pageSheet
         if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
             rightsSelectionVC.delegate = self
             if userAccess {
@@ -129,13 +129,16 @@ class ShareAndRightsViewController: UIViewController {
                     .selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.restricted).rawValue
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
             }
+            rightsSelectionVC.onDismiss = { [weak self] in
+                self?.updateShareList()
+            }
         }
         present(rightsSelectionViewController, animated: true)
     }
 
     private func showInviteView(shareables: [Shareable] = [], emails: [String] = []) {
         let inviteUserViewController = InviteUserViewController.instantiateInNavigationController()
-        inviteUserViewController.modalPresentationStyle = .fullScreen
+        inviteUserViewController.modalPresentationStyle = .pageSheet
         if let inviteUserVC = inviteUserViewController.viewControllers.first as? InviteUserViewController {
             inviteUserVC.driveFileManager = driveFileManager
             inviteUserVC.file = file
@@ -144,6 +147,9 @@ class ShareAndRightsViewController: UIViewController {
             inviteUserVC.emails = emails
             inviteUserVC.ignoredEmails = ignoredEmails + emails
             inviteUserVC.ignoredShareables = fileAccessElements.compactMap(\.shareable) + shareables
+            inviteUserVC.onDismiss = { [weak self] in
+                self?.updateShareList()
+            }
         }
         present(inviteUserViewController, animated: true)
     }

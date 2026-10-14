@@ -37,6 +37,7 @@ class InviteUserViewController: UIViewController {
     var ignoredShareables: [Shareable] = []
     var emails: [String] = []
     var shareables: [Shareable] = []
+    var onDismiss: (() -> Void)?
 
     var userIds: [Int] {
         return shareables.compactMap { $0 as? DriveUser }.map(\.id)
@@ -110,6 +111,11 @@ class InviteUserViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         matomo.track(view: [MatomoUtils.View.shareAndRights.displayName, "InviteUser"])
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        onDismiss?()
     }
 
     deinit {
@@ -284,7 +290,7 @@ extension InviteUserViewController: UITableViewDelegate, UITableViewDataSource {
                 file: file,
                 driveFileManager: driveFileManager
             )
-            rightsSelectionViewController.modalPresentationStyle = .fullScreen
+            rightsSelectionViewController.modalPresentationStyle = .pageSheet
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.delegate = self
                 rightsSelectionVC.selectedRight = newPermission.rawValue
