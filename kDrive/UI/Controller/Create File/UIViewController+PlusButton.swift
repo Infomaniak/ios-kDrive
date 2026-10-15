@@ -32,7 +32,11 @@ extension UIViewController {
             title: KDriveResourcesStrings.Localizable.buttonAdd,
             image: KDriveResourcesAsset.plus.image,
             primaryAction: UIAction { [weak self] _ in
-                guard let self, let currentFolder else { return }
+                guard let self,
+                      let currentFolder = currentFolder ?? driveFileManager.getCachedMyFilesRoot()
+                else {
+                    return
+                }
                 #if !ISEXTENSION
                 let panel = presentPlusButtonPanel(
                     driveFileManager: driveFileManager,

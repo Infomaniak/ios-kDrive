@@ -102,7 +102,7 @@ extension PreviewViewController {
 
         previewLayout = spansDivision && !isSidebarVisible ? .stacked : .standard
 
-        return divisionFrame.midY - view.bounds.minY
+        return view.bounds.maxY - divisionFrame.midY
     }
 
     func scheduleFileActionsLayoutUpdate() {
