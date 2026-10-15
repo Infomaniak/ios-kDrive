@@ -108,6 +108,12 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        navigationItem.scrollEdgeAppearance = appearance
+        if #available(iOS 26.0, *) {
+            navigationItem.standardAppearance = appearance
+        }
         navigationItem.hideBackButtonText()
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.tintColor = nil
@@ -140,9 +146,6 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
         setupViewModel()
         setupFooterIfNeeded()
-        if #available(iOS 26.0, *) {
-            collectionView.topEdgeEffect.isHidden = true
-        }
 
         if #available(iOS 18.4, *), !driveFileManager.isPublicShare {
             collectionView.appIntentsDataSource = self
@@ -207,9 +210,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        if #available(iOS 26.0, *) {
+        #if !ISEXTENSION
+        if #available(iOS 26.0, *), self is PhotoListViewController {
             collectionView.topEdgeEffect.style = .soft
         }
+        #endif
 
         tryLoadingFilesOrDisplayError()
     }
@@ -918,7 +923,15 @@ extension FileListViewController {
             setUpHeaderView(reusableView.headerView, isEmptyViewHidden: !viewModel.isShowingEmptyView)
             reusableView.headerView.delegate = self
             selectView = reusableView.headerView.selectView
-            headerView = reusableView.headerView
+            let header = reusableView.headerView
+            if #available(iOS 26.0, *) {
+                header.backgroundColor = .clear
+                header.sortView.backgroundColor = .clear
+                header.offlineView.backgroundColor = .clear
+                header.activityListView.backgroundColor = .clear
+                header.selectView.backgroundColor = .clear
+            }
+            headerView = header
 
             return reusableView
         }

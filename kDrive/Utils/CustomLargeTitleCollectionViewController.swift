@@ -105,8 +105,8 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
             lastAppliedTitleAlpha = alpha
             let titleColor = titleStyle.color.withAlphaComponent(alpha)
 
-            let newStandardNavigationBarAppearance = navigationBar.standardAppearance
-            let newCompactNavigationBarAppearance = navigationBar.compactAppearance
+            let newStandardNavigationBarAppearance = navigationItem.standardAppearance ?? navigationBar.standardAppearance
+            let newCompactNavigationBarAppearance = navigationItem.compactAppearance ?? navigationBar.compactAppearance
 
             newStandardNavigationBarAppearance.titleTextAttributes[.foregroundColor] = titleColor
             newCompactNavigationBarAppearance?.titleTextAttributes[.foregroundColor] = titleColor

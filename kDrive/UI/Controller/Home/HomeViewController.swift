@@ -208,6 +208,13 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
                 self?.mediaHelper = panel.mediaHelper
             }
         }
+
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        navigationItem.scrollEdgeAppearance = appearance
+        if #available(iOS 26.0, *) {
+            navigationItem.standardAppearance = appearance
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
