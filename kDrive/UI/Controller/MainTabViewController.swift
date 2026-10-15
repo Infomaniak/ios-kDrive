@@ -116,8 +116,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         super.traitCollectionDidChange(previousTraitCollection)
 
         guard let previousTraitCollection else { return }
-        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
-            || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
+        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass else { return }
 
         guard let rootViewController = appRouter.rootViewController as? RootSplitViewController else { return }
         if rootViewController.traitCollection.horizontalSizeClass == .regular {
