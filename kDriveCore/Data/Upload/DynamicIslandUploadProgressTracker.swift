@@ -74,7 +74,7 @@ final class DynamicIslandUploadProgressTracker: ObservableObject {
         overallProgress = Progress(totalUnitCount: Int64(totalUploadCount))
         overallProgress?
             .publisher(for: \.fractionCompleted)
-            .throttle(for: .milliseconds(50), scheduler: RunLoop.main, latest: true)
+            .throttle(for: .milliseconds(250), scheduler: RunLoop.main, latest: true)
             .sink { [weak self] fractionCompleted in
                 self?.fractionCompleted = fractionCompleted
             }
