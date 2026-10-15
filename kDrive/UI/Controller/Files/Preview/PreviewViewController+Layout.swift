@@ -47,7 +47,7 @@ extension PreviewViewController {
                 guard region.isActive else { return false }
                 let frame = referenceView.convert(region.frame, to: view)
 
-                guard !frame.isEmpty else { return false }
+                guard !frame.isEmpty, frame.intersects(availableBounds) else { return false }
 
                 if let inset = landscapePreviewInset(for: frame, in: availableBounds) {
                     leadingInset = inset
