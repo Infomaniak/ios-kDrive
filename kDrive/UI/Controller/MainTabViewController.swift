@@ -730,6 +730,21 @@ extension MainTabViewController: UpdateAccountDelegate {
     }
 }
 
+extension RootSplitViewController: UpdateAccountDelegate {
+    @MainActor func didUpdateCurrentUserProfile(_ currentUser: UserProfile) {
+        let columns: [UIViewController?] = [
+            viewController(for: .compact),
+            viewController(for: .primary),
+            viewController(for: .secondary)
+        ]
+        for column in columns {
+            guard let column, column.isViewLoaded else { continue }
+            let target = (column as? UINavigationController)?.viewControllers.first ?? column
+            (target as? UpdateAccountDelegate)?.didUpdateCurrentUserProfile(currentUser)
+        }
+    }
+}
+
 // MARK: - MainTabViewControllerDelegate
 
 extension MainTabViewController: MainTabViewControllerDelegate {
