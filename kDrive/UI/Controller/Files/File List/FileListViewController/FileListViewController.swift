@@ -254,7 +254,9 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     }
 
     private func updateRightBarButtons(_ barButtons: [UIBarButtonItem]) {
-        #if !ISEXTENSION
+        #if ISEXTENSION
+        navigationItem.rightBarButtonItems = barButtons
+        #else
         var items = barButtons.filter { $0 != plusBarButtonItem }
 
         if hasHinge,
