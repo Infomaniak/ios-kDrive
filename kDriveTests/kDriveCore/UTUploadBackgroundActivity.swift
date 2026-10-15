@@ -26,266 +26,272 @@ import InfomaniakLogin
 import RealmSwift
 import Testing
 
+/// Serializes tests that temporarily replace the process-wide dependency resolver, including across suspension points.
 @Suite(.serialized)
-@MainActor
-struct UTUploadBackgroundActivity {
-    @Test func sharesProtectionAndRestartsAfterIdle() {
-        var activities: [TestActivity] = []
-        let owner = UploadBackgroundActivity(makeActivity: { delegate in
-            let activity = TestActivity(delegate: delegate)
-            activities.append(activity)
-            return activity
-        }, pauseUploads: {})
+struct ResolverTests {}
 
-        owner.update(hasWork: true)
-        owner.update(hasWork: true)
-        #expect(activities.count == 1)
-        #expect(activities[0].starts == 1)
-        owner.update(hasWork: false)
-        #expect(activities[0].ends == 1)
-        owner.update(hasWork: true)
-        #expect(activities.count == 2)
-        owner.update(hasWork: false)
-    }
+extension ResolverTests {
+    @Suite
+    @MainActor
+    struct UTUploadBackgroundActivity {
+        @Test func sharesProtectionAndRestartsAfterIdle() {
+            var activities: [TestActivity] = []
+            let owner = UploadBackgroundActivity(makeActivity: { delegate in
+                let activity = TestActivity(delegate: delegate)
+                activities.append(activity)
+                return activity
+            }, pauseUploads: {})
 
-    @Test func expirationWaitsForCleanupAndIgnoresDuplicates() async {
-        var activities: [TestActivity] = []
-        var cleanup: CheckedContinuation<Void, Never>?
-        var cleanupCount = 0
-        let owner = UploadBackgroundActivity(makeActivity: { delegate in
-            let activity = TestActivity(delegate: delegate)
-            activities.append(activity)
-            return activity
-        }, pauseUploads: {
-            cleanupCount += 1
-            await withCheckedContinuation { cleanup = $0 }
-        })
+            owner.update(hasWork: true)
+            owner.update(hasWork: true)
+            #expect(activities.count == 1)
+            #expect(activities[0].starts == 1)
+            owner.update(hasWork: false)
+            #expect(activities[0].ends == 1)
+            owner.update(hasWork: true)
+            #expect(activities.count == 2)
+            owner.update(hasWork: false)
+        }
 
-        owner.update(hasWork: true)
-        activities[0].delegate?.backgroundActivityExpiring()
-        await drainCallbacks()
-        #expect(cleanupCount == 1)
-        #expect(activities[0].ends == 0)
+        @Test func expirationWaitsForCleanupAndIgnoresDuplicates() async {
+            var activities: [TestActivity] = []
+            var cleanup: CheckedContinuation<Void, Never>?
+            var cleanupCount = 0
+            let owner = UploadBackgroundActivity(makeActivity: { delegate in
+                let activity = TestActivity(delegate: delegate)
+                activities.append(activity)
+                return activity
+            }, pauseUploads: {
+                cleanupCount += 1
+                await withCheckedContinuation { cleanup = $0 }
+            })
 
-        activities[0].delegate?.backgroundActivityExpiring()
-        owner.update(hasWork: false)
-        await drainCallbacks()
-        #expect(cleanupCount == 1)
-        #expect(activities[0].ends == 0)
+            owner.update(hasWork: true)
+            activities[0].delegate?.backgroundActivityExpiring()
+            await drainCallbacks()
+            #expect(cleanupCount == 1)
+            #expect(activities[0].ends == 0)
 
-        cleanup?.resume()
-        await drainCallbacks()
-        #expect(activities[0].ends == 1)
+            activities[0].delegate?.backgroundActivityExpiring()
+            owner.update(hasWork: false)
+            await drainCallbacks()
+            #expect(cleanupCount == 1)
+            #expect(activities[0].ends == 0)
 
-        owner.update(hasWork: true)
-        #expect(activities.count == 2)
-        activities[0].delegate?.backgroundActivityExpiring()
-        await drainCallbacks()
-        #expect(cleanupCount == 1)
-        #expect(activities[1].ends == 0)
-        owner.update(hasWork: false)
-    }
+            cleanup?.resume()
+            await drainCallbacks()
+            #expect(activities[0].ends == 1)
 
-    @Test(arguments: [false, true])
-    func expirationChecksCurrentProtection(isProtectedAtExpiration: Bool) async {
-        var activities: [TestActivity] = []
-        var isProtected = !isProtectedAtExpiration
-        var cleanupCount = 0
-        let owner = UploadBackgroundActivity(makeActivity: { delegate in
-            let activity = TestActivity(delegate: delegate)
-            activities.append(activity)
-            return activity
-        }, shouldPauseUploads: {
-            !isProtected
-        }, pauseUploads: {
-            cleanupCount += 1
-        })
+            owner.update(hasWork: true)
+            #expect(activities.count == 2)
+            activities[0].delegate?.backgroundActivityExpiring()
+            await drainCallbacks()
+            #expect(cleanupCount == 1)
+            #expect(activities[1].ends == 0)
+            owner.update(hasWork: false)
+        }
 
-        owner.update(hasWork: true)
-        isProtected = isProtectedAtExpiration
-        activities[0].delegate?.backgroundActivityExpiring()
-        await drainCallbacks()
+        @Test(arguments: [false, true])
+        func expirationChecksCurrentProtection(isProtectedAtExpiration: Bool) async {
+            var activities: [TestActivity] = []
+            var isProtected = !isProtectedAtExpiration
+            var cleanupCount = 0
+            let owner = UploadBackgroundActivity(makeActivity: { delegate in
+                let activity = TestActivity(delegate: delegate)
+                activities.append(activity)
+                return activity
+            }, shouldPauseUploads: {
+                !isProtected
+            }, pauseUploads: {
+                cleanupCount += 1
+            })
 
-        #expect(cleanupCount == (isProtectedAtExpiration ? 0 : 1))
-        #expect(activities[0].ends == 1)
+            owner.update(hasWork: true)
+            isProtected = isProtectedAtExpiration
+            activities[0].delegate?.backgroundActivityExpiring()
+            await drainCallbacks()
 
-        activities[0].delegate?.backgroundActivityExpiring()
-        await drainCallbacks()
-        #expect(cleanupCount == (isProtectedAtExpiration ? 0 : 1))
-        #expect(activities[0].ends == 1)
+            #expect(cleanupCount == (isProtectedAtExpiration ? 0 : 1))
+            #expect(activities[0].ends == 1)
 
-        owner.update(hasWork: true)
-        #expect(activities.count == 2)
-        owner.update(hasWork: false)
-    }
+            activities[0].delegate?.backgroundActivityExpiring()
+            await drainCallbacks()
+            #expect(cleanupCount == (isProtectedAtExpiration ? 0 : 1))
+            #expect(activities[0].ends == 1)
 
-    @Test(arguments: [false, true])
-    func expirationReschedulesBothQueues(hasContinuedProtection: Bool) async throws {
-        let savedFactories = SimpleResolver.sharedResolver.factories
-        let savedServices = SimpleResolver.sharedResolver.store
-        defer {
+            owner.update(hasWork: true)
+            #expect(activities.count == 2)
+            owner.update(hasWork: false)
+        }
+
+        @Test(arguments: [false, true])
+        func expirationReschedulesBothQueues(hasContinuedProtection: Bool) async throws {
+            let savedFactories = SimpleResolver.sharedResolver.factories
+            let savedServices = SimpleResolver.sharedResolver.store
+            defer {
+                TestTargetAssemblyHelper.clearRegisteredTypes()
+                SimpleResolver.sharedResolver.factories = savedFactories
+                SimpleResolver.sharedResolver.store = savedServices
+            }
             TestTargetAssemblyHelper.clearRegisteredTypes()
             SimpleResolver.sharedResolver.factories = savedFactories
-            SimpleResolver.sharedResolver.store = savedServices
-        }
-        TestTargetAssemblyHelper.clearRegisteredTypes()
-        SimpleResolver.sharedResolver.factories = savedFactories
-        SimpleResolver.sharedResolver.store(factory: Factory(type: AppContextServiceable.self) { _, _ in
-            AppContextService(context: .appTests)
-        })
-        let configuration = Realm.Configuration(inMemoryIdentifier: UUID().uuidString)
-        let realm = try await Realm(configuration: configuration, actor: MainActor.shared)
-        let database = TransactionExecutor(realmAccessible: RealmAccessor(
-            realmURL: nil, realmConfiguration: configuration, excludeFromBackup: false
-        ))
-        SimpleResolver.sharedResolver.store(factory: Factory(type: Transactionable.self) { _, _ in
-            database
-        }, forCustomTypeIdentifier: kDriveDBID.uploads)
-        let globalQueue = UploadQueue(queueCoordinationDelegate: nil)
-        let photoQueue = UploadQueue(queueCoordinationDelegate: nil)
-        for (identifier, queue) in [(UploadQueueID.global, globalQueue), (UploadQueueID.photo, photoQueue)] {
-            queue.suspendAllOperations()
-            SimpleResolver.sharedResolver.store(factory: Factory(type: UploadQueueable.self) { _, _ in queue },
-                                                forCustomTypeIdentifier: identifier)
-        }
-        let notifications = ExpirationNotificationsHelper()
-        SimpleResolver.sharedResolver.store(factory: Factory(type: NotificationsHelpable.self) { _, _ in notifications })
-        SimpleResolver.sharedResolver.store(factory: Factory(type: AccountManageable.self) { _, _ in
-            ExpirationAccountManager()
-        })
-        SimpleResolver.sharedResolver.store.removeAll()
-        let service = UploadService()
-        service.blockingRebuildUploadQueue()
-
-        let completion = DynamicIslandTaskCompletion()
-        let unavailableService = UnavailableDynamicIslandService()
-        #expect(!unavailableService.isProtectingUploads)
-        SimpleResolver.sharedResolver.store(factory: Factory(type: UploadNotifiable.self) { _, _ in service })
-        let photoUploader = PhotoLibraryUploader()
-        let settings = PhotoSyncSettings()
-        settings.wifiSync = .wifiAndMobileData
-        try database.writeTransaction { $0.add(settings) }
-        SimpleResolver.sharedResolver.store(factory: Factory(type: PhotoLibraryUploadable.self) { _, _ in photoUploader })
-
-        let file = UploadFile()
-        file.name = "background-upload"
-        file.userId = 1
-        file.driveId = 1
-        file.ownedByFileProvider = true
-        let sourceURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try Data(count: Int(Constants.smallFileMaxSize)).write(to: sourceURL)
-        defer { try? FileManager.default.removeItem(at: sourceURL) }
-        file.pathURL = sourceURL
-        let session = UploadingSessionTask()
-        session.sessionExpiration = .distantFuture
-        session.uploadSession = UploadSession()
-        session.uploadSession?.uploadHost = "example.invalid"
-        let chunk = UploadingChunkTask()
-        chunk.range = 0 ... 0
-        chunk.sha256 = "test-hash"
-        session.chunkTasks.append(chunk)
-        file.uploadingSession = session
-        try database.writeTransaction { $0.add(file) }
-        let networkConfiguration = URLSessionConfiguration.ephemeral
-        networkConfiguration.protocolClasses = [ExpirationURLProtocol.self]
-        let networkSession = URLSession(configuration: networkConfiguration)
-        defer { networkSession.invalidateAndCancel() }
-        let photo = UploadFile()
-        photo.name = file.name
-        photo.userId = file.userId
-        photo.driveId = file.driveId
-        photo.pathURL = sourceURL
-        photo.ownedByFileProvider = true
-        let photoSession = UploadingSessionTask()
-        photoSession.sessionExpiration = .distantFuture
-        photoSession.uploadSession = UploadSession()
-        photoSession.uploadSession?.uploadHost = "example.invalid"
-        let photoChunk = UploadingChunkTask()
-        photoChunk.range = 0 ... 0
-        photoChunk.sha256 = "test-hash"
-        photoSession.chunkTasks.append(photoChunk)
-        photo.uploadingSession = photoSession
-        photo.setValue(UploadFileType.phAsset.rawValue, forKey: "rawType")
-        try database.writeTransaction { $0.add(photo) }
-        let operations = [file, photo].map { UploadOperation(uploadFileId: $0.id, urlSession: networkSession) }
-        for (queue, operation) in zip([globalQueue, photoQueue], operations) {
-            queue.operationQueue.addOperation(operation)
-            queue.operationQueue.isSuspended = false
-        }
-        defer {
-            globalQueue.cancelAllOperations()
-            photoQueue.cancelAllOperations()
-        }
-        let deadline = ContinuousClock.now.advanced(by: .seconds(5))
-        while operations.contains(where: { $0.uploadTasks.isEmpty && !$0.isFinished }), ContinuousClock.now < deadline {
-            try await Task.sleep(for: .milliseconds(10))
-        }
-        let networkTasks = try operations.map { operation in
-            #expect(operation.isExecuting)
-            var uploadTasks = operation.uploadTasks.makeIterator()
-            return try #require(uploadTasks.next()?.value)
-        }
-
-        var activities: [TestActivity] = []
-        let owner = UploadBackgroundActivity(makeActivity: { delegate in
-            let activity = TestActivity(delegate: delegate)
-            activities.append(activity)
-            return activity
-        }, shouldPauseUploads: {
-            !(hasContinuedProtection && completion.result == nil)
-        }, pauseUploads: {
-            await service.pauseForBackgroundExpiration()
-        })
-        owner.update(hasWork: true)
-        activities[0].delegate?.backgroundActivityExpiring()
-        await drainCallbacks()
-        if hasContinuedProtection {
-            #expect(activities[0].ends == 1)
-            #expect(notifications.pausedCount == 0)
-            for (file, operation) in zip([file, photo], operations) {
-                #expect(file.error == nil)
-                #expect(operation.isExecuting)
+            SimpleResolver.sharedResolver.store(factory: Factory(type: AppContextServiceable.self) { _, _ in
+                AppContextService(context: .appTests)
+            })
+            let configuration = Realm.Configuration(inMemoryIdentifier: UUID().uuidString)
+            let realm = try await Realm(configuration: configuration, actor: MainActor.shared)
+            let database = TransactionExecutor(realmAccessible: RealmAccessor(
+                realmURL: nil, realmConfiguration: configuration, excludeFromBackup: false
+            ))
+            SimpleResolver.sharedResolver.store(factory: Factory(type: Transactionable.self) { _, _ in
+                database
+            }, forCustomTypeIdentifier: kDriveDBID.uploads)
+            let globalQueue = UploadQueue(queueCoordinationDelegate: nil)
+            let photoQueue = UploadQueue(queueCoordinationDelegate: nil)
+            for (identifier, queue) in [(UploadQueueID.global, globalQueue), (UploadQueueID.photo, photoQueue)] {
+                queue.suspendAllOperations()
+                SimpleResolver.sharedResolver.store(factory: Factory(type: UploadQueueable.self) { _, _ in queue },
+                                                    forCustomTypeIdentifier: identifier)
             }
-            for task in networkTasks {
-                #expect(task.state == .running)
+            let notifications = ExpirationNotificationsHelper()
+            SimpleResolver.sharedResolver.store(factory: Factory(type: NotificationsHelpable.self) { _, _ in notifications })
+            SimpleResolver.sharedResolver.store(factory: Factory(type: AccountManageable.self) { _, _ in
+                ExpirationAccountManager()
+            })
+            SimpleResolver.sharedResolver.store.removeAll()
+            let service = UploadService()
+            service.blockingRebuildUploadQueue()
+
+            let completion = DynamicIslandTaskCompletion()
+            let unavailableService = UnavailableDynamicIslandService()
+            #expect(!unavailableService.isProtectingUploads)
+            SimpleResolver.sharedResolver.store(factory: Factory(type: UploadNotifiable.self) { _, _ in service })
+            let photoUploader = PhotoLibraryUploader()
+            let settings = PhotoSyncSettings()
+            settings.wifiSync = .wifiAndMobileData
+            try database.writeTransaction { $0.add(settings) }
+            SimpleResolver.sharedResolver.store(factory: Factory(type: PhotoLibraryUploadable.self) { _, _ in photoUploader })
+
+            let file = UploadFile()
+            file.name = "background-upload"
+            file.userId = 1
+            file.driveId = 1
+            file.ownedByFileProvider = true
+            let sourceURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try Data(count: Int(Constants.smallFileMaxSize)).write(to: sourceURL)
+            defer { try? FileManager.default.removeItem(at: sourceURL) }
+            file.pathURL = sourceURL
+            let session = UploadingSessionTask()
+            session.sessionExpiration = .distantFuture
+            session.uploadSession = UploadSession()
+            session.uploadSession?.uploadHost = "example.invalid"
+            let chunk = UploadingChunkTask()
+            chunk.range = 0 ... 0
+            chunk.sha256 = "test-hash"
+            session.chunkTasks.append(chunk)
+            file.uploadingSession = session
+            try database.writeTransaction { $0.add(file) }
+            let networkConfiguration = URLSessionConfiguration.ephemeral
+            networkConfiguration.protocolClasses = [ExpirationURLProtocol.self]
+            let networkSession = URLSession(configuration: networkConfiguration)
+            defer { networkSession.invalidateAndCancel() }
+            let photo = UploadFile()
+            photo.name = file.name
+            photo.userId = file.userId
+            photo.driveId = file.driveId
+            photo.pathURL = sourceURL
+            photo.ownedByFileProvider = true
+            let photoSession = UploadingSessionTask()
+            photoSession.sessionExpiration = .distantFuture
+            photoSession.uploadSession = UploadSession()
+            photoSession.uploadSession?.uploadHost = "example.invalid"
+            let photoChunk = UploadingChunkTask()
+            photoChunk.range = 0 ... 0
+            photoChunk.sha256 = "test-hash"
+            photoSession.chunkTasks.append(photoChunk)
+            photo.uploadingSession = photoSession
+            photo.setValue(UploadFileType.phAsset.rawValue, forKey: "rawType")
+            try database.writeTransaction { $0.add(photo) }
+            let operations = [file, photo].map { UploadOperation(uploadFileId: $0.id, urlSession: networkSession) }
+            for (queue, operation) in zip([globalQueue, photoQueue], operations) {
+                queue.operationQueue.addOperation(operation)
+                queue.operationQueue.isSuspended = false
             }
-            await completion.complete(with: .failure(ExpirationError.expired)) {
-                await service.pauseForBackgroundExpiration()
+            defer {
+                globalQueue.cancelAllOperations()
+                photoQueue.cancelAllOperations()
             }
-        } else {
-            let cleanupDeadline = ContinuousClock.now.advanced(by: .seconds(5))
-            while activities[0].ends == 0, ContinuousClock.now < cleanupDeadline {
+            let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+            while operations.contains(where: { $0.uploadTasks.isEmpty && !$0.isFinished }), ContinuousClock.now < deadline {
                 try await Task.sleep(for: .milliseconds(10))
             }
-        }
-        realm.refresh()
-        #expect(activities[0].ends == 1)
-        #expect(notifications.pausedCount == 1)
-        #expect(globalQueue.isSuspended)
-        #expect(photoQueue.isSuspended)
-        for (file, operation) in zip([file, photo], operations) {
-            #expect(operation.isFinished)
-            #expect(file.error == .taskRescheduled)
-            #expect(file.uploadingSession?.chunkTasks.first?.error == .taskRescheduled)
-            #expect(!file.ownedByFileProvider)
-        }
-        for task in networkTasks {
-            #expect(task.state == .canceling || task.state == .completed)
-        }
-
-        service.setPausedNotificationSent(false)
-        await withTaskGroup(of: Void.self) { group in
-            for _ in 0 ..< 100 {
-                group.addTask { await service.sendPausedNotificationIfNeeded() }
+            let networkTasks = try operations.map { operation in
+                #expect(operation.isExecuting)
+                var uploadTasks = operation.uploadTasks.makeIterator()
+                return try #require(uploadTasks.next()?.value)
             }
-        }
-        #expect(notifications.pausedCount == 2)
-        #expect(service.pausedNotificationSent)
-    }
 
-    private func drainCallbacks() async {
-        await withCheckedContinuation { continuation in
-            DispatchQueue.main.async { continuation.resume() }
+            var activities: [TestActivity] = []
+            let owner = UploadBackgroundActivity(makeActivity: { delegate in
+                let activity = TestActivity(delegate: delegate)
+                activities.append(activity)
+                return activity
+            }, shouldPauseUploads: {
+                !(hasContinuedProtection && completion.result == nil)
+            }, pauseUploads: {
+                await service.pauseForBackgroundExpiration()
+            })
+            owner.update(hasWork: true)
+            activities[0].delegate?.backgroundActivityExpiring()
+            await drainCallbacks()
+            if hasContinuedProtection {
+                #expect(activities[0].ends == 1)
+                #expect(notifications.pausedCount == 0)
+                for (file, operation) in zip([file, photo], operations) {
+                    #expect(file.error == nil)
+                    #expect(operation.isExecuting)
+                }
+                for task in networkTasks {
+                    #expect(task.state == .running)
+                }
+                await completion.complete(with: .failure(ExpirationError.expired)) {
+                    await service.pauseForBackgroundExpiration()
+                }
+            } else {
+                let cleanupDeadline = ContinuousClock.now.advanced(by: .seconds(5))
+                while activities[0].ends == 0, ContinuousClock.now < cleanupDeadline {
+                    try await Task.sleep(for: .milliseconds(10))
+                }
+            }
+            realm.refresh()
+            #expect(activities[0].ends == 1)
+            #expect(notifications.pausedCount == 1)
+            #expect(globalQueue.isSuspended)
+            #expect(photoQueue.isSuspended)
+            for (file, operation) in zip([file, photo], operations) {
+                #expect(operation.isFinished)
+                #expect(file.error == .taskRescheduled)
+                #expect(file.uploadingSession?.chunkTasks.first?.error == .taskRescheduled)
+                #expect(!file.ownedByFileProvider)
+            }
+            for task in networkTasks {
+                #expect(task.state == .canceling || task.state == .completed)
+            }
+
+            service.setPausedNotificationSent(false)
+            await withTaskGroup(of: Void.self) { group in
+                for _ in 0 ..< 100 {
+                    group.addTask { await service.sendPausedNotificationIfNeeded() }
+                }
+            }
+            #expect(notifications.pausedCount == 2)
+            #expect(service.pausedNotificationSent)
+        }
+
+        private func drainCallbacks() async {
+            await withCheckedContinuation { continuation in
+                DispatchQueue.main.async { continuation.resume() }
+            }
         }
     }
 }

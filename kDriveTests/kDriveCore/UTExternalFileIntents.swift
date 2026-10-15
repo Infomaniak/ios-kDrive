@@ -27,75 +27,81 @@ import RealmSwift
 import Testing
 import UniformTypeIdentifiers
 
-@Suite(.serialized)
-@MainActor
-struct UTExternalFileIntents {
-    @available(iOS 18.4, *)
-    @Test func externalImportSurvivesSourceRemovalDatabaseReopenAndCacheCleanup() async throws {
-        let fixture = try ExternalIntentFixture()
-        defer { fixture.tearDown() }
-        let contents = Data("External provider contents".utf8)
-        let sourceURL = fixture.paths.groupDirectoryURL.appendingPathComponent("Original name.txt")
-        try contents.write(to: sourceURL)
-        let identifier = try FileEntityIdentifier.file(url: sourceURL)
-        let entities = try await KDriveFileEntity.defaultQuery.entities(for: [identifier])
-        let entity = try #require(entities.first)
-        #expect(entities.count == 1)
-        #expect(entity.isExternal)
+extension ResolverTests {
+    @Suite
+    @MainActor
+    struct UTExternalFileIntents {
+        @available(iOS 18.4, *)
+        @Test func externalImportSurvivesSourceRemovalDatabaseReopenAndCacheCleanup() async throws {
+            let fixture = try ExternalIntentFixture()
+            defer { fixture.tearDown() }
+            let contents = Data("External provider contents".utf8)
+            let sourceURL = fixture.paths.groupDirectoryURL.appendingPathComponent("Original name.txt")
+            try contents.write(to: sourceURL)
+            let identifier = try FileEntityIdentifier.file(url: sourceURL)
+            let entities = try await KDriveFileEntity.defaultQuery.entities(for: [identifier])
+            let entity = try #require(entities.first)
+            #expect(entities.count == 1)
+            #expect(entity.isExternal)
 
-        let intent = MoveFilesIntent()
-        intent.entities = [entity]
-        intent.destinationFolder = try await fixture.destinationEntity()
-        _ = try await intent.perform()
+            let intent = MoveFilesIntent()
+            intent.entities = [entity]
+            intent.destinationFolder = try await fixture.destinationEntity()
+            _ = try await intent.perform()
 
-        let reopenedRealm = try await Realm(configuration: fixture.uploads.configuration, actor: MainActor.shared)
-        let upload = try #require(reopenedRealm.objects(UploadFile.self).first)
-        #expect(reopenedRealm.objects(UploadFile.self).count == 1)
-        #expect(fixture.uploads.queuedUploadIds == [upload.id])
-        #expect(upload.name == sourceURL.lastPathComponent)
-        #expect(upload.userId == fixture.drive.userId)
-        #expect(upload.driveId == fixture.drive.id)
-        #expect(upload.parentDirectoryId == fixture.destination.id)
-        #expect(upload.uploadDate == nil)
-        let importURL = try #require(upload.pathURL)
-        let importDirectoryPath = fixture.paths.importDirectoryURL.standardizedFileURL.path + "/"
-        try #require(importURL.standardizedFileURL.path.hasPrefix(importDirectoryPath))
-        #expect(importURL.standardizedFileURL != sourceURL.standardizedFileURL)
-        #expect(try Data(contentsOf: importURL) == contents)
+            let reopenedRealm = try await Realm(configuration: fixture.uploads.configuration, actor: MainActor.shared)
+            let upload = try #require(reopenedRealm.objects(UploadFile.self).first)
+            #expect(reopenedRealm.objects(UploadFile.self).count == 1)
+            #expect(fixture.uploads.queuedUploadIds == [upload.id])
+            #expect(upload.name == sourceURL.lastPathComponent)
+            #expect(upload.userId == fixture.drive.userId)
+            #expect(upload.driveId == fixture.drive.id)
+            #expect(upload.parentDirectoryId == fixture.destination.id)
+            #expect(upload.uploadDate == nil)
+            let importURL = try #require(upload.pathURL)
+            let importDirectoryPath = fixture.paths.importDirectoryURL.standardizedFileURL.path + "/"
+            try #require(importURL.standardizedFileURL.path.hasPrefix(importDirectoryPath))
+            #expect(importURL.standardizedFileURL != sourceURL.standardizedFileURL)
+            #expect(try Data(contentsOf: importURL) == contents)
 
-        // Simulate losing access to the provider source before the queued upload starts.
-        try FileManager.default.removeItem(at: sourceURL)
-        let orphanURL = fixture.paths.importDirectoryURL.appendingPathComponent("orphan.txt")
-        try Data("unused".utf8).write(to: orphanURL)
-        FreeSpaceService().cleanOrphanImportFolderFiles(in: fixture.paths.importDirectoryURL)
+            // Simulate losing access to the provider source before the queued upload starts.
+            try FileManager.default.removeItem(at: sourceURL)
+            let orphanURL = fixture.paths.importDirectoryURL.appendingPathComponent("orphan.txt")
+            try Data("unused".utf8).write(to: orphanURL)
+            FreeSpaceService().cleanOrphanImportFolderFiles(in: fixture.paths.importDirectoryURL)
 
-        #expect(!FileManager.default.fileExists(atPath: orphanURL.path))
-        #expect(try Data(contentsOf: importURL) == contents)
-        #expect(upload.name == "Original name.txt")
-    }
+            #expect(!FileManager.default.fileExists(atPath: orphanURL.path))
+            #expect(try Data(contentsOf: importURL) == contents)
+            #expect(upload.name == "Original name.txt")
+        }
 
-    @available(iOS 18.4, *)
-    @Test func externalFoldersAreExcludedWithoutDroppingRegularFilesOrNativeFolders() async throws {
-        let fixture = try ExternalIntentFixture()
-        defer { fixture.tearDown() }
-        let folderURL = fixture.paths.groupDirectoryURL.appendingPathComponent("External folder", isDirectory: true)
-        try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
-        let fileURL = folderURL.appendingPathComponent("File without extension")
-        try Data("regular file".utf8).write(to: fileURL)
-        let folderIdentifier = try FileEntityIdentifier.file(url: folderURL)
-        let fileIdentifier = try FileEntityIdentifier.file(url: fileURL)
-        let nativeFolder = try await fixture.destinationEntity()
+        @available(iOS 18.4, *)
+        @Test func externalFoldersAreExcludedWithoutDroppingRegularFilesOrNativeFolders() async throws {
+            let fixture = try ExternalIntentFixture()
+            defer { fixture.tearDown() }
+            let folderURL = fixture.paths.groupDirectoryURL.appendingPathComponent("External folder", isDirectory: true)
+            try FileManager.default.createDirectory(at: folderURL, withIntermediateDirectories: true)
+            let fileURL = folderURL.appendingPathComponent("File without extension")
+            try Data("regular file".utf8).write(to: fileURL)
+            let folderIdentifier = try FileEntityIdentifier.file(url: folderURL)
+            let fileIdentifier = try FileEntityIdentifier.file(url: fileURL)
+            let nativeFolder = try await fixture.destinationEntity()
 
-        let entities = try await KDriveFileEntity.defaultQuery.entities(for: [folderIdentifier, fileIdentifier, nativeFolder.id])
+            let entities = try await KDriveFileEntity.defaultQuery.entities(for: [
+                folderIdentifier,
+                fileIdentifier,
+                nativeFolder.id
+            ])
 
-        #expect(entities.count == 2)
-        #expect(!entities.contains { $0.id == folderIdentifier })
-        #expect(entities.contains { $0.id == fileIdentifier && $0.isExternal })
-        let resolvedFolder = try #require(entities.first { $0.id == nativeFolder.id })
-        #expect(!resolvedFolder.isExternal)
-        #expect(resolvedFolder.contentTypeIdentifier == UTType.folder.identifier)
-        #expect(try resolvedFolder.resolveCache().file.isDirectory)
-        #expect(fixture.uploads.getAllUploadingFilesFrozen().isEmpty)
+            #expect(entities.count == 2)
+            #expect(!entities.contains { $0.id == folderIdentifier })
+            #expect(entities.contains { $0.id == fileIdentifier && $0.isExternal })
+            let resolvedFolder = try #require(entities.first { $0.id == nativeFolder.id })
+            #expect(!resolvedFolder.isExternal)
+            #expect(resolvedFolder.contentTypeIdentifier == UTType.folder.identifier)
+            #expect(try resolvedFolder.resolveCache().file.isDirectory)
+            #expect(fixture.uploads.getAllUploadingFilesFrozen().isEmpty)
+        }
     }
 }
 
