@@ -99,6 +99,18 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        if #available(iOS 27.1, *) {
+            view.addInteraction(UIHingeInteraction { _, update in
+                guard let status = update.hinge?.status, status != .unknown else { return }
+                AlertViewController.isHingePartiallyOpen = status == .partiallyOpen
+                MainTabViewController.isHingeClosed = status == .closed
+            })
+        }
+    }
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         @InjectService var appRouter: AppNavigable
         super.traitCollectionDidChange(previousTraitCollection)
@@ -289,7 +301,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     private var buttonAdd: UIButton?
     private var mediaHelper: OpenMediaHelper?
-    private(set) var isHingeClosed = false
+    @MainActor static var isHingeClosed = false
 
     var legacyTabBarActive: Bool {
         if #available(iOS 26.0, *) {
@@ -344,18 +356,6 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
         delegate = self
         photoPickerDelegate.viewController = self
-
-        if #available(iOS 27.1, *) {
-            view.addInteraction(UIHingeInteraction { [weak self] _, update in
-                guard let self,
-                      let hinge = update.hinge,
-                      hinge.status != .unknown
-                else {
-                    return
-                }
-                isHingeClosed = hinge.status == .closed
-            })
-        }
     }
 
     override func viewWillLayoutSubviews() {

@@ -26,6 +26,8 @@ import UIKit
  `AlertTextViewController`, `AlertFieldViewController`, `AlertChoiceViewController`, or `AlertDocViewController`
  */
 open class AlertViewController: UIViewController {
+    @MainActor public static var isHingePartiallyOpen = false
+
     private let actionString: String
     private let hasCancelButton: Bool
     private let cancelString: String?
@@ -57,7 +59,7 @@ open class AlertViewController: UIViewController {
         self.cancelHandler = cancelHandler
         super.init(nibName: nil, bundle: nil)
         self.title = title
-        modalPresentationStyle = .overFullScreen
+        modalPresentationStyle = Self.isHingePartiallyOpen ? .overCurrentContext : .overFullScreen
         modalTransitionStyle = .crossDissolve
     }
 
@@ -115,7 +117,7 @@ open class AlertViewController: UIViewController {
         }
 
         // Constraints
-        centerConstraint = alertView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        centerConstraint = alertView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
         centerConstraint.isActive = true
         let leading = alertView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24)
         leading.priority = UILayoutPriority(499)
@@ -124,7 +126,7 @@ open class AlertViewController: UIViewController {
         trailing.priority = UILayoutPriority(499)
         trailing.isActive = true
         var constraints = [
-            alertView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            alertView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             alertView.widthAnchor.constraint(greaterThanOrEqualToConstant: 272),
             alertView.widthAnchor.constraint(lessThanOrEqualToConstant: 400),
             alertView.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),

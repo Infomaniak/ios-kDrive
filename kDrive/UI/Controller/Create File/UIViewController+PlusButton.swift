@@ -63,7 +63,7 @@ extension UIViewController {
         )
 
         #if !ISEXTENSION
-        if (tabBarController as? MainTabViewController)?.isHingeClosed == true {
+        if MainTabViewController.isHingeClosed {
             setPlusVisible(addItem: addItem, visible: true)
         }
         #endif
