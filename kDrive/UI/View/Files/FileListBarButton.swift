@@ -40,7 +40,6 @@ final class FileListBarButton: UIBarButtonItem {
             self.init(barButtonSystemItem: .search, target: target, action: action)
         case .emptyTrash:
             self.init(title: KDriveResourcesStrings.Localizable.buttonEmptyTrash, style: .plain, target: target, action: action)
-            image = KDriveResourcesAsset.delete.image
         case .searchFilters:
             self.init(image: KDriveResourcesAsset.filter.image, style: .plain, target: target, action: action)
             accessibilityLabel = KDriveResourcesStrings.Localizable.filtersTitle

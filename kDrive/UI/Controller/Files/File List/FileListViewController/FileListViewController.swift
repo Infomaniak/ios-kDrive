@@ -266,7 +266,17 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
         guard items != (navigationItem.rightBarButtonItems ?? []) else { return }
 
+        if let emptyTrashButton = barButtons.first(where: { ($0 as? FileListBarButton)?.type == .emptyTrash }) {
+            if #available(iOS 27.1, *),
+               traitCollection.verticalBarEdge != .unspecified {
+                emptyTrashButton.image = KDriveResourcesAsset.delete.image
+            } else {
+                emptyTrashButton.image = nil
+            }
+        }
+
         navigationItem.rightBarButtonItems = items
+        view.layoutIfNeeded()
         #endif
     }
 
