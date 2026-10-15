@@ -50,8 +50,7 @@ public class SelfSizingSheetHelper {
 
                 var totalPanelContentHeight = scrollView.contentSize.height
                 if self?.viewController?.traitCollection.horizontalSizeClass == .compact,
-                   totalPanelContentHeight > 80
-                {
+                   totalPanelContentHeight > 80 {
                     scrollView.contentInset.top = IKPadding.medium
                     totalPanelContentHeight += scrollView.contentInset.top
                 }

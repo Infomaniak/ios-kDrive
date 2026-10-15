@@ -152,9 +152,8 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         }
 
         if #available(iOS 27.1, *) {
-            let isInsideSearchNavigationStack: Bool = {
-                self.navigationController?.viewControllers.contains { $0 is SearchViewController } == true
-            }()
+            let isInsideSearchNavigationStack: Bool =
+                navigationController?.viewControllers.contains { $0 is SearchViewController } == true
             guard viewModel.currentDirectory.id >= DriveFileManager.constants.rootID,
                   !viewModel.currentDirectory.isTrashed,
                   viewModel.currentDirectory.capabilities.canCreateFile,
@@ -259,7 +258,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         var items = barButtons.filter { $0 != plusBarButtonItem }
 
         if hasHinge,
-            splitViewController?.traitCollection.horizontalSizeClass == .compact,
+           splitViewController?.traitCollection.horizontalSizeClass == .compact,
            let plusBarButtonItem {
             items.insert(plusBarButtonItem, at: 0)
         }

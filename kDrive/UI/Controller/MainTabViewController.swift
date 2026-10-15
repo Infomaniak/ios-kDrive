@@ -600,7 +600,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 }
 
-// - MARK: MainTabBarDelegate
+/// - MARK: MainTabBarDelegate
 extension MainTabViewController: MainTabBarDelegate {
     func plusButtonPressed() {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
@@ -615,7 +615,6 @@ extension MainTabViewController: MainTabBarDelegate {
         )
 
         mediaHelper = plusButtonFloatingPanel.mediaHelper
-
     }
 
     func avatarLongTouch() {
