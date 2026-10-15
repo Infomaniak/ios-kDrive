@@ -168,12 +168,18 @@ extension PreviewViewController {
             } else {
                 placement = .automatic
             }
-            if sheet.preferredPlacement != placement {
+            let detents = fileActionsDetents
+            let canExpand = presentationOrigin != .activities
+            let undimmedIdentifier: UISheetPresentationController.Detent.Identifier =
+                canExpand && previewLayout != .stacked ? .large : .medium
+
+            if sheet.preferredPlacement != placement
+                || sheet.detents.map(\.identifier) != detents.map(\.identifier)
+                || sheet.largestUndimmedDetentIdentifier != undimmedIdentifier {
                 updatePlacement = {
                     sheet.preferredPlacement = placement
-                    sheet.detents = self.fileActionsDetents
-                    let canExpand = self.presentationOrigin != .activities
-                    sheet.largestUndimmedDetentIdentifier = canExpand && self.previewLayout != .stacked ? .large : .medium
+                    sheet.detents = detents
+                    sheet.largestUndimmedDetentIdentifier = undimmedIdentifier
                 }
             }
         }
