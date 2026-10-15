@@ -124,8 +124,9 @@ extension ResolverTests {
             owner.update(hasWork: false)
         }
 
-        @Test(arguments: [false, true])
-        func expirationReschedulesBothQueues(hasContinuedProtection: Bool) async throws {
+        @Test(arguments: [UploadTermination.legacyExpiration, .continuedExpiration, .uploadError])
+        func expirationReschedulesBothQueues(termination: UploadTermination) async throws {
+            let hasContinuedProtection = termination != .legacyExpiration
             let savedFactories = SimpleResolver.sharedResolver.factories
             let savedServices = SimpleResolver.sharedResolver.store
             defer {
@@ -254,8 +255,22 @@ extension ResolverTests {
                 for task in networkTasks {
                     #expect(task.state == .running)
                 }
-                await completion.complete(with: .failure(ExpirationError.expired)) {
+                if termination == .uploadError {
+                    SimpleResolver.sharedResolver.store(factory: Factory(type: DynamicIslandServiceable.self) { _, _ in
+                        UnavailableDynamicIslandService()
+                    })
+                    await operations[0].catching {
+                        throw DriveError.quotaExceeded
+                    }
+                    realm.refresh()
+                    #expect(file.error == .quotaExceeded)
+                    #expect(operations[1].isExecuting)
+                    completion.complete(with: .failure(DriveError.quotaExceeded))
                     await service.pauseForBackgroundExpiration()
+                } else {
+                    await completion.complete(with: .failure(ExpirationError.expired)) {
+                        await service.pauseForBackgroundExpiration()
+                    }
                 }
             } else {
                 let cleanupDeadline = ContinuousClock.now.advanced(by: .seconds(5))
@@ -270,6 +285,11 @@ extension ResolverTests {
             #expect(photoQueue.isSuspended)
             for (file, operation) in zip([file, photo], operations) {
                 #expect(operation.isFinished)
+                if termination == .uploadError && file.id == operations[0].uploadFileId {
+                    #expect(file.error == .quotaExceeded)
+                    #expect(file.maxRetryCount == 0)
+                    continue
+                }
                 #expect(file.error == .taskRescheduled)
                 #expect(file.uploadingSession?.chunkTasks.first?.error == .taskRescheduled)
                 #expect(!file.ownedByFileProvider)
@@ -294,6 +314,12 @@ extension ResolverTests {
             }
         }
     }
+}
+
+enum UploadTermination {
+    case legacyExpiration
+    case continuedExpiration
+    case uploadError
 }
 
 private enum ExpirationError: Error {

@@ -271,6 +271,7 @@ public class DynamicIslandService: DynamicIslandServiceable {
         task.updateTitle(title, subtitle: subtitle)
 
         if (error as? DomainError) != .expiredTask {
+            await uploadService.pauseForBackgroundExpiration()
             try? await Task.sleep(for: .seconds(5))
         }
         task.setTaskCompleted(success: (error as? DomainError) == .expiredTask)
