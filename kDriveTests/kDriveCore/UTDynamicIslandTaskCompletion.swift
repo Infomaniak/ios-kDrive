@@ -117,4 +117,35 @@ struct UTDynamicIslandTaskCompletion {
             next.complete(with: .success(()))
         }
     }
+
+    @Test func expirationWaitsForCleanupAndRejectsCompetingCallbacks() async {
+        let completion = DynamicIslandTaskCompletion()
+        var cleanup: CheckedContinuation<Void, Never>?
+        var cleanupCount = 0
+        let expiration = Task {
+            await completion.complete(with: .failure(TestError.expiration)) {
+                cleanupCount += 1
+                await withCheckedContinuation { cleanup = $0 }
+            }
+        }
+        await withCheckedContinuation { continuation in
+            DispatchQueue.main.async { continuation.resume() }
+        }
+
+        completion.complete(with: .success(()))
+        completion.complete(with: .failure(TestError.upload))
+        await completion.complete(with: .failure(TestError.expiration)) {
+            cleanupCount += 1
+        }
+        #expect(cleanupCount == 1)
+        #expect(completion.result == nil)
+
+        cleanup?.resume()
+        await expiration.value
+        await #expect(throws: TestError.expiration) {
+            try await withCheckedThrowingContinuation { continuation in
+                completion.install(continuation)
+            }
+        }
+    }
 }

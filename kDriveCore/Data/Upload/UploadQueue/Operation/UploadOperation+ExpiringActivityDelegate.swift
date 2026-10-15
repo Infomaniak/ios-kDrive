@@ -82,7 +82,7 @@ extension UploadOperation: ExpiringActivityDelegate {
                 }
 
                 if notifyPaused {
-                    self.uploadNotifiable.sendPausedNotificationIfNeeded()
+                    await self.uploadNotifiable.sendPausedNotificationIfNeeded()
                 }
 
                 // each and all operations should be given the chance to call backgroundActivityExpiring

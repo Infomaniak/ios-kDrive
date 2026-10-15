@@ -19,6 +19,7 @@
 @MainActor
 final class DynamicIslandTaskCompletion {
     private var continuation: CheckedContinuation<Void, any Error>?
+    private var isCompleting = false
     private(set) var result: Result<Void, any Error>?
 
     func install(_ continuation: CheckedContinuation<Void, any Error>) {
@@ -30,7 +31,19 @@ final class DynamicIslandTaskCompletion {
     }
 
     func complete(with result: Result<Void, any Error>) {
-        guard self.result == nil else { return }
+        guard self.result == nil, !isCompleting else { return }
+        resolve(with: result)
+    }
+
+    /// Claims completion before cleanup, ignoring competing callbacks until the result can safely be delivered.
+    func complete(with result: Result<Void, any Error>, after cleanup: () async -> Void) async {
+        guard self.result == nil, !isCompleting else { return }
+        isCompleting = true
+        await cleanup()
+        resolve(with: result)
+    }
+
+    private func resolve(with result: Result<Void, any Error>) {
         self.result = result
         let continuation = continuation
         self.continuation = nil

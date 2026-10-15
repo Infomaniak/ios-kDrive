@@ -34,6 +34,9 @@ public protocol UploadServiceable {
 
     func suspendAllOperations()
 
+    /// Cancels running chunk requests and persists their rescheduled state before returning, with queues suspended.
+    @MainActor func pauseForBackgroundExpiration() async
+
     func resumeAllOperations()
 
     func waitForCompletion(_ completionHandler: @escaping () -> Void)

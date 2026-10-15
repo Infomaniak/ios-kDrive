@@ -25,6 +25,7 @@ public final class UploadParallelismOrchestrator {
     @LazyInjectService(customTypeIdentifier: UploadQueueID.photo) private var photoUploadQueue: UploadQueueable
     @LazyInjectService private var appContextService: AppContextServiceable
     @LazyInjectService private var dynamicIslandService: DynamicIslandServiceable
+    @LazyInjectService private var uploadService: UploadServiceable
 
     private let serialEventQueue = DispatchQueue(
         label: "com.infomaniak.drive.upload-parallelism-orchestrator.event",
@@ -39,19 +40,7 @@ public final class UploadParallelismOrchestrator {
         self?.dynamicIslandService.isProtectingUploads != true
     }, pauseUploads: { [weak self] in
         guard let self else { return }
-        let queues = self.allQueues
-        let hadUploads = queues.contains { $0.operationCount > 0 }
-        queues.forEach { $0.suspendAllOperations() }
-        let operations = queues.flatMap(\.runningUploadOperations)
-        await withTaskGroup(of: Void.self) { group in
-            for operation in operations {
-                group.addTask { await operation.rescheduleForBackgroundExpiration() }
-            }
-        }
-        if hadUploads {
-            @InjectService var uploadNotifiable: UploadNotifiable
-            uploadNotifiable.sendPausedNotificationIfNeeded()
-        }
+        await self.uploadService.pauseForBackgroundExpiration()
         self.computeUploadParallelismPerQueueAndApply()
     })
 

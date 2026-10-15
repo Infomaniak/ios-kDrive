@@ -109,14 +109,15 @@ public class DynamicIslandService: DynamicIslandServiceable {
         }
     }
 
-    @MainActor private func handleExpiration(completion: DynamicIslandTaskCompletion) {
+    @MainActor private func handleExpiration(completion: DynamicIslandTaskCompletion) async {
         guard uploadContinuationBox === completion, completion.result == nil else { return }
         Self.logger.error("Handling task expiration")
         #if DEBUG
         reportFailure(stage: "Expiration handler (iOS does not provide the expiration reason)", error: DomainError.expiredTask)
         #endif
-        uploadService.suspendAllOperations()
-        completion.complete(with: .failure(DomainError.expiredTask))
+        await completion.complete(with: .failure(DomainError.expiredTask)) {
+            await self.uploadService.pauseForBackgroundExpiration()
+        }
     }
 
     public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
@@ -145,8 +146,8 @@ public class DynamicIslandService: DynamicIslandServiceable {
         currentTask = task
 
         task.expirationHandler = { [weak self] in
-            DispatchQueue.main.async {
-                self?.handleExpiration(completion: completion)
+            Task { @MainActor in
+                await self?.handleExpiration(completion: completion)
             }
         }
 
@@ -269,7 +270,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
         let (title, subtitle) = errorInfo(for: error)
         task.updateTitle(title, subtitle: subtitle)
 
-        try? await Task.sleep(for: .seconds(5))
+        if (error as? DomainError) != .expiredTask {
+            try? await Task.sleep(for: .seconds(5))
+        }
         task.setTaskCompleted(success: (error as? DomainError) == .expiredTask)
     }
 

@@ -80,7 +80,7 @@ public final class UploadService {
             .reduce(0) { $0 + $1.operationCount }
     }
 
-    public var pausedNotificationSent = false
+    @MainActor public internal(set) var pausedNotificationSent = false
 
     public init() {
         rebuildUploadQueue()
@@ -178,6 +178,21 @@ extension UploadService: UploadServiceable {
 
     public func suspendAllOperations() {
         allQueues.forEach { $0.suspendAllOperations() }
+    }
+
+    @MainActor public func pauseForBackgroundExpiration() async {
+        let hadUploads = operationCount > 0
+        suspendAllOperations()
+        let operations = allQueues.flatMap(\.runningUploadOperations)
+        await withTaskGroup(of: Void.self) { group in
+            for operation in operations {
+                group.addTask { await operation.rescheduleForBackgroundExpiration() }
+            }
+        }
+        if hadUploads {
+            @InjectService var uploadNotifiable: UploadNotifiable
+            uploadNotifiable.sendPausedNotificationIfNeeded()
+        }
     }
 
     public func resumeAllOperations() {
