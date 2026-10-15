@@ -92,7 +92,7 @@ public extension UIConstants {
         @InjectService var appRouter: AppNavigable
 
         let snackbar: IKSnackBar?
-        if let contextView = contextView ?? appRouter.rootViewController?.viewIfLoaded {
+        if let contextView = contextView ?? appRouter.topMostViewController?.viewIfLoaded {
             snackbar = IKSnackBar.make(
                 in: contextView,
                 message: message,
