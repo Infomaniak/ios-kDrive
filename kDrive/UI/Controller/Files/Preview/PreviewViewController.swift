@@ -33,6 +33,7 @@ import UIKit
     func setFullscreen(_ fullscreen: Bool?)
     func errorWhilePreviewing(fileId: Int, error: Error)
     func openWith(from: UIView)
+    func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
 }
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
@@ -46,9 +47,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var driveFileManager: DriveFileManager!
     private var normalFolderHierarchy = true
     private var initialLoading = true
-    private var presentationOrigin = PresentationOrigin.fileList
+    var presentationOrigin = PresentationOrigin.fileList
     private var shouldScrollToCurrentIndex = true
-    private var currentIndex = IndexPath(row: 0, section: 0) {
+    var currentIndex = IndexPath(row: 0, section: 0) {
         didSet {
             saveSceneState()
         }
@@ -77,7 +78,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
 
-    private var fileInformationsViewController: FileActionsFloatingPanelViewController!
+    var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
     private var currentFile: File {
         get {
@@ -88,7 +89,48 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private let smallDetent = UISheetPresentationController.Detent.custom(
+        identifier: .init("smallDetent")
+    ) { _ in
+        75
+    }
+
+    private var backgroundExtensionView: UIView?
     private var backgroundExtensionImageView: UIImageView?
+    var lastAppliedBookPreviewLayout: Bool?
+
+    enum PreviewLayout {
+        case standard
+        case sideBySide
+        case stacked
+    }
+
+    var previewLayout = PreviewLayout.standard
+    var isBookPreviewLayout: Bool {
+        previewLayout != .standard
+    }
+
+    var isSidebarVisible: Bool {
+        guard let splitViewController = splitViewController else { return false }
+        switch splitViewController.displayMode {
+        case .oneBesideSecondary, .oneOverSecondary, .twoBesideSecondary, .twoOverSecondary, .twoDisplaceSecondary:
+            return true
+        default:
+            return false
+        }
+    }
+
+    var fileActionsDetents: [UISheetPresentationController.Detent] {
+        if previewLayout == .sideBySide {
+            return [.medium(), .large()]
+        }
+
+        if previewLayout == .stacked {
+            return [.medium()]
+        }
+
+        return presentationOrigin == .activities ? [.medium()] : [smallDetent, .medium(), .large()]
+    }
 
     private func setupBackgroundExtensionView() {
         guard #available(iOS 26.0, *) else { return }
@@ -119,6 +161,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             imageView.bottomAnchor.constraint(equalTo: collectionView.bottomAnchor)
         ])
 
+        backgroundExtensionView = extensionView
         backgroundExtensionImageView = imageView
         updateBackgroundExtensionForCurrentFile()
     }
@@ -132,9 +175,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private var networkObserver: ObservationToken?
-    private var indexBeforeBoundsChange: IndexPath?
+    var indexBeforeBoundsChange: IndexPath?
     private var boundsObserver: NSKeyValueObservation?
-    private var isUpdatingSheetContainer = false
+    var isUpdatingSheetContainer = false
+    var isFileActionsLayoutUpdateScheduled = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -154,7 +198,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             guard let self,
                   let oldSize = change.oldValue?.size,
                   oldSize != collectionView.bounds.size else { return }
-            self.indexBeforeBoundsChange = self.currentIndex
+            self.indexBeforeBoundsChange = self.indexBeforeBoundsChange ?? self.currentIndex
         }
 
         fileInformationsViewController = FileActionsFloatingPanelViewController(
@@ -168,9 +212,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         fileInformationsViewController.modalPresentationStyle = .pageSheet
         fileInformationsViewController.isModalInPresentation = true
         fileInformationsViewController.onPresentationWillAppear = { [weak self] in
-            UIView.performWithoutAnimation {
-                self?.updateSheetContainerFrameIfNeeded()
-            }
+            self?.updateSheetContainerFrameIfNeeded()
         }
 
         pdfPageLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 14), weight: .medium)
@@ -183,6 +225,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         observeFileUpdated()
         setupBackgroundExtensionView()
         updateFileEntityIdentifier()
+
+        if #available(iOS 27.1, *) {
+            view.addInteraction(UIHingeInteraction { [weak self] _, _ in
+                self?.viewIfLoaded?.setNeedsLayout()
+            })
+        }
     }
 
     func createFullscreenLayout() -> UICollectionViewLayout {
@@ -199,8 +247,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let configuration = UICollectionViewCompositionalLayoutConfiguration()
         configuration.scrollDirection = .horizontal
         configuration.contentInsetsReference = .none
-        let layout = UICollectionViewCompositionalLayout(section: section, configuration: configuration)
-        return layout
+        return UICollectionViewCompositionalLayout(section: section, configuration: configuration)
     }
 
     private func updateBackgroundExtensionForCurrentFile() {
@@ -266,8 +313,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        navigationController?.navigationBar.isHidden = true
-
         let backButtonAppearance = UIBarButtonItemAppearance(style: .plain)
         backButtonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.clear]
         backButtonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.clear]
@@ -311,7 +356,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
             updateFileForCurrentIndex()
 
-            collectionView.scrollToItem(at: currentIndex, at: .centeredVertically, animated: false)
+            collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
             if #available(iOS 26.0, *) {
                 collectionView.topEdgeEffect.style = .soft
             }
@@ -370,7 +415,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         setFullscreen(false)
-        navigationController?.navigationBar.isHidden = false
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
@@ -407,8 +451,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         let centerIndexPathBeforeRotate = currentIndex
+        indexBeforeBoundsChange = indexBeforeBoundsChange ?? centerIndexPathBeforeRotate
         coordinator.animate { _ in
-            self.collectionView.scrollToItem(at: centerIndexPathBeforeRotate, at: .centeredVertically, animated: false)
+            self.collectionView.scrollToItem(at: centerIndexPathBeforeRotate, at: .centeredHorizontally, animated: false)
         }
     }
 
@@ -426,20 +471,27 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        backgroundExtensionView?.alpha = isSidebarVisible ? 1 : 0
+        updatePreviewViewPort()
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if shouldScrollToCurrentIndex {
             collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
+            indexBeforeBoundsChange = nil
             shouldScrollToCurrentIndex = false
         } else if let indexPath = indexBeforeBoundsChange {
-            indexBeforeBoundsChange = nil
             let wasPagingEnabled = collectionView.isPagingEnabled
             collectionView.isPagingEnabled = false
             collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: false)
             collectionView.isPagingEnabled = wasPagingEnabled
+            indexBeforeBoundsChange = nil
         }
 
-        updateSheetContainerFrameIfNeeded()
+        scheduleFileActionsLayoutUpdate()
     }
 
     deinit {
@@ -594,7 +646,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func setFullscreen(_ fullscreen: Bool? = nil) {
-        if let value = fullscreen {
+        if isBookPreviewLayout {
+            fullScreenPreview = false
+            let hideBackButton = fullscreen ?? !navigationItem.hidesBackButton
+            navigationItem.setHidesBackButton(hideBackButton, animated: true)
+        } else if let value = fullscreen {
             fullScreenPreview = value
         } else {
             fullScreenPreview.toggle()
@@ -609,36 +665,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         hideFloatingPanel(fullScreenPreview)
-    }
-
-    private func updateSheetContainerFrameIfNeeded() {
-        guard !isUpdatingSheetContainer,
-              let sheet = fileInformationsViewController?
-              .presentationController as? UISheetPresentationController,
-              let containerView = sheet.containerView,
-              let containerSuperview = containerView.superview,
-              !traitCollection.horizontalSizeClass.iskDriveCompactSize else {
-            return
-        }
-
-        let targetFrame = collectionView.convert(
-            collectionView.bounds,
-            to: containerSuperview
-        )
-
-        guard !targetFrame.isEmpty,
-              containerView.frame != targetFrame else {
-            return
-        }
-
-        isUpdatingSheetContainer = true
-        defer { isUpdatingSheetContainer = false }
-
-        UIView.performWithoutAnimation {
-            containerView.frame = targetFrame
-            containerView.setNeedsLayout()
-            containerView.layoutIfNeeded()
-        }
     }
 
     func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false) {
@@ -663,24 +689,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         view.layoutIfNeeded()
 
-        let smallDetent = UISheetPresentationController.Detent.custom(
-            identifier: .init("smallDetent")
-        ) { _ in
-            75
-        }
         if let sheet = fileInformationsViewController.sheetPresentationController {
             let canExpand = presentationOrigin != .activities
-            sheet.detents = canExpand ? [smallDetent, .medium(), .large()] : [.medium()]
-            sheet.largestUndimmedDetentIdentifier = canExpand ? .large : .medium
+            sheet.detents = fileActionsDetents
+            sheet.largestUndimmedDetentIdentifier = canExpand && previewLayout != .stacked ? .large : .medium
             sheet.prefersGrabberVisible = canExpand
             sheet.prefersEdgeAttachedInCompactHeight = true
             sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
         }
 
         present(fileInformationsViewController, animated: animated) { [weak self] in
-            DispatchQueue.main.async { [weak self] in
-                self?.updateSheetContainerFrameIfNeeded()
-            }
+            self?.scheduleFileActionsLayoutUpdate()
         }
     }
 
@@ -694,7 +713,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard let centerCellIndexPath = collectionView.indexPathForItem(at: view.convert(view.center, to: collectionView)),
+        let center = CGPoint(x: collectionView.bounds.midX, y: collectionView.bounds.midY)
+        guard !shouldScrollToCurrentIndex, indexBeforeBoundsChange == nil,
+              let centerCellIndexPath = collectionView.indexPathForItem(at: center),
               currentIndex != centerCellIndexPath else {
             return
         }
@@ -902,6 +923,19 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 self.reloadItemsAfterOneLoop(at: indexPath)
                 updateNavigationBar()
             }
+        }
+    }
+
+    func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?) {
+        guard !fileInformationsViewController.isBeingDismissed else { return }
+
+        dismissFileActionsPanel(animated: true) { [weak self] in
+            guard let self, self.viewIfLoaded?.window != nil,
+                  self.presentedViewController == nil else {
+                return
+            }
+
+            self.present(controller, animated: true, completion: completion)
         }
     }
 

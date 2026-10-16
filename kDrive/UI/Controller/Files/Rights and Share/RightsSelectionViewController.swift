@@ -124,6 +124,7 @@ class RightsSelectionViewController: UIViewController {
     var canDelete = true
 
     var driveFileManager: DriveFileManager!
+    var onDismiss: (() -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -154,6 +155,11 @@ class RightsSelectionViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         matomo.track(view: [MatomoUtils.View.shareAndRights.displayName, "RightsSelection"])
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        onDismiss?()
     }
 
     private func setupView() {

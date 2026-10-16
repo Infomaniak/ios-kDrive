@@ -36,11 +36,11 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
 
     var isCompactView: Bool {
         if let splitViewController {
-            return splitViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
+            return splitViewController.traitCollection.horizontalSizeClass == .compact
         }
 
         guard let rootViewController = appRouter.rootViewController else { return false }
-        return rootViewController.traitCollection.horizontalSizeClass.iskDriveCompactSize
+        return rootViewController.traitCollection.horizontalSizeClass == .compact
     }
 
     override func viewDidLoad() {
@@ -105,8 +105,8 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
             lastAppliedTitleAlpha = alpha
             let titleColor = titleStyle.color.withAlphaComponent(alpha)
 
-            let newStandardNavigationBarAppearance = navigationBar.standardAppearance
-            let newCompactNavigationBarAppearance = navigationBar.compactAppearance
+            let newStandardNavigationBarAppearance = navigationItem.standardAppearance ?? navigationBar.standardAppearance
+            let newCompactNavigationBarAppearance = navigationItem.compactAppearance ?? navigationBar.compactAppearance
 
             newStandardNavigationBarAppearance.titleTextAttributes[.foregroundColor] = titleColor
             newCompactNavigationBarAppearance?.titleTextAttributes[.foregroundColor] = titleColor

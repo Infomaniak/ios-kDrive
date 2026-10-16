@@ -253,6 +253,7 @@ class FileDetailViewController: UIViewController, SceneStateRestorable {
     private func loadFileInformation() {
         isDirectorySizeLoading = file.isDirectory
 
+        fileInformationTask?.cancel()
         fileInformationTask = Task { [proxyFile = file.proxify(), isDirectory = file.isDirectory] in
             do {
                 let currentFile = try await driveFileManager.file(proxyFile, forceRefresh: true)
@@ -711,12 +712,15 @@ extension FileDetailViewController: UITableViewDelegate, UITableViewDataSource {
                 file: file,
                 driveFileManager: driveFileManager
             )
-            rightsSelectionViewController.modalPresentationStyle = .fullScreen
+            rightsSelectionViewController.modalPresentationStyle = .pageSheet
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC
                     .selectedRight = (file.hasSharelink ? ShareLinkPermission.public : ShareLinkPermission.restricted).rawValue
                 rightsSelectionVC.rightSelectionType = .shareLinkSettings
                 rightsSelectionVC.delegate = self
+                rightsSelectionVC.onDismiss = { [weak self] in
+                    self?.loadFileInformation()
+                }
             }
             present(rightsSelectionViewController, animated: true)
         }

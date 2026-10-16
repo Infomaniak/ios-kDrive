@@ -283,7 +283,7 @@ extension ShareLinkSettingsViewController: UITableViewDelegate, UITableViewDataS
                 file: file,
                 driveFileManager: driveFileManager
             )
-            rightsSelectionViewController.modalPresentationStyle = .fullScreen
+            rightsSelectionViewController.modalPresentationStyle = .pageSheet
             if let rightsSelectionVC = rightsSelectionViewController.viewControllers.first as? RightsSelectionViewController {
                 rightsSelectionVC.selectedRight = editRightValue
                 rightsSelectionVC.rightSelectionType = .officeOnly

@@ -20,9 +20,20 @@ import Foundation
 import UIKit
 
 extension MainTabViewController {
-    func addLegacyTabBarIfNeeded() {
-        guard legacyTabBarActive else { return }
+    func updateLegacyTabBarIfNeeded() {
+        if legacyTabBarActive {
+            addLegacyTabBarIfNeeded()
+        } else {
+            removeLegacyTabBarIfNeeded()
+        }
+    }
 
+    private func addLegacyTabBarIfNeeded() {
+        guard legacyTabBarActive, legacyTabBar.superview == nil else { return }
+
+        if #available(iOS 18.0, *) {
+            isTabBarHidden = true
+        }
         tabBar.isHidden = true
 
         legacyTabBar.items = tabBar.items
@@ -39,6 +50,20 @@ extension MainTabViewController {
                                         toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 1)
         tabBarHeightConstraint = height
         view.addConstraints([bottom, leading, trailing, height])
+    }
+
+    private func removeLegacyTabBarIfNeeded() {
+        guard legacyTabBar.superview != nil else { return }
+
+        legacyTabBar.removeFromSuperview()
+        tabBarHeightConstraint = nil
+        tabBar.isHidden = false
+        if #available(iOS 18.0, *) {
+            isTabBarHidden = false
+        }
+        for viewController in viewControllers ?? [] {
+            viewController.additionalSafeAreaInsets = .zero
+        }
     }
 
     func willLayoutLegacyTabBarIfNeeded() {

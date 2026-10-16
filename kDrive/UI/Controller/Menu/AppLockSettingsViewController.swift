@@ -57,11 +57,7 @@ class AppLockSettingsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if #available(iOS 26.0, *) {
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                additionalSafeAreaInsets.top = 12
-            } else {
-                additionalSafeAreaInsets.top = 16
-            }
+            additionalSafeAreaInsets.top = traitCollection.horizontalSizeClass == .regular ? 12 : 16
         }
     }
 

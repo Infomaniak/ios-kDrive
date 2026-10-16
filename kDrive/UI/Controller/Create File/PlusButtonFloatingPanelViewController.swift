@@ -206,8 +206,15 @@ public class PlusButtonFloatingPanelViewController: UITableViewController {
         }
         dismiss(animated: true)
 
-        guard let mainTabViewController = presentingViewController else {
+        guard var mainTabViewController = presentingViewController else {
             return
+        }
+
+        if let splitViewController = mainTabViewController as? UISplitViewController,
+           let secondaryViewController = splitViewController.viewController(for: .secondary),
+           secondaryViewController.viewIfLoaded?.window != nil {
+            secondaryViewController.definesPresentationContext = true
+            mainTabViewController = secondaryViewController
         }
 
         let action = content[indexPath.section][indexPath.row]

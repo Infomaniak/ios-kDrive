@@ -53,7 +53,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     #if !ISEXTENSION
     lazy var filePresenter = FilePresenter(viewController: self)
     var mediaHelper: OpenMediaHelper?
+    private var plusBarButtonItem: UIBarButtonItem?
     #endif
+
+    private var hasHinge = false
 
     private var networkObserver: ObservationToken?
 
@@ -105,6 +108,12 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        navigationItem.scrollEdgeAppearance = appearance
+        if #available(iOS 26.0, *) {
+            navigationItem.standardAppearance = appearance
+        }
         navigationItem.hideBackButtonText()
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.tintColor = nil
@@ -137,12 +146,36 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
         setupViewModel()
         setupFooterIfNeeded()
-        if #available(iOS 26.0, *) {
-            collectionView.topEdgeEffect.isHidden = true
-        }
 
         if #available(iOS 18.4, *), !driveFileManager.isPublicShare {
             collectionView.appIntentsDataSource = self
+        }
+
+        if #available(iOS 27.1, *) {
+            let isInsideSearchNavigationStack: Bool =
+                navigationController?.viewControllers.contains { $0 is SearchViewController } == true
+            guard viewModel.currentDirectory.id >= DriveFileManager.constants.rootID,
+                  !viewModel.currentDirectory.isTrashed,
+                  viewModel.currentDirectory.capabilities.canCreateFile,
+                  !isInsideSearchNavigationStack
+            else {
+                return
+            }
+
+            #if !ISEXTENSION
+            plusBarButtonItem = makePlusBarButtonItem(
+                driveFileManager: driveFileManager,
+                currentFolder: viewModel.currentDirectory,
+                presentedAboveFileList: true
+            ) { [weak self] panel in
+                self?.mediaHelper = panel.mediaHelper
+            }
+            view.addInteraction(UIHingeInteraction { [weak self] _, _ in
+                guard let self else { return }
+                hasHinge = true
+                updateRightBarButtons(viewModel.currentRightBarButtons.map(makeBarButtons) ?? [])
+            })
+            #endif
         }
     }
 
@@ -176,9 +209,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         super.viewWillAppear(animated)
 
         navigationController?.setInfomaniakAppearanceNavigationBar()
-        if #available(iOS 26.0, *) {
+        #if !ISEXTENSION
+        if #available(iOS 26.0, *), self is PhotoListViewController {
             collectionView.topEdgeEffect.style = .soft
         }
+        #endif
 
         tryLoadingFilesOrDisplayError()
     }
@@ -212,6 +247,38 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     @objc func appWillEnterForeground() {
         tryLoadingFilesOrDisplayError()
+    }
+
+    private func makeBarButtons(_ buttons: [FileListBarButtonType]) -> [UIBarButtonItem] {
+        buttons.map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+    }
+
+    private func updateRightBarButtons(_ barButtons: [UIBarButtonItem]) {
+        #if ISEXTENSION
+        navigationItem.rightBarButtonItems = barButtons
+        #else
+        var items = barButtons.filter { $0 != plusBarButtonItem }
+
+        if hasHinge,
+           splitViewController?.traitCollection.horizontalSizeClass == .compact,
+           let plusBarButtonItem {
+            items.insert(plusBarButtonItem, at: 0)
+        }
+
+        guard items != (navigationItem.rightBarButtonItems ?? []) else { return }
+
+        if let emptyTrashButton = barButtons.first(where: { ($0 as? FileListBarButton)?.type == .emptyTrash }) {
+            if #available(iOS 27.1, *),
+               traitCollection.verticalBarEdge != .unspecified {
+                emptyTrashButton.image = KDriveResourcesAsset.delete.image
+            } else {
+                emptyTrashButton.image = nil
+            }
+        }
+
+        navigationItem.rightBarButtonItems = items
+        view.layoutIfNeeded()
+        #endif
     }
 
     private func setupViewModel() {
@@ -255,12 +322,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
         }
 
-        navigationItem.rightBarButtonItems = viewModel.currentRightBarButtons?
-            .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+        updateRightBarButtons(viewModel.currentRightBarButtons.map(makeBarButtons) ?? [])
         viewModel.$currentRightBarButtons.receiveOnMain(store: &bindStore) { [weak self] rightBarButtons in
             guard let self else { return }
-            navigationItem.rightBarButtonItems = rightBarButtons?
-                .map { FileListBarButton(type: $0, target: self, action: #selector(self.barButtonPressed(_:))) }
+            updateRightBarButtons(rightBarButtons.map(makeBarButtons) ?? [])
         }
 
         viewModel.onPresentViewController = { [weak self] presentationType, viewController, animated in
@@ -606,7 +671,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             UIAction(
                 title: action.name,
                 image: action.image,
-                attributes: action.isEnabled ? [] : .disabled,
+                attributes: action.isEnabled ? [] : .disabled
             ) { _ in
                 fileInformationsViewController.handleAction(action, at: indexPath, isFromMenu: true)
             }
@@ -700,7 +765,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     private func bestEmptyViewType() -> EmptyTableView.EmptyTableViewType {
         var type = viewModel.configuration.emptyViewType
         if tabBarController?.tabBar.isHidden == false ||
-            !traitCollection.horizontalSizeClass.iskDriveCompactSize,
+            traitCollection.horizontalSizeClass == .regular,
             type == .emptyFolder &&
             viewModel.currentDirectory.capabilities.canCreateFile &&
             !viewModel.currentDirectory.isTrashed {
@@ -869,7 +934,15 @@ extension FileListViewController {
             setUpHeaderView(reusableView.headerView, isEmptyViewHidden: !viewModel.isShowingEmptyView)
             reusableView.headerView.delegate = self
             selectView = reusableView.headerView.selectView
-            headerView = reusableView.headerView
+            let header = reusableView.headerView
+            if #available(iOS 26.0, *) {
+                header.backgroundColor = .clear
+                header.sortView.backgroundColor = .clear
+                header.offlineView.backgroundColor = .clear
+                header.activityListView.backgroundColor = .clear
+                header.selectView.backgroundColor = .clear
+            }
+            headerView = header
 
             return reusableView
         }

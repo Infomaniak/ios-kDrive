@@ -99,13 +99,24 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        if #available(iOS 27.1, *) {
+            view.addInteraction(UIHingeInteraction { _, update in
+                guard let status = update.hinge?.status, status != .unknown else { return }
+                AlertViewController.isHingePartiallyOpen = status == .partiallyOpen
+                MainTabViewController.isHingeClosed = status == .closed
+            })
+        }
+    }
+
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         @InjectService var appRouter: AppNavigable
         super.traitCollectionDidChange(previousTraitCollection)
 
         guard let previousTraitCollection else { return }
-        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass
-            || traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass else { return }
+        guard traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass else { return }
 
         guard let rootViewController = appRouter.rootViewController as? RootSplitViewController else { return }
         if rootViewController.traitCollection.horizontalSizeClass == .regular {
@@ -289,20 +300,17 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     private var buttonAdd: UIButton?
     private var mediaHelper: OpenMediaHelper?
+    @MainActor static var isHingeClosed = false
 
-    lazy var legacyTabBarActive: Bool = {
-        if #available(iOS 26.0, *),
-           UIDevice.current.userInterfaceIdiom == .pad {
-            self.isTabBarHidden = false
+    var legacyTabBarActive: Bool {
+        if #available(iOS 26.0, *) {
             return false
         }
-        if #available(iOS 18.0, *),
-           UIDevice.current.userInterfaceIdiom == .pad {
-            self.isTabBarHidden = true
-            return true
+        if #available(iOS 18.0, *) {
+            return traitCollection.horizontalSizeClass == .regular
         }
         return false
-    }()
+    }
 
     var tabBarHeightConstraint: NSLayoutConstraint?
     var buttonAddBottomConstraint: NSLayoutConstraint?
@@ -339,7 +347,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        addLegacyTabBarIfNeeded()
+        updateLegacyTabBarIfNeeded()
         setupTabBar()
         updateCenterButton()
 
@@ -369,6 +377,13 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         super.viewWillAppear(animated)
         configureTabBar()
         updateTabBarProfilePicture()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard let previousTraitCollection,
+              traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass else { return }
+        updateLegacyTabBarIfNeeded()
     }
 
     private static func initHomeViewController(driveFileManager: DriveFileManager) -> UIViewController {
@@ -584,22 +599,21 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
     }
 }
 
-// - MARK: MainTabBarDelegate
+/// - MARK: MainTabBarDelegate
 extension MainTabViewController: MainTabBarDelegate {
     func plusButtonPressed() {
         let (currentDriveFileManager, currentDirectory) = getCurrentDirectory()
         guard let currentDirectory else { return }
 
         let fromFileList = (selectedViewController as? UINavigationController)?.topViewController is FileListViewController
-        let plusButtonFloatingPanel = PlusButtonFloatingPanelViewController(
+
+        let plusButtonFloatingPanel = presentPlusButtonPanel(
             driveFileManager: currentDriveFileManager,
             folder: currentDirectory,
             presentedAboveFileList: fromFileList
         )
 
         mediaHelper = plusButtonFloatingPanel.mediaHelper
-
-        present(plusButtonFloatingPanel, animated: true)
     }
 
     func avatarLongTouch() {
@@ -712,6 +726,21 @@ extension MainTabViewController: UpdateAccountDelegate {
         for viewController in viewControllers ?? [] where viewController.isViewLoaded {
             ((viewController as? UINavigationController)?.viewControllers.first as? UpdateAccountDelegate)?
                 .didUpdateCurrentUserProfile(currentUser)
+        }
+    }
+}
+
+extension RootSplitViewController: UpdateAccountDelegate {
+    @MainActor func didUpdateCurrentUserProfile(_ currentUser: UserProfile) {
+        let columns: [UIViewController?] = [
+            viewController(for: .compact),
+            viewController(for: .primary),
+            viewController(for: .secondary)
+        ]
+        for column in columns {
+            guard let column, column.isViewLoaded else { continue }
+            let target = (column as? UINavigationController)?.viewControllers.first ?? column
+            (target as? UpdateAccountDelegate)?.didUpdateCurrentUserProfile(currentUser)
         }
     }
 }
