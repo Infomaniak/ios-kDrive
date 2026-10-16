@@ -1,6 +1,10 @@
-- Follow file upload progress in Dynamic Island on supported devices running iOS 26 or later
+- Follow file upload progress in Dynamic Island on supported devices running iOS 26 or later, with improved progress updates
 - View folder sizes in the file information screen
 - Preview PDF thumbnails in Recent Activity
 - Improved background upload reliability
 - Fixed saving changes to kDrive files edited in the Files app
 - Fixed information sheet background colors and improved close button accessibility
+- Added support for iPhone Duo
+- Improved file previews and file information
+- Improved visibility of confirmation and error messages
+- Reduced app size

@@ -203,6 +203,7 @@ Keep UI tests pinned to an explicit simulator device available in the CI runner'
 
 ### Learned Preferences
 
+- When updating TestFlight changelogs, amend the existing notes and keep descriptions high-level.
 - Write new tests with Swift Testing (`import Testing`, `@Suite`, `@Test`, `#expect`, and `#require`) rather than XCTest.
 - Resetting previous upload errors on reauthentication is acceptable, consistent with background-upload behavior.
 
