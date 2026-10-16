@@ -21,22 +21,22 @@ import InfomaniakDI
 import UIKit
 
 public protocol UploadNotifiable {
-    var pausedNotificationSent: Bool { get }
+    @MainActor var pausedNotificationSent: Bool { get }
 
-    func setPausedNotificationSent(_ newValue: Bool)
+    @MainActor func setPausedNotificationSent(_ newValue: Bool)
 
-    func sendPausedNotificationIfNeeded()
+    @MainActor func sendPausedNotificationIfNeeded()
 
     func sendFileUploadStateNotificationIfNeeded(with result: UploadCompletionResult)
 }
 
 extension UploadService: UploadNotifiable {
-    public func setPausedNotificationSent(_ newValue: Bool) {
+    @MainActor public func setPausedNotificationSent(_ newValue: Bool) {
         Log.uploadQueue("setPausedNotificationSent newValue:\(newValue)")
         pausedNotificationSent = newValue
     }
 
-    public func sendPausedNotificationIfNeeded() {
+    @MainActor public func sendPausedNotificationIfNeeded() {
         Log.uploadQueue("sendPausedNotificationIfNeeded")
         guard !pausedNotificationSent else {
             return

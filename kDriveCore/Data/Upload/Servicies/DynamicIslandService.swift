@@ -23,6 +23,9 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
 import OSLog
+#if DEBUG
+import UserNotifications
+#endif
 
 @available(iOS 26.0, *)
 public class DynamicIslandService: DynamicIslandServiceable {
@@ -37,12 +40,20 @@ public class DynamicIslandService: DynamicIslandServiceable {
     @MainActor private var currentTask: BGContinuedProcessingTask?
     @MainActor private var uploadContinuationBox: DynamicIslandTaskCompletion?
 
+    @MainActor public var isProtectingUploads: Bool {
+        guard currentTask != nil, let uploadContinuationBox else { return false }
+        return uploadContinuationBox.result == nil
+    }
+
     @MainActor private var taskHandlingTask: Task<Void, Never>?
     private var hasRegisteredLaunchHandler = false
     private let registrationQueue = DispatchQueue(label: "com.infomaniak.drive.dynamic-island-service.registration")
 
     private enum DomainError: Error {
         case expiredTask
+        #if DEBUG
+        case taskAlreadyRunning
+        #endif
     }
 
     public func registerTask() {
@@ -84,6 +95,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
             Self.logger.info("Dynamic Island task submitted")
         } catch {
             Self.logger.error("Error submitting task : \(error)")
+            #if DEBUG
+            reportFailure(stage: "Submission", error: error)
+            #endif
         }
     }
 
@@ -95,11 +109,15 @@ public class DynamicIslandService: DynamicIslandServiceable {
         }
     }
 
-    @MainActor private func handleExpiration(completion: DynamicIslandTaskCompletion) {
+    @MainActor private func handleExpiration(completion: DynamicIslandTaskCompletion) async {
         guard uploadContinuationBox === completion, completion.result == nil else { return }
         Self.logger.error("Handling task expiration")
-        uploadService.suspendAllOperations()
-        completion.complete(with: .failure(DomainError.expiredTask))
+        #if DEBUG
+        reportFailure(stage: "Expiration handler (iOS does not provide the expiration reason)", error: DomainError.expiredTask)
+        #endif
+        await completion.complete(with: .failure(DomainError.expiredTask)) {
+            await self.uploadService.pauseForBackgroundExpiration()
+        }
     }
 
     public func updateQueueActivity(globalQueueActive: Bool, photoQueueActive: Bool) {
@@ -117,6 +135,9 @@ public class DynamicIslandService: DynamicIslandServiceable {
 
     @MainActor private func handle(task: BGContinuedProcessingTask) {
         guard currentTask == nil else {
+            #if DEBUG
+            reportFailure(stage: "Launch rejected: another task is running", error: DomainError.taskAlreadyRunning)
+            #endif
             task.setTaskCompleted(success: false)
             return
         }
@@ -125,91 +146,208 @@ public class DynamicIslandService: DynamicIslandServiceable {
         currentTask = task
 
         task.expirationHandler = { [weak self] in
-            DispatchQueue.main.async {
-                self?.handleExpiration(completion: completion)
+            Task { @MainActor in
+                await self?.handleExpiration(completion: completion)
             }
         }
 
         taskHandlingTask = Task { @MainActor in
-            var cancellable: AnyCancellable?
-            defer {
-                cancellable?.cancel()
-                let isExpiredTask: Bool
-                if case .failure(let error) = completion.result {
-                    isExpiredTask = (error as? DomainError) == .expiredTask
-                } else {
-                    isExpiredTask = false
-                }
-                if !isExpiredTask {
-                    uploadProgressTracker.reset()
-                }
-                currentTask = nil
-                uploadContinuationBox = nil
-                task.expirationHandler = nil
-                taskHandlingTask = nil
-            }
-            task.progress.totalUnitCount = 100
+            await run(task: task, completion: completion)
+        }
+    }
 
-            cancellable = uploadProgressTracker.$fractionCompleted.sink { progress in
-                task.progress.completedUnitCount = Int64(progress * 100)
-                task.updateTitle(
-                    KDriveResourcesStrings.Localizable.uploadInProgressTitle,
-                    subtitle: KDriveResourcesStrings.Localizable.uploadInProgressSubTitle(Int(progress * 100))
-                )
-            }
+    @MainActor private func run(task: BGContinuedProcessingTask, completion: DynamicIslandTaskCompletion) async {
+        let (observation, refreshTask) = startProgressReporting(task: task, completion: completion)
+        defer {
+            refreshTask.cancel()
+            observation.cancel()
+            cleanUp(task: task, completion: completion)
+        }
 
+        do {
+            try await waitForUploads(completion: completion)
+            refreshTask.cancel()
+            completeSuccessfully(task: task)
+        } catch {
+            refreshTask.cancel()
+            await completeWithError(task: task, error: error)
+        }
+    }
+
+    @MainActor private func startProgressReporting(
+        task: BGContinuedProcessingTask,
+        completion: DynamicIslandTaskCompletion
+    ) -> (AnyCancellable, Task<Void, Never>) {
+        var lastDisplayedPercentage: Int?
+        let refreshProgress: @MainActor (Double) -> Void = { progress in
+            guard completion.result == nil else { return }
+            self.updateProgress(task: task, fractionCompleted: progress, lastDisplayedPercentage: &lastDisplayedPercentage)
+        }
+        let observation = uploadProgressTracker.$fractionCompleted.sink { progress in
+            refreshProgress(progress)
+        }
+        let refreshTask = Task { @MainActor in
+            await refreshProgressPeriodically(completion: completion, refreshProgress: refreshProgress)
+        }
+        return (observation, refreshTask)
+    }
+
+    @MainActor private func updateProgress(
+        task: BGContinuedProcessingTask,
+        fractionCompleted: Double,
+        lastDisplayedPercentage: inout Int?
+    ) {
+        let fraction = min(max(fractionCompleted, 0), 1)
+        task.progress.totalUnitCount = Int64(max(uploadProgressTracker.totalUploadCount, 1)) * 1_000_000
+        task.progress.completedUnitCount = Int64(fraction * Double(task.progress.totalUnitCount))
+
+        let percentage = Int(fraction * 100)
+        guard percentage != lastDisplayedPercentage else { return }
+        lastDisplayedPercentage = percentage
+        task.updateTitle(
+            KDriveResourcesStrings.Localizable.uploadInProgressTitle,
+            subtitle: KDriveResourcesStrings.Localizable.uploadInProgressSubTitle(percentage)
+        )
+    }
+
+    @MainActor private func refreshProgressPeriodically(
+        completion: DynamicIslandTaskCompletion,
+        refreshProgress: @MainActor (Double) -> Void
+    ) async {
+        // Refresh independently of Realm notifications without inventing upload progress.
+        while !Task.isCancelled && completion.result == nil {
             do {
-                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
-                    completion.install(continuation)
-                    guard completion.result == nil else { return }
-
-                    uploadService.waitForCompletionForActiveQueues {
-                        DispatchQueue.main.async {
-                            completion.complete(with: .success(()))
-                        }
-                    }
-                }
-
-                let totalCount = uploadProgressTracker.totalUploadCount
-                let uploadedCount = min(uploadProgressTracker.progressUploading + 1, totalCount)
-
-                let status = ReachabilityListener.instance.currentStatus
-                let shouldBeSuspended = status != .wifi
-                let wifiSynchro = photoLibraryUploader.isWifiOnly
-
-                if uploadService.operationCount > 0 && shouldBeSuspended && wifiSynchro {
-                    task.updateTitle(
-                        KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
-                        subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessful(
-                            uploadedCount,
-                            totalCount
-                        )
-                    )
-                } else {
-                    task.updateTitle(
-                        KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
-                        subtitle: uploadedCount > 1 ?
-                            KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadedCount)
-                            : KDriveResourcesStrings.Localizable
-                            .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
-                    )
-                }
-
-                task.setTaskCompleted(success: true)
+                try await Task.sleep(for: .seconds(1))
             } catch {
-                let (title, subtitle) = errorInfo(for: error)
-                task.updateTitle(title, subtitle: subtitle)
+                return
+            }
+            guard !Task.isCancelled else { return }
+            refreshProgress(uploadProgressTracker.fractionCompleted)
+        }
+    }
 
-                try? await Task.sleep(for: .seconds(5))
+    @MainActor private func waitForUploads(completion: DynamicIslandTaskCompletion) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+            completion.install(continuation)
+            guard completion.result == nil else { return }
 
-                if let domainError = error as? DomainError, domainError == .expiredTask {
-                    task.setTaskCompleted(success: true)
-                } else {
-                    task.setTaskCompleted(success: false)
+            uploadService.waitForCompletionForActiveQueues {
+                DispatchQueue.main.async {
+                    completion.complete(with: .success(()))
                 }
             }
         }
     }
+
+    @MainActor private func completeSuccessfully(task: BGContinuedProcessingTask) {
+        let totalCount = uploadProgressTracker.totalUploadCount
+        let uploadedCount = min(uploadProgressTracker.progressUploading + 1, totalCount)
+        let status = ReachabilityListener.instance.currentStatus
+
+        if uploadService.operationCount > 0 && status != .wifi && photoLibraryUploader.isWifiOnly {
+            task.updateTitle(
+                KDriveResourcesStrings.Localizable.uploadNetworkErrorWifiRequired,
+                subtitle: KDriveResourcesStrings.Localizable.dynamicIslandUploadSuccessful(uploadedCount, totalCount)
+            )
+        } else {
+            task.updateTitle(
+                KDriveResourcesStrings.Localizable.allUploadFinishedTitle,
+                subtitle: uploadedCount > 1 ?
+                    KDriveResourcesStrings.Localizable.allUploadFinishedDescriptionPlural(uploadedCount)
+                    : KDriveResourcesStrings.Localizable
+                    .allUploadFinishedDescription(KDriveResourcesStrings.Localizable.fileDetailsInfoFile(1))
+            )
+        }
+        task.setTaskCompleted(success: true)
+    }
+
+    @MainActor private func completeWithError(task: BGContinuedProcessingTask, error: Error) async {
+        #if DEBUG
+        if (error as? DomainError) != .expiredTask {
+            reportFailure(stage: "Upload task", error: error)
+        }
+        #endif
+        let (title, subtitle) = errorInfo(for: error)
+        task.updateTitle(title, subtitle: subtitle)
+
+        if (error as? DomainError) != .expiredTask {
+            await uploadService.pauseForBackgroundExpiration()
+            try? await Task.sleep(for: .seconds(5))
+        }
+        task.setTaskCompleted(success: (error as? DomainError) == .expiredTask)
+    }
+
+    @MainActor private func cleanUp(task: BGContinuedProcessingTask, completion: DynamicIslandTaskCompletion) {
+        let isExpiredTask: Bool
+        if case .failure(let error) = completion.result {
+            isExpiredTask = (error as? DomainError) == .expiredTask
+        } else {
+            isExpiredTask = false
+        }
+        if !isExpiredTask {
+            uploadProgressTracker.reset()
+        }
+        currentTask = nil
+        uploadContinuationBox = nil
+        task.expirationHandler = nil
+        taskHandlingTask = nil
+    }
+
+    #if DEBUG
+    @MainActor private func reportFailure(stage: String, error: Error) {
+        let details = failureDetails(stage: stage, error: error)
+        Self.logger.error("\(details, privacy: .public)")
+        sendFailureNotification(details: details)
+    }
+
+    @MainActor private func failureDetails(stage: String, error: Error) -> String {
+        let nsError = error as NSError
+        var details = """
+        DynamicIslandService: \(stage)
+        Error: \(String(reflecting: error))
+        NSError: domain=\(nsError.domain), code=\(nsError.code), description=\(nsError.localizedDescription)
+        userInfo: \(String(reflecting: nsError.userInfo))
+        """
+        if let driveError = error as? DriveError {
+            details += "\nDriveError: type=\(driveError.type), code=\(driveError.code)"
+            if let underlyingError = driveError.underlyingError {
+                let underlyingNSError = underlyingError as NSError
+                details += """
+
+                Underlying error: \(String(reflecting: underlyingError))
+                domain=\(underlyingNSError.domain), code=\(underlyingNSError.code)
+                userInfo: \(String(reflecting: underlyingNSError.userInfo))
+                """
+            }
+        }
+        details += """
+
+        Operations: total=\(uploadService.operationCount), suspended=\(uploadService.isSuspended)
+        Progress: \(currentTask?.progress.completedUnitCount ?? 0)/\(currentTask?.progress.totalUnitCount ?? 0)
+        Uploads: completed=\(uploadProgressTracker.progressUploading), total=\(uploadProgressTracker.totalUploadCount)
+        Network: \(ReachabilityListener.instance.currentStatus)
+        """
+        return details
+    }
+
+    private func sendFailureNotification(details: String) {
+        let content = UNMutableNotificationContent()
+        content.title = KDriveResourcesStrings.Localizable.errorUpload
+        content.subtitle = "DynamicIslandService"
+        content.body = details
+        content.sound = .default
+        let request = UNNotificationRequest(
+            identifier: "\(taskIdentifier).diagnostic.\(UUID().uuidString)",
+            content: content,
+            trigger: nil
+        )
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error {
+                Self.logger.error("Unable to deliver Dynamic Island diagnostic: \(String(reflecting: error), privacy: .public)")
+            }
+        }
+    }
+    #endif
 
     private func errorInfo(for error: Error) -> (String, String) {
         if let driveError = error as? DriveError {
@@ -244,6 +382,8 @@ public class DynamicIslandService: DynamicIslandServiceable {
 }
 
 public class UnavailableDynamicIslandService: DynamicIslandServiceable {
+    @MainActor public var isProtectingUploads: Bool { false }
+
     public func registerTask() {}
 
     public func submitTask() {}
