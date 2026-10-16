@@ -50,7 +50,8 @@ struct OnboardingBottomButtonsView: View {
         } onCreateAccountPressed: {
             appNavigable.showRegister(delegate: loginDelegateHandler)
         }
-        .padding(IKPadding.large)
+        .padding(.horizontal, IKPadding.large)
+        .padding(.bottom, IKPadding.large)
         .ikButtonTheme(.drive)
     }
 }
