@@ -50,8 +50,10 @@ class SearchViewController: FileListViewController {
 
     // MARK: - View controller lifecycle
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    // UICollectionViewController creates its collection view in super.loadView().
+    // swiftlint:disable:next prohibited_super_call
+    override func loadView() {
+        super.loadView()
 
         collectionView.register(
             UINib(nibName: searchHeaderIdentifier, bundle: nil),
@@ -59,6 +61,11 @@ class SearchViewController: FileListViewController {
             withReuseIdentifier: searchHeaderIdentifier
         )
         collectionView.register(cellView: RecentSearchCollectionViewCell.self)
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
         collectionView.keyboardDismissMode = .onDrag
 
         searchController.hidesNavigationBarDuringPresentation = false
