@@ -79,6 +79,7 @@ class NewFolderViewController: UIViewController {
 
     private var sections: [Section] = [.header]
     private var optionsRows: [OptionsRow] = [.header]
+    private var didFocusFolderName = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -137,9 +138,21 @@ class NewFolderViewController: UIViewController {
             }
         }
         matomo.track(view: ["NewFolder"])
+        guard !folderCreated,
+              !didFocusFolderName,
+              let cell = tableView.cellForRow(
+                  at: IndexPath(row: 0, section: 0)
+              ) as? NewFolderHeaderTableViewCell else {
+            return
+        }
+
+        if cell.titleTextField.becomeFirstResponder() {
+            didFocusFolderName = true
+        }
     }
 
     private func setupTableViewRows() {
+        let oldSections = sections
         switch folderType {
         case .folder:
             sections = [.header]
@@ -158,6 +171,8 @@ class NewFolderViewController: UIViewController {
             }
             sections.append(.options)
         }
+
+        guard oldSections != sections || tableView.numberOfSections != sections.count else { return }
         tableView.reloadData()
     }
 
