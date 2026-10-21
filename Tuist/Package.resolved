@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "e667ed34941d4e06f0107d9633e2cc9438685fef",
-        "version" : "19.1.4"
+        "revision" : "7a8ab413d5ac54531d9cae327e49bd1c28b26adc",
+        "version" : "19.1.5"
       }
     },
     {
@@ -87,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core-ui",
       "state" : {
-        "revision" : "ac51e2248f1f655ec45606a98556013d6a9d90cd",
-        "version" : "26.1.2"
+        "revision" : "fa789107d7685c5555518c6b73d496043d085eec",
+        "version" : "26.3.0"
       }
     },
     {
@@ -267,8 +267,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "4f135c52afeeb1d6937eb93824c7ec1cddcaa372",
-        "version" : "9.30.1"
+        "revision" : "4bb2282661ee6ca2212aa01d19a1214394cd3c45",
+        "version" : "9.30.2"
       }
     },
     {
@@ -339,8 +339,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/FelixHerrmann/swift-package-list",
       "state" : {
-        "revision" : "a3e1d4d09a37bc1df1ad0c1c9b02cb192eaa857c",
-        "version" : "4.11.0"
+        "revision" : "27ae17a335a933ed78dc7cb03984d1554de9f878",
+        "version" : "4.12.0"
       }
     },
     {
