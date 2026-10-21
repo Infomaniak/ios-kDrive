@@ -55,7 +55,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
 
     lazy var validatePasswordButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
-        button.setTitle(KDriveCoreStrings.Localizable.buttonValid, for: .normal)
+        button.setTitle(KDriveResourcesStrings.Localizable.buttonValid, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(sendPassword(_:)), for: .touchUpInside)
         return button

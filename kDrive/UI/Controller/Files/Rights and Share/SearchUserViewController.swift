@@ -64,7 +64,7 @@ class SearchUserViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(cellView: UserAccountTableViewCell.self)
-        tableView.backgroundColor = KDriveCoreAsset.backgroundColor.color
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         tableView.separatorStyle = .none
     }
 

@@ -99,7 +99,7 @@ ios-kDrive/
 │   └── DI/                      #   Dependency Injection
 │       └── FactoryService.swift
 │
-├── kDriveResources/             # Resources framework (localizations, assets)
+├── kDriveResources (target)     # Generated resources framework; sources assets/localizations from kDrive/Resources
 ├── kDriveFileProvider/          # Files app integration (NSFileProviderExtension)
 │   ├── FileProviderExtension.swift      # Main provider implementation
 │   ├── Enumerators/             #   Directory/file enumeration

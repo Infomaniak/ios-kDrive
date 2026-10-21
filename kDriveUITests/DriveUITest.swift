@@ -665,7 +665,7 @@ class AppUITest: XCTestCase {
 
         app.swipeUp()
 
-        let copyButton = app.cells[KDriveCoreStrings.Localizable.buttonSendCopy].firstMatch
+        let copyButton = app.cells[KDriveResourcesStrings.Localizable.buttonSendCopy].firstMatch
         XCTAssertTrue(copyButton.waitForExistence(timeout: 3), "Copy button should display")
         copyButton.tap()
 
@@ -681,7 +681,7 @@ class AppUITest: XCTestCase {
         cellsQuery.containing(.image, identifier: "folder-select")
             .firstMatch
             .tap()
-        let createButton = app.buttons[KDriveCoreStrings.Localizable.buttonCreateFolder].firstMatch
+        let createButton = app.buttons[KDriveResourcesStrings.Localizable.buttonCreateFolder].firstMatch
         XCTAssertTrue(createButton.waitForExistence(timeout: 3), "Create folder button should be displayed")
         createButton.tap()
 
@@ -703,14 +703,14 @@ class AppUITest: XCTestCase {
             .firstMatch
             .tap()
 
-        let createFolderButton = app.buttons.matching(identifier: KDriveCoreStrings.Localizable.buttonCreateFolder)
+        let createFolderButton = app.buttons.matching(identifier: KDriveResourcesStrings.Localizable.buttonCreateFolder)
             .element(boundBy: 1)
         XCTAssertTrue(createFolderButton.waitForExistence(timeout: 3), "Create folder button should be displayed")
         createFolderButton.tap()
 
         app.staticTexts["Test"].firstMatch.tap()
 
-        let selectFolderButton = app.buttons.matching(identifier: KDriveCoreStrings.Localizable.buttonSelectTheFolder).firstMatch
+        let selectFolderButton = app.buttons.matching(identifier: KDriveResourcesStrings.Localizable.buttonSelectTheFolder).firstMatch
         XCTAssertTrue(selectFolderButton.waitForExistence(timeout: 8), "Select folder button should be displayed")
 
         let hittablePredicateSelectFolderButton = NSPredicate(format: "isHittable == true")
@@ -949,7 +949,7 @@ class AppUITest: XCTestCase {
 
         app.swipeUp()
 
-        let offlineButton = app.staticTexts[KDriveCoreStrings.Localizable.buttonAvailableOffline].firstMatch
+        let offlineButton = app.staticTexts[KDriveResourcesStrings.Localizable.buttonAvailableOffline].firstMatch
         XCTAssertTrue(offlineButton.waitForExistence(timeout: 3), "Available offline switch should be displayed")
         offlineButton.tap()
         wait(delay: 1)
@@ -972,12 +972,12 @@ class AppUITest: XCTestCase {
 
         if filetype != "zip" {
             XCTAssertFalse(
-                app.staticTexts[KDriveCoreStrings.Localizable.previewLoadError].waitForExistence(timeout: 5),
+                app.staticTexts[KDriveResourcesStrings.Localizable.previewLoadError].waitForExistence(timeout: 5),
                 "Preview should be displayed"
             )
         } else {
             XCTAssertTrue(
-                app.staticTexts[KDriveCoreStrings.Localizable.previewNoPreview].waitForExistence(timeout: 5),
+                app.staticTexts[KDriveResourcesStrings.Localizable.previewNoPreview].waitForExistence(timeout: 5),
                 "Preview shouldn't be displayed"
             )
         }
@@ -986,7 +986,7 @@ class AppUITest: XCTestCase {
         let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15))
         start.press(forDuration: 0.05, thenDragTo: end)
 
-        app.cells[KDriveCoreStrings.Localizable.fileDetailsInfosTitle].firstMatch.tap()
+        app.cells[KDriveResourcesStrings.Localizable.fileDetailsInfosTitle].firstMatch.tap()
 
         XCTAssertTrue(app.staticTexts[fileName].waitForExistence(timeout: 5), "File should be displayed")
 
@@ -1097,7 +1097,7 @@ class AppUITest: XCTestCase {
         }
 
         app.cells
-            .containing(.staticText, identifier: KDriveCoreStrings.Localizable.buttonSettingsLockApp)
+            .containing(.staticText, identifier: KDriveResourcesStrings.Localizable.buttonSettingsLockApp)
             .switches.firstMatch.tap()
 
         unlockApp()
@@ -1121,7 +1121,7 @@ class AppUITest: XCTestCase {
         }
 
         app.cells
-            .containing(.staticText, identifier: KDriveCoreStrings.Localizable.buttonSettingsLockApp)
+            .containing(.staticText, identifier: KDriveResourcesStrings.Localizable.buttonSettingsLockApp)
             .switches.firstMatch.tap()
 
         unlockApp()

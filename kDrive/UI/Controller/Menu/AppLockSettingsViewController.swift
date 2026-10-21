@@ -83,7 +83,7 @@ extension AppLockSettingsViewController: UITableViewDataSource, UITableViewDeleg
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(type: ParameterSwitchTableViewCell.self, for: indexPath)
-        cell.valueLabel.text = KDriveCoreStrings.Localizable.buttonSettingsLockApp
+        cell.valueLabel.text = KDriveResourcesStrings.Localizable.buttonSettingsLockApp
         cell.valueSwitch.isOn = UserDefaults.shared.isAppLockEnabled
         cell.switchHandler = { [weak self] sender in
             guard let self else { return }

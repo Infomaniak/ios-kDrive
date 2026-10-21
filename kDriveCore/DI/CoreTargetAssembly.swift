@@ -29,6 +29,7 @@ import InfomaniakDI
 import InfomaniakLogin
 import InfomaniakNotifications
 import InterAppLogin
+import kDriveResources
 import MyKSuite
 import os.log
 
@@ -181,8 +182,8 @@ open class CoreTargetAssembly: TargetAssembly {
             Factory(type: AppLockHelping.self) { _, _ in
                 AppLockHelper(
                     appLockUIConfiguration: AppLockUIConfiguration(
-                        logoImage: KDriveCoreAsset.logo.swiftUIImage,
-                        lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage,
+                        logoImage: KDriveResourcesAsset.logo.swiftUIImage,
+                        lockImage: KDriveResourcesAsset.lockInfomaniak.swiftUIImage,
                         ikButtonTheme: .drive
                     ),
                     userDefaults: UserDefaults.shared

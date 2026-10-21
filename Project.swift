@@ -114,6 +114,7 @@ let project = Project(name: "kDrive",
                                   dependencies: [
                                       .target(name: "kDrive"),
                                       .target(name: "kDriveCore"),
+                                      .target(name: "kDriveResources"),
                                       .external(name: "Alamofire"),
                                       .external(name: "DeviceAssociation"),
                                       .external(name: "IKSnackbar"),
@@ -186,11 +187,6 @@ let project = Project(name: "kDrive",
                                   deploymentTargets: Constants.deploymentTarget,
                                   infoPlist: .file(path: "kDriveCore/Info.plist"),
                                   sources: "kDriveCore/**",
-                                  resources: [
-                                      "kDrive/**/*.xcassets",
-                                      "kDrive/**/*.strings",
-                                      "kDrive/**/*.stringsdict"
-                                  ],
                                   dependencies: [
                                       .target(name: "kDriveResources"),
                                       .external(name: "Alamofire"),
