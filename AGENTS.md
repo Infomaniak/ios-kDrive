@@ -39,6 +39,7 @@ ios-kDrive/
 │   ├── Resources/               #   Assets, localized strings, entitlements
 │   │   ├── *.lproj/             #     Localizations (en, de, es, fr, it)
 │   │   ├── Assets.xcassets      #     Images, colors, icons
+│   │   ├── package-list.json    #     Generated third-party licenses shown in Settings
 │   │   └── Info.plist           #     App configuration
 │   ├── Utils/                   #   Utility functions, helpers
 │   │   └── KSuitePro/           #     KSuite Pro integration utilities
@@ -158,6 +159,17 @@ tuist test # Or via Xcode Test Navigator
 ```
 
 Keep UI tests pinned to an explicit simulator device available in the CI runner's selected Xcode.
+
+### Regenerating Third-Party Licenses
+
+Whenever libraries are updated, regenerate `kDrive/Resources/package-list.json`, the license listing displayed in Settings, and include it in the dependency update commit. Use the Tuist package manifest and checkouts. Run from the repository root:
+
+```bash
+mise exec -- tuist install
+mise exec -- swift-package-list Tuist/Package.swift --custom-source-packages-path Tuist/.build --output-type json --output-path kDrive/Resources --package-order identity-ascending
+```
+
+Commit the generated `kDrive/Resources/package-list.json` with dependency updates. Use `Tuist/Package.swift`, not `Project.swift`, because this project uses Tuist's XcodeProj-based dependency integration.
 
 ### Code Style
 
