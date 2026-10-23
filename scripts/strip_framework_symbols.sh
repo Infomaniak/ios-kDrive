@@ -14,6 +14,10 @@ for framework in "${frameworks_directory}"/*.framework; do
     [[ -d "${framework}" ]] || continue
     executable=$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "${framework}/Info.plist")
     binary="${framework}/${executable}"
+    if /usr/bin/codesign --verify --test-requirement="anchor apple" "${binary}" &>/dev/null; then
+        echo "Skipping Apple-signed framework: ${framework}"
+        continue
+    fi
     before=$(stat -f %z "${binary}")
 
     # Keep exported symbols for dynamic linking; dSYMs remain outside the app bundle.
