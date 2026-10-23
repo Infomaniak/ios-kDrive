@@ -30,11 +30,15 @@
                                         <subviews>
                                             <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mDo-EL-lhP">
                                                 <rect key="frame" x="0.0" y="0.0" width="364" height="60"/>
-                                                <color key="backgroundColor" name="backgroundCardView"/>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardView"/>
+                                                </userDefinedRuntimeAttributes>
                                             </view>
                                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="id8-ZX-iUQ">
                                                 <rect key="frame" x="0.0" y="0.0" width="364" height="60"/>
-                                                <color key="backgroundColor" name="backgroundCardViewSelectedColor"/>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewSelectedColor"/>
+                                                </userDefinedRuntimeAttributes>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LXW-VV-Quo" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
                                                 <rect key="frame" x="21" y="16" width="28" height="28"/>
@@ -44,12 +48,15 @@
                                                     <constraint firstAttribute="width" constant="28" id="T0c-Z0-Qr7"/>
                                                 </constraints>
                                             </view>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-filled" translatesAutoresizingMaskIntoConstraints="NO" id="BEv-j9-fSD">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="BEv-j9-fSD">
                                                 <rect key="frame" x="16" y="18" width="38" height="24"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="38" id="RcU-Uh-V0G"/>
                                                     <constraint firstAttribute="width" constant="38" id="y6P-eV-qo6"/>
                                                 </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
+                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="MLs-rs-LMm">
                                                 <rect key="frame" x="70" y="9.9999999999999982" width="60.666666666666657" height="19.333333333333329"/>
@@ -57,19 +64,22 @@
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="249" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TES-Tv-kfS" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="0.0" y="0.0" width="40.666666666666664" height="19.333333333333332"/>
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                        <color key="textColor" name="titleColor"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
-                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="favorite" translatesAutoresizingMaskIntoConstraints="NO" id="c2v-Wq-NpL">
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="c2v-Wq-NpL">
                                                         <rect key="frame" x="48.666666666666671" y="3.6666666666666661" width="12" height="12"/>
-                                                        <color key="tintColor" name="favoriteColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" secondItem="c2v-Wq-NpL" secondAttribute="height" multiplier="1:1" id="ubA-ca-3VK"/>
                                                             <constraint firstAttribute="width" constant="12" id="wBo-cl-8pL"/>
                                                         </constraints>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="favorite"/>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="favoriteColor"/>
+                                                        </userDefinedRuntimeAttributes>
                                                     </imageView>
                                                     <collectionView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" userInteractionEnabled="NO" contentMode="scaleToFill" scrollEnabled="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="RzT-IJ-oQu">
                                                         <rect key="frame" x="60.666666666666657" y="1.6666666666666661" width="64" height="15.999999999999998"/>
@@ -93,20 +103,23 @@
                                                             <constraint firstAttribute="width" constant="16" id="uug-ms-CGz"/>
                                                         </constraints>
                                                     </view>
-                                                    <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="check" translatesAutoresizingMaskIntoConstraints="NO" id="RNE-x0-Rf0">
+                                                    <imageView hidden="YES" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="RNE-x0-Rf0">
                                                         <rect key="frame" x="0.0" y="-0.6666666666666643" width="16" height="16"/>
-                                                        <color key="tintColor" name="greenColor"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="16" id="jkt-Ws-1yk"/>
                                                             <constraint firstAttribute="width" secondItem="RNE-x0-Rf0" secondAttribute="height" multiplier="1:1" id="nJJ-CA-Lol"/>
                                                         </constraints>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="check"/>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="greenColor"/>
+                                                        </userDefinedRuntimeAttributes>
                                                     </imageView>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xaN-Uz-J3R" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="0.0" y="0.0" width="31" height="14.333333333333334"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                        <color key="textColor" name="secondaryTextColor"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="secondaryTextColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
@@ -118,15 +131,17 @@
                                                     <constraint firstAttribute="height" constant="36" id="nYH-U5-wgC"/>
                                                     <constraint firstAttribute="width" constant="36" id="qFm-XY-DEq"/>
                                                 </constraints>
-                                                <color key="tintColor" name="primaryTextColor"/>
                                                 <inset key="imageEdgeInsets" minX="10" minY="9" maxX="8" maxY="9"/>
-                                                <state key="normal" image="menu"/>
+                                                <state key="normal"/>
                                                 <connections>
                                                     <action selector="moreButtonTap:" destination="gTV-IL-0wX" eventType="touchUpInside" id="LxQ-eF-Hoo"/>
                                                 </connections>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="menu"/>
+                                                </userDefinedRuntimeAttributes>
                                             </button>
                                         </subviews>
-                                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                                         <constraints>
                                             <constraint firstItem="WCm-bJ-flM" firstAttribute="centerY" secondItem="hE6-GN-a4l" secondAttribute="centerY" id="1bc-xG-ViU"/>
                                             <constraint firstItem="id8-ZX-iUQ" firstAttribute="top" secondItem="hE6-GN-a4l" secondAttribute="top" id="2OJ-DN-rJ7"/>
@@ -157,6 +172,9 @@
                                                 <exclude reference="UE1-IH-OR4"/>
                                             </mask>
                                         </variation>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
+                                        </userDefinedRuntimeAttributes>
                                     </view>
                                 </subviews>
                                 <constraints>
@@ -213,34 +231,6 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="check" width="24" height="24"/>
-        <image name="favorite" width="24" height="24"/>
-        <image name="folder-filled" width="24" height="24"/>
-        <image name="menu" width="24" height="24"/>
-        <namedColor name="backgroundCardView">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="backgroundCardViewSelectedColor">
-            <color red="0.89411764705882357" green="0.89411764705882357" blue="0.90980392156862744" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="favoriteColor">
-            <color red="1" green="0.75686274509803919" blue="0.039215686274509803" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="greenColor">
-            <color red="0.24300000071525574" green="0.74900001287460327" blue="0.30199998617172241" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

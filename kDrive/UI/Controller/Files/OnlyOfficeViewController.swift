@@ -344,10 +344,10 @@ extension OnlyOfficeViewController: WKNavigationDelegate {
 
     func showContentBlockerError() {
         dismiss(animated: true) {
-            let ikAction = IKSnackBar.Action(title: KDriveStrings.Localizable.readFAQ) {
+            let ikAction = IKSnackBar.Action(title: KDriveResourcesStrings.Localizable.readFAQ) {
                 UIApplication.shared.open(URLConstants.faqContentBlocker.url)
             }
-            UIConstants.showSnackBar(message: KDriveStrings.Localizable.errorUnableToLoadContent, action: ikAction)
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.errorUnableToLoadContent, action: ikAction)
         }
     }
 }

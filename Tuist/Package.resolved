@@ -1,5 +1,5 @@
 {
-  "originHash" : "1829255a4e3988739231abe2e741c57fadeef7e882ba29fa8bf7e854ee7803ec",
+  "originHash" : "58b9c496570b388dbc93a58f2bf261605bbbfe235941e2274e50e86caffb29d0",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -170,15 +170,6 @@
       "state" : {
         "revision" : "88888674d772ddcf19671159ed0022cb0bc37be2",
         "version" : "1.0.6"
-      }
-    },
-    {
-      "identity" : "localizekit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Infomaniak/LocalizeKit",
-      "state" : {
-        "revision" : "e7dbea6d3a8d57f8352e1457649c45e49699b5eb",
-        "version" : "1.0.2"
       }
     },
     {

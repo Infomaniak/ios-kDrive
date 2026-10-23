@@ -19,7 +19,9 @@
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="r0e-gs-QBf" customClass="PDFView">
                         <rect key="frame" x="0.0" y="0.0" width="214" height="262"/>
-                        <color key="backgroundColor" name="previewBackgroundColor"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="previewBackgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
             </view>
@@ -38,8 +40,5 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <namedColor name="previewBackgroundColor">
-            <color red="0.066666666666666666" green="0.10980392156862745" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

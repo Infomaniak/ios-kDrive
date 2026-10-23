@@ -18,9 +18,9 @@
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XUm-rx-jwT" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                     <rect key="frame" x="0.0" y="0.0" width="392" height="155"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                    <color key="textColor" name="titleColor"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                     </userDefinedRuntimeAttributes>
                 </label>
@@ -41,8 +41,5 @@
         </view>
     </objects>
     <resources>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

@@ -482,7 +482,7 @@ class MainTabViewController: UITabBarController, Restorable, PlusButtonObserver 
         guard buttonAdd == nil else { return }
 
         var config = UIButton.Configuration.prominentGlass()
-        config.image = KDriveAsset.plus.image
+        config.image = KDriveResourcesAsset.plus.image
 
         let button = UIButton(configuration: config)
         button.translatesAutoresizingMaskIntoConstraints = false
