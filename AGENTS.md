@@ -113,6 +113,7 @@ ios-kDrive/
 ├── kDriveAPITests/              # API integration tests
 ├── kDriveUITests/               # UI automation tests
 ├── kDriveTestShared/            # Shared test utilities
+├── TestFlight/                 # English and French TestFlight release notes
 ├── Tuist/                       # Tuist configuration
 │   ├── Package.swift            #   SPM dependency declarations
 │   └── ProjectDescriptionHelpers/   # Build helpers & constants
