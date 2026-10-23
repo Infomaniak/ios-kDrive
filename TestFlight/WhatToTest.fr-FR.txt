@@ -2,10 +2,10 @@
 - Consultez la taille des dossiers dans l’écran d’informations
 - Affichez les vignettes des PDF dans l’activité récente
 - Fiabilité améliorée des envois en arrière-plan
-- Correction d’un plantage à l’ouverture de la recherche
 - Correction de l’enregistrement des modifications des fichiers kDrive édités dans l’app Fichiers
 - Correction des couleurs de fond des panneaux d’information et amélioration de l’accessibilité des boutons de fermeture
 - Prise en charge de l’iPhone Duo
 - Amélioration des aperçus et des informations des fichiers
 - Amélioration de la visibilité des messages de confirmation et d’erreur
+- Amélioration de la présentation et de la navigation des écrans de bienvenue
 - Réduction de la taille de l’app

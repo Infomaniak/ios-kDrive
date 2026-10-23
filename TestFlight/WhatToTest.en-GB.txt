@@ -2,10 +2,10 @@
 - View folder sizes in the file information screen
 - Preview PDF thumbnails in Recent Activity
 - Improved background upload reliability
-- Fixed a crash when opening search
 - Fixed saving changes to kDrive files edited in the Files app
 - Fixed information sheet background colors and improved close button accessibility
 - Added support for iPhone Duo
 - Improved file previews and file information
 - Improved visibility of confirmation and error messages
+- Improved onboarding layout and navigation
 - Reduced app size
