@@ -24,6 +24,7 @@ import InfomaniakCoreUIKit
 import InfomaniakLogin
 @testable import kDrive
 @testable import kDriveCore
+import kDriveResources
 import RealmSwift
 import XCTest
 
@@ -80,8 +81,8 @@ final class UTRootViewControllerState: XCTestCase {
             Factory(type: AppLockHelping.self) { _, _ in
                 AppLockHelper(
                     appLockUIConfiguration: AppLockUIConfiguration(
-                        logoImage: KDriveCoreAsset.logo.swiftUIImage,
-                        lockImage: KDriveCoreAsset.lockInfomaniak.swiftUIImage,
+                        logoImage: KDriveResourcesAsset.logo.swiftUIImage,
+                        lockImage: KDriveResourcesAsset.lockInfomaniak.swiftUIImage,
                         ikButtonTheme: .drive
                     ),
                     userDefaults: UserDefaults.shared

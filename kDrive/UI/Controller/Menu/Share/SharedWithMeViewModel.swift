@@ -18,6 +18,7 @@
 
 import InfomaniakCoreCommonUI
 import kDriveCore
+import kDriveResources
 import RealmSwift
 import UIKit
 
@@ -26,7 +27,7 @@ class SharedWithMeViewModel: FileListViewModel {
         assert(currentDirectory == nil, "This does not support a specific file as current directory")
         let sharedWithMeRootFile = driveFileManager.getManagedFile(from: DriveFileManager.sharedWithMeRootFile)
         let configuration = Configuration(selectAllSupported: false,
-                                          rootTitle: KDriveCoreStrings.Localizable.sharedWithMeTitle,
+                                          rootTitle: KDriveResourcesStrings.Localizable.sharedWithMeTitle,
                                           emptyViewType: .noSharedWithMe,
                                           supportsDrop: false,
                                           matomoViewPath: [MatomoUtils.View.menu.displayName, "SharedWithMe"])

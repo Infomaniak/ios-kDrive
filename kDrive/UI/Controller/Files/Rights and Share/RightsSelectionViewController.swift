@@ -189,7 +189,7 @@ class RightsSelectionViewController: UIViewController {
                 case .delete:
                     return KDriveResourcesStrings.Localizable.userPermissionRemove
                 case .removeDriveAccess:
-                    return KDriveCoreStrings.Localizable.userDriveRemoveDescription
+                    return KDriveResourcesStrings.Localizable.userDriveRemoveDescription
                 }
             }
             let userPermissions = UserPermission.allCases

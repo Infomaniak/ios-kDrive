@@ -77,7 +77,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     lazy var addToKDriveButton: IKLargeButton = {
         let button = IKLargeButton(frame: .zero)
-        button.setTitle(KDriveCoreStrings.Localizable.buttonAddToKDrive, for: .normal)
+        button.setTitle(KDriveResourcesStrings.Localizable.buttonAddToKDrive, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(addToMyDriveButtonTapped(_:)), for: .touchUpInside)
         return button

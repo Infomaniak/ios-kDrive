@@ -53,7 +53,7 @@ final class SelectAccountViewController: UIViewController {
         view.addSubview(tableView)
 
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = KDriveCoreAsset.backgroundColor.color
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         tableView.separatorStyle = .none
 
         NSLayoutConstraint.activate([

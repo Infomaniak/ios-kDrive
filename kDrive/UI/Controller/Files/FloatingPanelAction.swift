@@ -156,7 +156,7 @@ public class FloatingPanelAction: Equatable {
         id: .cancelImport,
         name: KDriveResourcesStrings.Localizable.buttonCancelImport,
         image: KDriveResourcesAsset.remove.image,
-        tintColor: KDriveCoreAsset.binColor.color
+        tintColor: KDriveResourcesAsset.binColor.color
     )
     static let informations = FloatingPanelAction(
         id: .informations,
