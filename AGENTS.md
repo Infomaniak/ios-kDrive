@@ -120,6 +120,7 @@ ios-kDrive/
 ├── Project.swift                # Tuist project definition
 ├── scripts/                     # Development scripts
 │   └── lint.sh                  #   SwiftLint runner
+│   └── strip_framework_symbols.sh  # Release embedded-framework symbol stripping and re-signing
 ├── ci_scripts/                  # Xcode Cloud CI — DO NOT run locally
 ├── .github/
 │   ├── github-app.yml           # GitHub app session setup and build/run commands
