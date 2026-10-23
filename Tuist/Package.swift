@@ -8,7 +8,7 @@ import ProjectDescriptionHelpers
 let packageSettings = PackageSettings(
     productTypes: [
         "Alamofire": .framework,
-        "Atlantis": .framework,
+        "Atlantis": .staticFramework,
         "DesignSystem": .framework,
         "DeviceAssociation": .framework,
         "DifferenceKit": .framework,

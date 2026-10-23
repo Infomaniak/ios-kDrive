@@ -52,14 +52,18 @@ let project = Project(name: "kDrive",
                                       "kDrive/**/PrivacyInfo.xcprivacy"
                                   ],
                                   entitlements: "kDrive/Resources/kDrive.entitlements",
-                                  scripts: [Constants.swiftlintScript],
+                                  scripts: [
+                                      Constants.swiftlintScript,
+                                      .post(path: "scripts/strip_framework_symbols.sh",
+                                            name: "Strip Framework Symbols",
+                                            basedOnDependencyAnalysis: false)
+                                  ],
                                   dependencies: [
                                       .target(name: "kDriveFileProvider"),
                                       .target(name: "kDriveCore"),
                                       .target(name: "kDriveShareExtension"),
                                       .target(name: "kDriveActionExtension"),
                                       .target(name: "kDriveResources"),
-                                      .external(name: "Atlantis"),
                                       .external(name: "DeviceAssociation"),
                                       .external(name: "DifferenceKit"),
                                       .external(name: "HighlightSwift"),
