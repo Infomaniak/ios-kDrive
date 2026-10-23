@@ -18,12 +18,15 @@
                 <rect key="frame" x="0.0" y="0.0" width="333" height="388"/>
                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                 <subviews>
-                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="circle-tag" translatesAutoresizingMaskIntoConstraints="NO" id="kcr-vE-qpe">
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="kcr-vE-qpe">
                         <rect key="frame" x="20" y="22" width="30" height="30"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="30" id="UVu-S0-M2P"/>
                             <constraint firstAttribute="height" constant="30" id="jt9-IA-d3K"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="circle-tag"/>
+                        </userDefinedRuntimeAttributes>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Solo" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HMm-XV-G0e" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="60" y="27" width="253" height="20.5"/>
@@ -79,7 +82,6 @@
                 </subviews>
             </view>
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
-            <color key="backgroundColor" name="backgroundCardView"/>
             <constraints>
                 <constraint firstItem="5Zf-mp-FnH" firstAttribute="leading" secondItem="gTV-IL-0wX" secondAttribute="leading" constant="20" id="87i-Rw-5sb"/>
                 <constraint firstAttribute="trailing" secondItem="5Zf-mp-FnH" secondAttribute="trailing" constant="20" id="8qg-2J-hXe"/>
@@ -109,12 +111,11 @@
                 <outlet property="titleLabel" destination="HMm-XV-G0e" id="Vum-MG-kDm"/>
             </connections>
             <point key="canvasLocation" x="138.40579710144928" y="79.6875"/>
+            <userDefinedRuntimeAttributes>
+                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardView"/>
+            </userDefinedRuntimeAttributes>
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="circle-tag" width="35" height="35"/>
-        <namedColor name="backgroundCardView">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

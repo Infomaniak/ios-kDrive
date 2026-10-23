@@ -24,32 +24,40 @@
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YYl-IZ-5O2">
                                 <rect key="frame" x="0.0" y="54" width="272" height="1"/>
-                                <color key="backgroundColor" name="separatorColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="wCx-sg-2K9"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="separatorColor"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="lu4-Sp-fE9">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="lu4-Sp-fE9">
                                 <rect key="frame" x="238" y="22.5" width="10" height="10"/>
-                                <color key="tintColor" name="secondaryTextColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="lu4-Sp-fE9" secondAttribute="height" multiplier="1:1" id="WhH-Uj-cqC"/>
                                     <constraint firstAttribute="height" constant="10" id="dfn-2g-94L"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-filled" translatesAutoresizingMaskIntoConstraints="NO" id="LAL-46-wBg">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="LAL-46-wBg">
                                 <rect key="frame" x="24" y="17.5" width="20" height="20"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="20" id="DkF-It-fN8"/>
                                     <constraint firstAttribute="width" secondItem="LAL-46-wBg" secondAttribute="height" multiplier="1:1" id="qjV-q0-9pY"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="C5n-OY-iua" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="52" y="18" width="40.5" height="19.5"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -93,17 +101,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-right" width="16" height="16"/>
-        <image name="folder-filled" width="24" height="24"/>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="separatorColor">
-            <color red="0.96862745098039216" green="0.96862745098039216" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

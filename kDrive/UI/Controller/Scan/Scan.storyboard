@@ -35,21 +35,25 @@
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="NOx-4m-krY">
                                 <rect key="frame" x="0.0" y="150" width="414" height="746"/>
-				<color key="backgroundColor" name="backgroundColor"/>
                                 <connections>
                                     <outlet property="dataSource" destination="eOZ-3O-vB4" id="Mho-5w-4EV"/>
                                     <outlet property="delegate" destination="eOZ-3O-vB4" id="LFj-kJ-Fch"/>
                                 </connections>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="mNU-py-FqU"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="NOx-4m-krY" firstAttribute="top" secondItem="mNU-py-FqU" secondAttribute="top" id="4C3-pH-JU0"/>
                             <constraint firstItem="mNU-py-FqU" firstAttribute="trailing" secondItem="NOx-4m-krY" secondAttribute="trailing" id="P6R-iW-n5Z"/>
                             <constraint firstItem="NOx-4m-krY" firstAttribute="leading" secondItem="mNU-py-FqU" secondAttribute="leading" id="iTf-bF-Crg"/>
                             <constraint firstAttribute="bottom" secondItem="NOx-4m-krY" secondAttribute="bottom" id="wLW-mc-zMd"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Enregistrer sur le kDrive" largeTitleDisplayMode="always" id="MLT-vQ-JBR">
                         <barButtonItem key="backBarButtonItem" title=" " id="Z4k-Ym-J6G"/>
@@ -73,8 +77,5 @@
         </scene>
     </scenes>
     <resources>
-        <namedColor name="backgroundColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

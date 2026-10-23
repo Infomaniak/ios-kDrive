@@ -30,13 +30,16 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="L6b-Em-nU6" userLabel="Video Gradient View">
                                         <rect key="frame" x="0.0" y="0.0" width="175" height="150"/>
                                         <subviews>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="play-thumbnail" translatesAutoresizingMaskIntoConstraints="NO" id="6hu-AU-eAB">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="6hu-AU-eAB">
                                                 <rect key="frame" x="158" y="133" width="12" height="12"/>
                                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="12" id="DVZ-GB-Yib"/>
                                                     <constraint firstAttribute="height" constant="12" id="Uqa-gK-Vpe"/>
                                                 </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="play-thumbnail"/>
+                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                         </subviews>
                                         <constraints>
@@ -44,12 +47,15 @@
                                             <constraint firstAttribute="trailing" secondItem="6hu-AU-eAB" secondAttribute="trailing" constant="5" id="s5j-vi-Vhj"/>
                                         </constraints>
                                     </view>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="select" translatesAutoresizingMaskIntoConstraints="NO" id="eRP-ib-hD3">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="eRP-ib-hD3">
                                         <rect key="frame" x="10" y="10" width="24" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="24" id="8EX-8W-V9F"/>
                                             <constraint firstAttribute="width" constant="24" id="Udk-rx-MZh"/>
                                         </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="select"/>
+                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <view alpha="0.40000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ynw-Ya-FV2" userLabel="Highlight View">
                                         <rect key="frame" x="0.0" y="0.0" width="175" height="150"/>
@@ -104,8 +110,6 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="play-thumbnail" width="24" height="24"/>
-        <image name="select" width="24" height="24"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

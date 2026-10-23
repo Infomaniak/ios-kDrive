@@ -23,11 +23,13 @@
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="21V-35-UMi">
                                 <rect key="frame" x="0.0" y="0.0" width="30" height="30"/>
-                                <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="30" id="V7W-Uf-q89"/>
                                     <constraint firstAttribute="width" constant="30" id="zFC-av-wNS"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wid-1B-SZO">
                                 <rect key="frame" x="7.5" y="17" width="37.5" height="18"/>
@@ -63,8 +65,5 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

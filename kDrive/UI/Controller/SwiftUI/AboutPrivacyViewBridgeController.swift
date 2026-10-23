@@ -20,6 +20,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import InfomaniakPrivacyManagement
 import kDriveCore
+import kDriveResources
 import SwiftUI
 
 enum AboutPrivacyViewBridgeController {
@@ -27,8 +28,8 @@ enum AboutPrivacyViewBridgeController {
         @InjectService var matomo: MatomoUtils
         let swiftUIView = PrivacyManagementView(
             urlRepository: URLConstants.sourceCode.url,
-            backgroundColor: KDriveAsset.backgroundColor.swiftUIColor,
-            illustration: KDriveAsset.documentSignaturePencilBulb.swiftUIImage,
+            backgroundColor: KDriveResourcesAsset.backgroundColor.swiftUIColor,
+            illustration: KDriveResourcesAsset.documentSignaturePencilBulb.swiftUIImage,
             userDefaultStore: .shared,
             userDefaultKeyMatomo: UserDefaults.shared.key(.matomoAuthorized),
             userDefaultKeySentry: UserDefaults.shared.key(.sentryAuthorized),

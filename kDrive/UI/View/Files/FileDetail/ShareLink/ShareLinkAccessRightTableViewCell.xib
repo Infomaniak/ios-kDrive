@@ -24,9 +24,9 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="0.0" y="0.0" width="36" height="17"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -36,30 +36,36 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="c2S-Sc-24B">
                                         <rect key="frame" x="0.0" y="0.0" width="332" height="113"/>
                                         <subviews>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="view" translatesAutoresizingMaskIntoConstraints="NO" id="Bbk-d7-2xx">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Bbk-d7-2xx">
                                                 <rect key="frame" x="16" y="17" width="20" height="20"/>
-                                                <color key="tintColor" name="iconColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="20" id="AXe-qi-Emq"/>
                                                     <constraint firstAttribute="height" constant="20" id="FVU-cB-Z0u"/>
                                                 </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="view"/>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
+                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IFi-Mg-IrK" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="44" y="17" width="40.5" height="19.5"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                <color key="textColor" name="titleColor"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header3"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-down" translatesAutoresizingMaskIntoConstraints="NO" id="rQg-IF-2ZX">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="rQg-IF-2ZX">
                                                 <rect key="frame" x="306" y="22" width="10" height="10"/>
-                                                <color key="tintColor" name="secondaryTextColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="10" id="Ao7-di-LyT"/>
                                                     <constraint firstAttribute="width" constant="10" id="cJ0-2O-TJu"/>
                                                 </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-down"/>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
+                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                         </subviews>
                                         <gestureRecognizers/>
@@ -79,9 +85,7 @@
                                             <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
                                                 <real key="value" value="1"/>
                                             </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
-                                                <color key="value" name="BorderColor"/>
-                                            </userDefinedRuntimeAttribute>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBorderColorName" value="BorderColor"/>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="aUP-sK-FuZ" customClass="MaterialOutlinedTextField" customModule="MaterialOutlinedTextField">
@@ -109,7 +113,6 @@
                                 </subviews>
                             </stackView>
                         </subviews>
-                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstItem="rtI-Wc-46s" firstAttribute="top" secondItem="aqX-hy-10J" secondAttribute="top" id="4XY-5Z-YGK"/>
                             <constraint firstAttribute="bottom" secondItem="N1T-16-z3z" secondAttribute="bottom" constant="14" id="MD7-fM-0zu"/>
@@ -118,6 +121,9 @@
                             <constraint firstItem="N1T-16-z3z" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" id="iAB-RE-w3u"/>
                             <constraint firstItem="rtI-Wc-46s" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" id="tWk-9F-ZE5"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -145,22 +151,5 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-down" width="24" height="24"/>
-        <image name="view" width="24" height="24"/>
-        <namedColor name="BorderColor">
-            <color red="0.8784313725490196" green="0.8784313725490196" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

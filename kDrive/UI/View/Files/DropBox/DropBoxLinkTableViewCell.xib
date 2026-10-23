@@ -28,9 +28,9 @@
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lien de la boîte de dépôt" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wGz-LN-h9i" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="0.0" y="0.0" width="468" height="17"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                        <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="dropBoxLinkTitle"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                         </userDefinedRuntimeAttributes>
@@ -44,9 +44,11 @@
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="36" id="4pa-4D-1jZ"/>
                                                 </constraints>
-                                                <color key="textColor" name="titleColor"/>
                                                 <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="13"/>
                                                 <textInputTraits key="textInputTraits"/>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
+                                                </userDefinedRuntimeAttributes>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" pointerInteraction="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KEo-B6-Qkr" customClass="ImageButton" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="444" y="11" width="24" height="24"/>
@@ -54,9 +56,10 @@
                                                     <constraint firstAttribute="height" constant="24" id="MDI-aV-SQo"/>
                                                     <constraint firstAttribute="width" constant="24" id="gbC-g4-vxL"/>
                                                 </constraints>
-                                                <color key="tintColor" name="iconColor"/>
-                                                <state key="normal" image="export-ios"/>
+                                                <state key="normal"/>
                                                 <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="export-ios"/>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="imageWidth">
                                                         <real key="value" value="25"/>
                                                     </userDefinedRuntimeAttribute>
@@ -103,13 +106,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="export-ios" width="24" height="24"/>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

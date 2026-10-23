@@ -33,12 +33,15 @@
                                             <constraint firstAttribute="height" constant="24" id="cdE-0B-A6g"/>
                                         </constraints>
                                     </view>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="file-audio" translatesAutoresizingMaskIntoConstraints="NO" id="MBf-nm-J24">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="MBf-nm-J24">
                                         <rect key="frame" x="32" y="2" width="38" height="38"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="38" id="TPh-h4-ZN5"/>
                                             <constraint firstAttribute="height" constant="38" id="n8G-yE-WkA"/>
                                         </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="file-audio"/>
+                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="54V-wB-FIL">
                                         <rect key="frame" x="78" y="0.0" width="120" height="42"/>
@@ -46,18 +49,18 @@
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qcs-cN-ITn" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="0.0" y="0.0" width="120" height="18"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
-                                                <color key="textColor" name="titleColor"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7dX-Vg-iSK" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="0.0" y="26" width="120" height="16"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                                <color key="textColor" name="secondaryTextColor"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="secondaryTextColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
@@ -68,13 +71,16 @@
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="UJy-gt-mPu">
                                 <rect key="frame" x="222" y="20.5" width="82" height="19"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="edit" translatesAutoresizingMaskIntoConstraints="NO" id="fSi-IH-Fdu">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fSi-IH-Fdu">
                                         <rect key="frame" x="0.0" y="0.0" width="12" height="14"/>
-                                        <color key="tintColor" name="primaryTextColor"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="12" id="v5M-w0-9wi"/>
                                             <constraint firstAttribute="height" constant="14" id="wbO-dy-hYn"/>
                                         </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="edit"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
+                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TXK-ec-ySf">
                                         <rect key="frame" x="28" y="-5" width="20" height="19"/>
@@ -82,8 +88,11 @@
                                             <constraint firstAttribute="height" constant="19" id="YTb-hx-OQF"/>
                                             <constraint firstAttribute="width" constant="20" id="eYQ-1i-W8M"/>
                                         </constraints>
-                                        <color key="tintColor" name="primaryTextColor"/>
-                                        <state key="normal" image="retry"/>
+                                        <state key="normal"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="retry"/>
+                                        </userDefinedRuntimeAttributes>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p7c-Ge-Tlc">
                                         <rect key="frame" x="64" y="-5" width="18" height="19"/>
@@ -91,8 +100,11 @@
                                             <constraint firstAttribute="height" constant="19" id="aPW-oS-ELB"/>
                                             <constraint firstAttribute="width" constant="18" id="nCC-vw-AlW"/>
                                         </constraints>
-                                        <color key="tintColor" name="primaryTextColor"/>
-                                        <state key="normal" image="close"/>
+                                        <state key="normal"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="close"/>
+                                        </userDefinedRuntimeAttributes>
                                     </button>
                                 </subviews>
                                 <constraints>
@@ -100,7 +112,6 @@
                                 </constraints>
                             </stackView>
                         </subviews>
-                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="UJy-gt-mPu" secondAttribute="trailing" constant="16" id="8al-ZW-6bW"/>
                             <constraint firstItem="UJy-gt-mPu" firstAttribute="centerY" secondItem="ljH-zA-01a" secondAttribute="centerY" id="HFP-X1-zJg"/>
@@ -119,6 +130,9 @@
                             <outlet property="retryButton" destination="TXK-ec-ySf" id="UBt-6k-Q4a"/>
                             <outlet property="titleLabel" destination="qcs-cN-ITn" id="pAV-sw-qSJ"/>
                         </connections>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <constraints>
@@ -140,22 +154,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="close" width="24" height="24"/>
-        <image name="edit" width="24" height="24"/>
-        <image name="file-audio" width="24" height="24"/>
-        <image name="retry" width="24" height="24"/>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

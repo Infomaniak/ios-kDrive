@@ -19,7 +19,6 @@
 import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
-import LocalizeKit
 import UIKit
 
 class FileDetailActivityTableViewCell: InsetTableViewCell {
@@ -136,7 +135,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         case .unknown:
             localizedKey = "fileActivityUnknown"
         }
-        detailLabel.text = localizedKey.localized
+        detailLabel.text = KDriveResourcesResources.bundle.localizedString(forKey: localizedKey, value: nil, table: nil)
 
         timeLabel.text = Constants.formatDate(activity.createdAt, style: .time, relative: true)
     }

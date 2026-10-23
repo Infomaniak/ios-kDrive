@@ -25,9 +25,9 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Utilisateurs" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="93T-HS-1Im" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="24" y="16" width="76" height="17"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileDetailsInfosSharedUsersTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
@@ -42,9 +42,10 @@
                             </collectionView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xyM-iJ-pVY" customClass="ImageButton" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="460" y="47" width="24" height="24"/>
-                                <color key="tintColor" name="iconColor"/>
-                                <state key="normal" image="share"/>
+                                <state key="normal"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="share"/>
                                     <userDefinedRuntimeAttribute type="number" keyPath="imageWidth">
                                         <real key="value" value="25"/>
                                     </userDefinedRuntimeAttribute>
@@ -88,13 +89,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="share" width="24" height="24"/>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

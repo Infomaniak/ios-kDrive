@@ -28,10 +28,10 @@
                             </view>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Invitez un utilisateur ou une adresse mail…" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="D2y-Vg-Ung">
                                 <rect key="frame" x="16" y="8" width="430" height="40"/>
-                                <color key="textColor" name="primaryTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" keyboardType="emailAddress"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibPlaceholderLocKey" value="shareFileInputUserAndEmail"/>
                                 </userDefinedRuntimeAttributes>
                             </textField>
@@ -70,9 +70,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -24,33 +24,35 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zhw-FU-F6A" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="24" y="218" width="531" height="16"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                <color key="textColor" name="secondaryTextColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="secondaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1uo-b8-9Yt" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="24" y="176" width="531" height="34"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="28"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header1"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Rm8-Wd-8Gj">
                                 <rect key="frame" x="237.5" y="64" width="104" height="104"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-filled" translatesAutoresizingMaskIntoConstraints="NO" id="1In-V6-Yzb">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="1In-V6-Yzb">
                                         <rect key="frame" x="32" y="32" width="40" height="40"/>
                                         <constraints>
                                             <constraint firstAttribute="width" secondItem="1In-V6-Yzb" secondAttribute="height" multiplier="1:1" id="3fQ-ij-cfu"/>
                                             <constraint firstAttribute="height" constant="40" id="TZE-L6-bUM"/>
                                         </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
+                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                 </subviews>
-                                <color key="backgroundColor" name="backgroundCardViewColor"/>
                                 <constraints>
                                     <constraint firstItem="1In-V6-Yzb" firstAttribute="top" secondItem="Rm8-Wd-8Gj" secondAttribute="top" constant="32" id="9Nb-1r-Izt"/>
                                     <constraint firstAttribute="width" secondItem="Rm8-Wd-8Gj" secondAttribute="height" multiplier="1:1" id="Uq2-KM-mxB"/>
@@ -58,9 +60,11 @@
                                     <constraint firstItem="1In-V6-Yzb" firstAttribute="leading" secondItem="Rm8-Wd-8Gj" secondAttribute="leading" constant="32" id="niu-SF-1CR"/>
                                     <constraint firstAttribute="bottom" secondItem="1In-V6-Yzb" secondAttribute="bottom" constant="32" id="pT4-in-FWj"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
                         </subviews>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="Zhw-FU-F6A" secondAttribute="trailing" constant="24" id="3Z2-Gw-J1u"/>
                             <constraint firstAttribute="bottom" secondItem="Zhw-FU-F6A" secondAttribute="bottom" constant="16" id="BU0-ef-e1x"/>
@@ -72,10 +76,12 @@
                             <constraint firstAttribute="height" constant="250" id="vxn-eJ-Ouc"/>
                             <constraint firstItem="Rm8-Wd-8Gj" firstAttribute="centerX" secondItem="Sgh-8x-hlz" secondAttribute="centerX" id="zN6-4D-hGv"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Dnf-gZ-p3w" customClass="IKSegmentedControl" customModule="kDriveCore">
                         <rect key="frame" x="24" y="266" width="531" height="41"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="40" id="PgQ-Dd-IEm"/>
                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="40" id="TnG-ex-vn8"/>
@@ -85,8 +91,9 @@
                             <segment title="Activité"/>
                             <segment title="Commentaires"/>
                         </segments>
-                        <color key="selectedSegmentTintColor" name="infomaniakColor"/>
                         <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceSelectedSegmentTintColorName" value="infomaniakColor"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKeys" value="fileDetailsInfosTitle,fileDetailsActivityTitle,fileDetailsCommentsTitle"/>
                         </userDefinedRuntimeAttributes>
                         <connections>
@@ -118,21 +125,5 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="folder-filled" width="24" height="24"/>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

@@ -18,13 +18,16 @@
                 <rect key="frame" x="0.0" y="0.0" width="120" height="45"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="file-default" translatesAutoresizingMaskIntoConstraints="NO" id="SvM-uu-YA6">
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="SvM-uu-YA6">
                         <rect key="frame" x="16" y="12.5" width="20" height="20"/>
-                        <color key="tintColor" name="secondaryTextColor"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="20" id="ClR-ie-Exx"/>
                             <constraint firstAttribute="height" constant="20" id="fcM-6k-50t"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="file-default"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
+                        </userDefinedRuntimeAttributes>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7iq-qO-qOo" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="44" y="12.5" width="36" height="20.5"/>
@@ -41,15 +44,17 @@
                             <constraint firstAttribute="height" constant="16" id="AfZ-To-gbT"/>
                             <constraint firstAttribute="width" constant="16" id="jtF-E3-cqO"/>
                         </constraints>
-                        <color key="tintColor" name="primaryTextColor"/>
                         <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                        <state key="normal" image="remove"/>
+                        <state key="normal"/>
                         <connections>
                             <action selector="removeButtonPressed:" destination="Hes-WQ-GRt" eventType="touchUpInside" id="IDm-Du-yX5"/>
                         </connections>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="remove"/>
+                        </userDefinedRuntimeAttributes>
                     </button>
                 </subviews>
-                <color key="backgroundColor" name="backgroundCardViewColor"/>
                 <constraints>
                     <constraint firstAttribute="trailing" secondItem="0SL-mF-wuO" secondAttribute="trailing" constant="16" id="2E8-10-ELs"/>
                     <constraint firstItem="0SL-mF-wuO" firstAttribute="leading" secondItem="7iq-qO-qOo" secondAttribute="trailing" constant="8" symbolic="YES" id="GWT-ES-ayI"/>
@@ -59,6 +64,9 @@
                     <constraint firstItem="7iq-qO-qOo" firstAttribute="centerY" secondItem="DCT-r3-wcE" secondAttribute="centerY" id="shA-Ss-HfB"/>
                     <constraint firstItem="7iq-qO-qOo" firstAttribute="leading" secondItem="SvM-uu-YA6" secondAttribute="trailing" constant="8" id="xkJ-Sp-9ut"/>
                 </constraints>
+                <userDefinedRuntimeAttributes>
+                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
+                </userDefinedRuntimeAttributes>
             </collectionViewCellContentView>
             <size key="customSize" width="217" height="47"/>
             <connections>
@@ -70,16 +78,5 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="file-default" width="24" height="24"/>
-        <image name="remove" width="24" height="24"/>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

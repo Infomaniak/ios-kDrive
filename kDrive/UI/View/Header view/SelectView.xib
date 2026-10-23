@@ -33,7 +33,10 @@
                                 <constraint firstAttribute="height" constant="24" id="WF6-Hy-RfB"/>
                             </constraints>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <state key="normal" title="Button" image="menu"/>
+                            <state key="normal" title="Button"/>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="menu"/>
+                            </userDefinedRuntimeAttributes>
                         </button>
                     </subviews>
                     <constraints>
@@ -42,7 +45,6 @@
                 </stackView>
             </subviews>
             <viewLayoutGuide key="safeArea" id="7pJ-Ao-faI"/>
-            <color key="backgroundColor" name="backgroundColor"/>
             <constraints>
                 <constraint firstItem="7xf-sA-D2E" firstAttribute="leading" secondItem="D2M-pg-lBR" secondAttribute="leading" id="VFB-Mi-Xs7"/>
                 <constraint firstItem="YpP-eL-hOj" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="7xf-sA-D2E" secondAttribute="trailing" constant="8" id="iNo-oU-mX5"/>
@@ -57,12 +59,11 @@
                 <outlet property="titleLabel" destination="7xf-sA-D2E" id="qCX-Zz-ZAQ"/>
             </connections>
             <point key="canvasLocation" x="87.786259541984734" y="-747.18309859154931"/>
+            <userDefinedRuntimeAttributes>
+                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+            </userDefinedRuntimeAttributes>
         </view>
     </objects>
     <resources>
-        <image name="menu" width="24" height="24"/>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

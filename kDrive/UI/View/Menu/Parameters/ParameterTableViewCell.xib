@@ -24,26 +24,28 @@
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BSA-Kc-s9g">
                                 <rect key="frame" x="0.0" y="99" width="322" height="1"/>
-                                <color key="backgroundColor" name="separatorColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="APk-Ag-B28"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="separatorColor"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="20" y="21" width="36" height="57"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sL3-3Q-uH6" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="266.5" y="41.5" width="35.5" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -84,15 +86,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="separatorColor">
-            <color red="0.96862745098039216" green="0.96862745098039216" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
