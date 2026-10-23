@@ -39,6 +39,7 @@ ios-kDrive/
 │   ├── Resources/               #   Assets, localized strings, entitlements
 │   │   ├── *.lproj/             #     Localizations (en, de, es, fr, it)
 │   │   ├── Assets.xcassets      #     Images, colors, icons
+│   │   ├── LaunchAssets.xcassets  # App-only launch-screen images and background
 │   │   ├── package-list.json    #     Generated third-party licenses shown in Settings
 │   │   └── Info.plist           #     App configuration
 │   ├── Utils/                   #   Utility functions, helpers
@@ -88,6 +89,8 @@ ios-kDrive/
 │   │   ├── Alert/               #     Alert controllers
 │   │   └── Scan/                #     Document scanning
 │   ├── Utils/                   #   Core utilities
+│   │   ├── ResourceLocalization.swift  # Shared-bundle localization for Interface Builder controls
+│   │   ├── ResourceAssets.swift  # Shared-bundle images and colors for Interface Builder controls
 │   │   ├── PHAsset/             #     Photo library utilities
 │   │   ├── FileProvider/        #     File provider utilities
 │   │   ├── Files/               #     File operations
@@ -120,6 +123,7 @@ ios-kDrive/
 ├── Project.swift                # Tuist project definition
 ├── scripts/                     # Development scripts
 │   └── lint.sh                  #   SwiftLint runner
+│   └── strip_framework_symbols.sh  # Release embedded-framework symbol stripping and re-signing
 ├── ci_scripts/                  # Xcode Cloud CI — DO NOT run locally
 ├── .github/
 │   ├── github-app.yml           # GitHub app session setup and build/run commands

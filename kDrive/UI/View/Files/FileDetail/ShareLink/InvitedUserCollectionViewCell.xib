@@ -21,12 +21,15 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="hYw-nt-TLz">
                         <rect key="frame" x="0.0" y="0.0" width="201" height="45"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="test-image" translatesAutoresizingMaskIntoConstraints="NO" id="8GF-XH-4vr">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="8GF-XH-4vr">
                                 <rect key="frame" x="8" y="10.5" width="24" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="24" id="QIR-8X-rB0"/>
                                     <constraint firstAttribute="height" constant="24" id="YKX-Fr-Hin"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="test-image"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cpV-YI-wwo">
                                 <rect key="frame" x="177" y="14.5" width="16" height="16"/>
@@ -34,24 +37,26 @@
                                     <constraint firstAttribute="height" constant="16" id="Xxe-AI-wYL"/>
                                     <constraint firstAttribute="width" constant="16" id="tkF-k2-pwV"/>
                                 </constraints>
-                                <state key="normal" image="remove">
+                                <state key="normal">
                                     <color key="titleColor" red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
                                 <connections>
                                     <action selector="closeButton:" destination="gTV-IL-0wX" eventType="touchUpInside" id="lAo-bB-OXT"/>
                                 </connections>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="remove"/>
+                                </userDefinedRuntimeAttributes>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Username" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9eM-wH-jMv" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="40" y="14" width="129" height="17"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="8GF-XH-4vr" firstAttribute="centerY" secondItem="hYw-nt-TLz" secondAttribute="centerY" id="8Ze-40-oll"/>
                             <constraint firstItem="cpV-YI-wwo" firstAttribute="centerY" secondItem="9eM-wH-jMv" secondAttribute="centerY" id="8xj-EN-k0u"/>
@@ -62,6 +67,9 @@
                             <constraint firstAttribute="width" constant="201" id="k1L-e8-ZNe"/>
                             <constraint firstItem="cpV-YI-wwo" firstAttribute="leading" secondItem="9eM-wH-jMv" secondAttribute="trailing" constant="8" id="y0G-gq-VIq"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
             </view>
@@ -84,13 +92,5 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="remove" width="24" height="24"/>
-        <image name="test-image" width="2000" height="1333"/>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

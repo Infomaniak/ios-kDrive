@@ -35,21 +35,25 @@
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="3ab-oF-eeb">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
                                 <connections>
                                     <outlet property="dataSource" destination="o7y-8W-99b" id="cGr-33-sAv"/>
                                     <outlet property="delegate" destination="o7y-8W-99b" id="ooz-6F-PMr"/>
                                 </connections>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="RwZ-Sx-hVy"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="3ab-oF-eeb" firstAttribute="leading" secondItem="qnc-gq-Ddr" secondAttribute="leading" id="Okz-IY-xlc"/>
                             <constraint firstItem="3ab-oF-eeb" firstAttribute="top" secondItem="qnc-gq-Ddr" secondAttribute="top" id="P4B-Kh-jdL"/>
                             <constraint firstAttribute="trailing" secondItem="3ab-oF-eeb" secondAttribute="trailing" id="Yvx-1o-hD6"/>
                             <constraint firstAttribute="bottom" secondItem="3ab-oF-eeb" secondAttribute="bottom" id="iF1-HK-ms3"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Sélectionner un drive" id="Fl9-qa-prz">
                         <userDefinedRuntimeAttributes>
@@ -74,21 +78,25 @@
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="nwh-Is-go9">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
                                 <connections>
                                     <outlet property="dataSource" destination="pj3-xM-nmc" id="5iz-I0-lYb"/>
                                     <outlet property="delegate" destination="pj3-xM-nmc" id="llC-0k-UpU"/>
                                 </connections>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="2fO-wu-MvI"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="nwh-Is-go9" firstAttribute="bottom" secondItem="6Ra-Sm-OfL" secondAttribute="bottom" id="LhO-rI-rLe"/>
                             <constraint firstAttribute="top" secondItem="nwh-Is-go9" secondAttribute="top" id="Prb-b2-exs"/>
                             <constraint firstAttribute="trailing" secondItem="nwh-Is-go9" secondAttribute="trailing" id="bRa-eY-TE0"/>
                             <constraint firstItem="nwh-Is-go9" firstAttribute="leading" secondItem="6Ra-Sm-OfL" secondAttribute="leading" id="hww-Aw-yhb"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Sélectionner un format de photo" id="YRC-hf-LiG">
                         <userDefinedRuntimeAttributes>
@@ -113,21 +121,25 @@
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="KPo-kb-AjL">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
                                 <connections>
                                     <outlet property="dataSource" destination="IIc-LF-U4I" id="kcT-Jo-ts7"/>
                                     <outlet property="delegate" destination="IIc-LF-U4I" id="JwS-HX-NL0"/>
                                 </connections>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="kNH-ta-As2"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="KPo-kb-AjL" firstAttribute="top" secondItem="7Fh-1c-lZR" secondAttribute="top" id="0yw-XW-7s2"/>
                             <constraint firstItem="KPo-kb-AjL" firstAttribute="leading" secondItem="7Fh-1c-lZR" secondAttribute="leading" id="Ixg-YL-nIA"/>
                             <constraint firstAttribute="bottom" secondItem="KPo-kb-AjL" secondAttribute="bottom" id="j1q-kO-Q2K"/>
                             <constraint firstAttribute="trailing" secondItem="KPo-kb-AjL" secondAttribute="trailing" id="nU5-P3-z9k"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Enregistrer sur le kDrive" id="iJx-Zg-O5e">
                         <barButtonItem key="leftBarButtonItem" style="plain" id="vpq-hw-OF9">
@@ -150,8 +162,5 @@
         </scene>
     </scenes>
     <resources>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

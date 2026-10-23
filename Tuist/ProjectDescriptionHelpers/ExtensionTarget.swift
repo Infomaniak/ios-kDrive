@@ -51,12 +51,6 @@ public extension Target {
             "kDrive/UI/View/Menu/PhotoList/ReusableHeaderView.xib",
             "kDrive/UI/View/Menu/SwitchUser/*.xib",
             "kDrive/UI/View/NewFolder/*.xib",
-            "kDrive/**/*.xcassets",
-            "kDrive/**/Localizable.strings",
-            "kDrive/**/*.stringsdict",
-            "kDrive/Resources/illu_drop_box.json",
-            "kDrive/Resources/illu_photos.json",
-            "kDrive/Resources/illu_upgrade.json",
             "kDrive/**/PrivacyInfo.xcprivacy"
         ]
         resources.append(contentsOf: additionalResources)

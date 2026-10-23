@@ -16,7 +16,6 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Atlantis
 import AVFoundation
 import BackgroundTasks
 import InAppTwoFactorAuthentication

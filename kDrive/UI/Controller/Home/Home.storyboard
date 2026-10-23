@@ -15,7 +15,6 @@
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="nFG-fh-ZM9">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="8MB-7O-q5N">
                             <size key="itemSize" width="128" height="128"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -27,6 +26,9 @@
                             <outlet property="dataSource" destination="RSY-8S-k6V" id="7mN-mA-C04"/>
                             <outlet property="delegate" destination="RSY-8S-k6V" id="kvv-sl-mlK"/>
                         </connections>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </collectionView>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="dK0-aK-Jff"/>
                 </collectionViewController>
@@ -38,8 +40,11 @@
         <scene sceneID="wFc-Ct-V9A">
             <objects>
                 <navigationController storyboardIdentifier="HomeVC" automaticallyAdjustsScrollViewInsets="NO" id="TuV-Pj-cAB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCoreUIKit" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="" image="house" selectedImage="house-fill" id="YAE-aq-h2X">
+                    <tabBarItem key="tabBarItem" title="" selectedImage="house-fill" id="YAE-aq-h2X">
                         <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="house"/>
+                        </userDefinedRuntimeAttributes>
                     </tabBarItem>
                     <toolbarItems/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
@@ -58,10 +63,5 @@
         </scene>
     </scenes>
     <resources>
-        <image name="house" width="24" height="24"/>
-        <image name="house-fill" width="24" height="24"/>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

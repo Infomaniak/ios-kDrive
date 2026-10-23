@@ -29,11 +29,13 @@
                                         <subviews>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="exclamationmark.arrow.trianglehead.2.clockwise.rotate.90" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="Rx2-wp-Xd2" userLabel="Error Icon Image View">
                                                 <rect key="frame" x="14.666666666666668" y="20" width="24.666666666666661" height="23.333333333333329"/>
-                                                <color key="tintColor" name="iconColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="24" id="DNg-nk-5hq"/>
                                                     <constraint firstAttribute="height" constant="24" id="hlN-VZ-6dK"/>
                                                 </constraints>
+                                                <userDefinedRuntimeAttributes>
+                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
+                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="5fG-BH-ruV">
                                                 <rect key="frame" x="108" y="7.3333333333333321" width="176" height="48.666666666666671"/>
@@ -71,16 +73,18 @@
                                     <constraint firstItem="ztF-Xu-Gdi" firstAttribute="centerY" secondItem="cSl-Qq-OTk" secondAttribute="centerY" id="F5Z-fT-z2W"/>
                                 </constraints>
                             </stackView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-right" translatesAutoresizingMaskIntoConstraints="NO" id="G0J-Km-hBT">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="G0J-Km-hBT">
                                 <rect key="frame" x="292" y="41.666666666666664" width="12" height="12"/>
-                                <color key="tintColor" name="secondaryTextColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="12" id="K6b-Ht-28h"/>
                                     <constraint firstAttribute="height" constant="12" id="ljd-OK-bY3"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstItem="cSl-Qq-OTk" firstAttribute="centerY" secondItem="o3H-RR-j9t" secondAttribute="centerY" id="6s6-5a-I9z"/>
                             <constraint firstItem="G0J-Km-hBT" firstAttribute="centerY" secondItem="o3H-RR-j9t" secondAttribute="centerY" id="8QO-ut-SqU"/>
@@ -91,6 +95,9 @@
                             <constraint firstItem="cSl-Qq-OTk" firstAttribute="top" secondItem="o3H-RR-j9t" secondAttribute="top" constant="16" id="dnu-Lh-NJP"/>
                             <constraint firstItem="G0J-Km-hBT" firstAttribute="leading" secondItem="cSl-Qq-OTk" secondAttribute="trailing" constant="8" id="pIe-Lx-tVA"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -111,16 +118,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-right" width="16" height="16"/>
         <image name="exclamationmark.arrow.trianglehead.2.clockwise.rotate.90" catalog="system" width="128" height="121"/>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

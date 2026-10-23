@@ -24,20 +24,23 @@
                                 <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="zMN-vH-24t">
                                     <rect key="frame" x="0.0" y="0.0" width="509" height="122"/>
                                     <subviews>
-                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="offline" translatesAutoresizingMaskIntoConstraints="NO" id="dtS-Y7-A5o">
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="dtS-Y7-A5o">
                                             <rect key="frame" x="0.0" y="49" width="24" height="24"/>
-                                            <color key="tintColor" name="iconColor"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="24" id="hBi-y4-Ons"/>
                                                 <constraint firstAttribute="height" constant="24" id="s8B-KC-b0K"/>
                                             </constraints>
+                                            <userDefinedRuntimeAttributes>
+                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="offline"/>
+                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
+                                            </userDefinedRuntimeAttributes>
                                         </imageView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TPT-5S-TK5" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                             <rect key="frame" x="32" y="53.333333333333343" width="477" height="15.666666666666671"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
-                                            <color key="textColor" name="primaryTextColor"/>
                                             <nil key="highlightedColor"/>
                                             <userDefinedRuntimeAttributes>
+                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                 <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="allNoNetwork"/>
                                                 <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                             </userDefinedRuntimeAttributes>
@@ -45,13 +48,15 @@
                                     </subviews>
                                 </stackView>
                             </subviews>
-                            <color key="backgroundColor" name="backgroundColor"/>
                             <constraints>
                                 <constraint firstItem="zMN-vH-24t" firstAttribute="top" secondItem="ziK-7C-tFw" secondAttribute="top" id="1dB-Ap-f0x"/>
                                 <constraint firstAttribute="bottom" secondItem="zMN-vH-24t" secondAttribute="bottom" id="GBU-sc-Z6M"/>
                                 <constraint firstAttribute="trailing" secondItem="zMN-vH-24t" secondAttribute="trailing" id="RIe-wv-oVI"/>
                                 <constraint firstItem="zMN-vH-24t" firstAttribute="leading" secondItem="ziK-7C-tFw" secondAttribute="leading" id="RZ2-K4-NtZ"/>
                             </constraints>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                            </userDefinedRuntimeAttributes>
                         </view>
                     </subviews>
                 </stackView>
@@ -72,15 +77,5 @@
         </collectionReusableView>
     </objects>
     <resources>
-        <image name="offline" width="24" height="24"/>
-        <namedColor name="backgroundColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

@@ -15,11 +15,13 @@
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="22" sectionFooterHeight="-1" estimatedSectionFooterHeight="152" id="rQn-3w-wf1">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <connections>
                             <outlet property="dataSource" destination="J5q-yn-jYo" id="xSd-g1-7Hs"/>
                             <outlet property="delegate" destination="J5q-yn-jYo" id="DNS-Kt-mbH"/>
                         </connections>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </tableView>
                     <navigationItem key="navigationItem" title="Filtres" id="CHQ-vg-ClB">
                         <barButtonItem key="leftBarButtonItem" image="xmark" catalog="system" style="done" id="N3C-dt-S4u">
@@ -60,8 +62,5 @@
     </scenes>
     <resources>
         <image name="xmark" catalog="system" width="128" height="118"/>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>
