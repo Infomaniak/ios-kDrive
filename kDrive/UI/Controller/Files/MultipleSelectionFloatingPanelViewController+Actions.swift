@@ -20,6 +20,7 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import UIKit
 
 // MARK: - Actions
@@ -425,13 +426,16 @@ extension MultipleSelectionFloatingPanelViewController {
         }
     }
 
-    private func presentShareSheet(for sourceURLs: [URL], from indexPath: IndexPath) {
+    private nonisolated static func prepareShareCopies(
+        from sourceURLs: [URL]
+    ) throws -> (directory: URL, files: [URL]) {
         let fileManager = FileManager.default
         let exportDirectory = fileManager.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
 
         do {
             let shareURLs = try sourceURLs.map { sourceURL in
+                try Task.checkCancellation()
                 let directory = exportDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
                 try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
                 let shareURL = directory.appendingPathComponent(sourceURL.lastPathComponent)
@@ -439,16 +443,66 @@ extension MultipleSelectionFloatingPanelViewController {
                 return shareURL
             }
 
-            let activityViewController = UIActivityViewController(activityItems: shareURLs, applicationActivities: nil)
-            activityViewController.completionWithItemsHandler = { _, _, _, _ in
-                try? fileManager.removeItem(at: exportDirectory)
-            }
-            activityViewController.popoverPresentationController?.sourceView =
-                collectionView.cellForItem(at: indexPath) ?? collectionView
-            present(activityViewController, animated: true)
+            try Task.checkCancellation()
+            return (exportDirectory, shareURLs)
         } catch {
-            try? fileManager.removeItem(at: exportDirectory)
-            UIConstants.showSnackBarIfNeeded(error: error)
+            removeShareCopies(at: exportDirectory)
+            throw error
+        }
+    }
+
+    private nonisolated static func removeShareCopies(at directory: URL) {
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: directory.path) else { return }
+
+        do {
+            try fileManager.removeItem(at: directory)
+        } catch {
+            Logger.general.error("Error removing temporary share copies: \(error)")
+        }
+    }
+
+    private func presentShareSheet(
+        for sourceURLs: [URL],
+        from indexPath: IndexPath
+    ) {
+        Task { @MainActor in
+            defer {
+                setSendCopyLoading(false, at: indexPath)
+            }
+
+            do {
+                let export = try await Task.detached(priority: .userInitiated) {
+                    try Self.prepareShareCopies(from: sourceURLs)
+                }.value
+
+                guard viewIfLoaded?.window != nil else {
+                    Task.detached(priority: .utility) {
+                        Self.removeShareCopies(at: export.directory)
+                    }
+                    return
+                }
+
+                let activityViewController = UIActivityViewController(activityItems: export.files, applicationActivities: nil)
+
+                activityViewController.completionWithItemsHandler = { _, _, _, error in
+                    Task.detached(priority: .utility) {
+                        Self.removeShareCopies(at: export.directory)
+                    }
+
+                    if let error {
+                        Task { @MainActor in
+                            UIConstants.showSnackBarIfNeeded(error: error)
+                        }
+                    }
+                }
+
+                let sourceView = collectionView.cellForItem(at: indexPath) ?? collectionView
+                activityViewController.popoverPresentationController?.sourceView = sourceView
+                present(activityViewController, animated: true)
+            } catch {
+                UIConstants.showSnackBarIfNeeded(error: error)
+            }
         }
     }
 }
