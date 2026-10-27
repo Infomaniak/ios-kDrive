@@ -410,9 +410,9 @@ extension MultipleSelectionFloatingPanelViewController {
                                 at indexPath: IndexPath) {
         shareDownloadObserver?.cancel()
         shareDownloadObserver = nil
-        setSendCopyLoading(false, at: indexPath)
 
         if let error = downloadError {
+            setSendCopyLoading(false, at: indexPath)
             UIConstants.showSnackBarIfNeeded(error: error)
             return
         }
