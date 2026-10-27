@@ -395,7 +395,7 @@ extension FileActionsFloatingPanelViewController {
                 title: KDriveResourcesStrings.Localizable.cancelDownloadTitle,
                 message: KDriveResourcesStrings.Localizable.cancelDownloadDescription,
                 action: KDriveResourcesStrings.Localizable.buttonYes,
-                destructive: true
+                cancelString: KDriveResourcesStrings.Localizable.buttonNo
             ) {
                 operation.cancel()
             }
