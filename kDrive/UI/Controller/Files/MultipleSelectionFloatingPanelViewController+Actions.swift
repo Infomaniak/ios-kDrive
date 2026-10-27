@@ -347,6 +347,7 @@ extension MultipleSelectionFloatingPanelViewController {
             return
         }
 
+        downloadError = nil
         setSendCopyLoading(true, at: indexPath)
 
         observeDownloads(of: filesToDownload, group: group)
