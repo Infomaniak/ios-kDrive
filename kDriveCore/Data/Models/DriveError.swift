@@ -214,6 +214,11 @@ public struct DriveError: Error, Equatable, ErrorWithCode {
         code: "upload_destination_not_writable_error"
     )
 
+    public static let canNotCreateFileHereError = DriveError(
+        type: .serverError,
+        code: "can_not_create_file_here_error"
+    )
+
     public static let uploadNotTerminatedError = DriveError(type: .serverError, code: "upload_not_terminated_error")
 
     public static let uploadNotTerminated = DriveError(type: .serverError, code: "upload_not_terminated")
@@ -270,6 +275,7 @@ public struct DriveError: Error, Equatable, ErrorWithCode {
                                                   notAuthorized,
                                                   uploadDestinationNotFoundError,
                                                   uploadDestinationNotWritableError,
+                                                  canNotCreateFileHereError,
                                                   invalidUploadTokenError,
                                                   uploadError,
                                                   uploadFailedError,

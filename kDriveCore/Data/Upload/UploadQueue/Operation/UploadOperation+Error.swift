@@ -259,7 +259,7 @@ extension UploadOperation {
                 file.progress = nil
                 // _not_ overriding file.error
 
-            case .objectNotFound, .uploadDestinationNotFoundError, .uploadDestinationNotWritableError:
+            case .objectNotFound, .uploadDestinationNotFoundError, .uploadDestinationNotWritableError, .canNotCreateFileHereError:
                 // If we get an ”object not found“ error, we cancel all further uploads in this folder
                 file.maxRetryCount = 0
                 file.progress = nil
