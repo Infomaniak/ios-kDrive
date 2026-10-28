@@ -47,6 +47,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private var previewDownloadTask: ImageTask?
     private var file: File?
     private var videoPlayer: VideoPlayer?
+    private var playerViewControllerIfLoaded: AVPlayerViewController?
+    private var readyForDisplayObserver: NSKeyValueObservation?
+    private var playbackStatusObserver: NSKeyValueObservation?
+    private var isCurrentPage = false
+    private var isPlayerRevealed = false
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -56,6 +61,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     override func prepareForReuse() {
         super.prepareForReuse()
         videoPlayer?.stopPlayback()
+        removeInlinePlayer()
+        isCurrentPage = false
         previewFrameImageView.image = nil
         previewDownloadTask?.cancel()
     }
@@ -68,12 +75,24 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
         playButton.isEnabled = false
+        playButton.isHidden = true
 
         videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager, previewDelegate: self)
     }
 
+    override func didStartDisplaying() {
+        guard !isCurrentPage else { return }
+        isCurrentPage = true
+        if isPlayerRevealed {
+            playFromBeginning()
+        }
+    }
+
     override func didEndDisplaying() {
         matomo.trackMediaPlayer(leaveAt: videoPlayer?.progressPercentage)
+        isCurrentPage = false
+        videoPlayer?.stopPlayback()
+        playerViewControllerIfLoaded?.player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 
     @IBAction func playVideoPressed(_ sender: Any) {
@@ -109,5 +128,95 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
 
     func readyToPlay() {
         playButton.isEnabled = true
+        guard let parentViewController else { return }
+        embedInline(in: parentViewController)
+    }
+
+    private func embedInline(in parent: UIViewController) {
+        guard let playerViewController = videoPlayer?.playerViewController,
+              playerViewController.parent == nil,
+              let container = previewFrameImageView.superview else { return }
+
+        playerViewControllerIfLoaded = playerViewController
+        parent.addChild(playerViewController)
+
+        let playerView: UIView = playerViewController.view
+        playerView.alpha = 0
+        playerView.translatesAutoresizingMaskIntoConstraints = false
+        container.insertSubview(playerView, belowSubview: previewFrameImageView)
+        NSLayoutConstraint.activate([
+            playerView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            playerView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            playerView.widthAnchor.constraint(equalTo: container.widthAnchor),
+            playerView.heightAnchor.constraint(equalTo: container.heightAnchor)
+        ])
+        playerViewController.didMove(toParent: parent)
+        observePlaybackStatus(of: playerViewController)
+
+        if playerViewController.isReadyForDisplay {
+            revealPlayer(playerViewController)
+        } else {
+            readyForDisplayObserver = playerViewController
+                .observe(\.isReadyForDisplay, options: [.new]) { [weak self] _, change in
+                    guard change.newValue == true else { return }
+                    Task { @MainActor in
+                        guard let self, self.playerViewControllerIfLoaded === playerViewController else { return }
+                        self.readyForDisplayObserver = nil
+                        self.revealPlayer(playerViewController)
+                    }
+                }
+        }
+    }
+
+    private func revealPlayer(_ playerViewController: AVPlayerViewController) {
+        isPlayerRevealed = true
+        tapGestureRecognizer.isEnabled = false
+        if isCurrentPage {
+            playFromBeginning()
+        }
+
+        UIView.animate(withDuration: 0.25) {
+            playerViewController.view.alpha = 1
+            self.previewFrameImageView.alpha = 0
+        }
+    }
+
+    private func observePlaybackStatus(of playerViewController: AVPlayerViewController) {
+        playbackStatusObserver = playerViewController.player?
+            .observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
+                let status = player.timeControlStatus
+                Task { @MainActor in
+                    guard let self, self.isCurrentPage, self.playerViewControllerIfLoaded === playerViewController else { return }
+                    switch status {
+                    case .playing:
+                        self.previewDelegate?.setFullscreen(true)
+                    case .paused:
+                        self.previewDelegate?.setFullscreen(false)
+                    default:
+                        return
+                    }
+                }
+            }
+    }
+
+    private func playFromBeginning() {
+        guard let player = playerViewControllerIfLoaded?.player else { return }
+        matomo.trackMediaPlayer(playMedia: .video)
+        player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+        player.play()
+    }
+
+    private func removeInlinePlayer() {
+        readyForDisplayObserver = nil
+        playbackStatusObserver = nil
+        isPlayerRevealed = false
+        if let playerViewController = playerViewControllerIfLoaded {
+            playerViewController.willMove(toParent: nil)
+            playerViewController.view.removeFromSuperview()
+            playerViewController.removeFromParent()
+        }
+        playerViewControllerIfLoaded = nil
+        previewFrameImageView.alpha = 1
+        tapGestureRecognizer.isEnabled = true
     }
 }

@@ -417,6 +417,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         setFullscreen(false)
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
+        (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)?.didStartDisplaying()
 
         matomo.track(view: [MatomoUtils.View.preview.displayName, "File"])
 
@@ -726,6 +727,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         previousCell?.didEndDisplaying()
 
         currentIndex = centerCellIndexPath
+        (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)?.didStartDisplaying()
         updateFileForCurrentIndex()
 
         updateNavigationBar()
@@ -994,6 +996,10 @@ extension PreviewViewController: UICollectionViewDataSource {
         let file = previewFiles[indexPath.row]
         if let cell = cell as? DownloadingPreviewCollectionViewCell {
             cell.progressiveLoadingForFile(file, publicShareProxy: driveFileManager?.publicShareProxy)
+        }
+
+        if indexPath == currentIndex {
+            (cell as? PreviewCollectionViewCell)?.didStartDisplaying()
         }
     }
 
