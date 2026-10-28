@@ -34,6 +34,7 @@ import UIKit
     func errorWhilePreviewing(fileId: Int, error: Error)
     func openWith(from: UIView)
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
+    var fileActionPanelHeight: CGFloat { get }
 }
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
@@ -89,10 +90,16 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private static let smallDetentHeight: CGFloat = 75
+
     private let smallDetent = UISheetPresentationController.Detent.custom(
         identifier: .init("smallDetent")
     ) { _ in
-        75
+        smallDetentHeight
+    }
+
+    var fileActionPanelHeight: CGFloat {
+        fullScreenPreview || isBookPreviewLayout ? 0 : Self.smallDetentHeight
     }
 
     private var backgroundExtensionView: UIView?

@@ -229,13 +229,24 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
                     switch status {
                     case .playing:
                         self.previewDelegate?.setFullscreen(true)
+                        self.updatePlayerBottomInset(playerViewController)
                     case .paused:
                         self.previewDelegate?.setFullscreen(false)
+                        self.updatePlayerBottomInset(playerViewController)
                     default:
                         return
                     }
                 }
             }
+    }
+
+    private func updatePlayerBottomInset(_ playerViewController: AVPlayerViewController) {
+        let bottomInset = previewDelegate?.fileActionPanelHeight ?? 0
+        guard playerViewController.additionalSafeAreaInsets.bottom != bottomInset else { return }
+        UIView.animate(withDuration: 0.25) {
+            playerViewController.additionalSafeAreaInsets.bottom = bottomInset
+            playerViewController.view.layoutIfNeeded()
+        }
     }
 
     private func playFromBeginning() {
@@ -250,6 +261,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         playbackStatusObserver = nil
         isPlayerRevealed = false
         if let playerViewController = playerViewControllerIfLoaded {
+            playerViewController.additionalSafeAreaInsets.bottom = 0
             playerViewController.willMove(toParent: nil)
             playerViewController.view.removeFromSuperview()
             playerViewController.removeFromParent()
