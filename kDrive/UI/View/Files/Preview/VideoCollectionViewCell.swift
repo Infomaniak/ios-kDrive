@@ -53,9 +53,26 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private var isCurrentPage = false
     private var isPlayerRevealed = false
 
+    private var loadingIndicatorTask: Task<Void, Never>?
+
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.color = KDriveResourcesAsset.loaderDarkerDefaultColor.color
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+
     override func awakeFromNib() {
         super.awakeFromNib()
         playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
+
+        let container = previewFrameImageView.superview ?? contentView
+        container.addSubview(loadingIndicator)
+        NSLayoutConstraint.activate([
+            loadingIndicator.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
     }
 
     override func prepareForReuse() {
@@ -76,6 +93,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         }
         playButton.isEnabled = false
         playButton.isHidden = true
+
+        showLoadingIndicatorAfterDelay()
 
         videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager, previewDelegate: self)
     }
@@ -175,10 +194,30 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             playFromBeginning()
         }
 
+        loadingIndicatorTask?.cancel()
         UIView.animate(withDuration: 0.25) {
             playerViewController.view.alpha = 1
             self.previewFrameImageView.alpha = 0
+            self.loadingIndicator.alpha = 0
+        } completion: { _ in
+            self.hideLoadingIndicator()
         }
+    }
+
+    private func showLoadingIndicatorAfterDelay() {
+        hideLoadingIndicator()
+        loadingIndicatorTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled, let self, !self.isPlayerRevealed else { return }
+            loadingIndicator.startAnimating()
+        }
+    }
+
+    private func hideLoadingIndicator() {
+        loadingIndicatorTask?.cancel()
+        loadingIndicatorTask = nil
+        loadingIndicator.stopAnimating()
+        loadingIndicator.alpha = 1
     }
 
     private func observePlaybackStatus(of playerViewController: AVPlayerViewController) {
