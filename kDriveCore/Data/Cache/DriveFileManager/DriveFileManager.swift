@@ -92,18 +92,12 @@ public final class DriveFileManager {
 
     public let realmConfiguration: Realm.Configuration
 
-    private var _drive: Drive
-    public var drive: Drive {
-        guard let freshFrozenDrive = driveInfoDatabase.fetchObject(ofType: Drive.self, forPrimaryKey: _drive.objectId)?.freeze()
-        else {
-            return _drive
-        }
-        _drive = freshFrozenDrive
-        return freshFrozenDrive
-    }
+    private let initialDrive: Drive
+    private let driveObjectId: String
+    public let driveId: Int
 
-    public var driveId: Int {
-        _drive.id
+    public var drive: Drive {
+        return driveInfoDatabase.fetchObject(ofType: Drive.self, forPrimaryKey: driveObjectId)?.freeze() ?? initialDrive
     }
 
     public let apiFetcher: DriveApiFetcher
@@ -272,7 +266,10 @@ public final class DriveFileManager {
     }
 
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
-        _drive = drive
+        // Keep the fallback immutable: this manager is accessed from concurrent tasks.
+        initialDrive = drive.freezeIfNeeded()
+        driveObjectId = drive.objectId
+        driveId = drive.id
         self.apiFetcher = apiFetcher
         self.context = context
         realmConfiguration = Self.configuration(context: context, driveId: drive.id, driveUserId: drive.userId)
