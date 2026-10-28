@@ -54,6 +54,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private var isPlayerRevealed = false
 
     private var loadingIndicatorTask: Task<Void, Never>?
+    private let touchTracker = TouchTrackingGestureRecognizer()
 
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
@@ -236,6 +237,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
                         self.previewDelegate?.setFullscreen(true)
                         self.updatePlayerBottomInset(playerViewController)
                     case .paused:
+                        guard !self.touchTracker.isTouching else { return }
                         self.previewDelegate?.setFullscreen(false)
                         self.updatePlayerBottomInset(playerViewController)
                     default:
@@ -243,6 +245,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
                     }
                 }
             }
+        playerViewController.view.addGestureRecognizer(touchTracker)
     }
 
     private func updatePlayerBottomInset(_ playerViewController: AVPlayerViewController) {
@@ -264,6 +267,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private func removeInlinePlayer() {
         readyForDisplayObserver = nil
         playbackStatusObserver = nil
+        touchTracker.view?.removeGestureRecognizer(touchTracker)
         isPlayerRevealed = false
         if let playerViewController = playerViewControllerIfLoaded {
             playerViewController.additionalSafeAreaInsets.bottom = 0
