@@ -99,6 +99,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager, previewDelegate: self)
     }
 
+    override var prefersFullscreenPreview: Bool {
+        guard isCurrentPage, let player = playerViewControllerIfLoaded?.player else { return false }
+        return player.rate != 0
+    }
+
     override func didStartDisplaying() {
         guard !isCurrentPage else { return }
         isCurrentPage = true

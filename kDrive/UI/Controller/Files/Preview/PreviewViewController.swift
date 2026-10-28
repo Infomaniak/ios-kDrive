@@ -421,10 +421,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        setFullscreen(false)
+
+        let currentCell = collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell
+        currentCell?.didStartDisplaying()
+        setFullscreen(currentCell?.prefersFullscreenPreview ?? false)
+
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
-        (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)?.didStartDisplaying()
 
         matomo.track(view: [MatomoUtils.View.preview.displayName, "File"])
 
