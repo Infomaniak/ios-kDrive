@@ -117,6 +117,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     }
 
     func errorWhilePreviewing(error: any Error) {
+        hideLoadingIndicator()
         guard let file, let previewDelegate else { return }
         previewDelegate.errorWhilePreviewing(fileId: file.id, error: error)
         videoPlayer = nil
