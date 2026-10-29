@@ -80,6 +80,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
     private var isPlaybackFullscreen = false
+    private var isFileActionsTransitioning = false
+    private var pendingFileActionsVisibility: (isVisible: Bool, animated: Bool)?
 
     var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
@@ -460,6 +462,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
+        pendingFileActionsVisibility = nil
         dismissFileActionsPanel(animated: false)
     }
 
@@ -704,10 +707,17 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let targetTopInset = hide ? navBarHeight : 0.0
         additionalSafeAreaInsets.top = targetTopInset
         view.layoutIfNeeded()
-        if hide {
-            dismissFileActionsPanel(animated: !isViewDisappearing)
+        pendingFileActionsVisibility = (isVisible: !hide, animated: hide ? !isViewDisappearing : true)
+        applyPendingFileActionsVisibility()
+    }
+
+    private func applyPendingFileActionsVisibility() {
+        guard !isFileActionsTransitioning, let pending = pendingFileActionsVisibility else { return }
+        pendingFileActionsVisibility = nil
+        if pending.isVisible {
+            presentFileActionsPanel(animated: pending.animated)
         } else {
-            presentFileActionsPanel(animated: true)
+            dismissFileActionsPanel(animated: pending.animated)
         }
     }
 
@@ -716,6 +726,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
               fileInformationsViewController.presentingViewController == nil else {
             return
         }
+        isFileActionsTransitioning = true
 
         view.layoutIfNeeded()
 
@@ -729,7 +740,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         present(fileInformationsViewController, animated: animated) { [weak self] in
-            self?.scheduleFileActionsLayoutUpdate()
+            guard let self else { return }
+            isFileActionsTransitioning = false
+            scheduleFileActionsLayoutUpdate()
+            applyPendingFileActionsVisibility()
         }
     }
 
@@ -739,7 +753,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        fileInformationsViewController.dismiss(animated: animated, completion: completion)
+        isFileActionsTransitioning = true
+        fileInformationsViewController.dismiss(animated: animated) { [weak self] in
+            self?.isFileActionsTransitioning = false
+            completion?()
+            self?.applyPendingFileActionsVisibility()
+        }
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
