@@ -205,11 +205,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
                     guard let self, self.isCurrentPage, self.playerViewControllerIfLoaded === playerViewController else { return }
                     switch status {
                     case .playing:
-                        self.previewDelegate?.setFullscreen(true)
+                        self.previewDelegate?.setPlaybackFullscreen(true)
                         self.updatePlayerBottomInset(playerViewController)
                     case .paused:
                         guard !self.touchTracker.isTouching else { return }
-                        self.previewDelegate?.setFullscreen(false)
+                        self.previewDelegate?.setPlaybackFullscreen(false)
                         self.updatePlayerBottomInset(playerViewController)
                     default:
                         return

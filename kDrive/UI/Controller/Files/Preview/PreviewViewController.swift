@@ -31,6 +31,7 @@ import UIKit
 @MainActor protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
     func setFullscreen(_ fullscreen: Bool?)
+    func setPlaybackFullscreen(_ isPlaying: Bool)
     func errorWhilePreviewing(fileId: Int, error: Error)
     func openWith(from: UIView)
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
@@ -78,6 +79,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var titleHeightConstraint: NSLayoutConstraint?
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
+    private var isPlaybackFullscreen = false
 
     var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
@@ -424,7 +426,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         let currentCell = collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell
         currentCell?.didStartDisplaying()
-        setFullscreen(currentCell?.prefersFullscreenPreview ?? false)
+        let prefersFullscreen = currentCell?.prefersFullscreenPreview ?? false
+        setFullscreen(prefersFullscreen)
+        isPlaybackFullscreen = prefersFullscreen
 
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
@@ -657,6 +661,21 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func setFullscreen(_ fullscreen: Bool? = nil) {
+        isPlaybackFullscreen = false
+        applyFullscreen(fullscreen)
+    }
+
+    func setPlaybackFullscreen(_ isPlaying: Bool) {
+        if isPlaying {
+            guard !fullScreenPreview else { return }
+            applyFullscreen(true)
+            isPlaybackFullscreen = fullScreenPreview
+        } else {
+            setFullscreen(false)
+        }
+    }
+
+    private func applyFullscreen(_ fullscreen: Bool?) {
         if isBookPreviewLayout {
             fullScreenPreview = false
             let hideBackButton = fullscreen ?? !navigationItem.hidesBackButton
@@ -737,7 +756,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         previousCell?.didEndDisplaying()
 
         currentIndex = centerCellIndexPath
-        (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)?.didStartDisplaying()
+        let currentCell = collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell
+        currentCell?.didStartDisplaying()
+        if isPlaybackFullscreen && !(currentCell?.prefersFullscreenPreview ?? false) {
+            setFullscreen(false)
+        }
         updateFileForCurrentIndex()
 
         updateNavigationBar()
