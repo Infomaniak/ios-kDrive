@@ -39,24 +39,6 @@
             </objects>
             <point key="canvasLocation" x="2389.8550724637685" y="50.892857142857139"/>
         </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="xR9-1G-T5w">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Ia5-bK-Gtx" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" largeTitles="YES" id="kJl-1N-gTN">
-                        <rect key="frame" x="0.0" y="96" width="414" height="106"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="J5q-yn-jYo" kind="relationship" relationship="rootViewController" id="fyd-Dl-JEn"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="GRd-u7-taF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1479.7101449275362" y="50.892857142857139"/>
-        </scene>
     </scenes>
     <resources>
         <image name="xmark" catalog="system" width="128" height="118"/>
