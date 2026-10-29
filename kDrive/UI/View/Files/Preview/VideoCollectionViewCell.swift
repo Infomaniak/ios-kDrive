@@ -157,7 +157,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             revealPlayer(playerViewController)
         } else {
             readyForDisplayObserver = playerViewController
-                .observe(\.isReadyForDisplay, options: [.new]) { [weak self] _, change in
+                .observe(\.isReadyForDisplay, options: [.initial, .new]) { [weak self] _, change in
                     guard change.newValue == true else { return }
                     Task { @MainActor in
                         guard let self, self.playerViewControllerIfLoaded === playerViewController else { return }

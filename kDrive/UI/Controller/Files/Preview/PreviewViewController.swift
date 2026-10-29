@@ -672,7 +672,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         if isPlaying {
             guard !fullScreenPreview else { return }
             applyFullscreen(true)
-            isPlaybackFullscreen = fullScreenPreview
+            isPlaybackFullscreen = true
         } else {
             setFullscreen(false)
         }
