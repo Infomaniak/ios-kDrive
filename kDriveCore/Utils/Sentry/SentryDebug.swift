@@ -71,7 +71,9 @@ public enum SentryDebug {
         let additionalData = ["newTokenIsInfinite": newTokenIsInfinite, "oldTokenIsInfinite": oldTokenIsInfinite]
         let breadcrumb = Breadcrumb(level: .info, category: "Token")
         breadcrumb.message = "Token updated"
-        breadcrumb.data = additionalData
+        for (key, value) in additionalData {
+            breadcrumb.setData(value: value, key: key)
+        }
         SentrySDK.addBreadcrumb(breadcrumb)
 
         // Only track migration
@@ -129,7 +131,9 @@ public extension SentryDebug {
         Task {
             let breadcrumb = Breadcrumb(level: level, category: category.rawValue)
             breadcrumb.message = message
-            breadcrumb.data = metadata
+            for (key, value) in metadata ?? [:] {
+                breadcrumb.setData(value: value, key: key)
+            }
             SentrySDK.addBreadcrumb(breadcrumb)
         }
     }
