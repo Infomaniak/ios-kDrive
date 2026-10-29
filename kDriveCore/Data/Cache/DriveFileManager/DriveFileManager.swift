@@ -267,6 +267,7 @@ public final class DriveFileManager {
 
     init(drive: Drive, apiFetcher: DriveApiFetcher, context: DriveFileManagerContext = .drive) {
         // Keep the fallback immutable: this manager is accessed from concurrent tasks.
+        // We accept pinning a read version of the small drive-info Realm for simplicity; file data lives in separate Realms.
         initialDrive = drive.freezeIfNeeded()
         driveObjectId = drive.objectId
         driveId = drive.id
