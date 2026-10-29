@@ -116,6 +116,17 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         playerViewControllerIfLoaded?.player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 
+    override func willDisplayInCollectionView() {
+        guard let videoPlayer, videoPlayer.isReadyToPlay else { return }
+        readyToPlay(videoPlayer)
+    }
+
+    override func didEndDisplayingInCollectionView() {
+        isCurrentPage = false
+        videoPlayer?.stopPlayback()
+        removeInlinePlayer()
+    }
+
     func errorWhilePreviewing(_ videoPlayer: VideoPlayer, error: any Error) {
         guard videoPlayer === self.videoPlayer else { return }
         hideLoadingIndicator()

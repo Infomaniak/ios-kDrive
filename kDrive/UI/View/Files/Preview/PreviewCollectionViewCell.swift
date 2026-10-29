@@ -48,4 +48,12 @@ class PreviewCollectionViewCell: UICollectionViewCell {
     func didEndDisplaying() {
         // META: keep SonarCloud happy
     }
+
+    func willDisplayInCollectionView() {
+        // META: keep SonarCloud happy
+    }
+
+    func didEndDisplayingInCollectionView() {
+        // META: keep SonarCloud happy
+    }
 }

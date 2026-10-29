@@ -1031,9 +1031,18 @@ extension PreviewViewController: UICollectionViewDataSource {
             cell.progressiveLoadingForFile(file, publicShareProxy: driveFileManager?.publicShareProxy)
         }
 
+        (cell as? PreviewCollectionViewCell)?.willDisplayInCollectionView()
         if indexPath == currentIndex {
             (cell as? PreviewCollectionViewCell)?.didStartDisplaying()
         }
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didEndDisplaying cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
+        (cell as? PreviewCollectionViewCell)?.didEndDisplayingInCollectionView()
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

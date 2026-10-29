@@ -52,6 +52,10 @@ public final class VideoPlayer: Pausable {
 
     public var identifier: String = UUID().uuidString
 
+    public var isReadyToPlay: Bool {
+        player?.currentItem?.status == .readyToPlay
+    }
+
     public lazy var playerViewController: AVPlayerViewController = {
         let playerViewController = AVPlayerViewController()
         playerViewController.player = self.player
