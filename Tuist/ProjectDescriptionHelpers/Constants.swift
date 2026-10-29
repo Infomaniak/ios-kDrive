@@ -45,6 +45,7 @@ public enum Constants {
     public static let actionExtensionSettings = baseSettings
         .compilationConditions("ISEXTENSION")
         .appIcon(name: "ExtensionIcon")
+        .merging(["ASSETCATALOG_COMPILER_SKIP_APP_STORE_DEPLOYMENT": "YES"])
     public static let debugActionExtensionSettings = actionExtensionSettings
         .compilationConditions("ISEXTENSION DEBUG")
 
