@@ -116,15 +116,16 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         playerViewControllerIfLoaded?.player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 
-    func errorWhilePreviewing(error: any Error) {
+    func errorWhilePreviewing(_ videoPlayer: VideoPlayer, error: any Error) {
+        guard videoPlayer === self.videoPlayer else { return }
         hideLoadingIndicator()
         guard let file, let previewDelegate else { return }
         previewDelegate.errorWhilePreviewing(fileId: file.id, error: error)
-        videoPlayer = nil
+        self.videoPlayer = nil
     }
 
-    func readyToPlay() {
-        guard let parentViewController else { return }
+    func readyToPlay(_ videoPlayer: VideoPlayer) {
+        guard videoPlayer === self.videoPlayer, let parentViewController else { return }
         embedInline(in: parentViewController)
     }
 

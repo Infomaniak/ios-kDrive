@@ -24,8 +24,8 @@ import kDriveResources
 import MediaPlayer
 
 @MainActor public protocol VideoViewCellDelegate: AnyObject {
-    func readyToPlay()
-    func errorWhilePreviewing(error: Error)
+    func readyToPlay(_ videoPlayer: VideoPlayer)
+    func errorWhilePreviewing(_ videoPlayer: VideoPlayer, error: Error)
 }
 
 public final class VideoPlayer: Pausable {
@@ -170,14 +170,13 @@ public final class VideoPlayer: Pausable {
         )
 
         statusObserver = currentItem.observe(\.status, options: [.new]) { [weak self] item, _ in
-            guard let previewDelegate = self?.previewDelegate else { return }
-
             Task { @MainActor in
+                guard let self, let previewDelegate = self.previewDelegate else { return }
                 switch item.status {
                 case .readyToPlay:
-                    previewDelegate.readyToPlay()
+                    previewDelegate.readyToPlay(self)
                 default:
-                    previewDelegate.errorWhilePreviewing(error: ErrorDomain.incompatibleFile)
+                    previewDelegate.errorWhilePreviewing(self, error: ErrorDomain.incompatibleFile)
                 }
             }
         }
