@@ -18,15 +18,14 @@
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7SB-3S-IKv" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                     <rect key="frame" x="24" y="-6.5" width="272" height="20.5"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="17"/>
-                    <color key="textColor" name="primaryTextColor"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                     </userDefinedRuntimeAttributes>
                 </label>
             </subviews>
             <viewLayoutGuide key="safeArea" id="VXr-Tz-HHm"/>
-            <color key="backgroundColor" name="backgroundColor"/>
             <constraints>
                 <constraint firstItem="7SB-3S-IKv" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" constant="24" id="mI4-S8-dVA"/>
                 <constraint firstItem="7SB-3S-IKv" firstAttribute="leading" secondItem="VXr-Tz-HHm" secondAttribute="leading" constant="24" id="qz8-vO-NT6"/>
@@ -37,14 +36,11 @@
                 <outlet property="titleLabel" destination="7SB-3S-IKv" id="VJR-uf-akL"/>
             </connections>
             <point key="canvasLocation" x="-197.10144927536234" y="84.375"/>
+            <userDefinedRuntimeAttributes>
+                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+            </userDefinedRuntimeAttributes>
         </collectionReusableView>
     </objects>
     <resources>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

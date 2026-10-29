@@ -30,7 +30,9 @@
                     </label>
                     <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="t38-pQ-rhg">
                         <rect key="frame" x="40" y="77" width="240" height="4"/>
-                        <color key="tintColor" name="infomaniakColor"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="infomaniakColor"/>
+                        </userDefinedRuntimeAttributes>
                     </progressView>
                 </subviews>
                 <constraints>
@@ -52,8 +54,5 @@
         </tableViewCell>
     </objects>
     <resources>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

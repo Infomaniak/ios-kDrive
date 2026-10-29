@@ -35,18 +35,21 @@
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="EAA-pP-XDD">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="EAA-pP-XDD">
                                 <rect key="frame" x="48" y="138" width="294" height="62"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="62" id="a9W-Hv-uK5"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="logo"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Vous n’avez pas encore de kDrive !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="gpt-af-Fsa" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="24" y="505.66666666666669" width="342" height="21.666666666666686"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="noDriveTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
@@ -54,9 +57,9 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tester kDrive gratuitement ou connectez-vous avec un autre compte utilisateur." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="aqN-bN-aqi" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="24" y="543.33333333333337" width="342" height="33.666666666666629"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="noDriveDescription"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
@@ -64,21 +67,26 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="D7m-5I-rWo">
                                 <rect key="frame" x="93" y="277.66666666666669" width="204" height="204"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="no-drive" translatesAutoresizingMaskIntoConstraints="NO" id="fzr-FE-ijy">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="fzr-FE-ijy">
                                         <rect key="frame" x="59.666666666666657" y="61.666666666666629" width="85" height="81"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="81" id="L6c-Ku-t8M"/>
                                             <constraint firstAttribute="width" constant="85" id="z1i-nk-dIz"/>
                                         </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="no-drive"/>
+                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                 </subviews>
-                                <color key="backgroundColor" name="backgroundCardViewColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="204" id="Jwh-uT-7WE"/>
                                     <constraint firstItem="fzr-FE-ijy" firstAttribute="centerY" secondItem="D7m-5I-rWo" secondAttribute="centerY" id="LXb-W0-zCO"/>
                                     <constraint firstItem="fzr-FE-ijy" firstAttribute="centerX" secondItem="D7m-5I-rWo" secondAttribute="centerX" id="kvz-fd-e5V"/>
                                     <constraint firstAttribute="height" constant="204" id="mmF-J9-bLh"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="nYe-2W-A5z">
                                 <rect key="frame" x="24" y="636" width="342" height="140"/>
@@ -91,9 +99,9 @@
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                         <state key="normal" title="Tester gratuitement"/>
                                         <state key="disabled">
-                                            <color key="titleColor" name="blueColor"/>
                                         </state>
                                         <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceDisabledTitleColorName" value="blueColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonNoDriveFreeTest"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="primaryButton"/>
                                         </userDefinedRuntimeAttributes>
@@ -109,12 +117,12 @@
                                         </constraints>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                         <state key="normal" title="Utiliser un autre profil Infomaniak">
-                                            <color key="titleColor" name="infomaniakColor"/>
                                         </state>
                                         <state key="disabled">
-                                            <color key="titleColor" name="blueColor"/>
                                         </state>
                                         <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalTitleColorName" value="infomaniakColor"/>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceDisabledTitleColorName" value="blueColor"/>
                                             <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                                 <real key="value" value="10"/>
                                             </userDefinedRuntimeAttribute>
@@ -132,7 +140,6 @@
                             </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Wsc-Vk-Jbr"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="Wsc-Vk-Jbr" firstAttribute="trailing" secondItem="nYe-2W-A5z" secondAttribute="trailing" priority="999" constant="24" id="0Nh-TJ-h0u"/>
                             <constraint firstItem="aqN-bN-aqi" firstAttribute="leading" secondItem="Wsc-Vk-Jbr" secondAttribute="leading" constant="24" id="3pu-Ee-k1L"/>
@@ -152,6 +159,9 @@
                             <constraint firstItem="nYe-2W-A5z" firstAttribute="centerX" secondItem="qid-Rp-c7E" secondAttribute="centerX" id="wkE-oT-uRB"/>
                             <constraint firstItem="Wsc-Vk-Jbr" firstAttribute="trailing" secondItem="EAA-pP-XDD" secondAttribute="trailing" constant="48" id="wuf-Zx-9yR"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <connections>
                         <outlet property="circleView" destination="D7m-5I-rWo" id="Olt-pt-DPS"/>
@@ -174,11 +184,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="g4c-X4-Qk2">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="g4c-X4-Qk2">
                                 <rect key="frame" x="48" y="138" width="294" height="62"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="62" id="DNC-yc-Mkk"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="logo"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QKz-Y6-C7W" customClass="IKLargeButton" customModule="kDriveCore">
                                 <rect key="frame" x="24" y="581" width="342" height="60"/>
@@ -188,9 +201,9 @@
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                 <state key="normal" title="Déverrouiller"/>
                                 <state key="disabled">
-                                    <color key="titleColor" name="blueColor"/>
                                 </state>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceDisabledTitleColorName" value="blueColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonUnlock"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="primaryButton"/>
                                 </userDefinedRuntimeAttributes>
@@ -201,9 +214,9 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Application verrouillée" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" minimumScaleFactor="0.80000001192092896" translatesAutoresizingMaskIntoConstraints="NO" id="eyg-Oq-wrC" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="24" y="497.33333333333331" width="342" height="21.666666666666686"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="lockAppTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="sibtitle2"/>
                                 </userDefinedRuntimeAttributes>
@@ -211,8 +224,11 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="q3F-Yb-CKo">
                                 <rect key="frame" x="101.66666666666669" y="286.33333333333331" width="187" height="187"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="lock_infomaniak" translatesAutoresizingMaskIntoConstraints="NO" id="YBh-PW-phO">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YBh-PW-phO">
                                         <rect key="frame" x="0.0" y="0.0" width="187" height="187"/>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="lock_infomaniak"/>
+                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -300,28 +316,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="lock_infomaniak" width="187" height="187"/>
-        <image name="logo" width="209" height="56"/>
-        <image name="no-drive" width="89" height="86"/>
         <image name="xmark" catalog="system" width="128" height="118"/>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="blueColor">
-            <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59600001573562622" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

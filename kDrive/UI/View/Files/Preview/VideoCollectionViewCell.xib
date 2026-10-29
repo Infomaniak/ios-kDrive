@@ -26,10 +26,13 @@
                             <constraint firstAttribute="height" constant="64" id="69r-lr-iIN"/>
                             <constraint firstAttribute="width" constant="64" id="Mc9-YG-8S7"/>
                         </constraints>
-                        <state key="normal" image="play"/>
+                        <state key="normal"/>
                         <connections>
                             <action selector="playVideoPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="vqt-2p-hSZ"/>
                         </connections>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="play"/>
+                        </userDefinedRuntimeAttributes>
                     </button>
                 </subviews>
             </view>
@@ -51,6 +54,5 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="play" width="70" height="70"/>
     </resources>
 </document>

@@ -34,12 +34,15 @@
                                 <constraint firstAttribute="height" constant="16" id="OjG-bM-85a"/>
                                 <constraint firstAttribute="width" constant="16" id="YCL-dB-aoo"/>
                             </constraints>
-                            <color key="tintColor" name="iconColor"/>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                            <state key="normal" image="chevron-down"/>
+                            <state key="normal"/>
                             <connections>
                                 <action selector="titleButtonPressed:" destination="U6b-Vx-4bR" eventType="touchUpInside" id="LeH-ja-0aV"/>
                             </connections>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
+                                <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="chevron-down"/>
+                            </userDefinedRuntimeAttributes>
                         </button>
                     </subviews>
                 </stackView>
@@ -60,9 +63,5 @@
         </collectionReusableView>
     </objects>
     <resources>
-        <image name="chevron-down" width="24" height="24"/>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

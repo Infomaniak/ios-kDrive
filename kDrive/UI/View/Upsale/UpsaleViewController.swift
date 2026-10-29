@@ -35,7 +35,7 @@ public class UpsaleViewController: UIViewController {
         label.style = .header2
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.text = KDriveStrings.Localizable.obtainkDriveAdTitle
+        label.text = KDriveResourcesStrings.Localizable.obtainkDriveAdTitle
         return label
     }()
 
@@ -45,7 +45,7 @@ public class UpsaleViewController: UIViewController {
         label.textColor = KDriveResourcesAsset.primaryTextColor.color
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.text = KDriveStrings.Localizable.obtainkDriveAdDescription
+        label.text = KDriveResourcesStrings.Localizable.obtainkDriveAdDescription
         return label
     }()
 
@@ -82,11 +82,11 @@ public class UpsaleViewController: UIViewController {
 
     func configureButtons() {
         freeTrialButton.style = .primaryButton
-        freeTrialButton.setTitle(KDriveStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
+        freeTrialButton.setTitle(KDriveResourcesStrings.Localizable.obtainkDriveAdFreeTrialButton, for: .normal)
         freeTrialButton.addTarget(self, action: #selector(freeTrial), for: .touchUpInside)
 
         dismissButton.style = .secondaryButton
-        dismissButton.setTitle(KDriveStrings.Localizable.obtainkDriveAdAlreadyGotAccount, for: .normal)
+        dismissButton.setTitle(KDriveResourcesStrings.Localizable.obtainkDriveAdAlreadyGotAccount, for: .normal)
         dismissButton.addTarget(self, action: #selector(login), for: .touchUpInside)
     }
 
@@ -187,13 +187,13 @@ public class UpsaleViewController: UIViewController {
         mainStackView.translatesAutoresizingMaskIntoConstraints = false
 
         mainStackView.addArrangedSubview(createRow(
-            text: KDriveStrings.Localizable.obtainkDriveAdListing1
+            text: KDriveResourcesStrings.Localizable.obtainkDriveAdListing1
         ))
         mainStackView.addArrangedSubview(createRow(
-            text: KDriveStrings.Localizable.obtainkDriveAdListing2
+            text: KDriveResourcesStrings.Localizable.obtainkDriveAdListing2
         ))
         mainStackView.addArrangedSubview(createRow(
-            text: KDriveStrings.Localizable.obtainkDriveAdListing3
+            text: KDriveResourcesStrings.Localizable.obtainkDriveAdListing3
         ))
 
         bulletPointsView.addSubview(mainStackView)

@@ -19,9 +19,12 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="w27-f8-1Qx">
                     <rect key="frame" x="107" y="104" width="200" height="200"/>
                     <subviews>
-                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-filled" translatesAutoresizingMaskIntoConstraints="NO" id="tKU-Yd-MGq">
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="tKU-Yd-MGq">
                             <rect key="frame" x="70" y="70" width="60" height="60"/>
-                            <color key="tintColor" name="iconColor"/>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
+                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
+                            </userDefinedRuntimeAttributes>
                         </imageView>
                     </subviews>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -37,24 +40,23 @@
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="752" verticalCompressionResistancePriority="752" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zQB-Y1-YO0" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                     <rect key="frame" x="24" y="336" width="366" height="20"/>
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
-                    <color key="textColor" name="titleColor"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                     </userDefinedRuntimeAttributes>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Details" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I0w-c4-6se" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                     <rect key="frame" x="24" y="372" width="366" height="0.0"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                    <color key="textColor" name="primaryTextColor"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                     </userDefinedRuntimeAttributes>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Jv-j5-tP1" customClass="IKLargeButton" customModule="kDriveCore">
                     <rect key="frame" x="24" y="380" width="366" height="60"/>
-                    <color key="backgroundColor" name="infomaniakColor"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="60" id="Q1i-17-MV7"/>
                     </constraints>
@@ -62,6 +64,7 @@
                     <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <state key="normal" title="Actualiser"/>
                     <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonRefresh"/>
                     </userDefinedRuntimeAttributes>
                     <connections>
@@ -112,19 +115,6 @@
         </view>
     </objects>
     <resources>
-        <image name="folder-filled" width="24" height="24"/>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -51,13 +51,16 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="n3N-4l-Lcn">
                                                 <rect key="frame" x="22.5" y="0.0" width="184.5" height="24"/>
                                                 <subviews>
-                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.5" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="offline" translatesAutoresizingMaskIntoConstraints="NO" id="PWB-e7-TbP">
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.5" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="PWB-e7-TbP">
                                                         <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
                                                         <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="24" id="aGg-DO-x3Q"/>
                                                             <constraint firstAttribute="width" constant="24" id="yrd-q9-Lpa"/>
                                                         </constraints>
+                                                        <userDefinedRuntimeAttributes>
+                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="offline"/>
+                                                        </userDefinedRuntimeAttributes>
                                                     </imageView>
                                                     <label opaque="NO" userInteractionEnabled="NO" alpha="0.5" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Uuk-Lo-4gw" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="34" y="0.0" width="150.5" height="24"/>
@@ -89,8 +92,9 @@
                                     <constraint firstAttribute="height" constant="60" id="9hE-VO-Ngj"/>
                                 </constraints>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <state key="normal" title="buttonOpenWith" image="open-with"/>
+                                <state key="normal" title="buttonOpenWith"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="open-with"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenWith"/>
                                 </userDefinedRuntimeAttributes>
                                 <connections>
@@ -131,7 +135,5 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="offline" width="24" height="24"/>
-        <image name="open-with" width="24" height="24"/>
     </resources>
 </document>

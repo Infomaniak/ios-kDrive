@@ -34,12 +34,15 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MgD-0d-5ra">
                                 <rect key="frame" x="24" y="302" width="366" height="292"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="order-success" translatesAutoresizingMaskIntoConstraints="NO" id="vmx-9Y-v0i">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="vmx-9Y-v0i">
                                         <rect key="frame" x="108" y="0.0" width="150" height="150"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="150" id="UMO-Jw-E4w"/>
                                             <constraint firstAttribute="height" constant="150" id="UvD-X0-Sdb"/>
                                         </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="order-success"/>
+                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="0.0" y="174" width="366" height="41"/>
@@ -76,7 +79,6 @@
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="web-M0-5Gi"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="Let-jx-exJ" firstAttribute="leading" secondItem="web-M0-5Gi" secondAttribute="leading" constant="24" id="8K0-Mr-v9B"/>
                             <constraint firstItem="MgD-0d-5ra" firstAttribute="leading" secondItem="tcC-IV-wbn" secondAttribute="leading" constant="24" id="Q5A-6U-Lcf"/>
@@ -86,6 +88,9 @@
                             <constraint firstItem="MgD-0d-5ra" firstAttribute="centerY" secondItem="tcC-IV-wbn" secondAttribute="centerY" id="yqv-kx-bWV"/>
                             <constraint firstItem="web-M0-5Gi" firstAttribute="trailing" secondItem="Let-jx-exJ" secondAttribute="trailing" constant="24" id="zeI-Ac-vcm"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="449-4f-Z4n" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -99,7 +104,6 @@
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="vM7-1Z-EaT">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="TTS-yS-eCw">
                             <size key="itemSize" width="128" height="128"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -111,6 +115,9 @@
                             <outlet property="dataSource" destination="EfG-kK-v5l" id="flf-zh-cO4"/>
                             <outlet property="delegate" destination="EfG-kK-v5l" id="01P-E5-mOr"/>
                         </connections>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </collectionView>
                     <navigationItem key="navigationItem" title="Modifier votre offre" id="Yva-S2-ehi">
                         <userDefinedRuntimeAttributes>
@@ -130,44 +137,48 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="748" verticalCompressionResistancePriority="748" image="switch_user" translatesAutoresizingMaskIntoConstraints="NO" id="rBS-RF-o0M">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="748" verticalCompressionResistancePriority="748" translatesAutoresizingMaskIntoConstraints="NO" id="rBS-RF-o0M">
                                 <rect key="frame" x="16" y="128" width="382" height="170"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="cT4-aO-YYD"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="switch_user"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Changer d'utilisateur" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Orz-m0-bIR" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="346" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="switchAccountTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6cc-pK-yXN">
                                 <rect key="frame" x="32" y="386" width="46" height="2"/>
-                                <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="2" id="0s8-rW-ZlD"/>
                                     <constraint firstAttribute="width" constant="46" id="n0g-dM-Pfd"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ahf-mt-ZbI" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="404" width="350" height="81.5"/>
                                 <string key="text">Consulter les notifications de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez. </string>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="switchUserDescription"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="none" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="L3K-dK-zvk">
                                 <rect key="frame" x="0.0" y="501.5" width="414" height="394.5"/>
-                                <color key="backgroundColor" name="backgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="180" id="Bqe-NE-eMP"/>
                                 </constraints>
@@ -183,23 +194,26 @@
                                         <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="r72-dE-pDn">
                                             <rect key="frame" x="106" y="24" width="202" height="28"/>
                                             <subviews>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="add_user" translatesAutoresizingMaskIntoConstraints="NO" id="YKx-Rh-ySp">
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="YKx-Rh-ySp">
                                                     <rect key="frame" x="0.0" y="0.0" width="28" height="28"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="28" id="4tE-TB-Lib"/>
                                                         <constraint firstAttribute="height" constant="28" id="lll-5a-S5M"/>
                                                     </constraints>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="add_user"/>
+                                                    </userDefinedRuntimeAttributes>
                                                 </imageView>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BdQ-o7-PEt">
                                                     <rect key="frame" x="36" y="0.0" width="166" height="28"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                                     <state key="normal" title="Ajouter un utilisateur">
-                                                        <color key="titleColor" name="primaryTextColor"/>
                                                     </state>
                                                     <state key="highlighted">
-                                                        <color key="titleColor" name="lightTextColor"/>
                                                     </state>
                                                     <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalTitleColorName" value="primaryTextColor"/>
+                                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceHighlightedTitleColorName" value="lightTextColor"/>
                                                         <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonAddUser"/>
                                                     </userDefinedRuntimeAttributes>
                                                     <connections>
@@ -221,10 +235,12 @@
                                     <outlet property="dataSource" destination="26B-is-bLi" id="qxE-ur-DPR"/>
                                     <outlet property="delegate" destination="26B-is-bLi" id="ps7-NO-xTg"/>
                                 </connections>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="9UF-VY-vK7"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="Orz-m0-bIR" firstAttribute="top" secondItem="rBS-RF-o0M" secondAttribute="bottom" constant="48" id="10f-89-Ntj"/>
                             <constraint firstAttribute="trailing" secondItem="rBS-RF-o0M" secondAttribute="trailing" constant="16" id="1cM-Ar-pjE"/>
@@ -243,6 +259,9 @@
                             <constraint firstItem="ahf-mt-ZbI" firstAttribute="leading" secondItem="9UF-VY-vK7" secondAttribute="leading" constant="32" id="vs5-fx-tev"/>
                             <constraint firstItem="ahf-mt-ZbI" firstAttribute="top" secondItem="6cc-pK-yXN" secondAttribute="bottom" constant="16" id="wxI-xJ-NKX"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="fdd-I2-Xcr"/>
                     <connections>
@@ -261,36 +280,41 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="848"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="748" verticalCompressionResistancePriority="748" image="face_id_edit" translatesAutoresizingMaskIntoConstraints="NO" id="Wii-vB-zWo">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="748" verticalCompressionResistancePriority="748" translatesAutoresizingMaskIntoConstraints="NO" id="Wii-vB-zWo">
                                 <rect key="frame" x="16" y="148" width="382" height="170"/>
                                 <constraints>
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="Lbz-PD-KrR"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="face_id_edit"/>
+                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="366" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="appSecurityTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M26-GT-YZh">
                                 <rect key="frame" x="32" y="406" width="46" height="2"/>
-                                <color key="backgroundColor" name="infomaniakColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="46" id="EjK-HW-r8M"/>
                                     <constraint firstAttribute="height" constant="2" id="LyE-D9-gFr"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protégez l'accès à votre application Infomaniak en activant le système de verouillage par reconnaissance faciale Face ID. " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJI-rA-NpO" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="424" width="350" height="81.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" name="primaryTextColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="appSecurityDescription"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
@@ -313,7 +337,6 @@
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="cUS-U3-4VN"/>
-                        <color key="backgroundColor" name="backgroundColor"/>
                         <constraints>
                             <constraint firstItem="cUS-U3-4VN" firstAttribute="trailing" secondItem="0Ow-gT-FNm" secondAttribute="trailing" constant="32" id="0kw-aY-tEg"/>
                             <constraint firstAttribute="bottom" secondItem="yCS-yd-ffG" secondAttribute="bottom" id="21e-jb-JcP"/>
@@ -335,6 +358,9 @@
                             <constraint firstItem="31R-ua-Vke" firstAttribute="top" secondItem="cUS-U3-4VN" secondAttribute="top" id="wGL-ir-TRJ"/>
                             <constraint firstAttribute="trailing" secondItem="31R-ua-Vke" secondAttribute="trailing" id="yKC-UC-Ln5"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
+                        </userDefinedRuntimeAttributes>
                     </view>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
@@ -349,25 +375,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="add_user" width="512" height="512"/>
-        <image name="face_id_edit" width="512" height="434"/>
-        <image name="order-success" width="150" height="150"/>
-        <image name="switch_user" width="512" height="434"/>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="lightTextColor">
-            <color red="0.32899999618530273" green="0.32400000095367432" blue="0.4779999852180481" alpha="0.33000001311302185" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

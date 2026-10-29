@@ -39,8 +39,10 @@
                         <constraints>
                             <constraint firstAttribute="height" constant="5" id="rYi-6V-1QB"/>
                         </constraints>
-                        <color key="progressTintColor" name="infomaniakColor"/>
                         <color key="trackTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceProgressTintColorName" value="infomaniakColor"/>
+                        </userDefinedRuntimeAttributes>
                     </progressView>
                 </subviews>
             </view>
@@ -66,8 +68,5 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

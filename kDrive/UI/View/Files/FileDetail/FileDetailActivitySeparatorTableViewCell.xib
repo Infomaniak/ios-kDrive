@@ -24,11 +24,13 @@
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="snL-Rw-QIB">
                                 <rect key="frame" x="143" y="0.0" width="1" height="30"/>
-                                <color key="backgroundColor" name="borderColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="30" id="7mU-3Y-t1i"/>
                                     <constraint firstAttribute="width" constant="1" id="Z1k-NC-gkA"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="borderColor"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Bze-Cw-U2o">
                                 <rect key="frame" x="98" y="38" width="91.5" height="38"/>
@@ -36,14 +38,13 @@
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uxI-6a-Olb" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="28" y="8" width="35.5" height="22"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                        <color key="textColor" name="primaryTextColor"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
                                 </subviews>
-                                <color key="backgroundColor" name="backgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="uxI-6a-Olb" secondAttribute="trailing" constant="28" id="1Ku-6L-N9B"/>
                                     <constraint firstAttribute="bottom" secondItem="uxI-6a-Olb" secondAttribute="bottom" constant="8" id="2oh-Ad-qcI"/>
@@ -51,6 +52,7 @@
                                     <constraint firstItem="uxI-6a-Olb" firstAttribute="leading" secondItem="Bze-Cw-U2o" secondAttribute="leading" constant="28" id="xGg-9U-4Zc"/>
                                 </constraints>
                                 <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                         <real key="value" value="10"/>
                                     </userDefinedRuntimeAttribute>
@@ -58,11 +60,13 @@
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hnc-d4-Eb0">
                                 <rect key="frame" x="143" y="84" width="1" height="30"/>
-                                <color key="backgroundColor" name="borderColor"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="1" id="shW-gP-4iV"/>
                                     <constraint firstAttribute="height" constant="30" id="ygJ-xa-DDz"/>
                                 </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="borderColor"/>
+                                </userDefinedRuntimeAttributes>
                             </view>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -98,15 +102,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <namedColor name="backgroundColor">
-            <color red="0.95686274509803926" green="0.96470588235294119" blue="0.99215686274509807" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="borderColor">
-            <color red="0.8784313725490196" green="0.8784313725490196" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000596046448" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

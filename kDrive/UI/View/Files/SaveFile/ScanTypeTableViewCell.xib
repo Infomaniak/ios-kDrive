@@ -20,7 +20,6 @@
                 <subviews>
                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="qzj-9B-tvW" customClass="IKSegmentedControl" customModule="kDriveCore">
                         <rect key="frame" x="0.0" y="8" width="322" height="42"/>
-                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstAttribute="height" constant="41" id="phe-I5-ExG"/>
                         </constraints>
@@ -28,10 +27,13 @@
                             <segment title="PDF"/>
                             <segment title="Image (.JPG)"/>
                         </segments>
-                        <color key="selectedSegmentTintColor" name="infomaniakColor"/>
                         <connections>
                             <action selector="segmentedControlChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="QeZ-XE-V58"/>
                         </connections>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
+                            <userDefinedRuntimeAttribute type="string" keyPath="resourceSelectedSegmentTintColorName" value="infomaniakColor"/>
+                        </userDefinedRuntimeAttributes>
                     </segmentedControl>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -51,11 +53,5 @@
         </tableViewCell>
     </objects>
     <resources>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="infomaniakColor">
-            <color red="0.0" green="0.59607843137254901" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>
