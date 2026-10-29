@@ -83,7 +83,7 @@ struct DefaultFileListLayout: FileListLayout {
         )
 
         let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(size.height))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: gridColumns)
+        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, repeatingSubitem: item, count: gridColumns)
 
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsetsReference = .safeArea
