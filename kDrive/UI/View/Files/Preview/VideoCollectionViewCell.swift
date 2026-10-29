@@ -27,15 +27,6 @@ import Nuke
 import UIKit
 
 class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate {
-    private class VideoPlayerNavigationController: UINavigationController {
-        var disappearCallback: (() -> Void)?
-
-        override func viewDidDisappear(_ animated: Bool) {
-            super.viewDidDisappear(animated)
-            disappearCallback?()
-        }
-    }
-
     @IBOutlet var previewFrameImageView: UIImageView!
 
     @LazyInjectService private var matomo: MatomoUtils
