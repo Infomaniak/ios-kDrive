@@ -27,7 +27,7 @@ import RealmSwift
 import SwiftRegex
 
 // TODO: Move to core
-extension TransactionExecutor: CustomStringConvertible {
+extension TransactionExecutor: @retroactive CustomStringConvertible {
     public var description: String {
         var render = "TransactionExecutor: realm access issue"
         try? writeTransaction { realm in

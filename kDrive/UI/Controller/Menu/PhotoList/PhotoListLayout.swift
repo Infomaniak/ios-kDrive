@@ -49,7 +49,7 @@ struct PhotoListLayout: FileListLayout {
             let groupHeight = NSCollectionLayoutDimension.fractionalWidth(itemFractionalWidth)
             let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: groupHeight)
 
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: columns)
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, repeatingSubitem: item, count: columns)
             group.interItemSpacing = .fixed(4)
 
             let section = NSCollectionLayoutSection(group: group)
