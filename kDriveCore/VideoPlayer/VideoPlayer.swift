@@ -41,6 +41,9 @@ public final class VideoPlayer: Pausable {
     public private(set) var isAudioOnly = false
 
     private var statusObserver: NSKeyValueObservation?
+    private var playbackObserver: NSKeyValueObservation?
+    private var nowPlayingMetadata: MediaMetadata?
+    private var nowPlayingMetadataTask: Task<Void, Never>?
 
     public var onPlaybackEnded: (() -> Void)?
 
@@ -98,12 +101,30 @@ public final class VideoPlayer: Pausable {
     }
 
     @objc func playerStateChanged(notification: Notification) {
-        guard let file else { return }
-        guard let player else { return }
-        updateMetadata(asset: asset, defaultName: file.name)
+        Task { @MainActor [weak self] in
+            guard let self, orchestrator.isCurrentPlayback(self) else { return }
+            publishNowPlayingMetadata()
+        }
+    }
 
-        guard player.timeControlStatus == .playing else { return }
-        orchestrator.newPlaybackStarted(playable: self)
+    @MainActor
+    private func publishNowPlayingMetadata() {
+        if let nowPlayingMetadata {
+            setNowPlayingMetadata(metadata: nowPlayingMetadata)
+            return
+        }
+
+        guard nowPlayingMetadataTask == nil, let asset, let fileName = file?.name else { return }
+        nowPlayingMetadataTask = Task { @MainActor [weak self] in
+            let commonMetadata = try? await asset.load(.commonMetadata)
+            let metadata = await MediaMetadata.extractTrackMetadata(from: commonMetadata ?? [],
+                                                                    playableFileName: fileName)
+            guard let self else { return }
+            nowPlayingMetadata = metadata
+            nowPlayingMetadataTask = nil
+            guard orchestrator.isCurrentPlayback(self) else { return }
+            setNowPlayingMetadata(metadata: metadata)
+        }
     }
 
     private func setupPlayer(with file: File, driveFileManager: DriveFileManager) {
@@ -112,7 +133,6 @@ public final class VideoPlayer: Pausable {
             asset = localAsset
             let playerItem = AVPlayerItem(asset: localAsset)
             player = AVPlayer(playerItem: playerItem)
-            updateMetadata(asset: localAsset, defaultName: file.name)
             observePlayer(currentItem: playerItem)
         } else if let publicShareProxy = driveFileManager.publicShareProxy {
             let url = Endpoint.downloadShareLinkFile(
@@ -122,28 +142,35 @@ public final class VideoPlayer: Pausable {
             ).url
 
             let remoteAsset = AVURLAsset(url: url, options: nil)
-            setupStreamingAsset(remoteAsset, fileName: file.name)
+            setupStreamingAsset(remoteAsset)
 
         } else if driveFileManager.apiFetcher.currentToken != nil {
             let url = Endpoint.download(file: file).url
             guard let remoteAsset = AuthenticatedMediaAsset(url: url, apiFetcher: driveFileManager.apiFetcher) else {
                 return
             }
-            setupStreamingAsset(remoteAsset, fileName: file.name)
+            setupStreamingAsset(remoteAsset)
         }
     }
 
-    private func setupStreamingAsset(_ urlAsset: AVURLAsset, fileName: String) {
+    private func setupStreamingAsset(_ urlAsset: AVURLAsset) {
         asset = urlAsset
         Task { @MainActor in
             let playerItem = AVPlayerItem(asset: urlAsset)
             self.player = AVPlayer(playerItem: playerItem)
-            self.updateMetadata(asset: urlAsset, defaultName: fileName)
             self.observePlayer(currentItem: playerItem)
         }
     }
 
     private func observePlayer(currentItem: AVPlayerItem) {
+        playbackObserver = player?.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
+            guard player.timeControlStatus == .playing, let self else { return }
+            Task { @MainActor in
+                self.orchestrator.newPlaybackStarted(playable: self)
+                self.publishNowPlayingMetadata()
+            }
+        }
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerStateChanged),
@@ -185,16 +212,6 @@ public final class VideoPlayer: Pausable {
                     previewDelegate.errorWhilePreviewing(self, error: ErrorDomain.incompatibleFile)
                 }
             }
-        }
-    }
-
-    private func updateMetadata(asset: AVAsset?, defaultName: String) {
-        guard let asset else { return }
-        Task {
-            let commonMetadata = try? await asset.load(.commonMetadata)
-            let metadata = await MediaMetadata.extractTrackMetadata(from: commonMetadata ?? [],
-                                                                    playableFileName: defaultName)
-            setNowPlayingMetadata(metadata: metadata)
         }
     }
 }
