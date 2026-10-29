@@ -48,5 +48,9 @@ public enum Constants {
     public static let debugActionExtensionSettings = actionExtensionSettings
         .compilationConditions("ISEXTENSION DEBUG")
 
-    public static let swiftlintScript = TargetScript.post(path: "scripts/lint.sh", name: "Swiftlint")
+    public static let swiftlintScript = TargetScript.post(
+        path: "scripts/lint.sh",
+        name: "Swiftlint",
+        basedOnDependencyAnalysis: false
+    )
 }
