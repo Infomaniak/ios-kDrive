@@ -122,7 +122,7 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         Task {
             do {
                 let contentString = try await codePreviewWorker.readDataToStringInferEncoding(localUrl: localUrl)
-                try await displayContent(with: file, content: contentString)
+                await displayContent(with: file, content: contentString)
             } catch {
                 Logger.general.error("Failed to read file content: \(error)")
                 previewDelegate?.errorWhilePreviewing(fileId: fileId, error: error)
@@ -130,12 +130,12 @@ class CodePreviewCollectionViewCell: PreviewCollectionViewCell {
         }
     }
 
-    private func displayContent(with file: File, content: String) async throws {
+    private func displayContent(with file: File, content: String) async {
         if file.extension == "md" || file.extension == "markdown" {
             await displayMarkdown(for: content)
             isCode = false
         } else {
-            try await displayCode(for: content)
+            await displayCode(for: content)
             isCode = true
         }
         activityView.stopAnimating()
