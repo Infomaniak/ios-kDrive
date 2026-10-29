@@ -133,6 +133,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
               playerViewController.parent == nil,
               let container = previewFrameImageView.superview else { return }
 
+        playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
         playerViewControllerIfLoaded = playerViewController
         parent.addChild(playerViewController)
 
