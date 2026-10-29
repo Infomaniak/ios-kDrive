@@ -23,6 +23,7 @@ import Photos
 import RealmSwift
 import UIKit
 
+/// Schedules replacement scans and waits for cancelled scan work to finish.
 public protocol PhotoLibraryScanable {
     func scheduleNewPicturesForUpload() async
     func cancelScan() async
@@ -31,6 +32,14 @@ public protocol PhotoLibraryScanable {
 extension PhotoLibraryUploader: PhotoLibraryScanable {
     public func scheduleNewPicturesForUpload() async {
         Log.photoLibraryUploader("scheduleNewPicturesForUpload")
+        await scanCoordinator.run { [self] in
+            await scanNewPicturesForUpload()
+        }
+    }
+
+    @concurrent
+    private func scanNewPicturesForUpload() async {
+        guard !Task.isCancelled else { return }
         guard let frozenSettings,
               PHPhotoLibrary.authorizationStatus() == .authorized else {
             Log.photoLibraryUploader("0 new assets")
@@ -45,47 +54,41 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
             return
         }
 
-        await cancelScan()
+        let options = PHFetchOptions()
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
 
-        let worker = Task {
-            let options = PHFetchOptions()
-            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        let typesPredicates = getAssetPredicates(forSettings: frozenSettings)
+        let datePredicate = getDatePredicate(with: frozenSettings)
+        let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
+        options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
 
-            let typesPredicates = getAssetPredicates(forSettings: frozenSettings)
-            let datePredicate = getDatePredicate(with: frozenSettings)
-            let typePredicate = NSCompoundPredicate(orPredicateWithSubpredicates: typesPredicates)
-            options.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [datePredicate, typePredicate])
+        Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
+        let assetsFetchResult = PHAsset.fetchAssets(with: options)
+        let syncDate = Date()
 
-            Log.photoLibraryUploader("Fetching new pictures/videos with predicate: \(options.predicate!.predicateFormat)")
-            let assetsFetchResult = PHAsset.fetchAssets(with: options)
-            let syncDate = Date()
+        do {
+            try await addImageAssetsToUploadQueue(
+                assetsFetchResult: assetsFetchResult,
+                initial: frozenSettings.lastSync == Constants.yearOneDate,
+                frozenSettings: frozenSettings
+            )
 
-            do {
-                try await addImageAssetsToUploadQueue(
-                    assetsFetchResult: assetsFetchResult,
-                    initial: frozenSettings.lastSync == Constants.yearOneDate
-                )
-
-                if Task.isCancelled {
-                    Log.photoLibraryUploader("Scan Task cancelled before updating last sync date")
-                    return
-                }
-
-                try uploadsDatabase.writeTransaction { writableRealm in
-                    guard accountManager.getTokenForUserId(frozenSettings.userId) != nil else { return }
-                    updateLastSyncDate(syncDate, writableRealm: writableRealm)
-                }
-
-                Log.photoLibraryUploader("New assets count:\(assetsFetchResult.count)")
-            } catch ErrorDomain.importCancelledBySystem {
-                Log.photoLibraryUploader("System is requesting to stop", level: .error)
-            } catch {
-                Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
+            if Task.isCancelled {
+                Log.photoLibraryUploader("Scan Task cancelled before updating last sync date")
+                return
             }
-        }
 
-        workerTask = worker
-        await worker.value
+            try uploadsDatabase.writeTransaction { writableRealm in
+                guard accountManager.getTokenForUserId(frozenSettings.userId) != nil else { return }
+                updateLastSyncDate(syncDate, writableRealm: writableRealm)
+            }
+
+            Log.photoLibraryUploader("New assets count:\(assetsFetchResult.count)")
+        } catch ErrorDomain.importCancelledBySystem {
+            Log.photoLibraryUploader("System is requesting to stop", level: .error)
+        } catch {
+            Log.photoLibraryUploader("addImageAssetsToUploadQueue error:\(error)", level: .error)
+        }
     }
 
     private func earlyUploadWhatIsAvailableIfNecessary() async {
@@ -108,13 +111,7 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
     }
 
     public func cancelScan() async {
-        guard let workerTask else {
-            return
-        }
-
-        workerTask.cancel()
-        await workerTask.value
-        self.workerTask = nil
+        await scanCoordinator.cancel()
     }
 
     // MARK: - Private
@@ -126,12 +123,12 @@ extension PhotoLibraryUploader: PhotoLibraryScanable {
         }
     }
 
-    private func addImageAssetsToUploadQueue(assetsFetchResult: PHFetchResult<PHAsset>, initial: Bool) async throws {
+    private func addImageAssetsToUploadQueue(
+        assetsFetchResult: PHFetchResult<PHAsset>,
+        initial: Bool,
+        frozenSettings: PhotoSyncSettings
+    ) async throws {
         Log.photoLibraryUploader("addImageAssetsToUploadQueue")
-        guard let frozenSettings else {
-            Log.photoLibraryUploader("no settings")
-            return
-        }
 
         let expiringActivity = ExpiringActivity(id: "addImageAssetsToUploadQueue:\(UUID().uuidString)", delegate: nil)
         expiringActivity.start()
