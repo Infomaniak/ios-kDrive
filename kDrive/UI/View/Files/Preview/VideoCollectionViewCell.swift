@@ -37,7 +37,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     }
 
     @IBOutlet var previewFrameImageView: UIImageView!
-    @IBOutlet var playButton: UIButton!
 
     @LazyInjectService private var matomo: MatomoUtils
 
@@ -66,7 +65,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
 
         let container = previewFrameImageView.superview ?? contentView
         container.addSubview(loadingIndicator)
@@ -92,8 +90,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         file.getThumbnail(publicShareProxy: driveFileManager?.publicShareProxy) { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
         }
-        playButton.isEnabled = false
-        playButton.isHidden = true
 
         showLoadingIndicatorAfterDelay()
 
@@ -120,39 +116,13 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         playerViewControllerIfLoaded?.player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 
-    @IBAction func playVideoPressed(_ sender: Any) {
-        guard let player = videoPlayer?.playerViewController.player else { return }
-
-        matomo.trackMediaPlayer(playMedia: .video)
-
-        let playerViewController = AVPlayerViewController()
-        playerViewController.player = player
-        playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
-
-        let navController = VideoPlayerNavigationController(rootViewController: playerViewController)
-        navController.disappearCallback = { [weak self] in
-            self?.matomo.track(eventWithCategory: .mediaPlayer, name: "pause")
-            self?.videoPlayer?.stopPlayback()
-            self?.previewDelegate?.setFullscreen(false)
-        }
-        navController.setNavigationBarHidden(true, animated: false)
-        navController.modalPresentationStyle = .overFullScreen
-        navController.modalTransitionStyle = .crossDissolve
-
-        previewDelegate?.presentVideoPlayer(navController) {
-            playerViewController.player?.play()
-        }
-    }
-
     func errorWhilePreviewing(error: any Error) {
         guard let file, let previewDelegate else { return }
         previewDelegate.errorWhilePreviewing(fileId: file.id, error: error)
         videoPlayer = nil
-        playButton.isEnabled = false
     }
 
     func readyToPlay() {
-        playButton.isEnabled = true
         guard let parentViewController else { return }
         embedInline(in: parentViewController)
     }
