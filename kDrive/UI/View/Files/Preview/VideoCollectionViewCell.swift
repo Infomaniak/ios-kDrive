@@ -162,7 +162,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         playerViewController.didMove(toParent: parent)
         observePlaybackStatus(of: playerViewController)
 
-        if playerViewController.isReadyForDisplay {
+        if playerViewController.isReadyForDisplay || videoPlayer?.isAudioOnly == true {
             revealPlayer(playerViewController)
         } else {
             readyForDisplayObserver = playerViewController

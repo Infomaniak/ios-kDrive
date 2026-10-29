@@ -38,6 +38,7 @@ public final class VideoPlayer: Pausable {
     private var player: AVPlayer?
     private var asset: AVAsset?
     private var file: File?
+    public private(set) var isAudioOnly = false
 
     private var statusObserver: NSKeyValueObservation?
 
@@ -52,9 +53,7 @@ public final class VideoPlayer: Pausable {
 
     public var identifier: String = UUID().uuidString
 
-    public var isReadyToPlay: Bool {
-        player?.currentItem?.status == .readyToPlay
-    }
+    public private(set) var isReadyToPlay = false
 
     public lazy var playerViewController: AVPlayerViewController = {
         let playerViewController = AVPlayerViewController()
@@ -178,6 +177,9 @@ public final class VideoPlayer: Pausable {
                 guard let self, let previewDelegate = self.previewDelegate else { return }
                 switch item.status {
                 case .readyToPlay:
+                    let tracks = try? await item.asset.loadTracks(withMediaType: .video)
+                    self.isAudioOnly = tracks?.isEmpty ?? true
+                    self.isReadyToPlay = true
                     previewDelegate.readyToPlay(self)
                 default:
                     previewDelegate.errorWhilePreviewing(self, error: ErrorDomain.incompatibleFile)
