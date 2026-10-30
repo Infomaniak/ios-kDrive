@@ -780,28 +780,14 @@ public struct AppRouter: AppNavigable {
             return
         }
 
-        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String
-
         Task { @MainActor in
-            let alert = AlertTextViewController(
-                title: appName,
-                message: KDriveResourcesStrings.Localizable.reviewAlertTitle,
-                action: KDriveResourcesStrings.Localizable.buttonYes,
-                hasCancelButton: true,
-                cancelString: KDriveResourcesStrings.Localizable.buttonNo,
-                handler: requestAppStoreReview,
-                cancelHandler: openUserReport
+            presentingViewController.present(
+                AskForReviewBridgeController.instantiate(onDislike: openUserReport),
+                animated: true
             )
-
-            presentingViewController.present(alert, animated: true)
         }
-        matomo.track(eventWithCategory: .appReview, name: "alertPresented")
-    }
 
-    @MainActor private func requestAppStoreReview() {
-        matomo.track(eventWithCategory: .appReview, name: "like")
-        UserDefaults.shared.alreadyAskedReview = true
-        reviewManager.requestReview()
+        matomo.track(eventWithCategory: .appReview, name: "alertPresented")
     }
 
     @MainActor private func openUserReport() {
