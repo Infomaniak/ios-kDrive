@@ -281,6 +281,7 @@ public final class DownloadQueue: ParallelismHeuristicDelegate, DownloadQueueabl
             operation.completionBlock = {
                 self.dispatchQueue.async {
                     self.fileOperationsInQueue.removeValue(forKey: fileId)
+                    self.publishFileDownloaded(fileId: fileId, error: operation.error)
                     OperationQueueHelper.disableIdleTimer(false)
                     completion(operation.error)
                 }
