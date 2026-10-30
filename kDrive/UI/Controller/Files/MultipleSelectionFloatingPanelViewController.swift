@@ -73,7 +73,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     }
 
     var canSendCopyOfSelection: Bool {
-        !allItemsSelected && !files.isEmpty && files.allSatisfy { !$0.isDirectory }
+        !allItemsSelected && !files.isEmpty && files.allSatisfy { !$0.isDirectory && $0.capabilities.canRead }
     }
 
     init(
