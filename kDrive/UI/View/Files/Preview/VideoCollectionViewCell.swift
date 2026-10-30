@@ -42,6 +42,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private var playbackStatusObserver: NSKeyValueObservation?
     private var isCurrentPage = false
     private var isPlayerRevealed = false
+    private var needsPlayFromBeginning = true
 
     private var loadingIndicatorTask: Task<Void, Never>?
     private let touchTracker = TouchTrackingGestureRecognizer()
@@ -96,7 +97,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         guard !isCurrentPage else { return }
         isCurrentPage = true
         if isPlayerRevealed {
-            playFromBeginning()
+            if needsPlayFromBeginning {
+                playFromBeginning()
+            } else {
+                playerViewControllerIfLoaded?.player?.play()
+            }
         }
     }
 
@@ -104,6 +109,10 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         matomo.trackMediaPlayer(leaveAt: videoPlayer?.progressPercentage)
         isCurrentPage = false
         videoPlayer?.stopPlayback()
+    }
+
+    override func didLeavePage() {
+        needsPlayFromBeginning = true
         playerViewControllerIfLoaded?.player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
     }
 
@@ -236,6 +245,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         guard let player = playerViewControllerIfLoaded?.player else { return }
         matomo.trackMediaPlayer(playMedia: .video)
         player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+        needsPlayFromBeginning = false
         player.play()
     }
 
@@ -244,6 +254,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         playbackStatusObserver = nil
         touchTracker.view?.removeGestureRecognizer(touchTracker)
         isPlayerRevealed = false
+        needsPlayFromBeginning = true
         if let playerViewController = playerViewControllerIfLoaded {
             playerViewController.additionalSafeAreaInsets.bottom = 0
             playerViewController.willMove(toParent: nil)

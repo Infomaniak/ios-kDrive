@@ -49,6 +49,10 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         // META: keep SonarCloud happy
     }
 
+    func didLeavePage() {
+        // META: keep SonarCloud happy
+    }
+
     func willDisplayInCollectionView() {
         // META: keep SonarCloud happy
     }

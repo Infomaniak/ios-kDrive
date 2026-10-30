@@ -773,6 +773,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         let previousCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         previousCell?.didEndDisplaying()
+        previousCell?.didLeavePage()
 
         currentIndex = centerCellIndexPath
         let currentCell = collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell
