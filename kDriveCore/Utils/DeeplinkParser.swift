@@ -100,6 +100,14 @@ public struct DeeplinkParser: DeeplinkParsable {
             return await handleDeeplink(url: url)
         }
 
+        if components.scheme == Constants.UploadReturnDeeplink.scheme,
+           components.host == Constants.UploadReturnDeeplink.host,
+           components.path.isEmpty {
+            @InjectService var uploadService: UploadServiceable
+            uploadService.rebuildUploadQueue()
+            return true
+        }
+
         if components.scheme == KDriveFileSharingConstants.scheme, components.host == KDriveFileSharingConstants.host {
             guard let files = filesForSharingDeeplink(url) else {
                 Log.sceneDelegate("Failed to import files: Invalid request", level: .error)

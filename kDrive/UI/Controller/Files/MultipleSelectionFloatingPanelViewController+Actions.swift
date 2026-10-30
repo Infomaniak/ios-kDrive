@@ -20,6 +20,7 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import OSLog
 import UIKit
 
 // MARK: - Actions
@@ -48,6 +49,9 @@ extension MultipleSelectionFloatingPanelViewController {
             moveAction()
         case .duplicate:
             duplicateAction(group: group, at: indexPath)
+        case .sendCopy:
+            sendCopyAction(group: group, at: indexPath)
+            return
         default:
             break
         }
@@ -326,6 +330,174 @@ extension MultipleSelectionFloatingPanelViewController {
             }
             self.reloadAction?()
             self.changedFiles = []
+        }
+    }
+
+    private func sendCopyAction(group: DispatchGroup, at indexPath: IndexPath) {
+        guard !downloadInProgress else { return }
+        guard canSendCopyOfSelection else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            return
+        }
+
+        let selectedFiles = files.map { $0.freezeIfNeeded() }
+        let filesToDownload = selectedFiles.filter { !$0.isMostRecentDownloaded }
+
+        guard hasEnoughSpaceToSend(selectedFiles, filesToDownload: filesToDownload) else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.errorDeviceStorage)
+            return
+        }
+
+        downloadError = nil
+        setSendCopyLoading(true, at: indexPath)
+
+        observeDownloads(of: filesToDownload, group: group)
+        group.notify(queue: .main) { [weak self] in
+            self?.finishSendCopy(of: selectedFiles, at: indexPath)
+        }
+
+        startDownloads(of: filesToDownload)
+    }
+
+    private func hasEnoughSpaceToSend(_ selectedFiles: [File], filesToDownload: [File]) -> Bool {
+        let downloadSize = filesToDownload.compactMap(\.size).reduce(0, +)
+        let copySize = selectedFiles.compactMap(\.size).reduce(0, +)
+
+        @LazyInjectService var freeSpaceService: FreeSpaceService
+        return freeSpaceService.checkEnoughAvailableSpaceForDownload(estimatedSize: downloadSize + copySize)
+    }
+
+    private func setSendCopyLoading(_ isLoading: Bool, at indexPath: IndexPath) {
+        downloadInProgress = isLoading
+        collectionView.isUserInteractionEnabled = !isLoading
+        collectionView.reloadItems(at: [indexPath])
+    }
+
+    private func observeDownloads(of filesToDownload: [File], group: DispatchGroup) {
+        guard !filesToDownload.isEmpty else { return }
+
+        var remainingFileIds = Set(filesToDownload.map(\.id))
+        remainingFileIds.forEach { _ in group.enter() }
+
+        shareDownloadObserver?.cancel()
+        shareDownloadObserver = downloadQueue.observeFileDownloaded(self, fileId: nil) { [weak self] fileId, error in
+            Task { @MainActor in
+                guard remainingFileIds.remove(fileId) != nil else { return }
+                if let error, self?.downloadError == nil {
+                    self?.downloadError = error
+                }
+                group.leave()
+            }
+        }
+    }
+
+    private func startDownloads(of filesToDownload: [File]) {
+        for file in filesToDownload {
+            if let publicShareProxy = driveFileManager.publicShareProxy {
+                downloadQueue.addPublicShareToQueue(file: file,
+                                                    driveFileManager: driveFileManager,
+                                                    publicShareProxy: publicShareProxy,
+                                                    itemIdentifier: nil,
+                                                    onOperationCreated: nil,
+                                                    completion: nil)
+            } else {
+                downloadQueue.addToQueue(file: file, userId: accountManager.currentUserId, itemIdentifier: nil)
+            }
+        }
+    }
+
+    private func finishSendCopy(of selectedFiles: [File],
+                                at indexPath: IndexPath) {
+        shareDownloadObserver?.cancel()
+        shareDownloadObserver = nil
+
+        if let error = downloadError {
+            setSendCopyLoading(false, at: indexPath)
+            UIConstants.showSnackBarIfNeeded(error: error)
+            return
+        }
+
+        presentShareSheet(for: localURLs(of: selectedFiles), from: indexPath)
+    }
+
+    private func localURLs(of selectedFiles: [File]) -> [URL] {
+        selectedFiles.map { file in
+            (driveFileManager.getCachedFile(id: file.id) ?? file).localUrl
+        }
+    }
+
+    @concurrent
+    private func prepareShareCopies(
+        from sourceURLs: [URL]
+    ) async throws -> (directory: URL, files: [URL]) {
+        let exportDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+
+        do {
+            let shareURLs = try await sourceURLs.concurrentMap { sourceURL in
+                try Task.checkCancellation()
+                let directory = exportDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                let shareURL = directory.appendingPathComponent(sourceURL.lastPathComponent)
+                try FileManager.default.copyItem(at: sourceURL, to: shareURL)
+                return shareURL
+            }
+
+            try Task.checkCancellation()
+            return (exportDirectory, shareURLs)
+        } catch {
+            await removeShareCopies(at: exportDirectory)
+            throw error
+        }
+    }
+
+    @concurrent
+    private func removeShareCopies(at directory: URL) async {
+        let fileManager = FileManager.default
+        guard fileManager.fileExists(atPath: directory.path) else { return }
+
+        do {
+            try fileManager.removeItem(at: directory)
+        } catch {
+            Logger.general.error("Error removing temporary share copies: \(error)")
+        }
+    }
+
+    private func presentShareSheet(
+        for sourceURLs: [URL],
+        from indexPath: IndexPath
+    ) {
+        Task { @MainActor in
+            defer {
+                setSendCopyLoading(false, at: indexPath)
+            }
+
+            do {
+                let export = try await prepareShareCopies(from: sourceURLs)
+
+                guard viewIfLoaded?.window != nil else {
+                    await removeShareCopies(at: export.directory)
+                    return
+                }
+
+                let activityViewController = UIActivityViewController(activityItems: export.files, applicationActivities: nil)
+
+                activityViewController.completionWithItemsHandler = { _, _, _, error in
+                    Task { @MainActor in
+                        await self.removeShareCopies(at: export.directory)
+
+                        if let error {
+                            UIConstants.showSnackBarIfNeeded(error: error)
+                        }
+                    }
+                }
+
+                let sourceView = collectionView.cellForItem(at: indexPath) ?? collectionView
+                activityViewController.popoverPresentationController?.sourceView = sourceView
+                present(activityViewController, animated: true)
+            } catch {
+                UIConstants.showSnackBarIfNeeded(error: error)
+            }
         }
     }
 }

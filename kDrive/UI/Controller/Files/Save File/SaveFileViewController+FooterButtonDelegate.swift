@@ -112,7 +112,7 @@ extension SaveFileViewController: FooterButtonDelegate {
 
     #if ISEXTENSION
     private func openApp() async {
-        guard let url = URL(string: "kdrive://") else {
+        guard let url = Constants.UploadReturnDeeplink.url else {
             // Fallback on a local notification if failure to open URL
             @InjectService var notificationHelper: NotificationsHelpable
             notificationHelper.sendPausedUploadQueueNotification()

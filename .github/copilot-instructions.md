@@ -4,6 +4,10 @@ Before reading this file, please read AGENTS.md to learn more about the project 
 
 ## Pull Request Review Instructions
 
+- Review changed code against all applicable rules in AGENTS.md, especially Local Norms and the PR Checklist. Treat these as review criteria.
+- Flag concrete violations introduced or modified by the pull request. Explain the applicable rule and suggest a compliant correction.
+- Respect the wording of each rule: preferences allow justified exceptions.
+- For off-actor async work, flag Task.detached used solely to leave the caller's actor. Prefer an @concurrent async function called from Task { ... }, as specified in AGENTS.md.
 - Pay attention for consistency with existing code style and architecture.
     - Make sure new code is properly abstracted, split, and added to the correct layer (UI / Core …)
     - You can ask to add unit tests in core related code that can be easily tested.

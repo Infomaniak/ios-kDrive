@@ -131,6 +131,8 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
         case .manageCategories:
             let filesAreDisabled = files.allSatisfy(\.isDisabled)
             setEnabled(!filesAreDisabled)
+        case .sendCopy:
+            setProgress(showProgress ? -1 : nil)
         default:
             break
         }

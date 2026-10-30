@@ -43,6 +43,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     var addAction = true
     var currentArchiveId: String?
     var downloadError: DriveError?
+    var shareDownloadObserver: ObservationToken?
 
     enum DomainError: Error {
         case missingViewModel
@@ -69,6 +70,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
 
     private var filesAreWithinTheSameFolder: Bool {
         !files.contains { $0.parentId != files.first?.parentId }
+    }
+
+    var canSendCopyOfSelection: Bool {
+        !allItemsSelected && !files.isEmpty && files.allSatisfy { !$0.isDirectory && $0.capabilities.canRead }
     }
 
     init(
@@ -123,6 +128,8 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 return filesAreWithinTheSameFolder || filesAreAllMedia
             case .offline:
                 return !files.allSatisfy(\.isDirectory)
+            case .sendCopy:
+                return canSendCopyOfSelection
             default:
                 return true
             }
