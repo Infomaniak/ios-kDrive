@@ -38,4 +38,8 @@ public final class MediaPlayerOrchestrator {
 
         lastUsedPlayer.pause()
     }
+
+    public func isCurrentPlayback(_ playable: any Pausable) -> Bool {
+        lastUsedPlayer === playable
+    }
 }

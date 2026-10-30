@@ -99,6 +99,10 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         fatalError("init(coder:) has not been implemented")
     }
 
+    override var childForStatusBarHidden: UIViewController? {
+        viewController(for: isCollapsed ? .compact : .secondary)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 

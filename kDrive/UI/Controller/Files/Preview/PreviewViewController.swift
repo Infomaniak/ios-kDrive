@@ -31,9 +31,11 @@ import UIKit
 @MainActor protocol PreviewContentCellDelegate: AnyObject {
     func updateNavigationBar()
     func setFullscreen(_ fullscreen: Bool?)
+    func setPlaybackFullscreen(_ isPlaying: Bool)
     func errorWhilePreviewing(fileId: Int, error: Error)
     func openWith(from: UIView)
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
+    var fileActionPanelHeight: CGFloat { get }
 }
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
@@ -77,6 +79,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var titleHeightConstraint: NSLayoutConstraint?
     @IBOutlet var statusBarView: UIView!
     private var fullScreenPreview = false
+    private var isPlaybackFullscreen = false
+    private var isFileActionsTransitioning = false
+    private var pendingFileActionsVisibility: (isVisible: Bool, animated: Bool)?
 
     var fileInformationsViewController: FileActionsFloatingPanelViewController!
 
@@ -89,10 +94,16 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
     }
 
+    private static let smallDetentHeight: CGFloat = 75
+
     private let smallDetent = UISheetPresentationController.Detent.custom(
         identifier: .init("smallDetent")
     ) { _ in
-        75
+        smallDetentHeight
+    }
+
+    var fileActionPanelHeight: CGFloat {
+        fullScreenPreview || isBookPreviewLayout ? 0 : Self.smallDetentHeight
     }
 
     private var backgroundExtensionView: UIView?
@@ -414,7 +425,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        setFullscreen(false)
+
+        let currentCell = collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell
+        currentCell?.didStartDisplaying()
+        let prefersFullscreen = currentCell?.prefersFullscreenPreview ?? false
+        setFullscreen(prefersFullscreen)
+        isPlaybackFullscreen = prefersFullscreen
+
         UIApplication.shared.beginReceivingRemoteControlEvents()
         becomeFirstResponder()
 
@@ -445,6 +462,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
+        pendingFileActionsVisibility = nil
         dismissFileActionsPanel(animated: false)
     }
 
@@ -646,6 +664,21 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func setFullscreen(_ fullscreen: Bool? = nil) {
+        isPlaybackFullscreen = false
+        applyFullscreen(fullscreen)
+    }
+
+    func setPlaybackFullscreen(_ isPlaying: Bool) {
+        if isPlaying {
+            guard !fullScreenPreview else { return }
+            applyFullscreen(true)
+            isPlaybackFullscreen = true
+        } else {
+            setFullscreen(false)
+        }
+    }
+
+    private func applyFullscreen(_ fullscreen: Bool?) {
         if isBookPreviewLayout {
             fullScreenPreview = false
             let hideBackButton = fullscreen ?? !navigationItem.hidesBackButton
@@ -674,10 +707,19 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let targetTopInset = hide ? navBarHeight : 0.0
         additionalSafeAreaInsets.top = targetTopInset
         view.layoutIfNeeded()
-        if hide {
-            dismissFileActionsPanel(animated: !isViewDisappearing)
+        pendingFileActionsVisibility = (isVisible: !hide, animated: hide ? !isViewDisappearing : true)
+        applyPendingFileActionsVisibility()
+    }
+
+    private func applyPendingFileActionsVisibility() {
+        guard !isFileActionsTransitioning,
+              fileInformationsViewController.presentedViewController == nil,
+              let pending = pendingFileActionsVisibility else { return }
+        pendingFileActionsVisibility = nil
+        if pending.isVisible {
+            presentFileActionsPanel(animated: pending.animated)
         } else {
-            presentFileActionsPanel(animated: true)
+            dismissFileActionsPanel(animated: pending.animated)
         }
     }
 
@@ -686,6 +728,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
               fileInformationsViewController.presentingViewController == nil else {
             return
         }
+        isFileActionsTransitioning = true
 
         view.layoutIfNeeded()
 
@@ -699,7 +742,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         present(fileInformationsViewController, animated: animated) { [weak self] in
-            self?.scheduleFileActionsLayoutUpdate()
+            guard let self else { return }
+            isFileActionsTransitioning = false
+            scheduleFileActionsLayoutUpdate()
+            applyPendingFileActionsVisibility()
         }
     }
 
@@ -709,7 +755,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             return
         }
 
-        fileInformationsViewController.dismiss(animated: animated, completion: completion)
+        isFileActionsTransitioning = true
+        fileInformationsViewController.dismiss(animated: animated) { [weak self] in
+            self?.isFileActionsTransitioning = false
+            completion?()
+            self?.applyPendingFileActionsVisibility()
+        }
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -724,8 +775,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         let previousCell = (collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell)
         previousCell?.didEndDisplaying()
+        previousCell?.didLeavePage()
 
         currentIndex = centerCellIndexPath
+        let currentCell = collectionView.cellForItem(at: currentIndex) as? PreviewCollectionViewCell
+        currentCell?.didStartDisplaying()
+        if isPlaybackFullscreen && !(currentCell?.prefersFullscreenPreview ?? false) {
+            setFullscreen(false)
+        }
         updateFileForCurrentIndex()
 
         updateNavigationBar()
@@ -995,6 +1052,19 @@ extension PreviewViewController: UICollectionViewDataSource {
         if let cell = cell as? DownloadingPreviewCollectionViewCell {
             cell.progressiveLoadingForFile(file, publicShareProxy: driveFileManager?.publicShareProxy)
         }
+
+        (cell as? PreviewCollectionViewCell)?.willDisplayInCollectionView()
+        if indexPath == currentIndex {
+            (cell as? PreviewCollectionViewCell)?.didStartDisplaying()
+        }
+    }
+
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didEndDisplaying cell: UICollectionViewCell,
+        forItemAt indexPath: IndexPath
+    ) {
+        (cell as? PreviewCollectionViewCell)?.didEndDisplayingInCollectionView()
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

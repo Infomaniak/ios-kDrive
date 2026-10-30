@@ -33,11 +33,31 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         previewDelegate?.setFullscreen(nil)
     }
 
+    var prefersFullscreenPreview: Bool {
+        false
+    }
+
     func configureWith(file: File) {
         // META: keep SonarCloud happy
     }
 
+    func didStartDisplaying() {
+        // META: keep SonarCloud happy
+    }
+
     func didEndDisplaying() {
+        // META: keep SonarCloud happy
+    }
+
+    func didLeavePage() {
+        // META: keep SonarCloud happy
+    }
+
+    func willDisplayInCollectionView() {
+        // META: keep SonarCloud happy
+    }
+
+    func didEndDisplayingInCollectionView() {
         // META: keep SonarCloud happy
     }
 }
