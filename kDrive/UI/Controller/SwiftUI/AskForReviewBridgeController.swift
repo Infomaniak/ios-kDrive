@@ -28,7 +28,7 @@ enum AskForReviewBridgeController {
         @LazyInjectService var reviewManager: ReviewManageable
         @InjectService var matomo: MatomoUtils
 
-        var hostingController: UIHostingController<AlertView<AskForReviewView>>!
+        weak var weakHostingController: UIHostingController<AlertView<AskForReviewView>>?
         let rootView = AlertView(backgroundColor: Color(KDriveResourcesAsset.backgroundCardViewColor.color)) {
             AskForReviewView(
                 appName: Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as! String,
@@ -36,21 +36,21 @@ enum AskForReviewBridgeController {
                 onLike: {
                     matomo.track(eventWithCategory: .appReview, name: "like")
                     DispatchQueue.main.async {
-                        hostingController.dismiss(animated: true)
+                        weakHostingController?.dismiss(animated: true)
                     }
                 },
                 onDislike: {
-                    onDislike()
                     DispatchQueue.main.async {
-                        hostingController.dismiss(animated: true)
+                        weakHostingController?.dismiss(animated: true, completion: onDislike)
                     }
                 }
             )
         }
 
-        hostingController = UIHostingController(rootView: rootView)
+        let hostingController = UIHostingController(rootView: rootView)
         hostingController.modalPresentationStyle = .overFullScreen
         hostingController.view.backgroundColor = .clear
+        weakHostingController = hostingController
         return hostingController
     }
 }

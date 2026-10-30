@@ -313,7 +313,10 @@ extension SceneDelegate {
             currentRootViewControllerState = currentState
             appNavigable.prepareRootViewController(for: scene, currentState: currentState, restoration: isRestoration)
         }
-
+        #if DEBUG
+        UserDefaults.shared.actionUntilReview = 0
+        UserDefaults.shared.alreadyAskedReview = false
+        #endif
         switch currentState {
         case .mainViewController:
             UserDefaults.shared.numberOfConnections += 1
