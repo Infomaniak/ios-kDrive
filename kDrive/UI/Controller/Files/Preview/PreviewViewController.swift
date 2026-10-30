@@ -712,7 +712,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func applyPendingFileActionsVisibility() {
-        guard !isFileActionsTransitioning, let pending = pendingFileActionsVisibility else { return }
+        guard !isFileActionsTransitioning,
+              fileInformationsViewController.presentedViewController == nil,
+              let pending = pendingFileActionsVisibility else { return }
         pendingFileActionsVisibility = nil
         if pending.isVisible {
             presentFileActionsPanel(animated: pending.animated)
