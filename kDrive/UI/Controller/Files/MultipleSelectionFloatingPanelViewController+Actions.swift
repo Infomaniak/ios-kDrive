@@ -426,32 +426,33 @@ extension MultipleSelectionFloatingPanelViewController {
         }
     }
 
-    private nonisolated static func prepareShareCopies(
+    @concurrent
+    private func prepareShareCopies(
         from sourceURLs: [URL]
-    ) throws -> (directory: URL, files: [URL]) {
-        let fileManager = FileManager.default
-        let exportDirectory = fileManager.temporaryDirectory
+    ) async throws -> (directory: URL, files: [URL]) {
+        let exportDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
 
         do {
-            let shareURLs = try sourceURLs.map { sourceURL in
+            let shareURLs = try await sourceURLs.concurrentMap { sourceURL in
                 try Task.checkCancellation()
                 let directory = exportDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
-                try fileManager.createDirectory(at: directory, withIntermediateDirectories: true)
+                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
                 let shareURL = directory.appendingPathComponent(sourceURL.lastPathComponent)
-                try fileManager.copyItem(at: sourceURL, to: shareURL)
+                try FileManager.default.copyItem(at: sourceURL, to: shareURL)
                 return shareURL
             }
 
             try Task.checkCancellation()
             return (exportDirectory, shareURLs)
         } catch {
-            removeShareCopies(at: exportDirectory)
+            await removeShareCopies(at: exportDirectory)
             throw error
         }
     }
 
-    private nonisolated static func removeShareCopies(at directory: URL) {
+    @concurrent
+    private func removeShareCopies(at directory: URL) async {
         let fileManager = FileManager.default
         guard fileManager.fileExists(atPath: directory.path) else { return }
 
@@ -472,26 +473,20 @@ extension MultipleSelectionFloatingPanelViewController {
             }
 
             do {
-                let export = try await Task.detached(priority: .userInitiated) {
-                    try Self.prepareShareCopies(from: sourceURLs)
-                }.value
+                let export = try await prepareShareCopies(from: sourceURLs)
 
                 guard viewIfLoaded?.window != nil else {
-                    Task.detached(priority: .utility) {
-                        Self.removeShareCopies(at: export.directory)
-                    }
+                    await removeShareCopies(at: export.directory)
                     return
                 }
 
                 let activityViewController = UIActivityViewController(activityItems: export.files, applicationActivities: nil)
 
                 activityViewController.completionWithItemsHandler = { _, _, _, error in
-                    Task.detached(priority: .utility) {
-                        Self.removeShareCopies(at: export.directory)
-                    }
+                    Task { @MainActor in
+                        await self.removeShareCopies(at: export.directory)
 
-                    if let error {
-                        Task { @MainActor in
+                        if let error {
                             UIConstants.showSnackBarIfNeeded(error: error)
                         }
                     }
