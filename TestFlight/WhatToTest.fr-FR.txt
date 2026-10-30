@@ -1,11 +1,5 @@
-- Suivez la progression de l’envoi de fichiers dans la Dynamic Island sur les appareils compatibles sous iOS 26 ou ultérieur, avec un suivi amélioré
-- Consultez la taille des dossiers dans l’écran d’informations
-- Affichez les vignettes des PDF dans l’activité récente
-- Fiabilité améliorée des envois en arrière-plan
-- Correction de l’enregistrement des modifications des fichiers kDrive édités dans l’app Fichiers
-- Correction des couleurs de fond des panneaux d’information et amélioration de l’accessibilité des boutons de fermeture
-- Prise en charge de l’iPhone Duo
-- Amélioration des aperçus et des informations des fichiers
-- Amélioration de la visibilité des messages de confirmation et d’erreur
-- Amélioration de la présentation et de la navigation des écrans de bienvenue
-- Réduction de la taille de l’app
+- Lisez les vidéos directement dans l’aperçu des fichiers, avec des transitions plus fluides vers le plein écran et le mode Image dans l’image automatique
+- Envoyez des copies de plusieurs fichiers sélectionnés en une seule fois, avec un indicateur de chargement pendant leur préparation
+- Fiabilité améliorée des envois au retour dans kDrive après l’enregistrement de fichiers depuis une autre app
+- Nouvelle présentation de la demande d’avis sur l’app et clarification des choix d’annulation des téléchargements
+- Amélioration de la stabilité de l’app et de la gestion des envois vers les dossiers où la création de fichiers est impossible
