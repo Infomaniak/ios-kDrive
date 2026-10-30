@@ -186,6 +186,7 @@ Commit the generated `kDrive/Resources/package-list.json` with dependency update
 - **Early-start DI:** Prefer `@LazyInjectService` during early app startup to prevent DI resolution deadlocks.
 - **API layer:** Extend `DriveApiFetcher` for API operations. Create focused extensions (`+Upload`, `+Listing`, `+Share`).
 - **Endpoint definitions:** Define API endpoints in `Endpoint.swift` and extend with `Endpoint+Files.swift`, `Endpoint+Share.swift`, etc.
+- **Deep links:** Share matching scheme and host constants between URL construction and parsing; reuse existing constants where available.
 - **Concurrency:** Prefer native Swift `async/await`, structured concurrency, and actor isolation for shared mutable state. Avoid explicit locks and DispatchQueue-based synchronization when native concurrency mechanisms can express the solution. When bridging synchronous framework callbacks to actors, preserve required ordering and lifecycle semantics explicitly.
 - **Off-actor work:** Prefer `@concurrent` async functions called from `Task { ... }` over `Task.detached` when the goal is to run work off the caller's actor.
 - **Data persistence:** Realm models must be thread-safe; use `RealmAccessor` for background writes.

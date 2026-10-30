@@ -60,6 +60,18 @@ public struct URLConstants {
 }
 
 public enum Constants {
+    public enum UploadReturnDeeplink {
+        public static let scheme = "kdrive"
+        public static let host = "uploads"
+
+        public static var url: URL? {
+            var components = URLComponents()
+            components.scheme = scheme
+            components.host = host
+            return components.url
+        }
+    }
+
     public static let backgroundRefreshIdentifier = "com.infomaniak.background.refresh"
     public static let longBackgroundRefreshIdentifier = "com.infomaniak.background.long-refresh"
 
