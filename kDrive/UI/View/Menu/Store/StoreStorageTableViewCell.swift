@@ -18,6 +18,7 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol StoreStorageDelegate: AnyObject {
@@ -37,6 +38,7 @@ class StoreStorageTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        containerView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
         containerView.cornerRadius = UIConstants.cornerRadius
         slider.value = 3

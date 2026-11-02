@@ -26,9 +26,6 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="APk-Ag-B28"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="separatorColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="kZU-CD-ye1">
                                 <rect key="frame" x="283" y="23" width="12" height="14"/>
@@ -36,17 +33,12 @@
                                     <constraint firstAttribute="width" constant="12" id="J4L-76-GSw"/>
                                     <constraint firstAttribute="height" constant="14" id="K29-d6-cVZ"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="59" y="8" width="216" height="43"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -56,9 +48,6 @@
                                     <constraint firstAttribute="width" constant="26" id="MAh-KE-yES"/>
                                     <constraint firstAttribute="height" constant="26" id="rgF-C1-D1s"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

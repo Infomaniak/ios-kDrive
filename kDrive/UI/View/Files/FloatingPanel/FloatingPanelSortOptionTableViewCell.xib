@@ -26,9 +26,6 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="APk-Ag-B28"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="separatorColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="kZU-CD-ye1">
                                 <rect key="frame" x="278" y="16" width="24" height="24"/>
@@ -36,10 +33,6 @@
                                     <constraint firstAttribute="height" constant="24" id="OBw-3u-WI5"/>
                                     <constraint firstAttribute="width" constant="24" id="gYf-Qd-QnB"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="check"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="EI7-E4-hEE">
                                 <rect key="frame" x="20" y="16" width="238" height="24"/>
@@ -57,7 +50,6 @@
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>

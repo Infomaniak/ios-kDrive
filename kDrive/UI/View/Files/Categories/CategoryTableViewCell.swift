@@ -38,6 +38,9 @@ class CategoryTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        moreButton.setImage(KDriveResourcesAsset.menu.image, for: .normal)
+        borderView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         moreButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonMenu
         borderView.isHidden = true

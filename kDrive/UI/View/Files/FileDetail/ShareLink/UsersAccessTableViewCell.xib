@@ -29,9 +29,6 @@
                                         <subviews>
                                             <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="l7u-DC-qsi">
                                                 <rect key="frame" x="0.0" y="0.0" width="458" height="65"/>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardView"/>
-                                                </userDefinedRuntimeAttributes>
                                             </view>
                                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="1RC-eR-FYK">
                                                 <rect key="frame" x="12" y="4" width="35" height="35"/>
@@ -40,9 +37,6 @@
                                                     <constraint firstAttribute="height" constant="35" id="WkF-VQ-cqf"/>
                                                     <constraint firstAttribute="width" constant="35" id="pwq-qN-S40"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="test-image"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="b6c-UA-ZIN" userLabel="title Stack View">
                                                 <rect key="frame" x="57" y="4" width="361" height="22.5"/>
@@ -55,7 +49,6 @@
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="allAllDriveUsers"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                         </userDefinedRuntimeAttributes>
@@ -73,7 +66,6 @@
                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
@@ -103,10 +95,6 @@
                                                             <constraint firstAttribute="width" constant="12" id="a6F-DG-vBU"/>
                                                             <constraint firstAttribute="height" constant="12" id="j3S-gq-A7C"/>
                                                         </constraints>
-                                                        <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                                        </userDefinedRuntimeAttributes>
                                                     </imageView>
                                                 </subviews>
                                             </stackView>
@@ -142,7 +130,6 @@
                                                 <nil key="highlightedColor"/>
                                                 <color key="shadowColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="shareUserNotAccepted"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                                 </userDefinedRuntimeAttributes>
@@ -165,7 +152,6 @@
                                                 <nil key="highlightedColor"/>
                                                 <color key="shadowColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="shareUserExternal"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                                 </userDefinedRuntimeAttributes>
@@ -212,6 +198,9 @@
                 <outlet property="rightsStackView" destination="SmF-5H-MJ9" id="qRb-TK-ebR"/>
                 <outlet property="titleLabel" destination="pit-04-5d0" id="iJF-Bc-K0h"/>
                 <outlet property="topConstraint" destination="hah-GQ-TUr" id="uda-cl-UQ0"/>
+                <outlet property="disabledView" destination="l7u-DC-qsi" id="asset-l7u-DC-qsi"/>
+                <outlet property="invitationLabel" destination="bgz-By-CxN" id="asset-bgz-By-CxN"/>
+                <outlet property="externalUserLabel" destination="rXs-cg-QBY" id="asset-rXs-cg-QBY"/>
             </connections>
             <point key="canvasLocation" x="92.753623188405811" y="181.47321428571428"/>
         </tableViewCell>

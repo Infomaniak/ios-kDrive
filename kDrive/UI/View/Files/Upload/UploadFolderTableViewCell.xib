@@ -42,9 +42,6 @@
                                                     <constraint firstAttribute="height" constant="14" id="96h-F9-py2"/>
                                                     <constraint firstAttribute="width" constant="16" id="T3S-cY-yDj"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Dossier" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="981-OM-a3z" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="24" y="0.0" width="232" height="14"/>
@@ -83,9 +80,6 @@
                             <constraint firstItem="xfF-NT-TFG" firstAttribute="leading" secondItem="brH-e8-FdB" secondAttribute="leading" constant="16" id="u5C-Hj-Lj2"/>
                             <constraint firstItem="nsR-n8-bA7" firstAttribute="centerY" secondItem="brH-e8-FdB" secondAttribute="centerY" id="wYr-dT-kVU"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <constraints>

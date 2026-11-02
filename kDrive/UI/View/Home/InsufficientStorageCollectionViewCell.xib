@@ -35,7 +35,6 @@
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -44,7 +43,6 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notEnoughStorageUsed"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
@@ -57,7 +55,6 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notEnoughStorageDescription1"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                         </userDefinedRuntimeAttributes>
@@ -68,7 +65,6 @@
                                         <state key="normal" title="Faire évoluer mon offre">
                                         </state>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalTitleColorName" value="infomaniakColor"/>
                                             <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                                 <real key="value" value="18"/>
                                             </userDefinedRuntimeAttribute>
@@ -84,7 +80,6 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="notEnoughStorageDescription1"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                         </userDefinedRuntimeAttributes>
@@ -101,10 +96,6 @@
                                 <connections>
                                     <action selector="closeButtonPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="Gbe-XG-Tqu"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="close"/>
-                                </userDefinedRuntimeAttributes>
                             </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -142,6 +133,8 @@
                 <outlet property="topConstraint" destination="c6M-7V-XAH" id="eFn-Tn-JcJ"/>
                 <outlet property="upgradeButton" destination="2qe-le-aiX" id="bKH-nw-6nb"/>
                 <outlet property="upgradeLabel" destination="1l1-Gq-3en" id="yLq-98-YWh"/>
+                <outlet property="titleLabel" destination="WSJ-do-7xO" id="asset-WSJ-do-7xO"/>
+                <outlet property="closeButton" destination="a7j-pf-fSH" id="asset-a7j-pf-fSH"/>
             </connections>
             <point key="canvasLocation" x="350.72463768115944" y="165.73660714285714"/>
         </collectionViewCell>

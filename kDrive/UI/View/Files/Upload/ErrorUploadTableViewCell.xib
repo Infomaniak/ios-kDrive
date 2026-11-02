@@ -34,9 +34,6 @@
                                                     <constraint firstAttribute="height" constant="24" id="52e-zD-59f"/>
                                                     <constraint firstAttribute="width" constant="24" id="O43-Y4-qke"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="ZGM-cn-JFQ">
                                                 <rect key="frame" x="40.000000000000014" y="0.0" width="232.33333333333337" height="17"/>
@@ -46,7 +43,6 @@
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="photoSyncSuspendedTitle"/>
                                                         </userDefinedRuntimeAttributes>
@@ -60,7 +56,6 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="photoSyncSuspended"/>
                                         </userDefinedRuntimeAttributes>

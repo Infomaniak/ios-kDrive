@@ -33,10 +33,6 @@
                             <constraint firstAttribute="height" constant="13" id="8kJ-MO-egv"/>
                             <constraint firstAttribute="width" constant="13" id="cTA-Lh-l5Y"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="small-check"/>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="titleColor"/>
-                        </userDefinedRuntimeAttributes>
                     </imageView>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -53,6 +49,7 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <connections>
                 <outlet property="label" destination="LVK-Mz-L5g" id="XPw-ck-NUz"/>
+                <outlet property="smallCheckImageView" destination="dUs-yH-Iqj" id="asset-dUs-yH-Iqj"/>
             </connections>
             <point key="canvasLocation" x="131.8840579710145" y="77.678571428571431"/>
         </tableViewCell>

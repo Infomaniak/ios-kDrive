@@ -35,7 +35,6 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
@@ -45,10 +44,6 @@
                                             <constraint firstAttribute="height" constant="10" id="w7y-Yz-kKQ"/>
                                             <constraint firstAttribute="width" constant="10" id="yok-O2-3GE"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                 </subviews>
                             </stackView>

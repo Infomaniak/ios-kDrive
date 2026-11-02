@@ -27,7 +27,6 @@
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileDetailsInfosSharedUsersTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
@@ -44,8 +43,6 @@
                                 <rect key="frame" x="460" y="47" width="24" height="24"/>
                                 <state key="normal"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="share"/>
                                     <userDefinedRuntimeAttribute type="number" keyPath="imageWidth">
                                         <real key="value" value="25"/>
                                     </userDefinedRuntimeAttribute>

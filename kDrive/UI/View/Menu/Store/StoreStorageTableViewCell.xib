@@ -65,9 +65,6 @@
                             <constraint firstItem="UC4-6P-CaN" firstAttribute="centerX" secondItem="Zb0-Nj-dHX" secondAttribute="centerX" id="nJf-O1-st8"/>
                             <constraint firstAttribute="trailing" secondItem="WL6-BX-uLK" secondAttribute="trailing" constant="24" id="zAX-e2-udo"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <constraints>

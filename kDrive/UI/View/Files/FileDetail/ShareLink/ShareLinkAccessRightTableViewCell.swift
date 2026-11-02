@@ -26,6 +26,8 @@ protocol AccessRightPasswordDelegate: AnyObject {
 }
 
 class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
+    @IBOutlet private var chevronDownImageView: UIImageView!
+
     @IBOutlet var accessRightView: UIView!
     @IBOutlet var accessRightLabel: UILabel!
     @IBOutlet var accessRightImage: UIImageView!
@@ -37,6 +39,14 @@ class ShareLinkAccessRightTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        accessRightImage.image = KDriveResourcesAsset.view.image
+        accessRightImage.tintColor = KDriveResourcesAsset.iconColor.color
+        accessRightLabel.textColor = KDriveResourcesAsset.titleColor.color
+        chevronDownImageView.image = KDriveResourcesAsset.chevronDown.image
+        chevronDownImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        accessRightView.layer.borderColor = KDriveResourcesAsset.borderColor.color.cgColor
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
         accessRightView.isAccessibilityElement = true
         accessRightView.accessibilityTraits = .button

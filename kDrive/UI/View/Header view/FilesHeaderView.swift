@@ -33,6 +33,10 @@ protocol FilesHeaderViewDelegate: AnyObject {
 }
 
 class FilesHeaderView: UIView {
+    @IBOutlet private var deleteImageView: UIImageView!
+    @IBOutlet private var offlineImageView: UIImageView!
+    @IBOutlet private var offlineLabel: UILabel!
+
     @IBOutlet var containerStackView: UIStackView!
     @IBOutlet var commonDocumentsDescriptionLabel: UILabel!
     @IBOutlet var sortView: UIView!
@@ -58,6 +62,21 @@ class FilesHeaderView: UIView {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        deleteImageView.image = KDriveResourcesAsset.delete.image
+        deleteImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        offlineImageView.image = KDriveResourcesAsset.offline.image
+        offlineImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        offlineLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        offlineView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        activityAvatar.image = KDriveResourcesAsset.placeholderAvatar.image
+        activityAvatar.tintColor = KDriveResourcesAsset.iconColor.color
+        activityLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        activityListView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        sortButton.setImage(KDriveResourcesAsset.chevronDown.image, for: .normal)
+        listOrGridButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        listOrGridButton.setImage(KDriveResourcesAsset.list.image, for: .normal)
+        sortView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         // Sort button
         let layoutDirection = UIView.userInterfaceLayoutDirection(for: semanticContentAttribute)

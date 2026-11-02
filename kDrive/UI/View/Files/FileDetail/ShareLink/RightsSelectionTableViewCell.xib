@@ -34,10 +34,6 @@
                                                     <constraint firstAttribute="height" constant="24" id="E9J-Le-ZX1"/>
                                                     <constraint firstAttribute="width" constant="24" id="MwY-NJ-R6L"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="edit"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Nlc-ke-dbp">
                                                 <rect key="frame" x="40" y="0.0" width="190" height="181"/>
@@ -47,7 +43,6 @@
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
@@ -59,7 +54,6 @@ Ajout de commentaire</string>
                                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
@@ -73,8 +67,6 @@ Ajout de commentaire</string>
                                                         <state key="normal" title="Faire évoluer mon offre">
                                                         </state>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalTitleColorName" value="infomaniakColor"/>
                                                             <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                                                 <real key="value" value="18"/>
                                                             </userDefinedRuntimeAttribute>
@@ -91,9 +83,6 @@ Ajout de commentaire</string>
                                                                 <rect key="frame" x="0.0" y="0.0" width="95" height="19"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                                 <nil key="highlightedColor"/>
-                                                                <userDefinedRuntimeAttributes>
-                                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="infomaniakColor"/>
-                                                                </userDefinedRuntimeAttributes>
                                                             </label>
                                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LPI-qW-vdn">
                                                                 <rect key="frame" x="111" y="0.0" width="79" height="19"/>
@@ -108,9 +97,6 @@ Ajout de commentaire</string>
                                                         <rect key="frame" x="0.0" y="164" width="76" height="17"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                         <nil key="highlightedColor"/>
-                                                        <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
-                                                        </userDefinedRuntimeAttributes>
                                                     </label>
                                                 </subviews>
                                             </stackView>
@@ -127,7 +113,6 @@ Ajout de commentaire</string>
                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="infomaniakColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="userPermissionNotAvailable"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
@@ -139,7 +124,6 @@ Ajout de commentaire</string>
                                                     <constraint firstAttribute="bottom" secondItem="nDq-dR-RPe" secondAttribute="bottom" constant="8" id="tnx-4x-Q7H"/>
                                                 </constraints>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                                         <real key="value" value="16"/>
                                                     </userDefinedRuntimeAttribute>

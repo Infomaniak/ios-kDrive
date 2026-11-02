@@ -26,6 +26,7 @@ class NewFolderShareRuleUserCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        userImage.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
 
         userImage.cornerRadius = userImage.bounds.width / 2
         moreLabel.isHidden = true

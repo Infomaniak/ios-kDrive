@@ -23,6 +23,11 @@ import UIKit
 class SelectionTableViewCell: InsetTableViewCell {
     @IBOutlet var label: UILabel!
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        label.textColor = KDriveResourcesAsset.titleColor.color
+    }
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 

@@ -20,6 +20,9 @@ import kDriveResources
 import UIKit
 
 class UploadCardView: UIView {
+    @IBOutlet private var chevronImageView: UIImageView?
+    @IBOutlet private var detailsStackView: UIStackView?
+
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var cancelButton: UIButton?
     @IBOutlet var retryButton: UIButton?
@@ -33,6 +36,19 @@ class UploadCardView: UIView {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        detailsLabel.textColor = KDriveResourcesAsset.secondaryTextColor.color
+        chevronImageView?.image = KDriveResourcesAsset.chevronRight.image
+        chevronImageView?.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        detailsStackView?.tintColor = KDriveResourcesAsset.fileDescColor.color
+        backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        iconView.image = KDriveResourcesAsset.fileAudio.image
+        editImage?.image = KDriveResourcesAsset.edit.image
+        editImage?.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        retryButton?.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        retryButton?.setImage(KDriveResourcesAsset.retry.image, for: .normal)
+        cancelButton?.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        cancelButton?.setImage(KDriveResourcesAsset.close.image, for: .normal)
         retryButton?.addTarget(self, action: #selector(retryButtonPressed), for: .touchUpInside)
         cancelButton?.addTarget(self, action: #selector(cancelButtonPressed), for: .touchUpInside)
     }

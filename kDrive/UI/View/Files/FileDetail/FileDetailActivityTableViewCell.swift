@@ -22,11 +22,18 @@ import kDriveResources
 import UIKit
 
 class FileDetailActivityTableViewCell: InsetTableViewCell {
+    @IBOutlet private var clockImageView: UIImageView!
+
     @IBOutlet var detailLabel: UILabel!
     @IBOutlet var timeLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        detailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        clockImageView.image = KDriveResourcesAsset.clock.image
+        clockImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        timeLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
         accessoryImageView.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 

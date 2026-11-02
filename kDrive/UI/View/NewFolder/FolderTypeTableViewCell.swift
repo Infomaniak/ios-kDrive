@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCoreUIKit
+import kDriveResources
 import KSuite
 import UIKit
 
@@ -25,6 +26,16 @@ class FolderTypeTableViewCell: InsetTableViewCell {
     @IBOutlet var upgradeLabel: UILabel!
     @IBOutlet var chipContainerView: UIView!
     @IBOutlet var lowerConstraint: NSLayoutConstraint!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        accessoryImageView.image = KDriveResourcesAsset.folderFilled.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.infomaniakColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        upgradeLabel.textColor = KDriveResourcesAsset.titleColor.color
+    }
 
     override func prepareForReuse() {
         super.prepareForReuse()

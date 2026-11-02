@@ -20,7 +20,6 @@
                     <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                     </userDefinedRuntimeAttributes>
                 </label>

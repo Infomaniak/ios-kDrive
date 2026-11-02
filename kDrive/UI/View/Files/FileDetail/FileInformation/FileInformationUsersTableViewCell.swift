@@ -35,6 +35,9 @@ class FileInformationUsersTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        shareButton.tintColor = KDriveResourcesAsset.iconColor.color
+        shareButton.setImage(KDriveResourcesAsset.share.image, for: .normal)
 
         collectionView.delegate = self
         collectionView.dataSource = self

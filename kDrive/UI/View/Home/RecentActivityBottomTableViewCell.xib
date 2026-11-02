@@ -24,16 +24,12 @@
                             <constraint firstAttribute="height" constant="18" id="pdz-3K-bKq"/>
                             <constraint firstAttribute="width" constant="18" id="uLt-QR-FDZ"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
-                        </userDefinedRuntimeAttributes>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yM8-ry-7hp" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="26" y="0.0" width="376" height="18"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                         </userDefinedRuntimeAttributes>
                     </label>

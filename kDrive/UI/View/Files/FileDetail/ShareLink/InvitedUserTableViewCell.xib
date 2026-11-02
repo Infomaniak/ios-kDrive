@@ -36,9 +36,6 @@
                                     <outlet property="dataSource" destination="KGk-i7-Jjw" id="qF5-sB-X79"/>
                                     <outlet property="delegate" destination="KGk-i7-Jjw" id="DO1-SX-23F"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                                </userDefinedRuntimeAttributes>
                             </collectionView>
                         </subviews>
                         <constraints>
@@ -47,9 +44,6 @@
                             <constraint firstItem="ddx-uD-n82" firstAttribute="top" secondItem="sCL-PI-gFk" secondAttribute="top" constant="4" id="Qxp-Kx-FeJ"/>
                             <constraint firstAttribute="bottom" secondItem="ddx-uD-n82" secondAttribute="bottom" constant="4" id="dkD-LD-fzS"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <constraints>

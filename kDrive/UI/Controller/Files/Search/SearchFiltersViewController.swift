@@ -102,6 +102,7 @@ class SearchFiltersViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         navigationItem.largeTitleDisplayMode = .never
         navigationItem.hideBackButtonText()

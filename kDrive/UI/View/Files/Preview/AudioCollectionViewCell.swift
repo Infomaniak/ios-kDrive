@@ -48,6 +48,12 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        artworkImageView.image = KDriveResourcesAsset.music.image
+        landscapePlayButton.setImage(KDriveResourcesAsset.play.image, for: .normal)
+        elapsedTimeLabel.textColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        positionSlider.maximumTrackTintColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        remainingTimeLabel.textColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        playButton.setImage(KDriveResourcesAsset.play.image, for: .normal)
         // Change slider thumb
         let size = CGSize(width: 10, height: 10)
         let renderer = UIGraphicsImageRenderer(size: size)

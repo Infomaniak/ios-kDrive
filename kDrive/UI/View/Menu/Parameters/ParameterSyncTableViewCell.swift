@@ -24,6 +24,13 @@ class ParameterSyncTableViewCell: InsetTableViewCell {
     @IBOutlet var syncTitleLabel: UILabel!
     @IBOutlet var syncDetailLabel: UILabel!
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        syncTitleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        syncDetailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+    }
+
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 

@@ -27,8 +27,6 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileShareAddMessage"/>
                                 </userDefinedRuntimeAttributes>
                             </textView>

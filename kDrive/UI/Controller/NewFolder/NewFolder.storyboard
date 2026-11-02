@@ -20,9 +20,6 @@
                             <outlet property="dataSource" destination="N7u-GJ-nCc" id="BTp-2R-DrM"/>
                             <outlet property="delegate" destination="N7u-GJ-nCc" id="sb3-wu-a5Y"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </tableView>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="8NS-mo-zHt"/>
                     <connections>
@@ -43,9 +40,6 @@
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="P8r-Dg-J3T">
                                 <rect key="frame" x="0.0" y="150" width="414" height="746"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="cUa-4t-xdF"/>
@@ -55,9 +49,6 @@
                             <constraint firstItem="cUa-4t-xdF" firstAttribute="trailing" secondItem="P8r-Dg-J3T" secondAttribute="trailing" id="hwv-Ik-Ygb"/>
                             <constraint firstItem="P8r-Dg-J3T" firstAttribute="leading" secondItem="cUa-4t-xdF" secondAttribute="leading" id="wPV-AV-hYD"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" id="EwL-5I-HM4"/>
                     <connections>

@@ -16,81 +16,70 @@
  along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import kDriveCore
+@testable import kDrive
 import kDriveResources
 import Testing
 import UIKit
 
 @MainActor
-@Suite("Shared Interface Builder assets")
+@Suite("Shared assets in app nibs")
 struct ResourceAssetsTests {
-    @Test func imageAndButtonStateLookups() throws {
-        let image = UIImageView()
-        image.setValue("close", forKey: "resourceImageName")
-        #expect(try #require(image.image).size == KDriveResourcesAsset.close.image.size)
-
-        let item = UIBarButtonItem()
-        item.setValue("close", forKey: "resourceImageName")
-        #expect(item.image != nil)
-
-        let button = UIButton()
-        for state: UIControl.State in [.normal, .selected, .highlighted, .disabled] {
-            let key: String
-            switch state {
-            case .selected: key = "resourceSelectedImageName"
-            case .highlighted: key = "resourceHighlightedImageName"
-            case .disabled: key = "resourceDisabledImageName"
-            default: key = "resourceNormalImageName"
-            }
-            button.setValue("close", forKey: key)
-            #expect(button.image(for: state) != nil)
-        }
-        button.setValue("infomaniakColor", forKey: "resourceNormalTitleColorName")
-        button.setValue("titleColor", forKey: "resourceHighlightedTitleColorName")
-        button.setValue("titleColor", forKey: "resourceDisabledTitleColorName")
-        #expect(button.titleColor(for: .normal) == KDriveResourcesAsset.infomaniakColor.color)
-        #expect(button.titleColor(for: .highlighted) == KDriveResourcesAsset.titleColor.color)
-        #expect(button.titleColor(for: .disabled) == KDriveResourcesAsset.titleColor.color)
+    @Test(arguments: [
+        "SelectPhotoFormatFooterView", "RootMenuHeaderView", "ManageCategoriesTableViewCell",
+        "DropBoxDisableTableViewCell", "DropBoxLinkTableViewCell", "FileDetailActivityTableViewCell",
+        "FileDetailCommentTableViewCell", "FileInformationOwnerTableViewCell", "InfoTableViewCell",
+        "ShareLinkAccessRightTableViewCell", "UsersAccessTableViewCell", "NoPreviewCollectionViewCell",
+        "PhotoFormatTableViewCell", "RecentSearchCollectionViewCell", "FilesHeaderView",
+        "HomeLastPicCollectionViewCell", "InsufficientStorageCollectionViewCell", "RecentActivityCollectionViewCell",
+        "UploadsInProgressTableViewCell", "UploadsPausedTableViewCell", "PhotoAccessDeniedTableViewCell",
+        "StoreFeatureTableViewCell", "NewFolderLocationTableViewCell"
+    ])
+    func decorativeOutletsConnectWhenLoadingNib(_ name: String) throws {
+        let _: UIView = try loadNib(name)
     }
 
-    @Test func dynamicColorsPreserveAppearances() throws {
-        let view = UIView()
-        view.setValue("backgroundColor", forKey: "resourceBackgroundColorName")
-        view.setValue("infomaniakColor", forKey: "resourceTintColorName")
+    @Test func nibResolvesImagesAndDynamicColorsWithoutMainCatalog() throws {
+        let view: SelectView = try loadNib("SelectView")
+        let button = try #require(view.actionsView.arrangedSubviews.first as? UIButton)
+        #expect(button.image(for: .normal) == KDriveResourcesAsset.menu.image)
+
         let color = try #require(view.backgroundColor)
         for style: UIUserInterfaceStyle in [.light, .dark] {
             let traits = UITraitCollection(userInterfaceStyle: style)
             #expect(color.resolvedColor(with: traits) == KDriveResourcesAsset.backgroundColor.color.resolvedColor(with: traits))
         }
-        #expect(view.tintColor == KDriveResourcesAsset.infomaniakColor.color)
     }
 
-    @Test func specializedControlsResolveSharedColors() {
-        let color = KDriveResourcesAsset.infomaniakColor.color
-        let controls: [(NSObject, String)] = [
-            (UILabel(), "textColor"),
-            (UITextField(), "textColor"),
-            (UITextView(), "textColor"),
-            (UISwitch(), "onTintColor"),
-            (UISegmentedControl(), "selectedSegmentTintColor"),
-            (UIProgressView(), "progressTintColor"),
-            (UIActivityIndicatorView(), "color"),
-            (UISlider(), "maximumTrackTintColor")
-        ]
-        for (control, property) in controls {
-            let key = "resource" + property.prefix(1).uppercased() + property.dropFirst() + "Name"
-            control.setValue("infomaniakColor", forKey: key)
-            #expect(control.value(forKey: property) as? UIColor == color)
+    @Test func fileListAndGridNibsResolveInheritedOutlets() throws {
+        let list: FileCollectionViewCell = try loadNib("FileCollectionViewCell")
+        let grid: FileGridCollectionViewCell = try loadNib("FileGridCollectionViewCell")
+        for cell in [list, grid] {
+            #expect(cell.moreButton.image(for: .normal) == KDriveResourcesAsset.menu.image)
+            #expect(cell.availableOfflineImageView.image == KDriveResourcesAsset.check.image)
+            #expect(cell.highlightedView.backgroundColor == KDriveResourcesAsset.backgroundCardViewSelectedColor.color)
         }
+        #expect(grid.largeIconImageView.image == KDriveResourcesAsset.folderFilled.image)
+        #expect(grid.iconImageView.image == KDriveResourcesAsset.fileImage.image)
     }
 
-    @Test func nibResolvesImagesAndColorsWithoutMainCatalog() throws {
-        let objects = try #require(Bundle.main.loadNibNamed("SelectView", owner: nil))
-        let view = try #require(objects.first as? UIView)
-        func buttons(in view: UIView) -> [UIButton] {
-            (view as? UIButton).map { [$0] } ?? view.subviews.flatMap { buttons(in: $0) }
+    @Test func uploadNibsConfigureSharedViewInBothLayouts() throws {
+        let home: UploadCardCell = try loadNib("UploadCardCell")
+        let queue: UploadTableViewCell = try loadNib("UploadTableViewCell")
+        for card in [home.uploadCardView!, queue.cardContentView!] {
+            #expect(card.titleLabel.textColor == KDriveResourcesAsset.titleColor.color)
+            #expect(card.detailsLabel.textColor == KDriveResourcesAsset.secondaryTextColor.color)
         }
-        #expect(buttons(in: view).contains { $0.image(for: .normal) != nil })
-        #expect(view.backgroundColor == KDriveResourcesAsset.backgroundColor.color)
+        #expect(queue.cardContentView.retryButton?.image(for: .normal) == KDriveResourcesAsset.retry.image)
+        #expect(queue.cardContentView.cancelButton?.image(for: .normal) == KDriveResourcesAsset.close.image)
+    }
+
+    @Test func buttonTitleStatesSurviveNibLoading() throws {
+        let cell: RightsSelectionTableViewCell = try loadNib("RightsSelectionTableViewCell")
+        #expect(cell.updateButton.titleColor(for: .normal) == KDriveResourcesAsset.infomaniakColor.color)
+    }
+
+    private func loadNib<View: UIView>(_ name: String) throws -> View {
+        let objects = try #require(Bundle.main.loadNibNamed(name, owner: nil))
+        return try #require(objects.first as? View)
     }
 }

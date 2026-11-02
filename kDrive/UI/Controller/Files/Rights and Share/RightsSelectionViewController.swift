@@ -128,6 +128,7 @@ class RightsSelectionViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         tableView.register(cellView: RightsSelectionTableViewCell.self)
         tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: UIConstants.List.paddingBottom, right: 0)

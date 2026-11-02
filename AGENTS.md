@@ -90,7 +90,6 @@ ios-kDrive/
 │   │   └── Scan/                #     Document scanning
 │   ├── Utils/                   #   Core utilities
 │   │   ├── ResourceLocalization.swift  # Shared-bundle localization for Interface Builder controls
-│   │   ├── ResourceAssets.swift  # Shared-bundle images and colors for Interface Builder controls
 │   │   ├── PHAsset/             #     Photo library utilities
 │   │   ├── FileProvider/        #     File provider utilities
 │   │   ├── Files/               #     File operations
@@ -186,6 +185,7 @@ Commit the generated `kDrive/Resources/package-list.json` with dependency update
 - **SwiftUI (when used):** Property wrappers must be private (`@State`, `@StateObject`, etc.).
 - **Localized strings:** Use localized string keys from `kDriveResources` — never raw string literals.
 - **Icons:** Reuse icons from `kDrive/Resources/Assets.xcassets` via the generated `KDriveResourcesAsset` accessors (e.g. `KDriveResourcesAsset.close.image`) before falling back to SF Symbols. Use SF Symbols only when no suitable existing icon is available in that catalog.
+- **Interface Builder assets:** Configure shared images and colors with typed `KDriveResourcesAsset` accessors in the owning view's `awakeFromNib()` or controller's `viewDidLoad()`. Keep assets in `kDriveResources`; avoid string-based runtime asset attributes and alias lookups.
 - **DI:** Use `@InjectService` from InfomaniakDI for dependency injection; register via `FactoryService` in kDriveCore.
 - **Early-start DI:** Prefer `@LazyInjectService` during early app startup to prevent DI resolution deadlocks.
 - **API layer:** Extend `DriveApiFetcher` for API operations. Create focused extensions (`+Upload`, `+Listing`, `+Share`).

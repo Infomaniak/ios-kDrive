@@ -30,7 +30,6 @@
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="dropBoxLinkTitle"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                         </userDefinedRuntimeAttributes>
@@ -46,9 +45,6 @@
                                                 </constraints>
                                                 <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="13"/>
                                                 <textInputTraits key="textInputTraits"/>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" pointerInteraction="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KEo-B6-Qkr" customClass="ImageButton" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="444" y="11" width="24" height="24"/>
@@ -58,8 +54,6 @@
                                                 </constraints>
                                                 <state key="normal"/>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="export-ios"/>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="imageWidth">
                                                         <real key="value" value="25"/>
                                                     </userDefinedRuntimeAttribute>
@@ -101,6 +95,7 @@
                 <outlet property="copyButton" destination="KEo-B6-Qkr" id="6ZL-Nf-yvO"/>
                 <outlet property="copyTextField" destination="GYl-Yk-631" id="jPk-AC-grx"/>
                 <outlet property="topConstraint" destination="fR0-hW-myO" id="wKF-CK-8bW"/>
+                <outlet property="descriptionLabel" destination="wGz-LN-h9i" id="asset-wGz-LN-h9i"/>
             </connections>
             <point key="canvasLocation" x="266.66666666666669" y="55.245535714285715"/>
         </tableViewCell>

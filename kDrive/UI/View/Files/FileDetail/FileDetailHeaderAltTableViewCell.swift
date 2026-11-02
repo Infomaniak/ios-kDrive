@@ -32,6 +32,13 @@ class FileDetailHeaderAltTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        fileDetailLabel.textColor = KDriveResourcesAsset.secondaryTextColor.color
+        fileNameLabel.textColor = KDriveResourcesAsset.titleColor.color
+        logoImage.image = KDriveResourcesAsset.folderFilled.image
+        logoContainerView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        fileView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        segmentedControl.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        segmentedControl.selectedSegmentTintColor = KDriveResourcesAsset.infomaniakColor.color
 
         fileView.cornerRadius = 15
         fileView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]

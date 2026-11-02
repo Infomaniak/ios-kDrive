@@ -31,7 +31,6 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" keyboardType="emailAddress"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibPlaceholderLocKey" value="shareFileInputUserAndEmail"/>
                                 </userDefinedRuntimeAttributes>
                             </textField>

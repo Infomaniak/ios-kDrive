@@ -24,10 +24,6 @@
                             <constraint firstAttribute="width" constant="20" id="ClR-ie-Exx"/>
                             <constraint firstAttribute="height" constant="20" id="fcM-6k-50t"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="file-default"/>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                        </userDefinedRuntimeAttributes>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7iq-qO-qOo" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="44" y="12.5" width="36" height="20.5"/>
@@ -49,10 +45,6 @@
                         <connections>
                             <action selector="removeButtonPressed:" destination="Hes-WQ-GRt" eventType="touchUpInside" id="IDm-Du-yX5"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="remove"/>
-                        </userDefinedRuntimeAttributes>
                     </button>
                 </subviews>
                 <constraints>
@@ -64,9 +56,6 @@
                     <constraint firstItem="7iq-qO-qOo" firstAttribute="centerY" secondItem="DCT-r3-wcE" secondAttribute="centerY" id="shA-Ss-HfB"/>
                     <constraint firstItem="7iq-qO-qOo" firstAttribute="leading" secondItem="SvM-uu-YA6" secondAttribute="trailing" constant="8" id="xkJ-Sp-9ut"/>
                 </constraints>
-                <userDefinedRuntimeAttributes>
-                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                </userDefinedRuntimeAttributes>
             </collectionViewCellContentView>
             <size key="customSize" width="217" height="47"/>
             <connections>

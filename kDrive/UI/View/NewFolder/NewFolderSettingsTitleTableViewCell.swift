@@ -17,6 +17,15 @@
  */
 
 import InfomaniakCoreUIKit
+import kDriveResources
 import UIKit
 
-class NewFolderSettingsTitleTableViewCell: InsetTableViewCell {}
+class NewFolderSettingsTitleTableViewCell: InsetTableViewCell {
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        accessoryImageView.image = KDriveResourcesAsset.chevronRight.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+    }
+}

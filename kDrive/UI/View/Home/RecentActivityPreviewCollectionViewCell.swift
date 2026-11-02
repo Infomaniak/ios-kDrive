@@ -31,6 +31,9 @@ class RecentActivityPreviewCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        logoImage.image = KDriveResourcesAsset.folderFilled.image
+        logoContainerView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        noPreviewView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         moreLabel.isHidden = true
         darkLayer.isHidden = true

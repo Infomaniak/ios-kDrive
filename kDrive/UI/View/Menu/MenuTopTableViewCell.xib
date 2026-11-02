@@ -23,7 +23,6 @@
                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="22"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                         </userDefinedRuntimeAttributes>
                     </label>
@@ -36,26 +35,18 @@
                                     <constraint firstAttribute="height" constant="16" id="7uZ-MU-Mzw"/>
                                     <constraint firstAttribute="width" constant="16" id="a6z-xT-Lxv"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="drive"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r21-Wg-UxX" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="22" y="5" width="41.5" height="20.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle1"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Tyc-3X-hkw">
                                 <rect key="frame" x="69.5" y="0.0" width="30" height="30"/>
                                 <state key="normal"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="drive-switch"/>
-                                </userDefinedRuntimeAttributes>
                             </button>
                         </subviews>
                         <constraints>
@@ -70,16 +61,12 @@
                         <subviews>
                             <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Acs-ea-JHn">
                                 <rect key="frame" x="0.0" y="6" width="140" height="4"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="greenColor"/>
-                                </userDefinedRuntimeAttributes>
                             </progressView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zml-xC-HzQ" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="150" y="0.0" width="36" height="16"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -98,9 +85,6 @@
                                     <constraint firstAttribute="width" constant="100" id="NEc-qs-tCi"/>
                                     <constraint firstAttribute="height" constant="100" id="W12-1u-yjt"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="placeholder_avatar"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

@@ -19,9 +19,6 @@
                 <subviews>
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="r0e-gs-QBf" customClass="PDFView">
                         <rect key="frame" x="0.0" y="0.0" width="214" height="262"/>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="previewBackgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
             </view>

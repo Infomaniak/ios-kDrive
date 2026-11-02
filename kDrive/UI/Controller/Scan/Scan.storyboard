@@ -39,9 +39,6 @@
                                     <outlet property="dataSource" destination="eOZ-3O-vB4" id="Mho-5w-4EV"/>
                                     <outlet property="delegate" destination="eOZ-3O-vB4" id="LFj-kJ-Fch"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="mNU-py-FqU"/>
@@ -51,9 +48,6 @@
                             <constraint firstItem="NOx-4m-krY" firstAttribute="leading" secondItem="mNU-py-FqU" secondAttribute="leading" id="iTf-bF-Crg"/>
                             <constraint firstAttribute="bottom" secondItem="NOx-4m-krY" secondAttribute="bottom" id="wLW-mc-zMd"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Enregistrer sur le kDrive" largeTitleDisplayMode="always" id="MLT-vQ-JBR">
                         <barButtonItem key="backBarButtonItem" title=" " id="Z4k-Ym-J6G"/>

@@ -37,9 +37,6 @@
                                                     <constraint firstAttribute="width" constant="12" id="DVZ-GB-Yib"/>
                                                     <constraint firstAttribute="height" constant="12" id="Uqa-gK-Vpe"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="play-thumbnail"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                         </subviews>
                                         <constraints>
@@ -53,9 +50,6 @@
                                             <constraint firstAttribute="height" constant="24" id="8EX-8W-V9F"/>
                                             <constraint firstAttribute="width" constant="24" id="Udk-rx-MZh"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="select"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <view alpha="0.40000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ynw-Ya-FV2" userLabel="Highlight View">
                                         <rect key="frame" x="0.0" y="0.0" width="175" height="150"/>
@@ -105,6 +99,7 @@
                 <outlet property="fileImage" destination="j9K-4i-jdP" id="ogP-8q-eOx"/>
                 <outlet property="highlightView" destination="ynw-Ya-FV2" id="ina-ea-ehC"/>
                 <outlet property="videoGradientView" destination="L6b-Em-nU6" id="g0Y-PT-MCm"/>
+                <outlet property="playThumbnailImageView" destination="6hu-AU-eAB" id="asset-6hu-AU-eAB"/>
             </connections>
             <point key="canvasLocation" x="38.405797101449281" y="182.14285714285714"/>
         </collectionViewCell>

@@ -22,6 +22,8 @@ import Nuke
 import UIKit
 
 class HomeLastPicCollectionViewCell: UICollectionViewCell {
+    @IBOutlet private var playThumbnailImageView: UIImageView!
+
     @IBOutlet var contentInsetView: UIView!
     @IBOutlet var fileImage: UIImageView!
     @IBOutlet var highlightView: UIView!
@@ -48,6 +50,8 @@ class HomeLastPicCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        playThumbnailImageView.image = KDriveResourcesAsset.playThumbnail.image
+        checkmarkImage.image = KDriveResourcesAsset.select.image
         fileImage.layer.masksToBounds = true
         highlightView.isHidden = true
 

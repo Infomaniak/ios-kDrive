@@ -83,6 +83,8 @@ class NewFolderViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(cellView: NewFolderHeaderTableViewCell.self)

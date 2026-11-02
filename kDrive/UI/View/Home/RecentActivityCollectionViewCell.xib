@@ -31,9 +31,6 @@
                                             <constraint firstAttribute="height" constant="35" id="cb4-47-dZu"/>
                                             <constraint firstAttribute="width" constant="35" id="nGW-uc-AHK"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="placeholder_avatar"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="8Tt-tL-twy">
                                         <rect key="frame" x="43" y="0.0" width="525" height="35"/>
@@ -46,7 +43,6 @@
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
@@ -59,17 +55,12 @@
                                                                     <constraint firstAttribute="width" constant="10" id="6gC-cl-j35"/>
                                                                     <constraint firstAttribute="height" constant="10" id="Frh-c6-aQp"/>
                                                                 </constraints>
-                                                                <userDefinedRuntimeAttributes>
-                                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="clock"/>
-                                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                                                </userDefinedRuntimeAttributes>
                                                             </imageView>
                                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="751" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Y5l-Po-jq9" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                                 <rect key="frame" x="15" y="1.5" width="31" height="14.5"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                                 <nil key="highlightedColor"/>
                                                                 <userDefinedRuntimeAttributes>
-                                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                                                 </userDefinedRuntimeAttributes>
                                                             </label>
@@ -95,7 +86,6 @@
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
@@ -161,6 +151,7 @@
                 <outlet property="tableViewHeight" destination="icR-ef-7uh" id="IOj-4w-UQ1"/>
                 <outlet property="timeLabel" destination="Y5l-Po-jq9" id="oS7-g6-O1J"/>
                 <outlet property="titleLabel" destination="eSW-29-s2a" id="Ykl-sk-45t"/>
+                <outlet property="clockImageView" destination="HRE-xZ-92H" id="asset-HRE-xZ-92H"/>
             </connections>
             <point key="canvasLocation" x="539.13043478260875" y="238.39285714285714"/>
         </collectionViewCell>

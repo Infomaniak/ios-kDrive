@@ -34,9 +34,6 @@
                             </constraints>
                             <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                             <state key="normal" title="Button"/>
-                            <userDefinedRuntimeAttributes>
-                                <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="menu"/>
-                            </userDefinedRuntimeAttributes>
                         </button>
                     </subviews>
                     <constraints>
@@ -57,11 +54,9 @@
             <connections>
                 <outlet property="actionsView" destination="YpP-eL-hOj" id="9tQ-S7-vfx"/>
                 <outlet property="titleLabel" destination="7xf-sA-D2E" id="qCX-Zz-ZAQ"/>
+                <outlet property="menuButton" destination="p3m-ke-vG6" id="asset-p3m-ke-vG6"/>
             </connections>
             <point key="canvasLocation" x="87.786259541984734" y="-747.18309859154931"/>
-            <userDefinedRuntimeAttributes>
-                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-            </userDefinedRuntimeAttributes>
         </view>
     </objects>
     <resources>

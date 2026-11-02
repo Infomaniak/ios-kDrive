@@ -26,7 +26,6 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="secondaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -35,7 +34,6 @@
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="28"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header1"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -48,9 +46,6 @@
                                             <constraint firstAttribute="width" secondItem="1In-V6-Yzb" secondAttribute="height" multiplier="1:1" id="3fQ-ij-cfu"/>
                                             <constraint firstAttribute="height" constant="40" id="TZE-L6-bUM"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                 </subviews>
                                 <constraints>
@@ -60,9 +55,6 @@
                                     <constraint firstItem="1In-V6-Yzb" firstAttribute="leading" secondItem="Rm8-Wd-8Gj" secondAttribute="leading" constant="32" id="niu-SF-1CR"/>
                                     <constraint firstAttribute="bottom" secondItem="1In-V6-Yzb" secondAttribute="bottom" constant="32" id="pT4-in-FWj"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                         </subviews>
                         <constraints>
@@ -76,9 +68,6 @@
                             <constraint firstAttribute="height" constant="250" id="vxn-eJ-Ouc"/>
                             <constraint firstItem="Rm8-Wd-8Gj" firstAttribute="centerX" secondItem="Sgh-8x-hlz" secondAttribute="centerX" id="zN6-4D-hGv"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="Dnf-gZ-p3w" customClass="IKSegmentedControl" customModule="kDriveCore">
                         <rect key="frame" x="24" y="266" width="531" height="41"/>
@@ -92,8 +81,6 @@
                             <segment title="Commentaires"/>
                         </segments>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceSelectedSegmentTintColorName" value="infomaniakColor"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKeys" value="fileDetailsInfosTitle,fileDetailsActivityTitle,fileDetailsCommentsTitle"/>
                         </userDefinedRuntimeAttributes>
                         <connections>

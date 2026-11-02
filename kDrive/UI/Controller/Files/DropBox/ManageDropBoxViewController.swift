@@ -61,6 +61,7 @@ class ManageDropBoxViewController: UIViewController, UITableViewDelegate, UITabl
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         navigationItem.largeTitleDisplayMode = .always
         navigationController?.navigationBar.layoutMargins.left = 24

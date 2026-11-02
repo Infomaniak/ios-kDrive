@@ -27,9 +27,6 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="250" id="Ro3-2n-Pqh"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="test-image"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <view alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3Ov-RU-Zyl">
                                 <rect key="frame" x="0.0" y="0.0" width="579" height="250"/>
@@ -86,8 +83,6 @@
                             <segment title="Commentaires"/>
                         </segments>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceSelectedSegmentTintColorName" value="infomaniakColor"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKeys" value="fileDetailsInfosTitle,fileDetailsActivityTitle,fileDetailsCommentsTitle"/>
                         </userDefinedRuntimeAttributes>
                         <connections>

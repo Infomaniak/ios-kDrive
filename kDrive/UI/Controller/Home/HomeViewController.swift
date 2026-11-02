@@ -168,6 +168,7 @@ class HomeViewController: CustomLargeTitleCollectionViewController, UpdateAccoun
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         collectionView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 

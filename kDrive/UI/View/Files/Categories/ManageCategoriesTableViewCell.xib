@@ -40,9 +40,6 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="TEb-e8-Gjf"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WW2-Op-yn9">
                                 <rect key="frame" x="24" y="16" width="272" height="43"/>
@@ -53,17 +50,12 @@
                                             <constraint firstAttribute="width" constant="10" id="9tE-iA-8PY"/>
                                             <constraint firstAttribute="height" constant="10" id="SPe-Hc-E0b"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Gérer les catégories" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vqd-wp-OIn" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="28" y="0.0" width="228" height="43"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
@@ -73,10 +65,6 @@
                                             <constraint firstAttribute="height" constant="20" id="7ha-FS-NGj"/>
                                             <constraint firstAttribute="width" constant="20" id="f8N-3U-KWG"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="categories"/>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -137,6 +125,8 @@
                 <outlet property="topConstraint" destination="scF-ap-CQK" id="PZL-Gd-Mzh"/>
                 <outlet property="trailingConstraint" destination="4Xi-DE-1VQ" id="ZMT-Dh-K9x"/>
                 <outlet property="viewCenterConstraint" destination="ccL-Iu-uma" id="kNt-Nk-Xsb"/>
+                <outlet property="topSeparatorView" destination="ohQ-uU-Ho6" id="asset-ohQ-uU-Ho6"/>
+                <outlet property="categoriesImageView" destination="d2m-Ud-Nzf" id="asset-d2m-Ud-Nzf"/>
             </connections>
             <point key="canvasLocation" x="131.8840579710145" y="110.82589285714285"/>
         </tableViewCell>

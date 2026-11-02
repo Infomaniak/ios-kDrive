@@ -25,12 +25,18 @@ protocol DropBoxLinkDelegate: AnyObject {
 }
 
 class DropBoxLinkTableViewCell: InsetTableViewCell {
+    @IBOutlet private var descriptionLabel: UILabel!
+
     @IBOutlet var copyTextField: UITextField!
     @IBOutlet var copyButton: ImageButton!
     weak var delegate: DropBoxLinkDelegate?
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        descriptionLabel.textColor = KDriveResourcesAsset.titleColor.color
+        copyTextField.textColor = KDriveResourcesAsset.titleColor.color
+        copyButton.tintColor = KDriveResourcesAsset.iconColor.color
+        copyButton.setImage(KDriveResourcesAsset.exportIos.image, for: .normal)
         copyButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonShare
     }
 

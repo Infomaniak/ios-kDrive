@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class FileInformationSizeTableViewCell: UITableViewCell {
@@ -26,6 +27,8 @@ class FileInformationSizeTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        sizeLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(loadingIndicator)
         NSLayoutConstraint.activate([

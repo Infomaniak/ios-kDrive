@@ -27,7 +27,6 @@
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -37,16 +36,12 @@
                                     <constraint firstAttribute="height" constant="35" id="cQf-CR-ebR"/>
                                     <constraint firstAttribute="width" constant="35" id="iJa-ct-FjM"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="placeholder_avatar"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="a modifié le fichier" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="f1P-Ts-6EW" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="57" y="33" width="118.5" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -59,17 +54,12 @@
                                             <constraint firstAttribute="width" constant="10" id="4lM-Qi-Cy4"/>
                                             <constraint firstAttribute="height" constant="10" id="OYf-JR-6A7"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="clock"/>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="15 min" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gjL-XR-jdF" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="15" y="0.0" width="37" height="10"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
@@ -111,6 +101,7 @@
                 <outlet property="timeLabel" destination="gjL-XR-jdF" id="HMb-7T-sGn"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
                 <outlet property="topConstraint" destination="eo3-Nh-xzM" id="zKn-C5-K50"/>
+                <outlet property="clockImageView" destination="MPO-Sh-5Br" id="asset-MPO-Sh-5Br"/>
             </connections>
             <point key="canvasLocation" x="171.73913043478262" y="155.69196428571428"/>
         </tableViewCell>

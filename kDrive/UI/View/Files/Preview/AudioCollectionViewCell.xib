@@ -30,9 +30,6 @@
                                             <constraint firstAttribute="width" secondItem="W9a-yf-gb4" secondAttribute="height" multiplier="1:1" id="Pks-yi-fSU"/>
                                             <constraint firstAttribute="height" constant="120" id="SGq-zm-Qis"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="music"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="l45-mr-rI7" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="193" y="155.99999999999997" width="72.333333333333314" height="20.333333333333343"/>
@@ -62,9 +59,6 @@
                                                 <connections>
                                                     <action selector="playButtonPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="ZOm-sK-XJt"/>
                                                 </connections>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="play"/>
-                                                </userDefinedRuntimeAttributes>
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="9:59:59" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8sR-5A-U2n">
                                                 <rect key="frame" x="48" y="0.0" width="60" height="40"/>
@@ -73,9 +67,6 @@
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                 <nil key="highlightedColor"/>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="backgroundCardView"/>
-                                                </userDefinedRuntimeAttributes>
                                             </label>
                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="43x-AW-wg9">
                                                 <rect key="frame" x="114" y="0.0" width="268" height="41"/>
@@ -87,9 +78,6 @@
                                                     <action selector="sliderEndedTracking:" destination="gTV-IL-0wX" eventType="touchUpInside" id="BJX-cW-NAO"/>
                                                     <action selector="sliderEndedTracking:" destination="gTV-IL-0wX" eventType="touchUpOutside" id="cHu-OF-GOO"/>
                                                 </connections>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceMaximumTrackTintColorName" value="backgroundCardView"/>
-                                                </userDefinedRuntimeAttributes>
                                             </slider>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-9:59:59" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Ga-6s-Xxf">
                                                 <rect key="frame" x="388" y="0.0" width="60" height="40"/>
@@ -98,9 +86,6 @@
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                                 <nil key="highlightedColor"/>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="backgroundCardView"/>
-                                                </userDefinedRuntimeAttributes>
                                             </label>
                                         </subviews>
                                     </stackView>
@@ -114,9 +99,6 @@
                                         <connections>
                                             <action selector="playButtonPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="3kA-BJ-n0j"/>
                                         </connections>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="play"/>
-                                        </userDefinedRuntimeAttributes>
                                     </button>
                                 </subviews>
                                 <constraints>

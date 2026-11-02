@@ -26,7 +26,6 @@
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -35,9 +34,6 @@
                                 <connections>
                                     <action selector="switchValueChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="bxC-zq-HcP"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceOnTintColorName" value="infomaniakColor"/>
-                                </userDefinedRuntimeAttributes>
                             </switch>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="1Xm-Dy-4ti">
                                 <rect key="frame" x="0.0" y="41" width="289" height="304"/>
@@ -47,7 +43,6 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
@@ -87,9 +82,6 @@
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <nil key="highlightedColor"/>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="infomaniakColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </label>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3bI-0o-fhJ">
                                                 <rect key="frame" x="155" y="14" width="50" height="17"/>
@@ -118,9 +110,6 @@
                             <constraint firstItem="1Xm-Dy-4ti" firstAttribute="top" secondItem="rtI-Wc-46s" secondAttribute="bottom" priority="999" constant="15" id="x3E-QO-I3W"/>
                             <constraint firstAttribute="trailing" secondItem="1Xm-Dy-4ti" secondAttribute="trailing" id="x90-w8-bD0"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

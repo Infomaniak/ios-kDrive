@@ -30,9 +30,6 @@
                     </label>
                     <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="t38-pQ-rhg">
                         <rect key="frame" x="40" y="77" width="240" height="4"/>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="infomaniakColor"/>
-                        </userDefinedRuntimeAttributes>
                     </progressView>
                 </subviews>
                 <constraints>

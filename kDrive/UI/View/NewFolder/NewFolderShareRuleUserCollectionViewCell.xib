@@ -27,9 +27,6 @@
                                     <constraint firstAttribute="height" constant="30" id="V7W-Uf-q89"/>
                                     <constraint firstAttribute="width" constant="30" id="zFC-av-wNS"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wid-1B-SZO">
                                 <rect key="frame" x="7.5" y="17" width="37.5" height="18"/>

@@ -27,7 +27,6 @@
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonDisableDropBox"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
@@ -56,6 +55,7 @@
                 <outlet property="bottomConstraint" destination="MsG-Sm-pdc" id="qqe-Ef-HtL"/>
                 <outlet property="contentInsetView" destination="a2e-ee-Fhl" id="7Zr-4U-J59"/>
                 <outlet property="topConstraint" destination="Mlv-QF-qbz" id="7cD-yc-qJo"/>
+                <outlet property="descriptionLabel" destination="Vlm-Ga-0j6" id="asset-Vlm-Ga-0j6"/>
             </connections>
             <point key="canvasLocation" x="137.68115942028987" y="101.45089285714285"/>
         </tableViewCell>

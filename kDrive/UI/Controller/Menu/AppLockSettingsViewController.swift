@@ -25,6 +25,11 @@ import LocalAuthentication
 import UIKit
 
 class AppLockSettingsViewController: UIViewController {
+    @IBOutlet private var faceIdEditImageView: UIImageView!
+    @IBOutlet private var headingLabel: UILabel!
+    @IBOutlet private var separatorView: UIView!
+    @IBOutlet private var descriptionLabel: UILabel!
+
     @IBOutlet var tableView: UITableView!
     @IBOutlet var navigationBar: UINavigationBar!
     @IBOutlet var closeBarButtonItem: UIBarButtonItem!
@@ -36,6 +41,11 @@ class AppLockSettingsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        faceIdEditImageView.image = KDriveResourcesAsset.faceIdEdit.image
+        headingLabel.textColor = KDriveResourcesAsset.titleColor.color
+        separatorView.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         navigationBar.shadowImage = UIImage()
         navigationBar.setBackgroundImage(UIImage(), for: .default)
         closeBarButtonItem.image = UIImage(systemName: "xmark")

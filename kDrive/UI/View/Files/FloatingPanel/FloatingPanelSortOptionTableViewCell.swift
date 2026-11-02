@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCoreUIKit
+import kDriveResources
 import UIKit
 
 class FloatingPanelSortOptionTableViewCell: InsetTableViewCell {
@@ -28,6 +29,10 @@ class FloatingPanelSortOptionTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        accessoryImageView.image = KDriveResourcesAsset.check.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
 
         setUpView()
     }

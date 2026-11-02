@@ -20,7 +20,6 @@
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <nil key="highlightedColor"/>
                     <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="heicRecommandation"/>
                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                     </userDefinedRuntimeAttributes>
@@ -36,6 +35,9 @@
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <point key="canvasLocation" x="-1416.7938931297708" y="-321.83098591549299"/>
+            <connections>
+                <outlet property="descriptionLabel" destination="i6k-ju-Lqz" id="asset-i6k-ju-Lqz"/>
+            </connections>
         </view>
     </objects>
     <resources>

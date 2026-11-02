@@ -40,9 +40,6 @@
                                             <constraint firstAttribute="width" constant="150" id="UMO-Jw-E4w"/>
                                             <constraint firstAttribute="height" constant="150" id="UvD-X0-Sdb"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="order-success"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Merci de votre confiance, nous sommes heureux de pouvoir travailler ensemble !" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yth-Zq-eKV" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="0.0" y="174" width="366" height="41"/>
@@ -88,10 +85,10 @@
                             <constraint firstItem="MgD-0d-5ra" firstAttribute="centerY" secondItem="tcC-IV-wbn" secondAttribute="centerY" id="yqv-kx-bWV"/>
                             <constraint firstItem="web-M0-5Gi" firstAttribute="trailing" secondItem="Let-jx-exJ" secondAttribute="trailing" constant="24" id="zeI-Ac-vcm"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
+                    <connections>
+                        <outlet property="orderSuccessImageView" destination="vmx-9Y-v0i" id="asset-vmx-9Y-v0i"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="449-4f-Z4n" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -115,9 +112,6 @@
                             <outlet property="dataSource" destination="EfG-kK-v5l" id="flf-zh-cO4"/>
                             <outlet property="delegate" destination="EfG-kK-v5l" id="01P-E5-mOr"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </collectionView>
                     <navigationItem key="navigationItem" title="Modifier votre offre" id="Yva-S2-ehi">
                         <userDefinedRuntimeAttributes>
@@ -142,16 +136,12 @@
                                 <constraints>
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="cT4-aO-YYD"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="switch_user"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Changer d'utilisateur" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Orz-m0-bIR" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="346" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="switchAccountTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
@@ -162,9 +152,6 @@
                                     <constraint firstAttribute="height" constant="2" id="0s8-rW-ZlD"/>
                                     <constraint firstAttribute="width" constant="46" id="n0g-dM-Pfd"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ahf-mt-ZbI" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="404" width="350" height="81.5"/>
@@ -172,7 +159,6 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="switchUserDescription"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
@@ -200,9 +186,6 @@
                                                         <constraint firstAttribute="width" constant="28" id="4tE-TB-Lib"/>
                                                         <constraint firstAttribute="height" constant="28" id="lll-5a-S5M"/>
                                                     </constraints>
-                                                    <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="add_user"/>
-                                                    </userDefinedRuntimeAttributes>
                                                 </imageView>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BdQ-o7-PEt">
                                                     <rect key="frame" x="36" y="0.0" width="166" height="28"/>
@@ -212,8 +195,6 @@
                                                     <state key="highlighted">
                                                     </state>
                                                     <userDefinedRuntimeAttributes>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalTitleColorName" value="primaryTextColor"/>
-                                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceHighlightedTitleColorName" value="lightTextColor"/>
                                                         <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonAddUser"/>
                                                     </userDefinedRuntimeAttributes>
                                                     <connections>
@@ -235,9 +216,6 @@
                                     <outlet property="dataSource" destination="26B-is-bLi" id="qxE-ur-DPR"/>
                                     <outlet property="delegate" destination="26B-is-bLi" id="ps7-NO-xTg"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="9UF-VY-vK7"/>
@@ -259,13 +237,16 @@
                             <constraint firstItem="ahf-mt-ZbI" firstAttribute="leading" secondItem="9UF-VY-vK7" secondAttribute="leading" constant="32" id="vs5-fx-tev"/>
                             <constraint firstItem="ahf-mt-ZbI" firstAttribute="top" secondItem="6cc-pK-yXN" secondAttribute="bottom" constant="16" id="wxI-xJ-NKX"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="fdd-I2-Xcr"/>
                     <connections>
                         <outlet property="tableView" destination="L3K-dK-zvk" id="Bq5-EA-Bbw"/>
+                        <outlet property="switchUserImageView" destination="rBS-RF-o0M" id="asset-rBS-RF-o0M"/>
+                        <outlet property="headingLabel" destination="Orz-m0-bIR" id="asset-Orz-m0-bIR"/>
+                        <outlet property="separatorView" destination="6cc-pK-yXN" id="asset-6cc-pK-yXN"/>
+                        <outlet property="descriptionLabel" destination="ahf-mt-ZbI" id="asset-ahf-mt-ZbI"/>
+                        <outlet property="addUserImageView" destination="YKx-Rh-ySp" id="asset-YKx-Rh-ySp"/>
+                        <outlet property="addAccountButton" destination="BdQ-o7-PEt" id="asset-BdQ-o7-PEt"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9xE-c3-zc2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -285,16 +266,12 @@
                                 <constraints>
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="170" id="Lbz-PD-KrR"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="face_id_edit"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Face ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ow-gT-FNm" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="366" width="350" height="24"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="20"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="appSecurityTitle"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                 </userDefinedRuntimeAttributes>
@@ -305,16 +282,12 @@
                                     <constraint firstAttribute="width" constant="46" id="EjK-HW-r8M"/>
                                     <constraint firstAttribute="height" constant="2" id="LyE-D9-gFr"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Protégez l'accès à votre application Infomaniak en activant le système de verouillage par reconnaissance faciale Face ID. " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJI-rA-NpO" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="32" y="424" width="350" height="81.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="appSecurityDescription"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="body1"/>
                                 </userDefinedRuntimeAttributes>
@@ -358,15 +331,16 @@
                             <constraint firstItem="31R-ua-Vke" firstAttribute="top" secondItem="cUS-U3-4VN" secondAttribute="top" id="wGL-ir-TRJ"/>
                             <constraint firstAttribute="trailing" secondItem="31R-ua-Vke" secondAttribute="trailing" id="yKC-UC-Ln5"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <modalPageSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
                         <outlet property="closeBarButtonItem" destination="yGV-IZ-Ryx" id="gkj-c8-39h"/>
                         <outlet property="navigationBar" destination="31R-ua-Vke" id="igV-Iq-7Hw"/>
                         <outlet property="tableView" destination="yCS-yd-ffG" id="KU1-pk-rhY"/>
+                        <outlet property="faceIdEditImageView" destination="Wii-vB-zWo" id="asset-Wii-vB-zWo"/>
+                        <outlet property="headingLabel" destination="0Ow-gT-FNm" id="asset-0Ow-gT-FNm"/>
+                        <outlet property="separatorView" destination="M26-GT-YZh" id="asset-M26-GT-YZh"/>
+                        <outlet property="descriptionLabel" destination="gJI-rA-NpO" id="asset-gJI-rA-NpO"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Cuo-YB-vAU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

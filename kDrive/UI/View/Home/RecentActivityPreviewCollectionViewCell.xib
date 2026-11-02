@@ -37,9 +37,6 @@
                                                             <constraint firstAttribute="height" constant="23" id="KQE-pZ-eoJ"/>
                                                             <constraint firstAttribute="width" secondItem="U5j-88-Fnd" secondAttribute="height" multiplier="1:1" id="RZh-20-HYa"/>
                                                         </constraints>
-                                                        <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
-                                                        </userDefinedRuntimeAttributes>
                                                     </imageView>
                                                 </subviews>
                                                 <constraints>
@@ -49,18 +46,12 @@
                                                     <constraint firstAttribute="bottom" secondItem="U5j-88-Fnd" secondAttribute="bottom" constant="16" id="em9-mQ-i0T"/>
                                                     <constraint firstItem="U5j-88-Fnd" firstAttribute="leading" secondItem="G8O-eC-LM2" secondAttribute="leading" constant="16" id="pQK-Lw-ipO"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </view>
                                         </subviews>
                                         <constraints>
                                             <constraint firstItem="G8O-eC-LM2" firstAttribute="centerY" secondItem="2eT-ZB-Mma" secondAttribute="centerY" id="5y1-rG-AxO"/>
                                             <constraint firstItem="G8O-eC-LM2" firstAttribute="centerX" secondItem="2eT-ZB-Mma" secondAttribute="centerX" id="OaT-sm-5oB"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                        </userDefinedRuntimeAttributes>
                                     </view>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="exclamationmark.bubble.fill" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="j9K-4i-jdP">
                                         <rect key="frame" x="0.0" y="0.5" width="100" height="99.5"/>

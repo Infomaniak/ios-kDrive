@@ -55,6 +55,10 @@ class FileGridCollectionViewCell: FileCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        largeIconImageView.image = KDriveResourcesAsset.folderFilled.image
+        iconImageView.image = KDriveResourcesAsset.fileImage.image
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        logoImage.image = nil
         logoImage.layer.masksToBounds = true
     }
 

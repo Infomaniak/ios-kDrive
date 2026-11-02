@@ -48,7 +48,6 @@
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="15"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
@@ -57,7 +56,6 @@
                                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="secondaryTextColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
@@ -74,15 +72,8 @@
                                             <constraint firstAttribute="width" constant="12" id="ZfS-CS-w2V"/>
                                             <constraint firstAttribute="height" constant="12" id="zfC-5K-t8A"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                 </subviews>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="fileDescColor"/>
-                                </userDefinedRuntimeAttributes>
                             </stackView>
                         </subviews>
                         <constraints>
@@ -98,10 +89,9 @@
                             <outlet property="iconView" destination="5Or-ll-vvr" id="Ckd-mK-J0s"/>
                             <outlet property="progressView" destination="bKu-ZN-c40" id="WbO-V3-ouf"/>
                             <outlet property="titleLabel" destination="iR4-UQ-lOk" id="VVr-SL-Feo"/>
+                            <outlet property="chevronImageView" destination="qFY-xN-JBm" id="asset-qFY-xN-JBm"/>
+                            <outlet property="detailsStackView" destination="Tbp-yZ-aW6" id="asset-Tbp-yZ-aW6"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <constraints>

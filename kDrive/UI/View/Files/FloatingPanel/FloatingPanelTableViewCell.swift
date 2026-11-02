@@ -18,6 +18,13 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
-class FloatingPanelTableViewCell: InsetTableViewCell {}
+class FloatingPanelTableViewCell: InsetTableViewCell {
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+    }
+}

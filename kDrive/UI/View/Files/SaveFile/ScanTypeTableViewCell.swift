@@ -32,6 +32,7 @@ class ScanTypeTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        segmentedControl.selectedSegmentTintColor = KDriveResourcesAsset.infomaniakColor.color
 
         segmentedControl.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
     }

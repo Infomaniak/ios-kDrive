@@ -32,6 +32,13 @@ class ErrorUploadTableViewCell: InsetTableViewCell {
     @IBOutlet var errorDetailLabel: UILabel!
     @IBOutlet var settingButton: UIButton!
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        errorIconImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        errorTitleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        errorDetailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+    }
+
     weak var delegate: AccessParametersDelegate?
 
     @IBAction func updateButtonPressed(_ sender: UIButton) {

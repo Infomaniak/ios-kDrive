@@ -191,6 +191,8 @@ protocol FileCellDelegate: AnyObject {
 }
 
 class FileCollectionViewCell: UICollectionViewCell {
+    @IBOutlet private var rowBackgroundView: UIView?
+
     static let identifier = String(describing: FileCollectionViewCell.self)
 
     @IBOutlet var disabledView: UIView!
@@ -264,6 +266,18 @@ class FileCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        disabledView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        highlightedView.backgroundColor = KDriveResourcesAsset.backgroundCardViewSelectedColor.color
+        logoImage.image = KDriveResourcesAsset.folderFilled.image
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        favoriteImageView?.image = KDriveResourcesAsset.favorite.image
+        favoriteImageView?.tintColor = KDriveResourcesAsset.favoriteColor.color
+        availableOfflineImageView.image = KDriveResourcesAsset.check.image
+        availableOfflineImageView.tintColor = KDriveResourcesAsset.greenColor.color
+        detailLabel?.textColor = KDriveResourcesAsset.secondaryTextColor.color
+        moreButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        moreButton.setImage(KDriveResourcesAsset.menu.image, for: .normal)
+        rowBackgroundView?.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         favoriteImageView?.isAccessibilityElement = true
         favoriteImageView?.accessibilityLabel = KDriveResourcesStrings.Localizable.favoritesTitle
         availableOfflineImageView?.isAccessibilityElement = true

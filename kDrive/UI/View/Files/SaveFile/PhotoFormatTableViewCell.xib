@@ -27,16 +27,12 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="KsY-zl-YGp"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="separatorColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Enregistrer les photos .HEIC au format" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3f6-YG-Zjx" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="24" y="57" width="284.5" height="20"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="selectPhotoFormat"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
@@ -47,10 +43,6 @@
                                     <constraint firstAttribute="width" constant="12" id="1iS-Rn-Cgt"/>
                                     <constraint firstAttribute="height" constant="10" id="QDs-Zi-mGY"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="252" text="HEIC" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="CfG-Jw-ucY" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="938" y="20" width="40" height="94"/>
@@ -59,9 +51,6 @@
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                 <nil key="highlightedColor"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
-                                </userDefinedRuntimeAttributes>
                             </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -96,6 +85,8 @@
                 <outlet property="separator" destination="mjN-cZ-Wri" id="txW-4E-ejQ"/>
                 <outlet property="titleLabel" destination="CfG-Jw-ucY" id="q5Y-xD-VTO"/>
                 <outlet property="topConstraint" destination="9qh-EN-kuI" id="n5T-ij-Fmv"/>
+                <outlet property="formatDescriptionLabel" destination="3f6-YG-Zjx" id="asset-3f6-YG-Zjx"/>
+                <outlet property="chevronRightImageView" destination="9br-MM-euV" id="asset-9br-MM-euV"/>
             </connections>
             <point key="canvasLocation" x="638.40579710144937" y="116.85267857142857"/>
         </tableViewCell>

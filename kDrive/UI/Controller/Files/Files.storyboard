@@ -21,9 +21,6 @@
                             <outlet property="dataSource" destination="uHr-zE-0EB" id="VlT-u7-Q2C"/>
                             <outlet property="delegate" destination="uHr-zE-0EB" id="H7t-rl-oGs"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </tableView>
                     <navigationItem key="navigationItem" title="Importation en cours" id="apd-PM-3QP">
                         <userDefinedRuntimeAttributes>
@@ -49,9 +46,6 @@
                                     <outlet property="dataSource" destination="nN3-5p-EMr" id="hcs-o8-q23"/>
                                     <outlet property="delegate" destination="nN3-5p-EMr" id="bvS-1r-Nw5"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="381-7l-AXC"/>
@@ -61,9 +55,6 @@
                             <constraint firstItem="ark-zB-EEg" firstAttribute="top" secondItem="Gsf-qq-7Sa" secondAttribute="top" id="hPR-mA-B13"/>
                             <constraint firstItem="ark-zB-EEg" firstAttribute="leading" secondItem="Gsf-qq-7Sa" secondAttribute="leading" id="nkA-Vc-E7C"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Importation en cours" largeTitleDisplayMode="never" id="hls-Pc-UTS">
                         <rightBarButtonItems>
@@ -72,18 +63,12 @@
                                 <connections>
                                     <action selector="cancelButtonPressed:" destination="nN3-5p-EMr" id="kjm-9b-Wn4"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="close"/>
-                                </userDefinedRuntimeAttributes>
                             </barButtonItem>
                             <barButtonItem id="ktn-c4-wDY">
                                 <inset key="imageInsets" minX="6" minY="0.0" maxX="0.0" maxY="-11"/>
                                 <connections>
                                     <action selector="retryButtonPressed:" destination="nN3-5p-EMr" id="yD6-mg-CNe"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="retry"/>
-                                </userDefinedRuntimeAttributes>
                             </barButtonItem>
                         </rightBarButtonItems>
                         <userDefinedRuntimeAttributes>
@@ -95,6 +80,7 @@
                         <outlet property="cancelButton" destination="ktn-c4-wDY" id="NVZ-8t-Of3"/>
                         <outlet property="retryButton" destination="ktn-c4-wDY" id="kIh-Jx-YPK"/>
                         <outlet property="tableView" destination="ark-zB-EEg" id="b4c-83-HsT"/>
+                        <outlet property="closeBarButtonItem" destination="V93-EX-8dV" id="asset-V93-EX-8dV"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Xw4-NQ-1e4" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -168,9 +154,6 @@
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="EQw-wg-TyW">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                                </userDefinedRuntimeAttributes>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="u7Y-Pi-jHr"/>
@@ -180,9 +163,6 @@
                             <constraint firstItem="EQw-wg-TyW" firstAttribute="leading" secondItem="hWA-co-zIc" secondAttribute="leading" id="oNN-sv-bpr"/>
                             <constraint firstAttribute="trailing" secondItem="EQw-wg-TyW" secondAttribute="trailing" id="uNr-ch-0qV"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="always" id="PJV-NK-aje">
                         <barButtonItem key="backBarButtonItem" title=" " id="UZD-Bc-gT7"/>
@@ -206,9 +186,6 @@
                             <outlet property="dataSource" destination="1T1-ZU-t6a" id="OBZ-fI-eyb"/>
                             <outlet property="delegate" destination="1T1-ZU-t6a" id="2Vz-ji-gUv"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </tableView>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Gérer les catégories" largeTitleDisplayMode="never" id="QCT-zO-BPw">
@@ -216,9 +193,6 @@
                             <connections>
                                 <segue destination="PRb-bx-VPS" kind="show" identifier="createCategory" id="fVU-FL-9Kf"/>
                             </connections>
-                            <userDefinedRuntimeAttributes>
-                                <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="add"/>
-                            </userDefinedRuntimeAttributes>
                         </barButtonItem>
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
@@ -241,9 +215,6 @@
                             <outlet property="dataSource" destination="PRb-bx-VPS" id="yau-oI-HmZ"/>
                             <outlet property="delegate" destination="PRb-bx-VPS" id="GEO-vt-H2h"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </tableView>
                     <navigationItem key="navigationItem" title="Créer une catégorie" id="DGU-n7-MDg"/>
                 </tableViewController>
@@ -299,15 +270,9 @@
                                     <outlet property="dataSource" destination="cTq-SF-IvZ" id="Q8n-wh-JUk"/>
                                     <outlet property="delegate" destination="cTq-SF-IvZ" id="Ddy-Ru-l7r"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="previewBackgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </collectionView>
                             <view alpha="0.40000000000000002" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hjz-3J-y1V">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="96"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="previewBackgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="hzs-gF-i3p"/>
@@ -321,9 +286,6 @@
                             <constraint firstItem="qIU-Hu-Zbx" firstAttribute="leading" secondItem="XG8-QT-Clg" secondAttribute="leading" id="oTK-pc-7zm"/>
                             <constraint firstItem="hzs-gF-i3p" firstAttribute="top" secondItem="Hjz-3J-y1V" secondAttribute="bottom" id="s4g-Ag-twL"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="previewBackgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="0f8-nc-6CP"/>
                     <connections>
@@ -349,9 +311,6 @@
                                     <outlet property="dataSource" destination="jan-Kd-tqe" id="ifX-dh-WaG"/>
                                     <outlet property="delegate" destination="jan-Kd-tqe" id="r7H-e7-Ir3"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qGi-Yx-e8m" customClass="IKLargeButton" customModule="kDriveCore">
                                 <rect key="frame" x="24" y="804" width="366" height="60"/>
@@ -378,9 +337,6 @@
                             <constraint firstAttribute="trailing" secondItem="FwV-k9-Mfz" secondAttribute="trailing" id="aRh-dH-gvZ"/>
                             <constraint firstAttribute="bottom" secondItem="qGi-Yx-e8m" secondAttribute="bottom" constant="32" id="iPz-0s-sF7"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Partage et droits du dossier Name" largeTitleDisplayMode="always" id="bq4-3D-Tsx"/>
                     <connections>
@@ -432,9 +388,6 @@
                             <constraint firstItem="OiI-t5-4G2" firstAttribute="leading" secondItem="pi0-1l-I7W" secondAttribute="leading" constant="24" id="emx-rp-Db4"/>
                             <constraint firstAttribute="trailing" secondItem="V03-9s-fmu" secondAttribute="trailing" id="ota-Oo-1Vh"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Sélectionner le droit" largeTitleDisplayMode="always" id="W3S-GM-FjS">
                         <barButtonItem key="backBarButtonItem" title=" " id="tfP-2v-wQg"/>
@@ -475,9 +428,6 @@
                             <constraint firstAttribute="bottom" secondItem="AAq-3c-Ebk" secondAttribute="bottom" id="QlT-fz-jjp"/>
                             <constraint firstAttribute="trailing" secondItem="AAq-3c-Ebk" secondAttribute="trailing" id="Rrx-IA-iSn"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Partager le dossier" largeTitleDisplayMode="always" id="WPm-Tw-wPJ">
                         <userDefinedRuntimeAttributes>
@@ -498,7 +448,6 @@
                     <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <state key="normal" title="Enregistrer"/>
                     <userDefinedRuntimeAttributes>
-                        <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
                         <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                             <real key="value" value="10"/>
                         </userDefinedRuntimeAttribute>
@@ -535,9 +484,6 @@
                             <constraint firstItem="TPX-ha-etp" firstAttribute="trailing" secondItem="Dgh-C3-nl7" secondAttribute="trailing" id="gwy-Go-eZM"/>
                             <constraint firstAttribute="bottom" secondItem="TPX-ha-etp" secondAttribute="bottom" id="iJu-2V-7Ps"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <navigationItem key="navigationItem" title="Gérer la boîte de dépôt" id="HA3-9e-jn2">
                         <userDefinedRuntimeAttributes>

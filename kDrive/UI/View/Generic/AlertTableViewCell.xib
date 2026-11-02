@@ -37,10 +37,6 @@
                                     <constraint firstAttribute="width" constant="14" id="Fij-69-jW9"/>
                                     <constraint firstAttribute="height" constant="14" id="Lz2-fj-J6c"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="warning"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="warningColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>

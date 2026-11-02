@@ -23,6 +23,9 @@ import KSuite
 import UIKit
 
 class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
+    @IBOutlet private var titleLabel: UILabel!
+    @IBOutlet private var closeButton: UIButton!
+
     @IBOutlet var progressView: RPCircularProgress!
     @IBOutlet var storageLabel: UILabel!
     @IBOutlet var storageDescription: UILabel!
@@ -34,6 +37,13 @@ class InsufficientStorageCollectionViewCell: InsetCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        storageLabel.textColor = KDriveResourcesAsset.titleColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        storageDescription.textColor = KDriveResourcesAsset.titleColor.color
+        upgradeButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
+        upgradeLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        closeButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        closeButton.setImage(KDriveResourcesAsset.close.image, for: .normal)
         upgradeButton.isHidden = true
         upgradeLabel.isHidden = true
 

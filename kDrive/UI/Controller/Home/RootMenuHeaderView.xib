@@ -30,17 +30,12 @@
                                                 <constraint firstAttribute="width" constant="24" id="hBi-y4-Ons"/>
                                                 <constraint firstAttribute="height" constant="24" id="s8B-KC-b0K"/>
                                             </constraints>
-                                            <userDefinedRuntimeAttributes>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="offline"/>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                            </userDefinedRuntimeAttributes>
                                         </imageView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TPT-5S-TK5" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                             <rect key="frame" x="32" y="53.333333333333343" width="477" height="15.666666666666671"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <nil key="highlightedColor"/>
                                             <userDefinedRuntimeAttributes>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                 <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="allNoNetwork"/>
                                                 <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                             </userDefinedRuntimeAttributes>
@@ -54,9 +49,6 @@
                                 <constraint firstAttribute="trailing" secondItem="zMN-vH-24t" secondAttribute="trailing" id="RIe-wv-oVI"/>
                                 <constraint firstItem="zMN-vH-24t" firstAttribute="leading" secondItem="ziK-7C-tFw" secondAttribute="leading" id="RZ2-K4-NtZ"/>
                             </constraints>
-                            <userDefinedRuntimeAttributes>
-                                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                            </userDefinedRuntimeAttributes>
                         </view>
                     </subviews>
                 </stackView>
@@ -72,6 +64,8 @@
                 <outlet property="bottomConstraint" destination="43r-bA-iRU" id="REe-gA-2yy"/>
                 <outlet property="offlineView" destination="ziK-7C-tFw" id="KIr-Tt-ZCe"/>
                 <outlet property="topConstraint" destination="Yav-NU-opa" id="QsY-ph-Aza"/>
+                <outlet property="offlineImageView" destination="dtS-Y7-A5o" id="asset-dtS-Y7-A5o"/>
+                <outlet property="offlineLabel" destination="TPT-5S-TK5" id="asset-TPT-5S-TK5"/>
             </connections>
             <point key="canvasLocation" x="309.16030534351142" y="92.253521126760575"/>
         </collectionReusableView>

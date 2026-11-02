@@ -17,11 +17,15 @@
  */
 
 import InfomaniakCoreUIKit
+import kDriveResources
 import UIKit
 
 class DropBoxDisableTableViewCell: InsetTableViewCell {
+    @IBOutlet private var descriptionLabel: UILabel!
+
     override func awakeFromNib() {
         super.awakeFromNib()
+        descriptionLabel.textColor = KDriveResourcesAsset.titleColor.color
         accessibilityTraits = .button
     }
 }

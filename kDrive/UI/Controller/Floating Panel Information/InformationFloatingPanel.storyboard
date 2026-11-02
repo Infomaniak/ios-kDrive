@@ -25,9 +25,6 @@
                                         <constraints>
                                             <constraint firstAttribute="height" constant="78" id="pbg-9J-lMV"/>
                                         </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="stop"/>
-                                        </userDefinedRuntimeAttributes>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wIJ-5v-apn" customClass="LottieAnimationView" customModule="Lottie">
                                         <rect key="frame" x="0.0" y="102" width="366" height="258"/>
@@ -41,7 +38,6 @@
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="updateAvailableTitle"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header2"/>
                                         </userDefinedRuntimeAttributes>
@@ -51,7 +47,6 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="updateAvailableDescription"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                         </userDefinedRuntimeAttributes>
@@ -61,7 +56,6 @@
                                         <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                         </userDefinedRuntimeAttributes>
                                     </label>
@@ -72,9 +66,6 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="320" height="38"/>
                                                 <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="13"/>
                                                 <textInputTraits key="textInputTraits"/>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </textField>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gEz-bo-BeO">
                                                 <rect key="frame" x="328" y="0.0" width="38" height="38"/>
@@ -86,10 +77,6 @@
                                                 <connections>
                                                     <action selector="copyButtonPressed:" destination="nd8-3r-FrZ" eventType="touchUpInside" id="0If-gB-NPt"/>
                                                 </connections>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="export-ios"/>
-                                                </userDefinedRuntimeAttributes>
                                             </button>
                                         </subviews>
                                     </stackView>
@@ -107,9 +94,6 @@
                                                 <state key="disabled">
                                                 </state>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalTitleColorName" value="titleColor"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceDisabledTitleColorName" value="blueColor"/>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                                         <real key="value" value="12"/>
                                                     </userDefinedRuntimeAttribute>
@@ -132,8 +116,6 @@
                                                 <state key="disabled">
                                                 </state>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceDisabledTitleColorName" value="blueColor"/>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                                         <real key="value" value="12"/>
                                                     </userDefinedRuntimeAttribute>
@@ -161,9 +143,6 @@
                             <constraint firstItem="acw-k5-B2D" firstAttribute="leading" secondItem="vKN-eF-D9l" secondAttribute="leading" constant="24" id="qwt-LS-Wre"/>
                             <constraint firstItem="vKN-eF-D9l" firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="acw-k5-B2D" secondAttribute="bottom" constant="8" id="r6i-b0-bkQ"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                     <connections>
                         <outlet property="additionalInformationLabel" destination="BGB-3b-Vqr" id="Q6c-E0-H3b"/>
@@ -177,6 +156,7 @@
                         <outlet property="leftButton" destination="PIZ-xp-A8m" id="iFu-84-74S"/>
                         <outlet property="rightButton" destination="Pnz-dr-Pio" id="trq-T2-dab"/>
                         <outlet property="titleLabel" destination="VHD-ey-zw3" id="sOe-11-LCg"/>
+                        <outlet property="copyButton" destination="gEz-bo-BeO" id="asset-gEz-bo-BeO"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ykt-7g-xOJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

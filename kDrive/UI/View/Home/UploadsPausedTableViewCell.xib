@@ -33,9 +33,6 @@
                                                     <constraint firstAttribute="width" constant="24" id="DNg-nk-5hq"/>
                                                     <constraint firstAttribute="height" constant="24" id="hlN-VZ-6dK"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="5fG-BH-ruV">
                                                 <rect key="frame" x="108" y="7.3333333333333321" width="176" height="48.666666666666671"/>
@@ -79,10 +76,6 @@
                                     <constraint firstAttribute="width" constant="12" id="K6b-Ht-28h"/>
                                     <constraint firstAttribute="height" constant="12" id="ljd-OK-bY3"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                         </subviews>
                         <constraints>
@@ -95,9 +88,6 @@
                             <constraint firstItem="cSl-Qq-OTk" firstAttribute="top" secondItem="o3H-RR-j9t" secondAttribute="top" constant="16" id="dnu-Lh-NJP"/>
                             <constraint firstItem="G0J-Km-hBT" firstAttribute="leading" secondItem="cSl-Qq-OTk" secondAttribute="trailing" constant="8" id="pIe-Lx-tVA"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -113,6 +103,8 @@
             <connections>
                 <outlet property="contentInsetView" destination="o3H-RR-j9t" id="Py3-gb-dOH"/>
                 <outlet property="subtitleLabel" destination="KPv-M6-kv9" id="Kpw-rB-T6Q"/>
+                <outlet property="pauseImageView" destination="Rx2-wp-Xd2" id="asset-Rx2-wp-Xd2"/>
+                <outlet property="chevronRightImageView" destination="G0J-Km-hBT" id="asset-G0J-Km-hBT"/>
             </connections>
             <point key="canvasLocation" x="137.40458015267174" y="119.36619718309859"/>
         </tableViewCell>

@@ -22,6 +22,9 @@ import kDriveResources
 import UIKit
 
 class ManageCategoriesTableViewCell: InsetTableViewCell {
+    @IBOutlet private var topSeparatorView: UIView!
+    @IBOutlet private var categoriesImageView: UIImageView!
+
     @IBOutlet var leadingConstraint: NSLayoutConstraint!
     @IBOutlet var trailingConstraint: NSLayoutConstraint!
     @IBOutlet var viewCenterConstraint: NSLayoutConstraint!
@@ -44,6 +47,12 @@ class ManageCategoriesTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        topSeparatorView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        accessoryImageView.image = KDriveResourcesAsset.chevronRight.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        label.textColor = KDriveResourcesAsset.titleColor.color
+        categoriesImageView.image = KDriveResourcesAsset.categories.image
+        categoriesImageView.tintColor = KDriveResourcesAsset.iconColor.color
         collectionView.register(cellView: CategoryCollectionViewCell.self)
         collectionView.dataSource = self
         (collectionView.collectionViewLayout as? AlignedCollectionViewFlowLayout)?.horizontalAlignment = .leading

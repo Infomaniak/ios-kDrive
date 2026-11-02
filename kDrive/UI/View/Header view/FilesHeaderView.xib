@@ -37,10 +37,6 @@
                                         <constraint firstAttribute="width" constant="16" id="5i2-sc-Ux2"/>
                                         <constraint firstAttribute="height" constant="20" id="ZN1-eq-bJp"/>
                                     </constraints>
-                                    <userDefinedRuntimeAttributes>
-                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="delete"/>
-                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                    </userDefinedRuntimeAttributes>
                                 </imageView>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QgE-e7-AZW" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                     <rect key="frame" x="32" y="0.0" width="272" height="20.5"/>
@@ -91,17 +87,12 @@
                                                 <constraint firstAttribute="height" constant="24" id="fiO-ED-VP7"/>
                                                 <constraint firstAttribute="width" constant="24" id="iYa-EI-wA0"/>
                                             </constraints>
-                                            <userDefinedRuntimeAttributes>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="offline"/>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                            </userDefinedRuntimeAttributes>
                                         </imageView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pas de connexion réseau" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1xA-38-wIp" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                             <rect key="frame" x="32" y="4" width="272" height="16"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <nil key="highlightedColor"/>
                                             <userDefinedRuntimeAttributes>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                 <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="allNoNetwork"/>
                                                 <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                             </userDefinedRuntimeAttributes>
@@ -115,9 +106,6 @@
                                 <constraint firstItem="E5v-a7-it7" firstAttribute="top" secondItem="ycy-fJ-CPK" secondAttribute="top" id="Owh-Po-33F"/>
                                 <constraint firstItem="E5v-a7-it7" firstAttribute="leading" secondItem="ycy-fJ-CPK" secondAttribute="leading" id="TXI-SK-8eD"/>
                             </constraints>
-                            <userDefinedRuntimeAttributes>
-                                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                            </userDefinedRuntimeAttributes>
                         </view>
                         <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rqf-ue-Zdn" customClass="FilterView" customModule="kDrive" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="106" width="304" height="45"/>
@@ -161,8 +149,6 @@
                                                 <constraint firstAttribute="height" constant="24" id="P49-ZL-d6E"/>
                                             </constraints>
                                             <userDefinedRuntimeAttributes>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="placeholder_avatar"/>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
                                                 <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
                                                     <real key="value" value="12"/>
                                                 </userDefinedRuntimeAttribute>
@@ -173,7 +159,6 @@
                                             <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                             <nil key="highlightedColor"/>
                                             <userDefinedRuntimeAttributes>
-                                                <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="primaryTextColor"/>
                                                 <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                             </userDefinedRuntimeAttributes>
                                         </label>
@@ -186,9 +171,6 @@
                                 <constraint firstItem="YuO-7j-ThR" firstAttribute="leading" secondItem="ZS5-h5-V8H" secondAttribute="leading" id="W7x-ae-2e1"/>
                                 <constraint firstAttribute="bottom" secondItem="YuO-7j-ThR" secondAttribute="bottom" id="mcC-SD-gMp"/>
                             </constraints>
-                            <userDefinedRuntimeAttributes>
-                                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                            </userDefinedRuntimeAttributes>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="M4N-HE-jPw">
                             <rect key="frame" x="0.0" y="114" width="304" height="24"/>
@@ -201,7 +183,6 @@
                                     <inset key="imageEdgeInsets" minX="0.0" minY="7" maxX="0.0" maxY="7"/>
                                     <state key="normal" title="Nom"/>
                                     <userDefinedRuntimeAttributes>
-                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="chevron-down"/>
                                         <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                     </userDefinedRuntimeAttributes>
                                     <connections>
@@ -215,10 +196,6 @@
                                     <connections>
                                         <action selector="gridButtonPressed:" destination="U6b-Vx-4bR" eventType="touchUpInside" id="blU-ho-e1D"/>
                                     </connections>
-                                    <userDefinedRuntimeAttributes>
-                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
-                                        <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="list"/>
-                                    </userDefinedRuntimeAttributes>
                                 </button>
                             </subviews>
                             <constraints>
@@ -230,9 +207,6 @@
                                 <constraint firstAttribute="height" constant="24" id="wGL-r7-o2e"/>
                                 <constraint firstItem="bAx-uw-yHB" firstAttribute="leading" secondItem="M4N-HE-jPw" secondAttribute="leading" id="zMR-9t-7xN"/>
                             </constraints>
-                            <userDefinedRuntimeAttributes>
-                                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                            </userDefinedRuntimeAttributes>
                         </view>
                     </subviews>
                 </stackView>
@@ -259,11 +233,11 @@
                 <outlet property="trashInformationSubtitle" destination="Lop-v5-aTk" id="Y0B-j1-Iev"/>
                 <outlet property="trashInformationTitle" destination="QgE-e7-AZW" id="4V3-8I-eim"/>
                 <outlet property="trashInformationView" destination="yuD-RJ-QYe" id="b6l-gd-RDN"/>
+                <outlet property="deleteImageView" destination="Y85-uP-1W2" id="asset-Y85-uP-1W2"/>
+                <outlet property="offlineImageView" destination="Vyh-8R-RqM" id="asset-Vyh-8R-RqM"/>
+                <outlet property="offlineLabel" destination="1xA-38-wIp" id="asset-1xA-38-wIp"/>
             </connections>
             <point key="canvasLocation" x="-317.39130434782612" y="225.33482142857142"/>
-            <userDefinedRuntimeAttributes>
-                <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-            </userDefinedRuntimeAttributes>
         </collectionReusableView>
     </objects>
     <resources>

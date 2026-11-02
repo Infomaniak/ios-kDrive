@@ -55,6 +55,8 @@ class ShareAndRightsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         navigationController?.navigationBar.isTranslucent = true
 

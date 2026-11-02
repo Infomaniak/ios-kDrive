@@ -19,9 +19,6 @@
                             <outlet property="dataSource" destination="J5q-yn-jYo" id="xSd-g1-7Hs"/>
                             <outlet property="delegate" destination="J5q-yn-jYo" id="DNS-Kt-mbH"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </tableView>
                     <navigationItem key="navigationItem" title="Filtres" id="CHQ-vg-ClB">
                         <barButtonItem key="leftBarButtonItem" image="xmark" catalog="system" style="done" id="N3C-dt-S4u">

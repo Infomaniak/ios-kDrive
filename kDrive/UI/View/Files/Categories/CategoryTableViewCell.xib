@@ -49,19 +49,12 @@
                                 <connections>
                                     <action selector="menuButtonPressed:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="9QA-rs-5bb"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="menu"/>
-                                </userDefinedRuntimeAttributes>
                             </button>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hmr-Ok-MI9">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="1"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="1" id="73R-AV-FO3"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>

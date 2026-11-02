@@ -17,9 +17,17 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class PhotoAccessDeniedTableViewCell: UITableViewCell {
+    @IBOutlet private var descriptionLabel: UILabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+    }
+
     @IBAction func goToSettingsButtonPressed(_ sender: Any) {
         Constants.openSettings()
     }

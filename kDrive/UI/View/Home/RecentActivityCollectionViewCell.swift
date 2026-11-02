@@ -23,6 +23,8 @@ import UIKit
 
 class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionViewDelegate, UICollectionViewDataSource,
     UICollectionViewDelegateFlowLayout {
+    @IBOutlet private var clockImageView: UIImageView!
+
     @IBOutlet var avatarImage: UIImageView!
     @IBOutlet var timeLabel: UILabel!
     @IBOutlet var titleLabel: IKLabel!
@@ -42,6 +44,12 @@ class RecentActivityCollectionViewCell: InsetCollectionViewCell, UICollectionVie
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        clockImageView.image = KDriveResourcesAsset.clock.image
+        clockImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        timeLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        detailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
         collectionView.register(cellView: RecentActivityPreviewCollectionViewCell.self)
         collectionView.delegate = self
         collectionView.dataSource = self

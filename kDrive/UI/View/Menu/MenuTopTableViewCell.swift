@@ -38,6 +38,14 @@ class MenuTopTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        userDisplayNameLabel.textColor = KDriveResourcesAsset.titleColor.color
+        driveImageView.image = KDriveResourcesAsset.drive.image
+        driveNameLabel.textColor = KDriveResourcesAsset.titleColor.color
+        switchDriveButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        switchDriveButton.setImage(KDriveResourcesAsset.driveSwitch.image, for: .normal)
+        progressView.tintColor = KDriveResourcesAsset.greenColor.color
+        progressLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        userAvatarImageView.image = KDriveResourcesAsset.placeholderAvatar.image
         userEmailLabel.text = nil
         userDisplayNameLabel.text = nil
         driveNameLabel.text = nil

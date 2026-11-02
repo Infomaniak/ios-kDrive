@@ -23,6 +23,8 @@ import kDriveResources
 import UIKit
 
 class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserver {
+    @IBOutlet private var offlineImageView: UIImageView!
+
     @IBOutlet var iconImageView: UIImageView!
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var subtitleLabel: UILabel!
@@ -37,6 +39,8 @@ class NoPreviewCollectionViewCell: UICollectionViewCell, DownloadProgressObserve
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        offlineImageView.image = KDriveResourcesAsset.offline.image
+        openButton.setImage(KDriveResourcesAsset.openWith.image, for: .normal)
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCell))
         addGestureRecognizer(tapGestureRecognizer)
     }

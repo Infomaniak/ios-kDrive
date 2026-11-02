@@ -24,10 +24,6 @@
                             <constraint firstAttribute="height" constant="40" id="Wq8-je-zfa"/>
                             <constraint firstAttribute="width" constant="40" id="npp-ce-pyC"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="info"/>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="infomaniakColor"/>
-                        </userDefinedRuntimeAttributes>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Ouvrez le document pour y ajouter des commentaires. Faites ensuite un clic droit sur l'élément à commenter" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XBO-Oy-eIc" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="44" y="104" width="401" height="65"/>
@@ -37,7 +33,6 @@
                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="fileDetailsCommentsUnavailable"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header3"/>
                         </userDefinedRuntimeAttributes>
@@ -52,7 +47,6 @@
                             <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         </state>
                         <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="infomaniakColor"/>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenDocument"/>
                         </userDefinedRuntimeAttributes>
                         <connections>
@@ -76,6 +70,11 @@
             <viewLayoutGuide key="safeArea" id="1Xz-fq-xg2"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <point key="canvasLocation" x="-77.536231884057983" y="213.95089285714286"/>
+            <connections>
+                <outlet property="infoImageView" destination="BBi-Ps-EiW" id="asset-BBi-Ps-EiW"/>
+                <outlet property="titleLabel" destination="XBO-Oy-eIc" id="asset-XBO-Oy-eIc"/>
+                <outlet property="actionButton" destination="mga-tV-4f4" id="asset-mga-tV-4f4"/>
+            </connections>
         </tableViewCell>
     </objects>
     <resources>

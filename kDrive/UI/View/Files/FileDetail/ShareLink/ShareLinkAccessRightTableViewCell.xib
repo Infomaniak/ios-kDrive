@@ -26,7 +26,6 @@
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -42,17 +41,12 @@
                                                     <constraint firstAttribute="width" constant="20" id="AXe-qi-Emq"/>
                                                     <constraint firstAttribute="height" constant="20" id="FVU-cB-Z0u"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="view"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IFi-Mg-IrK" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="44" y="17" width="40.5" height="19.5"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header3"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
@@ -62,10 +56,6 @@
                                                     <constraint firstAttribute="height" constant="10" id="Ao7-di-LyT"/>
                                                     <constraint firstAttribute="width" constant="10" id="cJ0-2O-TJu"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-down"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                         </subviews>
                                         <gestureRecognizers/>
@@ -85,7 +75,6 @@
                                             <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
                                                 <real key="value" value="1"/>
                                             </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBorderColorName" value="BorderColor"/>
                                         </userDefinedRuntimeAttributes>
                                     </view>
                                     <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="aUP-sK-FuZ" customClass="MaterialOutlinedTextField" customModule="MaterialOutlinedTextField">
@@ -121,9 +110,6 @@
                             <constraint firstItem="N1T-16-z3z" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" id="iAB-RE-w3u"/>
                             <constraint firstItem="rtI-Wc-46s" firstAttribute="leading" secondItem="aqX-hy-10J" secondAttribute="leading" id="tWk-9F-ZE5"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -146,6 +132,7 @@
                 <outlet property="textField" destination="aUP-sK-FuZ" id="Nsb-8i-FxD"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
                 <outlet property="topConstraint" destination="eo3-Nh-xzM" id="zKn-C5-K50"/>
+                <outlet property="chevronDownImageView" destination="rQg-IF-2ZX" id="asset-rQg-IF-2ZX"/>
             </connections>
             <point key="canvasLocation" x="181.15942028985509" y="221.98660714285714"/>
         </tableViewCell>

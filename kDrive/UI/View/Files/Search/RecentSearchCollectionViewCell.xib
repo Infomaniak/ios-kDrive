@@ -23,9 +23,6 @@
                         <subviews>
                             <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="luu-yy-lRU">
                                 <rect key="frame" x="0.0" y="0.0" width="404" height="60"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewSelectedColor"/>
-                                </userDefinedRuntimeAttributes>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ao9-1p-EJY" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="58" y="10" width="302" height="40"/>
@@ -42,10 +39,6 @@
                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="38" id="4FZ-an-twV"/>
                                     <constraint firstAttribute="width" constant="38" id="Qov-Wl-XYJ"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="clock"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="iconColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="O3O-oa-5To">
                                 <rect key="frame" x="368" y="17" width="26" height="26"/>
@@ -58,10 +51,6 @@
                                 <connections>
                                     <action selector="removeButtonPressed:" destination="gTV-IL-0wX" eventType="touchUpInside" id="eFd-Dh-Y1q"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="close"/>
-                                </userDefinedRuntimeAttributes>
                             </button>
                         </subviews>
                         <constraints>
@@ -79,9 +68,6 @@
                             <constraint firstItem="e45-9w-cIm" firstAttribute="leading" secondItem="mxp-9Q-1Lc" secondAttribute="leading" constant="10" id="sRQ-DI-XFj"/>
                             <constraint firstAttribute="height" constant="60" id="zug-Db-0e3"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
             </view>
@@ -97,6 +83,8 @@
                 <outlet property="contentInsetView" destination="mxp-9Q-1Lc" id="H5h-M3-F8i"/>
                 <outlet property="highlightedView" destination="luu-yy-lRU" id="ZdI-2q-fmX"/>
                 <outlet property="recentSearchTitle" destination="ao9-1p-EJY" id="HNh-sd-iEc"/>
+                <outlet property="clockImageView" destination="e45-9w-cIm" id="asset-e45-9w-cIm"/>
+                <outlet property="removeButton" destination="O3O-oa-5To" id="asset-O3O-oa-5To"/>
             </connections>
             <point key="canvasLocation" x="388.40579710144931" y="112.16517857142857"/>
         </collectionViewCell>

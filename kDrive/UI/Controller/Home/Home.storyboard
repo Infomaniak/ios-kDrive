@@ -26,9 +26,6 @@
                             <outlet property="dataSource" destination="RSY-8S-k6V" id="7mN-mA-C04"/>
                             <outlet property="delegate" destination="RSY-8S-k6V" id="kvv-sl-mlK"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </collectionView>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="dK0-aK-Jff"/>
                 </collectionViewController>
@@ -42,9 +39,6 @@
                 <navigationController storyboardIdentifier="HomeVC" automaticallyAdjustsScrollViewInsets="NO" id="TuV-Pj-cAB" customClass="TitleSizeAdjustingNavigationController" customModule="InfomaniakCoreUIKit" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="" selectedImage="house-fill" id="YAE-aq-h2X">
                         <inset key="imageInsets" minX="-2" minY="-2" maxX="-2" maxY="-2"/>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="house"/>
-                        </userDefinedRuntimeAttributes>
                     </tabBarItem>
                     <toolbarItems/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>

@@ -27,9 +27,6 @@
                                     <constraint firstAttribute="width" constant="24" id="QIR-8X-rB0"/>
                                     <constraint firstAttribute="height" constant="24" id="YKX-Fr-Hin"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="test-image"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cpV-YI-wwo">
                                 <rect key="frame" x="177" y="14.5" width="16" height="16"/>
@@ -43,16 +40,12 @@
                                 <connections>
                                     <action selector="closeButton:" destination="gTV-IL-0wX" eventType="touchUpInside" id="lAo-bB-OXT"/>
                                 </connections>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="remove"/>
-                                </userDefinedRuntimeAttributes>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Username" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9eM-wH-jMv" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="40" y="14" width="129" height="17"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                 </userDefinedRuntimeAttributes>
                             </label>
@@ -67,9 +60,6 @@
                             <constraint firstAttribute="width" constant="201" id="k1L-e8-ZNe"/>
                             <constraint firstItem="cpV-YI-wwo" firstAttribute="leading" secondItem="9eM-wH-jMv" secondAttribute="trailing" constant="8" id="y0G-gq-VIq"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
             </view>

@@ -30,10 +30,6 @@
                         <connections>
                             <action selector="segmentedControlChanged:" destination="KGk-i7-Jjw" eventType="valueChanged" id="QeZ-XE-V58"/>
                         </connections>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceSelectedSegmentTintColorName" value="infomaniakColor"/>
-                        </userDefinedRuntimeAttributes>
                     </segmentedControl>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

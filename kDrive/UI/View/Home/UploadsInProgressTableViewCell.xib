@@ -60,10 +60,6 @@
                                     <constraint firstAttribute="height" constant="12" id="8j9-Rv-gPY"/>
                                     <constraint firstAttribute="width" constant="12" id="mA4-Vz-k3s"/>
                                 </constraints>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="chevron-right"/>
-                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="secondaryTextColor"/>
-                                </userDefinedRuntimeAttributes>
                             </imageView>
                         </subviews>
                         <constraints>
@@ -79,9 +75,6 @@
                             <constraint firstItem="WYb-0j-Zxn" firstAttribute="centerY" secondItem="xFX-mO-AH4" secondAttribute="centerY" id="lnu-Tl-l7f"/>
                             <constraint firstItem="WYb-0j-Zxn" firstAttribute="leading" secondItem="xFX-mO-AH4" secondAttribute="leading" constant="16" id="m7O-i3-3m8"/>
                         </constraints>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                        </userDefinedRuntimeAttributes>
                     </view>
                 </subviews>
                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -98,6 +91,7 @@
                 <outlet property="contentInsetView" destination="xFX-mO-AH4" id="Kml-vZ-ip2"/>
                 <outlet property="progressView" destination="WYb-0j-Zxn" id="FtX-h5-z3f"/>
                 <outlet property="subtitleLabel" destination="Yi9-hz-m6I" id="jUs-3z-bL4"/>
+                <outlet property="chevronRightImageView" destination="TPK-if-oYx" id="asset-TPK-if-oYx"/>
             </connections>
             <point key="canvasLocation" x="137.68115942028987" y="119.53125"/>
         </tableViewCell>

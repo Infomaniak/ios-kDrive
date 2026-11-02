@@ -32,6 +32,10 @@ class NewFolderHeaderTableViewCell: InsetTableViewCell, UITextFieldDelegate {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        titleTextField.textColor = KDriveResourcesAsset.titleColor.color
+        accessoryImageView.image = KDriveResourcesAsset.folderFilled.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
 
         titleTextField.setInfomaniakColors()
         titleTextField.autocorrectionType = .yes

@@ -40,9 +40,6 @@
                             <constraint firstAttribute="height" constant="5" id="rYi-6V-1QB"/>
                         </constraints>
                         <color key="trackTintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <userDefinedRuntimeAttributes>
-                            <userDefinedRuntimeAttribute type="string" keyPath="resourceProgressTintColorName" value="infomaniakColor"/>
-                        </userDefinedRuntimeAttributes>
                     </progressView>
                 </subviews>
             </view>

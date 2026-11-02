@@ -24,6 +24,15 @@ import UIKit
 class LocationTableViewCell: InsetTableViewCell {
     @IBOutlet var logoImage: UIImageView!
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        accessoryImageView.image = KDriveResourcesAsset.chevronRight.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        logoImage.image = KDriveResourcesAsset.folderFilled.image
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+    }
+
     func configure(with drive: Drive?) {
         logoImage.image = KDriveResourcesAsset.drive.image
 

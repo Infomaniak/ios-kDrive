@@ -30,15 +30,9 @@
                                         <subviews>
                                             <view hidden="YES" alpha="0.5" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mDo-EL-lhP">
                                                 <rect key="frame" x="0.0" y="0.0" width="364" height="60"/>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardView"/>
-                                                </userDefinedRuntimeAttributes>
                                             </view>
                                             <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="id8-ZX-iUQ">
                                                 <rect key="frame" x="0.0" y="0.0" width="364" height="60"/>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewSelectedColor"/>
-                                                </userDefinedRuntimeAttributes>
                                             </view>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LXW-VV-Quo" customClass="RPCircularProgress" customModule="kDrive" customModuleProvider="target">
                                                 <rect key="frame" x="21" y="16" width="28" height="28"/>
@@ -54,9 +48,6 @@
                                                     <constraint firstAttribute="height" relation="lessThanOrEqual" constant="38" id="RcU-Uh-V0G"/>
                                                     <constraint firstAttribute="width" constant="38" id="y6P-eV-qo6"/>
                                                 </constraints>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="folder-filled"/>
-                                                </userDefinedRuntimeAttributes>
                                             </imageView>
                                             <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="MLs-rs-LMm">
                                                 <rect key="frame" x="70" y="9.9999999999999982" width="60.666666666666657" height="19.333333333333329"/>
@@ -66,7 +57,6 @@
                                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="titleColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
@@ -76,10 +66,6 @@
                                                             <constraint firstAttribute="width" secondItem="c2v-Wq-NpL" secondAttribute="height" multiplier="1:1" id="ubA-ca-3VK"/>
                                                             <constraint firstAttribute="width" constant="12" id="wBo-cl-8pL"/>
                                                         </constraints>
-                                                        <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="favorite"/>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="favoriteColor"/>
-                                                        </userDefinedRuntimeAttributes>
                                                     </imageView>
                                                     <collectionView hidden="YES" clipsSubviews="YES" multipleTouchEnabled="YES" userInteractionEnabled="NO" contentMode="scaleToFill" scrollEnabled="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="RzT-IJ-oQu">
                                                         <rect key="frame" x="60.666666666666657" y="1.6666666666666661" width="64" height="15.999999999999998"/>
@@ -109,17 +95,12 @@
                                                             <constraint firstAttribute="height" constant="16" id="jkt-Ws-1yk"/>
                                                             <constraint firstAttribute="width" secondItem="RNE-x0-Rf0" secondAttribute="height" multiplier="1:1" id="nJJ-CA-Lol"/>
                                                         </constraints>
-                                                        <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceImageName" value="check"/>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="greenColor"/>
-                                                        </userDefinedRuntimeAttributes>
                                                     </imageView>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xaN-Uz-J3R" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                         <rect key="frame" x="0.0" y="0.0" width="31" height="14.333333333333334"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                         <nil key="highlightedColor"/>
                                                         <userDefinedRuntimeAttributes>
-                                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceTextColorName" value="secondaryTextColor"/>
                                                             <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="caption"/>
                                                         </userDefinedRuntimeAttributes>
                                                     </label>
@@ -136,10 +117,6 @@
                                                 <connections>
                                                     <action selector="moreButtonTap:" destination="gTV-IL-0wX" eventType="touchUpInside" id="LxQ-eF-Hoo"/>
                                                 </connections>
-                                                <userDefinedRuntimeAttributes>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceTintColorName" value="primaryTextColor"/>
-                                                    <userDefinedRuntimeAttribute type="string" keyPath="resourceNormalImageName" value="menu"/>
-                                                </userDefinedRuntimeAttributes>
                                             </button>
                                         </subviews>
                                         <constraints>
@@ -172,9 +149,6 @@
                                                 <exclude reference="UE1-IH-OR4"/>
                                             </mask>
                                         </variation>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="string" keyPath="resourceBackgroundColorName" value="backgroundCardViewColor"/>
-                                        </userDefinedRuntimeAttributes>
                                     </view>
                                 </subviews>
                                 <constraints>
@@ -226,6 +200,7 @@
                 <outlet property="titleLabel" destination="TES-Tv-kfS" id="VCA-rE-D4J"/>
                 <outlet property="topConstraint" destination="3Js-Vi-ibW" id="PDQ-1y-tWy"/>
                 <outlet property="trailingConstraint" destination="GeY-03-PvP" id="ILQ-ZZ-aaM"/>
+                <outlet property="rowBackgroundView" destination="hE6-GN-a4l" id="asset-hE6-GN-a4l"/>
             </connections>
             <point key="canvasLocation" x="-262.31884057971018" y="91.741071428571431"/>
         </collectionViewCell>
