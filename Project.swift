@@ -92,7 +92,7 @@ let project = Project(name: "kDrive",
                                       .external(name: "SwiftPackageListUI"),
                                       .sdk(name: "StoreKit", type: .framework, status: .required)
                                   ],
-                                  settings: .settings(base: Constants.baseSettings),
+                                   settings: .settings(base: Constants.appSettings),
                                   environmentVariables: [
                                       "hostname": .environmentVariable(value: "\(ProcessInfo.processInfo.hostName).",
                                                                        isEnabled: true)

@@ -401,7 +401,7 @@ extension UploadOperation {
 }
 
 /// Provide a useable debug output of `ApiError`
-extension ApiError: CustomDebugStringConvertible {
+extension ApiError: @retroactive CustomDebugStringConvertible {
     public var debugDescription: String {
         "<ApiError: code:\(code) description:\(description)>"
     }

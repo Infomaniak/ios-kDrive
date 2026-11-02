@@ -212,7 +212,7 @@ extension SearchFilesViewModel: SearchFiltersDelegate {
     }
 }
 
-extension String: Differentiable {}
+extension String: @retroactive ContentIdentifiable, @retroactive ContentEquatable {}
 
 // MARK: - RecentSearchesViewModel
 

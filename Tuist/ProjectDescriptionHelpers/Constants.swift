@@ -27,9 +27,13 @@ public enum Constants {
         .automaticCodeSigning(devTeam: "864VDCS2QY")
         .currentProjectVersion(Environment.xcodeCloudBuildNumber.getString(default: "1"))
         .marketingVersion("6.3.1")
+        .merging(["ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": ""])
 
     public static let deploymentTarget = DeploymentTargets.iOS("16.4")
     public static let destinations = Set<Destination>([.iPhone, .iPad])
+
+    public static let appSettings = baseSettings
+        .merging(["ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "infomaniakColor"])
 
     public static let fileProviderSettings = baseSettings
         .bridgingHeader(path: "$(SRCROOT)/kDriveFileProvider/Validation/kDriveFileProvider-Bridging-Header.h")
@@ -37,16 +41,21 @@ public enum Constants {
     public static let debugFileProviderSettings = fileProviderSettings
         .compilationConditions("ISEXTENSION DEBUG")
 
-    public static let shareExtensionSettings = baseSettings
+    public static let shareExtensionSettings = appSettings
         .compilationConditions("ISEXTENSION")
     public static let debugShareExtensionSettings = shareExtensionSettings
         .compilationConditions("ISEXTENSION DEBUG")
 
-    public static let actionExtensionSettings = baseSettings
+    public static let actionExtensionSettings = appSettings
         .compilationConditions("ISEXTENSION")
         .appIcon(name: "ExtensionIcon")
+        .merging(["ASSETCATALOG_COMPILER_SKIP_APP_STORE_DEPLOYMENT": "YES"])
     public static let debugActionExtensionSettings = actionExtensionSettings
         .compilationConditions("ISEXTENSION DEBUG")
 
-    public static let swiftlintScript = TargetScript.post(path: "scripts/lint.sh", name: "Swiftlint")
+    public static let swiftlintScript = TargetScript.post(
+        path: "scripts/lint.sh",
+        name: "Swiftlint",
+        basedOnDependencyAnalysis: false
+    )
 }
