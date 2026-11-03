@@ -260,7 +260,7 @@ public class FloatingPanelAction: Equatable {
     }
 
     static var multipleSelectionSharedWithMeActions: [FloatingPanelAction] {
-        return [download].map { $0.reset() }
+        return [offline, download].map { $0.reset() }
     }
 
     static var multipleSelectionPhotosListActions: [FloatingPanelAction] {
