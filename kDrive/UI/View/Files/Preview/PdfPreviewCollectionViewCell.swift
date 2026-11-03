@@ -23,7 +23,11 @@ import UIKit
 
 class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDelegate {
     @IBOutlet var pdfPreview: PDFView!
-    private var document: PDFDocument?
+    private var documentUrl: URL?
+    private var configurationId = UUID()
+    private var activationTask: Task<Void, Never>?
+    private var isDisplaying = false
+    private var hasActivatedDocument = false
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -34,8 +38,10 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
     }
 
     @objc private func pageChanged() {
+        let configurationId = configurationId
         Task { @MainActor [weak self] in
-            self?.previewDelegate?.updateNavigationBar()
+            guard let self, self.configurationId == configurationId, self.isDisplaying else { return }
+            self.previewDelegate?.updateNavigationBar()
         }
     }
 
@@ -44,19 +50,50 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
     }
 
     func configureWith(documentUrl: URL) {
+        self.documentUrl = documentUrl
+        configurationId = UUID()
+    }
+
+    override func willDisplayInCollectionView() {
+        isDisplaying = true
+        guard !hasActivatedDocument, activationTask == nil else { return }
+
+        let configurationId = configurationId
+        // PDFKit can force layout. Activate only after UIKit has finished provisioning and displaying the cell.
+        activationTask = Task { @MainActor [weak self] in
+            guard let self, !Task.isCancelled, self.configurationId == configurationId, self.isDisplaying,
+                  let documentUrl = self.documentUrl else { return }
+            self.activationTask = nil
+            self.hasActivatedDocument = true
+            self.observePageChanges()
+            self.pdfPreview.document = PDFDocument(url: documentUrl)
+            self.pageChanged()
+        }
+    }
+
+    override func didEndDisplayingInCollectionView() {
+        isDisplaying = false
+        activationTask?.cancel()
+        activationTask = nil
+    }
+
+    private func observePageChanges() {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(pageChanged),
             name: .PDFViewPageChanged,
             object: pdfPreview
         )
-        document = PDFDocument(url: documentUrl)
-        pdfPreview.document = document
     }
 
     override func prepareForReuse() {
         super.prepareForReuse()
+        didEndDisplayingInCollectionView()
+        configurationId = UUID()
         NotificationCenter.default.removeObserver(self, name: .PDFViewPageChanged, object: pdfPreview)
         pdfPreview.document = nil
+        documentUrl = nil
+        hasActivatedDocument = false
+        previewDelegate = nil
     }
 }
