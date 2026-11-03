@@ -29,7 +29,7 @@ import Sentry
 import UIKit
 
 @MainActor protocol PreviewContentCellDelegate: AnyObject {
-    func updateNavigationBar()
+    func pdfPreviewUpdated(fileId: Int, currentPage: Int, totalPages: Int)
     func setFullscreen(_ fullscreen: Bool?)
     func setPlaybackFullscreen(_ isPlaying: Bool)
     func errorWhilePreviewing(fileId: Int, error: Error)
@@ -554,6 +554,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         default:
             setNavbarStandard()
         }
+    }
+
+    func pdfPreviewUpdated(fileId: Int, currentPage: Int, totalPages: Int) {
+        guard currentFile.id == fileId,
+              currentFile.convertedType == .pdf,
+              !currentFile.isLocalVersionOlderThanRemote else { return }
+        setNavbarForPdf(currentPage: currentPage, totalPages: totalPages)
     }
 
     private func setNavbarStandard() {
@@ -1123,7 +1130,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             if let url = officePreviewError.pdfUrl {
                 let cell = collectionView.dequeueReusableCell(type: PdfPreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
-                cell.configureWith(documentUrl: url)
+                cell.configureWith(documentUrl: url, fileId: file.id)
                 return cell
             } else {
                 let cell = collectionView.dequeueReusableCell(type: NoPreviewCollectionViewCell.self, for: indexPath)

@@ -24,6 +24,7 @@ import UIKit
 class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDelegate {
     @IBOutlet var pdfPreview: PDFView!
     private var documentUrl: URL?
+    private var fileId: Int?
     private var configurationId = UUID()
     private var activationTask: Task<Void, Never>?
     private var isDisplaying = false
@@ -40,17 +41,27 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
     @objc private func pageChanged() {
         let configurationId = configurationId
         Task { @MainActor [weak self] in
-            guard let self, self.configurationId == configurationId, self.isDisplaying else { return }
-            self.previewDelegate?.updateNavigationBar()
+            guard let self, self.configurationId == configurationId, self.isDisplaying,
+                  let fileId = self.fileId,
+                  let document = self.pdfPreview.document,
+                  let page = self.pdfPreview.currentPage else { return }
+            let pageIndex = document.index(for: page)
+            guard pageIndex != NSNotFound else { return }
+            self.previewDelegate?.pdfPreviewUpdated(
+                fileId: fileId,
+                currentPage: pageIndex + 1,
+                totalPages: document.pageCount
+            )
         }
     }
 
     override func configureWith(file: File) {
-        configureWith(documentUrl: file.localUrl)
+        configureWith(documentUrl: file.localUrl, fileId: file.id)
     }
 
-    func configureWith(documentUrl: URL) {
+    func configureWith(documentUrl: URL, fileId: Int) {
         self.documentUrl = documentUrl
+        self.fileId = fileId
         configurationId = UUID()
     }
 
@@ -93,6 +104,7 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
         NotificationCenter.default.removeObserver(self, name: .PDFViewPageChanged, object: pdfPreview)
         pdfPreview.document = nil
         documentUrl = nil
+        fileId = nil
         hasActivatedDocument = false
         previewDelegate = nil
     }
