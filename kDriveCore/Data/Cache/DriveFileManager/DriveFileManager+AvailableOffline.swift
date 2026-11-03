@@ -33,7 +33,7 @@ public extension DriveFileManager {
     }
 
     func updateAvailableOfflineFiles() async throws {
-        let offlineFiles = getAvailableOfflineFiles()
+        let offlineFiles = getAvailableOfflineFiles().filter { $0.driveId == drive.id }
         guard !offlineFiles.isEmpty else { return }
 
         let batchSize = 500

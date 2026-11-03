@@ -38,7 +38,13 @@ public class AvailableOfflineManager: AvailableOfflineManageable {
             return
         }
 
-        for drive in driveInfosManager.getDrives(for: accountManager.currentUserId, sharedWithMe: false) {
+        let userId = accountManager.currentUserId
+        updateAvailableOfflineFiles(for: Array(driveInfosManager.getDrives(for: userId, sharedWithMe: false)))
+        updateAvailableOfflineFiles(for: Array(driveInfosManager.getDrives(for: userId, sharedWithMe: true)))
+    }
+
+    private func updateAvailableOfflineFiles(for drives: [Drive]) {
+        for drive in drives {
             let frozenDrive = drive.freezeIfNeeded()
             guard let driveFileManager = accountManager.getDriveFileManager(for: frozenDrive.id, userId: drive.userId) else {
                 continue
