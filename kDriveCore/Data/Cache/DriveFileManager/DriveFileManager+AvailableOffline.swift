@@ -74,7 +74,7 @@ public extension DriveFileManager {
     }
 
     func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
-        guard let liveFile = getCachedFile(id: file.id, freeze: false) else {
+        guard let liveFile = database.fetchObject(ofType: File.self, forPrimaryKey: file.uid) else {
             completion(DriveError.fileNotFound)
             return
         }
