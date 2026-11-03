@@ -33,7 +33,7 @@ enum FileListItem: Differentiable {
         case .uploadCard:
             return "upload-card"
         case .file(let file):
-            return "file-\(file.id)"
+            return "file-\(file.uid)"
         }
     }
 
