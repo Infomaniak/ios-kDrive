@@ -731,9 +731,13 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
 
     func onFilePresented(_ file: File) {
         #if !ISEXTENSION
+        let fileDriveFileManager = FileActionsHelper.manager(for: file, in: viewModel.driveFileManager)
+        let previewFiles = viewModel.files
+            .filter { $0.driveId == file.driveId }
+            .filter { fileDriveFileManager.getCachedFile(uid: $0.uid) != nil }
         filePresenter.present(for: file,
-                              files: viewModel.files,
-                              driveFileManager: FileActionsHelper.manager(for: file, in: viewModel.driveFileManager),
+                              files: previewFiles,
+                              driveFileManager: fileDriveFileManager,
                               normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
                               presentationOrigin: viewModel.configuration.presentationOrigin)
         #endif
