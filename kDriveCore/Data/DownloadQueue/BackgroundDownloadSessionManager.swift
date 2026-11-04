@@ -192,14 +192,18 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
             return nil
         }
 
-        if let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
+        if let file = driveFileManager.getCachedFile(id: downloadTask.fileId), file.isAvailableOffline {
             return (driveFileManager, file)
         }
 
         let sharedWithMeFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
 
-        if let file = sharedWithMeFileManager.getCachedFile(id: downloadTask.fileId) {
+        if let file = sharedWithMeFileManager.getCachedFile(id: downloadTask.fileId), file.isAvailableOffline {
             return (sharedWithMeFileManager, file)
+        }
+
+        if let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
+            return (driveFileManager, file)
         }
         return nil
     }
