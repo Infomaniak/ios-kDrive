@@ -67,7 +67,7 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     private var filesAreAllMedia: Bool {
         files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video }
     }
-    
+
     private var filesAreWithinSameDrive: Bool {
         return Set(files.map(\.driveId)).count <= 1
     }
