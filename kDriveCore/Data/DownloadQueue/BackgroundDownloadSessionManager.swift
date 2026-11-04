@@ -185,18 +185,19 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
             self.backgroundCompletionHandler = nil
         }
     }
-    
+
     private func resolveFileManagerAndFile(for downloadTask: DownloadTask) -> (DriveFileManager, File)? {
-        guard let driveFileManager = accountManager.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId) else {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId)
+        else {
             return nil
         }
-        
+
         if let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
             return (driveFileManager, file)
         }
-        
+
         let sharedWithMeFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
-        
+
         if let file = sharedWithMeFileManager.getCachedFile(id: downloadTask.fileId) {
             return (sharedWithMeFileManager, file)
         }
