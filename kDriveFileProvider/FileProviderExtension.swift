@@ -332,6 +332,8 @@ final class FileProviderExtension: NSFileProviderExtension {
             return
         }
 
+        // The system protects this item's content until completionHandler is called,
+        // including asynchronous downloads. Content provision must not coordinate file access again.
         Task {
             let freshFile: File
             do {
@@ -539,9 +541,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
 
             do {
-                try self.coordinateWrite(at: item.storageUrl, options: .forReplacing) { coordinatedURL in
-                    try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: coordinatedURL)
-                }
+                try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
                 SentryDebug.addBreadcrumb(
                     message: "Copy file from local url to file provider storage url",
                     category: .fileProvider,
@@ -590,9 +590,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         }
 
         do {
-            try coordinateWrite(at: item.storageUrl, options: .forReplacing) { coordinatedURL in
-                try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: coordinatedURL)
-            }
+            try FileManager.default.copyOrReplace(sourceUrl: file.localUrl, destinationUrl: item.storageUrl)
             completion(nil)
         } catch {
             let context = [
