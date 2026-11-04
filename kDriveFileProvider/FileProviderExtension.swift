@@ -123,8 +123,7 @@ final class FileProviderExtension: NSFileProviderExtension {
         // Read from upload queue
         if let uploadingFile = uploadDataSource.getUploadingFile(fileProviderItemIdentifier: identifier.rawValue) {
             Log.fileProvider("item for identifier - Uploading file")
-            let uploadingItem = uploadingFile.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
-            return uploadingItem
+            return uploadingFile.toFileProviderItem(parent: nil, drive: driveFileManager.drive, domain: domain)
         }
 
         // Read form uploaded UploadFiles
@@ -140,16 +139,14 @@ final class FileProviderExtension: NSFileProviderExtension {
             }
 
             Log.fileProvider("item for identifier - mapped File  \(remoteFileId) from uploaded UploadFile")
-            let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain)
-            return item
+            return file.toFileProviderItem(parent: nil, drive: drive, domain: domain)
         }
 
         // Read Files DB
         else if let fileId = identifier.toFileId(),
                 let file = driveFileManager.getCachedFile(id: fileId) {
             Log.fileProvider("item for identifier - File:\(fileId)")
-            let item = file.toFileProviderItem(parent: nil, drive: drive, domain: domain)
-            return item
+            return file.toFileProviderItem(parent: nil, drive: drive, domain: domain)
         }
 
         // did not match anything
@@ -320,19 +317,7 @@ final class FileProviderExtension: NSFileProviderExtension {
             return
         }
 
-        if fileStorageIsCurrent(item: item, file: file) {
-            SentryDebug.addBreadcrumb(
-                message: "fileStorageIsCurrent, no operation needed",
-                category: .fileProvider,
-                level: .info,
-                metadata: [
-                    "fileId": file.id,
-                    "itemIdentifier": item.itemIdentifier.rawValue
-                ]
-            )
-            // File is in the file provider and is the same, nothing to do...
-            completionHandler(nil)
-        } else if file.isDirectory {
+        guard !file.isDirectory else {
             SentryDebug.addBreadcrumb(
                 message: "file is a directory, we create it",
                 category: .fileProvider,
@@ -344,17 +329,42 @@ final class FileProviderExtension: NSFileProviderExtension {
             )
             try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             completionHandler(nil)
-        } else {
-            SentryDebug.addBreadcrumb(
-                message: "file is not current, downloading remote file",
-                category: .fileProvider,
-                level: .info,
-                metadata: [
-                    "fileId": file.id,
-                    "itemIdentifier": item.itemIdentifier.rawValue
-                ]
-            )
-            downloadRemoteFile(file, for: item, completion: completionHandler)
+            return
+        }
+
+        Task {
+            let freshFile: File
+            do {
+                freshFile = try await refreshCachedFileMetadata(for: file)
+            } catch {
+                completionHandler(error)
+                return
+            }
+
+            if fileStorageIsCurrent(item: item, file: freshFile) {
+                SentryDebug.addBreadcrumb(
+                    message: "fileStorageIsCurrent, no operation needed",
+                    category: .fileProvider,
+                    level: .info,
+                    metadata: [
+                        "fileId": freshFile.id,
+                        "itemIdentifier": item.itemIdentifier.rawValue
+                    ]
+                )
+                // File is in the file provider and is the same, nothing to do...
+                completionHandler(nil)
+            } else {
+                SentryDebug.addBreadcrumb(
+                    message: "file is not current, downloading remote file",
+                    category: .fileProvider,
+                    level: .info,
+                    metadata: [
+                        "fileId": freshFile.id,
+                        "itemIdentifier": item.itemIdentifier.rawValue
+                    ]
+                )
+                downloadRemoteFile(freshFile, for: item, completion: completionHandler)
+            }
         }
     }
 
@@ -396,6 +406,49 @@ final class FileProviderExtension: NSFileProviderExtension {
             atPath: item.storageUrl.path,
             andPath: file.localUrl.path
         )
+    }
+
+    private func refreshCachedFileMetadata(for file: File) async throws -> File {
+        guard !downloadQueue.hasOperation(for: file.id),
+              FileManager.default.fileExists(atPath: file.localUrl.path)
+        else {
+            return file
+        }
+
+        Log.fileProvider("Refreshing cached metadata from server for file:\(file.id)")
+        SentryDebug.addBreadcrumb(
+            message: "startProvidingItem refreshing cached metadata from server",
+            category: .fileProvider,
+            level: .info,
+            metadata: ["fileId": file.id]
+        )
+
+        do {
+            let remoteFile = try await driveFileManager.file(file.proxify(), forceRefresh: true)
+            Log.fileProvider("Cached metadata refreshed from server for file:\(file.id)")
+            return remoteFile
+        } catch let error as DriveError where error == .objectNotFound {
+            SentryDebug.addBreadcrumb(
+                message: "File no longer exists on server",
+                category: .fileProvider,
+                level: .warning,
+                metadata: ["fileId": file.id]
+            )
+            Log.fileProvider("File no longer exists on server file:\(file.id)", level: .warning)
+            throw NSFileProviderError(.noSuchItem)
+        } catch {
+            SentryDebug.addBreadcrumb(
+                message: "Failed to refresh cached metadata from server, keeping stale version",
+                category: .fileProvider,
+                level: .warning,
+                metadata: [
+                    "fileId": file.id,
+                    "error": String(describing: error)
+                ]
+            )
+            Log.fileProvider("Failed to refresh cached metadata from server for file:\(file.id), error:\(error)", level: .warning)
+            return file
+        }
     }
 
     private func downloadRemoteFile(_ file: File, for item: FileProviderItem, completion: @escaping (Error?) -> Void) {
