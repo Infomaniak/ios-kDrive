@@ -67,6 +67,10 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
     private var filesAreAllMedia: Bool {
         files.allSatisfy { $0.convertedType == .image || $0.convertedType == .video }
     }
+    
+    private var filesAreWithinSameDrive: Bool {
+        return Set(files.map(\.driveId)).count <= 1
+    }
 
     private var filesAreWithinTheSameFolder: Bool {
         !files.contains { $0.parentId != files.first?.parentId }
@@ -126,10 +130,11 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
                 return files.allSatisfy(\.capabilities.canColor)
             case .download:
                 let isDownloadable = filesAreWithinTheSameFolder || filesAreAllMedia
+                guard filesAreWithinSameDrive else { return false }
                 guard currentDirectory.id == DriveFileManager.offlineRoot.id else { return isDownloadable }
                 return isDownloadable && files.allSatisfy { $0.driveId == driveFileManager.drive.id }
             case .offline:
-                return !files.allSatisfy(\.isDirectory)
+                return !files.allSatisfy(\.isDirectory) && filesAreWithinSameDrive
             case .sendCopy:
                 return canSendCopyOfSelection
             default:
