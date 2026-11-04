@@ -506,13 +506,20 @@ public final class FileActionsHelper {
 
         for file in onlyFiles where file.isAvailableOffline == areAvailableOffline {
             group?.enter()
-            driveFileManager.setFileAvailableOffline(file: file, available: makeFilesAvailableOffline) { error in
-                completion(file, error)
-                group?.leave()
-            }
+            manager(for: file, in: driveFileManager)
+                .setFileAvailableOffline(file: file, available: makeFilesAvailableOffline) { error in
+                    completion(file, error)
+                    group?.leave()
+                }
         }
 
         return makeFilesAvailableOffline
+    }
+
+    static func manager(for file: File, in driveFileManager: DriveFileManager) -> DriveFileManager {
+        guard driveFileManager.getCachedFile(uid: file.uid) == nil else { return driveFileManager }
+        @InjectService var accountManager: AccountManageable
+        return accountManager.getDriveFileManager(for: file.driveId, userId: driveFileManager.drive.userId) ?? driveFileManager
     }
 
     #if !ISEXTENSION

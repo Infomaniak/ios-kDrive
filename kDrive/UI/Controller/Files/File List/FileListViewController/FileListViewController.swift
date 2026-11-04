@@ -548,7 +548,11 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
                 return
             }
             let fileInformationsViewController = FileActionsFloatingPanelViewController(frozenFile: file,
-                                                                                        driveFileManager: driveFileManager)
+                                                                                        driveFileManager: FileActionsHelper
+                                                                                            .manager(
+                                                                                                for: file,
+                                                                                                in: driveFileManager
+                                                                                            ))
 
             fileInformationsViewController.presentingParent = self
             fileInformationsViewController.normalFolderHierarchy = viewModel.configuration.normalFolderHierarchy
@@ -658,7 +662,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
     func makeContextMenuQuickActions(indexPath: IndexPath) -> [UIAction] {
         guard let file = getDisplayedFile(at: indexPath) else { return [] }
         let fileInformationsViewController = FileActionsFloatingPanelViewController(frozenFile: file,
-                                                                                    driveFileManager: driveFileManager,
+                                                                                    driveFileManager: FileActionsHelper.manager(
+                                                                                        for: file,
+                                                                                        in: driveFileManager
+                                                                                    ),
                                                                                     sourceView: collectionView
                                                                                         .cellForItem(at: indexPath) ??
                                                                                         collectionView)
@@ -726,7 +733,7 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         #if !ISEXTENSION
         filePresenter.present(for: file,
                               files: viewModel.files,
-                              driveFileManager: viewModel.driveFileManager,
+                              driveFileManager: FileActionsHelper.manager(for: file, in: viewModel.driveFileManager),
                               normalFolderHierarchy: viewModel.configuration.normalFolderHierarchy,
                               presentationOrigin: viewModel.configuration.presentationOrigin)
         #endif

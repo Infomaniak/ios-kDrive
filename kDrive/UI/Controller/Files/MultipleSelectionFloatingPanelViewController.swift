@@ -125,7 +125,9 @@ final class MultipleSelectionFloatingPanelViewController: UICollectionViewContro
             case .folderColor:
                 return files.allSatisfy(\.capabilities.canColor)
             case .download:
-                return filesAreWithinTheSameFolder || filesAreAllMedia
+                let isDownloadable = filesAreWithinTheSameFolder || filesAreAllMedia
+                guard currentDirectory.id == DriveFileManager.offlineRoot.id else { return isDownloadable }
+                return isDownloadable && files.allSatisfy { $0.driveId == driveFileManager.drive.id }
             case .offline:
                 return !files.allSatisfy(\.isDirectory)
             case .sendCopy:
