@@ -58,7 +58,7 @@ class OfflineFilesViewModel: FileListViewModel {
         }
         self.sharedResults = AnyRealmCollection(sharedResults)
     }
-    
+
     override func forceRefresh() {
         @LazyInjectService var offlineManager: AvailableOfflineManageable
         offlineManager.updateAvailableOfflineFiles(status: ReachabilityListener.instance.currentStatus)
