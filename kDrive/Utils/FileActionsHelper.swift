@@ -517,6 +517,7 @@ public final class FileActionsHelper {
     }
 
     static func manager(for file: File, in driveFileManager: DriveFileManager) -> DriveFileManager {
+        @InjectService var accountManager: AccountManageable
         if let sourceURL = file.realm?.configuration.fileURL {
             let sharedConfiguration = DriveFileManager.configuration(
                 context: .sharedWithMe,
@@ -524,13 +525,19 @@ public final class FileActionsHelper {
                 driveUserId: driveFileManager.drive.userId
             )
             if sourceURL == sharedConfiguration.fileURL {
-                return driveFileManager.isSharedWithMe
-                    ? driveFileManager
-                    : driveFileManager.instanceWith(context: .sharedWithMe)
+                if driveFileManager.isSharedWithMe && driveFileManager.drive.id == file.driveId {
+                    return driveFileManager
+                }
+                let owningManager = accountManager.getDriveFileManager(
+                    for: file.driveId,
+                    userId: driveFileManager.drive.userId
+                ) ?? driveFileManager
+                return owningManager.isSharedWithMe
+                    ? owningManager
+                    : owningManager.instanceWith(context: .sharedWithMe)
             }
         }
         guard driveFileManager.getCachedFile(uid: file.uid) == nil else { return driveFileManager }
-        @InjectService var accountManager: AccountManageable
         return accountManager.getDriveFileManager(for: file.driveId, userId: driveFileManager.drive.userId) ?? driveFileManager
     }
 

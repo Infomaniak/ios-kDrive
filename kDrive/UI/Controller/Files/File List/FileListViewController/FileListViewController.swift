@@ -734,7 +734,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
         let fileDriveFileManager = FileActionsHelper.manager(for: file, in: viewModel.driveFileManager)
         let previewFiles = viewModel.files
             .filter { $0.driveId == file.driveId }
-            .filter { fileDriveFileManager.getCachedFile(uid: $0.uid) != nil }
+            .filter {
+                viewModel.currentDirectory.id != DriveFileManager.offlineRoot.id
+                    || fileDriveFileManager.getCachedFile(uid: $0.uid) != nil
+            }
         filePresenter.present(for: file,
                               files: previewFiles,
                               driveFileManager: fileDriveFileManager,
