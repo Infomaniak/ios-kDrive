@@ -68,7 +68,7 @@ extension MultipleSelectionFloatingPanelViewController {
             if error != nil {
                 self.success = false
             }
-            if let file = self.driveFileManager.getCachedFile(uid: file.uid) {
+            if let file = FileActionsHelper.manager(for: file, in: self.driveFileManager).getCachedFile(uid: file.uid) {
                 self.changedFiles?.append(file)
             }
         }
