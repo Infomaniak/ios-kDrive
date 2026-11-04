@@ -27,8 +27,9 @@ public extension DriveFileManager {
             let file: File = try await apiFetcher
                 .perform(request: apiFetcher.authenticatedRequest(endpoint))
             try database.writeTransaction { mutableRealm in
+                let oldFile = mutableRealm.object(ofType: File.self, forPrimaryKey: file.uid)?.freeze()
                 keepCacheAttributesForFile(newFile: file, keepProperties: [.all], writableRealm: mutableRealm)
-                mutableRealm.add(file, update: .modified)
+                _ = try updateFileInDatabase(updatedFile: file, oldFile: oldFile, writableRealm: mutableRealm)
             }
 
             return file.freeze()
