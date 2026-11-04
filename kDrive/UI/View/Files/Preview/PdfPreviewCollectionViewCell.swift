@@ -29,6 +29,22 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
     private var activationTask: Task<Void, Never>?
     private var isDisplaying = false
     private var hasActivatedDocument = false
+    var breadcrumbContext: PreviewBreadcrumb.CellContext?
+    private let breadcrumbCellId = UUID().uuidString
+
+    private func recordBreadcrumb(_ message: String) {
+        var metadata: [String: Any] = [
+            "cellId": breadcrumbCellId,
+            "configurationId": configurationId.uuidString,
+            "isDisplaying": isDisplaying,
+            "activationPending": activationTask != nil,
+            "hasActivatedDocument": hasActivatedDocument,
+            "hasDocument": pdfPreview.document != nil
+        ]
+        metadata["sessionId"] = breadcrumbContext?.sessionId
+        metadata["item"] = breadcrumbContext?.item
+        PreviewBreadcrumb.record(message, metadata: metadata)
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -63,10 +79,12 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
         self.documentUrl = documentUrl
         self.fileId = fileId
         configurationId = UUID()
+        recordBreadcrumb("pdf.configured")
     }
 
     override func willDisplayInCollectionView() {
         isDisplaying = true
+        recordBreadcrumb("pdf.display.begin")
         guard !hasActivatedDocument, activationTask == nil else { return }
 
         let configurationId = configurationId
@@ -77,12 +95,15 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
             self.activationTask = nil
             self.hasActivatedDocument = true
             self.observePageChanges()
+            self.recordBreadcrumb("pdf.activation.begin")
             self.pdfPreview.document = PDFDocument(url: documentUrl)
+            self.recordBreadcrumb("pdf.activation.end")
             self.pageChanged()
         }
     }
 
     override func didEndDisplayingInCollectionView() {
+        recordBreadcrumb("pdf.display.end")
         isDisplaying = false
         activationTask?.cancel()
         activationTask = nil
@@ -98,6 +119,7 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
     }
 
     override func prepareForReuse() {
+        recordBreadcrumb("pdf.reuse.begin")
         super.prepareForReuse()
         didEndDisplayingInCollectionView()
         configurationId = UUID()
@@ -107,5 +129,6 @@ class PdfPreviewCollectionViewCell: PreviewCollectionViewCell, UIScrollViewDeleg
         fileId = nil
         hasActivatedDocument = false
         previewDelegate = nil
+        breadcrumbContext = nil
     }
 }

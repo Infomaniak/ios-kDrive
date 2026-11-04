@@ -49,6 +49,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private var driveFileManager: DriveFileManager!
     private var normalFolderHierarchy = true
     private var initialLoading = true
+    private let breadcrumbSessionId = UUID().uuidString
     var presentationOrigin = PresentationOrigin.fileList
     private var shouldScrollToCurrentIndex = true
     var currentIndex = IndexPath(row: 0, section: 0) {
@@ -296,7 +297,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 self.currentFile = frozenFile
 
                 self.collectionView.endEditing(true)
-                self.reloadItemsAfterOneLoop(at: self.currentIndex)
+                self.reloadItemsAfterOneLoop(at: self.currentIndex, reason: .fileUpdated)
             }
         }
     }
@@ -315,7 +316,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                     let file = self.previewFiles[index]
                     self.previewErrors[file.id] = nil
 
-                    self.reloadItemsAfterOneLoop(at: IndexPath(item: index, section: 0))
+                    self.reloadItemsAfterOneLoop(at: IndexPath(item: index, section: 0), reason: .networkChanged)
                 }
             }
         }
@@ -850,7 +851,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
         PdfPreviewCache.shared.retrievePdf(forSafeFile: safeFile, driveFileManager: driveFileManager) { downloadTask in
             previewError.addDownloadTask(downloadTask)
-            self.reloadItemsAfterOneLoop(at: IndexPath(item: previewIndex, section: 0))
+            self.reloadItemsAfterOneLoop(at: IndexPath(item: previewIndex, section: 0), reason: .officePreviewProgress)
         } completion: { url, error in
             previewError.removeDownloadTask()
             if let url {
@@ -858,7 +859,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             } else {
                 previewError.underlyingError = error
             }
-            self.reloadItemsAfterOneLoop(at: IndexPath(item: previewIndex, section: 0))
+            self.reloadItemsAfterOneLoop(at: IndexPath(item: previewIndex, section: 0), reason: .officePreviewCompleted)
         }
 
         previewErrors[safeFile.id] = previewError
@@ -969,6 +970,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         Task { @MainActor [weak self] in
             guard let self else { return }
 
+            PreviewBreadcrumb.record("download.completed", error: error, metadata: previewBreadcrumbMetadata(at: indexPath))
             self.updateFileForCurrentIndex()
             currentDownloadOperation = nil
 
@@ -977,14 +979,14 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             if let error {
                 if error != .taskCancelled {
                     previewErrors[currentFile.id] = PreviewError(fileId: currentFile.id, underlyingError: error)
-                    self.reloadItemsAfterOneLoop(at: indexPath)
+                    self.reloadItemsAfterOneLoop(at: indexPath, reason: .downloadFailed)
                 }
             } else {
                 (collectionView.cellForItem(at: indexPath) as? DownloadingPreviewCollectionViewCell)?
                     .previewDownloadTask?.cancel()
                 previewErrors[currentFile.id] = nil
                 collectionView.endEditing(true)
-                self.reloadItemsAfterOneLoop(at: indexPath)
+                self.reloadItemsAfterOneLoop(at: indexPath, reason: .downloadCompleted)
                 updateNavigationBar()
             }
         }
@@ -1076,6 +1078,9 @@ extension PreviewViewController: UICollectionViewDataSource {
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let file = previewFiles[indexPath.row]
+        let metadata = previewBreadcrumbMetadata(at: indexPath)
+        PreviewBreadcrumb.record("cell.provision.begin", metadata: metadata)
+        defer { PreviewBreadcrumb.record("cell.provision.end", metadata: metadata) }
         // File is already downloaded and up to date OR we can remote play it (audio / video)
         if previewErrors[file.id] == nil &&
             (!file.isLocalVersionOlderThanRemote || ConvertedType.remotePlayableTypes.contains(file.convertedType)) {
@@ -1092,6 +1097,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             case .pdf:
                 let cell = collectionView.dequeueReusableCell(type: PdfPreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
+                cell.breadcrumbContext = PreviewBreadcrumb.CellContext(sessionId: breadcrumbSessionId, item: indexPath.item)
                 cell.configureWith(file: file)
                 return cell
             case .video:
@@ -1130,6 +1136,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             if let url = officePreviewError.pdfUrl {
                 let cell = collectionView.dequeueReusableCell(type: PdfPreviewCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
+                cell.breadcrumbContext = PreviewBreadcrumb.CellContext(sessionId: breadcrumbSessionId, item: indexPath.item)
                 cell.configureWith(documentUrl: url, fileId: file.id)
                 return cell
             } else {
@@ -1177,12 +1184,42 @@ extension PreviewViewController: UICollectionViewDataSource {
         }
     }
 
-    private func reloadItemsAfterOneLoop(at indexPath: IndexPath) {
+    private func previewBreadcrumbMetadata(at indexPath: IndexPath) -> [String: Any] {
+        return [
+            "sessionId": breadcrumbSessionId,
+            "requestedItem": indexPath.item,
+            "currentItem": currentIndex.item,
+            "modelItemCount": previewFiles.count,
+            "isAttachedToWindow": viewIfLoaded?.window != nil
+        ]
+    }
+
+    private func reloadBreadcrumbMetadata(
+        at indexPath: IndexPath,
+        reloadId: String,
+        reason: PreviewBreadcrumb.ReloadReason
+    ) -> [String: Any] {
+        var metadata = previewBreadcrumbMetadata(at: indexPath)
+        metadata["reloadId"] = reloadId
+        metadata["reason"] = reason.rawValue
+        return metadata
+    }
+
+    private func reloadItemsAfterOneLoop(at indexPath: IndexPath, reason: PreviewBreadcrumb.ReloadReason) {
+        let reloadId = UUID().uuidString
+        let metadata = reloadBreadcrumbMetadata(at: indexPath, reloadId: reloadId, reason: reason)
+        PreviewBreadcrumb.record("reload.requested", metadata: metadata)
         Task { @MainActor in
-            guard currentIndex.item < collectionView.numberOfItems(inSection: 0) else {
+            var metadata = reloadBreadcrumbMetadata(at: indexPath, reloadId: reloadId, reason: reason)
+            let itemCount = collectionView.numberOfItems(inSection: 0)
+            metadata["collectionItemCount"] = itemCount
+            guard currentIndex.item < itemCount else {
+                PreviewBreadcrumb.record("reload.skipped", metadata: metadata)
                 return
             }
+            PreviewBreadcrumb.record("reload.begin", metadata: metadata)
             collectionView.reloadItems(at: [indexPath])
+            PreviewBreadcrumb.record("reload.end", metadata: metadata)
         }
     }
 }
