@@ -94,13 +94,13 @@ final class VideoControlsView: UIView {
         playPauseButton.addTarget(self, action: #selector(playPausePressed), for: .touchUpInside)
 
         for label in [elapsedTimeLabel, remainingTimeLabel] {
-            label.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
+            label.font = MediaPlaybackStyle.timeLabelFont
             label.textColor = .white
         }
 
         positionSlider.minimumTrackTintColor = .white
         positionSlider.maximumTrackTintColor = .white.withAlphaComponent(0.3)
-        positionSlider.setThumbImage(Self.circleImage, for: .normal)
+        positionSlider.setThumbImage(MediaPlaybackStyle.sliderThumbImage(color: .white), for: .normal)
 
         let stackView = UIStackView(arrangedSubviews: [
             playPauseButton,
@@ -137,27 +137,10 @@ final class VideoControlsView: UIView {
 
     private func updateLabels(currentTime: CMTime) {
         elapsedTimeLabel.text = currentTime.formattedText
-        let totalSeconds = duration.seconds
-        guard totalSeconds.isFinite else {
-            remainingTimeLabel.text = CMTime.unknownTimeText
-            return
-        }
-        let remaining = max(duration - currentTime, .zero)
-        remainingTimeLabel.text = "-\(remaining.formattedText)"
+        remainingTimeLabel.text = currentTime.remainingTimeText(until: duration)
     }
 
     @objc private func playPausePressed() {
         onPlayPause?()
     }
-
-    private static let circleImage: UIImage = {
-        let size = CGSize(width: 10, height: 10)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { ctx in
-            UIColor.white.setFill()
-            let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
-            ctx.cgContext.addEllipse(in: rect)
-            ctx.cgContext.drawPath(using: .fill)
-        }
-    }()
 }
