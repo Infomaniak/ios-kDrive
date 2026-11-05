@@ -36,6 +36,7 @@ import UIKit
     func openWith(from: UIView)
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
     var fileActionPanelHeight: CGFloat { get }
+    var isFullscreenPreview: Bool { get }
 }
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
@@ -105,6 +106,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     var fileActionPanelHeight: CGFloat {
         fullScreenPreview || isBookPreviewLayout ? 0 : Self.smallDetentHeight
+    }
+
+    public var isFullscreenPreview: Bool {
+        return fullScreenPreview
     }
 
     private var backgroundExtensionView: UIView?
@@ -706,6 +711,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         hideFloatingPanel(fullScreenPreview)
+        for case let cell as PreviewCollectionViewCell in collectionView.visibleCells {
+            cell.fullscreenDidChange()
+        }
     }
 
     func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false) {
@@ -1103,7 +1111,6 @@ extension PreviewViewController: UICollectionViewDataSource {
             case .video:
                 let cell = collectionView.dequeueReusableCell(type: VideoCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
-                cell.parentViewController = self
                 cell.driveFileManager = driveFileManager
                 cell.configureWith(file: file)
                 return cell
