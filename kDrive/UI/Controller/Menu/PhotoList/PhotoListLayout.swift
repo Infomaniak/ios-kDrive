@@ -37,22 +37,29 @@ struct PhotoListLayout: FileListLayout {
             let containerWidth = environment.container.effectiveContentSize.width
             let columns = getColumnCountFor(width: containerWidth)
 
-            let itemFractionalWidth = 1.0 / CGFloat(columns)
+            let spacing: CGFloat = 4
+            let cellWidth = (containerWidth - spacing * CGFloat(columns - 1)) / CGFloat(columns)
 
             let itemSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(itemFractionalWidth),
-                heightDimension: .fractionalWidth(itemFractionalWidth)
+                widthDimension: .absolute(cellWidth),
+                heightDimension: .absolute(cellWidth)
             )
-
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-            let groupHeight = NSCollectionLayoutDimension.fractionalWidth(itemFractionalWidth)
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: groupHeight)
-
-            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, repeatingSubitem: item, count: columns)
-            group.interItemSpacing = .fixed(4)
+            let groupSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1),
+                heightDimension: .absolute(cellWidth)
+            )
+            let group = NSCollectionLayoutGroup.horizontal(
+                layoutSize: groupSize,
+                repeatingSubitem: item,
+                count: columns
+            )
+            group.interItemSpacing = .fixed(spacing)
 
             let section = NSCollectionLayoutSection(group: group)
+
+            section.interGroupSpacing = spacing
 
             let headerFooterSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                           heightDimension: .estimated(50))

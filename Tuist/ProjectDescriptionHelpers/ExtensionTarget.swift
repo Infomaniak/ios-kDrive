@@ -106,6 +106,7 @@ public extension Target {
                            "kDrive/UI/View/Files/FloatingPanel/FloatingPanelSortOptionTableViewCell.swift",
                            "kDrive/UI/View/Files/FloatingPanel/FloatingPanelQuickActionCollectionViewCell.swift",
                            "kDrive/UI/View/Files/FloatingPanel/FloatingPanelTableViewCell.swift",
+                           "kDrive/UI/View/Files/FloatingPanel/FilePanelQuickActionsLayout.swift",
                            "kDrive/UI/View/Footer view/**",
                            "kDrive/UI/View/Menu/SwitchUser/**",
                            "kDrive/UI/View/Menu/MenuTableViewCell.swift",

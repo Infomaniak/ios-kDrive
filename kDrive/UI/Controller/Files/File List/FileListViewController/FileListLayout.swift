@@ -72,7 +72,10 @@ struct DefaultFileListLayout: FileListLayout {
         let cellWidth = floor((effectiveContentWidth - gridInnerSpacing * 2 * CGFloat(gridColumns - 1)) / CGFloat(gridColumns))
         let size = CGSize(width: cellWidth, height: floor(cellWidth * gridCellRatio))
 
-        let itemSize = NSCollectionLayoutSize(widthDimension: .absolute(size.width), heightDimension: .absolute(size.height))
+        let itemSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0 / CGFloat(gridColumns)),
+            heightDimension: .absolute(size.height)
+        )
 
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         item.contentInsets = NSDirectionalEdgeInsets(
