@@ -158,8 +158,7 @@ public final class SingleTrackPlayer: Pausable {
         onPositionChange.send(positionSlider)
 
         if let duration = player?.currentItem?.duration {
-            let remainingTime = "−\((duration - time).formattedText)"
-            onRemainingTimeChange.send(remainingTime)
+            onRemainingTimeChange.send(time.remainingTimeText(until: duration))
         }
     }
 
@@ -196,8 +195,7 @@ public final class SingleTrackPlayer: Pausable {
             onPositionMaximumChange.send(maximumPosition)
 
             let elapsedTime = player?.currentItem?.currentTime() ?? .zero
-            let remainingTime = "−\((duration - elapsedTime).formattedText)"
-            onRemainingTimeChange.send(remainingTime)
+            onRemainingTimeChange.send(elapsedTime.remainingTimeText(until: duration))
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
@@ -422,5 +420,10 @@ public extension CMTime {
         } else {
             return String(format: "%i:%02i", minutes, seconds)
         }
+    }
+
+    func remainingTimeText(until duration: CMTime) -> String {
+        guard duration.seconds.isFinite else { return Self.unknownTimeText }
+        return "−\(max(duration - self, .zero).formattedText)"
     }
 }
