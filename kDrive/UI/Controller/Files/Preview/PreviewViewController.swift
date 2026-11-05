@@ -1213,7 +1213,7 @@ extension PreviewViewController: UICollectionViewDataSource {
             var metadata = reloadBreadcrumbMetadata(at: indexPath, reloadId: reloadId, reason: reason)
             let itemCount = collectionView.numberOfItems(inSection: 0)
             metadata["collectionItemCount"] = itemCount
-            guard currentIndex.item < itemCount else {
+            guard (0..<itemCount).contains(indexPath.item) else {
                 PreviewBreadcrumb.record("reload.skipped", metadata: metadata)
                 return
             }
