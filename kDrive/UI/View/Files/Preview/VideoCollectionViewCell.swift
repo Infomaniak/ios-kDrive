@@ -331,10 +331,15 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         playbackStatusObserver = nil
         isPlayerRevealed = false
         needsStartFromBeginning = true
+        if let timeObserver {
+            player?.removeTimeObserver(timeObserver)
+            self.timeObserver = nil
+        }
         player = nil
         playerLayerView.player = nil
         playerLayerView.alpha = 0
         controlsView.reset()
+        updateControlsVisibility(animated: false)
         previewFrameImageView.alpha = 1
         tapGestureRecognizer.isEnabled = true
     }
