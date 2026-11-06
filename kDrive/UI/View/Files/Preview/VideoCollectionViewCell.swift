@@ -254,14 +254,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             Task { @MainActor in
                 guard let self, self.isCurrentPage, self.player === player else { return }
                 self.controlsView.setPlaying(status != .paused)
-                switch status {
-                case .playing:
-                    self.previewDelegate?.setPlaybackFullscreen(true)
-                case .paused:
-                    self.previewDelegate?.setPlaybackFullscreen(false)
-                default:
-                    return
-                }
             }
         }
         let interval = CMTime(seconds: 0.1, preferredTimescale: 600)

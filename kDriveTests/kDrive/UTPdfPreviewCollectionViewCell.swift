@@ -132,7 +132,6 @@ private final class PDFPageDelegate: PreviewContentCellDelegate {
     }
 
     func setFullscreen(_ fullscreen: Bool?) {}
-    func setPlaybackFullscreen(_ isPlaying: Bool) {}
     func errorWhilePreviewing(fileId: Int, error: Error) {}
     func openWith(from: UIView) {}
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?) {}
