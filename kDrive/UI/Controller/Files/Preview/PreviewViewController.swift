@@ -108,7 +108,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         fullScreenPreview || isBookPreviewLayout ? 0 : Self.smallDetentHeight
     }
 
-    public var isFullscreenPreview: Bool {
+    var isFullscreenPreview: Bool {
         return fullScreenPreview
     }
 
