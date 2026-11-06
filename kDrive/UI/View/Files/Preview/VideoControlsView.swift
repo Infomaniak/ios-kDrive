@@ -42,6 +42,12 @@ final class VideoControlsView: UIView {
     private var lastScrubbingActivity = Date.distantPast
     private var isScrubbing = false
 
+    private var airPlayButton: AVRoutePickerView = {
+        let view = AVRoutePickerView()
+        view.prioritizesVideoDevices = true
+        return view
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -120,7 +126,8 @@ final class VideoControlsView: UIView {
             playPauseButton,
             elapsedTimeLabel,
             positionSlider,
-            remainingTimeLabel
+            remainingTimeLabel,
+            airPlayButton
         ])
         stackView.axis = .horizontal
         stackView.alignment = .center
@@ -140,10 +147,13 @@ final class VideoControlsView: UIView {
                                                 constant: -UIConstants.Padding.small),
             stackView.topAnchor.constraint(equalTo: backgroundView.contentView.topAnchor),
             stackView.bottomAnchor.constraint(equalTo: backgroundView.contentView.bottomAnchor),
-            stackView.heightAnchor.constraint(equalToConstant: 52),
+            stackView.heightAnchor.constraint(equalToConstant: 48),
 
-            playPauseButton.widthAnchor.constraint(equalToConstant: 44),
-            playPauseButton.heightAnchor.constraint(equalToConstant: 44)
+            playPauseButton.widthAnchor.constraint(equalToConstant: 40),
+            playPauseButton.heightAnchor.constraint(equalToConstant: 40),
+
+            airPlayButton.widthAnchor.constraint(equalToConstant: 40),
+            airPlayButton.heightAnchor.constraint(equalToConstant: 40)
         ])
 
         reset()
