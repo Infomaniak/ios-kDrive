@@ -23,6 +23,7 @@ import UIKit
 
 final class VideoControlsView: UIView {
     var onPlayPause: (() -> Void)?
+    var onSeek: ((Float) -> Void)?
 
     private let backgroundView: UIVisualEffectView = {
         if #available(iOS 26.0, *) {
@@ -37,6 +38,7 @@ final class VideoControlsView: UIView {
     private let positionSlider = UISlider()
 
     private var duration = CMTime.indefinite
+    private var isScrubbing = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -62,6 +64,7 @@ final class VideoControlsView: UIView {
 
     func update(currentTime: CMTime, duration: CMTime) {
         self.duration = duration
+        guard !isScrubbing else { return }
         updateLabels(currentTime: currentTime)
         let totalSeconds = duration.seconds
         positionSlider.isEnabled = totalSeconds.isFinite && totalSeconds > 0
@@ -70,6 +73,7 @@ final class VideoControlsView: UIView {
 
     func reset() {
         duration = .indefinite
+        isScrubbing = false
         positionSlider.value = 0
         positionSlider.isEnabled = false
         elapsedTimeLabel.text = CMTime.zeroTimeText
@@ -101,6 +105,10 @@ final class VideoControlsView: UIView {
         positionSlider.minimumTrackTintColor = .white
         positionSlider.maximumTrackTintColor = .white.withAlphaComponent(0.3)
         positionSlider.setThumbImage(MediaPlaybackStyle.sliderThumbImage(color: .white), for: .normal)
+        positionSlider.addTarget(self, action: #selector(sliderBeganTracking), for: .touchDown)
+        positionSlider.addTarget(self, action: #selector(sliderValueChanged), for: .valueChanged)
+        positionSlider.addTarget(self, action: #selector(sliderEndedTracking),
+                                 for: [.touchUpInside, .touchUpOutside, .touchCancel])
 
         let stackView = UIStackView(arrangedSubviews: [
             playPauseButton,
@@ -142,5 +150,20 @@ final class VideoControlsView: UIView {
 
     @objc private func playPausePressed() {
         onPlayPause?()
+    }
+
+    @objc private func sliderBeganTracking() {
+        isScrubbing = true
+    }
+
+    @objc private func sliderValueChanged() {
+        isScrubbing = true
+        let previewTime = CMTimeMultiplyByFloat64(duration, multiplier: Float64(positionSlider.value))
+        updateLabels(currentTime: previewTime)
+    }
+
+    @objc private func sliderEndedTracking() {
+        isScrubbing = false
+        onSeek?(positionSlider.value)
     }
 }

@@ -101,6 +101,13 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         controlsView.onPlayPause = { [weak self] in
             self?.togglePlayPause()
         }
+
+        controlsView.onSeek = { [weak self] progress in
+            guard let self, let player else { return }
+            let duration = player.currentItem?.duration ?? .zero
+            let newTime = CMTimeMultiplyByFloat64(duration, multiplier: Float64(progress))
+            player.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        }
     }
 
     override func prepareForReuse() {
