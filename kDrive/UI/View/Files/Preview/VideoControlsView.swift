@@ -38,6 +38,8 @@ final class VideoControlsView: UIView {
     private let positionSlider = UISlider()
 
     private var duration = CMTime.indefinite
+    private var scrubbingTouch: UITouch?
+    private var lastScrubbingActivity = Date.distantPast
     private var isScrubbing = false
 
     override init(frame: CGRect) {
@@ -64,7 +66,10 @@ final class VideoControlsView: UIView {
 
     func update(currentTime: CMTime, duration: CMTime) {
         self.duration = duration
-        guard !isScrubbing else { return }
+        if isScrubbing {
+            guard scrubbingHasEnded else { return }
+            endScrubbing()
+        }
         updateLabels(currentTime: currentTime)
         let totalSeconds = duration.seconds
         positionSlider.isEnabled = totalSeconds.isFinite && totalSeconds > 0
@@ -74,6 +79,7 @@ final class VideoControlsView: UIView {
     func reset() {
         duration = .indefinite
         isScrubbing = false
+        scrubbingTouch = nil
         positionSlider.value = 0
         positionSlider.isEnabled = false
         elapsedTimeLabel.text = CMTime.zeroTimeText
@@ -105,8 +111,8 @@ final class VideoControlsView: UIView {
         positionSlider.minimumTrackTintColor = .white
         positionSlider.maximumTrackTintColor = .white.withAlphaComponent(0.3)
         positionSlider.setThumbImage(MediaPlaybackStyle.sliderThumbImage(color: .white), for: .normal)
-        positionSlider.addTarget(self, action: #selector(sliderBeganTracking), for: .touchDown)
-        positionSlider.addTarget(self, action: #selector(sliderValueChanged), for: .valueChanged)
+        positionSlider.addTarget(self, action: #selector(sliderBeganTracking(_:event:)), for: .touchDown)
+        positionSlider.addTarget(self, action: #selector(sliderValueChanged(_:event:)), for: .valueChanged)
         positionSlider.addTarget(self, action: #selector(sliderEndedTracking),
                                  for: [.touchUpInside, .touchUpOutside, .touchCancel])
 
@@ -152,18 +158,45 @@ final class VideoControlsView: UIView {
         onPlayPause?()
     }
 
-    @objc private func sliderBeganTracking() {
-        isScrubbing = true
+    @objc private func sliderBeganTracking(_ slider: UISlider, event: UIEvent?) {
+        beginScrubbing(event: event)
     }
 
-    @objc private func sliderValueChanged() {
-        isScrubbing = true
-        let previewTime = CMTimeMultiplyByFloat64(duration, multiplier: Float64(positionSlider.value))
+    @objc private func sliderValueChanged(_ slider: UISlider, event: UIEvent?) {
+        beginScrubbing(event: event)
+        let previewTime = CMTimeMultiplyByFloat64(duration, multiplier: Float64(slider.value))
         updateLabels(currentTime: previewTime)
+        if scrubbingHasEnded {
+            endScrubbing()
+        }
     }
 
     @objc private func sliderEndedTracking() {
+        endScrubbing()
+    }
+
+    private func beginScrubbing(event: UIEvent?) {
+        if !isScrubbing {
+            scrubbingTouch = nil
+        }
+        isScrubbing = true
+        lastScrubbingActivity = Date()
+        if let touch = event?.allTouches?.first {
+            scrubbingTouch = touch
+        }
+    }
+
+    private var scrubbingHasEnded: Bool {
+        if let scrubbingTouch {
+            return scrubbingTouch.phase == .ended || scrubbingTouch.phase == .cancelled
+        }
+        return Date().timeIntervalSince(lastScrubbingActivity) > 1
+    }
+
+    private func endScrubbing() {
+        guard isScrubbing else { return }
         isScrubbing = false
+        scrubbingTouch = nil
         onSeek?(positionSlider.value)
     }
 }
