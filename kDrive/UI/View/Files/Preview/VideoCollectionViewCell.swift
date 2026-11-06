@@ -293,7 +293,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         guard areControlsVisible, let controlsBottomConstraint else { return }
         let bottomInset = previewDelegate?.fileActionPanelHeight ?? 0
         guard controlsBottomConstraint.constant != -bottomInset else { return }
-        controlsBottomConstraint.constant = -bottomInset
+        if traitCollection.horizontalSizeClass == .regular {
+            controlsBottomConstraint.constant = -bottomInset - UIConstants.Padding.medium
+        } else {
+            controlsBottomConstraint.constant = -bottomInset
+        }
     }
 
     private func togglePlayPause() {
