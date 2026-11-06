@@ -31,11 +31,11 @@ import UIKit
 @MainActor protocol PreviewContentCellDelegate: AnyObject {
     func pdfPreviewUpdated(fileId: Int, currentPage: Int, totalPages: Int)
     func setFullscreen(_ fullscreen: Bool?)
-    func setPlaybackFullscreen(_ isPlaying: Bool)
     func errorWhilePreviewing(fileId: Int, error: Error)
     func openWith(from: UIView)
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
     var fileActionPanelHeight: CGFloat { get }
+    var isFullscreenPreview: Bool { get }
 }
 
 final class PreviewViewController: UIViewController, PreviewContentCellDelegate, SceneStateRestorable {
@@ -105,6 +105,10 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     var fileActionPanelHeight: CGFloat {
         fullScreenPreview || isBookPreviewLayout ? 0 : Self.smallDetentHeight
+    }
+
+    var isFullscreenPreview: Bool {
+        return fullScreenPreview
     }
 
     private var backgroundExtensionView: UIView?
@@ -676,16 +680,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         applyFullscreen(fullscreen)
     }
 
-    func setPlaybackFullscreen(_ isPlaying: Bool) {
-        if isPlaying {
-            guard !fullScreenPreview else { return }
-            applyFullscreen(true)
-            isPlaybackFullscreen = true
-        } else {
-            setFullscreen(false)
-        }
-    }
-
     private func applyFullscreen(_ fullscreen: Bool?) {
         if isBookPreviewLayout {
             fullScreenPreview = false
@@ -706,6 +700,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         }
 
         hideFloatingPanel(fullScreenPreview)
+        for case let cell as PreviewCollectionViewCell in collectionView.visibleCells {
+            cell.fullscreenDidChange()
+        }
     }
 
     func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false) {
@@ -1103,7 +1100,6 @@ extension PreviewViewController: UICollectionViewDataSource {
             case .video:
                 let cell = collectionView.dequeueReusableCell(type: VideoCollectionViewCell.self, for: indexPath)
                 cell.previewDelegate = self
-                cell.parentViewController = self
                 cell.driveFileManager = driveFileManager
                 cell.configureWith(file: file)
                 return cell

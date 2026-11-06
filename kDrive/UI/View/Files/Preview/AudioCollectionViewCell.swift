@@ -48,20 +48,14 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Change slider thumb
-        let size = CGSize(width: 10, height: 10)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        let circleImage = renderer.image { ctx in
-            KDriveResourcesAsset.infomaniakColor.color.setFill()
-            let rect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
-            ctx.cgContext.addEllipse(in: rect)
-            ctx.cgContext.drawPath(using: .fill)
-        }
         songTitleLabel.text = ""
         artistNameLabel.text = ""
-        elapsedTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
-        remainingTimeLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .medium)
-        positionSlider.setThumbImage(circleImage, for: .normal)
+        elapsedTimeLabel.font = MediaPlaybackStyle.timeLabelFont
+        remainingTimeLabel.font = MediaPlaybackStyle.timeLabelFont
+        positionSlider.setThumbImage(
+            MediaPlaybackStyle.sliderThumbImage(color: KDriveResourcesAsset.infomaniakColor.color),
+            for: .normal
+        )
         artworkImageView.isAccessibilityElement = false
 
         NotificationCenter.default.addObserver(

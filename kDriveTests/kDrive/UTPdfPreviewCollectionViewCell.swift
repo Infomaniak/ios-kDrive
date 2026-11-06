@@ -124,6 +124,7 @@ private final class PDFPageDelegate: PreviewContentCellDelegate {
     let updates = AsyncStream<PageUpdate>.makeStream()
     private(set) var updateCount = 0
     var fileActionPanelHeight: CGFloat { 0 }
+    var isFullscreenPreview: Bool { true }
 
     func pdfPreviewUpdated(fileId: Int, currentPage: Int, totalPages: Int) {
         updateCount += 1
@@ -131,7 +132,6 @@ private final class PDFPageDelegate: PreviewContentCellDelegate {
     }
 
     func setFullscreen(_ fullscreen: Bool?) {}
-    func setPlaybackFullscreen(_ isPlaying: Bool) {}
     func errorWhilePreviewing(fileId: Int, error: Error) {}
     func openWith(from: UIView) {}
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?) {}

@@ -53,6 +53,10 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         // META: keep SonarCloud happy
     }
 
+    func fullscreenDidChange() {
+        // META: keep SonarCloud happy
+    }
+
     func willDisplayInCollectionView() {
         // META: keep SonarCloud happy
     }

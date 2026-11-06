@@ -58,6 +58,10 @@ public final class VideoPlayer: Pausable {
 
     public private(set) var isReadyToPlay = false
 
+    public var avPlayer: AVPlayer? {
+        player
+    }
+
     public lazy var playerViewController: AVPlayerViewController = {
         let playerViewController = AVPlayerViewController()
         playerViewController.player = self.player
