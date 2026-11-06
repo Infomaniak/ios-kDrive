@@ -31,7 +31,6 @@ import UIKit
 @MainActor protocol PreviewContentCellDelegate: AnyObject {
     func pdfPreviewUpdated(fileId: Int, currentPage: Int, totalPages: Int)
     func setFullscreen(_ fullscreen: Bool?)
-    func setPlaybackFullscreen(_ isPlaying: Bool)
     func errorWhilePreviewing(fileId: Int, error: Error)
     func openWith(from: UIView)
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
@@ -679,16 +678,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     func setFullscreen(_ fullscreen: Bool? = nil) {
         isPlaybackFullscreen = false
         applyFullscreen(fullscreen)
-    }
-
-    func setPlaybackFullscreen(_ isPlaying: Bool) {
-        if isPlaying {
-            guard !fullScreenPreview else { return }
-            applyFullscreen(true)
-            isPlaybackFullscreen = true
-        } else {
-            setFullscreen(false)
-        }
     }
 
     private func applyFullscreen(_ fullscreen: Bool?) {
