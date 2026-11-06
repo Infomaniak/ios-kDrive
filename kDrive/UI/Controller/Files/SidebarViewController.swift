@@ -656,7 +656,6 @@ class SidebarViewController: CustomLargeTitleCollectionViewController, SelectSwi
                     selectMode: selectMode
                 )
 
-                headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
 
             case RootMenuHeaderView.kind.rawValue:
