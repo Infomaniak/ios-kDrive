@@ -56,7 +56,18 @@ class CustomLargeTitleCollectionViewController: UICollectionViewController {
 
         // Refresh once the transition has settled, since updates are skipped during it.
         lastAppliedTitleAlpha = nil
+        #if !ISEXTENSION
+        if !MainTabViewController.isHingeClosed {
+            refreshHeaderViewHeight()
+        }
+        #endif
         updateNavigationBarAppearance()
+    }
+
+    private func refreshHeaderViewHeight() {
+        guard let height = collectionView.visibleSupplementaryViews(ofKind: UICollectionView.elementKindSectionHeader)
+            .compactMap({ $0 as? HomeLargeTitleHeaderView }).first?.frame.height else { return }
+        headerViewHeight = height
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: any UIViewControllerTransitionCoordinator) {

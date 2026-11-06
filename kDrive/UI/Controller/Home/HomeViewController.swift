@@ -529,7 +529,6 @@ extension HomeViewController {
                     homeLargeTitleHeaderView.isEnabled = false
                     homeLargeTitleHeaderView.text = recentActivitiesController?.title ?? ""
                 }
-                headerViewHeight = homeLargeTitleHeaderView.frame.height
                 return homeLargeTitleHeaderView
             case .upload:
                 return UICollectionReusableView()
