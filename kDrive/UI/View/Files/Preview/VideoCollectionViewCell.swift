@@ -290,7 +290,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             controlsView.isHidden = false
         }
         UIView.animate(withDuration: animated ? 0.2 : 0) {
-            controlsView.alpha = isVisible ? 1 : 0
+            self.controlsView.alpha = isVisible ? 1 : 0
         } completion: { _ in
             guard !self.areControlsVisible else { return }
             self.controlsView.isHidden = true
@@ -306,9 +306,14 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
 
     private func togglePlayPause() {
         guard let player else { return }
-        if player.timeControlStatus == .playing {
+        if player.timeControlStatus != .paused {
             player.pause()
         } else {
+            if let item = player.currentItem,
+               item.duration.seconds.isFinite,
+               item.currentTime() >= item.duration {
+                player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+            }
             player.play()
         }
     }

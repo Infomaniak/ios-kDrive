@@ -168,7 +168,7 @@ final class VideoControlsView: UIView {
         onPlayPause?()
     }
 
-    @objc private func sliderBeganTracking(_ slider: UISlider, event: UIEvent?) {
+    @objc private func sliderBeganTracking(_: UISlider, event: UIEvent?) {
         beginScrubbing(event: event)
     }
 
