@@ -3,3 +3,6 @@
 - Fiabilité améliorée des envois au retour dans kDrive après l’enregistrement de fichiers depuis une autre app
 - Nouvelle présentation de la demande d’avis sur l’app et clarification des choix d’annulation des téléchargements
 - Amélioration de la stabilité de l’app et de la gestion des envois vers les dossiers où la création de fichiers est impossible
+- Fiabilité améliorée de l’aperçu des PDF lors du passage d’un fichier à l’autre
+- Fiabilité améliorée de l’ouverture des fichiers depuis l’app Fichiers et de la vérification des versions à jour
+- Correction de l’espacement des grilles de fichiers et de photos et de la disposition des boutons dans les panneaux d’actions et de catégories

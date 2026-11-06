@@ -3,3 +3,6 @@
 - Improved upload reliability when returning to kDrive after saving files from another app
 - Refreshed the app feedback prompt and clarified download cancellation choices
 - Improved app stability and handling of uploads to folders where files cannot be created
+- Improved PDF preview reliability when switching between files
+- Improved reliability when opening files from the Files app and checking for updated versions
+- Fixed spacing in file and photo grids and button layouts in action and category panels
