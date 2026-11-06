@@ -124,6 +124,7 @@ private final class PDFPageDelegate: PreviewContentCellDelegate {
     let updates = AsyncStream<PageUpdate>.makeStream()
     private(set) var updateCount = 0
     var fileActionPanelHeight: CGFloat { 0 }
+    var isFullscreenPreview: Bool { true }
 
     func pdfPreviewUpdated(fileId: Int, currentPage: Int, totalPages: Int) {
         updateCount += 1
