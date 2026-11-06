@@ -33,7 +33,7 @@ public extension DriveFileManager {
     }
 
     func updateAvailableOfflineFiles() async throws {
-        let offlineFiles = getAvailableOfflineFiles()
+        let offlineFiles = getAvailableOfflineFiles().filter { $0.driveId == drive.id }
         guard !offlineFiles.isEmpty else { return }
 
         let batchSize = 500
@@ -74,7 +74,7 @@ public extension DriveFileManager {
     }
 
     func setFileAvailableOffline(file: File, available: Bool, completion: @escaping (Error?) -> Void) {
-        guard let liveFile = getCachedFile(id: file.id, freeze: false) else {
+        guard let liveFile = getCachedFile(uid: file.uid, freeze: false) else {
             completion(DriveError.fileNotFound)
             return
         }
