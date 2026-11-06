@@ -47,6 +47,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private var controlsBottomConstraint: NSLayoutConstraint?
     private var areControlsVisible = true
 
+    private var pipController: AVPictureInPictureController?
+
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
         indicator.color = KDriveResourcesAsset.loaderDarkerDefaultColor.color
@@ -107,6 +109,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             let duration = player.currentItem?.duration ?? .zero
             let newTime = CMTimeMultiplyByFloat64(duration, multiplier: Float64(progress))
             player.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        }
+
+        if AVPictureInPictureController.isPictureInPictureSupported() {
+            pipController = AVPictureInPictureController(playerLayer: playerLayerView.playerLayer)
+            pipController?.canStartPictureInPictureAutomaticallyFromInline = true
         }
     }
 
