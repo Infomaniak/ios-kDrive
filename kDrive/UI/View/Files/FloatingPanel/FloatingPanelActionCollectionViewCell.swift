@@ -47,6 +47,8 @@ class FloatingPanelActionCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        disabledView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        highlightedView.backgroundColor = KDriveResourcesAsset.backgroundCardViewSelectedColor.color
         switchView.isHidden = true
         progressView.setInfomaniakStyle()
     }

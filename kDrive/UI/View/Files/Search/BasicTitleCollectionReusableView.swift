@@ -16,8 +16,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class BasicTitleCollectionReusableView: UICollectionReusableView {
     @IBOutlet var titleLabel: UILabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        backgroundColor = KDriveResourcesAsset.backgroundColor.color
+    }
 }

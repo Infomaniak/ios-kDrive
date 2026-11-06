@@ -33,6 +33,11 @@ class FileInformationLocationTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        locationImage.image = KDriveResourcesAsset.drive.image
+        locationLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        locationButton.tintColor = KDriveResourcesAsset.iconColor.color
+        locationButton.setImage(KDriveResourcesAsset.view.image, for: .normal)
         locationButton.accessibilityLabel = KDriveResourcesStrings.Localizable.allPathTitle
         locationButton.accessibilityIdentifier = KDriveResourcesStrings.Localizable.allPathTitle
     }

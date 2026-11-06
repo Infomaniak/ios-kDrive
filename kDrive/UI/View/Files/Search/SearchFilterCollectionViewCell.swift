@@ -36,6 +36,11 @@ class SearchFilterCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        iconImageView.image = KDriveResourcesAsset.fileDefault.image
+        iconImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        removeButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        removeButton.setImage(KDriveResourcesAsset.remove.image, for: .normal)
+        contentView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
         contentView.layer.cornerRadius = UIConstants.Button.cornerRadius
         contentView.clipsToBounds = true

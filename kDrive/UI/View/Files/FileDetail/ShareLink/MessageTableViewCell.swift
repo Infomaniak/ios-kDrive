@@ -27,6 +27,8 @@ class MessageTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        messageTextView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        messageTextView.textColor = KDriveResourcesAsset.primaryTextColor.color
 
         messageTextView.delegate = self
     }

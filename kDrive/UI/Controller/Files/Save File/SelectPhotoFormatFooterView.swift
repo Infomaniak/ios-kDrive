@@ -16,9 +16,17 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class SelectPhotoFormatFooterView: UIView {
+    @IBOutlet private var descriptionLabel: UILabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        descriptionLabel.textColor = KDriveResourcesAsset.titleColor.color
+    }
+
     class func instantiate() -> SelectPhotoFormatFooterView {
         return Bundle.main
             .loadNibNamed("SelectPhotoFormatFooterView", owner: nil, options: nil)![0] as! SelectPhotoFormatFooterView

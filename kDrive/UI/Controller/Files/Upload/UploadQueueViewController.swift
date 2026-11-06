@@ -30,6 +30,8 @@ import UIKit
 typealias UploadFileDisplayed = CornerCellContainer<UploadFile>
 
 final class UploadQueueViewController: UIViewController {
+    @IBOutlet private var closeBarButtonItem: UIBarButtonItem!
+
     private let errorFile = UploadFileDisplayed(isFirstInList: true, isLastInList: true, content: UploadFile())
     private var isWifiOnly = false
     private var wifiOnlyNotificationToken: NotificationToken?
@@ -58,6 +60,10 @@ final class UploadQueueViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        closeBarButtonItem.image = KDriveResourcesAsset.close.image
+        cancelButton.image = KDriveResourcesAsset.retry.image
         navigationItem.hideBackButtonText()
 
         tableView.register(cellView: UploadTableViewCell.self)

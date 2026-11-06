@@ -39,7 +39,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         label.style = .header2
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.text = KDriveStrings.Localizable.publicSharePasswordNeededTitle
+        label.text = KDriveResourcesStrings.Localizable.publicSharePasswordNeededTitle
         return label
     }()
 
@@ -49,7 +49,7 @@ public class PasswordViewController: UIViewController, UITextFieldDelegate {
         label.textColor = KDriveResourcesAsset.primaryTextColor.color
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.text = KDriveStrings.Localizable.publicSharePasswordNeededDescription
+        label.text = KDriveResourcesStrings.Localizable.publicSharePasswordNeededDescription
         return label
     }()
 

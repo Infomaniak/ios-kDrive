@@ -37,6 +37,9 @@ class FileDetailHeaderTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        fileImage.image = KDriveResourcesAsset.testImage.image
+        segmentedControl.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        segmentedControl.selectedSegmentTintColor = KDriveResourcesAsset.infomaniakColor.color
 
         fileImageView.cornerRadius = 15
         fileImageView.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]

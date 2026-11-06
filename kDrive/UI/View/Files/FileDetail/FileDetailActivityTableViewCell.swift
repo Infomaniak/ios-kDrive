@@ -19,15 +19,21 @@
 import InfomaniakCoreUIKit
 import kDriveCore
 import kDriveResources
-import LocalizeKit
 import UIKit
 
 class FileDetailActivityTableViewCell: InsetTableViewCell {
+    @IBOutlet private var clockImageView: UIImageView!
+
     @IBOutlet var detailLabel: UILabel!
     @IBOutlet var timeLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        detailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        clockImageView.image = KDriveResourcesAsset.clock.image
+        clockImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        timeLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
         accessoryImageView.image = KDriveResourcesAsset.placeholderAvatar.image
     }
 
@@ -136,7 +142,7 @@ class FileDetailActivityTableViewCell: InsetTableViewCell {
         case .unknown:
             localizedKey = "fileActivityUnknown"
         }
-        detailLabel.text = localizedKey.localized
+        detailLabel.text = KDriveResourcesResources.bundle.localizedString(forKey: localizedKey, value: nil, table: nil)
 
         timeLabel.text = Constants.formatDate(activity.createdAt, style: .time, relative: true)
     }

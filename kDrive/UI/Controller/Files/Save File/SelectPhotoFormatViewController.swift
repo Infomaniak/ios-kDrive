@@ -17,6 +17,7 @@
  */
 
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol SelectPhotoFormatDelegate: AnyObject {
@@ -33,6 +34,8 @@ class SelectPhotoFormatViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         tableView.register(cellView: SelectionTableViewCell.self)
 
         let footerView = SelectPhotoFormatFooterView.instantiate()

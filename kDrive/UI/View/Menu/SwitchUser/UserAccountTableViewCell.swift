@@ -25,6 +25,12 @@ class UserAccountTableViewCell: MenuTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        accessoryImageView.image = KDriveResourcesAsset.chevronRight.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        userEmailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         logoImage.image = KDriveResourcesAsset.placeholderAvatar.image
         logoImage.layer.cornerRadius = logoImage.frame.size.width / 2
     }

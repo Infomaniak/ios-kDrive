@@ -18,11 +18,25 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class NewFolderLocationTableViewCell: InsetTableViewCell {
+    @IBOutlet private var chevronRightImageView: UIImageView!
+    @IBOutlet private var folderCommonDocumentsImageView: UIImageView!
+
     @IBOutlet var driveIcon: UIImageView!
     @IBOutlet var driveLabel: IKLabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        driveIcon.image = KDriveResourcesAsset.drive.image
+        chevronRightImageView.image = KDriveResourcesAsset.chevronRight.image
+        chevronRightImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        folderCommonDocumentsImageView.image = KDriveResourcesAsset.folderCommonDocuments.image
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+    }
 
     func configure(with drive: Drive) {
         driveIcon.tintColor = UIColor(hex: drive.preferences.color)

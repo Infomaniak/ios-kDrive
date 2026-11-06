@@ -49,6 +49,16 @@ class EmptyTableView: UIView {
     @IBOutlet var emptyImageView: UIImageView!
     @IBOutlet var reloadButton: UIButton!
     @IBOutlet var emptyImageFrameViewHeightConstant: NSLayoutConstraint!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        emptyImageView.image = KDriveResourcesAsset.folderFilled.image
+        emptyImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        emptyMessageLabel.textColor = KDriveResourcesAsset.titleColor.color
+        emptyDetailsLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        reloadButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
+    }
+
     var actionHandler: ((UIButton) -> Void)?
 
     private func setCenteringEnabled(_ enabled: Bool) {

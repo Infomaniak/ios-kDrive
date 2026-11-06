@@ -22,7 +22,18 @@ import kDriveResources
 import UIKit
 
 class UploadsPausedTableViewCell: InsetTableViewCell {
+    @IBOutlet private var pauseImageView: UIImageView!
+    @IBOutlet private var chevronRightImageView: UIImageView!
+
     @IBOutlet var subtitleLabel: IKLabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        pauseImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        chevronRightImageView.image = KDriveResourcesAsset.chevronRight.image
+        chevronRightImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+    }
 
     func setUploadCount(_ count: Int) {
         subtitleLabel.text = KDriveResourcesStrings.Localizable.uploadInProgressNumberFile(count)

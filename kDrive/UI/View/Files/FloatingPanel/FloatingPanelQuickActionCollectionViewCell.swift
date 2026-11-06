@@ -43,6 +43,10 @@ class FloatingPanelQuickActionCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        darkLayer.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        actionLabel.textColor = KDriveResourcesAsset.titleColor.color
+        loadingIndicator.color = KDriveResourcesAsset.loaderDarkerDefaultColor.color
+        buttonView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         contentView.bringSubviewToFront(darkLayer)
         progressView.isHidden = true
         progressView.setInfomaniakStyle()

@@ -16,8 +16,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class ImportingTableViewCell: UITableViewCell {
     @IBOutlet var importationProgressView: UIProgressView!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        importationProgressView.tintColor = KDriveResourcesAsset.infomaniakColor.color
+    }
 }

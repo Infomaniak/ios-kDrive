@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class FileDetailActivitySeparatorTableViewCell: UITableViewCell {
@@ -24,6 +25,14 @@ class FileDetailActivitySeparatorTableViewCell: UITableViewCell {
     @IBOutlet var textView: UIView!
     @IBOutlet var dateLabel: UILabel!
     @IBOutlet var bottomSeparator: UIView!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        topSeparator.backgroundColor = KDriveResourcesAsset.borderColor.color
+        dateLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        textView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        bottomSeparator.backgroundColor = KDriveResourcesAsset.borderColor.color
+    }
 
     override func prepareForReuse() {
         super.prepareForReuse()

@@ -79,6 +79,7 @@ final class StoreViewController: UICollectionViewController, SceneStateRestorabl
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         // Set up collection view
         collectionView.register(WrapperCollectionViewCell.self, forCellWithReuseIdentifier: "WrapperCollectionViewCell")

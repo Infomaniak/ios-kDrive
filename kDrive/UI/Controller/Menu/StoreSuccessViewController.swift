@@ -19,9 +19,18 @@
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class StoreSuccessViewController: UIViewController {
+    @IBOutlet private var orderSuccessImageView: UIImageView!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        orderSuccessImageView.image = KDriveResourcesAsset.orderSuccess.image
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+    }
+
     @LazyInjectService private var router: AppNavigable
     @LazyInjectService private var accountManager: AccountManager
 

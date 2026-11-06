@@ -74,6 +74,8 @@ final class ManageCategoriesViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        createButton.image = KDriveResourcesAsset.add.image
 
         navigationItem.hideBackButtonText()
 

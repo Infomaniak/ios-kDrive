@@ -54,6 +54,16 @@ class ShareLinkTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        separatorView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        shareIconImageView.image = KDriveResourcesAsset.lock.image
+        shareIconImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        shareLinkTitleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        rightArrow.image = KDriveResourcesAsset.chevronRight.image
+        rightArrow.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        shareLinkDescriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        fileShareLinkSettingTitle.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
+        copyButton.tintColor = KDriveResourcesAsset.iconColor.color
+        copyButton.setImage(KDriveResourcesAsset.exportIos.image, for: .normal)
         copyButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonShare
         selectionStyle = .default
     }

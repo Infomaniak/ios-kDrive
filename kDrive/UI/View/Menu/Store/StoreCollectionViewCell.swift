@@ -41,6 +41,7 @@ final class StoreCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        imageView.image = KDriveResourcesAsset.circleTag.image
 
         cornerRadius = UIConstants.cornerRadius
         backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color

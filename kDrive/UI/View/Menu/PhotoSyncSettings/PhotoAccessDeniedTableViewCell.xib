@@ -21,7 +21,6 @@
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L'accès à vos photos est désactivé, pouvez changer ce paramètre dans les réglages." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O86-Nn-Dhm" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="33.5"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                        <color key="textColor" name="primaryTextColor"/>
                         <nil key="highlightedColor"/>
                         <userDefinedRuntimeAttributes>
                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="photoAccessDeniedDescription"/>
@@ -54,11 +53,11 @@
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <point key="canvasLocation" x="131.8840579710145" y="107.47767857142857"/>
+            <connections>
+                <outlet property="descriptionLabel" destination="O86-Nn-Dhm" id="asset-O86-Nn-Dhm"/>
+            </connections>
         </tableViewCell>
     </objects>
     <resources>
-        <namedColor name="primaryTextColor">
-            <color red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

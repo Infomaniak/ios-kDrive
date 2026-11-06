@@ -31,6 +31,7 @@ class ColorSelectionCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        checkmark.image = KDriveResourcesAsset.bigCheck.image
         layer.cornerRadius = frame.height / 2
         clipsToBounds = true
         checkmark.isHidden = true

@@ -23,6 +23,10 @@ import kDriveResources
 import UIKit
 
 class UsersAccessTableViewCell: InsetTableViewCell {
+    @IBOutlet private var disabledView: UIView!
+    @IBOutlet private var invitationLabel: UILabel!
+    @IBOutlet private var externalUserLabel: UILabel!
+
     @LazyInjectService private var driveInfosManager: DriveInfosManager
 
     @IBOutlet var rightsStackView: UIStackView!
@@ -36,6 +40,13 @@ class UsersAccessTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        disabledView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        detailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        accessoryImageView.image = KDriveResourcesAsset.chevronRight.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        invitationLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        externalUserLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
         accessoryImageView.isHidden = false
         avatarImage.layer.cornerRadius = avatarImage.frame.height / 2
         avatarImage.clipsToBounds = true

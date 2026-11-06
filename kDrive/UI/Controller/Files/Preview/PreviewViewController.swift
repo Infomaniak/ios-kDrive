@@ -194,6 +194,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        collectionView.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color
+        statusBarView.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.previewBackgroundColor.color
 
         collectionView.collectionViewLayout = createFullscreenLayout()
         collectionView.register(cellView: NoPreviewCollectionViewCell.self)

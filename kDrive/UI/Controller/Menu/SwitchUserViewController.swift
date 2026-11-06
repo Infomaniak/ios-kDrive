@@ -26,6 +26,13 @@ import kDriveResources
 import UIKit
 
 class SwitchUserViewController: UIViewController {
+    @IBOutlet private var switchUserImageView: UIImageView!
+    @IBOutlet private var headingLabel: UILabel!
+    @IBOutlet private var separatorView: UIView!
+    @IBOutlet private var descriptionLabel: UILabel!
+    @IBOutlet private var addUserImageView: UIImageView!
+    @IBOutlet private var addAccountButton: UIButton!
+
     @IBOutlet var tableView: UITableView!
 
     @LazyInjectService private var matomo: MatomoUtils
@@ -46,6 +53,15 @@ class SwitchUserViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        switchUserImageView.image = KDriveResourcesAsset.switchUser.image
+        headingLabel.textColor = KDriveResourcesAsset.titleColor.color
+        separatorView.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        addUserImageView.image = KDriveResourcesAsset.addUser.image
+        addAccountButton.setTitleColor(KDriveResourcesAsset.primaryTextColor.color, for: .normal)
+        addAccountButton.setTitleColor(KDriveResourcesAsset.lightTextColor.color, for: .highlighted)
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         tableView.register(cellView: UserAccountTableViewCell.self)
         tableView.sectionFooterHeight = 0
 

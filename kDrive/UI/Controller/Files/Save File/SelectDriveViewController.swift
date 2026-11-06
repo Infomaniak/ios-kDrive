@@ -21,6 +21,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol SelectDriveDelegate: AnyObject {
@@ -50,6 +51,8 @@ class SelectDriveViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         navigationItem.hideBackButtonText()
 

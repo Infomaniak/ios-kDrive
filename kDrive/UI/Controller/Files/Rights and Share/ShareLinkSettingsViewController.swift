@@ -100,6 +100,8 @@ class ShareLinkSettingsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
         title = KDriveResourcesStrings.Localizable.fileShareLinkSettingsTitle
 

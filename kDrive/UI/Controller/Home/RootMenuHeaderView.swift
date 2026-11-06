@@ -23,6 +23,9 @@ import kDriveResources
 import UIKit
 
 class RootMenuHeaderView: UICollectionReusableView {
+    @IBOutlet private var offlineImageView: UIImageView!
+    @IBOutlet private var offlineLabel: UILabel!
+
     static let kind: UICollectionView.UICollectionViewSupplementaryViewKind = .custom("menuHeader")
 
     @LazyInjectService var photoLibraryUploader: PhotoLibraryUploadable
@@ -40,6 +43,10 @@ class RootMenuHeaderView: UICollectionReusableView {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        offlineImageView.image = KDriveResourcesAsset.offline.image
+        offlineImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        offlineLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        offlineView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         offlineView.isHidden = true
         hideIfNeeded()
     }

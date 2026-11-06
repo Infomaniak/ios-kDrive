@@ -39,6 +39,7 @@ ios-kDrive/
 │   ├── Resources/               #   Assets, localized strings, entitlements
 │   │   ├── *.lproj/             #     Localizations (en, de, es, fr, it)
 │   │   ├── Assets.xcassets      #     Images, colors, icons
+│   │   ├── LaunchAssets.xcassets  # App-only launch-screen images and background
 │   │   ├── package-list.json    #     Generated third-party licenses shown in Settings
 │   │   └── Info.plist           #     App configuration
 │   ├── Utils/                   #   Utility functions, helpers
@@ -88,6 +89,7 @@ ios-kDrive/
 │   │   ├── Alert/               #     Alert controllers
 │   │   └── Scan/                #     Document scanning
 │   ├── Utils/                   #   Core utilities
+│   │   ├── ResourceLocalization.swift  # Shared-bundle localization for Interface Builder controls
 │   │   ├── PHAsset/             #     Photo library utilities
 │   │   ├── FileProvider/        #     File provider utilities
 │   │   ├── Files/               #     File operations
@@ -120,6 +122,7 @@ ios-kDrive/
 ├── Project.swift                # Tuist project definition
 ├── scripts/                     # Development scripts
 │   └── lint.sh                  #   SwiftLint runner
+│   └── strip_framework_symbols.sh  # Release embedded-framework symbol stripping and re-signing
 ├── ci_scripts/                  # Xcode Cloud CI — DO NOT run locally
 ├── .github/
 │   ├── github-app.yml           # GitHub app session setup and build/run commands
@@ -182,6 +185,7 @@ Commit the generated `kDrive/Resources/package-list.json` with dependency update
 - **SwiftUI (when used):** Property wrappers must be private (`@State`, `@StateObject`, etc.).
 - **Localized strings:** Use localized string keys from `kDriveResources` — never raw string literals.
 - **Icons:** Reuse icons from `kDrive/Resources/Assets.xcassets` via the generated `KDriveResourcesAsset` accessors (e.g. `KDriveResourcesAsset.close.image`) before falling back to SF Symbols. Use SF Symbols only when no suitable existing icon is available in that catalog.
+- **Interface Builder assets:** Configure shared images and colors with typed `KDriveResourcesAsset` accessors in the owning view's `awakeFromNib()` or controller's `viewDidLoad()`. Keep assets in `kDriveResources`; avoid string-based runtime asset attributes and alias lookups.
 - **DI:** Use `@InjectService` from InfomaniakDI for dependency injection; register via `FactoryService` in kDriveCore.
 - **Early-start DI:** Prefer `@LazyInjectService` during early app startup to prevent DI resolution deadlocks.
 - **API layer:** Extend `DriveApiFetcher` for API operations. Create focused extensions (`+Upload`, `+Listing`, `+Share`).

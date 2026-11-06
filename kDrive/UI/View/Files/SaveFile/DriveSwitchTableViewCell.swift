@@ -18,6 +18,7 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class DriveSwitchTableViewCell: InsetTableViewCell {
@@ -31,6 +32,16 @@ class DriveSwitchTableViewCell: InsetTableViewCell {
     @IBOutlet var heightConstraint: NSLayoutConstraint!
     @IBOutlet var driveImageView: UIImageView!
     @IBOutlet var selectDriveImageView: UIImageView!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        selectDriveImageView.image = KDriveResourcesAsset.chevronRight.image
+        selectDriveImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        driveImageView.image = KDriveResourcesAsset.drive.image
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+    }
+
     var style: Style = .home {
         didSet {
             heightConstraint.constant = style.height

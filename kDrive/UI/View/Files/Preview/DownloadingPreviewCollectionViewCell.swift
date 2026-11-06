@@ -18,6 +18,7 @@
 
 import AVKit
 import kDriveCore
+import kDriveResources
 import Nuke
 import UIKit
 
@@ -46,6 +47,7 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        progressView.progressTintColor = KDriveResourcesAsset.infomaniakColor.color
         previewZoomView.delegate = self
 
         tapToZoomRecognizer = UITapGestureRecognizer(target: self, action: #selector(didDoubleTap))

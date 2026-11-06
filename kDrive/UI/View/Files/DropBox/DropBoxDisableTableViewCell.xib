@@ -25,7 +25,6 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Désactiver la boîte de dépot" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vlm-Ga-0j6" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="16" y="16" width="288" height="35"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="18"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonDisableDropBox"/>
@@ -56,14 +55,12 @@
                 <outlet property="bottomConstraint" destination="MsG-Sm-pdc" id="qqe-Ef-HtL"/>
                 <outlet property="contentInsetView" destination="a2e-ee-Fhl" id="7Zr-4U-J59"/>
                 <outlet property="topConstraint" destination="Mlv-QF-qbz" id="7cD-yc-qJo"/>
+                <outlet property="descriptionLabel" destination="Vlm-Ga-0j6" id="asset-Vlm-Ga-0j6"/>
             </connections>
             <point key="canvasLocation" x="137.68115942028987" y="101.45089285714285"/>
         </tableViewCell>
     </objects>
     <resources>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

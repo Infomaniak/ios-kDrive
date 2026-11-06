@@ -36,6 +36,7 @@ class NewFolderTypeTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         tableView.register(cellView: FolderTypeTableViewCell.self)
         tableView.separatorColor = .clear
         tableView.sectionFooterHeight = 0

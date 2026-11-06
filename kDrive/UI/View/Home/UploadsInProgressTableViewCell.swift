@@ -22,11 +22,16 @@ import kDriveResources
 import UIKit
 
 class UploadsInProgressTableViewCell: InsetTableViewCell {
+    @IBOutlet private var chevronRightImageView: UIImageView!
+
     @IBOutlet var progressView: RPCircularProgress!
     @IBOutlet var subtitleLabel: IKLabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        chevronRightImageView.image = KDriveResourcesAsset.chevronRight.image
+        chevronRightImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
         progressView.setInfomaniakStyle()
     }
