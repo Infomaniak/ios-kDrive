@@ -424,7 +424,8 @@ public extension CMTime {
 
     func remainingTimeText(until duration: CMTime) -> String {
         guard duration.seconds.isFinite, seconds.isFinite else { return Self.unknownTimeText }
-        let remainingSeconds = max(duration.seconds.rounded() - seconds.rounded(.down), 0)
+        let remainingSeconds = seconds >= duration.seconds ?
+            0 : max(duration.seconds.rounded() - seconds.rounded(.down), 0)
         return "−\(CMTime(seconds: remainingSeconds, preferredTimescale: 1).formattedText)"
     }
 }
