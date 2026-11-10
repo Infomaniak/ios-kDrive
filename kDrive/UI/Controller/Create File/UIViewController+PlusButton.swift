@@ -72,8 +72,11 @@ extension UIViewController {
         }
         #endif
 
-        view.addInteraction(UIHingeInteraction { [weak self] _, _ in
-            guard let self else { return }
+        view.addInteraction(UIHingeInteraction { [weak self] _, update in
+            guard let self,
+                  let status = update.hinge?.status,
+                  status != .unknown else { return }
+
             setPlusVisible(
                 addItem: addItem,
                 visible: splitViewController?.traitCollection.horizontalSizeClass == .compact

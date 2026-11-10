@@ -170,8 +170,10 @@ class FileListViewController: UICollectionViewController, SceneStateRestorable {
             ) { [weak self] panel in
                 self?.mediaHelper = panel.mediaHelper
             }
-            view.addInteraction(UIHingeInteraction { [weak self] _, _ in
-                guard let self else { return }
+            view.addInteraction(UIHingeInteraction { [weak self] _, update in
+                guard let self,
+                      let status = update.hinge?.status,
+                      status != .unknown else { return }
                 hasHinge = true
                 updateRightBarButtons(viewModel.currentRightBarButtons.map(makeBarButtons) ?? [])
             })

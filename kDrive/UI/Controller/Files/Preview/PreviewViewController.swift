@@ -239,7 +239,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         updateFileEntityIdentifier()
 
         if #available(iOS 27.1, *) {
-            view.addInteraction(UIHingeInteraction { [weak self] _, _ in
+            view.addInteraction(UIHingeInteraction { [weak self] _, update in
+                guard let status = update.hinge?.status, status != .unknown else { return }
                 self?.viewIfLoaded?.setNeedsLayout()
             })
         }
