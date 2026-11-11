@@ -74,6 +74,10 @@ public extension DriveApiFetcher {
         }
     }
 
+    func externalImports(drive: AbstractDrive, page: Int) async throws -> ValidServerResponse<[ExternalImport]> {
+        try await perform(request: authenticatedRequest(.externalImports(drive: drive, page: page)))
+    }
+
     private static func makeCopyToDriveBody(file: AbstractFile,
                                             remotePath: String,
                                             destinationFolder: AbstractFile) -> [String: Encodable & Sendable] {

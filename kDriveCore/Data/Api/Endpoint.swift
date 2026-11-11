@@ -356,6 +356,14 @@ public extension Endpoint {
         return .driveInfoV2(drive: destinationDrive).appending(path: "/imports/kdrive")
     }
 
+    static func externalImports(drive: AbstractDrive, page: Int) -> Endpoint {
+        return .driveInfoV2(drive: drive).appending(path: "/imports", queryItems: [
+            URLQueryItem(name: "page", value: "\(page)"),
+            URLQueryItem(name: "per_page", value: "100"),
+            URLQueryItem(name: "total", value: "true")
+        ])
+    }
+
     static func cancelImport(drive: AbstractDrive, id: Int) -> Endpoint {
         return .driveInfoV2(drive: drive).appending(path: "/imports/\(id)/cancel")
     }
