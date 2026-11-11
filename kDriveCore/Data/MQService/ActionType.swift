@@ -40,9 +40,31 @@ enum Action: String, Codable {
     case reload
 }
 
-enum ExternalImportAction: String, Codable {
+public enum ExternalImportAction: String, Codable {
     case importStarted = "import_started"
     case createFile = "create_file"
     case importFinish = "import_finish"
     case cancel
+
+    case fileCreated = "import_file_created"
+    case importCanceling = "import_canceling"
+    case importCanceled = "import_canceled"
+    case importErrored = "import_errored"
+    case importFinished = "import_finished"
+    case unknown
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let value = try container.decode(String.self)
+        self = ExternalImportAction(rawValue: value) ?? .unknown
+    }
+
+    public var isTerminal: Bool {
+        switch self {
+        case .importFinish, .cancel, .importCanceled, .importErrored, .importFinished:
+            return true
+        case .importStarted, .createFile, .fileCreated, .importCanceling, .unknown:
+            return false
+        }
+    }
 }
