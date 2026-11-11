@@ -81,6 +81,12 @@ public enum UIConstants {
 }
 
 public extension UIConstants {
+    @MainActor
+    private static var defaultSnackBarContextView: UIView? {
+        @InjectService var appNavigable: AppNavigable
+        return appNavigable.rootViewController?.viewIfLoaded?.window
+    }
+
     @discardableResult
     @MainActor
     static func showSnackBar(
@@ -89,10 +95,8 @@ public extension UIConstants {
         action: IKSnackBar.Action? = nil,
         contextView: UIView? = nil
     ) -> IKSnackBar? {
-        @InjectService var appRouter: AppNavigable
-
         let snackbar: IKSnackBar?
-        if let contextView = contextView ?? appRouter.topMostViewController?.viewIfLoaded {
+        if let contextView = contextView ?? defaultSnackBarContextView {
             snackbar = IKSnackBar.make(
                 in: contextView,
                 message: message,
