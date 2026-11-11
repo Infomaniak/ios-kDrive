@@ -1107,14 +1107,15 @@ public final class DriveFileManager {
                 .where { $0.externalImport.id == id }
                 .first
 
-            guard let file else {
-                // No file corresponding to external import, ignore it
-                return
-            }
+            guard let file else { return }
 
             switch action {
-            case .importFinish:
+            case .importFinish, .importFinished:
                 file.externalImport?.status = .done
+            case .importErrored:
+                file.externalImport?.status = .failed
+            case .importCanceled:
+                file.externalImport?.status = .canceled
             case .cancel:
                 file.externalImport?.status = .failed
             default:

@@ -526,11 +526,20 @@ extension FileActionsFloatingPanelViewController {
         ] selectedDirectory, selectedDriveFileManager in
             Task {
                 do {
-                    _ = try await self?.driveFileManager.apiFetcher.copyToDrive(
+                    let externalImport = try await self?.driveFileManager.apiFetcher.copyToDrive(
                         file: proxyFile,
                         remotePath: remotePath,
                         destinationDrive: selectedDriveFileManager.drive,
                         destinationFolder: selectedDirectory.proxify()
+                    )
+                    guard let externalImport else { return }
+                    @InjectService var crossDriveImportTracker: CrossDriveImportTrackable
+                    crossDriveImportTracker.register(
+                        importId: externalImport.id,
+                        fileName: sourceName,
+                        destinationDriveId: selectedDriveFileManager.drive.id,
+                        destinationFolderId: selectedDirectory.id,
+                        userId: self?.accountManager.currentUserId ?? 0
                     )
                     self?.dismiss(animated: true)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveStarted(sourceName))
