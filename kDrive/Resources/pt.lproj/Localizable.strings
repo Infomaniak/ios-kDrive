@@ -607,6 +607,12 @@
 /* loco:604b81caf1d3fc3c426e2443 */
 "convertToDropboxTitle" = "Converter para caixa de depósito %@";
 
+/* loco:6af4708feb02d7c0c6025704 */
+"copyToDriveDoneSnackbar" = "%@ copiado para outra unidade";
+
+/* loco:6af470eed37a4970c1006005 */
+"copyToDriveErrorSnackbar" = "Falha na cópia de %@ para outra unidade";
+
 /* loco:6a5f4c062dd6a21492070df2 */
 "copyToDriveStarted" = "%s está a ser copiado para outra unidade";
 

@@ -616,6 +616,12 @@
 /* loco:604b81caf1d3fc3c426e2443 */
 "convertToDropboxTitle" = "Konverter til indleveringsboks %@";
 
+/* loco:6af4708feb02d7c0c6025704 */
+"copyToDriveDoneSnackbar" = "%@ er kopieret til et andet drev";
+
+/* loco:6af470eed37a4970c1006005 */
+"copyToDriveErrorSnackbar" = "Det lykkedes ikke at kopiere %@ til et andet drev";
+
 /* loco:6a5f4c062dd6a21492070df2 */
 "copyToDriveStarted" = "%s kopieres til et andet drev";
 

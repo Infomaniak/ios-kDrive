@@ -607,6 +607,12 @@
 /* loco:604b81caf1d3fc3c426e2443 */
 "convertToDropboxTitle" = "Convertir en boîte de dépôt %@";
 
+/* loco:6af4708feb02d7c0c6025704 */
+"copyToDriveDoneSnackbar" = "%@ copié sur un autre drive";
+
+/* loco:6af470eed37a4970c1006005 */
+"copyToDriveErrorSnackbar" = "Échec de la copie de %@ vers un autre drive";
+
 /* loco:6a5f4c062dd6a21492070df2 */
 "copyToDriveStarted" = "%s est en cours de copie vers un autre drive";
 

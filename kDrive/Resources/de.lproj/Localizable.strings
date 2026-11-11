@@ -616,6 +616,12 @@
 /* loco:604b81caf1d3fc3c426e2443 */
 "convertToDropboxTitle" = "In Briefkasten umwandeln %@";
 
+/* loco:6af4708feb02d7c0c6025704 */
+"copyToDriveDoneSnackbar" = "%@ wurde auf ein anderes Laufwerk kopiert";
+
+/* loco:6af470eed37a4970c1006005 */
+"copyToDriveErrorSnackbar" = "Das Kopieren von %@ auf ein anderes Laufwerk ist fehlgeschlagen";
+
 /* loco:6a5f4c062dd6a21492070df2 */
 "copyToDriveStarted" = "%s wird auf ein anderes Laufwerk kopiert";
 
