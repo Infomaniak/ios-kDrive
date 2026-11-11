@@ -51,7 +51,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="n3N-4l-Lcn">
                                                 <rect key="frame" x="22.5" y="0.0" width="184.5" height="24"/>
                                                 <subviews>
-                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.5" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="offline" translatesAutoresizingMaskIntoConstraints="NO" id="PWB-e7-TbP">
+                                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" alpha="0.5" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="PWB-e7-TbP">
                                                         <rect key="frame" x="0.0" y="0.0" width="24" height="24"/>
                                                         <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                         <constraints>
@@ -89,7 +89,7 @@
                                     <constraint firstAttribute="height" constant="60" id="9hE-VO-Ngj"/>
                                 </constraints>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <state key="normal" title="buttonOpenWith" image="open-with"/>
+                                <state key="normal" title="buttonOpenWith"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="buttonOpenWith"/>
                                 </userDefinedRuntimeAttributes>
@@ -126,12 +126,11 @@
                 <outlet property="progressView" destination="70m-uN-hhd" id="VFW-Mj-vx0"/>
                 <outlet property="subtitleLabel" destination="N9n-Yd-KkA" id="ZGA-m7-W0V"/>
                 <outlet property="titleLabel" destination="2vc-OR-Nm9" id="TOe-BV-0MR"/>
+                <outlet property="offlineImageView" destination="PWB-e7-TbP" id="asset-PWB-e7-TbP"/>
             </connections>
             <point key="canvasLocation" x="136.95652173913044" y="129.91071428571428"/>
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="offline" width="24" height="24"/>
-        <image name="open-with" width="24" height="24"/>
     </resources>
 </document>

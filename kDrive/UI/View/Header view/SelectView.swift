@@ -21,6 +21,8 @@ import kDriveResources
 import UIKit
 
 class SelectView: UIView {
+    @IBOutlet private var menuButton: UIButton!
+
     class MultipleSelectionActionButton: UIButton {
         private(set) var action: MultipleSelectionAction
         private weak var delegate: FilesHeaderViewDelegate?
@@ -58,6 +60,8 @@ class SelectView: UIView {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        menuButton.setImage(KDriveResourcesAsset.menu.image, for: .normal)
+        backgroundColor = KDriveResourcesAsset.backgroundColor.color
         titleLabel.font = UIFont.systemFont(ofSize: UIFontMetrics.default.scaledValue(for: 22), weight: .bold)
         titleLabel.accessibilityTraits = .header
         titleLabel.text = ""

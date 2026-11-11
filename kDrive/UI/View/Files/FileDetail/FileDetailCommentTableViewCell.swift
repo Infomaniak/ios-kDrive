@@ -26,6 +26,8 @@ protocol FileCommentDelegate: AnyObject {
 }
 
 class FileDetailCommentTableViewCell: UITableViewCell {
+    @IBOutlet private var clockImageView: UIImageView!
+
     @IBOutlet var userAvatar: UIImageView!
     @IBOutlet var userNameLabel: UILabel!
     @IBOutlet var descriptionLabel: UILabel!
@@ -40,6 +42,13 @@ class FileDetailCommentTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        clockImageView.image = KDriveResourcesAsset.clock.image
+        clockImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        timeLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        likeImage.tintColor = KDriveResourcesAsset.iconColor.color
+        likeLabel.textColor = KDriveResourcesAsset.iconColor.color
+        userNameLabel.textColor = KDriveResourcesAsset.titleColor.color
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(likeButton))
         likeImage.addGestureRecognizer(tap)

@@ -18,10 +18,16 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class ParameterAccessDeniedTableViewCell: UITableViewCell {
     @IBOutlet var descriptionLabel: IKLabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+    }
 
     @IBAction func goToSettingsButtonPressed(_ sender: Any) {
         Constants.openSettings()

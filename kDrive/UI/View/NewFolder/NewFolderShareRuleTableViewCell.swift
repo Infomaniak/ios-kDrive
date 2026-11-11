@@ -35,6 +35,9 @@ class NewFolderShareRuleTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
         rights = false
         collectionView.isHidden = true
         accessoryImageView.isHidden = false

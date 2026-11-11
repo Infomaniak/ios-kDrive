@@ -29,6 +29,8 @@ class UploadFolderTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        iconImageView.image = KDriveResourcesAsset.folderFilled.image
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
 
         progressView.setInfomaniakStyle()
     }

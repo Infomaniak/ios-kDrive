@@ -16,9 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class FileInformationCreationTableViewCell: UITableViewCell {
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var creationLabel: UILabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        creationLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+    }
 }

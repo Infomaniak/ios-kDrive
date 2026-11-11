@@ -25,6 +25,12 @@ class HomeLargeTitleHeaderView: UICollectionReusableView {
     @IBOutlet var titleButton: IKButton!
     @IBOutlet var leadingConstraint: NSLayoutConstraint!
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        chevronButton.tintColor = KDriveResourcesAsset.iconColor.color
+        chevronButton.setImage(KDriveResourcesAsset.chevronDown.image, for: .normal)
+    }
+
     var titleButtonPressedHandler: ((UIButton) -> Void)?
 
     var text: String? {

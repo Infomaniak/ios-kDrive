@@ -18,8 +18,17 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class StoreFeatureTableViewCell: UITableViewCell {
+    @IBOutlet private var smallCheckImageView: UIImageView!
+
     @IBOutlet var label: IKLabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        smallCheckImageView.image = KDriveResourcesAsset.smallCheck.image
+        smallCheckImageView.tintColor = KDriveResourcesAsset.titleColor.color
+    }
 }

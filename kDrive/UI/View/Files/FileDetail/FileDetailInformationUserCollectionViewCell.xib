@@ -20,7 +20,7 @@
                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="V7l-dZ-Fkq" userLabel="content view">
                         <rect key="frame" x="0.0" y="0.0" width="63" height="63"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="test-image" translatesAutoresizingMaskIntoConstraints="NO" id="Zpn-1r-17p">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Zpn-1r-17p">
                                 <rect key="frame" x="0.0" y="0.0" width="35" height="35"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="35" id="B3n-Jn-z95"/>
@@ -72,6 +72,5 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="test-image" width="2000" height="1333"/>
     </resources>
 </document>

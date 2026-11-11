@@ -46,6 +46,11 @@ class ShareLinkSettingTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        settingSwitch.onTintColor = KDriveResourcesAsset.infomaniakColor.color
+        settingDetail.textColor = KDriveResourcesAsset.primaryTextColor.color
+        updateLabel.textColor = KDriveResourcesAsset.infomaniakColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         passwordTextField.isHidden = true
         compactDatePicker.isHidden = true
         updateView.isHidden = true

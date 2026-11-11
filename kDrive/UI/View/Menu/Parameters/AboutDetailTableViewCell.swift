@@ -17,8 +17,18 @@
  */
 
 import InfomaniakCoreUIKit
+import kDriveResources
 import UIKit
 
 class AboutDetailTableViewCell: InsetTableViewCell {
     @IBOutlet var detailLabel: UILabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        accessoryImageView.image = KDriveResourcesAsset.chevron.image
+        accessoryImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        detailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+    }
 }

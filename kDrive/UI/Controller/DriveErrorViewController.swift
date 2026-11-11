@@ -25,6 +25,8 @@ import kDriveResources
 import UIKit
 
 class DriveErrorViewController: UIViewController {
+    @IBOutlet private var logoImageView: UIImageView!
+
     enum DriveErrorViewType {
         case noDrive
         case maintenance
@@ -55,6 +57,15 @@ class DriveErrorViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        logoImageView.image = KDriveResourcesAsset.logo.image
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        imageView.image = KDriveResourcesAsset.noDrive.image
+        circleView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        mainButton.setTitleColor(KDriveResourcesAsset.blueColor.color, for: .disabled)
+        otherProfileButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
+        otherProfileButton.setTitleColor(KDriveResourcesAsset.blueColor.color, for: .disabled)
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         navigationItem.hideBackButtonText()
 

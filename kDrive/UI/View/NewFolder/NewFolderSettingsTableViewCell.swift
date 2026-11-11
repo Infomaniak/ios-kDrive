@@ -50,6 +50,11 @@ class NewFolderSettingsTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        settingSwitch.tintColor = KDriveResourcesAsset.infomaniakColor.color
+        settingSwitch.onTintColor = KDriveResourcesAsset.infomaniakColor.color
+        detailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
         textField.delegate = self
 
         textField.setInfomaniakColors()

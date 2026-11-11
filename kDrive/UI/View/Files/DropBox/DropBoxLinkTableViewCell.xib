@@ -28,7 +28,6 @@
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Lien de la boîte de dépôt" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wGz-LN-h9i" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                         <rect key="frame" x="0.0" y="0.0" width="468" height="17"/>
                                         <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                        <color key="textColor" name="titleColor"/>
                                         <nil key="highlightedColor"/>
                                         <userDefinedRuntimeAttributes>
                                             <userDefinedRuntimeAttribute type="string" keyPath="xibLocKey" value="dropBoxLinkTitle"/>
@@ -44,7 +43,6 @@
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="36" id="4pa-4D-1jZ"/>
                                                 </constraints>
-                                                <color key="textColor" name="titleColor"/>
                                                 <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="13"/>
                                                 <textInputTraits key="textInputTraits"/>
                                             </textField>
@@ -54,8 +52,7 @@
                                                     <constraint firstAttribute="height" constant="24" id="MDI-aV-SQo"/>
                                                     <constraint firstAttribute="width" constant="24" id="gbC-g4-vxL"/>
                                                 </constraints>
-                                                <color key="tintColor" name="iconColor"/>
-                                                <state key="normal" image="export-ios"/>
+                                                <state key="normal"/>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="number" keyPath="imageWidth">
                                                         <real key="value" value="25"/>
@@ -98,18 +95,12 @@
                 <outlet property="copyButton" destination="KEo-B6-Qkr" id="6ZL-Nf-yvO"/>
                 <outlet property="copyTextField" destination="GYl-Yk-631" id="jPk-AC-grx"/>
                 <outlet property="topConstraint" destination="fR0-hW-myO" id="wKF-CK-8bW"/>
+                <outlet property="descriptionLabel" destination="wGz-LN-h9i" id="asset-wGz-LN-h9i"/>
             </connections>
             <point key="canvasLocation" x="266.66666666666669" y="55.245535714285715"/>
         </tableViewCell>
     </objects>
     <resources>
-        <image name="export-ios" width="24" height="24"/>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -26,6 +26,12 @@ class AlertTableViewCell: UITableViewCell {
     @IBOutlet var iconImageView: UIImageView!
     @IBOutlet var messageLabel: IKLabel!
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        iconImageView.image = KDriveResourcesAsset.warning.image
+        iconImageView.tintColor = KDriveResourcesAsset.warningColor.color
+    }
+
     enum Style {
         case info, warning
     }

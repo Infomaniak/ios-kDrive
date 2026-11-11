@@ -16,9 +16,22 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class InfoTableViewCell: UITableViewCell {
+    @IBOutlet private var infoImageView: UIImageView!
+    @IBOutlet private var titleLabel: UILabel!
+    @IBOutlet private var actionButton: UIButton!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        infoImageView.image = KDriveResourcesAsset.info.image
+        infoImageView.tintColor = KDriveResourcesAsset.infomaniakColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        actionButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
+    }
+
     var actionHandler: ((UIButton) -> Void)?
 
     @IBAction func buttonPressed(_ sender: UIButton) {

@@ -18,6 +18,7 @@
 
 import InfomaniakCoreCommonUI
 import InfomaniakCoreUIKit
+import kDriveResources
 import UIKit
 
 class ParameterSwitchTableViewCell: InsetTableViewCell {
@@ -28,6 +29,9 @@ class ParameterSwitchTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        valueSwitch.onTintColor = KDriveResourcesAsset.infomaniakColor.color
         valueLabel.text = ""
     }
 

@@ -16,10 +16,16 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class NewFolderSectionHeaderView: UIView {
     @IBOutlet var titleLabel: UILabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+    }
 
     class func instantiate(title: String = "") -> NewFolderSectionHeaderView {
         let view = Bundle.main

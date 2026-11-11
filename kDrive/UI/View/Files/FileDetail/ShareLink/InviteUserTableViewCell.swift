@@ -20,6 +20,7 @@ import InfomaniakCore
 import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
+import kDriveResources
 import UIKit
 
 protocol InviteUserCellDelegate: AnyObject {
@@ -35,6 +36,7 @@ class InviteUserTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        textField.textColor = KDriveResourcesAsset.primaryTextColor.color
 
         textField.delegate = self
     }

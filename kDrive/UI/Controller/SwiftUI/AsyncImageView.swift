@@ -21,6 +21,7 @@ import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import kDriveCore
+import kDriveResources
 import SwiftUI
 
 struct AsyncImageView: View {
@@ -35,7 +36,7 @@ struct AsyncImageView: View {
                     .scaledToFit()
             } else {
                 Circle()
-                    .fill(KDriveAsset.loaderDefaultColor.swiftUIColor)
+                    .fill(KDriveResourcesAsset.loaderDefaultColor.swiftUIColor)
             }
         }
         .task {

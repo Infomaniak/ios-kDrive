@@ -18,12 +18,27 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class RecentSearchCollectionViewCell: UICollectionViewCell {
+    @IBOutlet private var clockImageView: UIImageView!
+    @IBOutlet private var removeButton: UIButton!
+
     @IBOutlet var contentInsetView: UIView!
     @IBOutlet var highlightedView: UIView!
     @IBOutlet var recentSearchTitle: IKLabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        highlightedView.backgroundColor = KDriveResourcesAsset.backgroundCardViewSelectedColor.color
+        clockImageView.image = KDriveResourcesAsset.clock.image
+        clockImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        removeButton.tintColor = KDriveResourcesAsset.primaryTextColor.color
+        removeButton.setImage(KDriveResourcesAsset.close.image, for: .normal)
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+    }
+
     var removeButtonHandler: ((UIButton) -> Void)?
 
     override var isHighlighted: Bool {

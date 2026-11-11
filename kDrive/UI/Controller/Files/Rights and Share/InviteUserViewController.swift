@@ -68,6 +68,7 @@ class InviteUserViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         tableView.register(cellView: InviteUserTableViewCell.self)
         tableView.register(cellView: MenuTableViewCell.self)

@@ -16,10 +16,18 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class NewFolderLocationCollectionViewCell: UICollectionViewCell {
     @IBOutlet var accessoryImage: UIImageView!
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var chevronImage: UIImageView!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        chevronImage.image = KDriveResourcesAsset.chevronRight.image
+        chevronImage.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+    }
 }

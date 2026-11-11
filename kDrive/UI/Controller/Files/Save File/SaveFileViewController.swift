@@ -131,6 +131,8 @@ class SaveFileViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         // Set selected drive and directory to last values
         if selectedDirectory == nil {

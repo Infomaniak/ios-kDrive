@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Foundation
 import ProjectDescription
 
 public extension Target {
@@ -51,12 +52,6 @@ public extension Target {
             "kDrive/UI/View/Menu/PhotoList/ReusableHeaderView.xib",
             "kDrive/UI/View/Menu/SwitchUser/*.xib",
             "kDrive/UI/View/NewFolder/*.xib",
-            "kDrive/**/*.xcassets",
-            "kDrive/**/Localizable.strings",
-            "kDrive/**/*.stringsdict",
-            "kDrive/Resources/illu_drop_box.json",
-            "kDrive/Resources/illu_photos.json",
-            "kDrive/Resources/illu_upgrade.json",
             "kDrive/**/PrivacyInfo.xcprivacy"
         ]
         resources.append(contentsOf: additionalResources)
@@ -66,7 +61,7 @@ public extension Target {
                        product: .appExtension,
                        bundleId: bundleId,
                        deploymentTargets: Constants.deploymentTarget,
-                       infoPlist: .file(path: "\(name)/Info.plist"),
+                       infoPlist: localizedExtensionInfoPlist(name: name),
                        sources: [
                            "\(name)/**",
                            "kDrive/UI/Controller/DriveUpdateRequiredViewController.swift",
@@ -141,5 +136,49 @@ public extension Target {
                            .external(name: "AppLock")
                        ],
                        settings: settings)
+    }
+}
+
+private func localizedExtensionInfoPlist(name: String) -> InfoPlist {
+    let root = URL(fileURLWithPath: #filePath)
+        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+    do {
+        let resources = root.appendingPathComponent("kDrive/Resources")
+        let languages = try FileManager.default.contentsOfDirectory(at: resources, includingPropertiesForKeys: nil)
+            .filter {
+                $0.pathExtension == "lproj"
+                    && FileManager.default.fileExists(atPath: $0.appendingPathComponent("Localizable.strings").path)
+            }
+            .map { $0.deletingPathExtension().lastPathComponent }
+            .sorted()
+        precondition(!languages.isEmpty, "Shared translations must declare at least one language")
+
+        let data = try Data(contentsOf: root.appendingPathComponent("\(name)/Info.plist"))
+        let plist = try PropertyListSerialization.propertyList(from: data, format: nil)
+        guard case var .dictionary(values) = extensionPlistValue(plist) else {
+            preconditionFailure("Extension Info.plist must contain a dictionary")
+        }
+        values["CFBundleLocalizations"] = .array(languages.map { .string($0) })
+        return .dictionary(values)
+    } catch {
+        preconditionFailure("Unable to generate localized extension Info.plist: \(error)")
+    }
+}
+
+private func extensionPlistValue(_ value: Any) -> Plist.Value {
+    switch value {
+    case let string as String:
+        return .string(string)
+    case let dictionary as [String: Any]:
+        return .dictionary(dictionary.mapValues(extensionPlistValue))
+    case let array as [Any]:
+        return .array(array.map(extensionPlistValue))
+    case let number as NSNumber:
+        if CFGetTypeID(number) == CFBooleanGetTypeID() {
+            return .boolean(number.boolValue)
+        }
+        return .integer(number.intValue)
+    default:
+        preconditionFailure("Unsupported extension Info.plist value: \(value)")
     }
 }

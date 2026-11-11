@@ -18,9 +18,22 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class PhotoFormatTableViewCell: InsetTableViewCell {
+    @IBOutlet private var formatDescriptionLabel: UILabel!
+    @IBOutlet private var chevronRightImageView: UIImageView!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        formatDescriptionLabel.textColor = KDriveResourcesAsset.titleColor.color
+        chevronRightImageView.image = KDriveResourcesAsset.chevronRight.image
+        chevronRightImageView.tintColor = KDriveResourcesAsset.secondaryTextColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+    }
+
     func configure(with photoFileFormat: PhotoFileFormat) {
         titleLabel.text = photoFileFormat.title
     }

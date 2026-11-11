@@ -39,6 +39,16 @@ class RightsSelectionTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        rightsIconImageView.image = KDriveResourcesAsset.edit.image
+        rightsIconImageView.tintColor = KDriveResourcesAsset.iconColor.color
+        rightsTitleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        rightsDetailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        updateButton.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        updateButton.setTitleColor(KDriveResourcesAsset.infomaniakColor.color, for: .normal)
+        upgradeLabel.textColor = KDriveResourcesAsset.infomaniakColor.color
+        detailLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        bannerLabel.textColor = KDriveResourcesAsset.infomaniakColor.color
+        bannerBackgroundView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         bannerView.isHidden = true
         updateButton.isHidden = true

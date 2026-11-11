@@ -36,7 +36,7 @@
                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="Jpf-Z6-sIi">
                                         <rect key="frame" x="0.0" y="0.0" width="256" height="14"/>
                                         <subviews>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="folder-filled" translatesAutoresizingMaskIntoConstraints="NO" id="ATZ-nw-3Ee">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ATZ-nw-3Ee">
                                                 <rect key="frame" x="0.0" y="0.0" width="16" height="14"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="14" id="96h-F9-py2"/>
@@ -69,7 +69,6 @@
                                 </constraints>
                             </stackView>
                         </subviews>
-                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstItem="nsR-n8-bA7" firstAttribute="leading" secondItem="xfF-NT-TFG" secondAttribute="trailing" constant="8" id="1gB-LW-5yg"/>
                             <constraint firstAttribute="trailing" secondItem="nsR-n8-bA7" secondAttribute="trailing" constant="16" id="4jh-Mn-pT2"/>
@@ -105,10 +104,6 @@
         </tableViewCell>
     </objects>
     <resources>
-        <image name="folder-filled" width="24" height="24"/>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

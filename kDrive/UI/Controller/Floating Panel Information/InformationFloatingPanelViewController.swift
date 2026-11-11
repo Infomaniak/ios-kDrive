@@ -22,6 +22,8 @@ import Lottie
 import UIKit
 
 class InformationFloatingPanelViewController: UIViewController {
+    @IBOutlet private var copyButton: UIButton!
+
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var imageViewHeightConstraint: NSLayoutConstraint!
     @IBOutlet var animationView: LottieAnimationView!
@@ -41,6 +43,19 @@ class InformationFloatingPanelViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        imageView.image = KDriveResourcesAsset.stop.image
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        descriptionLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        additionalInformationLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        copyTextField.textColor = KDriveResourcesAsset.titleColor.color
+        copyButton.tintColor = KDriveResourcesAsset.iconColor.color
+        copyButton.setImage(KDriveResourcesAsset.exportIos.image, for: .normal)
+        leftButton.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        leftButton.setTitleColor(KDriveResourcesAsset.titleColor.color, for: .normal)
+        leftButton.setTitleColor(KDriveResourcesAsset.blueColor.color, for: .disabled)
+        rightButton.backgroundColor = KDriveResourcesAsset.infomaniakColor.color
+        rightButton.setTitleColor(KDriveResourcesAsset.blueColor.color, for: .disabled)
+        view.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         leftButton.titleLabel?.numberOfLines = 2
         leftButton.titleLabel?.textAlignment = .center
         rightButton.titleLabel?.numberOfLines = 2

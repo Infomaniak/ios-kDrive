@@ -55,7 +55,6 @@
                                 </userDefinedRuntimeAttributes>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstItem="UC4-6P-CaN" firstAttribute="top" secondItem="WL6-BX-uLK" secondAttribute="bottom" constant="16" id="AzZ-Qs-vM4"/>
                             <constraint firstItem="WL6-BX-uLK" firstAttribute="leading" secondItem="Zb0-Nj-dHX" secondAttribute="leading" constant="24" id="Mvn-tW-IEh"/>
@@ -89,8 +88,5 @@
         </tableViewCell>
     </objects>
     <resources>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

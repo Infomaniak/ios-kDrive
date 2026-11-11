@@ -24,6 +24,12 @@ class RecentActivityBottomTableViewCell: UITableViewCell {
     @IBOutlet var fileNameLabel: UILabel!
     @IBOutlet var fileImage: UIImageView!
 
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        fileImage.image = KDriveResourcesAsset.folderFilled.image
+        fileNameLabel.textColor = KDriveResourcesAsset.titleColor.color
+    }
+
     override func prepareForReuse() {
         super.prepareForReuse()
         fileNameLabel.layer.sublayers?.forEach { $0.removeFromSuperlayer() }

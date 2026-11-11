@@ -24,7 +24,6 @@
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rtI-Wc-46s" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                 <rect key="frame" x="0.0" y="0.0" width="36" height="17"/>
                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                                <color key="textColor" name="titleColor"/>
                                 <nil key="highlightedColor"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="subtitle2"/>
@@ -36,9 +35,8 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="c2S-Sc-24B">
                                         <rect key="frame" x="0.0" y="0.0" width="332" height="113"/>
                                         <subviews>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="view" translatesAutoresizingMaskIntoConstraints="NO" id="Bbk-d7-2xx">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Bbk-d7-2xx">
                                                 <rect key="frame" x="16" y="17" width="20" height="20"/>
-                                                <color key="tintColor" name="iconColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="width" constant="20" id="AXe-qi-Emq"/>
                                                     <constraint firstAttribute="height" constant="20" id="FVU-cB-Z0u"/>
@@ -47,15 +45,13 @@
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IFi-Mg-IrK" customClass="IKLabel" customModule="InfomaniakCoreUIKit">
                                                 <rect key="frame" x="44" y="17" width="40.5" height="19.5"/>
                                                 <fontDescription key="fontDescription" type="system" weight="medium" pointSize="16"/>
-                                                <color key="textColor" name="titleColor"/>
                                                 <nil key="highlightedColor"/>
                                                 <userDefinedRuntimeAttributes>
                                                     <userDefinedRuntimeAttribute type="string" keyPath="styleName" value="header3"/>
                                                 </userDefinedRuntimeAttributes>
                                             </label>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="chevron-down" translatesAutoresizingMaskIntoConstraints="NO" id="rQg-IF-2ZX">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="rQg-IF-2ZX">
                                                 <rect key="frame" x="306" y="22" width="10" height="10"/>
-                                                <color key="tintColor" name="secondaryTextColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="10" id="Ao7-di-LyT"/>
                                                     <constraint firstAttribute="width" constant="10" id="cJ0-2O-TJu"/>
@@ -78,9 +74,6 @@
                                             </userDefinedRuntimeAttribute>
                                             <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
                                                 <real key="value" value="1"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
-                                                <color key="value" name="BorderColor"/>
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
                                     </view>
@@ -109,7 +102,6 @@
                                 </subviews>
                             </stackView>
                         </subviews>
-                        <color key="backgroundColor" name="backgroundCardViewColor"/>
                         <constraints>
                             <constraint firstItem="rtI-Wc-46s" firstAttribute="top" secondItem="aqX-hy-10J" secondAttribute="top" id="4XY-5Z-YGK"/>
                             <constraint firstAttribute="bottom" secondItem="N1T-16-z3z" secondAttribute="bottom" constant="14" id="MD7-fM-0zu"/>
@@ -140,27 +132,11 @@
                 <outlet property="textField" destination="aUP-sK-FuZ" id="Nsb-8i-FxD"/>
                 <outlet property="titleLabel" destination="rtI-Wc-46s" id="1mr-2E-JMe"/>
                 <outlet property="topConstraint" destination="eo3-Nh-xzM" id="zKn-C5-K50"/>
+                <outlet property="chevronDownImageView" destination="rQg-IF-2ZX" id="asset-rQg-IF-2ZX"/>
             </connections>
             <point key="canvasLocation" x="181.15942028985509" y="221.98660714285714"/>
         </tableViewCell>
     </objects>
     <resources>
-        <image name="chevron-down" width="24" height="24"/>
-        <image name="view" width="24" height="24"/>
-        <namedColor name="BorderColor">
-            <color red="0.8784313725490196" green="0.8784313725490196" blue="0.8784313725490196" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="backgroundCardViewColor">
-            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="iconColor">
-            <color red="0.52156862745098043" green="0.63529411764705879" blue="0.71372549019607845" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="secondaryTextColor">
-            <color red="0.62352941176470589" green="0.62352941176470589" blue="0.62352941176470589" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
-        <namedColor name="titleColor">
-            <color red="0.20000000000000001" green="0.20000000000000001" blue="0.20000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
     </resources>
 </document>

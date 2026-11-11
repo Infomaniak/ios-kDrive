@@ -39,6 +39,8 @@ class InvitedUserTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        invitedCollectionView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundCardViewColor.color
         (invitedCollectionView.collectionViewLayout as! AlignedCollectionViewFlowLayout).horizontalAlignment = .leading
         invitedCollectionView.register(cellView: InvitedUserCollectionViewCell.self)
     }

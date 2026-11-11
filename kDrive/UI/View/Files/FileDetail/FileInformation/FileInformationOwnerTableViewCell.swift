@@ -21,12 +21,17 @@ import kDriveResources
 import UIKit
 
 class FileInformationOwnerTableViewCell: UITableViewCell {
+    @IBOutlet private var separatorView: UIView!
+
     @IBOutlet var titleLabel: UILabel!
     @IBOutlet var ownerImage: UIImageView!
     @IBOutlet var ownerLabel: UILabel!
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        ownerLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+        separatorView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         ownerImage.image = KDriveResourcesAsset.placeholderAvatar.image
         ownerImage.cornerRadius = ownerImage.frame.width / 2
     }

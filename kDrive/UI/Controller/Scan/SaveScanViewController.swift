@@ -32,6 +32,8 @@ final class SaveScanViewController: SaveFileViewController {
     override func viewDidLoad() {
         tableView.register(cellView: ScanTypeTableViewCell.self)
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
+        view.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         sections = [.fileName, .fileType, .directorySelection]
         worker = SaveScanWorker(scan: scan, resultDelegate: self)
 

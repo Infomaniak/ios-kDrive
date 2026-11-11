@@ -26,7 +26,7 @@ class SavePhotosFloatingPanelViewController: InformationFloatingPanelViewControl
         super.viewDidLoad()
 
         imageView.isHidden = true
-        animationView.animation = LottieAnimation.named("illu_photos")
+        animationView.animation = LottieAnimation.named("illu_photos", bundle: KDriveResourcesResources.bundle)
         animationViewHeightConstraint.constant = 258
         titleLabel.text = KDriveResourcesStrings.Localizable.syncConfigureTitle
         if let drive {

@@ -62,6 +62,7 @@ final class EditCategoryViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         tableView.register(cellView: AlertTableViewCell.self)
         tableView.register(cellView: FileNameTableViewCell.self)

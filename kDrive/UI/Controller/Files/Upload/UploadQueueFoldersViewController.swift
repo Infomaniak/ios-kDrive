@@ -21,6 +21,7 @@ import InfomaniakCore
 import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
+import kDriveResources
 import OSLog
 import RealmSwift
 import UIKit
@@ -74,6 +75,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
 
         navigationItem.hideBackButtonText()
 

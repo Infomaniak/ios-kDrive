@@ -18,8 +18,14 @@
 
 import InfomaniakCoreUIKit
 import kDriveCore
+import kDriveResources
 import UIKit
 
 class HomeRecentFilesHeaderView: UICollectionReusableView {
     @IBOutlet var titleLabel: IKLabel!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+    }
 }

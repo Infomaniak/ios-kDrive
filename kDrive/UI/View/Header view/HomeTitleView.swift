@@ -16,6 +16,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import kDriveResources
 import UIKit
 
 class HomeTitleView: UIView {
@@ -24,6 +25,11 @@ class HomeTitleView: UIView {
     @IBOutlet var trailingConstraint: NSLayoutConstraint!
     @IBOutlet var bottomConstraint: NSLayoutConstraint!
     @IBOutlet var topConstraint: NSLayoutConstraint!
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        titleLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
+    }
 
     class func instantiate(title: String, insets: NSDirectionalEdgeInsets = .zero) -> HomeTitleView {
         let view = Bundle.main.loadNibNamed("HomeTitleView", owner: nil, options: nil)![0] as! HomeTitleView

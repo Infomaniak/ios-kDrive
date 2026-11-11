@@ -30,6 +30,9 @@ class InvitedUserCollectionViewCell: UICollectionViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        removeButton.setImage(KDriveResourcesAsset.remove.image, for: .normal)
+        usernameLabel.textColor = KDriveResourcesAsset.titleColor.color
+        contentInsetView.backgroundColor = KDriveResourcesAsset.backgroundColor.color
         avatarImage.image = KDriveResourcesAsset.placeholderAvatar.image
         removeButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonDelete
     }

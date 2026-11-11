@@ -17,6 +17,7 @@
  */
 
 import InfomaniakCoreUIKit
+import kDriveResources
 import UIKit
 
 protocol PhotoSyncSettingsTableViewCellDelegate: AnyObject {
@@ -31,6 +32,9 @@ class PhotoSyncSettingsTableViewCell: InsetTableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        separator?.backgroundColor = KDriveResourcesAsset.separatorColor.color
+        titleLabel.textColor = KDriveResourcesAsset.titleColor.color
+        valueLabel.textColor = KDriveResourcesAsset.primaryTextColor.color
         valueLabel.text = ""
         datePicker.maximumDate = Date()
     }
