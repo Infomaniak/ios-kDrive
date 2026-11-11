@@ -93,11 +93,10 @@ public extension DriveFileManager {
 
         // We reverse actions to handle the most recent one first
         for fileAction in actions.reversed() {
-            guard let actionFile = mappedActionsFiles[fileAction.fileId]?.first,
-                  !alreadyHandledActionIds.contains(fileAction.fileId) else { continue }
-            alreadyHandledActionIds.insert(fileAction.fileId)
+            guard alreadyHandledActionIds.insert(fileAction.fileId).inserted else { continue }
 
             let fileUid = File.uid(driveId: directory.driveId, fileId: fileAction.fileId)
+            let actionFile = mappedActionsFiles[fileAction.fileId]?.first
 
             switch fileAction.action {
             case .fileDelete, .fileTrash:
@@ -113,6 +112,10 @@ public extension DriveFileManager {
                 oldParent.children.remove(movedOutFile)
 
             case .fileMoveIn, .fileRestore, .fileCreate:
+                guard let actionFile else {
+                    removeMissingActionFile(fileUid: fileUid, directory: directory, writableRealm: writableRealm)
+                    continue
+                }
                 keepCacheAttributesForFile(
                     newFile: actionFile,
                     keepProperties: [.standard, .extras],
@@ -130,6 +133,11 @@ public extension DriveFileManager {
                  .collaborativeFolderCreate, .collaborativeFolderUpdate, .collaborativeFolderDelete,
                  .fileColorUpdate, .fileColorDelete,
                  .fileCategorize, .fileUncategorize:
+                guard let actionFile else {
+                    removeMissingActionFile(fileUid: fileUid, directory: directory, writableRealm: writableRealm)
+                    continue
+                }
+
                 if let oldFile: File = writableRealm.getObject(id: fileUid),
                    oldFile.name != actionFile.name {
                     try? renameCachedFile(updatedFile: actionFile, oldFile: oldFile)
@@ -150,5 +158,10 @@ public extension DriveFileManager {
                 break
             }
         }
+    }
+
+    private func removeMissingActionFile(fileUid: String, directory: File, writableRealm: Realm) {
+        guard fileUid != directory.uid else { return }
+        removeFileInDatabase(fileUid: fileUid, cascade: true, writableRealm: writableRealm)
     }
 }
