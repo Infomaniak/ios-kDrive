@@ -42,6 +42,7 @@ public class FloatingPanelAction: Equatable {
         case download
         case move
         case duplicate
+        case copyToDrive
         case rename
         case delete
         case leaveShare
@@ -136,6 +137,11 @@ public class FloatingPanelAction: Equatable {
         name: KDriveResourcesStrings.Localizable.buttonDuplicate,
         image: KDriveResourcesAsset.duplicate.image
     )
+    static let copyToDrive = FloatingPanelAction(
+        id: .copyToDrive,
+        name: KDriveResourcesStrings.Localizable.buttonCopyToDrive,
+        image: KDriveResourcesAsset.driveSwitch.image
+    )
     static let rename = FloatingPanelAction(
         id: .rename,
         name: KDriveResourcesStrings.Localizable.buttonRename,
@@ -206,6 +212,7 @@ public class FloatingPanelAction: Equatable {
             download,
             move,
             duplicate,
+            copyToDrive,
             rename,
             leaveShare,
             delete
@@ -224,6 +231,7 @@ public class FloatingPanelAction: Equatable {
             download,
             move,
             duplicate,
+            copyToDrive,
             rename,
             leaveShare,
             delete,

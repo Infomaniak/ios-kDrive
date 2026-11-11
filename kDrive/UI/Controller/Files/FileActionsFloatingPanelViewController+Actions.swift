@@ -116,6 +116,12 @@ extension FileActionsFloatingPanelViewController {
                         return !sharedWithMe && frozenFile.capabilities.canRead && frozenFile
                             .visibility != .isSharedSpace && frozenFile
                             .visibility != .isTeamSpace
+                    case .copyToDrive:
+                        return !sharedWithMe && frozenFile.capabilities.canRead && !frozenFile.isImporting
+                            && driveInfosManager.hasEligibleDestinationDrives(
+                                userId: accountManager.currentUserId,
+                                excluding: driveFileManager.drive.id
+                            )
                     case .rename:
                         return frozenFile.capabilities.canRename && !sharedWithMe && !frozenFile.isImporting
                     case .delete:
