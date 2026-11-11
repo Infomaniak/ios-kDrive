@@ -607,6 +607,9 @@
 /* loco:604b81caf1d3fc3c426e2443 */
 "convertToDropboxTitle" = "Konwertuj na skrzynkę nadawczą %@";
 
+/* loco:6a5f4c062dd6a21492070df2 */
+"copyToDriveStarted" = "%s jest w trakcie kopiowania na inny dysk";
+
 /* loco:61695ef04a145b45632ed042 */
 "createCategoryTitle" = "Utwórz kategorię";
 

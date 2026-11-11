@@ -616,6 +616,9 @@
 /* loco:604b81caf1d3fc3c426e2443 */
 "convertToDropboxTitle" = "Convertir en buzón de depósito %@";
 
+/* loco:6a5f4c062dd6a21492070df2 */
+"copyToDriveStarted" = "%s se está copiando a otra unidad";
+
 /* loco:61695ef04a145b45632ed042 */
 "createCategoryTitle" = "Crear una categoría";
 
