@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import UIKit
@@ -24,10 +25,11 @@ import UIKit
 #if !ISEXTENSION
 protocol CrossDriveImportTrackable: AnyObject {
     func register(importId: Int, fileName: String, destinationDriveId: Int, destinationFolderId: Int, userId: Int)
+    func reconcilePendingImports()
 }
 
 final class CrossDriveImportTracker: CrossDriveImportTrackable {
-    private struct PendingImport: Codable {
+    private struct PendingImport: Codable, Equatable {
         let importId: Int
         let fileName: String
         let destinationDriveId: Int
@@ -35,7 +37,13 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
         let userId: Int
     }
 
+    private enum ImportOutcome {
+        case success
+        case failure
+    }
+
     private static let pendingImportsKey = "crossDrivePendingImports"
+    private static let maxReconciliationPageCount = 5
 
     private var pendingImports: [PendingImport] {
         get {
@@ -53,7 +61,9 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            self?.handleExternalImportUpdate(notification)
+            Task { @MainActor in
+                self?.handleExternalImportUpdate(notification)
+            }
         }
     }
 
@@ -64,6 +74,13 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
                                           destinationFolderId: destinationFolderId,
                                           userId: userId)
         pendingImports.append(pendingImport)
+    }
+
+    func reconcilePendingImports() {
+        guard !pendingImports.isEmpty else { return }
+        Task {
+            await reconcilePendingImportsByDrive()
+        }
     }
 
     @MainActor private func handleExternalImportUpdate(_ notification: Notification) {
@@ -78,15 +95,93 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
 
         guard UIApplication.shared.applicationState == .active else { return }
 
-        let pendingImport = pendingImports[pendingIndex]
-        pendingImports.remove(at: pendingIndex)
+        guard let outcome = outcome(for: action) else { return }
+        finalizePendingImport(pendingImport: pendingImports[pendingIndex], outcome: outcome)
+    }
+
+    @MainActor private func outcome(for action: ExternalImportAction) -> ImportOutcome? {
         switch action {
         case .importFinish, .importFinished:
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveDoneSnackbar(pendingImport.fileName))
+            return .success
         case .cancel, .importCanceled, .importErrored:
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveErrorSnackbar(pendingImport.fileName))
+            return .failure
         default:
-            break
+            return nil
+        }
+    }
+
+    @MainActor private func reconcilePendingImportsByDrive() async {
+        @InjectService var accountManager: AccountManageable
+        let pendingGroups = Dictionary(grouping: pendingImports) { pendingImport in
+            "\(pendingImport.userId)-\(pendingImport.destinationDriveId)"
+        }
+
+        for pendingGroup in pendingGroups.values {
+            await reconcile(pendingGroup: pendingGroup, accountManager: accountManager)
+        }
+    }
+
+    @MainActor private func reconcile(pendingGroup: [PendingImport], accountManager: AccountManageable) async {
+        guard let firstPendingImport = pendingGroup.first,
+              let driveFileManager = accountManager.getDriveFileManager(
+                  for: firstPendingImport.destinationDriveId,
+                  userId: firstPendingImport.userId
+              ) else { return }
+
+        var unlistedPendingImports = pendingGroup
+        var listedImportIds = Set<Int>()
+        var scannedEveryPage = false
+        var page = 1
+
+        while !unlistedPendingImports.isEmpty, page <= Self.maxReconciliationPageCount {
+            guard let response = try? await driveFileManager.apiFetcher.externalImports(
+                drive: driveFileManager.drive,
+                page: page
+            ) else {
+                return
+            }
+
+            for serverImport in response.validApiResponse.data {
+                guard let status = serverImport.status,
+                      let pendingIndex = unlistedPendingImports
+                      .firstIndex(where: { $0.importId == serverImport.id }) else { continue }
+                listedImportIds.insert(serverImport.id)
+
+                switch status {
+                case .done:
+                    finalizePendingImport(pendingImport: unlistedPendingImports[pendingIndex], outcome: .success)
+                case .failed, .canceled:
+                    finalizePendingImport(pendingImport: unlistedPendingImports[pendingIndex], outcome: .failure)
+                default:
+                    break
+                }
+            }
+            unlistedPendingImports.removeAll { listedImportIds.contains($0.importId) }
+
+            guard page < response.validApiResponse.pages ?? page else {
+                scannedEveryPage = true
+                break
+            }
+            page += 1
+        }
+
+        if scannedEveryPage {
+            pendingImports.removeAll { unlistedPendingImports.contains($0) }
+        }
+    }
+
+    @MainActor private func finalizePendingImport(pendingImport: PendingImport, outcome: ImportOutcome) {
+        guard let index = pendingImports
+            .firstIndex(where: { $0.importId == pendingImport.importId && $0.userId == pendingImport.userId }) else {
+            return
+        }
+        pendingImports.remove(at: index)
+
+        switch outcome {
+        case .success:
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveDoneSnackbar(pendingImport.fileName))
+        case .failure:
+            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveErrorSnackbar(pendingImport.fileName))
         }
     }
 }

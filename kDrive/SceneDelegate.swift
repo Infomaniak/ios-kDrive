@@ -38,6 +38,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
     @LazyInjectService var uploadNotifications: UploadNotifiable
     @LazyInjectService var uploadDataSource: UploadServiceDataSourceable
     @LazyInjectService var uploadObservation: UploadObservable
+    @LazyInjectService var crossDriveImportTracker: CrossDriveImportTrackable
 
     private var mediaHelper: OpenMediaHelper?
     var currentRootViewControllerState: RootViewControllerState = .splashScreen
@@ -63,6 +64,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         prepareWindowScene(windowScene)
 
         accountManager.delegate = self
+        crossDriveImportTracker.reconcilePendingImports()
 
         NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
 
@@ -128,6 +130,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func sceneWillEnterForeground(_ scene: UIScene) {
         lockHelper.startObservation()
+        crossDriveImportTracker.reconcilePendingImports()
         let newState = RootViewControllerState.getCurrentState()
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
         if window?.rootViewController == nil {
