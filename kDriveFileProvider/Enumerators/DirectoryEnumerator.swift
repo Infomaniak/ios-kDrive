@@ -211,20 +211,22 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                         updatedItems.append(updatedChild)
                     }
 
-                    for movedOutChild in handledActions.movedOut {
-                        guard let existingMovedFile: File = writableRealm.getObject(id: movedOutChild.uid) else {
+                    let driveId = self.driveFileManager.driveId
+                    for movedOutFileId in handledActions.movedOutFileIds {
+                        let movedOutFileUid = File.uid(driveId: driveId, fileId: movedOutFileId)
+                        guard let existingMovedFile: File = writableRealm.getObject(id: movedOutFileUid) else {
                             continue
                         }
 
-                        deletedItems.append(NSFileProviderItemIdentifier(movedOutChild.id))
+                        deletedItems.append(NSFileProviderItemIdentifier(movedOutFileId))
                         parentDirectory.children.remove(existingMovedFile)
                     }
 
-                    for deletedChild in handledActions.deleted {
-                        guard let existingDeletedFile: File = writableRealm.getObject(id: deletedChild.uid) else {
+                    for deletedFileId in handledActions.deletedFileIds {
+                        let deletedFileUid = File.uid(driveId: driveId, fileId: deletedFileId)
+                        guard let existingDeletedFile: File = writableRealm.getObject(id: deletedFileUid) else {
                             continue
                         }
-
                         deletedItems.append(NSFileProviderItemIdentifier(existingDeletedFile.id))
                         updatedItems.removeAll { $0.id == existingDeletedFile.id }
                         writableRealm.delete(existingDeletedFile)
