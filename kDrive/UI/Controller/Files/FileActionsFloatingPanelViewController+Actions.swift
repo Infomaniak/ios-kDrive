@@ -522,26 +522,27 @@ extension FileActionsFloatingPanelViewController {
             weak self,
             proxyFile = frozenFile.proxify(),
             remotePath = frozenFile.remotePath,
-            sourceName = frozenFile.name
+            sourceName = frozenFile.name,
+            apiFetcher = driveFileManager.apiFetcher,
+            userId = accountManager.currentUserId
         ] selectedDirectory, selectedDriveFileManager in
+            self?.presentingViewController?.dismiss(animated: true)
             Task {
                 do {
-                    let externalImport = try await self?.driveFileManager.apiFetcher.copyToDrive(
+                    let externalImport = try await apiFetcher.copyToDrive(
                         file: proxyFile,
                         remotePath: remotePath,
                         destinationDrive: selectedDriveFileManager.drive,
                         destinationFolder: selectedDirectory.proxify()
                     )
-                    guard let externalImport else { return }
                     @InjectService var crossDriveImportTracker: CrossDriveImportTrackable
                     crossDriveImportTracker.register(
                         importId: externalImport.id,
                         fileName: sourceName,
                         destinationDriveId: selectedDriveFileManager.drive.id,
                         destinationFolderId: selectedDirectory.id,
-                        userId: self?.accountManager.currentUserId ?? 0
+                        userId: userId
                     )
-                    self?.dismiss(animated: true)
                     UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveStarted(sourceName))
                 } catch {
                     UIConstants.showSnackBarIfNeeded(error: error)
