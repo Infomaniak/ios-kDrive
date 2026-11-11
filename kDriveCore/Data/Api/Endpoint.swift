@@ -352,6 +352,10 @@ public extension Endpoint {
 
     // MARK: - Import
 
+    static func copyToDrive(destinationDrive: AbstractDrive) -> Endpoint {
+        return .driveInfoV2(drive: destinationDrive).appending(path: "/imports/kdrive")
+    }
+
     static func cancelImport(drive: AbstractDrive, id: Int) -> Endpoint {
         return .driveInfoV2(drive: drive).appending(path: "/imports/\(id)/cancel")
     }
