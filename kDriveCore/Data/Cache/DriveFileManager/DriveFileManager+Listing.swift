@@ -78,7 +78,7 @@ public extension DriveFileManager {
             managedParent.responseAt = responseAt ?? Int(Date().timeIntervalSince1970)
         }
 
-        guard let managedParentDirectory else {
+        guard let managedParentDirectory, !managedParentDirectory.isInvalidated else {
             throw DriveError.fileNotFound
         }
 
@@ -93,6 +93,7 @@ public extension DriveFileManager {
 
         // We reverse actions to handle the most recent one first
         for fileAction in actions.reversed() {
+            guard !directory.isInvalidated else { break }
             guard alreadyHandledActionIds.insert(fileAction.fileId).inserted else { continue }
 
             let fileUid = File.uid(driveId: directory.driveId, fileId: fileAction.fileId)
