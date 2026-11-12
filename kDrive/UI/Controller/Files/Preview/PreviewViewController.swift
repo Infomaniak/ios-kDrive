@@ -848,12 +848,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     private func removeFile(id fileId: Int) {
         guard let index = previewFiles.firstIndex(where: { $0.id == fileId }) else { return }
-        previewFiles.remove(at: index)
 
-        guard !previewFiles.isEmpty else {
+        guard previewFiles.count > 1 else {
             navigationController?.popViewController(animated: true)
             return
         }
+
+        previewFiles.remove(at: index)
 
         if index < currentIndex.row || currentIndex.row >= previewFiles.count {
             currentIndex = IndexPath(row: currentIndex.row - 1, section: 0)
