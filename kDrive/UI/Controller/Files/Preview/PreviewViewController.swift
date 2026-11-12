@@ -24,6 +24,7 @@ import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import Nuke
+import OSLog
 import PDFKit
 import SafariServices
 import Sentry
@@ -842,7 +843,9 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
                 driveFileManager.removeDeletedFileLocally(proxyFile)
                 removeFile(id: proxyFile.id)
                 UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
-            } catch {}
+            } catch {
+                Logger.general.error("Failed to check if the file was deleted remotely: \(error)")
+            }
         }
     }
 
@@ -866,6 +869,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         updateNavigationBar()
         updateFileForCurrentIndex()
         downloadFileIfNeeded(at: currentIndex)
+        updateBackgroundExtensionForCurrentFile()
+        updateFileEntityIdentifier()
     }
 
     func handleAudioPreviewError(_ error: Error, previewIndex: Int) {
