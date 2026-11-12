@@ -824,7 +824,7 @@ public final class DriveFileManager {
         return response
     }
 
-    private func removeDeletedFileLocally(_ file: ProxyFile) {
+    public func removeDeletedFileLocally(_ file: ProxyFile) {
         Task {
             try? database.writeTransaction { writableRealm in
                 let savedFile = try? file.resolve(using: writableRealm).freeze()

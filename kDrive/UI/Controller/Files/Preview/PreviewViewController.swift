@@ -23,6 +23,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import Nuke
 import PDFKit
 import SafariServices
 import Sentry
@@ -821,10 +822,49 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             handleAudioPreviewError(error, previewIndex: index)
         } else if file.convertedType == .video {
             handleVideoPreviewError(error, previewIndex: index)
+        } else if let dataLoadingError = (error as? ImagePipeline.Error)?.dataLoadingError,
+                  case .statusCodeUnacceptable(let statusCode) = dataLoadingError as? DataLoader.Error,
+                  statusCode == 404 {
+            removeFileIfDeletedRemotely(file.proxify())
         }
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
         // cellForItemAt and iOS 18 seems unhappy about this.
+    }
+
+    private func removeFileIfDeletedRemotely(_ proxyFile: ProxyFile) {
+        guard !driveFileManager.isPublicShare else { return }
+
+        Task {
+            do {
+                _ = try await driveFileManager.file(proxyFile, forceRefresh: true)
+            } catch let error as DriveError where error == .objectNotFound {
+                driveFileManager.removeDeletedFileLocally(proxyFile)
+                removeFile(id: proxyFile.id)
+                UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
+            } catch {}
+        }
+    }
+
+    private func removeFile(id fileId: Int) {
+        guard let index = previewFiles.firstIndex(where: { $0.id == fileId }) else { return }
+        previewFiles.remove(at: index)
+
+        guard !previewFiles.isEmpty else {
+            navigationController?.popViewController(animated: true)
+            return
+        }
+
+        if index < currentIndex.row || currentIndex.row >= previewFiles.count {
+            currentIndex = IndexPath(row: currentIndex.row - 1, section: 0)
+        }
+
+        collectionView.reloadData()
+        collectionView.layoutIfNeeded()
+        collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
+        updateNavigationBar()
+        updateFileForCurrentIndex()
+        downloadFileIfNeeded(at: currentIndex)
     }
 
     func handleAudioPreviewError(_ error: Error, previewIndex: Int) {
