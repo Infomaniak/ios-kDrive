@@ -213,23 +213,22 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
                     let driveId = self.driveFileManager.driveId
                     for movedOutFileId in handledActions.movedOutFileIds {
-                        let movedOutFileUid = File.uid(driveId: driveId, fileId: movedOutFileId)
-                        guard let existingMovedFile: File = writableRealm.getObject(id: movedOutFileUid) else {
-                            continue
-                        }
-
                         deletedItems.append(NSFileProviderItemIdentifier(movedOutFileId))
-                        parentDirectory.children.remove(existingMovedFile)
+
+                        let movedOutFileUid = File.uid(driveId: driveId, fileId: movedOutFileId)
+                        if let existingMovedFile: File = writableRealm.getObject(id: movedOutFileUid) {
+                            parentDirectory.children.remove(existingMovedFile)
+                        }
                     }
 
                     for deletedFileId in handledActions.deletedFileIds {
+                        deletedItems.append(NSFileProviderItemIdentifier(deletedFileId))
+                        updatedItems.removeAll { $0.id == deletedFileId }
+
                         let deletedFileUid = File.uid(driveId: driveId, fileId: deletedFileId)
-                        guard let existingDeletedFile: File = writableRealm.getObject(id: deletedFileUid) else {
-                            continue
+                        if let existingDeletedFile: File = writableRealm.getObject(id: deletedFileUid) {
+                            writableRealm.delete(existingDeletedFile)
                         }
-                        deletedItems.append(NSFileProviderItemIdentifier(existingDeletedFile.id))
-                        updatedItems.removeAll { $0.id == existingDeletedFile.id }
-                        writableRealm.delete(existingDeletedFile)
                     }
 
                     // parentDirectory could have been deleted above, rendering it invalid
