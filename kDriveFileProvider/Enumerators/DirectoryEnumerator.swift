@@ -185,7 +185,8 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
                 let handledActions = FileProviderActionsReducer().reduce(
                     actions: response.data.actions,
-                    actionsFiles: response.data.actionsFiles
+                    actionsFiles: response.data.actionsFiles,
+                    containerId: fileId
                 )
 
                 var updatedItems = [File]()
@@ -211,23 +212,24 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                         updatedItems.append(updatedChild)
                     }
 
-                    for movedOutChild in handledActions.movedOut {
-                        guard let existingMovedFile: File = writableRealm.getObject(id: movedOutChild.uid) else {
-                            continue
-                        }
+                    let driveId = self.driveFileManager.driveId
+                    for movedOutFileId in handledActions.movedOutFileIds {
+                        deletedItems.append(NSFileProviderItemIdentifier(movedOutFileId))
 
-                        deletedItems.append(NSFileProviderItemIdentifier(movedOutChild.id))
-                        parentDirectory.children.remove(existingMovedFile)
+                        let movedOutFileUid = File.uid(driveId: driveId, fileId: movedOutFileId)
+                        if let existingMovedFile: File = writableRealm.getObject(id: movedOutFileUid) {
+                            parentDirectory.children.remove(existingMovedFile)
+                        }
                     }
 
-                    for deletedChild in handledActions.deleted {
-                        guard let existingDeletedFile: File = writableRealm.getObject(id: deletedChild.uid) else {
-                            continue
-                        }
+                    for deletedFileId in handledActions.deletedFileIds {
+                        deletedItems.append(NSFileProviderItemIdentifier(deletedFileId))
+                        updatedItems.removeAll { $0.id == deletedFileId }
 
-                        deletedItems.append(NSFileProviderItemIdentifier(existingDeletedFile.id))
-                        updatedItems.removeAll { $0.id == existingDeletedFile.id }
-                        writableRealm.delete(existingDeletedFile)
+                        let deletedFileUid = File.uid(driveId: driveId, fileId: deletedFileId)
+                        if let existingDeletedFile: File = writableRealm.getObject(id: deletedFileUid) {
+                            writableRealm.delete(existingDeletedFile)
+                        }
                     }
 
                     // parentDirectory could have been deleted above, rendering it invalid

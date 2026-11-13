@@ -30,38 +30,41 @@ public struct FileProviderActionsReducer {
     public struct Output {
         /// Files that should be updated in / inserted into the directory.
         public let updated: Set<File>
-        /// Files that were deleted or trashed and must be removed from the cache.
-        public let deleted: Set<File>
-        /// Files that were moved out of the directory. They must be removed from the directory
+        /// Ids of files that were deleted, trashed or are no longer accessible and must be removed from the cache.
+        public let deletedFileIds: Set<Int>
+        /// Ids of files that were moved out of the directory. They must be removed from the directory
         /// but kept in the cache since they still exist somewhere else.
-        public let movedOut: Set<File>
+        public let movedOutFileIds: Set<Int>
     }
 
     public init() {}
 
-    public func reduce(actions: [FileAction], actionsFiles: [File]) -> Output {
+    public func reduce(actions: [FileAction], actionsFiles: [File], containerId: Int? = nil) -> Output {
         let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
         var alreadyHandledActionIds = Set<Int>()
 
-        var deletedFiles = Set<File>()
-        var movedOutFiles = Set<File>()
+        var deletedFileIds = Set<Int>()
+        var movedOutFileIds = Set<Int>()
         var updatedFiles = Set<File>()
 
         // We reverse actions to handle the most recent one first
         for fileAction in actions.reversed() {
-            guard let actionFile = mappedActionsFiles[fileAction.fileId]?.first,
-                  !alreadyHandledActionIds.contains(fileAction.fileId) else { continue }
-            alreadyHandledActionIds.insert(fileAction.fileId)
+            guard alreadyHandledActionIds.insert(fileAction.fileId).inserted else { continue }
 
             switch fileAction.action {
             case .fileDelete, .fileTrash:
-                deletedFiles.insert(actionFile)
+                deletedFileIds.insert(fileAction.fileId)
             case .fileMoveOut:
-                movedOutFiles.insert(actionFile)
+                movedOutFileIds.insert(fileAction.fileId)
             case .fileRename, .fileMoveIn, .fileRestore, .fileCreate, .fileFavoriteCreate, .fileFavoriteRemove, .fileUpdate,
                  .fileShareCreate, .fileShareUpdate, .fileShareDelete, .collaborativeFolderCreate, .collaborativeFolderUpdate,
                  .collaborativeFolderDelete, .fileColorUpdate, .fileColorDelete:
-                updatedFiles.insert(actionFile)
+                if let actionFile = mappedActionsFiles[fileAction.fileId]?.first {
+                    updatedFiles.insert(actionFile)
+                } else {
+                    guard fileAction.fileId != containerId else { continue }
+                    deletedFileIds.insert(fileAction.fileId)
+                }
             default:
                 break
             }
@@ -69,8 +72,8 @@ public struct FileProviderActionsReducer {
 
         return Output(
             updated: updatedFiles,
-            deleted: deletedFiles,
-            movedOut: movedOutFiles
+            deletedFileIds: deletedFileIds,
+            movedOutFileIds: movedOutFileIds
         )
     }
 }

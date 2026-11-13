@@ -87,7 +87,8 @@ public extension File {
                                        publicDriveId: Int,
                                        publicFileId: Int,
                                        token: String? = nil,
-                                       completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
+                                       completion: @escaping ((UIImage?) -> Void),
+                                       onError: ((Error) -> Void)? = nil) -> ImageTask? {
         let previewURL = Endpoint.shareLinkFilePreview(driveId: publicDriveId,
                                                        linkUuid: publicShareId,
                                                        fileId: publicFileId,
@@ -95,16 +96,18 @@ public extension File {
 
         let request = ImageRequest(url: previewURL)
         return ImagePipeline.shared.loadImage(with: request) { result in
-            if let image = try? result.get().image {
-                completion(image)
-            } else {
+            switch result {
+            case .success(let response):
+                completion(response.image)
+            case .failure(let error):
                 completion(nil)
+                onError?(error)
             }
         }
     }
 
     @discardableResult
-    private func getPreview(completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
+    private func getPreview(completion: @escaping ((UIImage?) -> Void), onError: ((Error) -> Void)? = nil) -> ImageTask? {
         guard let authenticatedRequest = ImageRequest.authenticatedImageRequest(
             url: imagePreviewUrl,
             driveFileManager: accountManager.currentDriveFileManager
@@ -113,23 +116,28 @@ public extension File {
         }
 
         return ImagePipeline.shared.loadImage(with: authenticatedRequest) { result in
-            if let image = try? result.get().image {
-                completion(image)
-            } else {
+            switch result {
+            case .success(let response):
+                completion(response.image)
+            case .failure(let error):
                 completion(nil)
+                onError?(error)
             }
         }
     }
 
     @discardableResult
-    func getPreview(publicShareProxy: PublicShareProxy?, completion: @escaping ((UIImage?) -> Void)) -> ImageTask? {
+    func getPreview(publicShareProxy: PublicShareProxy?,
+                    completion: @escaping ((UIImage?) -> Void),
+                    onError: ((Error) -> Void)? = nil) -> ImageTask? {
         if let publicShareProxy {
             return getPublicSharePreview(publicShareId: publicShareProxy.shareLinkUid,
                                          publicDriveId: publicShareProxy.driveId,
                                          publicFileId: id,
                                          token: publicShareProxy.token,
-                                         completion: completion)
+                                         completion: completion,
+                                         onError: onError)
         }
-        return getPreview(completion: completion)
+        return getPreview(completion: completion, onError: onError)
     }
 }

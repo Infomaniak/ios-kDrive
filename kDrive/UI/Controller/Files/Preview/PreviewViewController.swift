@@ -23,6 +23,8 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
+import Nuke
+import OSLog
 import PDFKit
 import SafariServices
 import Sentry
@@ -821,10 +823,65 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             handleAudioPreviewError(error, previewIndex: index)
         } else if file.convertedType == .video {
             handleVideoPreviewError(error, previewIndex: index)
+        } else if let dataLoadingError = (error as? ImagePipeline.Error)?.dataLoadingError,
+                  case .statusCodeUnacceptable(let statusCode) = dataLoadingError as? DataLoader.Error,
+                  statusCode == 404 {
+            removeFileIfDeletedRemotely(file.proxify())
         }
 
         // We have to delay reload because errorWhilePreviewing can be called when the collectionView requests a new cell in
         // cellForItemAt and iOS 18 seems unhappy about this.
+    }
+
+    private func removeFileIfDeletedRemotely(_ proxyFile: ProxyFile) {
+        guard !driveFileManager.isPublicShare else { return }
+
+        Task {
+            do {
+                _ = try await driveFileManager.file(proxyFile, forceRefresh: true)
+            } catch let error as DriveError where error == .objectNotFound {
+                driveFileManager.removeDeletedFileLocally(proxyFile)
+                removeFile(id: proxyFile.id)
+                UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
+            } catch {
+                Logger.general.error("Failed to check if the file was deleted remotely: \(error)")
+            }
+        }
+    }
+
+    private func removeFile(id fileId: Int) {
+        guard let index = previewFiles.firstIndex(where: { $0.id == fileId }) else { return }
+
+        guard previewFiles.count > 1 else {
+            if let navigationController {
+                if navigationController.topViewController === self {
+                    navigationController.popViewController(animated: true)
+                } else {
+                    navigationController.setViewControllers(
+                        navigationController.viewControllers.filter { $0 !== self },
+                        animated: false
+                    )
+                }
+            }
+            return
+        }
+
+        previewFiles.remove(at: index)
+
+        if index < currentIndex.row || currentIndex.row >= previewFiles.count {
+            currentIndex = IndexPath(row: currentIndex.row - 1, section: 0)
+        }
+
+        indexBeforeBoundsChange = currentIndex
+
+        collectionView.reloadData()
+        collectionView.layoutIfNeeded()
+        collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
+        updateNavigationBar()
+        updateFileForCurrentIndex()
+        downloadFileIfNeeded(at: currentIndex)
+        updateBackgroundExtensionForCurrentFile()
+        updateFileEntityIdentifier()
     }
 
     func handleAudioPreviewError(_ error: Error, previewIndex: Int) {

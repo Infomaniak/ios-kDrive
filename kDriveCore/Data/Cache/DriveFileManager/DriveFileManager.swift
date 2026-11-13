@@ -813,7 +813,18 @@ public final class DriveFileManager {
     }
 
     public func delete(file: ProxyFile) async throws -> CancelableResponse {
-        let response = try await apiFetcher.delete(file: file)
+        let response: CancelableResponse
+        do {
+            response = try await apiFetcher.delete(file: file)
+        } catch let error as DriveError where error == .objectNotFound {
+            removeDeletedFileLocally(file)
+            throw error
+        }
+        removeDeletedFileLocally(file)
+        return response
+    }
+
+    public func removeDeletedFileLocally(_ file: ProxyFile) {
         Task {
             try? database.writeTransaction { writableRealm in
                 let savedFile = try? file.resolve(using: writableRealm).freeze()
@@ -832,8 +843,6 @@ public final class DriveFileManager {
                 )
             }
         }
-
-        return response
     }
 
     public func directorySize(of directory: ProxyFile) async throws -> Int {

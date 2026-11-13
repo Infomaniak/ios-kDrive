@@ -52,8 +52,8 @@ final class UTFileProviderActionsReducer: XCTestCase {
 
         // THEN
         XCTAssertTrue(output.updated.isEmpty)
-        XCTAssertTrue(output.deleted.isEmpty)
-        XCTAssertTrue(output.movedOut.isEmpty)
+        XCTAssertTrue(output.deletedFileIds.isEmpty)
+        XCTAssertTrue(output.movedOutFileIds.isEmpty)
     }
 
     func testUpdateActionsAreCategorizedAsUpdated() {
@@ -66,8 +66,8 @@ final class UTFileProviderActionsReducer: XCTestCase {
 
         // THEN
         XCTAssertEqual(ids(output.updated), [10])
-        XCTAssertTrue(output.deleted.isEmpty)
-        XCTAssertTrue(output.movedOut.isEmpty)
+        XCTAssertTrue(output.deletedFileIds.isEmpty)
+        XCTAssertTrue(output.movedOutFileIds.isEmpty)
     }
 
     func testDeleteAndTrashActionsAreCategorizedAsDeleted() {
@@ -83,9 +83,9 @@ final class UTFileProviderActionsReducer: XCTestCase {
         let output = reducer.reduce(actions: actions, actionsFiles: [deletedFile, trashedFile])
 
         // THEN
-        XCTAssertEqual(ids(output.deleted), [10, 11])
+        XCTAssertEqual(output.deletedFileIds, [10, 11])
         XCTAssertTrue(output.updated.isEmpty)
-        XCTAssertTrue(output.movedOut.isEmpty)
+        XCTAssertTrue(output.movedOutFileIds.isEmpty)
     }
 
     func testMoveOutActionIsCategorizedAsMovedOutNotDeleted() {
@@ -97,8 +97,8 @@ final class UTFileProviderActionsReducer: XCTestCase {
         let output = reducer.reduce(actions: actions, actionsFiles: [file])
 
         // THEN a moved-out file must be removed from the directory but kept in cache
-        XCTAssertEqual(ids(output.movedOut), [10])
-        XCTAssertTrue(output.deleted.isEmpty)
+        XCTAssertEqual(output.movedOutFileIds, [10])
+        XCTAssertTrue(output.deletedFileIds.isEmpty)
         XCTAssertTrue(output.updated.isEmpty)
     }
 
@@ -115,21 +115,38 @@ final class UTFileProviderActionsReducer: XCTestCase {
 
         // THEN
         XCTAssertTrue(output.updated.isEmpty)
-        XCTAssertTrue(output.deleted.isEmpty)
-        XCTAssertTrue(output.movedOut.isEmpty)
+        XCTAssertTrue(output.deletedFileIds.isEmpty)
+        XCTAssertTrue(output.movedOutFileIds.isEmpty)
     }
 
-    func testActionWithoutMatchingFileIsIgnored() {
-        // GIVEN an action referencing a file id that is not part of actionsFiles
+    func testUpdateActionWithoutMatchingFileIsCategorizedAsDeleted() {
+        // GIVEN the API omits files that are no longer accessible from actionsFiles
         let actions = [makeAction(.fileUpdate, fileId: 999)]
 
         // WHEN
         let output = reducer.reduce(actions: actions, actionsFiles: [makeFile(id: 10)])
 
         // THEN
+        XCTAssertEqual(output.deletedFileIds, [999])
         XCTAssertTrue(output.updated.isEmpty)
-        XCTAssertTrue(output.deleted.isEmpty)
-        XCTAssertTrue(output.movedOut.isEmpty)
+        XCTAssertTrue(output.movedOutFileIds.isEmpty)
+    }
+
+    func testRemovalActionsWithoutMatchingFileAreStillApplied() {
+        // GIVEN deleted, trashed and moved-out files absent from actionsFiles
+        let actions = [
+            makeAction(.fileDelete, fileId: 10),
+            makeAction(.fileTrash, fileId: 11),
+            makeAction(.fileMoveOut, fileId: 12)
+        ]
+
+        // WHEN
+        let output = reducer.reduce(actions: actions, actionsFiles: [])
+
+        // THEN
+        XCTAssertEqual(output.deletedFileIds, [10, 11])
+        XCTAssertEqual(output.movedOutFileIds, [12])
+        XCTAssertTrue(output.updated.isEmpty)
     }
 
     // MARK: - Last action wins
@@ -146,9 +163,9 @@ final class UTFileProviderActionsReducer: XCTestCase {
         let output = reducer.reduce(actions: actions, actionsFiles: [file])
 
         // THEN the most recent action (delete) is the one applied
-        XCTAssertEqual(ids(output.deleted), [10])
+        XCTAssertEqual(output.deletedFileIds, [10])
         XCTAssertTrue(output.updated.isEmpty)
-        XCTAssertTrue(output.movedOut.isEmpty)
+        XCTAssertTrue(output.movedOutFileIds.isEmpty)
     }
 
     func testMostRecentActionWinsWhenUpdateFollowsDelete() {
@@ -164,8 +181,8 @@ final class UTFileProviderActionsReducer: XCTestCase {
 
         // THEN the most recent action (update) is the one applied
         XCTAssertEqual(ids(output.updated), [10])
-        XCTAssertTrue(output.deleted.isEmpty)
-        XCTAssertTrue(output.movedOut.isEmpty)
+        XCTAssertTrue(output.deletedFileIds.isEmpty)
+        XCTAssertTrue(output.movedOutFileIds.isEmpty)
     }
 
     func testOnlyLastActionIsKeptAcrossManyActionsForSameFile() {
@@ -182,9 +199,9 @@ final class UTFileProviderActionsReducer: XCTestCase {
         let output = reducer.reduce(actions: actions, actionsFiles: [file])
 
         // THEN
-        XCTAssertEqual(ids(output.movedOut), [10])
+        XCTAssertEqual(output.movedOutFileIds, [10])
         XCTAssertTrue(output.updated.isEmpty)
-        XCTAssertTrue(output.deleted.isEmpty)
+        XCTAssertTrue(output.deletedFileIds.isEmpty)
     }
 
     // MARK: - Multiple files
@@ -208,7 +225,7 @@ final class UTFileProviderActionsReducer: XCTestCase {
 
         // THEN each file lands in exactly one, mutually exclusive, set
         XCTAssertEqual(ids(output.updated), [10])
-        XCTAssertEqual(ids(output.deleted), [11])
-        XCTAssertEqual(ids(output.movedOut), [12])
+        XCTAssertEqual(output.deletedFileIds, [11])
+        XCTAssertEqual(output.movedOutFileIds, [12])
     }
 }

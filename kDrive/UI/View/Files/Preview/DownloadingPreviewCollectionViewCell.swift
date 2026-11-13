@@ -113,6 +113,8 @@ class DownloadingPreviewCollectionViewCell: UICollectionViewCell, UIScrollViewDe
             if let preview {
                 previewImageView.image = preview
             }
+        } onError: { [weak self] error in
+            self?.previewDelegate?.errorWhilePreviewing(fileId: file.id, error: error)
         }
     }
 
