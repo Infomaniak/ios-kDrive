@@ -185,7 +185,8 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
                 let handledActions = FileProviderActionsReducer().reduce(
                     actions: response.data.actions,
-                    actionsFiles: response.data.actionsFiles
+                    actionsFiles: response.data.actionsFiles,
+                    containerId: fileId
                 )
 
                 var updatedItems = [File]()

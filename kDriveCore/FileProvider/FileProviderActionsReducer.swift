@@ -39,7 +39,7 @@ public struct FileProviderActionsReducer {
 
     public init() {}
 
-    public func reduce(actions: [FileAction], actionsFiles: [File]) -> Output {
+    public func reduce(actions: [FileAction], actionsFiles: [File], containerId: Int? = nil) -> Output {
         let mappedActionsFiles = Dictionary(grouping: actionsFiles, by: \.id)
         var alreadyHandledActionIds = Set<Int>()
 
@@ -62,6 +62,7 @@ public struct FileProviderActionsReducer {
                 if let actionFile = mappedActionsFiles[fileAction.fileId]?.first {
                     updatedFiles.insert(actionFile)
                 } else {
+                    guard fileAction.fileId != containerId else { continue }
                     deletedFileIds.insert(fileAction.fileId)
                 }
             default:
