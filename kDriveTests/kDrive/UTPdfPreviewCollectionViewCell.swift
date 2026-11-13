@@ -135,4 +135,5 @@ private final class PDFPageDelegate: PreviewContentCellDelegate {
     func errorWhilePreviewing(fileId: Int, error: Error) {}
     func openWith(from: UIView) {}
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?) {}
+    func fileActionPanelFrame(in view: UIView) -> CGRect? { nil }
 }

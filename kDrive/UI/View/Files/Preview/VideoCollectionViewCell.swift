@@ -44,6 +44,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private var needsStartFromBeginning = true
 
     private var loadingIndicatorTask: Task<Void, Never>?
+    private var controlsLeftConstraint: NSLayoutConstraint?
+    private var controlsRightConstraint: NSLayoutConstraint?
     private var controlsBottomConstraint: NSLayoutConstraint?
     private var areControlsVisible = true
 
@@ -79,12 +81,12 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         container.addSubview(loadingIndicator)
         container.addSubview(controlsView)
 
-        let controlsBottomConstraint = controlsView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
+        let controlsLeftConstraint = controlsView.leftAnchor.constraint(equalTo: leftAnchor)
+        let controlsRightConstraint = controlsView.rightAnchor.constraint(equalTo: rightAnchor)
+        let controlsBottomConstraint = controlsView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        self.controlsLeftConstraint = controlsLeftConstraint
+        self.controlsRightConstraint = controlsRightConstraint
         self.controlsBottomConstraint = controlsBottomConstraint
-        let controlsPreferredWidth = controlsView.widthAnchor.constraint(
-            equalTo: container.safeAreaLayoutGuide.widthAnchor,
-            constant: -2 * UIConstants.Padding.medium
-        )
 
         NSLayoutConstraint.activate([
             playerLayerView.topAnchor.constraint(equalTo: container.topAnchor),
@@ -95,8 +97,8 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             loadingIndicator.centerXAnchor.constraint(equalTo: container.centerXAnchor),
             loadingIndicator.centerYAnchor.constraint(equalTo: container.centerYAnchor),
 
-            controlsView.centerXAnchor.constraint(equalTo: container.safeAreaLayoutGuide.centerXAnchor),
-            controlsPreferredWidth,
+            controlsLeftConstraint,
+            controlsRightConstraint,
             controlsBottomConstraint
         ])
 
@@ -123,6 +125,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         removeInlinePlayer()
         isCurrentPage = false
         previewFrameImageView.image = nil
+    }
+
+    override func layoutSubviews() {
+        updateControlsLayout()
+        super.layoutSubviews()
     }
 
     override func configureWith(file: File) {
@@ -271,20 +278,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         }
     }
 
-    private func updatePlayerBottomInset(_ playerViewController: AVPlayerViewController) {
-        let bottomInset = previewDelegate?.fileActionPanelHeight ?? 0
-        guard playerViewController.additionalSafeAreaInsets.bottom != bottomInset else { return }
-        UIView.animate(withDuration: 0.25) {
-            playerViewController.additionalSafeAreaInsets.bottom = bottomInset
-            playerViewController.view.layoutIfNeeded()
-        }
-    }
-
     private func updateControlsVisibility(animated: Bool) {
         let isVisible = isPlayerRevealed && !(previewDelegate?.isFullscreenPreview ?? false)
         areControlsVisible = isVisible
         if isVisible {
-            updateControlsBottomInset()
+            updateControlsLayout()
             controlsView.isHidden = false
         }
         UIView.animate(withDuration: animated ? 0.2 : 0) {
@@ -295,15 +293,27 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         }
     }
 
-    private func updateControlsBottomInset() {
-        guard areControlsVisible, let controlsBottomConstraint else { return }
-        let bottomInset = previewDelegate?.fileActionPanelHeight ?? 0
-        guard controlsBottomConstraint.constant != -bottomInset else { return }
-        if traitCollection.horizontalSizeClass == .regular {
-            controlsBottomConstraint.constant = -bottomInset - UIConstants.Padding.medium
-        } else {
-            controlsBottomConstraint.constant = -bottomInset
+    func updateControlsLayout() {
+        guard areControlsVisible else { return }
+        let spacing = UIConstants.Padding.medium
+        let safeFrame = safeAreaLayoutGuide.layoutFrame
+        var leftInset = safeFrame.minX - bounds.minX + spacing
+        var rightInset = bounds.maxX - safeFrame.maxX + spacing
+
+        let viewport = superview ?? self
+        if let panelFrame = previewDelegate?.fileActionPanelFrame(in: viewport),
+           panelFrame.intersects(viewport.bounds),
+           panelFrame.minX >= viewport.bounds.minX,
+           panelFrame.maxX <= viewport.bounds.maxX {
+            // Each page keeps the viewport's horizontal alignment while moving during a swipe.
+            leftInset = panelFrame.minX - viewport.bounds.minX
+            rightInset = viewport.bounds.maxX - panelFrame.maxX
         }
+
+        let bottom = safeFrame.maxY - (previewDelegate?.fileActionPanelHeight ?? 0) - spacing
+        controlsLeftConstraint?.constant = leftInset
+        controlsRightConstraint?.constant = -rightInset
+        controlsBottomConstraint?.constant = bottom - bounds.maxY
     }
 
     private func togglePlayPause() {

@@ -34,6 +34,7 @@ import UIKit
     func errorWhilePreviewing(fileId: Int, error: Error)
     func openWith(from: UIView)
     func presentVideoPlayer(_ controller: UIViewController, completion: (() -> Void)?)
+    func fileActionPanelFrame(in view: UIView) -> CGRect?
     var fileActionPanelHeight: CGFloat { get }
     var isFullscreenPreview: Bool { get }
 }
@@ -105,6 +106,16 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
 
     var fileActionPanelHeight: CGFloat {
         fullScreenPreview || isBookPreviewLayout ? 0 : Self.smallDetentHeight
+    }
+
+    func fileActionPanelFrame(in view: UIView) -> CGRect? {
+        guard !fullScreenPreview, !isBookPreviewLayout,
+              let panel = fileInformationsViewController,
+              panel.presentingViewController != nil,
+              let panelView = panel.viewIfLoaded,
+              let window = view.window,
+              panelView.window === window else { return nil }
+        return panelView.convert(panelView.bounds, to: view)
     }
 
     var isFullscreenPreview: Bool {
@@ -739,6 +750,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         view.layoutIfNeeded()
 
         if let sheet = fileInformationsViewController.sheetPresentationController {
+            sheet.delegate = self
             let canExpand = presentationOrigin != .activities
             sheet.detents = fileActionsDetents
             sheet.largestUndimmedDetentIdentifier = canExpand && previewLayout != .stacked ? .large : .medium
