@@ -863,6 +863,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             currentIndex = IndexPath(row: currentIndex.row - 1, section: 0)
         }
 
+        indexBeforeBoundsChange = currentIndex
+
         collectionView.reloadData()
         collectionView.layoutIfNeeded()
         collectionView.scrollToItem(at: currentIndex, at: .centeredHorizontally, animated: false)
