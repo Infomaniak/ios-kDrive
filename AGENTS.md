@@ -78,6 +78,7 @@ ios-kDrive/
 │   │   │   ├── DynamicIslandTaskCompletion.swift  # Main-owned, exactly-once background task completion
 │   │   │   ├── DynamicIslandUploadProgressTracker.swift  # Main-isolated upload progress observation
 │   │   │   ├── Servicies/        #     Upload service, photo scanning/sync, storage cleanup
+│   │   │   │   └── PhotoLibraryUploader/PhotoLibraryScanCoordinator.swift # Actor-owned scan lifecycle
 │   │   │   └── Services/
 │   │   │       └── BackgroundUploadSessionManager.swift
 │   │   └── MQService/           #   MQTT real-time sync
