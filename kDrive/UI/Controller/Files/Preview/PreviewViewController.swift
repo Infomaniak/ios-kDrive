@@ -853,7 +853,16 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         guard let index = previewFiles.firstIndex(where: { $0.id == fileId }) else { return }
 
         guard previewFiles.count > 1 else {
-            navigationController?.popViewController(animated: true)
+            if let navigationController {
+                if navigationController.topViewController === self {
+                    navigationController.popViewController(animated: true)
+                } else {
+                    navigationController.setViewControllers(
+                        navigationController.viewControllers.filter { $0 !== self },
+                        animated: false
+                    )
+                }
+            }
             return
         }
 
