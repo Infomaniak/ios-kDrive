@@ -166,11 +166,7 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
                   let downloadTask = uploadsDatabase.fetchObject(ofType: DownloadTask.self, filtering: { lazyCollection in
                       lazyCollection.filter("sessionUrl = %@", sessionUrl).first
                   }),
-                  let driveFileManager = accountManager.getDriveFileManager(
-                      for: downloadTask.driveId,
-                      userId: downloadTask.userId
-                  ),
-                  let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
+                  let (driveFileManager, file) = resolveFileManagerAndFile(for: downloadTask) {
             let operation = DownloadAuthenticatedOperation(file: file,
                                                            driveFileManager: driveFileManager,
                                                            task: task,
@@ -188,5 +184,27 @@ public final class BackgroundDownloadSessionManager: NSObject, BackgroundDownloa
             self.backgroundCompletionHandler?()
             self.backgroundCompletionHandler = nil
         }
+    }
+
+    private func resolveFileManagerAndFile(for downloadTask: DownloadTask) -> (DriveFileManager, File)? {
+        guard let driveFileManager = accountManager.getDriveFileManager(for: downloadTask.driveId, userId: downloadTask.userId)
+        else {
+            return nil
+        }
+
+        if let file = driveFileManager.getCachedFile(id: downloadTask.fileId), file.isAvailableOffline {
+            return (driveFileManager, file)
+        }
+
+        let sharedWithMeFileManager = driveFileManager.instanceWith(context: .sharedWithMe)
+
+        if let file = sharedWithMeFileManager.getCachedFile(id: downloadTask.fileId), file.isAvailableOffline {
+            return (sharedWithMeFileManager, file)
+        }
+
+        if let file = driveFileManager.getCachedFile(id: downloadTask.fileId) {
+            return (driveFileManager, file)
+        }
+        return nil
     }
 }
