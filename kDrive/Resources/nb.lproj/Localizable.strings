@@ -295,6 +295,9 @@
 /* loco:6049df4d5c2c3a04bc397942 */
 "buttonCopy" = "Kopier";
 
+/* loco:6a1ee837ce553d00af066292 */
+"buttonCopyToDrive" = "Kopier til en annen stasjon";
+
 /* loco:6049df4d5c2c3a04bc397944 */
 "buttonCreate" = "Opprett";
 
@@ -603,6 +606,15 @@
 
 /* loco:604b81caf1d3fc3c426e2443 */
 "convertToDropboxTitle" = "Gjør om til dropboks %@";
+
+/* loco:6af4708feb02d7c0c6025704 */
+"copyToDriveDoneSnackbar" = "%@ er kopiert til en annen stasjon";
+
+/* loco:6af470eed37a4970c1006005 */
+"copyToDriveErrorSnackbar" = "Kopiering av %@ til en annen stasjon mislyktes";
+
+/* loco:6a5f4c062dd6a21492070df2 */
+"copyToDriveStarted" = "%s kopieres til en annen stasjon";
 
 /* loco:61695ef04a145b45632ed042 */
 "createCategoryTitle" = "Opprett en kategori";

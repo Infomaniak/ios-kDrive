@@ -304,6 +304,9 @@
 /* loco:6049df4d5c2c3a04bc397942 */
 "buttonCopy" = "Copia";
 
+/* loco:6a1ee837ce553d00af066292 */
+"buttonCopyToDrive" = "Copia su un’altra unità";
+
 /* loco:6049df4d5c2c3a04bc397944 */
 "buttonCreate" = "Crea";
 
@@ -612,6 +615,15 @@
 
 /* loco:604b81caf1d3fc3c426e2443 */
 "convertToDropboxTitle" = "Converti in deposito file %@";
+
+/* loco:6af4708feb02d7c0c6025704 */
+"copyToDriveDoneSnackbar" = "%@ copiato su un’altra unità";
+
+/* loco:6af470eed37a4970c1006005 */
+"copyToDriveErrorSnackbar" = "Impossibile copiare %@ su un’altra unità";
+
+/* loco:6a5f4c062dd6a21492070df2 */
+"copyToDriveStarted" = "%s è in corso di copia su un’altra unità";
 
 /* loco:61695ef04a145b45632ed042 */
 "createCategoryTitle" = "Crea una categoria";

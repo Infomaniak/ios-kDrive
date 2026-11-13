@@ -116,6 +116,12 @@ extension FileActionsFloatingPanelViewController {
                         return !sharedWithMe && frozenFile.capabilities.canRead && frozenFile
                             .visibility != .isSharedSpace && frozenFile
                             .visibility != .isTeamSpace
+                    case .copyToDrive:
+                        return !sharedWithMe && frozenFile.capabilities.canRead && !frozenFile.isImporting
+                            && driveInfosManager.hasEligibleDestinationDrives(
+                                userId: accountManager.currentUserId,
+                                excluding: driveFileManager.drive.id
+                            )
                     case .rename:
                         return frozenFile.capabilities.canRename && !sharedWithMe && !frozenFile.isImporting
                     case .delete:
@@ -171,6 +177,8 @@ extension FileActionsFloatingPanelViewController {
             moveAction()
         case .duplicate:
             duplicateAction()
+        case .copyToDrive:
+            copyToDriveAction()
         case .rename:
             renameAction()
         case .delete:
@@ -462,6 +470,88 @@ extension FileActionsFloatingPanelViewController {
         present(selectFolderNavigationController, animated: true)
     }
 
+    private func copyToDriveAction() {
+        guard frozenFile.isManagedByRealm else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            return
+        }
+        let eligibleDrives = driveInfosManager.eligibleDestinationDrives(
+            userId: accountManager.currentUserId,
+            excluding: driveFileManager.drive.id
+        )
+        guard !eligibleDrives.isEmpty else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            return
+        }
+
+        if eligibleDrives.count == 1 {
+            startCopyToDriveFlow(destinationDrive: eligibleDrives[0])
+        } else {
+            let driveOptionSheet = FloatingPanelSelectOptionViewController<Drive>.instantiateSheet(
+                options: eligibleDrives,
+                headerTitle: KDriveResourcesStrings.Localizable.selectDriveTitle,
+                delegate: self
+            )
+            present(driveOptionSheet, animated: true)
+        }
+    }
+
+    private func startCopyToDriveFlow(destinationDrive: Drive) {
+        guard let destinationDriveFileManager = accountManager.getDriveFileManager(
+            for: destinationDrive.id,
+            userId: destinationDrive.userId
+        ) else {
+            UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
+            return
+        }
+
+        Task {
+            do {
+                try await destinationDriveFileManager.initRoot()
+                presentDestinationFolderPicker(from: destinationDriveFileManager)
+            } catch {
+                UIConstants.showSnackBarIfNeeded(error: error)
+            }
+        }
+    }
+
+    private func presentDestinationFolderPicker(from destinationDriveFileManager: DriveFileManager) {
+        let selectFolderNavigationController = SelectFolderViewController.instantiateInNavigationController(
+            driveFileManager: destinationDriveFileManager
+        ) { [
+            weak self,
+            proxyFile = frozenFile.proxify(),
+            remotePath = frozenFile.remotePath,
+            sourceName = frozenFile.name,
+            apiFetcher = driveFileManager.apiFetcher,
+            userId = accountManager.currentUserId
+        ] selectedDirectory, selectedDriveFileManager in
+            self?.presentingViewController?.dismiss(animated: true)
+            Task {
+                do {
+                    let externalImport = try await apiFetcher.copyToDrive(
+                        file: proxyFile,
+                        remotePath: remotePath,
+                        destinationDrive: selectedDriveFileManager.drive,
+                        destinationFolder: selectedDirectory.proxify()
+                    )
+                    @InjectService var crossDriveImportTracker: CrossDriveImportTrackable
+                    crossDriveImportTracker.register(
+                        importId: externalImport.id,
+                        fileName: sourceName,
+                        destinationDriveId: selectedDriveFileManager.drive.id,
+                        destinationFolderId: selectedDirectory.id,
+                        userId: userId
+                    )
+                    UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveStarted(sourceName))
+                } catch {
+                    UIConstants.showSnackBarIfNeeded(error: error)
+                }
+            }
+        }
+        present(selectFolderNavigationController, animated: true)
+    }
+
     private func renameAction() {
         guard frozenFile.isManagedByRealm else {
             UIConstants.showSnackBarIfNeeded(error: DriveError.unknownError)
@@ -604,5 +694,12 @@ extension FileActionsFloatingPanelViewController {
                 self.dismiss(animated: true)
             }
         )
+    }
+}
+
+extension FileActionsFloatingPanelViewController: SelectDelegate {
+    func didSelect(option: Selectable) {
+        guard let destinationDrive = option as? Drive else { return }
+        startCopyToDriveFlow(destinationDrive: destinationDrive)
     }
 }

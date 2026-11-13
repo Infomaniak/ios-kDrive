@@ -58,6 +58,9 @@ public class KDriveTargetAssembly: CoreTargetAssembly {
         ]
         #else
         extraDependencies += [
+            Factory(type: CrossDriveImportTrackable.self) { _, _ in
+                CrossDriveImportTracker()
+            },
             Factory(type: AppRestorationServiceable.self) { _, _ in
                 AppRestorationService()
             },
