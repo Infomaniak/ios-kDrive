@@ -18,7 +18,13 @@
 
 import UIKit
 
-extension PreviewViewController {
+extension PreviewViewController: UISheetPresentationControllerDelegate {
+    func sheetPresentationControllerDidChangeSelectedDetentIdentifier(
+        _ sheetPresentationController: UISheetPresentationController
+    ) {
+        scheduleFileActionsLayoutUpdate()
+    }
+
     func updatePreviewViewPort() {
         previewLayout = .standard
 
@@ -134,6 +140,9 @@ extension PreviewViewController {
 
             guard panel.presentingViewController != nil else { return }
             self.updateSheetContainerFrameIfNeeded(animated: true)
+            for case let cell as VideoCollectionViewCell in self.collectionView.visibleCells {
+                cell.updateControlsLayout()
+            }
         }
     }
 

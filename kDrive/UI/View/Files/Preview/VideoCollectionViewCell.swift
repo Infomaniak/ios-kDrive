@@ -32,20 +32,24 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     @LazyInjectService private var matomo: MatomoUtils
 
     var driveFileManager: DriveFileManager!
-    weak var parentViewController: UIViewController?
 
-    private var previewDownloadTask: ImageTask?
     private var file: File?
     private var videoPlayer: VideoPlayer?
-    private var playerViewControllerIfLoaded: AVPlayerViewController?
+    private var player: AVPlayer?
     private var readyForDisplayObserver: NSKeyValueObservation?
     private var playbackStatusObserver: NSKeyValueObservation?
+    private var timeObserver: Any?
     private var isCurrentPage = false
     private var isPlayerRevealed = false
-    private var needsPlayFromBeginning = true
+    private var needsStartFromBeginning = true
 
     private var loadingIndicatorTask: Task<Void, Never>?
-    private let touchTracker = TouchTrackingGestureRecognizer()
+    private var controlsLeftConstraint: NSLayoutConstraint?
+    private var controlsRightConstraint: NSLayoutConstraint?
+    private var controlsBottomConstraint: NSLayoutConstraint?
+    private var areControlsVisible = true
+
+    private var pipController: AVPictureInPictureController?
 
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
@@ -55,15 +59,64 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         return indicator
     }()
 
+    private let playerLayerView: PlayerLayerView = {
+        let view = PlayerLayerView()
+        view.alpha = 0
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private let controlsView: VideoControlsView = {
+        let view = VideoControlsView()
+        view.isHidden = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     override func awakeFromNib() {
         super.awakeFromNib()
 
         let container = previewFrameImageView.superview ?? contentView
+        container.insertSubview(playerLayerView, belowSubview: previewFrameImageView)
         container.addSubview(loadingIndicator)
+        container.addSubview(controlsView)
+
+        let controlsLeftConstraint = controlsView.leftAnchor.constraint(equalTo: leftAnchor)
+        let controlsRightConstraint = controlsView.rightAnchor.constraint(equalTo: rightAnchor)
+        let controlsBottomConstraint = controlsView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        self.controlsLeftConstraint = controlsLeftConstraint
+        self.controlsRightConstraint = controlsRightConstraint
+        self.controlsBottomConstraint = controlsBottomConstraint
+
         NSLayoutConstraint.activate([
+            playerLayerView.topAnchor.constraint(equalTo: container.topAnchor),
+            playerLayerView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            playerLayerView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            playerLayerView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+
             loadingIndicator.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+            loadingIndicator.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+
+            controlsLeftConstraint,
+            controlsRightConstraint,
+            controlsBottomConstraint
         ])
+
+        controlsView.onPlayPause = { [weak self] in
+            self?.togglePlayPause()
+        }
+
+        controlsView.onSeek = { [weak self] progress in
+            guard let self, let player else { return }
+            let duration = player.currentItem?.duration ?? .zero
+            let newTime = CMTimeMultiplyByFloat64(duration, multiplier: Float64(progress))
+            player.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero)
+        }
+
+        if AVPictureInPictureController.isPictureInPictureSupported() {
+            pipController = AVPictureInPictureController(playerLayer: playerLayerView.playerLayer)
+            pipController?.canStartPictureInPictureAutomaticallyFromInline = true
+        }
     }
 
     override func prepareForReuse() {
@@ -72,7 +125,11 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         removeInlinePlayer()
         isCurrentPage = false
         previewFrameImageView.image = nil
-        previewDownloadTask?.cancel()
+    }
+
+    override func layoutSubviews() {
+        updateControlsLayout()
+        super.layoutSubviews()
     }
 
     override func configureWith(file: File) {
@@ -81,15 +138,21 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         self.file = file
         file.getThumbnail(publicShareProxy: driveFileManager?.publicShareProxy) { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
+            self.videoPlayer?.thumbnail = self.previewFrameImageView.image
         }
 
         showLoadingIndicatorAfterDelay()
 
-        videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager, previewDelegate: self)
+        videoPlayer = VideoPlayer(
+            frozenFile: file,
+            driveFileManager: driveFileManager,
+            previewDelegate: self,
+            thumbnail: previewFrameImageView.image
+        )
     }
 
     override var prefersFullscreenPreview: Bool {
-        guard isCurrentPage, let player = playerViewControllerIfLoaded?.player else { return false }
+        guard isCurrentPage, let player else { return false }
         return player.rate != 0
     }
 
@@ -97,10 +160,10 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         guard !isCurrentPage else { return }
         isCurrentPage = true
         if isPlayerRevealed {
-            if needsPlayFromBeginning {
-                playFromBeginning()
+            if needsStartFromBeginning {
+                startFromBeginning()
             } else {
-                playerViewControllerIfLoaded?.player?.play()
+                videoPlayer?.play()
             }
         }
     }
@@ -112,8 +175,12 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     }
 
     override func didLeavePage() {
-        needsPlayFromBeginning = true
-        playerViewControllerIfLoaded?.player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+        needsStartFromBeginning = true
+        player?.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+    }
+
+    override func fullscreenDidChange() {
+        updateControlsVisibility(animated: true)
     }
 
     override func willDisplayInCollectionView() {
@@ -136,57 +203,41 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     }
 
     func readyToPlay(_ videoPlayer: VideoPlayer) {
-        guard videoPlayer === self.videoPlayer, let parentViewController else { return }
-        embedInline(in: parentViewController)
+        guard videoPlayer === self.videoPlayer else { return }
+        embedInline()
     }
 
-    private func embedInline(in parent: UIViewController) {
-        guard let playerViewController = videoPlayer?.playerViewController,
-              playerViewController.parent == nil,
-              let container = previewFrameImageView.superview else { return }
+    private func embedInline() {
+        guard player == nil, let player = videoPlayer?.avPlayer else { return }
 
-        playerViewController.canStartPictureInPictureAutomaticallyFromInline = true
-        playerViewControllerIfLoaded = playerViewController
-        parent.addChild(playerViewController)
+        self.player = player
+        playerLayerView.player = player
 
-        let playerView: UIView = playerViewController.view
-        playerView.alpha = 0
-        playerView.translatesAutoresizingMaskIntoConstraints = false
-        container.insertSubview(playerView, belowSubview: previewFrameImageView)
-        NSLayoutConstraint.activate([
-            playerView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            playerView.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            playerView.widthAnchor.constraint(equalTo: container.widthAnchor),
-            playerView.heightAnchor.constraint(equalTo: container.heightAnchor)
-        ])
-        playerViewController.didMove(toParent: parent)
-        observePlaybackStatus(of: playerViewController)
-
-        if playerViewController.isReadyForDisplay || videoPlayer?.isAudioOnly == true {
-            revealPlayer(playerViewController)
+        if playerLayerView.playerLayer.isReadyForDisplay || videoPlayer?.isAudioOnly == true {
+            revealPlayer()
         } else {
-            readyForDisplayObserver = playerViewController
+            readyForDisplayObserver = playerLayerView.playerLayer
                 .observe(\.isReadyForDisplay, options: [.initial, .new]) { [weak self] _, change in
                     guard change.newValue == true else { return }
                     Task { @MainActor in
-                        guard let self, self.playerViewControllerIfLoaded === playerViewController else { return }
+                        guard let self, self.player === player, !self.isPlayerRevealed else { return }
                         self.readyForDisplayObserver = nil
-                        self.revealPlayer(playerViewController)
+                        self.revealPlayer()
                     }
                 }
         }
+        observePlaybackStatus(of: player)
     }
 
-    private func revealPlayer(_ playerViewController: AVPlayerViewController) {
+    private func revealPlayer() {
         isPlayerRevealed = true
-        tapGestureRecognizer.isEnabled = false
         if isCurrentPage {
-            playFromBeginning()
+            startFromBeginning()
         }
 
         loadingIndicatorTask?.cancel()
         UIView.animate(withDuration: 0.25) {
-            playerViewController.view.alpha = 1
+            self.playerLayerView.alpha = 1
             self.previewFrameImageView.alpha = 0
             self.loadingIndicator.alpha = 0
         } completion: { _ in
@@ -210,58 +261,97 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         loadingIndicator.alpha = 1
     }
 
-    private func observePlaybackStatus(of playerViewController: AVPlayerViewController) {
-        playbackStatusObserver = playerViewController.player?
-            .observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
-                let status = player.timeControlStatus
-                Task { @MainActor in
-                    guard let self, self.isCurrentPage, self.playerViewControllerIfLoaded === playerViewController else { return }
-                    switch status {
-                    case .playing:
-                        self.previewDelegate?.setPlaybackFullscreen(true)
-                        self.updatePlayerBottomInset(playerViewController)
-                    case .paused:
-                        guard !self.touchTracker.isTouching else { return }
-                        self.previewDelegate?.setPlaybackFullscreen(false)
-                        self.updatePlayerBottomInset(playerViewController)
-                    default:
-                        return
-                    }
-                }
+    private func observePlaybackStatus(of player: AVPlayer) {
+        playbackStatusObserver = player.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
+            let status = player.timeControlStatus
+            Task { @MainActor in
+                guard let self, self.isCurrentPage, self.player === player else { return }
+                self.controlsView.setPlaying(status != .paused)
             }
-        playerViewController.view.addGestureRecognizer(touchTracker)
-    }
-
-    private func updatePlayerBottomInset(_ playerViewController: AVPlayerViewController) {
-        let bottomInset = previewDelegate?.fileActionPanelHeight ?? 0
-        guard playerViewController.additionalSafeAreaInsets.bottom != bottomInset else { return }
-        UIView.animate(withDuration: 0.25) {
-            playerViewController.additionalSafeAreaInsets.bottom = bottomInset
-            playerViewController.view.layoutIfNeeded()
+        }
+        let interval = CMTime(seconds: 0.1, preferredTimescale: 600)
+        timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self, weak player] time in
+            MainActor.assumeIsolated {
+                guard let self, let player, self.player === player else { return }
+                self.controlsView.update(currentTime: time, duration: player.currentItem?.duration ?? .indefinite)
+            }
         }
     }
 
-    private func playFromBeginning() {
-        guard let player = playerViewControllerIfLoaded?.player else { return }
+    private func updateControlsVisibility(animated: Bool) {
+        let isVisible = isPlayerRevealed && !(previewDelegate?.isFullscreenPreview ?? false)
+        areControlsVisible = isVisible
+        if isVisible {
+            updateControlsLayout()
+            controlsView.isHidden = false
+        }
+        UIView.animate(withDuration: animated ? 0.2 : 0) {
+            self.controlsView.alpha = isVisible ? 1 : 0
+        } completion: { _ in
+            guard !self.areControlsVisible else { return }
+            self.controlsView.isHidden = true
+        }
+    }
+
+    func updateControlsLayout() {
+        guard areControlsVisible else { return }
+        let spacing = UIConstants.Padding.medium
+        let safeFrame = safeAreaLayoutGuide.layoutFrame
+        var leftInset = safeFrame.minX - bounds.minX + spacing
+        var rightInset = bounds.maxX - safeFrame.maxX + spacing
+
+        let viewport = superview ?? self
+        if let panelFrame = previewDelegate?.fileActionPanelFrame(in: viewport),
+           panelFrame.intersects(viewport.bounds),
+           panelFrame.minX >= viewport.bounds.minX,
+           panelFrame.maxX <= viewport.bounds.maxX {
+            // Each page keeps the viewport's horizontal alignment while moving during a swipe.
+            leftInset = panelFrame.minX - viewport.bounds.minX
+            rightInset = viewport.bounds.maxX - panelFrame.maxX
+        }
+
+        let bottom = safeFrame.maxY - (previewDelegate?.fileActionPanelHeight ?? 0) - spacing
+        controlsLeftConstraint?.constant = leftInset
+        controlsRightConstraint?.constant = -rightInset
+        controlsBottomConstraint?.constant = bottom - bounds.maxY
+    }
+
+    private func togglePlayPause() {
+        guard let player else { return }
+        if player.timeControlStatus != .paused {
+            player.pause()
+        } else {
+            if let item = player.currentItem,
+               item.duration.seconds.isFinite,
+               item.currentTime() >= item.duration {
+                player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
+            }
+            videoPlayer?.play()
+        }
+    }
+
+    private func startFromBeginning() {
+        guard let player else { return }
         matomo.trackMediaPlayer(playMedia: .video)
         player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
-        needsPlayFromBeginning = false
-        player.play()
+        needsStartFromBeginning = false
+        updateControlsVisibility(animated: true)
     }
 
     private func removeInlinePlayer() {
         readyForDisplayObserver = nil
         playbackStatusObserver = nil
-        touchTracker.view?.removeGestureRecognizer(touchTracker)
         isPlayerRevealed = false
-        needsPlayFromBeginning = true
-        if let playerViewController = playerViewControllerIfLoaded {
-            playerViewController.additionalSafeAreaInsets.bottom = 0
-            playerViewController.willMove(toParent: nil)
-            playerViewController.view.removeFromSuperview()
-            playerViewController.removeFromParent()
+        needsStartFromBeginning = true
+        if let timeObserver {
+            player?.removeTimeObserver(timeObserver)
+            self.timeObserver = nil
         }
-        playerViewControllerIfLoaded = nil
+        player = nil
+        playerLayerView.player = nil
+        playerLayerView.alpha = 0
+        controlsView.reset()
+        updateControlsVisibility(animated: false)
         previewFrameImageView.alpha = 1
         tapGestureRecognizer.isEnabled = true
     }
