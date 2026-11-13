@@ -131,11 +131,17 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         self.file = file
         file.getThumbnail(publicShareProxy: driveFileManager?.publicShareProxy) { preview, hasThumbnail in
             self.previewFrameImageView.image = hasThumbnail ? preview : nil
+            self.videoPlayer?.thumbnail = self.previewFrameImageView.image
         }
 
         showLoadingIndicatorAfterDelay()
 
-        videoPlayer = VideoPlayer(frozenFile: file, driveFileManager: driveFileManager, previewDelegate: self)
+        videoPlayer = VideoPlayer(
+            frozenFile: file,
+            driveFileManager: driveFileManager,
+            previewDelegate: self,
+            thumbnail: previewFrameImageView.image
+        )
     }
 
     override var prefersFullscreenPreview: Bool {
@@ -150,7 +156,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             if needsStartFromBeginning {
                 startFromBeginning()
             } else {
-                player?.play()
+                videoPlayer?.play()
             }
         }
     }
@@ -310,7 +316,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
                item.currentTime() >= item.duration {
                 player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero)
             }
-            player.play()
+            videoPlayer?.play()
         }
     }
 

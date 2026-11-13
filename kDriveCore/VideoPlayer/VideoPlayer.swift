@@ -38,12 +38,21 @@ public final class VideoPlayer: Pausable {
     private var player: AVPlayer?
     private var asset: AVAsset?
     private var file: File?
+    public var thumbnail: UIImage? {
+        didSet {
+            Task { @MainActor in
+                updateNowPlayingInfo()
+            }
+        }
+    }
+
     public private(set) var isAudioOnly = false
 
     private var statusObserver: NSKeyValueObservation?
     private var playbackObserver: NSKeyValueObservation?
     private var nowPlayingMetadata: MediaMetadata?
     private var nowPlayingMetadataTask: Task<Void, Never>?
+    private var nowPlayingSession: MPNowPlayingSession?
 
     public var onPlaybackEnded: (() -> Void)?
 
@@ -62,37 +71,61 @@ public final class VideoPlayer: Pausable {
         player
     }
 
-    public lazy var playerViewController: AVPlayerViewController = {
-        let playerViewController = AVPlayerViewController()
-        playerViewController.player = self.player
-        return playerViewController
-    }()
-
-    public init(frozenFile: File, driveFileManager: DriveFileManager, previewDelegate: VideoViewCellDelegate?) {
+    public init(
+        frozenFile: File,
+        driveFileManager: DriveFileManager,
+        previewDelegate: VideoViewCellDelegate?,
+        thumbnail: UIImage? = nil
+    ) {
         setupPlayer(with: frozenFile, driveFileManager: driveFileManager)
         file = frozenFile
         self.previewDelegate = previewDelegate
+        self.thumbnail = thumbnail
     }
 
-    public func setNowPlayingMetadata(metadata: MediaMetadata) {
-        var nowPlayingInfo = [String: Any]()
+    @MainActor
+    private func updateNowPlayingInfo() {
+        guard let player, let currentItem = player.currentItem,
+              let nowPlayingInfoCenter = nowPlayingSession?.nowPlayingInfoCenter else { return }
+
+        var nowPlayingInfo = nowPlayingInfoCenter.nowPlayingInfo ?? [String: Any]()
         nowPlayingInfo[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.video.rawValue
         nowPlayingInfo[MPNowPlayingInfoPropertyIsLiveStream] = false
 
-        nowPlayingInfo[MPMediaItemPropertyTitle] = metadata.title
-        nowPlayingInfo[MPMediaItemPropertyArtist] = metadata.artist
-        if let artwork = metadata.artwork {
-            let artworkItem = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
-            nowPlayingInfo[MPMediaItemPropertyArtwork] = artworkItem
+        if let nowPlayingMetadata {
+            nowPlayingInfo[MPMediaItemPropertyTitle] = nowPlayingMetadata.title
+            nowPlayingInfo[MPMediaItemPropertyArtist] = nowPlayingMetadata.artist
         }
 
-        if let player,
-           let currentItem = player.currentItem {
-            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = CMTimeGetSeconds(currentItem.duration)
-            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime())
+        if let artwork = nowPlayingMetadata?.artwork ?? thumbnail {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
+        } else {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = nil
         }
 
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        let position = player.currentTime().seconds
+        if position.isFinite {
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = Float(position)
+        }
+
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate
+        nowPlayingInfo[MPNowPlayingInfoPropertyDefaultPlaybackRate] = 1.0
+
+        let duration = currentItem.duration.seconds
+        if duration.isFinite, duration > 0 {
+            nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = Float(duration)
+        }
+
+        nowPlayingInfoCenter.nowPlayingInfo = nowPlayingInfo
+    }
+
+    @MainActor
+    public func play() {
+        guard let player else { return }
+        configureNowPlaying(player: player)
+        updateNowPlayingInfo()
+        nowPlayingSession?.becomeActiveIfPossible(completion: nil)
+        player.play()
     }
 
     public func stopPlayback() {
@@ -104,21 +137,15 @@ public final class VideoPlayer: Pausable {
         onPlaybackEnded?()
     }
 
-    @objc func playerStateChanged(notification: Notification) {
+    @objc private func playerItemTimeJumped(notification: Notification) {
         Task { @MainActor [weak self] in
-            guard let self, orchestrator.isCurrentPlayback(self) else { return }
-            publishNowPlayingMetadata()
+            self?.updateNowPlayingInfo()
         }
     }
 
     @MainActor
-    private func publishNowPlayingMetadata() {
-        if let nowPlayingMetadata {
-            setNowPlayingMetadata(metadata: nowPlayingMetadata)
-            return
-        }
-
-        guard nowPlayingMetadataTask == nil, let asset, let fileName = file?.name else { return }
+    private func loadNowPlayingMetadata() {
+        guard nowPlayingMetadata == nil, nowPlayingMetadataTask == nil, let asset, let fileName = file?.name else { return }
         nowPlayingMetadataTask = Task { @MainActor [weak self] in
             let commonMetadata = try? await asset.load(.commonMetadata)
             let metadata = await MediaMetadata.extractTrackMetadata(from: commonMetadata ?? [],
@@ -126,8 +153,7 @@ public final class VideoPlayer: Pausable {
             guard let self else { return }
             nowPlayingMetadata = metadata
             nowPlayingMetadataTask = nil
-            guard orchestrator.isCurrentPlayback(self) else { return }
-            setNowPlayingMetadata(metadata: metadata)
+            updateNowPlayingInfo()
         }
     }
 
@@ -168,38 +194,26 @@ public final class VideoPlayer: Pausable {
 
     private func observePlayer(currentItem: AVPlayerItem) {
         playbackObserver = player?.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
-            guard player.timeControlStatus == .playing, let self else { return }
+            guard let self else { return }
             Task { @MainActor in
-                self.orchestrator.newPlaybackStarted(playable: self)
-                self.publishNowPlayingMetadata()
+                switch player.timeControlStatus {
+                case .playing:
+                    self.orchestrator.newPlaybackStarted(playable: self)
+                    self.configureNowPlaying(player: player)
+                    await self.nowPlayingSession?.becomeActiveIfPossible()
+                    self.updateNowPlayingInfo()
+                case .paused:
+                    self.updateNowPlayingInfo()
+                default:
+                    break
+                }
             }
         }
 
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(playerStateChanged),
+            selector: #selector(playerItemTimeJumped),
             name: .AVPlayerItemTimeJumped,
-            object: currentItem
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(playerStateChanged),
-            name: .AVPlayerItemPlaybackStalled,
-            object: currentItem
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(playerStateChanged),
-            name: .AVPlayerItemDidPlayToEndTime,
-            object: currentItem
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(playerStateChanged),
-            name: .AVPlayerItemFailedToPlayToEndTime,
             object: currentItem
         )
 
@@ -211,11 +225,79 @@ public final class VideoPlayer: Pausable {
                     let tracks = try? await item.asset.loadTracks(withMediaType: .video)
                     self.isAudioOnly = tracks?.isEmpty ?? true
                     self.isReadyToPlay = true
+                    self.loadNowPlayingMetadata()
                     previewDelegate.readyToPlay(self)
                 default:
                     previewDelegate.errorWhilePreviewing(self, error: ErrorDomain.incompatibleFile)
                 }
             }
+        }
+    }
+
+    @MainActor
+    private func configureNowPlaying(player: AVPlayer) {
+        guard nowPlayingSession == nil else { return }
+
+        let session = MPNowPlayingSession(players: [player])
+        session.automaticallyPublishesNowPlayingInfo = false
+        nowPlayingSession = session
+        registerRemoteCommands(session.remoteCommandCenter, for: player)
+    }
+
+    private func registerRemoteCommands(_ commands: MPRemoteCommandCenter, for player: AVPlayer) {
+        commands.togglePlayPauseCommand.isEnabled = true
+        commands.togglePlayPauseCommand.addTarget { [weak player] _ in
+            guard let player else { return .commandFailed }
+            if player.timeControlStatus == .playing {
+                player.pause()
+            } else {
+                player.play()
+            }
+            return .success
+        }
+
+        commands.playCommand.isEnabled = true
+        commands.playCommand.addTarget { [weak player] _ in
+            guard let player else { return .commandFailed }
+            player.play()
+            return .success
+        }
+
+        commands.pauseCommand.isEnabled = true
+        commands.pauseCommand.addTarget { [weak player] _ in
+            guard let player else { return .commandFailed }
+            player.pause()
+            return .success
+        }
+
+        let skipCommands: [(command: MPSkipIntervalCommand, direction: Double)] = [
+            (commands.skipBackwardCommand, -1),
+            (commands.skipForwardCommand, 1)
+        ]
+        for (command, direction) in skipCommands {
+            command.isEnabled = true
+            command.preferredIntervals = [15]
+            command.addTarget { [weak player] event in
+                guard let player,
+                      let duration = player.currentItem?.duration.seconds,
+                      let event = event as? MPSkipIntervalCommandEvent else {
+                    return .commandFailed
+                }
+
+                let currentTime = player.currentTime().seconds
+                guard currentTime.isFinite, duration.isFinite, duration > 0 else { return .commandFailed }
+
+                let targetTime = min(max(currentTime + direction * event.interval, 0), duration)
+                player.seek(to: CMTime(seconds: targetTime, preferredTimescale: 600))
+                return .success
+            }
+        }
+
+        commands.changePlaybackPositionCommand.isEnabled = true
+        commands.changePlaybackPositionCommand.addTarget { [weak player] event in
+            guard let player, let event = event as? MPChangePlaybackPositionCommandEvent else { return .commandFailed }
+            player.seek(to: CMTime(seconds: event.positionTime, preferredTimescale: 600))
+            return .success
         }
     }
 }
