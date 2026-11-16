@@ -57,12 +57,10 @@ jobs:
         run: |
           touch $ENV_PATH
           echo -e "enum Env {\n    static let token = \"$ACCESS_TOKEN\"\n\n    static let driveId = 420132\n\n    static let userId = $USER_ID\n\n    static let inviteUserId = $INVITE_USER_ID\n\n    static let inviteMail = \"$INVITE_EMAIL\"\n\n    static let inviteTeam = 0\n\n    static let commonDocumentsId = 3\n}" > $ENV_PATH
-      - name: Clean
-        run: tuist clean selectiveTests
       - name: Generate
         run: tuist install && tuist generate
       - name: Test Local
-        run: tuist test kDriveTests --clean --no-selective-testing
+        run: tuist test kDriveTests --clean --no-selective-testing --device "${{ vars.LATEST_IPHONE_SIMULATOR }}"
 
   api_tests:
     name: API Tests
@@ -84,17 +82,13 @@ jobs:
         run: |
           touch $ENV_PATH
           echo -e "enum Env {\n    static let token = \"$ACCESS_TOKEN\"\n\n    static let driveId = 420132\n\n    static let userId = $USER_ID\n\n    static let inviteUserId = $INVITE_USER_ID\n\n    static let inviteMail = \"$INVITE_EMAIL\"\n\n    static let inviteTeam = 0\n\n    static let commonDocumentsId = 3\n}" > $ENV_PATH
-      - name: Clean
-        run: tuist clean selectiveTests
       - name: Generate
         run: tuist install && tuist generate
       - name: Test API
-        run: tuist test kDriveAPITests --clean --test-targets kDriveAPITests/DriveApiTests --no-selective-testing
+        run: tuist test kDriveAPITests --clean --test-targets kDriveAPITests/DriveApiTests --no-selective-testing --device "${{ vars.LATEST_IPHONE_SIMULATOR }}"
   ui_tests:
     name: UI Tests
     runs-on: [ self-hosted, iOS ]
-    env:
-      DEVICE_NAME: "iPhone 18 Pro"
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -114,7 +108,7 @@ jobs:
           echo -e "enum Env {\n static let testAccountEmail = \"${UITEST_ACCOUNT_EMAIL}\"\n static let testAccountPassword = \"${UITEST_ACCOUNT_PASSWORD}\"\n}" > "$ENV_PATH"
 
       - name: Setup
-        run: tuist install && tuist generate --no-open
+        run: tuist install && tuist generate
 
       - name: UITest
         env:
@@ -122,6 +116,6 @@ jobs:
         run: |
           tuist test kDrive-Workspace \
             --clean \
-            --device "$DEVICE_NAME" \
+            --device "${{ vars.LATEST_IPHONE_SIMULATOR }}" \
             --test-targets "kDriveUITests/AppUITest" \
             --no-selective-testing
