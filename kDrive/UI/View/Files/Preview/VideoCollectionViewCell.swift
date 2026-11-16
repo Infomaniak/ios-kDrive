@@ -221,18 +221,18 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
                     return
                 }
 
-                completion(self.makeSubtitlesMenu(player: player).children)
+                completion(self.getSubtitlesActions(player: player))
             }
         ])
 
         button.isHidden = player.subtitleGroup?.options.isEmpty != false
     }
 
-    private func makeSubtitlesMenu(player: VideoPlayer) -> UIMenu {
+    private func getSubtitlesActions(player: VideoPlayer) -> [UIAction] {
         guard let avPlayer = player.avPlayer, let item = avPlayer.currentItem,
               let group = player.subtitleGroup
         else {
-            return UIMenu(children: [])
+            return []
         }
 
         let selectedLanguage = item.currentMediaSelection
@@ -260,7 +260,7 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
             }
         }
 
-        return UIMenu(children: actions)
+        return actions
     }
 
     private func embedInline() {
