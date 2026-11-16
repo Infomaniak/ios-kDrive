@@ -36,6 +36,7 @@ final class VideoControlsView: UIView {
     private let elapsedTimeLabel = UILabel()
     private let remainingTimeLabel = UILabel()
     private let positionSlider = UISlider()
+    var subtitlesButton = UIButton(type: .system)
 
     private var duration = CMTime.indefinite
     private var scrubbingTouch: UITouch?
@@ -127,6 +128,7 @@ final class VideoControlsView: UIView {
             elapsedTimeLabel,
             positionSlider,
             remainingTimeLabel,
+            subtitlesButton,
             airPlayButton
         ])
         stackView.axis = .horizontal
@@ -151,6 +153,9 @@ final class VideoControlsView: UIView {
 
             playPauseButton.widthAnchor.constraint(equalToConstant: 40),
             playPauseButton.heightAnchor.constraint(equalToConstant: 40),
+
+            subtitlesButton.heightAnchor.constraint(equalToConstant: 40),
+            subtitlesButton.heightAnchor.constraint(equalToConstant: 40),
 
             airPlayButton.widthAnchor.constraint(equalToConstant: 40),
             airPlayButton.heightAnchor.constraint(equalToConstant: 40)

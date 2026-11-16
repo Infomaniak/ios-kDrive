@@ -207,13 +207,71 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         embedInline()
     }
 
+    private func configureSubtitlesButton(
+        _ button: UIButton,
+        player: VideoPlayer
+    ) {
+        button.setImage(UIImage(systemName: "captions.bubble"), for: .normal)
+        button.showsMenuAsPrimaryAction = true
+
+        button.menu = UIMenu(children: [
+            UIDeferredMenuElement.uncached { [weak self] completion in
+                guard let self else {
+                    completion([])
+                    return
+                }
+
+                completion(self.makeSubtitlesMenu(player: player).children)
+            }
+        ])
+
+        button.isHidden = player.subtitleGroup?.options.isEmpty != false
+    }
+
+    private func makeSubtitlesMenu(player: VideoPlayer) -> UIMenu {
+        guard let avPlayer = player.avPlayer, let item = avPlayer.currentItem,
+              let group = player.subtitleGroup
+        else {
+            return UIMenu(children: [])
+        }
+
+        let selectedLanguage = item.currentMediaSelection
+            .selectedMediaOption(in: group)
+
+        var actions = [UIAction]()
+
+        if group.allowsEmptySelection {
+            actions.append(UIAction(
+                title: KDriveResourcesStrings.Localizable.allDisabled,
+                state: selectedLanguage == nil ? .on : .off
+            ) { _ in
+                guard avPlayer.currentItem === item else { return }
+                item.select(nil, in: group)
+            })
+        }
+
+        actions += group.options.map { option in
+            UIAction(
+                title: option.displayName,
+                state: selectedLanguage == option ? .on : .off
+            ) { _ in
+                guard avPlayer.currentItem === item else { return }
+                item.select(option, in: group)
+            }
+        }
+
+        return UIMenu(children: actions)
+    }
+
     private func embedInline() {
-        guard player == nil, let player = videoPlayer?.avPlayer else { return }
+        guard player == nil, let videoPlayer, let player = videoPlayer.avPlayer else { return }
+
+        configureSubtitlesButton(controlsView.subtitlesButton, player: videoPlayer)
 
         self.player = player
         playerLayerView.player = player
 
-        if playerLayerView.playerLayer.isReadyForDisplay || videoPlayer?.isAudioOnly == true {
+        if playerLayerView.playerLayer.isReadyForDisplay || videoPlayer.isAudioOnly == true {
             revealPlayer()
         } else {
             readyForDisplayObserver = playerLayerView.playerLayer

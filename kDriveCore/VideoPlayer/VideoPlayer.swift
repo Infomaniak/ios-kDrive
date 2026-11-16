@@ -22,6 +22,7 @@ import InfomaniakCore
 import InfomaniakDI
 import kDriveResources
 import MediaPlayer
+import OSLog
 
 @MainActor public protocol VideoViewCellDelegate: AnyObject {
     func readyToPlay(_ videoPlayer: VideoPlayer)
@@ -70,6 +71,8 @@ public final class VideoPlayer: Pausable {
     public var avPlayer: AVPlayer? {
         player
     }
+
+    public private(set) var subtitleGroup: AVMediaSelectionGroup?
 
     public init(
         frozenFile: File,
@@ -192,6 +195,15 @@ public final class VideoPlayer: Pausable {
         }
     }
 
+    private func loadSubtitleGroup(of asset: AVAsset) async -> AVMediaSelectionGroup? {
+        do {
+            return try await asset.loadMediaSelectionGroup(for: .legible)
+        } catch {
+            Logger.general.error("Failed to load legible media selection group: \(error)")
+            return nil
+        }
+    }
+
     private func observePlayer(currentItem: AVPlayerItem) {
         playbackObserver = player?.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
             guard let self else { return }
@@ -224,6 +236,7 @@ public final class VideoPlayer: Pausable {
                 case .readyToPlay:
                     let tracks = try? await item.asset.loadTracks(withMediaType: .video)
                     self.isAudioOnly = tracks?.isEmpty ?? true
+                    self.subtitleGroup = await self.loadSubtitleGroup(of: item.asset)
                     self.isReadyToPlay = true
                     self.loadNowPlayingMetadata()
                     previewDelegate.readyToPlay(self)
