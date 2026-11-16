@@ -22,7 +22,7 @@ import InfomaniakCoreCommonUI
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
-import Sentry
+import SentrySwift
 import UIKit
 import WebKit
 

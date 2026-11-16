@@ -26,7 +26,7 @@ import InfomaniakLogin
 import kDriveCore
 import kDriveResources
 import MyKSuite
-import Sentry
+import SentrySwift
 import UIKit
 
 class ParameterTableViewController: BaseGroupedTableViewController {

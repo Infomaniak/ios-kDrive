@@ -20,7 +20,7 @@ import Foundation
 import InfomaniakCore
 import InfomaniakDI
 import RealmSwift
-import Sentry
+import SentrySwift
 
 /// An abstract NSOperation
 public protocol Operationable: AnyObject {

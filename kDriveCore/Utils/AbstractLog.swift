@@ -19,7 +19,7 @@
 import Foundation
 import InfomaniakDI
 import OSLog
-import Sentry
+import SentrySwift
 
 /// A representation of sandard log levels
 public enum AbstractLogLevel {

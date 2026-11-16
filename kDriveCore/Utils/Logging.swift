@@ -23,7 +23,7 @@ import InfomaniakDI
 import InfomaniakLogin
 import OSLog
 import RealmSwift
-import Sentry
+import SentrySwift
 
 public enum Logging {
     public static func initLogging() {

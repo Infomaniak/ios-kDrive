@@ -22,7 +22,7 @@ import InfomaniakDI
 import kDriveCore
 import kDriveResources
 import LinkPresentation
-import Sentry
+import SentrySwift
 import UIKit
 
 extension FileActionsFloatingPanelViewController {

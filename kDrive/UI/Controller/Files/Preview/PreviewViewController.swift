@@ -27,7 +27,7 @@ import Nuke
 import OSLog
 import PDFKit
 import SafariServices
-import Sentry
+import SentrySwift
 import UIKit
 
 @MainActor protocol PreviewContentCellDelegate: AnyObject {

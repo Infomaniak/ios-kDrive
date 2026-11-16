@@ -17,7 +17,7 @@
  */
 
 import kDriveCore
-import Sentry
+import SentrySwift
 
 /// Records breadcrumbs immediately, before preview operations that may crash.
 enum PreviewBreadcrumb {

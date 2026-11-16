@@ -22,7 +22,7 @@ import InfomaniakCore
 import InfomaniakDI
 import InfomaniakLogin
 import Nuke
-import Sentry
+import SentrySwift
 import UIKit
 
 extension ImageRequest {

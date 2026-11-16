@@ -22,7 +22,7 @@ import InfomaniakCoreDB
 import InfomaniakDI
 import Realm
 import RealmSwift
-import Sentry
+import SentrySwift
 
 // TODO: Move to core db / + tests
 public extension Results where Element: KeypathSortable {

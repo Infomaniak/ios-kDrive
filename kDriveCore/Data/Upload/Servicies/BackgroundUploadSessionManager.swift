@@ -19,7 +19,7 @@
 import Foundation
 import InfomaniakDI
 import RealmSwift
-import Sentry
+import SentrySwift
 
 /// A completion handler to call to terminate processing a network request
 public typealias RequestCompletionHandler = (Data?, URLResponse?, Error?) -> Void

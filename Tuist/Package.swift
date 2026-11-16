@@ -39,10 +39,16 @@ let packageSettings = PackageSettings(
         "Nuke": .framework,
         "RealmSwift": .framework,
         "Realm": .framework,
-        "Sentry-Dynamic": .framework,
         "SwiftRegex": .framework,
         "VersionChecker": .framework,
         "_LottieStub": .framework
+    ],
+    targetSettings: [
+        "InfomaniakCore": .settings(base: [
+            // Keep SentrySPM static and linked only by InfomaniakCore to avoid duplicate SDK state.
+            // Load its Objective-C categories as well as referenced classes.
+            "OTHER_LDFLAGS": "$(inherited) -ObjC"
+        ])
     ]
 )
 #endif
@@ -59,18 +65,17 @@ let package = Package(
         .package(url: "https://github.com/Cocoanetics/Kvitto", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/flowbe/MaterialOutlinedTextField", .upToNextMajor(from: "0.1.0")),
         .package(url: "https://github.com/flowbe/SwiftRegex", .upToNextMajor(from: "1.0.0")),
-        .package(url: "https://github.com/getsentry/sentry-cocoa", .upToNextMajor(from: "9.8.0")),
-        .package(url: "https://github.com/Infomaniak/ios-bug-tracker", .upToNextMajor(from: "19.0.0")),
-        .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "19.1.4")),
-        .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "26.1.2")),
-        .package(url: "https://github.com/Infomaniak/ios-core-uikit", .upToNextMajor(from: "2.0.1")),
+        .package(url: "https://github.com/Infomaniak/ios-bug-tracker", .upToNextMajor(from: "21.0.0")),
+        .package(url: "https://github.com/Infomaniak/ios-core", .upToNextMajor(from: "20.0.0")),
+        .package(url: "https://github.com/Infomaniak/ios-core-ui", .upToNextMajor(from: "28.0.0")),
+        .package(url: "https://github.com/Infomaniak/ios-core-uikit", .upToNextMajor(from: "4.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-dependency-injection", .upToNextMajor(from: "2.0.5")),
         .package(url: "https://github.com/Infomaniak/ios-device-check", .upToNextMajor(from: "1.1.1")),
-        .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "10.2.0")),
+        .package(url: "https://github.com/Infomaniak/ios-features", .upToNextMajor(from: "12.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-login", .upToNextMajor(from: "7.2.0")),
-        .package(url: "https://github.com/Infomaniak/ios-notifications", .upToNextMajor(from: "16.0.0")),
+        .package(url: "https://github.com/Infomaniak/ios-notifications", .upToNextMajor(from: "17.0.0")),
         .package(url: "https://github.com/Infomaniak/ios-onboarding", .upToNextMajor(from: "1.5.0")),
-        .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "18.0.0")),
+        .package(url: "https://github.com/Infomaniak/ios-version-checker", .upToNextMajor(from: "20.0.0")),
         .package(url: "https://github.com/Infomaniak/LocalizeKit", .upToNextMajor(from: "1.0.2")),
         .package(url: "https://github.com/Infomaniak/swift-concurrency", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/matomo-org/matomo-sdk-ios", .upToNextMajor(from: "7.5.1")),

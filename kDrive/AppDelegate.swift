@@ -29,7 +29,7 @@ import kDriveCore
 import kDriveResources
 import Nuke
 import os.log
-import Sentry
+import SentrySwift
 import StoreKit
 import UIKit
 import UserNotifications

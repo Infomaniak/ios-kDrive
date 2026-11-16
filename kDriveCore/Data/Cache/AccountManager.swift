@@ -27,7 +27,7 @@ import kDriveResources
 import MyKSuite
 import OSLog
 import RealmSwift
-import Sentry
+import SentrySwift
 
 public protocol UpdateAccountDelegate: AnyObject {
     @MainActor func didUpdateCurrentUserProfile(_ currentUser: InfomaniakCore.UserProfile)
@@ -619,7 +619,7 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
         guard userId != 0 else {
             return
         }
-        let user = Sentry.User(userId: "\(userId)")
+        let user = SentrySwift.User(userId: "\(userId)")
         user.ipAddress = "{{auto}}"
         SentrySDK.setUser(user)
     }

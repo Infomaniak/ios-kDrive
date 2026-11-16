@@ -22,7 +22,7 @@ import InfomaniakCoreDB
 import InfomaniakDI
 import Photos
 import RealmSwift
-import Sentry
+import SentrySwift
 
 public protocol PhotoLibraryUploadable {
     var liveSettings: PhotoSyncSettings? { get }

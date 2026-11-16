@@ -17,7 +17,7 @@
  */
 
 import Foundation
-import Sentry
+import SentrySwift
 
 // MARK: - REALM Migration
 

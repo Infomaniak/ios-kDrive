@@ -21,7 +21,7 @@ import InfomaniakCore
 import InfomaniakCoreDB
 import InfomaniakDI
 import RealmSwift
-import Sentry
+import SentrySwift
 
 /// Receives notifications about upload queue emptiness and suspension.
 ///

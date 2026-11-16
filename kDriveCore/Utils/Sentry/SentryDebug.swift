@@ -19,7 +19,7 @@
 import Foundation
 import InfomaniakCore
 import InfomaniakLogin
-import Sentry
+import SentrySwift
 import UIKit
 
 /// Something to track errors
