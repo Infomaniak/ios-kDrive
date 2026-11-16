@@ -110,6 +110,8 @@ final class VideoControlsView: UIView {
         playPauseButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
         playPauseButton.addTarget(self, action: #selector(playPausePressed), for: .touchUpInside)
 
+        subtitlesButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerSubtitles
+
         for label in [elapsedTimeLabel, remainingTimeLabel] {
             label.font = MediaPlaybackStyle.timeLabelFont
             label.textColor = .white
@@ -154,7 +156,7 @@ final class VideoControlsView: UIView {
             playPauseButton.widthAnchor.constraint(equalToConstant: 40),
             playPauseButton.heightAnchor.constraint(equalToConstant: 40),
 
-            subtitlesButton.heightAnchor.constraint(equalToConstant: 40),
+            subtitlesButton.widthAnchor.constraint(equalToConstant: 40),
             subtitlesButton.heightAnchor.constraint(equalToConstant: 40),
 
             airPlayButton.widthAnchor.constraint(equalToConstant: 40),
