@@ -42,13 +42,6 @@ let packageSettings = PackageSettings(
         "SwiftRegex": .framework,
         "VersionChecker": .framework,
         "_LottieStub": .framework
-    ],
-    targetSettings: [
-        "InfomaniakCore": .settings(base: [
-            // Keep SentrySPM static and linked only by InfomaniakCore to avoid duplicate SDK state.
-            // Load its Objective-C categories as well as referenced classes.
-            "OTHER_LDFLAGS": "$(inherited) -ObjC"
-        ])
     ]
 )
 #endif
