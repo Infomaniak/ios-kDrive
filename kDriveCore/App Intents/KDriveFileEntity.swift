@@ -306,11 +306,38 @@ struct KDriveFileEntity: FileEntity, IndexedEntity {
             return entities
         }
 
+        /// Shortcuts may pass File Provider URLs prefixed with `/.nofollow`, which File Provider lookups cannot resolve.
+        static func userVisibleURL(
+            for url: URL,
+            fileProviderStorageURL: URL = NSFileProviderManager.default.documentStorageURL
+        ) -> URL {
+            let noFollowPrefix = "/.nofollow/"
+            guard url.isFileURL, url.path.hasPrefix(noFollowPrefix) else {
+                return url
+            }
+
+            let strippedURL = URL(
+                fileURLWithPath: "/" + url.path.dropFirst(noFollowPrefix.count),
+                isDirectory: url.hasDirectoryPath
+            )
+            let components = strippedURL.pathComponents
+            let storageComponents = fileProviderStorageURL.pathComponents
+            guard !components.contains(".."),
+                  !components.contains("."),
+                  components.count > storageComponents.count,
+                  Array(components.prefix(storageComponents.count)) == storageComponents else {
+                return url
+            }
+
+            return strippedURL
+        }
+
         private static func providerIdentifiers(
             for url: URL
         ) async throws -> (item: NSFileProviderItemIdentifier, domain: NSFileProviderDomainIdentifier) {
-            try await withCheckedThrowingContinuation { continuation in
-                NSFileProviderManager.getIdentifierForUserVisibleFile(at: url) { item, domain, error in
+            let lookupURL = userVisibleURL(for: url)
+            return try await withCheckedThrowingContinuation { continuation in
+                NSFileProviderManager.getIdentifierForUserVisibleFile(at: lookupURL) { item, domain, error in
                     if let error {
                         continuation.resume(throwing: error)
                     } else if let item, let domain {
