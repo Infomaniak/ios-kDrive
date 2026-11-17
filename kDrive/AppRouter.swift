@@ -524,6 +524,7 @@ public struct AppRouter: AppNavigable {
         )
         window.rootViewController = rootSplitViewController
         window.makeKeyAndVisible()
+        window.layoutIfNeeded()
         return rootSplitViewController
     }
 
