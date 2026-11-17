@@ -475,11 +475,8 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
             await resumeUploads(for: token)
             return token
         } catch {
-            if account(for: token)?.accessToken == token.accessToken {
-                await removeTokenAndAccountFor(userId: token.userId, isInvoluntary: true)
-            } else {
-                revokeApiToken(token)
-            }
+            await removeTokenAndAccountFor(userId: token.userId, isInvoluntary: true)
+            revokeApiToken(token)
 
             throw error
         }
