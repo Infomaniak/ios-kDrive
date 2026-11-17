@@ -53,9 +53,13 @@ extension ResolverTests {
             owner.update(hasWork: false)
         }
 
-        @Test func expirationWaitsForCleanupAndIgnoresDuplicates() async {
+        @Test(.timeLimit(.minutes(1)))
+        func expirationWaitsForCleanupAndIgnoresDuplicates() async throws {
             var activities: [TestActivity] = []
             var cleanup: CheckedContinuation<Void, Never>?
+            defer { cleanup?.resume() }
+            let cleanupStarted = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
+            defer { cleanupStarted.continuation.finish() }
             var cleanupCount = 0
             let owner = UploadBackgroundActivity(makeActivity: { delegate in
                 let activity = TestActivity(delegate: delegate)
@@ -63,12 +67,16 @@ extension ResolverTests {
                 return activity
             }, pauseUploads: {
                 cleanupCount += 1
-                await withCheckedContinuation { cleanup = $0 }
+                await withCheckedContinuation {
+                    cleanup = $0
+                    cleanupStarted.continuation.yield(())
+                }
             })
 
             owner.update(hasWork: true)
             activities[0].delegate?.backgroundActivityExpiring()
-            await drainCallbacks()
+            var cleanupEvents = cleanupStarted.stream.makeAsyncIterator()
+            _ = await cleanupEvents.next()
             #expect(cleanupCount == 1)
             #expect(activities[0].ends == 0)
 
@@ -79,11 +87,12 @@ extension ResolverTests {
             #expect(activities[0].ends == 0)
 
             cleanup?.resume()
-            await drainCallbacks()
+            cleanup = nil
+            await activities[0].waitForEnd()
             #expect(activities[0].ends == 1)
 
             owner.update(hasWork: true)
-            #expect(activities.count == 2)
+            try #require(activities.count == 2)
             activities[0].delegate?.backgroundActivityExpiring()
             await drainCallbacks()
             #expect(cleanupCount == 1)
@@ -91,7 +100,7 @@ extension ResolverTests {
             owner.update(hasWork: false)
         }
 
-        @Test(arguments: [false, true])
+        @Test(.timeLimit(.minutes(1)), arguments: [false, true])
         func expirationChecksCurrentProtection(isProtectedAtExpiration: Bool) async {
             var activities: [TestActivity] = []
             var isProtected = !isProtectedAtExpiration
@@ -109,7 +118,7 @@ extension ResolverTests {
             owner.update(hasWork: true)
             isProtected = isProtectedAtExpiration
             activities[0].delegate?.backgroundActivityExpiring()
-            await drainCallbacks()
+            await activities[0].waitForEnd()
 
             #expect(cleanupCount == (isProtectedAtExpiration ? 0 : 1))
             #expect(activities[0].ends == 1)
@@ -124,7 +133,7 @@ extension ResolverTests {
             owner.update(hasWork: false)
         }
 
-        @Test(arguments: [UploadTermination.legacyExpiration, .continuedExpiration, .uploadError])
+        @Test(.timeLimit(.minutes(1)), arguments: [UploadTermination.legacyExpiration, .continuedExpiration, .uploadError])
         func expirationReschedulesBothQueues(termination: UploadTermination) async throws {
             let hasContinuedProtection = termination != .legacyExpiration
             let savedFactories = SimpleResolver.sharedResolver.factories
@@ -244,7 +253,7 @@ extension ResolverTests {
             })
             owner.update(hasWork: true)
             activities[0].delegate?.backgroundActivityExpiring()
-            await drainCallbacks()
+            await activities[0].waitForEnd()
             if hasContinuedProtection {
                 #expect(activities[0].ends == 1)
                 #expect(notifications.pausedCount == 0)
@@ -271,11 +280,6 @@ extension ResolverTests {
                     await completion.complete(with: .failure(ExpirationError.expired)) {
                         await service.pauseForBackgroundExpiration()
                     }
-                }
-            } else {
-                let cleanupDeadline = ContinuousClock.now.advanced(by: .seconds(5))
-                while activities[0].ends == 0, ContinuousClock.now < cleanupDeadline {
-                    try await Task.sleep(for: .milliseconds(10))
                 }
             }
             realm.refresh()
@@ -390,6 +394,7 @@ private final class TestActivity: ExpiringActivityable {
     var ends = 0
     var shouldTerminate = false
     let delegate: ExpiringActivityDelegate?
+    private let endEvents = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
 
     init(delegate: ExpiringActivityDelegate) {
         self.delegate = delegate
@@ -404,5 +409,13 @@ private final class TestActivity: ExpiringActivityable {
     }
 
     func start() { starts += 1 }
-    func endAll() { ends += 1 }
+    func endAll() {
+        ends += 1
+        endEvents.continuation.yield(())
+    }
+
+    func waitForEnd() async {
+        var iterator = endEvents.stream.makeAsyncIterator()
+        _ = await iterator.next()
+    }
 }

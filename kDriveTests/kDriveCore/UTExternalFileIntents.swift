@@ -50,6 +50,7 @@ extension ResolverTests {
             _ = try await intent.perform()
 
             let reopenedRealm = try await Realm(configuration: fixture.uploads.configuration, actor: MainActor.shared)
+            await reopenedRealm.asyncRefresh()
             let upload = try #require(reopenedRealm.objects(UploadFile.self).first)
             #expect(reopenedRealm.objects(UploadFile.self).count == 1)
             #expect(fixture.uploads.queuedUploadIds == [upload.id])
