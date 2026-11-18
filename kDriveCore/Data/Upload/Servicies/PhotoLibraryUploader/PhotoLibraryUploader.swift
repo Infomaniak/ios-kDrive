@@ -52,7 +52,7 @@ public final class PhotoLibraryUploader: PhotoLibraryUploadable {
         case importCancelledBySystem
     }
 
-    var workerTask: Task<Void, Never>?
+    let scanCoordinator = PhotoLibraryScanCoordinator()
 
     public var liveSettings: PhotoSyncSettings? {
         return uploadsDatabase.fetchObject(ofType: PhotoSyncSettings.self) { lazyCollection in
