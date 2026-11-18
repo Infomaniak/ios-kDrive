@@ -430,7 +430,7 @@ extension UploadService: UploadServiceable {
             }
 
             for file in filesToClean {
-                file.cleanSourceFileIfNeeded()
+                file.cleanSourceFileIfNeeded(forceClean: true)
             }
 
             self.globalUploadQueue.cancelAllOperations(uploadingFilesIds: globalUploadingFilesIds)
