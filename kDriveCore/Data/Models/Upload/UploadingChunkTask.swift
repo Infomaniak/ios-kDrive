@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakFoundation
 import RealmSwift
 
 /// Tracks the upload of a chunk

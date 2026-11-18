@@ -18,6 +18,7 @@
 
 import Foundation
 import InfomaniakCore
+import InfomaniakFoundation
 import Sentry
 
 // MARK: - Session management -
