@@ -250,7 +250,8 @@ final class FileProviderExtension: NSFileProviderExtension {
 
     private func uploadNewChild(at url: URL, in folder: File) {
         let folderStorageURL = FileProviderItem.getStorageUrl(file: folder, domain: domain)
-        guard FileProviderService.isDirectChild(url, ofFolderStorageURL: folderStorageURL) else {
+        guard FileProviderService.isDirectChild(url, ofFolderStorageURL: folderStorageURL),
+              (try? url.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile == true else {
             Log.fileProvider("itemChanged ignored, url is not a direct child of folder \(folder.id)", level: .error)
             return
         }
