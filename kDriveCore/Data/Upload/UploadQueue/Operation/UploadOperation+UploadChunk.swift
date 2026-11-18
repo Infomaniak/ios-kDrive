@@ -17,8 +17,8 @@
  */
 
 import Foundation
+import InfomaniakChunking
 import InfomaniakCore
-import InfomaniakFoundation
 
 extension UploadOperation {
     /// Compute SHA256 hash for chunks that need it, then fan out for upload.

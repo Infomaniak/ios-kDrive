@@ -17,8 +17,8 @@
  */
 
 import Foundation
+import InfomaniakChunking
 import InfomaniakCore
-import InfomaniakFoundation
 import kDriveResources
 import UIKit
 
