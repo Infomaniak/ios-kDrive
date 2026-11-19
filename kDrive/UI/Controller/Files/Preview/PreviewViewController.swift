@@ -713,14 +713,15 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.statusBarView.transform = hideStatusBar
         }
 
-        hideFloatingPanel(fullScreenPreview)
+        let isAudioCell = collectionView.cellForItem(at: currentIndex) is AudioCollectionViewCell
+        hideFloatingPanel(fullScreenPreview, hideNavigationBar: !isAudioCell)
         for case let cell as PreviewCollectionViewCell in collectionView.visibleCells {
             cell.fullscreenDidChange()
         }
     }
 
-    func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false) {
-        if !isViewDisappearing {
+    func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false, hideNavigationBar: Bool = true) {
+        if !isViewDisappearing, hideNavigationBar {
             navigationController?.setNavigationBarHidden(hide, animated: true)
         }
         let targetTopInset = hide ? navBarHeight : 0.0

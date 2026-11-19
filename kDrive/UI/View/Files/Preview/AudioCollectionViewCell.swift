@@ -45,6 +45,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     private let playbackControls = AudioControlsView()
     private let playButton = UIButton(type: .system)
     private var iconHeightConstraint: NSLayoutConstraint!
+    private var containerLeadingConstraint: NSLayoutConstraint!
+    private var containerTrailingConstraint: NSLayoutConstraint!
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -96,9 +98,18 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
         iconHeightConstraint = artworkImageView.heightAnchor.constraint(equalToConstant: 120)
 
+        containerLeadingConstraint = containerView.leadingAnchor.constraint(
+            equalTo: contentView.leadingAnchor,
+            constant: 24
+        )
+        containerTrailingConstraint = contentView.trailingAnchor.constraint(
+            equalTo: containerView.trailingAnchor,
+            constant: 24
+        )
+
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 24),
-            safeAreaLayoutGuide.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: 24),
+            containerLeadingConstraint,
+            containerTrailingConstraint,
             containerView.centerYAnchor.constraint(equalTo: centerYAnchor),
 
             verticalStack.topAnchor.constraint(equalTo: containerView.topAnchor),
@@ -124,6 +135,26 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         )
 
         setControls(enabled: false)
+    }
+
+    private func refreshHorizontalSafeInsets() {
+        guard let window else { return }
+        setHorizontalSafeInsets(left: window.safeAreaInsets.left, right: window.safeAreaInsets.right)
+    }
+
+    private func setHorizontalSafeInsets(left: CGFloat, right: CGFloat) {
+        containerLeadingConstraint.constant = 24 + left
+        containerTrailingConstraint.constant = 24 + right
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        refreshHorizontalSafeInsets()
+    }
+
+    override func safeAreaInsetsDidChange() {
+        super.safeAreaInsetsDidChange()
+        refreshHorizontalSafeInsets()
     }
 
     @MainActor func setControls(enabled: Bool) {
