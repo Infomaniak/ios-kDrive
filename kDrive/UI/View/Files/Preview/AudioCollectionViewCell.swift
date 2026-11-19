@@ -48,6 +48,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     private var containerLeadingConstraint: NSLayoutConstraint!
     private var containerTrailingConstraint: NSLayoutConstraint!
 
+    private var lastOrientationIsPortrait: Bool?
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
@@ -157,6 +159,11 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         refreshHorizontalSafeInsets()
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        setUpPlayButtons()
+    }
+
     @MainActor func setControls(enabled: Bool) {
         playbackControls.elapsedTimeLabel.text = CMTime.zeroTimeText
         playbackControls.remainingTimeLabel.text = CMTime.unknownTimeText
@@ -179,7 +186,6 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     override func configureWith(file: File) {
         let frozenFile = file.freezeIfNeeded()
-        setUpPlayButtons()
 
         Task { @MainActor in
             setupObservationFor(frozenFile: frozenFile)
@@ -261,6 +267,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     private func setUpPlayButtons() {
         let isPortrait = (window?.windowScene?.interfaceOrientation.isPortrait ?? true)
+        guard isPortrait != lastOrientationIsPortrait else { return }
+        lastOrientationIsPortrait = isPortrait
         playButton.isHidden = !isPortrait
         playbackControls.playPauseButton.isHidden = isPortrait
         iconHeightConstraint.constant = isPortrait ? 254 : 120
