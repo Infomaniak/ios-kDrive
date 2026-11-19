@@ -286,8 +286,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         let currentFileId = currentFile.id
 
         currentFile.getThumbnail(publicShareProxy: driveFileManager?.publicShareProxy) {
-            [weak self] thumbnail, _ in
-            guard let self, self.currentFile.id == currentFileId else { return }
+            [weak self] thumbnail, isThumbnailAvailable in
+            guard let self, self.currentFile.id == currentFileId, isThumbnailAvailable else { return }
             self.backgroundExtensionImageView?.image = thumbnail
         }
 
