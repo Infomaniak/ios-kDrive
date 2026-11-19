@@ -44,9 +44,9 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     private let artistNameLabel = IKLabel(frame: .zero)
     private let playbackControls = AudioControlsView()
     private let playButton = UIButton(type: .system)
-    private var iconHeightConstraint: NSLayoutConstraint!
     private var containerLeadingConstraint: NSLayoutConstraint!
     private var containerTrailingConstraint: NSLayoutConstraint!
+    private var stackBottomConstraint: NSLayoutConstraint!
 
     private var lastOrientationIsPortrait: Bool?
 
@@ -63,11 +63,16 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     private func setupView() {
         artworkImageView.contentMode = .scaleAspectFit
         artworkImageView.isAccessibilityElement = false
+        artworkImageView.setContentHuggingPriority(.fittingSizeLevel, for: .vertical)
+        artworkImageView.setContentCompressionResistancePriority(.defaultLow, for: .vertical)
 
         songTitleLabel.style = .header1Light
         songTitleLabel.text = ""
+        songTitleLabel.setContentHuggingPriority(.required, for: .vertical)
+
         artistNameLabel.style = .body1Light
         artistNameLabel.text = ""
+        artistNameLabel.setContentHuggingPriority(.required, for: .vertical)
 
         playbackControls.onPlayPause = { [weak self] in
             self?.togglePlayPause()
@@ -81,10 +86,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
         playButton.setImage(KDriveResourcesAsset.play.image.withRenderingMode(.alwaysOriginal), for: .normal)
         playButton.addTarget(self, action: #selector(playButtonPressed(_:)), for: .touchUpInside)
-
-        let containerView = UIView()
         let verticalStack = UIStackView(arrangedSubviews: [
-            artworkImageView,
             songTitleLabel,
             artistNameLabel,
             playbackControls,
@@ -92,39 +94,46 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         ])
         verticalStack.axis = .vertical
         verticalStack.alignment = .center
-        verticalStack.spacing = 36
+        verticalStack.spacing = 8
+        verticalStack.setCustomSpacing(2, after: songTitleLabel)
         verticalStack.translatesAutoresizingMaskIntoConstraints = false
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(containerView)
-        containerView.addSubview(verticalStack)
+        artworkImageView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(verticalStack)
+        contentView.addSubview(artworkImageView)
 
-        iconHeightConstraint = artworkImageView.heightAnchor.constraint(equalToConstant: 120)
+        let artworkLayoutGuide = UILayoutGuide()
+        contentView.addLayoutGuide(artworkLayoutGuide)
 
-        containerLeadingConstraint = containerView.leadingAnchor.constraint(
-            equalTo: contentView.leadingAnchor,
-            constant: 24
+        let preferredArtworkHeight = artworkImageView.heightAnchor.constraint(
+            equalTo: artworkLayoutGuide.heightAnchor,
+            multiplier: 0.75
         )
-        containerTrailingConstraint = contentView.trailingAnchor.constraint(
-            equalTo: containerView.trailingAnchor,
-            constant: 24
-        )
+        preferredArtworkHeight.priority = .defaultLow
+        containerLeadingConstraint = verticalStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24)
+        containerTrailingConstraint = contentView.trailingAnchor.constraint(equalTo: verticalStack.trailingAnchor, constant: 24)
+        stackBottomConstraint = verticalStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
 
         NSLayoutConstraint.activate([
             containerLeadingConstraint,
             containerTrailingConstraint,
-            containerView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            stackBottomConstraint,
 
-            verticalStack.topAnchor.constraint(equalTo: containerView.topAnchor),
-            verticalStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            containerView.trailingAnchor.constraint(equalTo: verticalStack.trailingAnchor),
-            containerView.bottomAnchor.constraint(equalTo: verticalStack.bottomAnchor, constant: 32),
+            artworkLayoutGuide.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor),
+            artworkLayoutGuide.bottomAnchor.constraint(equalTo: songTitleLabel.topAnchor),
+
+            artworkImageView.centerXAnchor.constraint(equalTo: verticalStack.centerXAnchor),
+            artworkImageView.centerYAnchor.constraint(equalTo: artworkLayoutGuide.centerYAnchor),
+            artworkImageView.widthAnchor.constraint(equalTo: artworkImageView.heightAnchor),
+            preferredArtworkHeight,
+
+            artworkImageView.heightAnchor.constraint(lessThanOrEqualTo: artworkLayoutGuide.heightAnchor, multiplier: 0.75),
+            artworkImageView.widthAnchor.constraint(
+                lessThanOrEqualTo: contentView.safeAreaLayoutGuide.widthAnchor,
+                multiplier: 0.7
+            ),
 
             playbackControls.leadingAnchor.constraint(greaterThanOrEqualTo: verticalStack.leadingAnchor),
             verticalStack.trailingAnchor.constraint(greaterThanOrEqualTo: playbackControls.trailingAnchor),
-
-            artworkImageView.widthAnchor.constraint(equalTo: artworkImageView.heightAnchor),
-            iconHeightConstraint,
-
             playButton.widthAnchor.constraint(equalToConstant: 70),
             playButton.heightAnchor.constraint(equalToConstant: 70)
         ])
@@ -162,6 +171,18 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         setUpPlayButtons()
+    }
+
+    override func willDisplayInCollectionView() {
+        super.willDisplayInCollectionView()
+        updateControlsLayout()
+    }
+
+    private func updateControlsLayout() {
+        let spacing = UIConstants.Padding.standard
+        let safeFrame = safeAreaLayoutGuide.layoutFrame
+        let bottom = safeFrame.maxY - (previewDelegate?.fileActionPanelHeight ?? 0) - spacing
+        stackBottomConstraint.constant = bottom - bounds.maxY
     }
 
     @MainActor func setControls(enabled: Bool) {
@@ -271,7 +292,6 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         lastOrientationIsPortrait = isPortrait
         playButton.isHidden = !isPortrait
         playbackControls.playPauseButton.isHidden = isPortrait
-        iconHeightConstraint.constant = isPortrait ? 254 : 120
     }
 
     func handleMetadata(_ metadata: MediaMetadata, file: File) {

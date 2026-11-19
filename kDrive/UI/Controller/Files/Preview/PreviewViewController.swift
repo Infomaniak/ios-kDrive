@@ -724,7 +724,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         if !isViewDisappearing, hideNavigationBar {
             navigationController?.setNavigationBarHidden(hide, animated: true)
         }
-        let targetTopInset = hide ? navBarHeight : 0.0
+        let targetTopInset = hide && hideNavigationBar ? navBarHeight : 0.0
         additionalSafeAreaInsets.top = targetTopInset
         view.layoutIfNeeded()
         pendingFileActionsVisibility = (isVisible: !hide, animated: hide ? !isViewDisappearing : true)
