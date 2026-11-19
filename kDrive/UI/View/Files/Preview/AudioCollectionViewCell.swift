@@ -19,6 +19,7 @@
 import Combine
 import InfomaniakCore
 import InfomaniakCoreCommonUI
+import InfomaniakCoreUIKit
 import InfomaniakDI
 import kDriveCore
 import kDriveResources
@@ -27,15 +28,7 @@ import Nuke
 import UIKit
 
 final class AudioCollectionViewCell: PreviewCollectionViewCell {
-    @IBOutlet var artworkImageView: UIImageView!
-    @IBOutlet var elapsedTimeLabel: UILabel!
-    @IBOutlet var remainingTimeLabel: UILabel!
-    @IBOutlet var positionSlider: UISlider!
-    @IBOutlet var playButton: UIButton!
-    @IBOutlet var landscapePlayButton: UIButton!
-    @IBOutlet var iconHeightConstraint: NSLayoutConstraint!
-    @IBOutlet var songTitleLabel: UILabel!
-    @IBOutlet var artistNameLabel: UILabel!
+    static let identifier = String(describing: AudioCollectionViewCell.self)
 
     @LazyInjectService private var matomo: MatomoUtils
 
@@ -46,17 +39,82 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     private var cancellables = Set<AnyCancellable>()
     private var thumbnailDownloadTask: ImageTask?
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        songTitleLabel.text = ""
-        artistNameLabel.text = ""
-        elapsedTimeLabel.font = MediaPlaybackStyle.timeLabelFont
-        remainingTimeLabel.font = MediaPlaybackStyle.timeLabelFont
-        positionSlider.setThumbImage(
-            MediaPlaybackStyle.sliderThumbImage(color: KDriveResourcesAsset.infomaniakColor.color),
-            for: .normal
-        )
+    private let artworkImageView = UIImageView(image: KDriveResourcesAsset.music.image)
+    private let songTitleLabel = IKLabel(frame: .zero)
+    private let artistNameLabel = IKLabel(frame: .zero)
+    private let playbackControls = AudioControlsView()
+    private let playButton = UIButton(type: .system)
+    private var iconHeightConstraint: NSLayoutConstraint!
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+
+    @available(*, unavailable)
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setupView() {
+        artworkImageView.contentMode = .scaleAspectFit
         artworkImageView.isAccessibilityElement = false
+
+        songTitleLabel.style = .header1Light
+        songTitleLabel.text = ""
+        artistNameLabel.style = .body1Light
+        artistNameLabel.text = ""
+
+        playbackControls.onPlayPause = { [weak self] in
+            self?.togglePlayPause()
+        }
+        playbackControls.onScrubbingBegan = { [weak self] in
+            self?.singleTrackPlayer.stopPlaybackObservation()
+        }
+        playbackControls.onSeek = { [weak self] position in
+            self?.seek(to: position)
+        }
+
+        playButton.setImage(KDriveResourcesAsset.play.image.withRenderingMode(.alwaysOriginal), for: .normal)
+        playButton.addTarget(self, action: #selector(playButtonPressed(_:)), for: .touchUpInside)
+
+        let containerView = UIView()
+        let verticalStack = UIStackView(arrangedSubviews: [
+            artworkImageView,
+            songTitleLabel,
+            artistNameLabel,
+            playbackControls,
+            playButton
+        ])
+        verticalStack.axis = .vertical
+        verticalStack.alignment = .center
+        verticalStack.spacing = 36
+        verticalStack.translatesAutoresizingMaskIntoConstraints = false
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(containerView)
+        containerView.addSubview(verticalStack)
+
+        iconHeightConstraint = artworkImageView.heightAnchor.constraint(equalToConstant: 120)
+
+        NSLayoutConstraint.activate([
+            containerView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 24),
+            safeAreaLayoutGuide.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: 24),
+            containerView.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            verticalStack.topAnchor.constraint(equalTo: containerView.topAnchor),
+            verticalStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: verticalStack.trailingAnchor),
+            containerView.bottomAnchor.constraint(equalTo: verticalStack.bottomAnchor, constant: 32),
+
+            playbackControls.leadingAnchor.constraint(greaterThanOrEqualTo: verticalStack.leadingAnchor),
+            verticalStack.trailingAnchor.constraint(greaterThanOrEqualTo: playbackControls.trailingAnchor),
+
+            artworkImageView.widthAnchor.constraint(equalTo: artworkImageView.heightAnchor),
+            iconHeightConstraint,
+
+            playButton.widthAnchor.constraint(equalToConstant: 70),
+            playButton.heightAnchor.constraint(equalToConstant: 70)
+        ])
 
         NotificationCenter.default.addObserver(
             self,
@@ -69,13 +127,13 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     @MainActor func setControls(enabled: Bool) {
-        elapsedTimeLabel.text = CMTime.zeroTimeText
-        remainingTimeLabel.text = CMTime.unknownTimeText
-        positionSlider.value = 0.0
+        playbackControls.elapsedTimeLabel.text = CMTime.zeroTimeText
+        playbackControls.remainingTimeLabel.text = CMTime.unknownTimeText
+        playbackControls.positionSlider.value = 0.0
         playButton.isEnabled = enabled
-        landscapePlayButton.isEnabled = enabled
+        playbackControls.playPauseButton.isEnabled = enabled
         playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
-        landscapePlayButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
+        playbackControls.playPauseButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
     }
 
     override func prepareForReuse() {
@@ -124,7 +182,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .onElapsedTimeChange
             .receive(on: DispatchQueue.main)
             .sink { elapsedTime in
-                self.elapsedTimeLabel.text = elapsedTime
+                self.playbackControls.elapsedTimeLabel.text = elapsedTime
             }
             .store(in: &cancellables)
 
@@ -132,7 +190,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .onRemainingTimeChange
             .receive(on: DispatchQueue.main)
             .sink { remainingTime in
-                self.remainingTimeLabel.text = remainingTime
+                self.playbackControls.remainingTimeLabel.text = remainingTime
             }
             .store(in: &cancellables)
 
@@ -140,8 +198,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .onPositionChange
             .receive(on: DispatchQueue.main)
             .sink { newPosition in
-                guard !self.positionSlider.isTracking else { return }
-                self.positionSlider.setValue(newPosition, animated: true)
+                guard !self.playbackControls.positionSlider.isTracking else { return }
+                self.playbackControls.positionSlider.setValue(newPosition, animated: true)
             }
             .store(in: &cancellables)
 
@@ -149,7 +207,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .onPositionMaximumChange
             .receive(on: DispatchQueue.main)
             .sink { sliderMaximum in
-                self.positionSlider.maximumValue = sliderMaximum
+                self.playbackControls.positionSlider.maximumValue = sliderMaximum
             }
             .store(in: &cancellables)
 
@@ -170,10 +228,10 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .store(in: &cancellables)
     }
 
-    @MainActor func setUpPlayButtons() {
+    private func setUpPlayButtons() {
         let isPortrait = (window?.windowScene?.interfaceOrientation.isPortrait ?? true)
         playButton.isHidden = !isPortrait
-        landscapePlayButton.isHidden = isPortrait
+        playbackControls.playPauseButton.isHidden = isPortrait
         iconHeightConstraint.constant = isPortrait ? 254 : 120
     }
 
@@ -192,20 +250,12 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         songTitleLabel.text = metadata.title
     }
 
-    @objc func rotated() {
+    @objc private func rotated() {
         setUpPlayButtons()
     }
 
-    @IBAction func playButtonPressed(_ sender: UIButton) {
+    @objc private func playButtonPressed(_ sender: UIButton) {
         togglePlayPause()
-    }
-
-    @IBAction func sliderBeganTracking(_ sender: UISlider) {
-        singleTrackPlayer.stopPlaybackObservation()
-    }
-
-    @IBAction func sliderEndedTracking(_ sender: UISlider) {
-        seek(to: TimeInterval(sender.value))
     }
 
     override func didEndDisplaying() {
@@ -214,13 +264,9 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     private func updateUI(state: SingleTrackPlayer.State) {
-        if state == .playing {
-            playButton?.setImage(KDriveResourcesAsset.pause.image, for: .normal)
-            landscapePlayButton?.setImage(KDriveResourcesAsset.pause.image, for: .normal)
-        } else {
-            playButton?.setImage(KDriveResourcesAsset.play.image, for: .normal)
-            landscapePlayButton?.setImage(KDriveResourcesAsset.play.image, for: .normal)
-        }
+        let image = state == .playing ? KDriveResourcesAsset.pause.image : KDriveResourcesAsset.play.image
+        playButton.setImage(image.withRenderingMode(.alwaysOriginal), for: .normal)
+        playbackControls.playPauseButton.setImage(image.withRenderingMode(.alwaysOriginal), for: .normal)
     }
 
     func play() {

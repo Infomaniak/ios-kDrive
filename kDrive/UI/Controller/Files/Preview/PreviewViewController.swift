@@ -219,7 +219,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         collectionView.register(cellView: PdfPreviewCollectionViewCell.self)
         collectionView.register(cellView: VideoCollectionViewCell.self)
         collectionView.register(cellView: OfficePreviewCollectionViewCell.self)
-        collectionView.register(cellView: AudioCollectionViewCell.self)
+        collectionView.register(AudioCollectionViewCell.self, forCellWithReuseIdentifier: AudioCollectionViewCell.identifier)
         collectionView.register(cellView: CodePreviewCollectionViewCell.self)
         collectionView.contentInsetAdjustmentBehavior = .never
 

@@ -23,8 +23,17 @@ class PreviewCollectionViewCell: UICollectionViewCell {
     var tapGestureRecognizer: UITapGestureRecognizer!
     weak var previewDelegate: PreviewContentCellDelegate?
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupTapGesture()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupTapGesture()
+    }
+
+    private func setupTapGesture() {
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapOnCell))
         addGestureRecognizer(tapGestureRecognizer)
     }
