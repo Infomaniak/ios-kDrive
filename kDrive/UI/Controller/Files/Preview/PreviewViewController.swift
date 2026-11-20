@@ -107,7 +107,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     var fileActionPanelHeight: CGFloat {
-        fullScreenPreview || isBookPreviewLayout ? 0 : Self.smallDetentHeight
+        isBookPreviewLayout ? 0 : Self.smallDetentHeight
     }
 
     func fileActionPanelFrame(in view: UIView) -> CGRect? {
@@ -219,7 +219,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         collectionView.register(cellView: PdfPreviewCollectionViewCell.self)
         collectionView.register(cellView: VideoCollectionViewCell.self)
         collectionView.register(cellView: OfficePreviewCollectionViewCell.self)
-        collectionView.register(cellView: AudioCollectionViewCell.self)
+        collectionView.register(AudioCollectionViewCell.self, forCellWithReuseIdentifier: AudioCollectionViewCell.identifier)
         collectionView.register(cellView: CodePreviewCollectionViewCell.self)
         collectionView.contentInsetAdjustmentBehavior = .never
 
@@ -283,11 +283,12 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private func updateBackgroundExtensionForCurrentFile() {
         guard #available(iOS 26.0, *) else { return }
 
+        backgroundExtensionImageView?.image = nil
         let currentFileId = currentFile.id
 
         currentFile.getThumbnail(publicShareProxy: driveFileManager?.publicShareProxy) {
-            [weak self] thumbnail, _ in
-            guard let self, self.currentFile.id == currentFileId else { return }
+            [weak self] thumbnail, isThumbnailAvailable in
+            guard let self, self.currentFile.id == currentFileId, isThumbnailAvailable else { return }
             self.backgroundExtensionImageView?.image = thumbnail
         }
 
@@ -713,17 +714,18 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             self.statusBarView.transform = hideStatusBar
         }
 
-        hideFloatingPanel(fullScreenPreview)
+        let isAudioCell = collectionView.cellForItem(at: currentIndex) is AudioCollectionViewCell
+        hideFloatingPanel(fullScreenPreview, hideNavigationBar: !isAudioCell)
         for case let cell as PreviewCollectionViewCell in collectionView.visibleCells {
             cell.fullscreenDidChange()
         }
     }
 
-    func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false) {
+    func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false, hideNavigationBar: Bool = true) {
         if !isViewDisappearing {
-            navigationController?.setNavigationBarHidden(hide, animated: true)
+            navigationController?.setNavigationBarHidden(hide && hideNavigationBar, animated: true)
         }
-        let targetTopInset = hide ? navBarHeight : 0.0
+        let targetTopInset = hide && hideNavigationBar ? navBarHeight : 0.0
         additionalSafeAreaInsets.top = targetTopInset
         view.layoutIfNeeded()
         pendingFileActionsVisibility = (isVisible: !hide, animated: hide ? !isViewDisappearing : true)
