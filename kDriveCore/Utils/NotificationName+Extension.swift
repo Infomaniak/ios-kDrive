@@ -21,5 +21,6 @@ import Foundation
 public extension Notification.Name {
     static let locateUploadActionTapped = Notification.Name(rawValue: "kDriveLocateUploadActionTapped")
     static let reloadDrive = Notification.Name(rawValue: "kDriveReloadDrive")
+    static let externalImportDidUpdate = Notification.Name(rawValue: "kDriveExternalImportDidUpdate")
     static let reloadWifiView = Notification.Name(rawValue: "kDriveReloadWifiView")
 }

@@ -99,6 +99,14 @@ public extension DriveInfosManager {
         return freeze ? drive.freeze() : drive
     }
 
+    func eligibleDestinationDrives(userId: Int, excluding driveId: Int) -> [Drive] {
+        return getDrives(for: userId).filter { $0.id != driveId && !$0.inMaintenance }
+    }
+
+    func hasEligibleDestinationDrives(userId: Int, excluding driveId: Int) -> Bool {
+        return !eligibleDestinationDrives(userId: userId, excluding: driveId).isEmpty
+    }
+
     func getUsers(for driveId: Int, userId: Int) -> Results<DriveUser> {
         guard let drive = getDrive(id: driveId, userId: userId) else {
             return driveInfoDatabase.fetchResults(ofType: DriveUser.self) { lazyCollection in
