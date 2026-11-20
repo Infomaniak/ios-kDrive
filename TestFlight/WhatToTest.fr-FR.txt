@@ -1,5 +1,7 @@
-- Lisez les vidéos directement dans l’aperçu des fichiers, avec des commandes de lecture améliorées, AirPlay et le mode Image dans l’image automatique
+- Lisez les vidéos directement dans l’aperçu des fichiers avec des commandes améliorées, AirPlay, le mode Image dans l’image automatique et des sous-titres lorsqu’ils sont disponibles
+- Nouvelle présentation du lecteur audio
 - Envoyez des copies de plusieurs fichiers sélectionnés en une seule fois, avec un indicateur de chargement pendant leur préparation
+- Les fichiers envoyés avec Raccourcis arrivent désormais dans le dossier sélectionné
 - Fiabilité améliorée des envois au retour dans kDrive après l’enregistrement de fichiers depuis une autre app
 - Nouvelle présentation de la demande d’avis sur l’app et clarification des choix d’annulation des téléchargements
 - Amélioration de la stabilité de l’app et de la gestion des envois vers les dossiers où la création de fichiers est impossible
