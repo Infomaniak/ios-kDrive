@@ -107,7 +107,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     var fileActionPanelHeight: CGFloat {
-        fullScreenPreview || isBookPreviewLayout ? 0 : Self.smallDetentHeight
+        isBookPreviewLayout ? 0 : Self.smallDetentHeight
     }
 
     func fileActionPanelFrame(in view: UIView) -> CGRect? {

@@ -170,6 +170,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     override func layoutSubviews() {
         super.layoutSubviews()
+        updateControlsLayout()
         setUpPlayButtons()
     }
 
