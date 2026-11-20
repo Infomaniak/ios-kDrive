@@ -363,13 +363,13 @@ public extension UploadFile {
 
     /// Centralise source file cleaning
     @discardableResult
-    func cleanSourceFileIfNeeded(forceClean: Bool = false) -> Bool {
+    func cleanSourceFileIfNeeded() -> Bool {
         guard let path = pathURL,
               shouldRemoveAfterUpload else {
             return false
         }
 
-        if let realm, !forceClean,
+        if let realm,
            !realm.objects(UploadFile.self)
            .where({ $0.url == url && $0.id != id && $0.uploadDate == nil })
            .isEmpty {
