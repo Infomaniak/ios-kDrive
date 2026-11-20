@@ -219,6 +219,13 @@ final class FileProviderExtension: NSFileProviderExtension {
             return
         }
 
+        do {
+            try isFileProviderExtensionEnabled()
+            try updateDriveFileManager()
+        } catch {
+            return
+        }
+
         if let folderId = identifier.toFileId(),
            let folder = driveFileManager.getCachedFile(id: folderId),
            folder.isDirectory {
