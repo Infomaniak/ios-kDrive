@@ -722,8 +722,8 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     func hideFloatingPanel(_ hide: Bool, isViewDisappearing: Bool = false, hideNavigationBar: Bool = true) {
-        if !isViewDisappearing, hideNavigationBar {
-            navigationController?.setNavigationBarHidden(hide, animated: true)
+        if !isViewDisappearing {
+            navigationController?.setNavigationBarHidden(hide && hideNavigationBar, animated: true)
         }
         let targetTopInset = hide && hideNavigationBar ? navBarHeight : 0.0
         additionalSafeAreaInsets.top = targetTopInset
