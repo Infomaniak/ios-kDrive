@@ -219,6 +219,20 @@ final class FileProviderExtension: NSFileProviderExtension {
             return
         }
 
+        do {
+            try isFileProviderExtensionEnabled()
+            try updateDriveFileManager()
+        } catch {
+            return
+        }
+
+        if let folderId = identifier.toFileId(),
+           let folder = driveFileManager.getCachedFile(id: folderId),
+           folder.isDirectory {
+            uploadNewChild(at: url, in: folder)
+            return
+        }
+
         let fileProviderItem = try? item(for: identifier)
 
         if let fileItem = fileProviderItem as? FileProviderItem,
@@ -239,6 +253,31 @@ final class FileProviderExtension: NSFileProviderExtension {
         } else {
             Log.fileProvider("itemChanged lookup failed for :\(url)", level: .error)
         }
+    }
+
+    private func uploadNewChild(at url: URL, in folder: File) {
+        let folderStorageURL = FileProviderItem.getStorageUrl(file: folder, domain: domain)
+        guard FileProviderService.isDirectChild(url, ofFolderStorageURL: folderStorageURL),
+              (try? url.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile == true else {
+            Log.fileProvider("itemChanged ignored, url is not a direct child of folder \(folder.id)", level: .error)
+            return
+        }
+
+        guard folder.capabilities.canUpload else {
+            Log.fileProvider("itemChanged ignored, upload forbidden in folder \(folder.id)", level: .error)
+            return
+        }
+
+        let uploadItem = UploadFileProviderItem(
+            uploadFileUUID: UUID().uuidString,
+            parentDirectoryId: folder.id,
+            userId: driveFileManager.drive.userId,
+            driveId: driveFileManager.driveId,
+            sourceUrl: url,
+            conflictOption: .version,
+            driveError: nil
+        )
+        backgroundUpload(uploadItem)
     }
 
     override func startProvidingItem(at url: URL, completionHandler: @escaping (Error?) -> Void) {

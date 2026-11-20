@@ -369,6 +369,13 @@ public extension UploadFile {
             return false
         }
 
+        if let realm,
+           !realm.objects(UploadFile.self)
+           .where({ $0.url == url && $0.id != id && $0.uploadDate == nil })
+           .isEmpty {
+            return false
+        }
+
         do {
             try FileManager.default.removeItem(at: path)
             assert(!FileManager.default.fileExists(atPath: path.path), "expecting the file to be removed")

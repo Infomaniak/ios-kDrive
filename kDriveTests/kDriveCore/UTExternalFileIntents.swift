@@ -32,6 +32,28 @@ extension ResolverTests {
     @MainActor
     struct UTExternalFileIntents {
         @available(iOS 18.4, *)
+        @Test func userVisibleURLStripsNoFollowPrefixOnlyInsideFileProviderStorage() {
+            let storageURL = URL(fileURLWithPath: "/private/var/File Provider Storage", isDirectory: true)
+            let folderURL = URL(string: "file:///.nofollow/private/var/File%20Provider%20Storage/1_2/4244/Test/")!
+            let normalizedURL = KDriveFileEntity.KDriveEntityQuery.userVisibleURL(
+                for: folderURL,
+                fileProviderStorageURL: storageURL
+            )
+            #expect(normalizedURL.path == "/private/var/File Provider Storage/1_2/4244/Test")
+            #expect(normalizedURL.hasDirectoryPath)
+
+            let rejectedURLs = [
+                URL(string: "file:///.nofollow/private/var/Other%20Storage/file.pdf")!,
+                URL(string: "file:///.nofollow/private/var/File%20Provider%20Storage/../Other/file.pdf")!,
+                URL(string: "file:///.nofollow/private/var/File%20Provider%20Storage/")!,
+                URL(fileURLWithPath: "/private/var/File Provider Storage/1_2/file.pdf")
+            ]
+            for url in rejectedURLs {
+                #expect(KDriveFileEntity.KDriveEntityQuery.userVisibleURL(for: url, fileProviderStorageURL: storageURL) == url)
+            }
+        }
+
+        @available(iOS 18.4, *)
         @Test func externalImportSurvivesSourceRemovalDatabaseReopenAndCacheCleanup() async throws {
             let fixture = try ExternalIntentFixture()
             defer { fixture.tearDown() }

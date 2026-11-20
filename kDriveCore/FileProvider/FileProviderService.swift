@@ -110,6 +110,13 @@ public struct FileProviderService: FileProviderServiceable {
         return NSFileProviderItemIdentifier(identifier)
     }
 
+    public static func isDirectChild(_ itemURL: URL, ofFolderStorageURL folderURL: URL) -> Bool {
+        let itemComponents = itemURL.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        let folderComponents = folderURL.resolvingSymlinksInPath().standardizedFileURL.pathComponents
+        return itemComponents.count == folderComponents.count + 1
+            && Array(itemComponents.prefix(folderComponents.count)) == folderComponents
+    }
+
     public func createStorageUrl(identifier: NSFileProviderItemIdentifier, filename: String,
                                  domain: NSFileProviderDomain?) -> URL {
         let rootStorageURL: URL

@@ -155,4 +155,29 @@ struct UTFileProviderServiceIdentifier {
 
         #expect(identifier == nil)
     }
+
+    @Test("Only entries directly inside a folder storage directory are direct children")
+    func directChildDetection() {
+        let folderURL = rootStorageURL
+            .appendingPathComponent("4244", isDirectory: true)
+            .appendingPathComponent("Test", isDirectory: true)
+
+        #expect(FileProviderService.isDirectChild(
+            folderURL.appendingPathComponent("file.pdf"),
+            ofFolderStorageURL: folderURL
+        ))
+        #expect(!FileProviderService.isDirectChild(folderURL, ofFolderStorageURL: folderURL))
+        #expect(!FileProviderService.isDirectChild(
+            folderURL.appendingPathComponent("Sub/file.pdf"),
+            ofFolderStorageURL: folderURL
+        ))
+        #expect(!FileProviderService.isDirectChild(
+            folderURL.appendingPathComponent("../other.pdf"),
+            ofFolderStorageURL: folderURL
+        ))
+        #expect(!FileProviderService.isDirectChild(
+            rootStorageURL.appendingPathComponent("4245/Other/file.pdf"),
+            ofFolderStorageURL: folderURL
+        ))
+    }
 }
