@@ -283,6 +283,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     private func updateBackgroundExtensionForCurrentFile() {
         guard #available(iOS 26.0, *) else { return }
 
+        backgroundExtensionImageView?.image = nil
         let currentFileId = currentFile.id
 
         currentFile.getThumbnail(publicShareProxy: driveFileManager?.publicShareProxy) {
