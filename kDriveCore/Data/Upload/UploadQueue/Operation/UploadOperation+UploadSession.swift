@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import InfomaniakChunking
 import InfomaniakCore
 import Sentry
 
