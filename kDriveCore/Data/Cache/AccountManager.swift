@@ -439,42 +439,47 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
     }
 
     public func createAndSetCurrentAccount(token: ApiToken) async throws -> ApiToken {
-        let apiFetcher = DriveApiFetcher(token: token, delegate: self)
-        let user = try await userProfileStore.updateUserProfile(with: apiFetcher)
+        do {
+            let apiFetcher = DriveApiFetcher(token: token, delegate: self)
+            let user = try await userProfileStore.updateUserProfile(with: apiFetcher)
 
-        let driveResponse = try await apiFetcher.userDrives()
-        guard !driveResponse.drives.filter(\.isDriveUser).isEmpty else {
-            try? await networkLogin.deleteApiToken(token: token)
-            throw DriveError.noDrive
-        }
-
-        attachDeviceToApiToken(token, apiFetcher: apiFetcher)
-        async let _ = notificationService.updateTopicsIfNeeded([Topic.twoFAPushChallenge], userApiFetcher: apiFetcher)
-
-        await updateMyKSuiteIfNeeded(for: driveResponse.drives, userId: user.id, apiFetcher: apiFetcher)
-
-        try await addAccount(token: token)
-        setCurrentAccount(account: token)
-
-        guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
-            await removeAccountFor(userId: token.userId, isInvoluntary: true)
-            if let drive = driveResponse.drives.first, drive.isInTechnicalMaintenance {
-                throw driveResponse.drives.count > 1 ? DriveError.productMaintenance : DriveError.NoDriveError
-                    .maintenance(drive: drive)
+            let driveResponse = try await apiFetcher.userDrives()
+            guard !driveResponse.drives.filter(\.isDriveUser).isEmpty else {
+                throw DriveError.noDrive
             }
-            throw DriveError.blocked
+
+            attachDeviceToApiToken(token, apiFetcher: apiFetcher)
+            async let _ = notificationService.updateTopicsIfNeeded([Topic.twoFAPushChallenge], userApiFetcher: apiFetcher)
+
+            await updateMyKSuiteIfNeeded(for: driveResponse.drives, userId: user.id, apiFetcher: apiFetcher)
+
+            try await addAccount(token: token)
+            setCurrentAccount(account: token)
+
+            guard let mainDrive = driveResponse.drives.first(where: { $0.isDriveUser && !$0.inMaintenance }) else {
+                if let drive = driveResponse.drives.first, drive.isInTechnicalMaintenance {
+                    throw driveResponse.drives.count > 1 ? DriveError.productMaintenance : DriveError.NoDriveError
+                        .maintenance(drive: drive)
+                }
+                throw DriveError.blocked
+            }
+            driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
+
+            let frozenDrive = mainDrive.freeze()
+            setCurrentDriveForCurrentAccount(for: frozenDrive.id, userId: frozenDrive.userId)
+            let driveFileManager = getDriveFileManager(for: mainDrive.id, userId: mainDrive.userId)
+            try await driveFileManager?.initRoot()
+
+            mqService.registerForNotifications(with: driveResponse.ips)
+
+            await resumeUploads(for: token)
+            return token
+        } catch {
+            await removeTokenAndAccountFor(userId: token.userId, isInvoluntary: true)
+            revokeApiToken(token)
+
+            throw error
         }
-        driveInfosManager.storeDriveResponse(user: user, driveResponse: driveResponse)
-
-        let frozenDrive = mainDrive.freeze()
-        setCurrentDriveForCurrentAccount(for: frozenDrive.id, userId: frozenDrive.userId)
-        let driveFileManager = getDriveFileManager(for: mainDrive.id, userId: mainDrive.userId)
-        try await driveFileManager?.initRoot()
-
-        mqService.registerForNotifications(with: driveResponse.ips)
-
-        await resumeUploads(for: token)
-        return token
     }
 
     public func updateUser(for account: ApiToken, registerToken: Bool) async throws -> ApiToken {
@@ -693,7 +698,11 @@ public class AccountManager: RefreshTokenDelegate, AccountManageable {
 
         guard let removedToken else { return }
 
-        networkLogin.deleteApiToken(token: removedToken) { result in
+        revokeApiToken(removedToken)
+    }
+
+    private func revokeApiToken(_ token: ApiToken) {
+        networkLogin.deleteApiToken(token: token) { result in
             guard case .failure(let error) = result else { return }
             Logger.general.error("Failed to delete api token: \(error.localizedDescription)")
         }
