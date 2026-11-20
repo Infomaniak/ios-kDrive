@@ -1,5 +1,7 @@
-- Play videos directly in file previews, with improved playback controls, AirPlay and automatic Picture in Picture
+- Play videos directly in file previews with improved controls, AirPlay, automatic Picture in Picture and subtitles when available
+- Refreshed the audio player layout
 - Send copies of multiple selected files at once, with a loading indicator while files are prepared
+- Files uploaded with Shortcuts now go to the selected folder
 - Improved upload reliability when returning to kDrive after saving files from another app
 - Refreshed the app feedback prompt and clarified download cancellation choices
 - Improved app stability and handling of uploads to folders where files cannot be created
