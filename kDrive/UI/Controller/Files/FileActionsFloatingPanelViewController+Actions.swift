@@ -521,7 +521,6 @@ extension FileActionsFloatingPanelViewController {
         ) { [
             weak self,
             proxyFile = frozenFile.proxify(),
-            remotePath = frozenFile.remotePath,
             sourceName = frozenFile.name,
             apiFetcher = driveFileManager.apiFetcher,
             userId = accountManager.currentUserId
@@ -529,9 +528,10 @@ extension FileActionsFloatingPanelViewController {
             self?.presentingViewController?.dismiss(animated: true)
             Task {
                 do {
+                    let sourceFile = try await apiFetcher.file(proxyFile)
                     let externalImport = try await apiFetcher.copyToDrive(
                         file: proxyFile,
-                        remotePath: remotePath,
+                        remotePath: sourceFile.remotePath,
                         destinationDrive: selectedDriveFileManager.drive,
                         destinationFolder: selectedDirectory.proxify()
                     )
