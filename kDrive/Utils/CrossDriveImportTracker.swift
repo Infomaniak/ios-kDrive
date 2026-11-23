@@ -74,6 +74,7 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
                                           destinationFolderId: destinationFolderId,
                                           userId: userId)
         pendingImports.append(pendingImport)
+        reconcilePendingImports()
     }
 
     func reconcilePendingImports() {
