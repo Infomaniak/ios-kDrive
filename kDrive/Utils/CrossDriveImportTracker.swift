@@ -43,7 +43,6 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
     }
 
     private static let pendingImportsKey = "crossDrivePendingImports"
-    private static let maxReconciliationPageCount = 5
 
     private var pendingImports: [PendingImport] {
         get {
@@ -134,7 +133,7 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
         var scannedEveryPage = false
         var page = 1
 
-        while !unlistedPendingImports.isEmpty, page <= Self.maxReconciliationPageCount {
+        while !unlistedPendingImports.isEmpty {
             guard let response = try? await driveFileManager.apiFetcher.externalImports(
                 drive: driveFileManager.drive,
                 page: page
