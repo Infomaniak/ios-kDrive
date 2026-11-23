@@ -106,7 +106,11 @@ class FloatingPanelSelectOptionViewController<T: Selectable & Equatable>: UITabl
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        dismiss(animated: true)
-        delegate?.didSelect(option: options[indexPath.row - 1])
+        let option = options[indexPath.row - 1]
+        let delegate = delegate
+
+        dismiss(animated: true) {
+            delegate?.didSelect(option: option)
+        }
     }
 }
