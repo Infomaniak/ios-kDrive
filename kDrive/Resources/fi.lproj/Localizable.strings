@@ -606,10 +606,10 @@
 "convertToDropboxTitle" = "Muunna drop boxiksi %@";
 
 /* loco:6af4708feb02d7c0c6025704 */
-"copyToDriveDoneSnackbar" = "%@ kopioitu toiselle asemalle";
+"copyToDriveDoneSnackbar" = "%s kopioitiin toiselle asemalle";
 
 /* loco:6af470eed37a4970c1006005 */
-"copyToDriveErrorSnackbar" = "%@:n kopiointi toiselle asemalle epäonnistui";
+"copyToDriveErrorSnackbar" = "%s:n kopiointi toiselle asemalle epäonnistui";
 
 /* loco:6a5f4c062dd6a21492070df2 */
 "copyToDriveStarted" = "%s kopioidaan toiselle asemalle";
