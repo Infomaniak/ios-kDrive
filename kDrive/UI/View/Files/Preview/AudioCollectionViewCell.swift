@@ -194,26 +194,19 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             }
             .store(in: &cancellables)
 
-        singleTrackPlayer
-            .onPositionChange
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newPosition in
-                guard let self else { return }
-                controlsView.update(
-                    currentTime: CMTime(seconds: Double(newPosition), preferredTimescale: 1), duration: currentDuration
-                )
-            }
-            .store(in: &cancellables)
-
-        singleTrackPlayer
-            .onPositionMaximumChange
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] sliderMaximum in
-                guard let self else { return }
-                currentDuration = CMTime(seconds: Double(sliderMaximum), preferredTimescale: 1)
-                controlsView.update(currentTime: .zero, duration: currentDuration)
-            }
-            .store(in: &cancellables)
+        Publishers.CombineLatest(
+            singleTrackPlayer.onPositionChange,
+            singleTrackPlayer.onPositionMaximumChange
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] position, maximum in
+            guard let self else { return }
+            currentDuration = CMTime(seconds: Double(maximum), preferredTimescale: 1)
+            controlsView.update(
+                currentTime: CMTime(seconds: Double(position), preferredTimescale: 1), duration: currentDuration
+            )
+        }
+        .store(in: &cancellables)
 
         singleTrackPlayer
             .onCurrentTrackMetadata
