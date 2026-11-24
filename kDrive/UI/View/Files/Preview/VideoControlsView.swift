@@ -43,7 +43,7 @@ final class VideoControlsView: UIView {
     private var lastScrubbingActivity = Date.distantPast
     private var isScrubbing = false
 
-    private var airPlayButton: AVRoutePickerView = {
+    var airPlayButton: AVRoutePickerView = {
         let view = AVRoutePickerView()
         view.prioritizesVideoDevices = true
         return view

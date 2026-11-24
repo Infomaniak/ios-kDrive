@@ -140,8 +140,9 @@ extension PreviewViewController: UISheetPresentationControllerDelegate {
 
             guard panel.presentingViewController != nil else { return }
             self.updateSheetContainerFrameIfNeeded(animated: true)
-            for case let cell as VideoCollectionViewCell in self.collectionView.visibleCells {
+            for case let cell as PreviewCollectionViewCell in self.collectionView.visibleCells {
                 cell.updateControlsLayout()
+                cell.layoutIfNeeded()
             }
         }
     }
