@@ -166,7 +166,7 @@ final class StorageTableViewController: UITableViewController {
         let section = sections[indexPath.section]
         switch section {
         case .header:
-            cell.titleLabel.text = KDriveResourcesStrings.Localizable.totalStorageUsedTitle
+            cell.titleLabel.text = KDriveResourcesStrings.Localizable.manageStorageTotalStorageUsedTitle
             cell.valueLabel.text = Constants.formatFileSize(Int64(totalSize), countStyle: .file)
             cell.selectionStyle = .none
         case .directories:
@@ -192,9 +192,9 @@ final class StorageTableViewController: UITableViewController {
         case .header:
             break
         case .directories:
-            sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.directoriesTitle
+            sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.manageStorageDirectoriesTitle
         case .files:
-            sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.cachedFileTitle
+            sectionHeaderView.titleLabel.text = KDriveResourcesStrings.Localizable.manageStorageCachedFileTitle
         }
         return sectionHeaderView
     }
@@ -210,14 +210,14 @@ final class StorageTableViewController: UITableViewController {
         case .directories:
             guard indexPath.row != 0 else { return }
             storage = directories[indexPath.row]
-            message = KDriveResourcesStrings.Localizable.modalClearCacheDirectoryDescription(storage.directoryTitle)
+            message = KDriveResourcesStrings.Localizable.manageStorageModalClearCacheDirectoryDescription(storage.directoryTitle)
         case .files:
             storage = files[indexPath.row]
-            message = KDriveResourcesStrings.Localizable.modalClearCacheFileDescription(storage.name)
+            message = KDriveResourcesStrings.Localizable.manageStorageModalClearCacheFileDescription(storage.name)
         }
 
         let alertViewController = AlertTextViewController(
-            title: KDriveResourcesStrings.Localizable.modalClearCacheTitle,
+            title: KDriveResourcesStrings.Localizable.manageStorageModalClearCacheTitle,
             message: message,
             action: KDriveResourcesStrings.Localizable.buttonClear,
             destructive: true

@@ -527,12 +527,6 @@
 /* loco:6101109cb5c21e394d127402 */
 "buttonYes" = "Sim";
 
-/* loco:614c8806c00b6044a92a7775 */
-"cacheDirectory" = "Cache";
-
-/* loco:614c88a2f93d4c57b6630c25 */
-"cachedFileTitle" = "Ficheiros em cache";
-
 /* loco:6054b7d53726d8506b6c9a42 */
 "cameraAccessDeniedDescription" = "O acesso à sua câmara está desativado: pode alterar isto nas Definições.";
 
@@ -700,12 +694,6 @@
 
 /* loco:68c9617bf6bead14aa05ca53 */
 "deleteUploadedPhotosTitle" = "Tem %d fotos para limpar";
-
-/* loco:614c887ba0ad81657c1e75a2 */
-"directoriesTitle" = "Dados";
-
-/* loco:614c86f5dd7fc56d0c5fcaa4 */
-"documentsDirectory" = "Outros documentos";
 
 /* loco:608fce0b43535250c00ba5c2 */
 "driveBlockedDescription" = "O produto expirou desde %@. Renove-o para o gerir e aceder aos seus dados.";
@@ -1295,12 +1283,6 @@
 /* loco:6049df4d5c2c3a04bc3979f9 */
 "homeTitle" = "Bem-vindo";
 
-/* loco:6889c36b7cef77ada70ae2d3 */
-"imageCache" = "Cache de imagens";
-
-/* loco:6889c331e5ba3eb6640d7e22 */
-"importDirectory" = "Importações";
-
 /* loco:6049df4d5c2c3a04bc3979fb */
 "inputExpirationDate" = "Data de expiração";
 
@@ -1355,20 +1337,47 @@
 /* loco:604b1ff2a5300e5b7d75fb82 */
 "manageDropboxTitle" = "Gerir a caixa de depósito %@";
 
+/* loco:614c8806c00b6044a92a7775 */
+"manageStorageCacheDirectory" = "Cache";
+
+/* loco:614c88a2f93d4c57b6630c25 */
+"manageStorageCachedFileTitle" = "Ficheiros em cache";
+
+/* loco:614c887ba0ad81657c1e75a2 */
+"manageStorageDirectoriesTitle" = "Dados";
+
+/* loco:614c86f5dd7fc56d0c5fcaa4 */
+"manageStorageDocumentsDirectory" = "Outros documentos";
+
+/* loco:6889c36b7cef77ada70ae2d3 */
+"manageStorageImageCache" = "Cache de imagens";
+
+/* loco:6889c331e5ba3eb6640d7e22 */
+"manageStorageImportDirectory" = "Importações";
+
+/* loco:614c8925d281f46671687393 */
+"manageStorageModalClearCacheDirectoryDescription" = "Pretende limpar o conteúdo de \"%@\"?";
+
+/* loco:614c8965f987554eab2cc096 */
+"manageStorageModalClearCacheFileDescription" = "Pretende remover o ficheiro \"%@\" do cache local? Não será removido do seu kDrive.";
+
+/* loco:614c88ddf987554eab2cc092 */
+"manageStorageModalClearCacheTitle" = "Limpar cache";
+
+/* loco:6660083917d29585d5010582 */
+"manageStorageOpenInPlaceDirectory" = "Abrir no local";
+
+/* loco:614c87dd3af1ff4501490ec5 */
+"manageStorageTempDirectory" = "Ficheiros temporários";
+
 /* loco:614c861005fa88548e40ee83 */
 "manageStorageTitle" = "Gerir o armazenamento local";
 
+/* loco:614c8841083c4c6d41454f55 */
+"manageStorageTotalStorageUsedTitle" = "Armazenamento total utilizado";
+
 /* loco:6049df4d5c2c3a04bc3979fe */
 "menuTitle" = "Menu";
-
-/* loco:614c8925d281f46671687393 */
-"modalClearCacheDirectoryDescription" = "Pretende limpar o conteúdo de \"%@\"?";
-
-/* loco:614c8965f987554eab2cc096 */
-"modalClearCacheFileDescription" = "Pretende remover o ficheiro \"%@\" do cache local? Não será removido do seu kDrive.";
-
-/* loco:614c88ddf987554eab2cc092 */
-"modalClearCacheTitle" = "Limpar cache";
 
 /* loco:6049df4d5c2c3a04bc3979ff */
 "modalCommentAddTitle" = "Editar um comentário";
@@ -1600,9 +1609,6 @@
 
 /* loco:6a2a78ccb80096108403dcd2 */
 "openAppToContinue" = "Abra a aplicação para continuar";
-
-/* loco:6660083917d29585d5010582 */
-"openInPlaceDirectory" = "Abrir no local";
 
 /* loco:6049df4d5c2c3a04bc397a23 */
 "photoAccessDeniedDescription" = "O acesso às suas fotos está desativado, pode alterar este parâmetro nas definições";
@@ -2117,9 +2123,6 @@
 /* loco:66f5115224f82ae9020b3162 */
 "syncWifiSettingsTitle" = "Sincronizar ficheiros offline";
 
-/* loco:614c87dd3af1ff4501490ec5 */
-"tempDirectory" = "Ficheiros temporários";
-
 /* loco:60a65b76f8bf9002e9594852 */
 "themeSettingsDarkLabel" = "Escuro";
 
@@ -2134,9 +2137,6 @@
 
 /* loco:60a65b3df229b924e419f452 */
 "themeSettingsTitle" = "Tema";
-
-/* loco:614c8841083c4c6d41454f55 */
-"totalStorageUsedTitle" = "Armazenamento total utilizado";
 
 /* loco:6049df4d5c2c3a04bc397a76 */
 "trashActionDelete" = "Eliminar permanentemente";
