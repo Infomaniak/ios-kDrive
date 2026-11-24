@@ -500,10 +500,6 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         switch event?.subtype {
         case .remoteControlTogglePlayPause:
             cell.togglePlayPause()
-        case .remoteControlPlay:
-            cell.play()
-        case .remoteControlPause:
-            cell.pause()
         default:
             break
         }

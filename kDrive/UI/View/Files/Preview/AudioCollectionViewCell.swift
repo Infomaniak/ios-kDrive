@@ -42,13 +42,16 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     private let artworkImageView = UIImageView(image: KDriveResourcesAsset.music.image)
     private let songTitleLabel = IKLabel(frame: .zero)
     private let artistNameLabel = IKLabel(frame: .zero)
-    private let playbackControls = AudioControlsView()
-    private let playButton = UIButton(type: .system)
     private var containerLeadingConstraint: NSLayoutConstraint!
     private var containerTrailingConstraint: NSLayoutConstraint!
     private var stackBottomConstraint: NSLayoutConstraint!
 
-    private var lastOrientationIsPortrait: Bool?
+    private var currentDuration: CMTime = .indefinite
+
+    private var controlsLeftConstraint: NSLayoutConstraint?
+    private var controlsRightConstraint: NSLayoutConstraint?
+    private var controlsBottomConstraint: NSLayoutConstraint?
+    private var areControlsVisible = true
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -59,6 +62,12 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    private let controlsView: VideoControlsView = {
+        let view = VideoControlsView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
 
     private func setupView() {
         artworkImageView.contentMode = .scaleAspectFit
@@ -74,28 +83,25 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         artistNameLabel.text = ""
         artistNameLabel.setContentHuggingPriority(.required, for: .vertical)
 
-        playbackControls.onPlayPause = { [weak self] in
+        controlsView.onPlayPause = { [weak self] in
             self?.togglePlayPause()
         }
-        playbackControls.onScrubbingBegan = { [weak self] in
-            self?.singleTrackPlayer.stopPlaybackObservation()
-        }
-        playbackControls.onSeek = { [weak self] position in
-            self?.seek(to: position)
+        controlsView.onSeek = { [weak self] progress in
+            guard let self, currentDuration.seconds.isFinite, currentDuration.seconds > 0 else { return }
+            seek(to: CMTimeMultiplyByFloat64(currentDuration, multiplier: Float64(progress)))
         }
 
-        playButton.setImage(KDriveResourcesAsset.play.image.withRenderingMode(.alwaysOriginal), for: .normal)
-        playButton.addTarget(self, action: #selector(playButtonPressed(_:)), for: .touchUpInside)
         let verticalStack = UIStackView(arrangedSubviews: [
             songTitleLabel,
             artistNameLabel,
-            playbackControls,
-            playButton
+            controlsView
         ])
+        controlsView.subtitlesButton.isHidden = true
+        controlsView.airPlayButton.isHidden = true
         verticalStack.axis = .vertical
         verticalStack.alignment = .center
         verticalStack.spacing = 8
-        verticalStack.setCustomSpacing(2, after: songTitleLabel)
+        verticalStack.setCustomSpacing(24, after: artistNameLabel)
         verticalStack.translatesAutoresizingMaskIntoConstraints = false
         artworkImageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(verticalStack)
@@ -132,20 +138,9 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
                 multiplier: 0.7
             ),
 
-            playbackControls.leadingAnchor.constraint(greaterThanOrEqualTo: verticalStack.leadingAnchor),
-            verticalStack.trailingAnchor.constraint(greaterThanOrEqualTo: playbackControls.trailingAnchor),
-            playButton.widthAnchor.constraint(equalToConstant: 70),
-            playButton.heightAnchor.constraint(equalToConstant: 70)
+            controlsView.leadingAnchor.constraint(equalTo: verticalStack.leadingAnchor),
+            controlsView.trailingAnchor.constraint(equalTo: verticalStack.trailingAnchor)
         ])
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(rotated),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
-
-        setControls(enabled: false)
     }
 
     private func refreshHorizontalSafeInsets() {
@@ -171,7 +166,6 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         updateControlsLayout()
-        setUpPlayButtons()
     }
 
     override func willDisplayInCollectionView() {
@@ -180,27 +174,18 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     }
 
     private func updateControlsLayout() {
-        let spacing = UIConstants.Padding.standard
+        let spacing = UIConstants.Padding.medium
         let safeFrame = safeAreaLayoutGuide.layoutFrame
         let bottom = safeFrame.maxY - (previewDelegate?.fileActionPanelHeight ?? 0) - spacing
         stackBottomConstraint.constant = bottom - bounds.maxY
     }
 
-    @MainActor func setControls(enabled: Bool) {
-        playbackControls.elapsedTimeLabel.text = CMTime.zeroTimeText
-        playbackControls.remainingTimeLabel.text = CMTime.unknownTimeText
-        playbackControls.positionSlider.value = 0.0
-        playButton.isEnabled = enabled
-        playbackControls.playPauseButton.isEnabled = enabled
-        playButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
-        playbackControls.playPauseButton.accessibilityLabel = KDriveResourcesStrings.Localizable.buttonPlayerPlayPause
-    }
-
     override func prepareForReuse() {
         super.prepareForReuse()
         thumbnailDownloadTask?.cancel()
-        setControls(enabled: false)
+        controlsView.reset()
         singleTrackPlayer.reset()
+        currentDuration = .indefinite
         songTitleLabel.text = ""
         artistNameLabel.text = ""
         artworkImageView.image = KDriveResourcesAsset.music.image
@@ -212,7 +197,6 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         Task { @MainActor in
             setupObservationFor(frozenFile: frozenFile)
             await singleTrackPlayer.setup(with: frozenFile)
-            setControls(enabled: true)
         }
     }
 
@@ -225,7 +209,7 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .onPlayerStateChange
             .receive(on: DispatchQueue.main)
             .sink { newState in
-                self.updateUI(state: newState)
+                self.controlsView.setPlaying(newState == .playing)
             }
             .store(in: &cancellables)
 
@@ -238,35 +222,23 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .store(in: &cancellables)
 
         singleTrackPlayer
-            .onElapsedTimeChange
-            .receive(on: DispatchQueue.main)
-            .sink { elapsedTime in
-                self.playbackControls.elapsedTimeLabel.text = elapsedTime
-            }
-            .store(in: &cancellables)
-
-        singleTrackPlayer
-            .onRemainingTimeChange
-            .receive(on: DispatchQueue.main)
-            .sink { remainingTime in
-                self.playbackControls.remainingTimeLabel.text = remainingTime
-            }
-            .store(in: &cancellables)
-
-        singleTrackPlayer
             .onPositionChange
             .receive(on: DispatchQueue.main)
-            .sink { newPosition in
-                guard !self.playbackControls.positionSlider.isTracking else { return }
-                self.playbackControls.positionSlider.setValue(newPosition, animated: true)
+            .sink { [weak self] newPosition in
+                guard let self else { return }
+                controlsView.update(
+                    currentTime: CMTime(seconds: Double(newPosition), preferredTimescale: 1), duration: currentDuration
+                )
             }
             .store(in: &cancellables)
 
         singleTrackPlayer
             .onPositionMaximumChange
             .receive(on: DispatchQueue.main)
-            .sink { sliderMaximum in
-                self.playbackControls.positionSlider.maximumValue = sliderMaximum
+            .sink { [weak self] sliderMaximum in
+                guard let self else { return }
+                currentDuration = CMTime(seconds: Double(sliderMaximum), preferredTimescale: 1)
+                controlsView.update(currentTime: .zero, duration: currentDuration)
             }
             .store(in: &cancellables)
 
@@ -287,14 +259,6 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             .store(in: &cancellables)
     }
 
-    private func setUpPlayButtons() {
-        let isPortrait = (window?.windowScene?.interfaceOrientation.isPortrait ?? true)
-        guard isPortrait != lastOrientationIsPortrait else { return }
-        lastOrientationIsPortrait = isPortrait
-        playButton.isHidden = !isPortrait
-        playbackControls.playPauseButton.isHidden = isPortrait
-    }
-
     func handleMetadata(_ metadata: MediaMetadata, file: File) {
         if let artwork = metadata.artwork {
             artworkImageView.image = artwork
@@ -310,30 +274,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         songTitleLabel.text = metadata.title
     }
 
-    @objc private func rotated() {
-        setUpPlayButtons()
-    }
-
-    @objc private func playButtonPressed(_ sender: UIButton) {
-        togglePlayPause()
-    }
-
     override func didEndDisplaying() {
         matomo.trackMediaPlayer(leaveAt: singleTrackPlayer.progressPercentage)
-        singleTrackPlayer.pause()
-    }
-
-    private func updateUI(state: SingleTrackPlayer.State) {
-        let image = state == .playing ? KDriveResourcesAsset.pause.image : KDriveResourcesAsset.play.image
-        playButton.setImage(image.withRenderingMode(.alwaysOriginal), for: .normal)
-        playbackControls.playPauseButton.setImage(image.withRenderingMode(.alwaysOriginal), for: .normal)
-    }
-
-    func play() {
-        singleTrackPlayer.play()
-    }
-
-    func pause() {
         singleTrackPlayer.pause()
     }
 
@@ -347,17 +289,5 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
 
     func seek(to position: TimeInterval) {
         singleTrackPlayer.seek(to: position)
-    }
-
-    func skipForward(by interval: TimeInterval) {
-        singleTrackPlayer.skipForward(by: interval)
-    }
-
-    func skipBackward(by interval: TimeInterval) {
-        singleTrackPlayer.skipBackward(by: interval)
-    }
-
-    func setPlaybackRate(_ rate: Float) {
-        singleTrackPlayer.setPlaybackRate(rate)
     }
 }
