@@ -44,9 +44,6 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private var needsStartFromBeginning = true
 
     private var loadingIndicatorTask: Task<Void, Never>?
-    private var controlsLeftConstraint: NSLayoutConstraint?
-    private var controlsRightConstraint: NSLayoutConstraint?
-    private var controlsBottomConstraint: NSLayoutConstraint?
     private var areControlsVisible = true
 
     private var pipController: AVPictureInPictureController?
@@ -351,27 +348,9 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         }
     }
 
-    func updateControlsLayout() {
+    override func updateControlsLayout() {
         guard areControlsVisible else { return }
-        let spacing = UIConstants.Padding.medium
-        let safeFrame = safeAreaLayoutGuide.layoutFrame
-        var leftInset = safeFrame.minX - bounds.minX + spacing
-        var rightInset = bounds.maxX - safeFrame.maxX + spacing
-
-        let viewport = superview ?? self
-        if let panelFrame = previewDelegate?.fileActionPanelFrame(in: viewport),
-           panelFrame.intersects(viewport.bounds),
-           panelFrame.minX >= viewport.bounds.minX,
-           panelFrame.maxX <= viewport.bounds.maxX {
-            // Each page keeps the viewport's horizontal alignment while moving during a swipe.
-            leftInset = panelFrame.minX - viewport.bounds.minX
-            rightInset = viewport.bounds.maxX - panelFrame.maxX
-        }
-
-        let bottom = safeFrame.maxY - (previewDelegate?.fileActionPanelHeight ?? 0) - spacing
-        controlsLeftConstraint?.constant = leftInset
-        controlsRightConstraint?.constant = -rightInset
-        controlsBottomConstraint?.constant = bottom - bounds.maxY
+        super.updateControlsLayout()
     }
 
     private func togglePlayPause() {

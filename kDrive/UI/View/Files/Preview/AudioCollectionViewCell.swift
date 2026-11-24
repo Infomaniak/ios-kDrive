@@ -44,14 +44,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     private let artistNameLabel = IKLabel(frame: .zero)
     private var containerLeadingConstraint: NSLayoutConstraint!
     private var containerTrailingConstraint: NSLayoutConstraint!
-    private var stackBottomConstraint: NSLayoutConstraint!
 
     private var currentDuration: CMTime = .indefinite
-
-    private var controlsLeftConstraint: NSLayoutConstraint?
-    private var controlsRightConstraint: NSLayoutConstraint?
-    private var controlsBottomConstraint: NSLayoutConstraint?
-    private var areControlsVisible = true
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -70,6 +64,8 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     }()
 
     private func setupView() {
+        tapGestureRecognizer.isEnabled = false
+
         artworkImageView.contentMode = .scaleAspectFit
         artworkImageView.isAccessibilityElement = false
         artworkImageView.setContentHuggingPriority(.fittingSizeLevel, for: .vertical)
@@ -115,14 +111,18 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
             multiplier: 0.75
         )
         preferredArtworkHeight.priority = .defaultLow
-        containerLeadingConstraint = verticalStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24)
-        containerTrailingConstraint = contentView.trailingAnchor.constraint(equalTo: verticalStack.trailingAnchor, constant: 24)
-        stackBottomConstraint = verticalStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+
+        let controlsLeftConstraint = controlsView.leftAnchor.constraint(equalTo: leftAnchor)
+        let controlsRightConstraint = controlsView.rightAnchor.constraint(equalTo: rightAnchor)
+        let controlsBottomConstraint = controlsView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        self.controlsLeftConstraint = controlsLeftConstraint
+        self.controlsRightConstraint = controlsRightConstraint
+        self.controlsBottomConstraint = controlsBottomConstraint
 
         NSLayoutConstraint.activate([
-            containerLeadingConstraint,
-            containerTrailingConstraint,
-            stackBottomConstraint,
+            controlsLeftConstraint,
+            controlsRightConstraint,
+            controlsBottomConstraint,
 
             artworkLayoutGuide.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor),
             artworkLayoutGuide.bottomAnchor.constraint(equalTo: songTitleLabel.topAnchor),
@@ -143,26 +143,6 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         ])
     }
 
-    private func refreshHorizontalSafeInsets() {
-        guard let window else { return }
-        setHorizontalSafeInsets(left: window.safeAreaInsets.left, right: window.safeAreaInsets.right)
-    }
-
-    private func setHorizontalSafeInsets(left: CGFloat, right: CGFloat) {
-        containerLeadingConstraint.constant = 24 + left
-        containerTrailingConstraint.constant = 24 + right
-    }
-
-    override func didMoveToWindow() {
-        super.didMoveToWindow()
-        refreshHorizontalSafeInsets()
-    }
-
-    override func safeAreaInsetsDidChange() {
-        super.safeAreaInsetsDidChange()
-        refreshHorizontalSafeInsets()
-    }
-
     override func layoutSubviews() {
         super.layoutSubviews()
         updateControlsLayout()
@@ -171,13 +151,6 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
     override func willDisplayInCollectionView() {
         super.willDisplayInCollectionView()
         updateControlsLayout()
-    }
-
-    private func updateControlsLayout() {
-        let spacing = UIConstants.Padding.medium
-        let safeFrame = safeAreaLayoutGuide.layoutFrame
-        let bottom = safeFrame.maxY - (previewDelegate?.fileActionPanelHeight ?? 0) - spacing
-        stackBottomConstraint.constant = bottom - bounds.maxY
     }
 
     override func prepareForReuse() {
@@ -272,6 +245,13 @@ final class AudioCollectionViewCell: PreviewCollectionViewCell {
         }
         artistNameLabel.text = metadata.artist
         songTitleLabel.text = metadata.title
+    }
+
+    override func didStartDisplaying() {
+        super.didStartDisplaying()
+        if previewDelegate?.isFullscreenPreview == true {
+            previewDelegate?.setFullscreen(false)
+        }
     }
 
     override func didEndDisplaying() {
