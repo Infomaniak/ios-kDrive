@@ -135,11 +135,7 @@ struct UTVideoCollectionViewCell {
 
     private func makeCell(delegate: VideoLayoutDelegate) -> VideoCollectionViewCell {
         let cell = VideoCollectionViewCell(frame: CGRect(x: 0, y: 0, width: 400, height: 800))
-        let imageView = UIImageView(frame: cell.contentView.bounds)
-        cell.contentView.addSubview(imageView)
-        cell.previewFrameImageView = imageView
         cell.previewDelegate = delegate
-        cell.awakeFromNib()
         return cell
     }
 }

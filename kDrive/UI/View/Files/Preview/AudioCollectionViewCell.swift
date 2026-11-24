@@ -28,9 +28,9 @@ import Nuke
 import UIKit
 
 final class AudioCollectionViewCell: PreviewCollectionViewCell {
-    static let identifier = String(describing: AudioCollectionViewCell.self)
-
     @LazyInjectService private var matomo: MatomoUtils
+
+    static let identifier = String(describing: AudioCollectionViewCell.self)
 
     var driveFileManager: DriveFileManager!
 

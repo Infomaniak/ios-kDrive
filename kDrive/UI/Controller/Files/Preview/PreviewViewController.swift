@@ -217,7 +217,7 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         collectionView.register(cellView: DownloadingPreviewCollectionViewCell.self)
         collectionView.register(cellView: ImagePreviewCollectionViewCell.self)
         collectionView.register(cellView: PdfPreviewCollectionViewCell.self)
-        collectionView.register(cellView: VideoCollectionViewCell.self)
+        collectionView.register(VideoCollectionViewCell.self, forCellWithReuseIdentifier: VideoCollectionViewCell.identifier)
         collectionView.register(cellView: OfficePreviewCollectionViewCell.self)
         collectionView.register(AudioCollectionViewCell.self, forCellWithReuseIdentifier: AudioCollectionViewCell.identifier)
         collectionView.register(cellView: CodePreviewCollectionViewCell.self)

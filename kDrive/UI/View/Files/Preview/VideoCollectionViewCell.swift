@@ -27,9 +27,9 @@ import Nuke
 import UIKit
 
 class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate {
-    @IBOutlet var previewFrameImageView: UIImageView!
-
     @LazyInjectService private var matomo: MatomoUtils
+
+    static let identifier = String(describing: VideoCollectionViewCell.self)
 
     var driveFileManager: DriveFileManager!
 
@@ -47,6 +47,14 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
     private var areControlsVisible = true
 
     private var pipController: AVPictureInPictureController?
+
+    private let previewFrameImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
 
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .medium)
@@ -70,13 +78,21 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         return view
     }()
 
-    override func awakeFromNib() {
-        super.awakeFromNib()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
 
-        let container = previewFrameImageView.superview ?? contentView
-        container.insertSubview(playerLayerView, belowSubview: previewFrameImageView)
-        container.addSubview(loadingIndicator)
-        container.addSubview(controlsView)
+    @available(*, unavailable)
+    @MainActor required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setupView() {
+        contentView.addSubview(previewFrameImageView)
+        contentView.insertSubview(playerLayerView, belowSubview: previewFrameImageView)
+        contentView.addSubview(loadingIndicator)
+        contentView.addSubview(controlsView)
 
         let controlsLeftConstraint = controlsView.leftAnchor.constraint(equalTo: leftAnchor)
         let controlsRightConstraint = controlsView.rightAnchor.constraint(equalTo: rightAnchor)
@@ -86,13 +102,18 @@ class VideoCollectionViewCell: PreviewCollectionViewCell, VideoViewCellDelegate 
         self.controlsBottomConstraint = controlsBottomConstraint
 
         NSLayoutConstraint.activate([
-            playerLayerView.topAnchor.constraint(equalTo: container.topAnchor),
-            playerLayerView.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            playerLayerView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            playerLayerView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            previewFrameImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            previewFrameImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            previewFrameImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            previewFrameImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
 
-            loadingIndicator.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            playerLayerView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            playerLayerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            playerLayerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            playerLayerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+
+            loadingIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
 
             controlsLeftConstraint,
             controlsRightConstraint,
