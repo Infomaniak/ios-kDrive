@@ -486,6 +486,11 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
         dismissFileActionsPanel(animated: false)
     }
 
+    func dismissFileActionsPanelForHandoff() {
+        pendingFileActionsVisibility = nil
+        dismissFileActionsPanel(animated: false)
+    }
+
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         let centerIndexPathBeforeRotate = currentIndex
@@ -741,6 +746,13 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
     }
 
     private func presentFileActionsPanel(animated: Bool) {
+        if let blockingViewController = presentedViewController,
+           blockingViewController !== fileInformationsViewController,
+           blockingViewController.isBeingDismissed {
+            retryFileActionsPresentation(after: blockingViewController, animated: animated)
+            return
+        }
+
         guard viewIfLoaded?.window != nil, presentedViewController == nil,
               fileInformationsViewController.presentingViewController == nil else {
             return
@@ -764,6 +776,21 @@ final class PreviewViewController: UIViewController, PreviewContentCellDelegate,
             isFileActionsTransitioning = false
             scheduleFileActionsLayoutUpdate()
             applyPendingFileActionsVisibility()
+        }
+    }
+
+    private func retryFileActionsPresentation(after blockingViewController: UIViewController, animated: Bool) {
+        pendingFileActionsVisibility = (isVisible: true, animated: animated)
+        let retry: () -> Void = { [weak self] in
+            self?.applyPendingFileActionsVisibility()
+        }
+
+        if let coordinator = blockingViewController.transitionCoordinator {
+            coordinator.animate(alongsideTransition: nil) { _ in
+                DispatchQueue.main.async(execute: retry)
+            }
+        } else {
+            DispatchQueue.main.async(execute: retry)
         }
     }
 

@@ -140,6 +140,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         detailNavigationController.popToRootViewController(animated: false)
 
         if let previewViewController = filesNavigationController.topViewController as? PreviewViewController {
+            previewViewController.dismissFileActionsPanelForHandoff()
             let fileId = previewViewController.currentPreviewedFileId
             let database = driveFileManager.database
             let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
@@ -193,6 +194,7 @@ class RootSplitViewController: UISplitViewController, SidebarViewControllerDeleg
         filesNavigationController.popToRootViewController(animated: false)
 
         if let previewViewController = detailNavigationController.topViewController as? PreviewViewController {
+            previewViewController.dismissFileActionsPanelForHandoff()
             let fileId = previewViewController.currentPreviewedFileId
             let database = driveFileManager.database
             let frozenFile = database.fetchObject(ofType: File.self) { lazyCollection in
