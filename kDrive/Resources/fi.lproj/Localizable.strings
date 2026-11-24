@@ -527,12 +527,6 @@
 /* loco:6101109cb5c21e394d127402 */
 "buttonYes" = "Kyllä";
 
-/* loco:614c8806c00b6044a92a7775 */
-"cacheDirectory" = "Välimuisti";
-
-/* loco:614c88a2f93d4c57b6630c25 */
-"cachedFileTitle" = "Välimuistissa olevat tiedostot";
-
 /* loco:6054b7d53726d8506b6c9a42 */
 "cameraAccessDeniedDescription" = "Kameran käyttö on poistettu käytöstä: voit vaihtaa tämän asetuksista.";
 
@@ -700,12 +694,6 @@
 
 /* loco:68c9617bf6bead14aa05ca53 */
 "deleteUploadedPhotosTitle" = "Sinulla on %d kuvaa siivottavana";
-
-/* loco:614c887ba0ad81657c1e75a2 */
-"directoriesTitle" = "Tietoja";
-
-/* loco:614c86f5dd7fc56d0c5fcaa4 */
-"documentsDirectory" = "Muut asiakirjat";
 
 /* loco:608fce0b43535250c00ba5c2 */
 "driveBlockedDescription" = "Tuote on vanhentunut %@. Uudista se hallitaksesi sitä ja päästäksesi sen tietoihin käsiksi.";
@@ -1295,12 +1283,6 @@
 /* loco:6049df4d5c2c3a04bc3979f9 */
 "homeTitle" = "Koti";
 
-/* loco:6889c36b7cef77ada70ae2d3 */
-"imageCache" = "Kuvien välimuisti";
-
-/* loco:6889c331e5ba3eb6640d7e22 */
-"importDirectory" = "Tuonnit";
-
 /* loco:6049df4d5c2c3a04bc3979fb */
 "inputExpirationDate" = "Vanhenemispäivä";
 
@@ -1355,20 +1337,47 @@
 /* loco:604b1ff2a5300e5b7d75fb82 */
 "manageDropboxTitle" = "Hallitse lähetyslaatikko %@";
 
+/* loco:614c8806c00b6044a92a7775 */
+"manageStorageCacheDirectory" = "Välimuisti";
+
+/* loco:614c88a2f93d4c57b6630c25 */
+"manageStorageCachedFileTitle" = "Välimuistissa olevat tiedostot";
+
+/* loco:614c887ba0ad81657c1e75a2 */
+"manageStorageDirectoriesTitle" = "Tietoja";
+
+/* loco:614c86f5dd7fc56d0c5fcaa4 */
+"manageStorageDocumentsDirectory" = "Muut asiakirjat";
+
+/* loco:6889c36b7cef77ada70ae2d3 */
+"manageStorageImageCache" = "Kuvien välimuisti";
+
+/* loco:6889c331e5ba3eb6640d7e22 */
+"manageStorageImportDirectory" = "Tuonnit";
+
+/* loco:614c8925d281f46671687393 */
+"manageStorageModalClearCacheDirectoryDescription" = "Haluatko tyhjentää kohteen \"%@\" sisällön?";
+
+/* loco:614c8965f987554eab2cc096 */
+"manageStorageModalClearCacheFileDescription" = "Haluatko poistaa tiedoston \"%@\" paikallisesta välimuistista? Se ei poistu kDrivestasi.";
+
+/* loco:614c88ddf987554eab2cc092 */
+"manageStorageModalClearCacheTitle" = "Tyhjennä välimuisti";
+
+/* loco:6660083917d29585d5010582 */
+"manageStorageOpenInPlaceDirectory" = "Avaa paikallaan";
+
+/* loco:614c87dd3af1ff4501490ec5 */
+"manageStorageTempDirectory" = "Väliaikaistiedostot";
+
 /* loco:614c861005fa88548e40ee83 */
 "manageStorageTitle" = "Hallitse paikallista tallennustilaa";
 
+/* loco:614c8841083c4c6d41454f55 */
+"manageStorageTotalStorageUsedTitle" = "Käytetty tallennustila yhteensä";
+
 /* loco:6049df4d5c2c3a04bc3979fe */
 "menuTitle" = "Valikko";
-
-/* loco:614c8925d281f46671687393 */
-"modalClearCacheDirectoryDescription" = "Haluatko tyhjentää kohteen \"%@\" sisällön?";
-
-/* loco:614c8965f987554eab2cc096 */
-"modalClearCacheFileDescription" = "Haluatko poistaa tiedoston \"%@\" paikallisesta välimuistista? Se ei poistu kDrivestasi.";
-
-/* loco:614c88ddf987554eab2cc092 */
-"modalClearCacheTitle" = "Tyhjennä välimuisti";
 
 /* loco:6049df4d5c2c3a04bc3979ff */
 "modalCommentAddTitle" = "Muokkaa kommenttia";
@@ -1600,9 +1609,6 @@
 
 /* loco:6a2a78ccb80096108403dcd2 */
 "openAppToContinue" = "Avaa sovellus jatkaaksesi";
-
-/* loco:6660083917d29585d5010582 */
-"openInPlaceDirectory" = "Avaa paikallaan";
 
 /* loco:6049df4d5c2c3a04bc397a23 */
 "photoAccessDeniedDescription" = "Pääsy kuviisi on poistettu käytöstä: voit muuttaa tämän Asetuksissa";
@@ -2117,9 +2123,6 @@
 /* loco:66f5115224f82ae9020b3162 */
 "syncWifiSettingsTitle" = "Synkronoi offline-tiedostot";
 
-/* loco:614c87dd3af1ff4501490ec5 */
-"tempDirectory" = "Väliaikaistiedostot";
-
 /* loco:60a65b76f8bf9002e9594852 */
 "themeSettingsDarkLabel" = "Tumma";
 
@@ -2134,9 +2137,6 @@
 
 /* loco:60a65b3df229b924e419f452 */
 "themeSettingsTitle" = "Teema";
-
-/* loco:614c8841083c4c6d41454f55 */
-"totalStorageUsedTitle" = "Käytetty tallennustila yhteensä";
 
 /* loco:6049df4d5c2c3a04bc397a76 */
 "trashActionDelete" = "Poista pysyvästi";

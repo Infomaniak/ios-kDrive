@@ -155,7 +155,7 @@ public enum CacheItem {
             return url.lastPathComponent
 
         case .storageImageCache:
-            return KDriveResourcesStrings.Localizable.imageCache
+            return KDriveResourcesStrings.Localizable.manageStorageImageCache
         }
     }
 
@@ -166,21 +166,21 @@ public enum CacheItem {
             case "drives":
                 return KDriveResourcesStrings.Localizable.drivesDirectory
             case "Documents":
-                return KDriveResourcesStrings.Localizable.documentsDirectory
+                return KDriveResourcesStrings.Localizable.manageStorageDocumentsDirectory
             case "import":
-                return KDriveResourcesStrings.Localizable.importDirectory
+                return KDriveResourcesStrings.Localizable.manageStorageImportDirectory
             case "tmp":
-                return KDriveResourcesStrings.Localizable.tempDirectory
+                return KDriveResourcesStrings.Localizable.manageStorageTempDirectory
             case "Caches":
-                return KDriveResourcesStrings.Localizable.cacheDirectory
+                return KDriveResourcesStrings.Localizable.manageStorageCacheDirectory
             case ".shared":
-                return KDriveResourcesStrings.Localizable.openInPlaceDirectory
+                return KDriveResourcesStrings.Localizable.manageStorageOpenInPlaceDirectory
             default:
                 return name.capitalized
             }
 
         case .storageImageCache:
-            return KDriveResourcesStrings.Localizable.imageCache
+            return KDriveResourcesStrings.Localizable.manageStorageImageCache
         }
     }
 

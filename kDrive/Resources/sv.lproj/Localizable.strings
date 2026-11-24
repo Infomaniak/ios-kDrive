@@ -527,12 +527,6 @@
 /* loco:6101109cb5c21e394d127402 */
 "buttonYes" = "Ja";
 
-/* loco:614c8806c00b6044a92a7775 */
-"cacheDirectory" = "Cache";
-
-/* loco:614c88a2f93d4c57b6630c25 */
-"cachedFileTitle" = "Cachade filer";
-
 /* loco:6054b7d53726d8506b6c9a42 */
 "cameraAccessDeniedDescription" = "Åtkomsten till din kamera är inaktiverad: du kan ändra detta i Inställningarna.";
 
@@ -700,12 +694,6 @@
 
 /* loco:68c9617bf6bead14aa05ca53 */
 "deleteUploadedPhotosTitle" = "Du har %d foton att rensa";
-
-/* loco:614c887ba0ad81657c1e75a2 */
-"directoriesTitle" = "Data";
-
-/* loco:614c86f5dd7fc56d0c5fcaa4 */
-"documentsDirectory" = "Övriga dokument";
 
 /* loco:608fce0b43535250c00ba5c2 */
 "driveBlockedDescription" = "Produkten har gått ut sedan %@. Förnya den för att hantera den och komma åt dess data.";
@@ -1295,12 +1283,6 @@
 /* loco:6049df4d5c2c3a04bc3979f9 */
 "homeTitle" = "Välkommen";
 
-/* loco:6889c36b7cef77ada70ae2d3 */
-"imageCache" = "Bildcache";
-
-/* loco:6889c331e5ba3eb6640d7e22 */
-"importDirectory" = "Importer";
-
 /* loco:6049df4d5c2c3a04bc3979fb */
 "inputExpirationDate" = "Utgångsdatum";
 
@@ -1355,20 +1337,47 @@
 /* loco:604b1ff2a5300e5b7d75fb82 */
 "manageDropboxTitle" = "Hantera depårutan %@";
 
+/* loco:614c8806c00b6044a92a7775 */
+"manageStorageCacheDirectory" = "Cache";
+
+/* loco:614c88a2f93d4c57b6630c25 */
+"manageStorageCachedFileTitle" = "Cachade filer";
+
+/* loco:614c887ba0ad81657c1e75a2 */
+"manageStorageDirectoriesTitle" = "Data";
+
+/* loco:614c86f5dd7fc56d0c5fcaa4 */
+"manageStorageDocumentsDirectory" = "Övriga dokument";
+
+/* loco:6889c36b7cef77ada70ae2d3 */
+"manageStorageImageCache" = "Bildcache";
+
+/* loco:6889c331e5ba3eb6640d7e22 */
+"manageStorageImportDirectory" = "Importer";
+
+/* loco:614c8925d281f46671687393 */
+"manageStorageModalClearCacheDirectoryDescription" = "Vill du rensa innehållet i \"%@\"?";
+
+/* loco:614c8965f987554eab2cc096 */
+"manageStorageModalClearCacheFileDescription" = "Vill du ta bort filen \"%@\" från den lokala cachen? Den kommer inte att tas bort från din kDrive.";
+
+/* loco:614c88ddf987554eab2cc092 */
+"manageStorageModalClearCacheTitle" = "Rensa cache";
+
+/* loco:6660083917d29585d5010582 */
+"manageStorageOpenInPlaceDirectory" = "Öppna på plats";
+
+/* loco:614c87dd3af1ff4501490ec5 */
+"manageStorageTempDirectory" = "Tillfälliga filer";
+
 /* loco:614c861005fa88548e40ee83 */
 "manageStorageTitle" = "Hantera lokal lagring";
 
+/* loco:614c8841083c4c6d41454f55 */
+"manageStorageTotalStorageUsedTitle" = "Totalt använt lagringsutrymme";
+
 /* loco:6049df4d5c2c3a04bc3979fe */
 "menuTitle" = "Meny";
-
-/* loco:614c8925d281f46671687393 */
-"modalClearCacheDirectoryDescription" = "Vill du rensa innehållet i \"%@\"?";
-
-/* loco:614c8965f987554eab2cc096 */
-"modalClearCacheFileDescription" = "Vill du ta bort filen \"%@\" från den lokala cachen? Den kommer inte att tas bort från din kDrive.";
-
-/* loco:614c88ddf987554eab2cc092 */
-"modalClearCacheTitle" = "Rensa cache";
 
 /* loco:6049df4d5c2c3a04bc3979ff */
 "modalCommentAddTitle" = "Redigera en kommentar";
@@ -1600,9 +1609,6 @@
 
 /* loco:6a2a78ccb80096108403dcd2 */
 "openAppToContinue" = "Öppna appen för att fortsätta";
-
-/* loco:6660083917d29585d5010582 */
-"openInPlaceDirectory" = "Öppna på plats";
 
 /* loco:6049df4d5c2c3a04bc397a23 */
 "photoAccessDeniedDescription" = "Åtkomst till dina foton är inaktiverad: du kan ändra detta i Inställningar";
@@ -2117,9 +2123,6 @@
 /* loco:66f5115224f82ae9020b3162 */
 "syncWifiSettingsTitle" = "Synkronisera filer offline";
 
-/* loco:614c87dd3af1ff4501490ec5 */
-"tempDirectory" = "Tillfälliga filer";
-
 /* loco:60a65b76f8bf9002e9594852 */
 "themeSettingsDarkLabel" = "Mörkt";
 
@@ -2134,9 +2137,6 @@
 
 /* loco:60a65b3df229b924e419f452 */
 "themeSettingsTitle" = "Tema";
-
-/* loco:614c8841083c4c6d41454f55 */
-"totalStorageUsedTitle" = "Totalt använt lagringsutrymme";
 
 /* loco:6049df4d5c2c3a04bc397a76 */
 "trashActionDelete" = "Ta bort permanent";
