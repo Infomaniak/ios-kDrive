@@ -48,18 +48,33 @@ actor CrossDriveImportTracker: CrossDriveImportTrackable {
         }
     }
 
-    private enum ImportOutcome {
+    private struct DeliverableOutcome: Codable, Sendable {
+        let fileName: String
+        let outcome: ImportOutcome
+        let date: Date
+    }
+
+    private enum ImportOutcome: String, Codable {
         case success
         case failure
     }
 
     private static let pendingImportsKey = "crossDrivePendingImports"
+    private static let deliverableOutcomesKey = "crossDriveDeliverableOutcomes"
+    private static let reconcileRetryDelay: Duration = .seconds(30)
+    private static let maxReconcileRetries = 3
+    private static let deliverableExpirationInterval: TimeInterval = 24 * 60 * 60
 
     private var pendingImports: [ImportKey: PendingImport]
+    private var deliverableOutcomes: [DeliverableOutcome]
+    private var reconcileRetryTask: Task<Void, Never>?
+    private var reconcileRetryCount = 0
     private var notificationToken: (any NSObjectProtocol)?
+    private var didBecomeActiveToken: (any NSObjectProtocol)?
 
     init() {
         pendingImports = Self.loadStoredPendingImports()
+        deliverableOutcomes = Self.loadStoredDeliverableOutcomes()
         notificationToken = NotificationCenter.default.addObserver(
             forName: .externalImportDidUpdate,
             object: nil,
@@ -69,11 +84,24 @@ actor CrossDriveImportTracker: CrossDriveImportTrackable {
                 await self?.handleExternalImportUpdate(notification)
             }
         }
+        didBecomeActiveToken = NotificationCenter.default.addObserver(
+            forName: UIApplication.didBecomeActiveNotification,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            Task {
+                await self?.flushDeliverableOutcomes()
+            }
+        }
     }
 
     deinit {
+        reconcileRetryTask?.cancel()
         if let notificationToken {
             NotificationCenter.default.removeObserver(notificationToken)
+        }
+        if let didBecomeActiveToken {
+            NotificationCenter.default.removeObserver(didBecomeActiveToken)
         }
     }
 
@@ -85,6 +113,7 @@ actor CrossDriveImportTracker: CrossDriveImportTrackable {
                                           userId: userId)
         pendingImports[pendingImport.key] = pendingImport
         persistPendingImports()
+        reconcileRetryCount = 0
 
         Task {
             await reconcilePendingImports()
@@ -92,8 +121,36 @@ actor CrossDriveImportTracker: CrossDriveImportTrackable {
     }
 
     func reconcilePendingImports() async {
-        guard !pendingImports.isEmpty else { return }
+        reconcileRetryTask?.cancel()
+        reconcileRetryTask = nil
+
+        guard !pendingImports.isEmpty else {
+            reconcileRetryCount = 0
+            return
+        }
+
         await reconcilePendingImportsByDrive()
+        scheduleReconcileRetryIfNeeded()
+    }
+
+    private func scheduleReconcileRetryIfNeeded() {
+        guard !pendingImports.isEmpty else {
+            reconcileRetryCount = 0
+            return
+        }
+        guard reconcileRetryCount < Self.maxReconcileRetries else { return }
+
+        reconcileRetryCount += 1
+        reconcileRetryTask = Task { [weak self] in
+            try? await Task.sleep(for: Self.reconcileRetryDelay)
+            guard let self, !Task.isCancelled else { return }
+            await self.runScheduledReconcile()
+        }
+    }
+
+    private func runScheduledReconcile() async {
+        reconcileRetryTask = nil
+        await reconcilePendingImports()
     }
 
     private func handleExternalImportUpdate(_ notification: Notification) async {
@@ -105,10 +162,7 @@ actor CrossDriveImportTracker: CrossDriveImportTrackable {
         }
 
         let key = ImportKey(importId: importId, userId: userId)
-        guard pendingImports[key] != nil else { return }
-        guard let outcome = outcome(for: action) else { return }
-        let isApplicationActive = await MainActor.run { UIApplication.shared.applicationState == .active }
-        guard isApplicationActive else { return }
+        guard pendingImports[key] != nil, let outcome = outcome(for: action) else { return }
 
         await finalizePendingImport(key: key, outcome: outcome)
     }
@@ -193,20 +247,47 @@ actor CrossDriveImportTracker: CrossDriveImportTrackable {
         }
         persistPendingImports()
 
-        switch outcome {
-        case .success:
-            await UIConstants.showSnackBar(
-                message: KDriveResourcesStrings.Localizable.copyToDriveDoneSnackbar(pendingImport.fileName)
-            )
-        case .failure:
-            await UIConstants.showSnackBar(
-                message: KDriveResourcesStrings.Localizable.copyToDriveErrorSnackbar(pendingImport.fileName)
-            )
+        deliverableOutcomes.append(DeliverableOutcome(fileName: pendingImport.fileName,
+                                                      outcome: outcome,
+                                                      date: Date()))
+        persistDeliverableOutcomes()
+        await flushDeliverableOutcomes()
+    }
+
+    private func flushDeliverableOutcomes() async {
+        let expirationDate = Date().addingTimeInterval(-Self.deliverableExpirationInterval)
+        if deliverableOutcomes.contains(where: { $0.date < expirationDate }) {
+            deliverableOutcomes.removeAll { $0.date < expirationDate }
+            persistDeliverableOutcomes()
+        }
+
+        guard !deliverableOutcomes.isEmpty else { return }
+        let isApplicationActive = await MainActor.run { UIApplication.shared.applicationState == .active }
+        guard isApplicationActive else { return }
+
+        while !deliverableOutcomes.isEmpty {
+            let deliverableOutcome = deliverableOutcomes.removeFirst()
+            persistDeliverableOutcomes()
+
+            switch deliverableOutcome.outcome {
+            case .success:
+                await UIConstants.showSnackBar(
+                    message: KDriveResourcesStrings.Localizable.copyToDriveDoneSnackbar(deliverableOutcome.fileName)
+                )
+            case .failure:
+                await UIConstants.showSnackBar(
+                    message: KDriveResourcesStrings.Localizable.copyToDriveErrorSnackbar(deliverableOutcome.fileName)
+                )
+            }
         }
     }
 
     private func persistPendingImports() {
         UserDefaults.standard.set(try? JSONEncoder().encode(Array(pendingImports.values)), forKey: Self.pendingImportsKey)
+    }
+
+    private func persistDeliverableOutcomes() {
+        UserDefaults.standard.set(try? JSONEncoder().encode(deliverableOutcomes), forKey: Self.deliverableOutcomesKey)
     }
 
     private static func loadStoredPendingImports() -> [ImportKey: PendingImport] {
@@ -215,6 +296,11 @@ actor CrossDriveImportTracker: CrossDriveImportTrackable {
             return [:]
         }
         return storedImports.reduce(into: [ImportKey: PendingImport]()) { $0[$1.key] = $1 }
+    }
+
+    private static func loadStoredDeliverableOutcomes() -> [DeliverableOutcome] {
+        guard let data = UserDefaults.standard.data(forKey: deliverableOutcomesKey) else { return [] }
+        return (try? JSONDecoder().decode([DeliverableOutcome].self, from: data)) ?? []
     }
 }
 #endif
