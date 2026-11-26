@@ -536,7 +536,7 @@ extension FileActionsFloatingPanelViewController {
                         destinationFolder: selectedDirectory.proxify()
                     )
                     @InjectService var crossDriveImportTracker: CrossDriveImportTrackable
-                    crossDriveImportTracker.register(
+                    await crossDriveImportTracker.register(
                         importId: externalImport.id,
                         fileName: sourceName,
                         destinationDriveId: selectedDriveFileManager.drive.id,

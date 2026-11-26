@@ -23,18 +23,29 @@ import kDriveResources
 import UIKit
 
 #if !ISEXTENSION
-protocol CrossDriveImportTrackable: AnyObject {
-    func register(importId: Int, fileName: String, destinationDriveId: Int, destinationFolderId: Int, userId: Int)
-    func reconcilePendingImports()
+/// Tracks cross-drive file copies and reports their outcome to the user,
+/// surviving app restarts until every import reaches a terminal state.
+protocol CrossDriveImportTrackable: Sendable {
+    func register(importId: Int, fileName: String, destinationDriveId: Int, destinationFolderId: Int, userId: Int) async
+    func reconcilePendingImports() async
 }
 
-final class CrossDriveImportTracker: CrossDriveImportTrackable {
-    private struct PendingImport: Codable, Equatable {
+actor CrossDriveImportTracker: CrossDriveImportTrackable {
+    private struct ImportKey: Hashable, Sendable {
+        let importId: Int
+        let userId: Int
+    }
+
+    private struct PendingImport: Codable, Equatable, Sendable {
         let importId: Int
         let fileName: String
         let destinationDriveId: Int
         let destinationFolderId: Int
         let userId: Int
+
+        var key: ImportKey {
+            ImportKey(importId: importId, userId: userId)
+        }
     }
 
     private enum ImportOutcome {
@@ -44,62 +55,65 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
 
     private static let pendingImportsKey = "crossDrivePendingImports"
 
-    private var pendingImports: [PendingImport] {
-        get {
-            guard let data = UserDefaults.standard.data(forKey: Self.pendingImportsKey) else { return [] }
-            return (try? JSONDecoder().decode([PendingImport].self, from: data)) ?? []
-        }
-        set {
-            UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: Self.pendingImportsKey)
-        }
-    }
+    private var pendingImports: [ImportKey: PendingImport]
+    private var notificationToken: (any NSObjectProtocol)?
 
     init() {
-        NotificationCenter.default.addObserver(
+        pendingImports = Self.loadStoredPendingImports()
+        notificationToken = NotificationCenter.default.addObserver(
             forName: .externalImportDidUpdate,
             object: nil,
-            queue: .main
+            queue: nil
         ) { [weak self] notification in
-            Task { @MainActor in
-                self?.handleExternalImportUpdate(notification)
+            Task {
+                await self?.handleExternalImportUpdate(notification)
             }
         }
     }
 
-    func register(importId: Int, fileName: String, destinationDriveId: Int, destinationFolderId: Int, userId: Int) {
+    deinit {
+        if let notificationToken {
+            NotificationCenter.default.removeObserver(notificationToken)
+        }
+    }
+
+    func register(importId: Int, fileName: String, destinationDriveId: Int, destinationFolderId: Int, userId: Int) async {
         let pendingImport = PendingImport(importId: importId,
                                           fileName: fileName,
                                           destinationDriveId: destinationDriveId,
                                           destinationFolderId: destinationFolderId,
                                           userId: userId)
-        pendingImports.append(pendingImport)
-        reconcilePendingImports()
-    }
+        pendingImports[pendingImport.key] = pendingImport
+        persistPendingImports()
 
-    func reconcilePendingImports() {
-        guard !pendingImports.isEmpty else { return }
         Task {
-            await reconcilePendingImportsByDrive()
+            await reconcilePendingImports()
         }
     }
 
-    @MainActor private func handleExternalImportUpdate(_ notification: Notification) {
+    func reconcilePendingImports() async {
+        guard !pendingImports.isEmpty else { return }
+        await reconcilePendingImportsByDrive()
+    }
+
+    private func handleExternalImportUpdate(_ notification: Notification) async {
         guard let importId = notification.userInfo?["importId"] as? Int,
               let userId = notification.userInfo?["userId"] as? Int,
               let action = notification.userInfo?["action"] as? ExternalImportAction,
-              action.isTerminal,
-              let pendingIndex = pendingImports
-              .firstIndex(where: { $0.importId == importId && $0.userId == userId }) else {
+              action.isTerminal else {
             return
         }
 
-        guard UIApplication.shared.applicationState == .active else { return }
-
+        let key = ImportKey(importId: importId, userId: userId)
+        guard pendingImports[key] != nil else { return }
         guard let outcome = outcome(for: action) else { return }
-        finalizePendingImport(pendingImport: pendingImports[pendingIndex], outcome: outcome)
+        let isApplicationActive = await MainActor.run { UIApplication.shared.applicationState == .active }
+        guard isApplicationActive else { return }
+
+        await finalizePendingImport(key: key, outcome: outcome)
     }
 
-    @MainActor private func outcome(for action: ExternalImportAction) -> ImportOutcome? {
+    private func outcome(for action: ExternalImportAction) -> ImportOutcome? {
         switch action {
         case .importFinish, .importFinished:
             return .success
@@ -110,9 +124,9 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
         }
     }
 
-    @MainActor private func reconcilePendingImportsByDrive() async {
+    private func reconcilePendingImportsByDrive() async {
         @InjectService var accountManager: AccountManageable
-        let pendingGroups = Dictionary(grouping: pendingImports) { pendingImport in
+        let pendingGroups = Dictionary(grouping: pendingImports.values) { pendingImport in
             "\(pendingImport.userId)-\(pendingImport.destinationDriveId)"
         }
 
@@ -121,19 +135,19 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
         }
     }
 
-    @MainActor private func reconcile(pendingGroup: [PendingImport], accountManager: AccountManageable) async {
+    private func reconcile(pendingGroup: [PendingImport], accountManager: AccountManageable) async {
         guard let firstPendingImport = pendingGroup.first,
               let driveFileManager = accountManager.getDriveFileManager(
                   for: firstPendingImport.destinationDriveId,
                   userId: firstPendingImport.userId
               ) else { return }
 
-        var unlistedPendingImports = pendingGroup
-        var listedImportIds = Set<Int>()
+        let userId = firstPendingImport.userId
+        var unlistedImportIds = Set(pendingGroup.map(\.importId))
         var scannedEveryPage = false
         var page = 1
 
-        while !unlistedPendingImports.isEmpty {
+        while !unlistedImportIds.isEmpty {
             guard let response = try? await driveFileManager.apiFetcher.externalImports(
                 drive: driveFileManager.drive,
                 page: page
@@ -142,21 +156,21 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
             }
 
             for serverImport in response.validApiResponse.data {
-                guard let status = serverImport.status,
-                      let pendingIndex = unlistedPendingImports
-                      .firstIndex(where: { $0.importId == serverImport.id }) else { continue }
-                listedImportIds.insert(serverImport.id)
+                guard let status = serverImport.status else { continue }
+                unlistedImportIds.remove(serverImport.id)
+
+                let key = ImportKey(importId: serverImport.id, userId: userId)
+                guard pendingImports[key] != nil else { continue }
 
                 switch status {
                 case .done:
-                    finalizePendingImport(pendingImport: unlistedPendingImports[pendingIndex], outcome: .success)
+                    await finalizePendingImport(key: key, outcome: .success)
                 case .failed, .canceled:
-                    finalizePendingImport(pendingImport: unlistedPendingImports[pendingIndex], outcome: .failure)
+                    await finalizePendingImport(key: key, outcome: .failure)
                 default:
                     break
                 }
             }
-            unlistedPendingImports.removeAll { listedImportIds.contains($0.importId) }
 
             guard page < response.validApiResponse.pages ?? page else {
                 scannedEveryPage = true
@@ -166,23 +180,41 @@ final class CrossDriveImportTracker: CrossDriveImportTrackable {
         }
 
         if scannedEveryPage {
-            pendingImports.removeAll { unlistedPendingImports.contains($0) }
+            for importId in unlistedImportIds {
+                pendingImports.removeValue(forKey: ImportKey(importId: importId, userId: userId))
+            }
+            persistPendingImports()
         }
     }
 
-    @MainActor private func finalizePendingImport(pendingImport: PendingImport, outcome: ImportOutcome) {
-        guard let index = pendingImports
-            .firstIndex(where: { $0.importId == pendingImport.importId && $0.userId == pendingImport.userId }) else {
+    private func finalizePendingImport(key: ImportKey, outcome: ImportOutcome) async {
+        guard let pendingImport = pendingImports.removeValue(forKey: key) else {
             return
         }
-        pendingImports.remove(at: index)
+        persistPendingImports()
 
         switch outcome {
         case .success:
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveDoneSnackbar(pendingImport.fileName))
+            await UIConstants.showSnackBar(
+                message: KDriveResourcesStrings.Localizable.copyToDriveDoneSnackbar(pendingImport.fileName)
+            )
         case .failure:
-            UIConstants.showSnackBar(message: KDriveResourcesStrings.Localizable.copyToDriveErrorSnackbar(pendingImport.fileName))
+            await UIConstants.showSnackBar(
+                message: KDriveResourcesStrings.Localizable.copyToDriveErrorSnackbar(pendingImport.fileName)
+            )
         }
+    }
+
+    private func persistPendingImports() {
+        UserDefaults.standard.set(try? JSONEncoder().encode(Array(pendingImports.values)), forKey: Self.pendingImportsKey)
+    }
+
+    private static func loadStoredPendingImports() -> [ImportKey: PendingImport] {
+        guard let data = UserDefaults.standard.data(forKey: pendingImportsKey),
+              let storedImports = try? JSONDecoder().decode([PendingImport].self, from: data) else {
+            return [:]
+        }
+        return storedImports.reduce(into: [ImportKey: PendingImport]()) { $0[$1.key] = $1 }
     }
 }
 #endif

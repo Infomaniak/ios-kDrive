@@ -64,7 +64,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
         prepareWindowScene(windowScene)
 
         accountManager.delegate = self
-        crossDriveImportTracker.reconcilePendingImports()
+        Task { await crossDriveImportTracker.reconcilePendingImports() }
 
         NotificationCenter.default.addObserver(self, selector: #selector(reloadDrive), name: .reloadDrive, object: nil)
 
@@ -130,7 +130,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate, AccountManagerDel
 
     func sceneWillEnterForeground(_ scene: UIScene) {
         lockHelper.startObservation()
-        crossDriveImportTracker.reconcilePendingImports()
+        Task { await crossDriveImportTracker.reconcilePendingImports() }
         let newState = RootViewControllerState.getCurrentState()
         Log.sceneDelegate("sceneWillEnterForeground \(scene) \(String(describing: window))")
         if window?.rootViewController == nil {
