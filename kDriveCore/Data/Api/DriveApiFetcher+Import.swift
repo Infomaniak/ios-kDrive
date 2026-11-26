@@ -82,7 +82,8 @@ public extension DriveApiFetcher {
                                             remotePath: String,
                                             destinationFolder: AbstractFile) -> [String: Encodable & Sendable] {
         let privatePrefix = "/Private"
-        let sourcePath = remotePath.hasPrefix(privatePrefix) ? String(remotePath.dropFirst(privatePrefix.count)) : remotePath
+        let isPrivateComponent = remotePath == privatePrefix || remotePath.hasPrefix(privatePrefix + "/")
+        let sourcePath = isPrivateComponent ? String(remotePath.dropFirst(privatePrefix.count)) : remotePath
 
         return [
             "application_drive_id": "\(file.driveId)",
