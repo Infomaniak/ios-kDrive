@@ -181,7 +181,9 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
 
             do {
                 let proxyFile = ProxyFile(driveId: driveFileManager.driveId, id: fileId)
-                let response = try await fetchDroppingCursorIfNeeded(in: proxyFile, cursor: cursor)
+                let response = try await driveFileManager.apiFetcher.files(in: proxyFile,
+                                                                           advancedListingCursor: cursor,
+                                                                           sortType: .nameAZ).validApiResponse
 
                 let handledActions = FileProviderActionsReducer().reduce(
                     actions: response.data.actions,
@@ -257,12 +259,28 @@ final class DirectoryEnumerator: NSObject, NSFileProviderEnumerator {
                     upTo: nextAnchor,
                     moreComing: response.hasMore
                 )
+            } catch let error as DriveError where error == DriveError.invalidCursorError {
+                try resetCursor()
+                observer.finishEnumeratingWithError(NSFileProviderError(.syncAnchorExpired))
             } catch let error as NSFileProviderError {
                 observer.finishEnumeratingWithError(error)
             } catch {
                 Log.fileProvider("DirectoryEnumerator - Error in enumerateChanges \(error)", level: .error)
                 observer.finishEnumeratingWithError(NSFileProviderError(.serverUnreachable))
             }
+        }
+    }
+
+    private func resetCursor() throws {
+        try driveFileManager.database.writeTransaction { writableRealm in
+            let parentDirectory = try self.driveFileManager.getCachedFile(
+                itemIdentifier: self.containerItemIdentifier,
+                freeze: false,
+                using: writableRealm
+            )
+
+            parentDirectory.lastCursor = nil
+            parentDirectory.fullyDownloaded = false
         }
     }
 
