@@ -384,6 +384,23 @@ extension UploadService: UploadServiceable {
         }
     }
 
+    public func cancelUploadsForMissingDestination(parentId: Int, userId: Int, driveId: Int) {
+        cancelAllOperations(withParent: parentId, userId: userId, driveId: driveId)
+
+        @InjectService var photoLibraryUploader: PhotoLibraryUploadable
+        guard photoLibraryUploader.isSyncEnabled,
+              let settings = photoLibraryUploader.frozenSettings,
+              settings.userId == userId,
+              settings.driveId == driveId,
+              settings.parentDirectoryId == parentId else {
+            return
+        }
+
+        @InjectService var photoLibrarySync: PhotoLibrarySyncable
+        photoLibrarySync.disableSync()
+        notificationHelper.sendPhotoSyncErrorNotification()
+    }
+
     public func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {
         Log.uploadQueue("cancelAllOperations parentId:\(parentId)")
         guard appContextService.context != .shareExtension else {

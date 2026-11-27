@@ -51,7 +51,7 @@ private struct UploadFolderResolver: UploadFolderResolving {
     }
 
     func cancelUploads(in folder: ProxyFile) {
-        uploadService.cancelAllOperations(withParent: folder.id, userId: userId, driveId: folder.driveId)
+        uploadService.cancelUploadsForMissingDestination(parentId: folder.id, userId: userId, driveId: folder.driveId)
     }
 }
 

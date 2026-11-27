@@ -49,6 +49,8 @@ public protocol UploadServiceable {
 
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int)
 
+    func cancelUploadsForMissingDestination(parentId: Int, userId: Int, driveId: Int)
+
     func cancelAnyPhotoSync(includingBlockedUploadsForUserId userId: Int?) async throws
 
     func blockUploadsForAuthentication(userId: Int) throws

@@ -267,15 +267,9 @@ extension UploadOperation {
                 Task {
                     await self.cleanUploadFileSession()
                 }
-                self.uploadService.cancelAllOperations(withParent: file.parentDirectoryId,
-                                                       userId: file.userId,
-                                                       driveId: file.driveId)
-
-                if self.photoLibraryUploader.isSyncEnabled,
-                   self.photoLibraryUploader.frozenSettings?.parentDirectoryId == file.parentDirectoryId {
-                    self.photoLibrarySync.disableSync()
-                    self.notificationHelper.sendPhotoSyncErrorNotification()
-                }
+                self.uploadService.cancelUploadsForMissingDestination(parentId: file.parentDirectoryId,
+                                                                      userId: file.userId,
+                                                                      driveId: file.driveId)
 
             case .networkError:
                 // simple retry
