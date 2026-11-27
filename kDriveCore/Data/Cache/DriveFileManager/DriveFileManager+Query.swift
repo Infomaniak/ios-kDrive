@@ -61,6 +61,13 @@ public extension DriveFileManager {
         return freeze ? file.freeze() : file
     }
 
+    func getCachedFile(uid: String, freeze: Bool = true) -> File? {
+        guard let file = database.fetchObject(ofType: File.self, forPrimaryKey: uid) else {
+            return nil
+        }
+        return freeze ? file.freeze() : file
+    }
+
     func getCachedFile(id: Int, freeze: Bool = true, using realm: Realm) -> File? {
         let uid = File.uid(driveId: drive.id, fileId: id)
         guard let file = realm.object(ofType: File.self, forPrimaryKey: uid), !file.isInvalidated else {

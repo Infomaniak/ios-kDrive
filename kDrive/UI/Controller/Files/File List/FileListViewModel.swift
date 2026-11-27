@@ -382,6 +382,8 @@ class FileListViewModel: SelectDelegate {
 
     func didSelectSwipeAction(_ action: SwipeCellAction, at indexPath: IndexPath) {
         if let file = getFile(at: indexPath) {
+            let fileDriveFileManager = FileActionsHelper.manager(for: file, in: driveFileManager)
+
             switch action {
             case .share:
                 matomo.track(eventWithCategory: .fileListFileAction, name: "swipeShareAndRights")
@@ -389,20 +391,20 @@ class FileListViewModel: SelectDelegate {
                     UIConstants.showSnackBarIfNeeded(error: DriveError.fileNotFound)
                     return
                 }
-                let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: driveFileManager, liveFile: liveFile)
+                let shareVC = ShareAndRightsViewController.instantiate(driveFileManager: fileDriveFileManager, liveFile: liveFile)
                 onPresentViewController?(.push, shareVC, true)
             case .delete:
                 matomo.track(eventWithCategory: .fileListFileAction, name: "swipePutInTrash")
                 // Keep the filename before it is invalidated
                 Task { [proxyFile = file.proxify(), proxyParent = currentDirectory.proxify(), filename = file.name] in
                     do {
-                        let cancelResponse = try await driveFileManager.delete(file: proxyFile)
+                        let cancelResponse = try await fileDriveFileManager.delete(file: proxyFile)
                         UIConstants.showCancelableSnackBar(
                             message: KDriveResourcesStrings.Localizable.snackbarMoveTrashConfirmation(filename),
                             cancelSuccessMessage: KDriveResourcesStrings.Localizable.allTrashActionCancelled,
                             cancelableResponse: cancelResponse,
                             parentFile: proxyParent,
-                            driveFileManager: driveFileManager
+                            driveFileManager: fileDriveFileManager
                         )
                     } catch {
                         UIConstants.showSnackBarIfNeeded(error: error)
