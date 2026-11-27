@@ -46,17 +46,30 @@ struct UTUploadQueueFolders {
         #expect(fixture.resolver.requests.count == 1)
     }
 
-    @Test func failedFolderFetchDoesNotPopPendingUploads() async throws {
+    @Test func deletedFolderCancelsItsPendingUploads() async throws {
         let fixture = try Fixture()
         defer { fixture.resolver.finish() }
         try await waitUntil { fixture.resolver.requests.count == 1 }
         fixture.resolver.finish(error: DriveError.objectNotFound)
+        try await waitUntil { fixture.resolver.cancelledFolders.count == 1 }
+
+        #expect(fixture.resolver.cancelledFolders.first?.id == 42)
+        #expect(fixture.resolver.cancelledFolders.first?.driveId == 7)
+        #expect(fixture.rowCount == 0)
+    }
+
+    @Test func failedFolderFetchDoesNotPopOrCancelPendingUploads() async throws {
+        let fixture = try Fixture()
+        defer { fixture.resolver.finish() }
+        try await waitUntil { fixture.resolver.requests.count == 1 }
+        fixture.resolver.finish(error: DriveError.networkError)
         try fixture.realm.write { fixture.upload.name = "updated.jpg" }
         await fixture.realmNotification()
 
         #expect(fixture.navigation.topViewController === fixture.controller)
         #expect(fixture.rowCount == 0)
         #expect(fixture.resolver.requests.count == 1)
+        #expect(fixture.resolver.cancelledFolders.isEmpty)
     }
 
     @Test func completingUploadsDuringFetchDoesNotRestoreStaleRowsOrPopAnotherScreen() async throws {
@@ -122,6 +135,7 @@ private final class Fixture {
 @MainActor
 private final class ControlledFolderResolver: UploadFolderResolving {
     private(set) var requests: [ProxyFile] = []
+    private(set) var cancelledFolders: [ProxyFile] = []
     private var continuation: CheckedContinuation<Void, any Error>?
     private var folder: File?
 
@@ -130,6 +144,10 @@ private final class ControlledFolderResolver: UploadFolderResolving {
     func loadFolder(_ file: ProxyFile) async throws {
         requests.append(file)
         try await withCheckedThrowingContinuation { continuation = $0 }
+    }
+
+    func cancelUploads(in folder: ProxyFile) {
+        cancelledFolders.append(folder)
     }
 
     func finish(error: (any Error)? = nil) {

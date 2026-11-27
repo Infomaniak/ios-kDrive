@@ -175,22 +175,17 @@ public struct FreeSpaceService {
             // Get uploading in progress tracked in DB
             let uploadingFiles = uploadDataSource.getAllUploadingFilesFrozen()
 
-            // Match files on SSD against DB, delete if not matched.
-            let cachedFilesNames = cachedFiles.map { $0.lastPathComponent }
-            let filesNamesToClean = cachedFilesNames.filter { cachedFileName in
-                let cachedFileIsUploading = uploadingFiles.contains { uploadFile in
-                    guard let uploadFilePath = uploadFile.url else {
-                        return false
-                    }
-                    return uploadFilePath.hasSuffix(cachedFileName)
-                }
+            let itemsToClean = cachedFiles.filter { candidate in
+                let candidateComponents = candidate.standardizedFileURL.pathComponents
 
-                return !cachedFileIsUploading
+                return !uploadingFiles.contains { uploadFile in
+                    guard let source = uploadFile.pathURL else { return false }
+                    return source.standardizedFileURL.pathComponents.starts(with: candidateComponents)
+                }
             }
 
-            Log.uploadOperation("cleanning \(filesNamesToClean.count) files in \(importDirectory) folder", level: .info)
-            for fileToClean in filesNamesToClean {
-                let fileToCleanURL = importDirectory.appendingPathComponent(fileToClean)
+            Log.uploadOperation("cleaning \(itemsToClean.count) items in \(importDirectory) folder", level: .info)
+            for fileToCleanURL in itemsToClean {
                 try? fileManager.removeItem(at: fileToCleanURL)
             }
         } catch {

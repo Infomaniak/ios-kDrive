@@ -69,6 +69,7 @@ private final class UploadReturnServiceSpy: UploadServiceable {
     func retry(_ uploadFileId: String) {}
     func retryAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {}
     func cancelAllOperations(withParent parentId: Int, userId: Int, driveId: Int) {}
+    func cancelUploadsForMissingDestination(parentId: Int, userId: Int, driveId: Int) {}
     func cancelAnyPhotoSync(includingBlockedUploadsForUserId userId: Int?) async throws {}
     func blockUploadsForAuthentication(userId: Int) throws {}
     func resumeUploadsAfterAuthentication(userId: Int) async {}

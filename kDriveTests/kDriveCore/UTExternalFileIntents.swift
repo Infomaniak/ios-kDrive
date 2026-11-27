@@ -125,6 +125,31 @@ extension ResolverTests {
             #expect(try resolvedFolder.resolveCache().file.isDirectory)
             #expect(fixture.uploads.getAllUploadingFilesFrozen().isEmpty)
         }
+
+        @available(iOS 18.4, *)
+        @Test func cleanupPreservesPendingUploadInSubdirectory() throws {
+            let fixture = try ExternalIntentFixture()
+            defer { fixture.tearDown() }
+
+            let importDirectory = fixture.paths.importDirectoryURL
+            let folder = importDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let source = folder.appendingPathComponent("photo.jpg")
+            try Data("test".utf8).write(to: source)
+
+            let upload = UploadFile()
+            upload.name = "photo.jpg"
+            upload.pathURL = source
+            _ = fixture.uploads.saveToRealm(upload, itemIdentifier: nil, addToQueue: false)
+
+            let pending = try #require(fixture.uploads.getAllUploadingFilesFrozen().first)
+            #expect(pending.pathURL?.path == source.path)
+
+            FreeSpaceService().cleanOrphanImportFolderFiles(in: importDirectory)
+
+            #expect(fixture.uploads.getAllUploadingFilesFrozen().count == 1)
+            #expect(FileManager.default.fileExists(atPath: source.path))
+        }
     }
 }
 

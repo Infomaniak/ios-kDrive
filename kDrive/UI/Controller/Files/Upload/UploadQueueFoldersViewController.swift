@@ -31,10 +31,12 @@ typealias FileDisplayed = CornerCellContainer<File>
 protocol UploadFolderResolving {
     func cachedFolder(_ file: ProxyFile) -> File?
     func loadFolder(_ file: ProxyFile) async throws
+    func cancelUploads(in folder: ProxyFile)
 }
 
 private struct UploadFolderResolver: UploadFolderResolving {
     let accountManager: AccountManageable
+    let uploadService: UploadServiceable
     let userId: Int
 
     func cachedFolder(_ file: ProxyFile) -> File? {
@@ -47,6 +49,10 @@ private struct UploadFolderResolver: UploadFolderResolving {
         }
         _ = try await manager.file(file)
     }
+
+    func cancelUploads(in folder: ProxyFile) {
+        uploadService.cancelUploadsForMissingDestination(parentId: folder.id, userId: userId, driveId: folder.driveId)
+    }
 }
 
 final class UploadQueueFoldersViewController: UITableViewController {
@@ -58,6 +64,7 @@ final class UploadQueueFoldersViewController: UITableViewController {
     @LazyInjectService private var accountManager: AccountManageable
     @LazyInjectService private var driveInfosManager: DriveInfosManager
     @LazyInjectService private var uploadDataSource: UploadServiceDataSourceable
+    @LazyInjectService private var uploadService: UploadServiceable
     @LazyInjectService private var matomo: MatomoUtils
 
     private var frozenUploadingFolders = [FileDisplayed]()
@@ -98,7 +105,8 @@ final class UploadQueueFoldersViewController: UITableViewController {
             .map(\.id)
         let uploadingFiles = uploadDataSource.getUploadingFiles(userId: userId, driveIds: driveIds)
             .distinct(by: [\.driveId, \.parentDirectoryId])
-        observeUploads(uploadingFiles, folderResolver: UploadFolderResolver(accountManager: accountManager, userId: userId))
+        let folderResolver = UploadFolderResolver(accountManager: accountManager, uploadService: uploadService, userId: userId)
+        observeUploads(uploadingFiles, folderResolver: folderResolver)
     }
 
     func observeUploads(_ uploadingFiles: Results<UploadFile>, folderResolver: UploadFolderResolving) {
@@ -166,6 +174,10 @@ final class UploadQueueFoldersViewController: UITableViewController {
                 guard !Task.isCancelled else { return }
                 let metadata = ["parentId": "\(identifier.parentId)", "driveId": "\(identifier.driveId)"]
                 Log.fileList("Unable to load upload destination: \(error)", metadata: metadata, level: .error)
+
+                if let driveError = error as? DriveError, driveError == .objectNotFound {
+                    folderResolver.cancelUploads(in: ProxyFile(driveId: identifier.driveId, id: identifier.parentId))
+                }
             }
         }
     }
