@@ -32,7 +32,7 @@ final class AuthenticatedMediaAsset: AVURLAsset, @unchecked Sendable {
 
         Logger.general.debug("Creating authenticated media asset for host \(url.host ?? "unknown", privacy: .public)")
 
-        let resourceLoaderDelegate = AuthenticatedMediaResourceLoader(apiFetcher: apiFetcher)
+        let resourceLoaderDelegate = AuthenticatedMediaResourceLoader(sourceURL: url, apiFetcher: apiFetcher)
         self.resourceLoaderDelegate = resourceLoaderDelegate
 
         super.init(url: wrappedURL, options: nil)
@@ -43,6 +43,7 @@ final class AuthenticatedMediaAsset: AVURLAsset, @unchecked Sendable {
 final class AuthenticatedMediaResourceLoader: NSObject, AVAssetResourceLoaderDelegate, @unchecked Sendable {
     enum ResourceLoaderError: Error {
         case invalidResponse
+        case unexpectedSource
     }
 
     fileprivate let queue = DispatchQueue(label: "com.infomaniak.kdrive.authenticated-media-loader")
@@ -51,11 +52,28 @@ final class AuthenticatedMediaResourceLoader: NSObject, AVAssetResourceLoaderDel
     private static let allowedHostSuffix = ".download.kdrive.infomaniakusercontent.com"
     private static let redirectStatusCodes = [301, 302, 303, 307, 308]
 
+    private let sourceURL: URL
     private let apiFetcher: DriveApiFetcher
     private var requests = [ObjectIdentifier: DataRequest]()
 
-    init(apiFetcher: DriveApiFetcher) {
+    init(sourceURL: URL, apiFetcher: DriveApiFetcher) {
+        self.sourceURL = sourceURL
         self.apiFetcher = apiFetcher
+    }
+
+    /// Only the URL this loader was created for may receive authenticated requests.
+    /// Any other URL, such as one referenced by a playlist, is rejected.
+    static func isSameResource(_ url: URL, as expectedURL: URL) -> Bool {
+        guard let lhs = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let rhs = URLComponents(url: expectedURL, resolvingAgainstBaseURL: false) else {
+            return false
+        }
+
+        return lhs.scheme?.lowercased() == rhs.scheme?.lowercased()
+            && lhs.host?.lowercased() == rhs.host?.lowercased()
+            && lhs.port == rhs.port
+            && lhs.percentEncodedPath == rhs.percentEncodedPath
+            && lhs.percentEncodedQuery == rhs.percentEncodedQuery
     }
 
     static func wrap(_ url: URL) -> URL? {
@@ -94,6 +112,12 @@ final class AuthenticatedMediaResourceLoader: NSObject, AVAssetResourceLoaderDel
         guard let wrappedURL = loadingRequest.request.url,
               let sourceURL = Self.unwrap(wrappedURL) else {
             Logger.general.error("Authenticated media resource loader rejected an invalid loading request")
+            return false
+        }
+
+        guard Self.isSameResource(sourceURL, as: self.sourceURL) else {
+            Logger.general.error("Authenticated media resource loader rejected an unexpected source URL")
+            loadingRequest.finishLoading(with: ResourceLoaderError.unexpectedSource)
             return false
         }
 
