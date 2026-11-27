@@ -53,4 +53,48 @@ struct UTAuthenticatedMediaResourceLoader {
 
         #expect(!AuthenticatedMediaResourceLoader.isAllowed(url))
     }
+
+    @Test("Accept the expected source URL", arguments: [
+        "https://api.kdrive.infomaniak.com/2/drive/1/files/2/download",
+        "https://API.kDrive.Infomaniak.com/2/drive/1/files/2/download"
+    ])
+    func acceptExpectedSource(rawURL: String) throws {
+        let expectedURL = try #require(URL(string: "https://api.kdrive.infomaniak.com/2/drive/1/files/2/download"))
+        let url = try #require(URL(string: rawURL))
+
+        #expect(AuthenticatedMediaResourceLoader.isSameResource(url, as: expectedURL))
+    }
+
+    @Test("Reject sources other than the expected URL", arguments: [
+        "https://attacker.example/2/drive/1/files/2/download",
+        "https://api.kdrive.infomaniak.com.attacker.example/2/drive/1/files/2/download",
+        "https://api.kdrive.infomaniak.com:8443/2/drive/1/files/2/download",
+        "http://api.kdrive.infomaniak.com/2/drive/1/files/2/download",
+        "https://api.kdrive.infomaniak.com/2/drive/1/files/3/download",
+        "https://api.kdrive.infomaniak.com/2/drive/1/files/2/download?redirect=https://attacker.example"
+    ])
+    func rejectUnexpectedSource(rawURL: String) throws {
+        let expectedURL = try #require(URL(string: "https://api.kdrive.infomaniak.com/2/drive/1/files/2/download"))
+        let url = try #require(URL(string: rawURL))
+
+        #expect(!AuthenticatedMediaResourceLoader.isSameResource(url, as: expectedURL))
+    }
+
+    @Test("Reject a playlist entry using the custom scheme to reach another host")
+    func rejectCustomSchemePlaylistEntry() throws {
+        let expectedURL = try #require(URL(string: "https://api.kdrive.infomaniak.com/2/drive/1/files/2/download"))
+        let playlistEntry = try #require(URL(string: "kdrive-authenticated-media://attacker.example/segment.ts"))
+        let unwrappedURL = try #require(AuthenticatedMediaResourceLoader.unwrap(playlistEntry))
+
+        #expect(!AuthenticatedMediaResourceLoader.isSameResource(unwrappedURL, as: expectedURL))
+    }
+
+    @Test("Accept the wrapped expected source after unwrapping")
+    func acceptWrappedExpectedSource() throws {
+        let expectedURL = try #require(URL(string: "https://api.kdrive.infomaniak.com/2/drive/1/files/2/download"))
+        let wrappedURL = try #require(AuthenticatedMediaResourceLoader.wrap(expectedURL))
+        let unwrappedURL = try #require(AuthenticatedMediaResourceLoader.unwrap(wrappedURL))
+
+        #expect(AuthenticatedMediaResourceLoader.isSameResource(unwrappedURL, as: expectedURL))
+    }
 }
