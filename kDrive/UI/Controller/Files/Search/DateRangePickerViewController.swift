@@ -23,13 +23,13 @@ import kDriveCore
 import kDriveResources
 import UIKit
 
-extension Day {
+extension DayComponents {
     var date: Date? {
         return Calendar.current.date(from: components)
     }
 }
 
-extension DayRange {
+extension DayComponentsRange {
     var dateInterval: DateInterval? {
         if let startDate = lowerBound.date,
            let upperDate = upperBound.date,
@@ -47,8 +47,8 @@ class DateRangePickerViewController: UIViewController {
     typealias DateRangeHandler = (DateInterval) -> Void
 
     private enum CalendarSelection {
-        case singleDay(Day)
-        case dayRange(DayRange)
+        case singleDay(DayComponents)
+        case dayRange(DayComponentsRange)
     }
 
     private lazy var dayDateFormatter: DateFormatter = {
@@ -204,7 +204,7 @@ class DateRangePickerViewController: UIViewController {
         }
     }
 
-    private func didSelectDay(_ day: Day) {
+    private func didSelectDay(_ day: DayComponents) {
         switch calendarSelection {
         case .singleDay(let selectedDay):
             if day > selectedDay {
@@ -257,7 +257,7 @@ class DateRangePickerViewController: UIViewController {
         }
     }
 
-    private func configureDay(_ day: Day) -> AnyCalendarItemModel {
+    private func configureDay(_ day: DayComponents) -> AnyCalendarItemModel {
         var invariantViewProperties = DayView.InvariantViewProperties.baseInteractive
 
         let isSelectedStyle: Bool
@@ -287,7 +287,7 @@ class DateRangePickerViewController: UIViewController {
 
         return CalendarItemModel<DayView>(
             invariantViewProperties: invariantViewProperties,
-            viewModel: .init(
+            content: .init(
                 dayText: "\(day.day)",
                 accessibilityLabel: dayDateFormatter.string(from: date),
                 accessibilityHint: nil
@@ -295,14 +295,14 @@ class DateRangePickerViewController: UIViewController {
         )
     }
 
-    private func configureDayRange(_ dayRangeLayoutContext: CalendarViewContent.DayRangeLayoutContext) -> AnyCalendarItemModel {
+    private func configureDayRange(_ dayRangeLayoutContext: DayRangeLayoutContext) -> AnyCalendarItemModel {
         return CalendarItemModel<DayRangeIndicatorView>(
             invariantViewProperties: .init(),
-            viewModel: .init(framesOfDaysToHighlight: dayRangeLayoutContext.daysAndFrames.map(\.frame))
+            content: .init(framesOfDaysToHighlight: dayRangeLayoutContext.daysAndFrames.map(\.frame))
         )
     }
 
-    private func configureMonthHeader(_ month: Month) -> AnyCalendarItemModel {
+    private func configureMonthHeader(_ month: MonthComponents) -> AnyCalendarItemModel {
         var invariantViewProperties = MonthHeaderView.InvariantViewProperties.base
         invariantViewProperties.font = TextStyle.header3.font
         invariantViewProperties.textColor = TextStyle.header3.color
@@ -312,7 +312,7 @@ class DateRangePickerViewController: UIViewController {
 
         return CalendarItemModel<MonthHeaderView>(
             invariantViewProperties: invariantViewProperties,
-            viewModel: .init(monthText: monthText, accessibilityLabel: monthText)
+            content: .init(monthText: monthText, accessibilityLabel: monthText)
         )
     }
 }
