@@ -1,12 +1,4 @@
-- Play videos directly in file previews with improved controls, AirPlay, automatic Picture in Picture and subtitles when available
-- Refreshed the audio player layout
-- Send copies of multiple selected files at once, with a loading indicator while files are prepared
-- Files uploaded with Shortcuts now go to the selected folder
-- Improved upload reliability when returning to kDrive after saving files from another app
-- Refreshed the app feedback prompt and clarified download cancellation choices
-- Improved app stability and handling of uploads to folders where files cannot be created
-- Improved PDF preview reliability when switching between files
-- Improved reliability when opening files from the Files app and checking for updated versions
-- Improved spacing and layouts in file and photo grids, previews, and action and category panels
-- Improved handling of deleted files in previews and the Files app
-- Fixed the display of in-app messages
+- Improved handling of uploads and photo backup when the destination folder is deleted
+- Imported files waiting to upload are now kept when cleaning up local storage
+- Improved folder sync in the Files app
+- Strengthened security when streaming videos from kDrive

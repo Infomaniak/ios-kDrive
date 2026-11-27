@@ -26,7 +26,7 @@ public enum Constants {
     public static let baseSettings = SettingsDictionary()
         .automaticCodeSigning(devTeam: "864VDCS2QY")
         .currentProjectVersion(Environment.xcodeCloudBuildNumber.getString(default: "1"))
-        .marketingVersion("6.3.1")
+        .marketingVersion("6.3.2")
         .merging(["ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": ""])
 
     public static let deploymentTarget = DeploymentTargets.iOS("16.4")
