@@ -1,5 +1,5 @@
 {
-  "originHash" : "d64d14e4d546cdc86f3186002392631659924ca0e6575a9e1f3993e17be2710f",
+  "originHash" : "3234d8bede65ef0abf53e3a3d60e0f7d906925db2738851b28965473c17571db",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/ProxymanApp/atlantis",
       "state" : {
-        "revision" : "6427600ec87d516a43754e4eaa7762f3271ac77f",
-        "version" : "1.36.0"
+        "revision" : "cc059013de8778072b4fea6453b45e964e4202fe",
+        "version" : "2.0.0"
       }
     },
     {
@@ -33,14 +33,14 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/LottieFiles/dotlottie-ios",
       "state" : {
-        "revision" : "ddc69d0ae3a90894b15b5a925c73232ff1d94307",
-        "version" : "0.16.9"
+        "revision" : "7f2f4ad577202a417cd84f5e956b9ce3f0a8f182",
+        "version" : "0.18.0"
       }
     },
     {
       "identity" : "dtfoundation",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Cocoanetics/DTFoundation",
+      "location" : "https://github.com/Cocoanetics/DTFoundation.git",
       "state" : {
         "revision" : "a61be65dd7d5b2cde3acabd13bf320b71f2907a5",
         "version" : "1.7.19"
@@ -51,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/appstefan/HighlightSwift",
       "state" : {
-        "revision" : "784ca3ccfc8a2cf724fbb2f06cb6ec3329424da3",
-        "version" : "1.1.0"
+        "revision" : "af38c32bf2625e96e10c2dd5fbc105984e61a2e5",
+        "version" : "1.2.0"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/airbnb/HorizonCalendar",
       "state" : {
-        "revision" : "3b8e98233634591bbf6fbdd6654f79455e02288b",
-        "version" : "1.16.0"
+        "revision" : "a360d71a1255f0b24e378f2ee31a7a7d674a49b6",
+        "version" : "2.0.0"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Infomaniak/ios-core",
       "state" : {
-        "revision" : "211cbcb3e8aad90fa6ae7bc92b1b9d58d6cb9f8c",
-        "version" : "22.0.0"
+        "revision" : "edf65e038afe67533c305374bf817131e8508b04",
+        "version" : "22.0.2"
       }
     },
     {
@@ -186,8 +186,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/airbnb/lottie-spm",
       "state" : {
-        "revision" : "04f2fd18cc9404a0a0917265a449002674f24ec9",
-        "version" : "4.5.2"
+        "revision" : "0aff16288f8dc1e3dab35cbf5cf45979673fd3df",
+        "version" : "4.6.1"
       }
     },
     {
@@ -213,8 +213,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/matomo-org/matomo-sdk-ios",
       "state" : {
-        "revision" : "f140afcb7cedebdcbf8b8230fdd822b4b61e3685",
-        "version" : "7.8.0"
+        "revision" : "268b38cc518ca8bfedf86d4f8cdf050ec304dc00",
+        "version" : "7.9.0"
       }
     },
     {
@@ -229,7 +229,7 @@
     {
       "identity" : "osinfo",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/MarcoEidinger/OSInfo",
+      "location" : "https://github.com/MarcoEidinger/OSInfo.git",
       "state" : {
         "revision" : "fa5164afc8ef56c3069728629647f140c03933f5",
         "version" : "1.0.2"
@@ -247,7 +247,7 @@
     {
       "identity" : "realm-core",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/realm/realm-core",
+      "location" : "https://github.com/realm/realm-core.git",
       "state" : {
         "revision" : "b4192c46305570577c4d08df790fddec5ab3aa04",
         "version" : "20.1.5"
@@ -267,8 +267,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/getsentry/sentry-cocoa",
       "state" : {
-        "revision" : "485e0622e00d60d71eb6b519822188e2eb7c29e3",
-        "version" : "9.35.0"
+        "revision" : "733cff2106f706dd2df19b1cc4937ed554f8fe71",
+        "version" : "9.36.0"
       }
     },
     {
@@ -283,7 +283,7 @@
     {
       "identity" : "snapkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SnapKit/SnapKit",
+      "location" : "https://github.com/SnapKit/SnapKit.git",
       "state" : {
         "revision" : "2842e6e84e82eb9a8dac0100ca90d9444b0307f4",
         "version" : "5.7.1"
@@ -337,7 +337,7 @@
     {
       "identity" : "swift-numerics",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-numerics",
+      "location" : "https://github.com/apple/swift-numerics.git",
       "state" : {
         "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
         "version" : "1.1.1"
@@ -348,8 +348,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/FelixHerrmann/swift-package-list",
       "state" : {
-        "revision" : "27ae17a335a933ed78dc7cb03984d1554de9f878",
-        "version" : "4.12.0"
+        "revision" : "1533a7629b60a522ef72cf60b3f17899c62d8120",
+        "version" : "5.0.0"
       }
     },
     {
@@ -393,8 +393,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/siteline/SwiftUI-Introspect",
       "state" : {
-        "revision" : "7f76fe19415a60ce28493c5ec67b8da629f27a44",
-        "version" : "27.1.0"
+        "revision" : "a2b5e92c15dbfe009b48df15cb830e868c723ed4",
+        "version" : "27.2.0"
       }
     }
   ],

@@ -1,12 +1,4 @@
-- Lisez les vidéos directement dans l’aperçu des fichiers avec des commandes améliorées, AirPlay, le mode Image dans l’image automatique et des sous-titres lorsqu’ils sont disponibles
-- Nouvelle présentation du lecteur audio
-- Envoyez des copies de plusieurs fichiers sélectionnés en une seule fois, avec un indicateur de chargement pendant leur préparation
-- Les fichiers envoyés avec Raccourcis arrivent désormais dans le dossier sélectionné
-- Fiabilité améliorée des envois au retour dans kDrive après l’enregistrement de fichiers depuis une autre app
-- Nouvelle présentation de la demande d’avis sur l’app et clarification des choix d’annulation des téléchargements
-- Amélioration de la stabilité de l’app et de la gestion des envois vers les dossiers où la création de fichiers est impossible
-- Fiabilité améliorée de l’aperçu des PDF lors du passage d’un fichier à l’autre
-- Fiabilité améliorée de l’ouverture des fichiers depuis l’app Fichiers et de la vérification des versions à jour
-- Amélioration de l’espacement et de la disposition des grilles de fichiers et de photos, des aperçus et des panneaux d’actions et de catégories
-- Meilleure prise en compte des fichiers supprimés dans les aperçus et l’app Fichiers
-- Correction de l’affichage des messages dans l’app
+- Meilleure gestion des envois et de la sauvegarde des photos lorsque le dossier de destination est supprimé
+- Les fichiers importés en attente d’envoi sont désormais conservés lors du nettoyage du stockage local
+- Synchronisation plus fiable des dossiers dans l’app Fichiers
+- Sécurité renforcée lors de la lecture en ligne de vidéos depuis kDrive
