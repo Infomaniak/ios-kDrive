@@ -29,6 +29,7 @@ final class FileActionsFloatingPanelViewController: UICollectionViewController {
     @LazyInjectService var accountManager: AccountManageable
     @LazyInjectService var router: AppNavigable
     @LazyInjectService var downloadQueue: DownloadQueueable
+    @LazyInjectService var driveInfosManager: DriveInfosManager
 
     private var fileUid: String {
         frozenFile.uid

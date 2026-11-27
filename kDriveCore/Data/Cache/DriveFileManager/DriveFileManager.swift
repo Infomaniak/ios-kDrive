@@ -1122,8 +1122,12 @@ public final class DriveFileManager {
             }
 
             switch action {
-            case .importFinish:
+            case .importFinish, .importFinished:
                 file.externalImport?.status = .done
+            case .importErrored:
+                file.externalImport?.status = .failed
+            case .importCanceled:
+                file.externalImport?.status = .canceled
             case .cancel:
                 file.externalImport?.status = .failed
             default:

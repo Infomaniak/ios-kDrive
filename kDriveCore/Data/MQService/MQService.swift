@@ -122,6 +122,13 @@ public final class MQService {
     }
 
     private func handleExternalImportNotification(_ notification: ExternalImportNotification) {
+        NotificationCenter.default.post(name: .externalImportDidUpdate, object: nil, userInfo: [
+            "importId": notification.importId,
+            "driveId": notification.driveId,
+            "userId": notification.userId,
+            "action": notification.action
+        ])
+
         @InjectService var accountManager: AccountManageable
         guard let driveFileManager = accountManager.getDriveFileManager(for: notification.driveId,
                                                                         userId: notification.userId)
